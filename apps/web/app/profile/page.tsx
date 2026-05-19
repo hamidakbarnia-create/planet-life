@@ -81,26 +81,65 @@ function tr(text: string, lang: string): string {
 const PSYM:Record<string,string>={sun:'☉',moon:'☽',mercury:'☿',venus:'♀',mars:'♂',jupiter:'♃',saturn:'♄',uranus:'⛢',neptune:'♆',pluto:'♇',north_node:'☊'};
 const PCOL:Record<string,string>={sun:'#fbbf24',moon:'#a5f3fc',mercury:'#86efac',venus:'#f9a8d4',mars:'#f87171',jupiter:'#fb923c',saturn:'#94a3b8',uranus:'#67e8f9',neptune:'#818cf8',pluto:'#c084fc',north_node:'#fde68a'};
 
-function NatalChartSVG({ planets, positions }: { planets: string[], positions: Record<string, number> }) {
-  const cx=150,cy=150,r=110,r2=82;
-  const toXY=(deg:number,radius:number)=>({x:cx+radius*Math.cos((deg-90)*Math.PI/180),y:cy+radius*Math.sin((deg-90)*Math.PI/180)});
+function NatalChartSVG({ planets, positions, ascendant }: { planets: string[], positions: Record<string, number>, ascendant: number }) {
+  const cx=150,cy=150,r=110,r2=82,r3=55;
+  const toXY=(deg:number,radius:number)=>({
+    x:cx+radius*Math.cos((deg-90)*Math.PI/180),
+    y:cy+radius*Math.sin((deg-90)*Math.PI/180)
+  });
   const signs=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+  const signColors=['#ef4444','#22c55e','#eab308','#a5f3fc','#f97316','#6366f1','#ec4899','#dc2626','#8b5cf6','#64748b','#06b6d4','#0ea5e9'];
+
   return (
     <svg width="300" height="300" viewBox="0 0 300 300" style={{maxWidth:'100%'}}>
-      <circle cx={cx} cy={cy} r={r} fill="rgba(0,0,0,0.3)" stroke="rgba(251,191,36,0.2)" strokeWidth="1"/>
-      <circle cx={cx} cy={cy} r={r2} fill="none" stroke="rgba(251,191,36,0.08)" strokeWidth="0.5"/>
-      <circle cx={cx} cy={cy} r="6" fill="#fbbf24" opacity="0.9"/>
+      <circle cx={cx} cy={cy} r={r} fill="rgba(0,0,0,0.4)" stroke="rgba(251,191,36,0.3)" strokeWidth="1"/>
+      <circle cx={cx} cy={cy} r={r2} fill="rgba(0,0,0,0.2)" stroke="rgba(251,191,36,0.1)" strokeWidth="0.5"/>
+      <circle cx={cx} cy={cy} r={r3} fill="rgba(0,0,0,0.1)" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5"/>
+      
       {Array.from({length:12},(_,i)=>{
-        const deg=i*30;const p1=toXY(deg,r);const p2=toXY(deg,r2);const ps=toXY(deg+15,r+14);
-        return(<g key={i}><line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="rgba(251,191,36,0.15)" strokeWidth="0.5"/><text x={ps.x} y={ps.y} textAnchor="middle" dominantBaseline="middle" fontSize="9" fill="rgba(251,191,36,0.4)">{signs[i]}</text></g>);
+        const startDeg = i*30 - ascendant + 180;
+        const endDeg = startDeg + 30;
+        const midDeg = startDeg + 15;
+        const p1=toXY(startDeg,r);const p2=toXY(startDeg,r2);
+        const ps=toXY(midDeg,r+13);
+        return(
+          <g key={i}>
+            <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="rgba(251,191,36,0.2)" strokeWidth="0.5"/>
+            <text x={ps.x} y={ps.y} textAnchor="middle" dominantBaseline="middle" fontSize="9" fill={signColors[i]}>{signs[i]}</text>
+          </g>
+        );
       })}
-      {planets.map((name,idx)=>{
-        const lon = positions[name] !== undefined ? positions[name] % 360 : (idx*32.7)%360;
-        const p=toXY(lon,r2-16);
-        const sym=PSYM[name]||name[0].toUpperCase();const col=PCOL[name]||'#fff';
-        return(<g key={name}><circle cx={p.x} cy={p.y} r="10" fill="rgba(0,0,0,0.7)" stroke={col} strokeWidth="0.5"/><text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize="9" fill={col}>{sym}</text></g>);
+
+      {ascendant > 0 && (()=>{
+        const p1=toXY(180,r+5);const p2=toXY(180,r3);
+        const p3=toXY(0,r+5);const p4=toXY(0,r3);
+        return(<g>
+          <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
+          <line x1={p3.x} y1={p3.y} x2={p4.x} y2={p4.y} stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
+          <text x={toXY(183,r3-8).x} y={toXY(183,r3-8).y} fontSize="7" fill="rgba(255,255,255,0.6)" textAnchor="middle">AC</text>
+        </g>);
+      })()}
+
+      <circle cx={cx} cy={cy} r="5" fill="#fbbf24" opacity="0.9"/>
+
+      {planets.map((name)=>{
+        const lon = positions[name];
+        if(lon === undefined) return null;
+        const displayDeg = lon - ascendant + 180;
+        const p=toXY(displayDeg, r2-16);
+        const sym=PSYM[name]||name[0].toUpperCase();
+        const col=PCOL[name]||'#fff';
+        return(
+          <g key={name}>
+            <circle cx={p.x} cy={p.y} r="10" fill="rgba(0,0,0,0.8)" stroke={col} strokeWidth="0.8"/>
+            <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize="9" fill={col}>{sym}</text>
+          </g>
+        );
       })}
-      {planets.length===0&&<text x="150" y="155" textAnchor="middle" fontSize="11" fill="rgba(255,255,255,0.15)" fontFamily="Inter">Click Generate Chart</text>}
+
+      {planets.length===0&&(
+        <text x="150" y="155" textAnchor="middle" fontSize="11" fill="rgba(255,255,255,0.15)" fontFamily="Inter">Click Generate Chart</text>
+      )}
     </svg>
   );
 }
@@ -113,6 +152,7 @@ export default function Profile() {
   const [name, setName] = useState('');
   const [planets, setPlanets] = useState<string[]>([]);
   const [planetPositions, setPlanetPositions] = useState<Record<string, number>>({});
+  const [chartData, setChartData] = useState<any>(null); 
   const [loading, setLoading] = useState(false);
   const [citySearch, setCitySearch] = useState('New York');
   const [cities, setCities] = useState<any[]>([]);
@@ -155,7 +195,7 @@ export default function Profile() {
   const generateChart = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/business/analyze', {
+      const res = await fetch('http://localhost:8000/api/business/chart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -167,15 +207,15 @@ export default function Profile() {
         })
       });
       const data = await res.json();
-      if (data.technical?.aspects_evaluated) {
-        const planetMap: Record<string, number> = {};
-        data.technical.aspects_evaluated.forEach((asp: any) => {
-          if (asp.natal_planet && asp.natal_longitude !== undefined) {
-            planetMap[asp.natal_planet] = asp.natal_longitude;
-          }
+      if (data.planets) {
+        const planetList = Object.keys(data.planets);
+        const positions: Record<string, number> = {};
+        Object.entries(data.planets).forEach(([name, info]: [string, any]) => {
+          positions[name] = info.longitude;
         });
-        setPlanetPositions(planetMap);
-        setPlanets(data.technical.natal_points_used || []);
+        setPlanets(planetList);
+        setPlanetPositions(positions);
+        setChartData(data);
       }
     } catch {}
     setLoading(false);
@@ -279,7 +319,7 @@ export default function Profile() {
                   <div className="fi text-xs" style={{color:'rgba(255,255,255,0.2)'}}>Loading...</div>
                 </div>
               ) : (
-                <NatalChartSVG planets={planets} positions={planetPositions}/>
+                <NatalChartSVG planets={planets} positions={planetPositions} ascendant={chartData?.ascendant || 0}/>
               )}
             </div>
           </div>

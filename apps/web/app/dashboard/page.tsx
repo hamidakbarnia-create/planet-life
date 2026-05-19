@@ -48,7 +48,7 @@ const LANGS = {
   },
   ar: {
     dir: 'rtl', name: 'AR',
-   title: 'Planet Life', sub: 'الذكاء الفلكي',
+    title: 'Planet Life', sub: 'الذكاء الفلكي',
     bdate: 'تاريخ الميلاد', btime: 'وقت الميلاد',
     loc: 'مدينة الميلاد', tdate: 'التاريخ المستهدف', action: 'نوع النشاط',
     analyze: 'تحليل نجومي', loading: 'نقرأ الكون...',
@@ -70,79 +70,16 @@ const DOMAIN_ACTIONS: Record<string, string[]> = {
 
 const ASPECT_TRANS: Record<string, Record<string, string>> = {
   ru: {
-     'Strategic': 'Стратегический', 'focus': 'фокус', 'visibility': 'видимость',
-'momentum': 'импульс', 'scalable': 'масштабируемый', 'growth': 'рост',
-'Supportive': 'Поддерживающий', 'transits': 'транзиты', 'rulers': 'управители',
-'activity': 'активность', 'Hard': 'Жёсткие', 'aspects': 'аспекты',
-'suggest': 'указывают', 'resistance': 'сопротивление', 'delays': 'задержки',
-'rework': 'переработку', 'Consolidate': 'Консолидируйте', 'plan': 'планируйте',
-'avoid': 'избегайте', 'overextension': 'перенапряжения',
-'No': 'Нет', 'major': 'значительных', 'retrograde': 'ретроградных',
-'friction': 'трений', 'primary': 'первичных', 'standard': 'стандартная',
-'due': 'должная', 'diligence': 'осмотрительность', 'applies': 'применяется',
-'capital': 'капитал', 'allocation': 'распределение', 'risk': 'риск',
-'reward': 'вознаграждение', 'long': 'долгосрочный', 'term': 'срок', 'yield': 'доходность',
-'asset': 'актив', 'security': 'безопасность', 'valuation': 'оценка', 'structural': 'структурный',
-'soundness': 'надёжность', 'communication': 'коммуникация', 'rapport': 'взаимопонимание',
-'mutually': 'взаимовыгодные', 'beneficial': 'выгодные', 'terms': 'условия',
-'contingency': 'резервные', 'plans': 'планы', 'light': 'лёгкими',
-    'Transit': 'Транзит', 'natal': 'натальный', 'trine': 'трин',
-    'sextile': 'секстиль', 'square': 'квадрат', 'conjunction': 'соединение',
-    'opposition': 'оппозиция', 'quincunx': 'квинкункс',
-    'Sun': 'Солнце', 'Moon': 'Луна', 'Mercury': 'Меркурий',
-    'Venus': 'Венера', 'Mars': 'Марс', 'Jupiter': 'Юпитер',
-    'Saturn': 'Сатурн', 'Uranus': 'Уран', 'Neptune': 'Нептун',
-    'Pluto': 'Плутон', 'North_Node': 'Северный узел', 'orb': 'орб',
+    'Strategic':'Стратегический','focus':'фокус','visibility':'видимость','momentum':'импульс','scalable':'масштабируемый','growth':'рост','Supportive':'Поддерживающий','transits':'транзиты','rulers':'управители','activity':'активность','Hard':'Жёсткие','aspects':'аспекты','suggest':'указывают','resistance':'сопротивление','delays':'задержки','rework':'переработку','Consolidate':'Консолидируйте','plan':'планируйте','avoid':'избегайте','overextension':'перенапряжения','No':'Нет','major':'значительных','retrograde':'ретроградных','friction':'трений','primary':'первичных','standard':'стандартная','due':'должная','diligence':'осмотрительность','applies':'применяется','capital':'капитал','allocation':'распределение','risk':'риск','reward':'вознаграждение','long':'долгосрочный','term':'срок','yield':'доходность','asset':'актив','security':'безопасность','valuation':'оценка','structural':'структурный','soundness':'надёжность','communication':'коммуникация','rapport':'взаимопонимание','mutually':'взаимовыгодные','beneficial':'выгодные','terms':'условия','contingency':'резервные','plans':'планы','light':'лёгкими',
+    'Transit':'Транзит','natal':'натальный','trine':'трин','sextile':'секстиль','square':'квадрат','conjunction':'соединение','opposition':'оппозиция','quincunx':'квинкункс','Sun':'Солнце','Moon':'Луна','Mercury':'Меркурий','Venus':'Венера','Mars':'Марс','Jupiter':'Юпитер','Saturn':'Сатурн','Uranus':'Уран','Neptune':'Нептун','Pluto':'Плутон','North_Node':'Северный узел','orb':'орб',
   },
   fa: {
-     'Strategic': 'استراتژیک', 'focus': 'تمرکز', 'visibility': 'دیده‌شدن',
-'momentum': 'شتاب', 'scalable': 'مقیاس‌پذیر', 'growth': 'رشد',
-'Supportive': 'حمایتی', 'transits': 'ترانزیت‌ها', 'rulers': 'حاکمان',
-'activity': 'فعالیت', 'Hard': 'سخت', 'aspects': 'جنبه‌ها',
-'suggest': 'نشان می‌دهند', 'resistance': 'مقاومت', 'delays': 'تأخیرها',
-'rework': 'بازنگری', 'Consolidate': 'تثبیت کنید', 'plan': 'برنامه‌ریزی کنید',
-'avoid': 'اجتناب کنید', 'overextension': 'کشش بیش از حد',
-'No': 'بدون', 'major': 'عمده', 'retrograde': 'رتروگراد',
-'friction': 'اصطکاک', 'primary': 'اصلی', 'standard': 'استاندارد',
-'due': 'لازم', 'diligence': 'دقت', 'applies': 'صدق می‌کند',
-'capital': 'سرمایه', 'allocation': 'تخصیص', 'risk': 'ریسک',
-'reward': 'بازده', 'long': 'بلند', 'term': 'مدت', 'yield': 'سود',
-'asset': 'دارایی', 'security': 'امنیت', 'valuation': 'ارزیابی', 'structural': 'ساختاری',
-'soundness': 'استحکام', 'communication': 'ارتباط', 'rapport': 'اعتماد متقابل',
-'mutually': 'متقابلاً', 'beneficial': 'سودمند', 'terms': 'شرایط',
-'contingency': 'اضطراری', 'plans': 'برنامه‌ها', 'light': 'سبک',
-    'Transit': 'ترانزیت', 'natal': 'تولدی', 'trine': 'تثلیث',
-    'sextile': 'سداسی', 'square': 'تربیع', 'conjunction': 'اقتران',
-    'opposition': 'مقابله', 'quincunx': 'کوینکانکس',
-    'Sun': 'خورشید', 'Moon': 'ماه', 'Mercury': 'عطارد',
-    'Venus': 'زهره', 'Mars': 'مریخ', 'Jupiter': 'مشتری',
-    'Saturn': 'زحل', 'Uranus': 'اورانوس', 'Neptune': 'نپتون',
-    'Pluto': 'پلوتون', 'North_Node': 'گره شمالی', 'orb': 'اُرب',
+    'Strategic':'استراتژیک','focus':'تمرکز','visibility':'دیده‌شدن','momentum':'شتاب','scalable':'مقیاس‌پذیر','growth':'رشد','Supportive':'حمایتی','transits':'ترانزیت‌ها','rulers':'حاکمان','activity':'فعالیت','Hard':'سخت','aspects':'جنبه‌ها','suggest':'نشان می‌دهند','resistance':'مقاومت','delays':'تأخیرها','rework':'بازنگری','Consolidate':'تثبیت کنید','plan':'برنامه‌ریزی کنید','avoid':'اجتناب کنید','overextension':'کشش بیش از حد','No':'بدون','major':'عمده','retrograde':'رتروگراد','friction':'اصطکاک','primary':'اصلی','standard':'استاندارد','due':'لازم','diligence':'دقت','applies':'صدق می‌کند','capital':'سرمایه','allocation':'تخصیص','risk':'ریسک','reward':'بازده','long':'بلند','term':'مدت','yield':'سود','asset':'دارایی','security':'امنیت','valuation':'ارزیابی','structural':'ساختاری','soundness':'استحکام','communication':'ارتباط','rapport':'اعتماد متقابل','mutually':'متقابلاً','beneficial':'سودمند','terms':'شرایط','contingency':'اضطراری','plans':'برنامه‌ها','light':'سبک',
+    'Transit':'ترانزیت','natal':'تولدی','trine':'تثلیث','sextile':'سداسی','square':'تربیع','conjunction':'اقتران','opposition':'مقابله','quincunx':'کوینکانکس','Sun':'خورشید','Moon':'ماه','Mercury':'عطارد','Venus':'زهره','Mars':'مریخ','Jupiter':'مشتری','Saturn':'زحل','Uranus':'اورانوس','Neptune':'نپتون','Pluto':'پلوتون','North_Node':'گره شمالی','orb':'اُرب',
   },
   ar: {
-     'Strategic': 'استراتيجي', 'focus': 'تركيز', 'visibility': 'الظهور',
-'momentum': 'الزخم', 'scalable': 'قابل للتوسع', 'growth': 'النمو',
-'Supportive': 'داعم', 'transits': 'العبورات', 'rulers': 'الحكام',
-'activity': 'النشاط', 'Hard': 'صعبة', 'aspects': 'الجوانب',
-'suggest': 'تشير إلى', 'resistance': 'مقاومة', 'delays': 'تأخيرات',
-'rework': 'إعادة العمل', 'Consolidate': 'قم بالتوطيد', 'plan': 'خطط',
-'avoid': 'تجنب', 'overextension': 'الإفراط في التمدد',
-'No': 'لا', 'major': 'رئيسية', 'retrograde': 'راجع',
-'friction': 'احتكاك', 'primary': 'رئيسي', 'standard': 'معياري',
-'due': 'الواجب', 'diligence': 'العناية', 'applies': 'ينطبق',
-'capital': 'رأس المال', 'allocation': 'توزيع', 'risk': 'مخاطر',
-'reward': 'عائد', 'long': 'طويل', 'term': 'مدى', 'yield': 'عائد',
-'asset': 'أصل', 'security': 'أمان', 'valuation': 'تقييم', 'structural': 'هيكلي',
-'soundness': 'متانة', 'communication': 'تواصل', 'rapport': 'ألفة',
-'mutually': 'بشكل متبادل', 'beneficial': 'مفيد', 'terms': 'شروط',
-'contingency': 'طوارئ', 'plans': 'خطط', 'light': 'خفيفة',
-    'Transit': 'عبور', 'natal': 'ميلادي', 'trine': 'تثليث',
-    'sextile': 'سداسي', 'square': 'تربيع', 'conjunction': 'اقتران',
-    'opposition': 'مقابلة', 'quincunx': 'كوينكونكس',
-    'Sun': 'الشمس', 'Moon': 'القمر', 'Mercury': 'عطارد',
-    'Venus': 'الزهرة', 'Mars': 'المريخ', 'Jupiter': 'المشتري',
-    'Saturn': 'زحل', 'Uranus': 'أورانوس', 'Neptune': 'نبتون',
-    'Pluto': 'بلوتو', 'North_Node': 'العقدة الشمالية', 'orb': 'المدار',
+    'Strategic':'استراتيجي','focus':'تركيز','visibility':'الظهور','momentum':'الزخم','scalable':'قابل للتوسع','growth':'النمو','Supportive':'داعم','transits':'العبورات','rulers':'الحكام','activity':'النشاط','Hard':'صعبة','aspects':'الجوانب','suggest':'تشير إلى','resistance':'مقاومة','delays':'تأخيرات','rework':'إعادة العمل','Consolidate':'قم بالتوطيد','plan':'خطط','avoid':'تجنب','overextension':'الإفراط في التمدد','No':'لا','major':'رئيسية','retrograde':'راجع','friction':'احتكاك','primary':'رئيسي','standard':'معياري','due':'الواجب','diligence':'العناية','applies':'ينطبق','capital':'رأس المال','allocation':'توزيع','risk':'مخاطر','reward':'عائد','long':'طويل','term':'مدى','yield':'عائد','asset':'أصل','security':'أمان','valuation':'تقييم','structural':'هيكلي','soundness':'متانة','communication':'تواصل','rapport':'ألفة','mutually':'بشكل متبادل','beneficial':'مفيد','terms':'شروط','contingency':'طوارئ','plans':'خطط','light':'خفيفة',
+    'Transit':'عبور','natal':'ميلادي','trine':'تثليث','sextile':'سداسي','square':'تربيع','conjunction':'اقتران','opposition':'مقابلة','quincunx':'كوينكونكس','Sun':'الشمس','Moon':'القمر','Mercury':'عطارد','Venus':'الزهرة','Mars':'المريخ','Jupiter':'المشتري','Saturn':'زحل','Uranus':'أورانوس','Neptune':'نبتون','Pluto':'بلوتو','North_Node':'العقدة الشمالية','orb':'المدار',
   },
 };
 
@@ -156,6 +93,7 @@ function translateAspect(text: string, lang: string): string {
   });
   return result;
 }
+
 const SCORE_MSG: Record<string, Record<string, string>> = {
   en: {
     high: "The stars are with you. This is a rare golden window — move forward with confidence and bold action.",
@@ -179,6 +117,8 @@ const SCORE_MSG: Record<string, Record<string, string>> = {
   },
 };
 
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
 export default function Dashboard() {
   const [lang, setLang] = useState<keyof typeof LANGS>('en');
   const [domain, setDomain] = useState('business');
@@ -194,6 +134,8 @@ export default function Dashboard() {
   const cityRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<any>(null);
   const t = LANGS[lang];
+
+  const [bdY, bdM, bdD] = form.birth_date.split('-');
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -218,9 +160,8 @@ export default function Dashboard() {
   }, []);
 
   const selectCity = (city: any) => {
-    const displayName = city.short;
-    setCitySearch(displayName);
-    setForm(f => ({ ...f, location: city.name }));
+    setCitySearch(city.short);
+    setForm(f => ({ ...f, location: city.short }));
     setShowCities(false);
   };
 
@@ -239,19 +180,18 @@ export default function Dashboard() {
       const data = await res.json();
       if (data.detail) setError(data.detail);
       else {
-  if (lang !== 'en') {
-    try {
-      const tr = await fetch('/api/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: data.executive.recommendation, lang })
-      });
-      const trData = await tr.json();
-      if (trData.translated) data.executive.recommendation = trData.translated;
-    } catch {}
-  }
-  setResult(data); setTimeout(() => setAnimated(true), 100);
-}
+        if (lang !== 'en') {
+          try {
+            const tr = await fetch('/api/translate', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: data.executive.recommendation, lang })
+            });
+            const trData = await tr.json();
+            if (trData.translated) data.executive.recommendation = trData.translated;
+          } catch {}
+        }
+        setResult(data); setTimeout(() => setAnimated(true), 100);
+      }
     } catch {
       setError('Cannot connect to API. Make sure the backend is running on port 8000.');
     }
@@ -267,23 +207,28 @@ export default function Dashboard() {
   const getMsgKey = (s: number) => s >= 65 ? 'high' : s >= 45 ? 'mid' : 'low';
 
   return (
-    <div style={{ direction: t.dir as any, fontFamily: (lang==='fa'||lang==='ar') ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif' }} className="min-h-screen bg-[#070B14] text-white">
+    <div style={{ direction: t.dir as any, fontFamily: (lang==='fa'||lang==='ar') ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif', fontFeatureSettings: '"kern"' }}
+        className="min-h-screen bg-[#070B14] text-white">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
-@import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
-        .fc{font-family:'Cinzel',serif} .fi{font-family:'Inter',sans-serif} .ff{font-family:'Vazirmatn',sans-serif}
+        @import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
+        .fc{font-family:'Cinzel',serif} .fi{font-family:'Inter',sans-serif}
         .fade-up{animation:fu 0.5s ease forwards;opacity:0;transform:translateY(12px)}
         @keyframes fu{to{opacity:1;transform:translateY(0)}}
         .score-ring{transition:stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)}
         .city-row:hover{background:rgba(251,191,36,0.06)}
+        *{font-variant-numeric:normal !important}
+        input,select{...
         input,select{background:rgba(255,255,255,0.04)!important;border:1px solid rgba(255,255,255,0.08)!important;color:white!important;border-radius:10px}
+        select option{background:#070B14 !important;color:white !important}
         input:focus,select:focus{border-color:rgba(251,191,36,0.35)!important;outline:none!important}
-        select option{background:#0d1220}
+        select::-webkit-scrollbar{width:4px}
+        select::-webkit-scrollbar-track{background:#0d1220}
+        select::-webkit-scrollbar-thumb{background:#fbbf24;border-radius:2px}
         .shimmer{background:linear-gradient(90deg,rgba(255,255,255,0.02) 0%,rgba(255,255,255,0.06) 50%,rgba(255,255,255,0.02) 100%);background-size:200% 100%;animation:sh 1.5s infinite}
         @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
       `}</style>
 
-      {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-white/5">
         <a href="/" className="flex items-center gap-3 no-underline">
           <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
@@ -295,15 +240,14 @@ export default function Dashboard() {
             <ellipse cx="15" cy="15" rx="13" ry="4.5" stroke="#fbbf24" strokeWidth="0.3" opacity="0.2"/>
           </svg>
           <div>
-            <div className="fc text-sm font-semibold tracking-widest" style={{color:'#fbbf24'}}>{t.title}</div>
-            <div className="fi text-[10px] tracking-wider" style={{color:'rgba(255,255,255,0.3)'}}>{t.sub}</div>
+            <div className="fc text-sm font-semibold tracking-widest" style={{color:'#fbbf24'}}>Planet Life</div>
+            <div className="fi text-[10px] tracking-wider" style={{color:'rgba(255,255,255,0.3)'}}>Astrological Intelligence</div>
           </div>
         </a>
-<div className="flex items-center gap-4 mx-4">
-  <a href="/dashboard" className="fi text-sm text-white/40 hover:text-white transition" style={{color:'rgba(255,255,255,0.4)'}}>Dashboard</a>
-  <a href="/profile" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>Profile</a> 
-
-     </div>
+        <div className="flex items-center gap-4 mx-4">
+          <a href="/dashboard" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>Dashboard</a>
+          <a href="/profile" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>Profile</a>
+        </div>
         <div className="flex gap-1">
           {(Object.keys(LANGS) as Array<keyof typeof LANGS>).map(l => (
             <button key={l} onClick={() => setLang(l)}
@@ -316,7 +260,6 @@ export default function Dashboard() {
       </nav>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Domain tabs */}
         <div className="flex gap-2 mb-8">
           {[{key:'business',icon:'◈',label:t.business},{key:'finance',icon:'◎',label:t.finance},{key:'real-estate',icon:'⬡',label:t.realestate}].map(d => (
             <button key={d.key}
@@ -329,22 +272,22 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* Form */}
           <div className="lg:col-span-2 rounded-2xl p-6" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)'}}>
-            <div className="grid grid-cols-2 gap-3 mb-3">
+
+            <div className="grid gap-3 mb-3" style={{gridTemplateColumns:'3fr 2fr'}}>
               <div>
                 <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.bdate}</label>
-                <div className="grid grid-cols-3 gap-1">
-  <select value={form.birth_date.split('-')[2]} onChange={e => setForm(f => ({...f, birth_date: `${f.birth_date.split('-')[0]}-${f.birth_date.split('-')[1]}-${e.target.value}`}))} className="fi px-2 py-2.5 text-sm">
-    {Array.from({length:31},(_,i)=>String(i+1).padStart(2,'0')).map(d=><option key={d} value={d}>{d}</option>)}
-  </select>
-  <select value={form.birth_date.split('-')[1]} onChange={e => setForm(f => ({...f, birth_date: `${f.birth_date.split('-')[0]}-${e.target.value}-${f.birth_date.split('-')[2]}`}))} className="fi px-2 py-2.5 text-sm">
-    {['01','02','03','04','05','06','07','08','09','10','11','12'].map((m,i)=><option key={m} value={m}>{['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i]}</option>)}
-  </select>
-  <select value={form.birth_date.split('-')[0]} onChange={e => setForm(f => ({...f, birth_date: `${e.target.value}-${f.birth_date.split('-')[1]}-${f.birth_date.split('-')[2]}`}))} className="fi px-2 py-2.5 text-sm">
-    {Array.from({length:100},(_,i)=>String(new Date().getFullYear()-i)).map(y=><option key={y} value={y}>{y}</option>)}
-  </select>
-</div>
+                <div className="grid gap-1" style={{gridTemplateColumns:'1fr 2fr 2.5fr'}}>
+                  <select value={bdD} onChange={e => setForm(f => ({...f, birth_date:`${bdY}-${bdM}-${e.target.value}`}))} className="fi px-1 py-2.5 text-sm">
+                    {Array.from({length:31},(_,i)=>String(i+1).padStart(2,'0')).map(d=><option key={d} value={d}>{d}</option>)}
+                  </select>
+                  <select value={bdM} onChange={e => setForm(f => ({...f, birth_date:`${bdY}-${e.target.value}-${bdD}`}))} className="fi px-1 py-2.5 text-sm">
+                    {['01','02','03','04','05','06','07','08','09','10','11','12'].map((m,i)=><option key={m} value={m}>{MONTHS[i]}</option>)}
+                  </select>
+                  <select value={bdY} onChange={e => setForm(f => ({...f, birth_date:`${e.target.value}-${bdM}-${bdD}`}))} className="fi px-1 py-2.5 text-sm">
+                    {Array.from({length:100},(_,i)=>String(new Date().getFullYear()-i)).map(y=><option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
               </div>
               <div>
                 <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.btime}</label>
@@ -352,7 +295,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* City autocomplete */}
             <div className="mb-3 relative" ref={cityRef}>
               <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.loc}</label>
               <input type="text" value={citySearch} placeholder={t.placeholder}
@@ -393,7 +335,6 @@ export default function Dashboard() {
             {error && <div className="fi mt-4 p-3 rounded-lg text-xs leading-relaxed" style={{background:'rgba(248,113,113,0.08)',border:'1px solid rgba(248,113,113,0.15)',color:'#fca5a5'}}>{error}</div>}
           </div>
 
-          {/* Results */}
           <div className="lg:col-span-3">
             {!result && !loading && (
               <div className="h-full min-h-64 flex flex-col items-center justify-center gap-3 rounded-2xl" style={{border:'1px solid rgba(255,255,255,0.04)'}}>
