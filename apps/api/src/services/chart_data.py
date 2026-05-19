@@ -67,19 +67,31 @@ def _planet_house(longitude, cusps):
             return index + 1
     return 1
 
-def _build_chart_payload(dt_local, lat, lon):
+_HOUSE_SYSTEMS = {
+    "placidus": b"P",
+    "whole_sign": b"W",
+}
+
+
+def _build_chart_payload(dt_local, lat, lon, *, house_system: str = "placidus", zodiac: str = "tropical"):
     swe = _import_swisseph()
     dt_utc = dt_local.astimezone(timezone.utc)
     jd_ut = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day,
         dt_utc.hour + dt_utc.minute / 60.0 + dt_utc.second / 3600.0, swe.GREG_CAL)
-    cusps, _ascmc = swe.houses(jd_ut, lat, lon, b"P")
+    hs = _HOUSE_SYSTEMS.get(house_system, b"P")
+    cusps, _ascmc = swe.houses(jd_ut, lat, lon, hs)
     cusp_list = [float(cusps[i]) for i in range(1, 13)] if len(cusps) >= 13 else [float(c) for c in cusps[:12]]
+    if zodiac == "sidereal":
+        swe.set_sid_mode(swe.SIDM_FAGAN_BRADLEY)
+    calc_flags = swe.FLG_MOSEPH
+    if zodiac == "sidereal":
+        calc_flags |= swe.FLG_SIDEREAL
     planets = {}
     for planet_id, name in _planet_bodies(swe):
         try:
-            result, _flag = swe.calc_ut(jd_ut, planet_id, swe.FLG_MOSEPH)
+            result, _flag = swe.calc_ut(jd_ut, planet_id, calc_flags)
         except Exception:
-            result, _flag = swe.calc_ut(jd_ut, planet_id, swe.FLG_MOSEPH | swe.FLG_SPEED)
+            result, _flag = swe.calc_ut(jd_ut, planet_id, calc_flags | swe.FLG_SPEED)
         longitude = float(result[0])
         speed = float(result[3]) if len(result) > 3 else 0.0
         body = {"longitude": longitude, "house": _planet_house(longitude, cusp_list)}
@@ -88,12 +100,22 @@ def _build_chart_payload(dt_local, lat, lon):
         planets[name] = body
     return {"planets": planets}
 
-def build_chart_payload(*, birth_date, birth_time, location, target_date):
+def build_chart_payload(
+    *,
+    birth_date,
+    birth_time,
+    location,
+    target_date,
+    target_time=None,
+    house_system: str = "placidus",
+    zodiac: str = "tropical",
+):
     lat, lon = resolve_coordinates(location)
     natal_dt = _local_datetime(birth_date, birth_time, lat, lon)
-    transit_dt = _local_datetime(target_date, birth_time, lat, lon)
-    user_natal_data = _build_chart_payload(natal_dt, lat, lon)
-    current_transit_data = _build_chart_payload(transit_dt, lat, lon)
+    transit_dt = _local_datetime(target_date, target_time or birth_time, lat, lon)
+    chart_kw = {"house_system": house_system, "zodiac": zodiac}
+    user_natal_data = _build_chart_payload(natal_dt, lat, lon, **chart_kw)
+    current_transit_data = _build_chart_payload(transit_dt, lat, lon, **chart_kw)
     current_transit_data["evaluation"] = {
         "target_date": target_date, "location": location,
         "latitude": lat, "longitude": lon,

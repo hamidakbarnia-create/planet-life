@@ -1,6 +1,15 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import {
+  NatalChart,
+  type ChartPlanet,
+  type NatalChartLabels,
+} from '@/components/NatalChart';
+import { BottomNav } from '@/components/BottomNav';
+import { HOME_LANGS } from '@/lib/home-i18n';
+import type { AppLang } from '@/lib/app-settings';
+import { loadBirthProfile, saveBirthProfile } from '@/lib/birth-profile';
 
 const ZODIAC = [
   { sign: 'Aries', symbol: '♈', dates: 'Mar 21 – Apr 19', stone: 'Diamond', colorName: 'Red', color: '#ef4444', element: 'Fire', planet: 'Mars' },
@@ -17,11 +26,25 @@ const ZODIAC = [
   { sign: 'Pisces', symbol: '♓', dates: 'Feb 19 – Mar 20', stone: 'Aquamarine', colorName: 'Ocean Blue', color: '#0ea5e9', element: 'Water', planet: 'Neptune' },
 ];
 
+const PLANET_LABELS: Record<string, Record<string, string>> = {
+  en: { sun:'Sun', moon:'Moon', mercury:'Mercury', venus:'Venus', mars:'Mars', jupiter:'Jupiter', saturn:'Saturn', uranus:'Uranus', neptune:'Neptune', pluto:'Pluto', north_node:'North Node' },
+  ru: { sun:'Солнце', moon:'Луна', mercury:'Меркурий', venus:'Венера', mars:'Марс', jupiter:'Юпитер', saturn:'Сатурн', uranus:'Уран', neptune:'Нептун', pluto:'Плутон', north_node:'Северный узел' },
+  fa: { sun:'خورشید', moon:'ماه', mercury:'عطارد', venus:'زهره', mars:'مریخ', jupiter:'مشتری', saturn:'زحل', uranus:'اورانوس', neptune:'نپتون', pluto:'پلوتون', north_node:'گره شمالی' },
+  ar: { sun:'الشمس', moon:'القمر', mercury:'عطارد', venus:'الزهرة', mars:'المريخ', jupiter:'المشتري', saturn:'زحل', uranus:'أورانوس', neptune:'نبتون', pluto:'بلوتو', north_node:'العقدة الشمالية' },
+};
+
+const ASPECT_LABELS: Record<string, Record<string, string>> = {
+  en: { trine:'Trine', square:'Square', sextile:'Sextile', opposition:'Opposition', conjunction:'Conjunction' },
+  ru: { trine:'Трин', square:'Квадрат', sextile:'Секстиль', opposition:'Оппозиция', conjunction:'Соединение' },
+  fa: { trine:'تثلیث', square:'تربیع', sextile:'سدسی', opposition:'مقابله', conjunction:'اقتران' },
+  ar: { trine:'تثليث', square:'تربيع', sextile:'تسديس', opposition:'مقابلة', conjunction:'اقتران' },
+};
+
 const LANGS = {
-  en: { name:'EN', dir:'ltr', yourData:'Your Birth Data', nameLabel:'Name', bdate:'Birth Date', btime:'Birth Time', city:'Birth City', generate:'Generate Chart', loading:'Loading...', natalChart:'Natal Chart', element:'Element', planet:'Ruling Planet', stone:'Lucky Stone', color:'Power Color', lifePath:'Life Path Number', dashboard:'Dashboard', profile:'Profile', placeholder:'Type a city name...', searching:'Searching...', noResults:'No cities found' },
-  ru: { name:'RU', dir:'ltr', yourData:'Ваши данные рождения', nameLabel:'Имя', bdate:'Дата рождения', btime:'Время рождения', city:'Город рождения', generate:'Создать карту', loading:'Загрузка...', natalChart:'Натальная карта', element:'Стихия', planet:'Управляющая планета', stone:'Счастливый камень', color:'Цвет силы', lifePath:'Число жизненного пути', dashboard:'Панель', profile:'Профиль', placeholder:'Введите город...', searching:'Поиск...', noResults:'Города не найдены' },
-  fa: { name:'FA', dir:'rtl', yourData:'اطلاعات تولد شما', nameLabel:'نام', bdate:'تاریخ تولد', btime:'زمان تولد', city:'شهر تولد', generate:'تولید نقشه', loading:'در حال بارگذاری...', natalChart:'نقشه تولدی', element:'عنصر', planet:'سیاره حاکم', stone:'سنگ خوش‌شانسی', color:'رنگ قدرت', lifePath:'عدد مسیر زندگی', dashboard:'داشبورد', profile:'پروفایل', placeholder:'نام شهر را بنویسید...', searching:'جستجو...', noResults:'شهری یافت نشد' },
-  ar: { name:'AR', dir:'rtl', yourData:'بيانات ميلادك', nameLabel:'الاسم', bdate:'تاريخ الميلاد', btime:'وقت الميلاد', city:'مدينة الميلاد', generate:'إنشاء الخريطة', loading:'جاري التحميل...', natalChart:'خريطة الميلاد', element:'العنصر', planet:'الكوكب الحاكم', stone:'حجر الحظ', color:'لون القوة', lifePath:'رقم مسار الحياة', dashboard:'لوحة التحكم', profile:'الملف', placeholder:'اكتب اسم مدينة...', searching:'جاري البحث...', noResults:'لا توجد مدن' },
+  en: { name:'EN', dir:'ltr', yourData:'Your Birth Data', nameLabel:'Name', bdate:'Birth Date', btime:'Birth Time', city:'Birth City', generate:'Generate Chart', loading:'Loading...', natalChart:'Natal Chart', element:'Element', planet:'Ruling Planet', stone:'Lucky Stone', color:'Power Color', lifePath:'Life Path Number', dashboard:'Dashboard', calendar:'Calendar', people:'People', profile:'Profile', placeholder:'Type a city name...', searching:'Searching...', noResults:'No cities found', chartEmpty:'Click Generate Chart', tablePlanet:'Planet', tableSign:'Sign', tableDegree:'Degree', tableHouse:'House', tableRetro:'Retrograde', retroYes:'Yes', retroNo:'—' },
+  ru: { name:'RU', dir:'ltr', yourData:'Ваши данные рождения', nameLabel:'Имя', bdate:'Дата рождения', btime:'Время рождения', city:'Город рождения', generate:'Создать карту', loading:'Загрузка...', natalChart:'Натальная карта', element:'Стихия', planet:'Управляющая планета', stone:'Счастливый камень', color:'Цвет силы', lifePath:'Число жизненного пути', dashboard:'Панель', calendar:'Календарь', people:'Люди', profile:'Профиль', placeholder:'Введите город...', searching:'Поиск...', noResults:'Города не найдены', chartEmpty:'Нажмите «Создать карту»', tablePlanet:'Планета', tableSign:'Знак', tableDegree:'Градус', tableHouse:'Дом', tableRetro:'Ретроград', retroYes:'Да', retroNo:'—' },
+  fa: { name:'FA', dir:'rtl', yourData:'اطلاعات تولد شما', nameLabel:'نام', bdate:'تاریخ تولد', btime:'زمان تولد', city:'شهر تولد', generate:'تولید نقشه', loading:'در حال بارگذاری...', natalChart:'نقشه تولدی', element:'عنصر', planet:'سیاره حاکم', stone:'سنگ خوش‌شانسی', color:'رنگ قدرت', lifePath:'عدد مسیر زندگی', dashboard:'داشبورد', calendar:'تقویم', people:'افراد', profile:'پروفایل', placeholder:'نام شهر را بنویسید...', searching:'جستجو...', noResults:'شهری یافت نشد', chartEmpty:'روی «تولید نقشه» کلیک کنید', tablePlanet:'سیاره', tableSign:'برج', tableDegree:'درجه', tableHouse:'خانه', tableRetro:'رتروگراد', retroYes:'بله', retroNo:'—' },
+  ar: { name:'AR', dir:'rtl', yourData:'بيانات ميلادك', nameLabel:'الاسم', bdate:'تاريخ الميلاد', btime:'وقت الميلاد', city:'مدينة الميلاد', generate:'إنشاء الخريطة', loading:'جاري التحميل...', natalChart:'خريطة الميلاد', element:'العنصر', planet:'الكوكب الحاكم', stone:'حجر الحظ', color:'لون القوة', lifePath:'رقم مسار الحياة', dashboard:'لوحة التحكم', calendar:'التقويم', people:'الأشخاص', profile:'الملف', placeholder:'اكتب اسم مدينة...', searching:'جاري البحث...', noResults:'لا توجد مدن', chartEmpty:'انقر «إنشاء الخريطة»', tablePlanet:'كوكب', tableSign:'برج', tableDegree:'درجة', tableHouse:'بيت', tableRetro:'راجع', retroYes:'نعم', retroNo:'—' },
 };
 
 const ZODIAC_TRANS: Record<string, Record<string, string>> = {
@@ -78,70 +101,12 @@ function tr(text: string, lang: string): string {
   return dict[text]||text;
 }
 
-const PSYM:Record<string,string>={sun:'☉',moon:'☽',mercury:'☿',venus:'♀',mars:'♂',jupiter:'♃',saturn:'♄',uranus:'⛢',neptune:'♆',pluto:'♇',north_node:'☊'};
-const PCOL:Record<string,string>={sun:'#fbbf24',moon:'#a5f3fc',mercury:'#86efac',venus:'#f9a8d4',mars:'#f87171',jupiter:'#fb923c',saturn:'#94a3b8',uranus:'#67e8f9',neptune:'#818cf8',pluto:'#c084fc',north_node:'#fde68a'};
-
-function NatalChartSVG({ planets, positions, ascendant }: { planets: string[], positions: Record<string, number>, ascendant: number }) {
-  const cx=150,cy=150,r=110,r2=82,r3=55;
-  const toXY=(deg:number,radius:number)=>({
-    x:cx+radius*Math.cos((deg-90)*Math.PI/180),
-    y:cy+radius*Math.sin((deg-90)*Math.PI/180)
+function buildSignNames(lang: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  ZODIAC.forEach((z) => {
+    out[z.sign] = tr(z.sign, lang);
   });
-  const signs=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
-  const signColors=['#ef4444','#22c55e','#eab308','#a5f3fc','#f97316','#6366f1','#ec4899','#dc2626','#8b5cf6','#64748b','#06b6d4','#0ea5e9'];
-
-  return (
-    <svg width="300" height="300" viewBox="0 0 300 300" style={{maxWidth:'100%'}}>
-      <circle cx={cx} cy={cy} r={r} fill="rgba(0,0,0,0.4)" stroke="rgba(251,191,36,0.3)" strokeWidth="1"/>
-      <circle cx={cx} cy={cy} r={r2} fill="rgba(0,0,0,0.2)" stroke="rgba(251,191,36,0.1)" strokeWidth="0.5"/>
-      <circle cx={cx} cy={cy} r={r3} fill="rgba(0,0,0,0.1)" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5"/>
-      
-      {Array.from({length:12},(_,i)=>{
-        const startDeg = i*30 - ascendant + 180;
-        const endDeg = startDeg + 30;
-        const midDeg = startDeg + 15;
-        const p1=toXY(startDeg,r);const p2=toXY(startDeg,r2);
-        const ps=toXY(midDeg,r+13);
-        return(
-          <g key={i}>
-            <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="rgba(251,191,36,0.2)" strokeWidth="0.5"/>
-            <text x={ps.x} y={ps.y} textAnchor="middle" dominantBaseline="middle" fontSize="9" fill={signColors[i]}>{signs[i]}</text>
-          </g>
-        );
-      })}
-
-      {ascendant > 0 && (()=>{
-        const p1=toXY(180,r+5);const p2=toXY(180,r3);
-        const p3=toXY(0,r+5);const p4=toXY(0,r3);
-        return(<g>
-          <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
-          <line x1={p3.x} y1={p3.y} x2={p4.x} y2={p4.y} stroke="rgba(255,255,255,0.4)" strokeWidth="1"/>
-          <text x={toXY(183,r3-8).x} y={toXY(183,r3-8).y} fontSize="7" fill="rgba(255,255,255,0.6)" textAnchor="middle">AC</text>
-        </g>);
-      })()}
-
-      <circle cx={cx} cy={cy} r="5" fill="#fbbf24" opacity="0.9"/>
-
-      {planets.map((name)=>{
-        const lon = positions[name];
-        if(lon === undefined) return null;
-        const displayDeg = lon - ascendant + 180;
-        const p=toXY(displayDeg, r2-16);
-        const sym=PSYM[name]||name[0].toUpperCase();
-        const col=PCOL[name]||'#fff';
-        return(
-          <g key={name}>
-            <circle cx={p.x} cy={p.y} r="10" fill="rgba(0,0,0,0.8)" stroke={col} strokeWidth="0.8"/>
-            <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize="9" fill={col}>{sym}</text>
-          </g>
-        );
-      })}
-
-      {planets.length===0&&(
-        <text x="150" y="155" textAnchor="middle" fontSize="11" fill="rgba(255,255,255,0.15)" fontFamily="Inter">Click Generate Chart</text>
-      )}
-    </svg>
-  );
+  return out;
 }
 
 export default function Profile() {
@@ -150,9 +115,9 @@ export default function Profile() {
   const [birthTime, setBirthTime] = useState('14:30');
   const [location, setLocation] = useState('New York');
   const [name, setName] = useState('');
-  const [planets, setPlanets] = useState<string[]>([]);
-  const [planetPositions, setPlanetPositions] = useState<Record<string, number>>({});
-  const [chartData, setChartData] = useState<any>(null); 
+  const [chartPlanets, setChartPlanets] = useState<Record<string, ChartPlanet> | null>(null);
+  const [ascendant, setAscendant] = useState(0);
+  const [chartError, setChartError] = useState('');
   const [loading, setLoading] = useState(false);
   const [citySearch, setCitySearch] = useState('New York');
   const [cities, setCities] = useState<any[]>([]);
@@ -163,6 +128,42 @@ export default function Profile() {
   const t = LANGS[lang];
   const zodiac = getZodiac(birthDate);
   const lifePath = getLifePath(birthDate);
+
+  useEffect(() => {
+    const saved = loadBirthProfile();
+    if (saved) {
+      setBirthDate(saved.birth_date);
+      setBirthTime(saved.birth_time);
+      setLocation(saved.location);
+      setCitySearch(saved.location);
+    }
+  }, []);
+
+  useEffect(() => {
+    saveBirthProfile({
+      birth_date: birthDate,
+      birth_time: birthTime,
+      location,
+      action_type: 'business_launch',
+    });
+  }, [birthDate, birthTime, location]);
+
+  const chartLabels: NatalChartLabels = useMemo(
+    () => ({
+      empty: t.chartEmpty,
+      tablePlanet: t.tablePlanet,
+      tableSign: t.tableSign,
+      tableDegree: t.tableDegree,
+      tableHouse: t.tableHouse,
+      tableRetro: t.tableRetro,
+      retroYes: t.retroYes,
+      retroNo: t.retroNo,
+      planetNames: PLANET_LABELS[lang] ?? PLANET_LABELS.en,
+      signNames: buildSignNames(lang),
+      aspectLegend: ASPECT_LABELS[lang] ?? ASPECT_LABELS.en,
+    }),
+    [lang, t]
+  );
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -194,6 +195,8 @@ export default function Profile() {
 
   const generateChart = async () => {
     setLoading(true);
+    setChartError('');
+    setChartPlanets(null);
     try {
       const res = await fetch('http://localhost:8000/api/business/chart', {
         method: 'POST',
@@ -203,26 +206,35 @@ export default function Profile() {
           birth_time: birthTime,
           location: location,
           action_type: 'business_launch',
-          target_date: new Date().toISOString().split('T')[0]
-        })
+          target_date: new Date().toISOString().split('T')[0],
+        }),
       });
       const data = await res.json();
-      if (data.planets) {
-        const planetList = Object.keys(data.planets);
-        const positions: Record<string, number> = {};
-        Object.entries(data.planets).forEach(([name, info]: [string, any]) => {
-          positions[name] = info.longitude;
+      if (data.detail) {
+        setChartError(typeof data.detail === 'string' ? data.detail : 'Chart request failed');
+      } else if (data.planets) {
+        const parsed: Record<string, ChartPlanet> = {};
+        Object.entries(data.planets).forEach(([name, info]) => {
+          const p = info as ChartPlanet;
+          parsed[name] = {
+            longitude: p.longitude,
+            sign: p.sign,
+            degree: p.degree,
+            house: p.house,
+            retrograde: Boolean(p.retrograde),
+          };
         });
-        setPlanets(planetList);
-        setPlanetPositions(positions);
-        setChartData(data);
+        setChartPlanets(parsed);
+        setAscendant(typeof data.ascendant === 'number' ? data.ascendant : 0);
       }
-    } catch {}
+    } catch {
+      setChartError('Cannot connect to API. Start the backend on port 8000.');
+    }
     setLoading(false);
   };
 
   return (
-    <div style={{direction:t.dir as any, fontFamily:(lang==='fa'||lang==='ar')?'Vazirmatn,sans-serif':'Inter,sans-serif'}} className="min-h-screen bg-[#070B14] text-white">
+    <div style={{direction:t.dir as any, fontFamily:(lang==='fa'||lang==='ar')?'Vazirmatn,sans-serif':'Inter,sans-serif'}} className="min-h-screen bg-[#070B14] text-white pb-20">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
         @import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
@@ -243,6 +255,8 @@ export default function Profile() {
         </Link>
         <div className="flex items-center gap-4">
           <Link href="/dashboard" className="fi text-sm text-white/40 hover:text-white transition">{t.dashboard}</Link>
+          <Link href="/calendar" className="fi text-sm text-white/40 hover:text-white transition">{t.calendar}</Link>
+          <Link href="/people" className="fi text-sm text-white/40 hover:text-white transition">{t.people}</Link>
           <Link href="/profile" className="fi text-sm" style={{color:'#fbbf24'}}>{t.profile}</Link>
           <div className="flex gap-1 ml-2">
             {(Object.keys(LANGS) as Array<keyof typeof LANGS>).map(l=>(
@@ -313,15 +327,21 @@ export default function Profile() {
 
           <div className="rounded-2xl p-6 flex flex-col items-center" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)'}}>
             <div className="fc text-sm tracking-widest mb-4" style={{color:'#fbbf24'}}>{t.natalChart}</div>
-            <div style={{background:'rgba(0,0,0,0.3)',borderRadius:'50%',padding:'6px'}}>
-              {loading ? (
-                <div className="w-[300px] h-[300px] flex items-center justify-center">
-                  <div className="fi text-xs" style={{color:'rgba(255,255,255,0.2)'}}>Loading...</div>
+            {loading ? (
+                <div className="w-[320px] min-h-[320px] flex items-center justify-center">
+                  <div className="fi text-xs" style={{color:'rgba(255,255,255,0.2)'}}>{t.loading}</div>
                 </div>
               ) : (
-                <NatalChartSVG planets={planets} positions={planetPositions} ascendant={chartData?.ascendant || 0}/>
+                <NatalChart
+                  planets={chartPlanets}
+                  ascendant={ascendant}
+                  labels={chartLabels}
+                  empty={!chartPlanets}
+                />
               )}
-            </div>
+            {chartError && (
+              <p className="fi mt-3 text-xs text-center px-2" style={{color:'#fca5a5'}}>{chartError}</p>
+            )}
           </div>
 
           <div className="space-y-4">
@@ -360,6 +380,7 @@ export default function Profile() {
 
         </div>
       </div>
+      <BottomNav labels={HOME_LANGS[(lang as AppLang) || 'en'].nav} />
     </div>
   );
 }

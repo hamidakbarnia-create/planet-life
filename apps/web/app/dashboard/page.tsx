@@ -1,5 +1,16 @@
 'use client';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import {
+  translateAnalysis,
+  type AstroLang,
+  type AnalysisPayload,
+} from '@/lib/astrology-i18n';
+import { BottomNav } from '@/components/BottomNav';
+import { ActionDisclaimer } from '@/components/disclaimers/ActionDisclaimer';
+import { ModuleDisclaimerBanner } from '@/components/disclaimers/ModuleDisclaimerBanner';
+import { saveBirthProfile } from '@/lib/birth-profile';
+import type { DisclaimerLang } from '@/lib/disclaimers';
+import { HOME_LANGS } from '@/lib/home-i18n';
 
 const API = 'http://localhost:8000';
 
@@ -14,6 +25,9 @@ const LANGS = {
     rec: 'Guidance', opps: '✦ Cosmic Tailwinds', risks: '⚡ Watch Out For',
     themes: '◈ Key Themes', timing: '◷ Timing Notes',
     placeholder: 'Type a city name...', noResults: 'No cities found', searching: 'Searching...',
+    calendar: 'Calendar',
+    people: 'People',
+    profile: 'Profile',
     actions_business: { business_launch:'Business Launch', negotiation:'Negotiation', hiring:'Hiring', networking:'Networking', creative_work:'Creative Work', travel:'Travel' },
     actions_finance: { investment:'Investment', finance_transaction:'Finance Transaction', negotiation:'Negotiation', contract_signing:'Contract Signing' },
     actions_re: { real_estate:'Real Estate Purchase', contract_signing:'Contract Signing', investment:'Investment', negotiation:'Negotiation' },
@@ -28,6 +42,9 @@ const LANGS = {
     rec: 'Рекомендация', opps: '✦ Попутный ветер', risks: '⚡ Остерегайтесь',
     themes: '◈ Ключевые темы', timing: '◷ Заметки о времени',
     placeholder: 'Введите город...', noResults: 'Города не найдены', searching: 'Поиск...',
+    calendar: 'Календарь',
+    people: 'Люди',
+    profile: 'Профиль',
     actions_business: { business_launch:'Запуск бизнеса', negotiation:'Переговоры', hiring:'Найм', networking:'Нетворкинг', creative_work:'Творческая работа', travel:'Путешествие' },
     actions_finance: { investment:'Инвестиция', finance_transaction:'Финансовая операция', negotiation:'Переговоры', contract_signing:'Подписание контракта' },
     actions_re: { real_estate:'Покупка недвижимости', contract_signing:'Подписание контракта', investment:'Инвестиция', negotiation:'Переговоры' },
@@ -42,6 +59,9 @@ const LANGS = {
     rec: 'راهنمایی', opps: '✦ بادهای موافق', risks: '⚡ هشدارها',
     themes: '◈ موضوعات کلیدی', timing: '◷ نکات زمانی',
     placeholder: 'نام شهر را بنویسید...', noResults: 'شهری یافت نشد', searching: 'جستجو...',
+    calendar: 'تقویم',
+    people: 'افراد',
+    profile: 'پروفایل',
     actions_business: { business_launch:'راه‌اندازی کسب‌وکار', negotiation:'مذاکره', hiring:'استخدام', networking:'شبکه‌سازی', creative_work:'کار خلاقانه', travel:'سفر' },
     actions_finance: { investment:'سرمایه‌گذاری', finance_transaction:'تراکنش مالی', negotiation:'مذاکره', contract_signing:'امضای قرارداد' },
     actions_re: { real_estate:'خرید ملک', contract_signing:'امضای قرارداد', investment:'سرمایه‌گذاری', negotiation:'مذاکره' },
@@ -56,6 +76,9 @@ const LANGS = {
     rec: 'التوجيه', opps: '✦ رياح مواتية', risks: '⚡ تحذيرات',
     themes: '◈ المواضيع الرئيسية', timing: '◷ ملاحظات التوقيت',
     placeholder: 'اكتب اسم مدينة...', noResults: 'لا توجد مدن', searching: 'جاري البحث...',
+    calendar: 'التقويم',
+    people: 'الأشخاص',
+    profile: 'الملف',
     actions_business: { business_launch:'إطلاق مشروع', negotiation:'مفاوضة', hiring:'توظيف', networking:'شبكات', creative_work:'عمل إبداعي', travel:'سفر' },
     actions_finance: { investment:'استثمار', finance_transaction:'معاملة مالية', negotiation:'مفاوضة', contract_signing:'توقيع عقد' },
     actions_re: { real_estate:'شراء عقار', contract_signing:'توقيع عقد', investment:'استثمار', negotiation:'مفاوضة' },
@@ -67,32 +90,6 @@ const DOMAIN_ACTIONS: Record<string, string[]> = {
   finance: ['investment','finance_transaction','negotiation','contract_signing'],
   'real-estate': ['real_estate','contract_signing','investment','negotiation'],
 };
-
-const ASPECT_TRANS: Record<string, Record<string, string>> = {
-  ru: {
-    'Strategic':'Стратегический','focus':'фокус','visibility':'видимость','momentum':'импульс','scalable':'масштабируемый','growth':'рост','Supportive':'Поддерживающий','transits':'транзиты','rulers':'управители','activity':'активность','Hard':'Жёсткие','aspects':'аспекты','suggest':'указывают','resistance':'сопротивление','delays':'задержки','rework':'переработку','Consolidate':'Консолидируйте','plan':'планируйте','avoid':'избегайте','overextension':'перенапряжения','No':'Нет','major':'значительных','retrograde':'ретроградных','friction':'трений','primary':'первичных','standard':'стандартная','due':'должная','diligence':'осмотрительность','applies':'применяется','capital':'капитал','allocation':'распределение','risk':'риск','reward':'вознаграждение','long':'долгосрочный','term':'срок','yield':'доходность','asset':'актив','security':'безопасность','valuation':'оценка','structural':'структурный','soundness':'надёжность','communication':'коммуникация','rapport':'взаимопонимание','mutually':'взаимовыгодные','beneficial':'выгодные','terms':'условия','contingency':'резервные','plans':'планы','light':'лёгкими',
-    'Transit':'Транзит','natal':'натальный','trine':'трин','sextile':'секстиль','square':'квадрат','conjunction':'соединение','opposition':'оппозиция','quincunx':'квинкункс','Sun':'Солнце','Moon':'Луна','Mercury':'Меркурий','Venus':'Венера','Mars':'Марс','Jupiter':'Юпитер','Saturn':'Сатурн','Uranus':'Уран','Neptune':'Нептун','Pluto':'Плутон','North_Node':'Северный узел','orb':'орб',
-  },
-  fa: {
-    'Strategic':'استراتژیک','focus':'تمرکز','visibility':'دیده‌شدن','momentum':'شتاب','scalable':'مقیاس‌پذیر','growth':'رشد','Supportive':'حمایتی','transits':'ترانزیت‌ها','rulers':'حاکمان','activity':'فعالیت','Hard':'سخت','aspects':'جنبه‌ها','suggest':'نشان می‌دهند','resistance':'مقاومت','delays':'تأخیرها','rework':'بازنگری','Consolidate':'تثبیت کنید','plan':'برنامه‌ریزی کنید','avoid':'اجتناب کنید','overextension':'کشش بیش از حد','No':'بدون','major':'عمده','retrograde':'رتروگراد','friction':'اصطکاک','primary':'اصلی','standard':'استاندارد','due':'لازم','diligence':'دقت','applies':'صدق می‌کند','capital':'سرمایه','allocation':'تخصیص','risk':'ریسک','reward':'بازده','long':'بلند','term':'مدت','yield':'سود','asset':'دارایی','security':'امنیت','valuation':'ارزیابی','structural':'ساختاری','soundness':'استحکام','communication':'ارتباط','rapport':'اعتماد متقابل','mutually':'متقابلاً','beneficial':'سودمند','terms':'شرایط','contingency':'اضطراری','plans':'برنامه‌ها','light':'سبک',
-    'Transit':'ترانزیت','natal':'تولدی','trine':'تثلیث','sextile':'سداسی','square':'تربیع','conjunction':'اقتران','opposition':'مقابله','quincunx':'کوینکانکس','Sun':'خورشید','Moon':'ماه','Mercury':'عطارد','Venus':'زهره','Mars':'مریخ','Jupiter':'مشتری','Saturn':'زحل','Uranus':'اورانوس','Neptune':'نپتون','Pluto':'پلوتون','North_Node':'گره شمالی','orb':'اُرب',
-  },
-  ar: {
-    'Strategic':'استراتيجي','focus':'تركيز','visibility':'الظهور','momentum':'الزخم','scalable':'قابل للتوسع','growth':'النمو','Supportive':'داعم','transits':'العبورات','rulers':'الحكام','activity':'النشاط','Hard':'صعبة','aspects':'الجوانب','suggest':'تشير إلى','resistance':'مقاومة','delays':'تأخيرات','rework':'إعادة العمل','Consolidate':'قم بالتوطيد','plan':'خطط','avoid':'تجنب','overextension':'الإفراط في التمدد','No':'لا','major':'رئيسية','retrograde':'راجع','friction':'احتكاك','primary':'رئيسي','standard':'معياري','due':'الواجب','diligence':'العناية','applies':'ينطبق','capital':'رأس المال','allocation':'توزيع','risk':'مخاطر','reward':'عائد','long':'طويل','term':'مدى','yield':'عائد','asset':'أصل','security':'أمان','valuation':'تقييم','structural':'هيكلي','soundness':'متانة','communication':'تواصل','rapport':'ألفة','mutually':'بشكل متبادل','beneficial':'مفيد','terms':'شروط','contingency':'طوارئ','plans':'خطط','light':'خفيفة',
-    'Transit':'عبور','natal':'ميلادي','trine':'تثليث','sextile':'سداسي','square':'تربيع','conjunction':'اقتران','opposition':'مقابلة','quincunx':'كوينكونكس','Sun':'الشمس','Moon':'القمر','Mercury':'عطارد','Venus':'الزهرة','Mars':'المريخ','Jupiter':'المشتري','Saturn':'زحل','Uranus':'أورانوس','Neptune':'نبتون','Pluto':'بلوتو','North_Node':'العقدة الشمالية','orb':'المدار',
-  },
-};
-
-function translateAspect(text: string, lang: string): string {
-  if (lang === 'en') return text;
-  const dict = ASPECT_TRANS[lang];
-  if (!dict) return text;
-  let result = text;
-  Object.entries(dict).forEach(([en, tr]) => {
-    result = result.replace(new RegExp(en, 'g'), tr);
-  });
-  return result;
-}
 
 const SCORE_MSG: Record<string, Record<string, string>> = {
   en: {
@@ -123,7 +120,7 @@ export default function Dashboard() {
   const [lang, setLang] = useState<keyof typeof LANGS>('en');
   const [domain, setDomain] = useState('business');
   const [form, setForm] = useState({ birth_date:'1990-06-15', birth_time:'14:30', location:'New York', target_date: new Date().toISOString().split('T')[0], action_type:'business_launch' });
-  const [result, setResult] = useState<any>(null);
+  const [rawResult, setRawResult] = useState<AnalysisPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [cities, setCities] = useState<any[]>([]);
@@ -131,9 +128,15 @@ export default function Dashboard() {
   const [showCities, setShowCities] = useState(false);
   const [cityLoading, setCityLoading] = useState(false);
   const [animated, setAnimated] = useState(false);
+  const [moduleBannerDismissed, setModuleBannerDismissed] = useState(false);
   const cityRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<any>(null);
   const t = LANGS[lang];
+
+  const result = useMemo(
+    () => (rawResult ? translateAnalysis(rawResult, lang as AstroLang) : null),
+    [rawResult, lang]
+  );
 
   const [bdY, bdM, bdD] = form.birth_date.split('-');
 
@@ -144,6 +147,15 @@ export default function Dashboard() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  useEffect(() => {
+    saveBirthProfile({
+      birth_date: form.birth_date,
+      birth_time: form.birth_time,
+      location: form.location,
+      action_type: form.action_type,
+    });
+  }, [form.birth_date, form.birth_time, form.location, form.action_type]);
 
   const searchCities = useCallback((q: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -171,7 +183,8 @@ export default function Dashboard() {
   };
 
   const analyze = async () => {
-    setLoading(true); setError(''); setResult(null); setAnimated(false);
+    setModuleBannerDismissed(false);
+    setLoading(true); setError(''); setRawResult(null); setAnimated(false);
     try {
       const res = await fetch(`${API}/api/${domain}/analyze`, {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -180,17 +193,7 @@ export default function Dashboard() {
       const data = await res.json();
       if (data.detail) setError(data.detail);
       else {
-        if (lang !== 'en') {
-          try {
-            const tr = await fetch('/api/translate', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: data.executive.recommendation, lang })
-            });
-            const trData = await tr.json();
-            if (trData.translated) data.executive.recommendation = trData.translated;
-          } catch {}
-        }
-        setResult(data); setTimeout(() => setAnimated(true), 100);
+        setRawResult(data); setTimeout(() => setAnimated(true), 100);
       }
     } catch {
       setError('Cannot connect to API. Make sure the backend is running on port 8000.');
@@ -208,7 +211,7 @@ export default function Dashboard() {
 
   return (
     <div style={{ direction: t.dir as any, fontFamily: (lang==='fa'||lang==='ar') ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif', fontFeatureSettings: '"kern"' }}
-        className="min-h-screen bg-[#070B14] text-white">
+        className="min-h-screen bg-[#070B14] text-white pb-20">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
         @import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
@@ -245,8 +248,10 @@ export default function Dashboard() {
           </div>
         </a>
         <div className="flex items-center gap-4 mx-4">
-          <a href="/dashboard" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>Dashboard</a>
-          <a href="/profile" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>Profile</a>
+          <a href="/dashboard" className="fi text-sm" style={{color:'#fbbf24'}}>Dashboard</a>
+          <a href="/calendar" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>{t.calendar}</a>
+          <a href="/people" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>{t.people}</a>
+          <a href="/profile" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>{t.profile}</a>
         </div>
         <div className="flex gap-1">
           {(Object.keys(LANGS) as Array<keyof typeof LANGS>).map(l => (
@@ -263,7 +268,7 @@ export default function Dashboard() {
         <div className="flex gap-2 mb-8">
           {[{key:'business',icon:'◈',label:t.business},{key:'finance',icon:'◎',label:t.finance},{key:'real-estate',icon:'⬡',label:t.realestate}].map(d => (
             <button key={d.key}
-              onClick={() => { setDomain(d.key); setForm(f => ({...f, action_type:DOMAIN_ACTIONS[d.key][0]})); setResult(null); }}
+              onClick={() => { setDomain(d.key); setForm(f => ({...f, action_type:DOMAIN_ACTIONS[d.key][0]})); setRawResult(null); }}
               className="fi flex items-center gap-2 px-4 py-2 rounded-lg border text-sm transition-all"
               style={domain===d.key ? {borderColor:'rgba(251,191,36,0.5)',color:'#fbbf24',background:'rgba(251,191,36,0.06)'} : {borderColor:'rgba(255,255,255,0.08)',color:'rgba(255,255,255,0.4)'}}>
               <span className="text-xs">{d.icon}</span>{d.label}
@@ -367,6 +372,12 @@ export default function Dashboard() {
               const msg = SCORE_MSG[lang]?.[getMsgKey(ex.score)] || SCORE_MSG.en[getMsgKey(ex.score)];
               return (
                 <div className="space-y-4">
+                  {!moduleBannerDismissed && (
+                    <ModuleDisclaimerBanner
+                      lang={lang as DisclaimerLang}
+                      onDismiss={() => setModuleBannerDismissed(true)}
+                    />
+                  )}
                   <div className="fade-up rounded-2xl p-6" style={{background:s.bg,border:'1px solid rgba(255,255,255,0.07)',animationDelay:'0ms'}}>
                     <div className="flex items-center gap-5">
                       <div className="relative flex-shrink-0">
@@ -392,6 +403,9 @@ export default function Dashboard() {
                   <div className="fade-up rounded-2xl p-5" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)',animationDelay:'80ms'}}>
                     <div className="fi text-[10px] tracking-widest mb-2 uppercase" style={{color:'rgba(255,255,255,0.25)'}}>{t.rec}</div>
                     <p className="fi text-sm leading-relaxed" style={{color:'rgba(255,255,255,0.75)'}}>{ex.recommendation}</p>
+                    {ex.score >= 85 && (
+                      <ActionDisclaimer lang={lang as DisclaimerLang} />
+                    )}
                   </div>
 
                   {st?.opportunity_factors?.length > 0 && (
@@ -401,7 +415,7 @@ export default function Dashboard() {
                         {st.opportunity_factors.slice(0,4).map((o: string, i: number) => (
                           <div key={i} className="flex items-start gap-2">
                             <span className="text-xs mt-0.5" style={{color:'#4ade80'}}>◆</span>
-                            <span className="fi text-xs leading-relaxed" style={{color:'rgba(255,255,255,0.55)'}}>{translateAspect(o, lang)}</span>
+                            <span className="fi text-xs leading-relaxed" style={{color:'rgba(255,255,255,0.55)'}}>{o}</span>
                           </div>
                         ))}
                       </div>
@@ -415,7 +429,7 @@ export default function Dashboard() {
                         {st.risk_factors.slice(0,4).map((r: string, i: number) => (
                           <div key={i} className="flex items-start gap-2">
                             <span className="text-xs mt-0.5" style={{color:'#f87171'}}>▲</span>
-                            <span className="fi text-xs leading-relaxed" style={{color:'rgba(255,255,255,0.55)'}}>{translateAspect(r, lang)}</span>
+                            <span className="fi text-xs leading-relaxed" style={{color:'rgba(255,255,255,0.55)'}}>{r}</span>
                           </div>
                         ))}
                       </div>
@@ -428,7 +442,7 @@ export default function Dashboard() {
                         <div className="rounded-2xl p-4" style={{background:'rgba(251,191,36,0.03)',border:'1px solid rgba(251,191,36,0.08)'}}>
                           <div className="fc text-xs tracking-wider mb-3" style={{color:'#fbbf24'}}>{t.themes}</div>
                           {st.key_themes.slice(0,3).map((th: string, i: number) => (
-                            <div key={i} className="fi text-[11px] leading-relaxed py-1.5" style={{color:'rgba(255,255,255,0.45)',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>{translateAspect(th, lang)}</div>
+                            <div key={i} className="fi text-[11px] leading-relaxed py-1.5" style={{color:'rgba(255,255,255,0.45)',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>{th}</div>
                           ))}
                         </div>
                       )}
@@ -436,7 +450,7 @@ export default function Dashboard() {
                         <div className="rounded-2xl p-4" style={{background:'rgba(96,165,250,0.03)',border:'1px solid rgba(96,165,250,0.08)'}}>
                           <div className="fc text-xs tracking-wider mb-3" style={{color:'#60a5fa'}}>{t.timing}</div>
                           {st.timing_notes.slice(0,3).map((tn: string, i: number) => (
-                            <div key={i} className="fi text-[11px] leading-relaxed py-1.5" style={{color:'rgba(255,255,255,0.45)',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>{translateAspect(tn, lang)}</div>
+                            <div key={i} className="fi text-[11px] leading-relaxed py-1.5" style={{color:'rgba(255,255,255,0.45)',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>{tn}</div>
                           ))}
                         </div>
                       )}
@@ -448,6 +462,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      <BottomNav labels={HOME_LANGS[lang as keyof typeof HOME_LANGS].nav} />
     </div>
   );
 }

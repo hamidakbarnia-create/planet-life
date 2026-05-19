@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { PeopleHomeRow } from '@/components/PeopleHomeRow';
 
 export default function Home() {
   return (
@@ -17,7 +18,7 @@ export default function Home() {
           <a href="#features" className="hover:text-white transition">Features</a>
           <a href="#how" className="hover:text-white transition">How it works</a>
           <Link href="/profile" className="hover:text-white transition">Profile</Link>
-          <Link href="/dashboard" className="bg-amber-500 text-black px-4 py-2 rounded-lg font-medium hover:bg-amber-400 transition">
+          <Link href="/home" className="bg-amber-500 text-black px-4 py-2 rounded-lg font-medium hover:bg-amber-400 transition">
             Get Started
           </Link>
         </div>
@@ -32,7 +33,7 @@ export default function Home() {
           Planet Life analyzes your natal chart against current transits to score your business, financial, and real estate decisions from 0 to 100.
         </p>
         <div className="flex gap-4">
-          <Link href="/dashboard" className="bg-amber-500 text-black px-6 py-3 rounded-lg font-medium hover:bg-amber-400 transition text-sm">
+          <Link href="/home" className="bg-amber-500 text-black px-6 py-3 rounded-lg font-medium hover:bg-amber-400 transition text-sm">
             Analyze now
           </Link>
           <Link href="/profile" className="border border-white/20 px-6 py-3 rounded-lg text-sm hover:border-white/40 transition">
@@ -40,6 +41,8 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      <PeopleHomeRow />
 
       <section id="features" className="px-8 py-20 max-w-5xl mx-auto">
         <h2 className="text-2xl font-semibold text-center mb-12">Three domains. One blueprint.</h2>
@@ -80,8 +83,8 @@ export default function Home() {
       <section className="text-center py-20 px-6">
         <h2 className="text-3xl font-semibold mb-4">Ready to align with the cosmos?</h2>
         <p className="text-white/50 mb-8">Start your first analysis in 30 seconds.</p>
-        <Link href="/dashboard" className="bg-amber-500 text-black px-8 py-3 rounded-lg font-medium hover:bg-amber-400 transition">
-          Go to dashboard
+        <Link href="/home" className="bg-amber-500 text-black px-8 py-3 rounded-lg font-medium hover:bg-amber-400 transition">
+          Go to home
         </Link>
       </section>
 

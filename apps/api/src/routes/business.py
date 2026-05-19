@@ -14,6 +14,9 @@ class BusinessAnalysisRequest(BaseModel):
     location: str
     action_type: str
     target_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
+    target_time: str | None = Field(None, pattern=r"^\d{2}:\d{2}$")
+    house_system: str = "placidus"
+    zodiac: str = "tropical"
 
 @router.post("/analyze")
 async def analyze_business(request: BusinessAnalysisRequest):
@@ -24,6 +27,9 @@ async def analyze_business(request: BusinessAnalysisRequest):
             birth_time=request.birth_time,
             location=request.location,
             target_date=request.target_date,
+            target_time=request.target_time,
+            house_system=request.house_system,
+            zodiac=request.zodiac,
         )
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
