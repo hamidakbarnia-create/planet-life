@@ -1,10 +1,10 @@
-from __future__ import annotations
+content = '''from __future__ import annotations
 import re
 from datetime import datetime, timezone
 from typing import Any
 
 _COORD_PATTERN = re.compile(
-    r"^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$"
+    r"^\\s*(-?\\d{1,3}(?:\\.\\d+)?)\\s*,\\s*(-?\\d{1,3}(?:\\.\\d+)?)\\s*$"
 )
 
 def _planet_bodies(swe):
@@ -99,3 +99,8 @@ def build_chart_payload(*, birth_date, birth_time, location, target_date):
         "latitude": lat, "longitude": lon,
     }
     return user_natal_data, current_transit_data
+'''
+
+with open('apps/api/src/services/chart_data.py', 'w', encoding='utf-8') as f:
+    f.write(content)
+print("Done")
