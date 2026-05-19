@@ -1,0 +1,512 @@
+'use client';
+import { useState, useRef, useEffect, useCallback } from 'react';
+
+const API = 'http://localhost:8000';
+
+const LANGS = {
+  en: {
+    dir: 'ltr', name: 'EN',
+    title: 'Planet Life', sub: 'Astrological Intelligence',
+    bdate: 'Birth Date', btime: 'Birth Time',
+    loc: 'City of Birth', tdate: 'Target Date', action: 'Action',
+    analyze: 'Analyze My Stars', loading: 'Reading the cosmos...',
+    business: 'Business', finance: 'Finance', realestate: 'Real Estate',
+    rec: 'Guidance', opps: '✦ Cosmic Tailwinds', risks: '⚡ Watch Out For',
+    themes: '◈ Key Themes', timing: '◷ Timing Notes',
+    placeholder: 'Type a city name...', noResults: 'No cities found', searching: 'Searching...',
+    actions_business: { business_launch:'Business Launch', negotiation:'Negotiation', hiring:'Hiring', networking:'Networking', creative_work:'Creative Work', travel:'Travel' },
+    actions_finance: { investment:'Investment', finance_transaction:'Finance Transaction', negotiation:'Negotiation', contract_signing:'Contract Signing' },
+    actions_re: { real_estate:'Real Estate Purchase', contract_signing:'Contract Signing', investment:'Investment', negotiation:'Negotiation' },
+  },
+  ru: {
+    dir: 'ltr', name: 'RU',
+    title: 'Planet Life', sub: 'Астрологический анализ',
+    bdate: 'Дата рождения', btime: 'Время рождения',
+    loc: 'Город рождения', tdate: 'Целевая дата', action: 'Действие',
+    analyze: 'Анализировать', loading: 'Читаем космос...',
+    business: 'Бизнес', finance: 'Финансы', realestate: 'Недвижимость',
+    rec: 'Рекомендация', opps: '✦ Попутный ветер', risks: '⚡ Остерегайтесь',
+    themes: '◈ Ключевые темы', timing: '◷ Заметки о времени',
+    placeholder: 'Введите город...', noResults: 'Города не найдены', searching: 'Поиск...',
+    actions_business: { business_launch:'Запуск бизнеса', negotiation:'Переговоры', hiring:'Найм', networking:'Нетворкинг', creative_work:'Творческая работа', travel:'Путешествие' },
+    actions_finance: { investment:'Инвестиция', finance_transaction:'Финансовая операция', negotiation:'Переговоры', contract_signing:'Подписание контракта' },
+    actions_re: { real_estate:'Покупка недвижимости', contract_signing:'Подписание контракта', investment:'Инвестиция', negotiation:'Переговоры' },
+  },
+  fa: {
+    dir: 'rtl', name: 'FA',
+    title: 'Planet Life', sub: 'هوش نجومی',
+    bdate: 'تاریخ تولد', btime: 'زمان تولد',
+    loc: 'شهر تولد', tdate: 'تاریخ هدف', action: 'نوع فعالیت',
+    analyze: 'تحلیل ستاره‌هایم', loading: 'در حال خواندن کیهان...',
+    business: 'کسب‌وکار', finance: 'مالی', realestate: 'مسکن',
+    rec: 'راهنمایی', opps: '✦ بادهای موافق', risks: '⚡ هشدارها',
+    themes: '◈ موضوعات کلیدی', timing: '◷ نکات زمانی',
+    placeholder: 'نام شهر را بنویسید...', noResults: 'شهری یافت نشد', searching: 'جستجو...',
+    actions_business: { business_launch:'راه‌اندازی کسب‌وکار', negotiation:'مذاکره', hiring:'استخدام', networking:'شبکه‌سازی', creative_work:'کار خلاقانه', travel:'سفر' },
+    actions_finance: { investment:'سرمایه‌گذاری', finance_transaction:'تراکنش مالی', negotiation:'مذاکره', contract_signing:'امضای قرارداد' },
+    actions_re: { real_estate:'خرید ملک', contract_signing:'امضای قرارداد', investment:'سرمایه‌گذاری', negotiation:'مذاکره' },
+  },
+  ar: {
+    dir: 'rtl', name: 'AR',
+   title: 'Planet Life', sub: 'الذكاء الفلكي',
+    bdate: 'تاريخ الميلاد', btime: 'وقت الميلاد',
+    loc: 'مدينة الميلاد', tdate: 'التاريخ المستهدف', action: 'نوع النشاط',
+    analyze: 'تحليل نجومي', loading: 'نقرأ الكون...',
+    business: 'أعمال', finance: 'مالية', realestate: 'عقارات',
+    rec: 'التوجيه', opps: '✦ رياح مواتية', risks: '⚡ تحذيرات',
+    themes: '◈ المواضيع الرئيسية', timing: '◷ ملاحظات التوقيت',
+    placeholder: 'اكتب اسم مدينة...', noResults: 'لا توجد مدن', searching: 'جاري البحث...',
+    actions_business: { business_launch:'إطلاق مشروع', negotiation:'مفاوضة', hiring:'توظيف', networking:'شبكات', creative_work:'عمل إبداعي', travel:'سفر' },
+    actions_finance: { investment:'استثمار', finance_transaction:'معاملة مالية', negotiation:'مفاوضة', contract_signing:'توقيع عقد' },
+    actions_re: { real_estate:'شراء عقار', contract_signing:'توقيع عقد', investment:'استثمار', negotiation:'مفاوضة' },
+  },
+};
+
+const DOMAIN_ACTIONS: Record<string, string[]> = {
+  business: ['business_launch','negotiation','hiring','networking','creative_work','travel'],
+  finance: ['investment','finance_transaction','negotiation','contract_signing'],
+  'real-estate': ['real_estate','contract_signing','investment','negotiation'],
+};
+
+const ASPECT_TRANS: Record<string, Record<string, string>> = {
+  ru: {
+     'Strategic': 'Стратегический', 'focus': 'фокус', 'visibility': 'видимость',
+'momentum': 'импульс', 'scalable': 'масштабируемый', 'growth': 'рост',
+'Supportive': 'Поддерживающий', 'transits': 'транзиты', 'rulers': 'управители',
+'activity': 'активность', 'Hard': 'Жёсткие', 'aspects': 'аспекты',
+'suggest': 'указывают', 'resistance': 'сопротивление', 'delays': 'задержки',
+'rework': 'переработку', 'Consolidate': 'Консолидируйте', 'plan': 'планируйте',
+'avoid': 'избегайте', 'overextension': 'перенапряжения',
+'No': 'Нет', 'major': 'значительных', 'retrograde': 'ретроградных',
+'friction': 'трений', 'primary': 'первичных', 'standard': 'стандартная',
+'due': 'должная', 'diligence': 'осмотрительность', 'applies': 'применяется',
+'capital': 'капитал', 'allocation': 'распределение', 'risk': 'риск',
+'reward': 'вознаграждение', 'long': 'долгосрочный', 'term': 'срок', 'yield': 'доходность',
+'asset': 'актив', 'security': 'безопасность', 'valuation': 'оценка', 'structural': 'структурный',
+'soundness': 'надёжность', 'communication': 'коммуникация', 'rapport': 'взаимопонимание',
+'mutually': 'взаимовыгодные', 'beneficial': 'выгодные', 'terms': 'условия',
+'contingency': 'резервные', 'plans': 'планы', 'light': 'лёгкими',
+    'Transit': 'Транзит', 'natal': 'натальный', 'trine': 'трин',
+    'sextile': 'секстиль', 'square': 'квадрат', 'conjunction': 'соединение',
+    'opposition': 'оппозиция', 'quincunx': 'квинкункс',
+    'Sun': 'Солнце', 'Moon': 'Луна', 'Mercury': 'Меркурий',
+    'Venus': 'Венера', 'Mars': 'Марс', 'Jupiter': 'Юпитер',
+    'Saturn': 'Сатурн', 'Uranus': 'Уран', 'Neptune': 'Нептун',
+    'Pluto': 'Плутон', 'North_Node': 'Северный узел', 'orb': 'орб',
+  },
+  fa: {
+     'Strategic': 'استراتژیک', 'focus': 'تمرکز', 'visibility': 'دیده‌شدن',
+'momentum': 'شتاب', 'scalable': 'مقیاس‌پذیر', 'growth': 'رشد',
+'Supportive': 'حمایتی', 'transits': 'ترانزیت‌ها', 'rulers': 'حاکمان',
+'activity': 'فعالیت', 'Hard': 'سخت', 'aspects': 'جنبه‌ها',
+'suggest': 'نشان می‌دهند', 'resistance': 'مقاومت', 'delays': 'تأخیرها',
+'rework': 'بازنگری', 'Consolidate': 'تثبیت کنید', 'plan': 'برنامه‌ریزی کنید',
+'avoid': 'اجتناب کنید', 'overextension': 'کشش بیش از حد',
+'No': 'بدون', 'major': 'عمده', 'retrograde': 'رتروگراد',
+'friction': 'اصطکاک', 'primary': 'اصلی', 'standard': 'استاندارد',
+'due': 'لازم', 'diligence': 'دقت', 'applies': 'صدق می‌کند',
+'capital': 'سرمایه', 'allocation': 'تخصیص', 'risk': 'ریسک',
+'reward': 'بازده', 'long': 'بلند', 'term': 'مدت', 'yield': 'سود',
+'asset': 'دارایی', 'security': 'امنیت', 'valuation': 'ارزیابی', 'structural': 'ساختاری',
+'soundness': 'استحکام', 'communication': 'ارتباط', 'rapport': 'اعتماد متقابل',
+'mutually': 'متقابلاً', 'beneficial': 'سودمند', 'terms': 'شرایط',
+'contingency': 'اضطراری', 'plans': 'برنامه‌ها', 'light': 'سبک',
+    'Transit': 'ترانزیت', 'natal': 'تولدی', 'trine': 'تثلیث',
+    'sextile': 'سداسی', 'square': 'تربیع', 'conjunction': 'اقتران',
+    'opposition': 'مقابله', 'quincunx': 'کوینکانکس',
+    'Sun': 'خورشید', 'Moon': 'ماه', 'Mercury': 'عطارد',
+    'Venus': 'زهره', 'Mars': 'مریخ', 'Jupiter': 'مشتری',
+    'Saturn': 'زحل', 'Uranus': 'اورانوس', 'Neptune': 'نپتون',
+    'Pluto': 'پلوتون', 'North_Node': 'گره شمالی', 'orb': 'اُرب',
+  },
+  ar: {
+     'Strategic': 'استراتيجي', 'focus': 'تركيز', 'visibility': 'الظهور',
+'momentum': 'الزخم', 'scalable': 'قابل للتوسع', 'growth': 'النمو',
+'Supportive': 'داعم', 'transits': 'العبورات', 'rulers': 'الحكام',
+'activity': 'النشاط', 'Hard': 'صعبة', 'aspects': 'الجوانب',
+'suggest': 'تشير إلى', 'resistance': 'مقاومة', 'delays': 'تأخيرات',
+'rework': 'إعادة العمل', 'Consolidate': 'قم بالتوطيد', 'plan': 'خطط',
+'avoid': 'تجنب', 'overextension': 'الإفراط في التمدد',
+'No': 'لا', 'major': 'رئيسية', 'retrograde': 'راجع',
+'friction': 'احتكاك', 'primary': 'رئيسي', 'standard': 'معياري',
+'due': 'الواجب', 'diligence': 'العناية', 'applies': 'ينطبق',
+'capital': 'رأس المال', 'allocation': 'توزيع', 'risk': 'مخاطر',
+'reward': 'عائد', 'long': 'طويل', 'term': 'مدى', 'yield': 'عائد',
+'asset': 'أصل', 'security': 'أمان', 'valuation': 'تقييم', 'structural': 'هيكلي',
+'soundness': 'متانة', 'communication': 'تواصل', 'rapport': 'ألفة',
+'mutually': 'بشكل متبادل', 'beneficial': 'مفيد', 'terms': 'شروط',
+'contingency': 'طوارئ', 'plans': 'خطط', 'light': 'خفيفة',
+    'Transit': 'عبور', 'natal': 'ميلادي', 'trine': 'تثليث',
+    'sextile': 'سداسي', 'square': 'تربيع', 'conjunction': 'اقتران',
+    'opposition': 'مقابلة', 'quincunx': 'كوينكونكس',
+    'Sun': 'الشمس', 'Moon': 'القمر', 'Mercury': 'عطارد',
+    'Venus': 'الزهرة', 'Mars': 'المريخ', 'Jupiter': 'المشتري',
+    'Saturn': 'زحل', 'Uranus': 'أورانوس', 'Neptune': 'نبتون',
+    'Pluto': 'بلوتو', 'North_Node': 'العقدة الشمالية', 'orb': 'المدار',
+  },
+};
+
+function translateAspect(text: string, lang: string): string {
+  if (lang === 'en') return text;
+  const dict = ASPECT_TRANS[lang];
+  if (!dict) return text;
+  let result = text;
+  Object.entries(dict).forEach(([en, tr]) => {
+    result = result.replace(new RegExp(en, 'g'), tr);
+  });
+  return result;
+}
+const SCORE_MSG: Record<string, Record<string, string>> = {
+  en: {
+    high: "The stars are with you. This is a rare golden window — move forward with confidence and bold action.",
+    mid: "The cosmos offers mixed signals. Thoughtful preparation and flexibility will serve you well right now.",
+    low: "The planets suggest patience. If you wait a little longer, a much stronger window is coming your way.",
+  },
+  ru: {
+    high: "Звёзды на вашей стороне. Это редкое золотое окно — действуйте смело и уверенно.",
+    mid: "Космос посылает смешанные сигналы. Тщательная подготовка и гибкость сейчас будут вашими союзниками.",
+    low: "Планеты советуют терпение. Если подождать немного, впереди вас ждёт гораздо более сильное окно.",
+  },
+  fa: {
+    high: "ستاره‌ها با شما هستند. این یک پنجره طلایی نادر است — با اطمینان و جسارت پیش بروید.",
+    mid: "کیهان سیگنال‌های متفاوتی می‌فرستد. آمادگی دقیق و انعطاف‌پذیری همین الان بهترین مسیر است.",
+    low: "سیاره‌ها صبر را توصیه می‌کنند. اگر کمی صبر کنی، یک پنجره بسیار قوی‌تر در راه است.",
+  },
+  ar: {
+    high: "النجوم في صفك. هذه نافذة ذهبية نادرة — تقدم بثقة وجرأة.",
+    mid: "الكون يرسل إشارات متباينة. الاستعداد الدقيق والمرونة هما أفضل مسار الآن.",
+    low: "الكواكب توصي بالصبر. إذا انتظرت قليلاً، نافذة أقوى بكثير في طريقها إليك.",
+  },
+};
+
+export default function Dashboard() {
+  const [lang, setLang] = useState<keyof typeof LANGS>('en');
+  const [domain, setDomain] = useState('business');
+  const [form, setForm] = useState({ birth_date:'1990-06-15', birth_time:'14:30', location:'New York', target_date: new Date().toISOString().split('T')[0], action_type:'business_launch' });
+  const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [cities, setCities] = useState<any[]>([]);
+  const [citySearch, setCitySearch] = useState('New York');
+  const [showCities, setShowCities] = useState(false);
+  const [cityLoading, setCityLoading] = useState(false);
+  const [animated, setAnimated] = useState(false);
+  const cityRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<any>(null);
+  const t = LANGS[lang];
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (cityRef.current && !cityRef.current.contains(e.target as Node)) setShowCities(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const searchCities = useCallback((q: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (q.length < 2) { setCities([]); return; }
+    setCityLoading(true);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/cities?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        setCities(data);
+      } catch { setCities([]); }
+      setCityLoading(false);
+    }, 300);
+  }, []);
+
+  const selectCity = (city: any) => {
+    const displayName = city.short;
+    setCitySearch(displayName);
+    setForm(f => ({ ...f, location: city.name }));
+    setShowCities(false);
+  };
+
+  const getActions = () => {
+    const key = domain === 'business' ? 'actions_business' : domain === 'finance' ? 'actions_finance' : 'actions_re';
+    return t[key as keyof typeof t] as Record<string, string>;
+  };
+
+  const analyze = async () => {
+    setLoading(true); setError(''); setResult(null); setAnimated(false);
+    try {
+      const res = await fetch(`${API}/api/${domain}/analyze`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(form)
+      });
+      const data = await res.json();
+      if (data.detail) setError(data.detail);
+      else {
+  if (lang !== 'en') {
+    try {
+      const tr = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: data.executive.recommendation, lang })
+      });
+      const trData = await tr.json();
+      if (trData.translated) data.executive.recommendation = trData.translated;
+    } catch {}
+  }
+  setResult(data); setTimeout(() => setAnimated(true), 100);
+}
+    } catch {
+      setError('Cannot connect to API. Make sure the backend is running on port 8000.');
+    }
+    setLoading(false);
+  };
+
+  const getStyle = (s: number) => {
+    if (s >= 65) return { color:'#4ade80', border:'#4ade80', bg:'rgba(74,222,128,0.06)' };
+    if (s >= 45) return { color:'#fbbf24', border:'#fbbf24', bg:'rgba(251,191,36,0.06)' };
+    return { color:'#f87171', border:'#f87171', bg:'rgba(248,113,113,0.06)' };
+  };
+
+  const getMsgKey = (s: number) => s >= 65 ? 'high' : s >= 45 ? 'mid' : 'low';
+
+  return (
+    <div style={{ direction: t.dir as any, fontFamily: (lang==='fa'||lang==='ar') ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif' }} className="min-h-screen bg-[#070B14] text-white">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
+        .fc{font-family:'Cinzel',serif} .fi{font-family:'Inter',sans-serif} .ff{font-family:'Vazirmatn',sans-serif}
+        .fade-up{animation:fu 0.5s ease forwards;opacity:0;transform:translateY(12px)}
+        @keyframes fu{to{opacity:1;transform:translateY(0)}}
+        .score-ring{transition:stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)}
+        .city-row:hover{background:rgba(251,191,36,0.06)}
+        input,select{background:rgba(255,255,255,0.04)!important;border:1px solid rgba(255,255,255,0.08)!important;color:white!important;border-radius:10px}
+        input:focus,select:focus{border-color:rgba(251,191,36,0.35)!important;outline:none!important}
+        select option{background:#0d1220}
+        .shimmer{background:linear-gradient(90deg,rgba(255,255,255,0.02) 0%,rgba(255,255,255,0.06) 50%,rgba(255,255,255,0.02) 100%);background-size:200% 100%;animation:sh 1.5s infinite}
+        @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+      `}</style>
+
+      {/* Nav */}
+      <nav className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+        <a href="/" className="flex items-center gap-3 no-underline">
+          <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+            <circle cx="15" cy="15" r="13" stroke="#fbbf24" strokeWidth="0.5" opacity="0.4"/>
+            <circle cx="15" cy="15" r="7" stroke="#fbbf24" strokeWidth="0.5" opacity="0.6"/>
+            <circle cx="15" cy="15" r="2.5" fill="#fbbf24"/>
+            <line x1="15" y1="2" x2="15" y2="28" stroke="#fbbf24" strokeWidth="0.3" opacity="0.3"/>
+            <line x1="2" y1="15" x2="28" y2="15" stroke="#fbbf24" strokeWidth="0.3" opacity="0.3"/>
+            <ellipse cx="15" cy="15" rx="13" ry="4.5" stroke="#fbbf24" strokeWidth="0.3" opacity="0.2"/>
+          </svg>
+          <div>
+            <div className="fc text-sm font-semibold tracking-widest" style={{color:'#fbbf24'}}>{t.title}</div>
+            <div className="fi text-[10px] tracking-wider" style={{color:'rgba(255,255,255,0.3)'}}>{t.sub}</div>
+          </div>
+        </a>
+<div className="flex items-center gap-4 mx-4">
+  <a href="/dashboard" className="fi text-sm text-white/40 hover:text-white transition" style={{color:'rgba(255,255,255,0.4)'}}>Dashboard</a>
+  <a href="/profile" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>Profile</a> 
+
+     </div>
+        <div className="flex gap-1">
+          {(Object.keys(LANGS) as Array<keyof typeof LANGS>).map(l => (
+            <button key={l} onClick={() => setLang(l)}
+              className="fi px-2.5 py-1 text-xs rounded-md border transition-all"
+              style={lang===l ? {borderColor:'rgba(251,191,36,0.5)',color:'#fbbf24',background:'rgba(251,191,36,0.06)'} : {borderColor:'rgba(255,255,255,0.08)',color:'rgba(255,255,255,0.3)'}}>
+              {LANGS[l].name}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        {/* Domain tabs */}
+        <div className="flex gap-2 mb-8">
+          {[{key:'business',icon:'◈',label:t.business},{key:'finance',icon:'◎',label:t.finance},{key:'real-estate',icon:'⬡',label:t.realestate}].map(d => (
+            <button key={d.key}
+              onClick={() => { setDomain(d.key); setForm(f => ({...f, action_type:DOMAIN_ACTIONS[d.key][0]})); setResult(null); }}
+              className="fi flex items-center gap-2 px-4 py-2 rounded-lg border text-sm transition-all"
+              style={domain===d.key ? {borderColor:'rgba(251,191,36,0.5)',color:'#fbbf24',background:'rgba(251,191,36,0.06)'} : {borderColor:'rgba(255,255,255,0.08)',color:'rgba(255,255,255,0.4)'}}>
+              <span className="text-xs">{d.icon}</span>{d.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Form */}
+          <div className="lg:col-span-2 rounded-2xl p-6" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)'}}>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.bdate}</label>
+                <div className="grid grid-cols-3 gap-1">
+  <select value={form.birth_date.split('-')[2]} onChange={e => setForm(f => ({...f, birth_date: `${f.birth_date.split('-')[0]}-${f.birth_date.split('-')[1]}-${e.target.value}`}))} className="fi px-2 py-2.5 text-sm">
+    {Array.from({length:31},(_,i)=>String(i+1).padStart(2,'0')).map(d=><option key={d} value={d}>{d}</option>)}
+  </select>
+  <select value={form.birth_date.split('-')[1]} onChange={e => setForm(f => ({...f, birth_date: `${f.birth_date.split('-')[0]}-${e.target.value}-${f.birth_date.split('-')[2]}`}))} className="fi px-2 py-2.5 text-sm">
+    {['01','02','03','04','05','06','07','08','09','10','11','12'].map((m,i)=><option key={m} value={m}>{['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i]}</option>)}
+  </select>
+  <select value={form.birth_date.split('-')[0]} onChange={e => setForm(f => ({...f, birth_date: `${e.target.value}-${f.birth_date.split('-')[1]}-${f.birth_date.split('-')[2]}`}))} className="fi px-2 py-2.5 text-sm">
+    {Array.from({length:100},(_,i)=>String(new Date().getFullYear()-i)).map(y=><option key={y} value={y}>{y}</option>)}
+  </select>
+</div>
+              </div>
+              <div>
+                <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.btime}</label>
+                <input type="time" value={form.birth_time} onChange={e => setForm(f => ({...f,birth_time:e.target.value}))} className="fi w-full px-3 py-2.5 text-sm"/>
+              </div>
+            </div>
+
+            {/* City autocomplete */}
+            <div className="mb-3 relative" ref={cityRef}>
+              <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.loc}</label>
+              <input type="text" value={citySearch} placeholder={t.placeholder}
+                onChange={e => { setCitySearch(e.target.value); setForm(f => ({...f,location:e.target.value})); searchCities(e.target.value); setShowCities(true); }}
+                onFocus={() => citySearch.length >= 2 && setShowCities(true)}
+                className="fi w-full px-3 py-2.5 text-sm"/>
+              {showCities && (cityLoading || cities.length > 0) && (
+                <div className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden shadow-2xl" style={{background:'#0d1220',border:'1px solid rgba(255,255,255,0.1)'}}>
+                  {cityLoading && <div className="fi px-4 py-3 text-xs" style={{color:'rgba(255,255,255,0.3)'}}>{t.searching}</div>}
+                  {!cityLoading && cities.length === 0 && <div className="fi px-4 py-3 text-xs" style={{color:'rgba(255,255,255,0.3)'}}>{t.noResults}</div>}
+                  {cities.map((city, i) => (
+                    <div key={i} className="city-row px-4 py-2.5 cursor-pointer transition-colors" onMouseDown={() => selectCity(city)}>
+                      <div className="fi text-sm" style={{color:'rgba(255,255,255,0.8)'}}>{city.short}</div>
+                      <div className="fi text-[11px] truncate" style={{color:'rgba(255,255,255,0.3)'}}>{city.name}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3">
+              <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.tdate}</label>
+              <input type="date" value={form.target_date} onChange={e => setForm(f => ({...f,target_date:e.target.value}))} className="fi w-full px-3 py-2.5 text-sm"/>
+            </div>
+
+            <div className="mb-5">
+              <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.action}</label>
+              <select value={form.action_type} onChange={e => setForm(f => ({...f,action_type:e.target.value}))} className="fi w-full px-3 py-2.5 text-sm">
+                {Object.entries(getActions()).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            </div>
+
+            <button onClick={analyze} disabled={loading} className="fc w-full py-3 rounded-xl text-sm tracking-widest transition-all disabled:opacity-40"
+              style={{background:'linear-gradient(135deg,#d97706,#f59e0b)',color:'#000',boxShadow:'0 0 20px rgba(251,191,36,0.15)'}}>
+              {loading ? t.loading : t.analyze}
+            </button>
+
+            {error && <div className="fi mt-4 p-3 rounded-lg text-xs leading-relaxed" style={{background:'rgba(248,113,113,0.08)',border:'1px solid rgba(248,113,113,0.15)',color:'#fca5a5'}}>{error}</div>}
+          </div>
+
+          {/* Results */}
+          <div className="lg:col-span-3">
+            {!result && !loading && (
+              <div className="h-full min-h-64 flex flex-col items-center justify-center gap-3 rounded-2xl" style={{border:'1px solid rgba(255,255,255,0.04)'}}>
+                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" opacity="0.15">
+                  <circle cx="22" cy="22" r="19" stroke="white" strokeWidth="0.5"/>
+                  <circle cx="22" cy="22" r="11" stroke="white" strokeWidth="0.5"/>
+                  <circle cx="22" cy="22" r="3" stroke="white" strokeWidth="1"/>
+                  <line x1="22" y1="3" x2="22" y2="41" stroke="white" strokeWidth="0.3"/>
+                  <line x1="3" y1="22" x2="41" y2="22" stroke="white" strokeWidth="0.3"/>
+                </svg>
+                <div className="fi text-xs tracking-wider" style={{color:'rgba(255,255,255,0.15)'}}>Your cosmic blueprint awaits</div>
+              </div>
+            )}
+
+            {loading && (
+              <div className="space-y-3 pt-2">
+                <div className="shimmer rounded-2xl h-28"/>
+                <div className="shimmer rounded-2xl h-14"/>
+                <div className="shimmer rounded-2xl h-20"/>
+                <div className="shimmer rounded-2xl h-16"/>
+              </div>
+            )}
+
+            {result && (() => {
+              const ex = result.executive;
+              const st = result.strategic;
+              const s = getStyle(ex.score);
+              const C = 2 * Math.PI * 36;
+              const offset = C - (ex.score / 100) * C;
+              const msg = SCORE_MSG[lang]?.[getMsgKey(ex.score)] || SCORE_MSG.en[getMsgKey(ex.score)];
+              return (
+                <div className="space-y-4">
+                  <div className="fade-up rounded-2xl p-6" style={{background:s.bg,border:'1px solid rgba(255,255,255,0.07)',animationDelay:'0ms'}}>
+                    <div className="flex items-center gap-5">
+                      <div className="relative flex-shrink-0">
+                        <svg width="88" height="88" viewBox="0 0 88 88">
+                          <circle cx="44" cy="44" r="36" stroke="rgba(255,255,255,0.06)" strokeWidth="5" fill="none"/>
+                          <circle cx="44" cy="44" r="36" stroke={s.border} strokeWidth="5" fill="none"
+                            strokeDasharray={C} strokeDashoffset={animated ? offset : C}
+                            strokeLinecap="round" transform="rotate(-90 44 44)" className="score-ring"/>
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="fc text-2xl" style={{color:s.color}}>{ex.score}</span>
+                          <span className="fi text-[10px]" style={{color:'rgba(255,255,255,0.3)'}}>/100</span>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="fc text-lg mb-1" style={{color:s.color}}>{ex.rating}</div>
+                        <div className="fi text-xs mb-3" style={{color:'rgba(255,255,255,0.4)'}}>{ex.activity}</div>
+                        <div className="fi text-sm italic leading-relaxed" style={{color:'rgba(255,255,255,0.65)'}}>&ldquo;{msg}&rdquo;</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="fade-up rounded-2xl p-5" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)',animationDelay:'80ms'}}>
+                    <div className="fi text-[10px] tracking-widest mb-2 uppercase" style={{color:'rgba(255,255,255,0.25)'}}>{t.rec}</div>
+                    <p className="fi text-sm leading-relaxed" style={{color:'rgba(255,255,255,0.75)'}}>{ex.recommendation}</p>
+                  </div>
+
+                  {st?.opportunity_factors?.length > 0 && (
+                    <div className="fade-up rounded-2xl p-5" style={{background:'rgba(74,222,128,0.03)',border:'1px solid rgba(74,222,128,0.1)',animationDelay:'160ms'}}>
+                      <div className="fc text-xs tracking-wider mb-3" style={{color:'#4ade80'}}>{t.opps}</div>
+                      <div className="space-y-2">
+                        {st.opportunity_factors.slice(0,4).map((o: string, i: number) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="text-xs mt-0.5" style={{color:'#4ade80'}}>◆</span>
+                            <span className="fi text-xs leading-relaxed" style={{color:'rgba(255,255,255,0.55)'}}>{translateAspect(o, lang)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {st?.risk_factors?.length > 0 && (
+                    <div className="fade-up rounded-2xl p-5" style={{background:'rgba(248,113,113,0.03)',border:'1px solid rgba(248,113,113,0.1)',animationDelay:'240ms'}}>
+                      <div className="fc text-xs tracking-wider mb-3" style={{color:'#f87171'}}>{t.risks}</div>
+                      <div className="space-y-2">
+                        {st.risk_factors.slice(0,4).map((r: string, i: number) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="text-xs mt-0.5" style={{color:'#f87171'}}>▲</span>
+                            <span className="fi text-xs leading-relaxed" style={{color:'rgba(255,255,255,0.55)'}}>{translateAspect(r, lang)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {(st?.key_themes?.length > 0 || st?.timing_notes?.length > 0) && (
+                    <div className="fade-up grid grid-cols-2 gap-3" style={{animationDelay:'320ms'}}>
+                      {st?.key_themes?.length > 0 && (
+                        <div className="rounded-2xl p-4" style={{background:'rgba(251,191,36,0.03)',border:'1px solid rgba(251,191,36,0.08)'}}>
+                          <div className="fc text-xs tracking-wider mb-3" style={{color:'#fbbf24'}}>{t.themes}</div>
+                          {st.key_themes.slice(0,3).map((th: string, i: number) => (
+                            <div key={i} className="fi text-[11px] leading-relaxed py-1.5" style={{color:'rgba(255,255,255,0.45)',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>{translateAspect(th, lang)}</div>
+                          ))}
+                        </div>
+                      )}
+                      {st?.timing_notes?.length > 0 && (
+                        <div className="rounded-2xl p-4" style={{background:'rgba(96,165,250,0.03)',border:'1px solid rgba(96,165,250,0.08)'}}>
+                          <div className="fc text-xs tracking-wider mb-3" style={{color:'#60a5fa'}}>{t.timing}</div>
+                          {st.timing_notes.slice(0,3).map((tn: string, i: number) => (
+                            <div key={i} className="fi text-[11px] leading-relaxed py-1.5" style={{color:'rgba(255,255,255,0.45)',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>{translateAspect(tn, lang)}</div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
