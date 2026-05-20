@@ -139,7 +139,7 @@ export default function HomePage() {
           <div className="space-y-4">
             <h1 className="fc text-xl tracking-wide" style={{ color: '#fbbf24' }}>
               {t.heatmapTitle}
-            </div>
+            </h1>
             {!hasProfile && (
               <div
                 className="rounded-2xl p-4 fi text-sm"
