@@ -1,6 +1,7 @@
 from __future__ import annotations
 import re
 from datetime import datetime, timezone
+from functools import lru_cache
 from typing import Any
 
 _COORD_PATTERN = re.compile(
@@ -26,7 +27,14 @@ def _import_swisseph():
         raise ChartComputationError("pyswisseph not installed") from exc
     return swe
 
+@lru_cache(maxsize=2048)
 def resolve_coordinates(location):
+    """Resolve a location string ('City' or 'lat,lon') to (lat, lon).
+
+    Cached across the process so repeated requests for the same location
+    don't re-hit Nominatim. This is the single biggest speed-up: a 30-day
+    calendar batch previously did 30 geocoding HTTP calls.
+    """
     coord_match = _COORD_PATTERN.match(location)
     if coord_match:
         lat = float(coord_match.group(1))
@@ -41,6 +49,7 @@ def resolve_coordinates(location):
         raise ValueError(f"Could not resolve location: {location!r}")
     return float(result.latitude), float(result.longitude)
 
+@lru_cache(maxsize=2048)
 def _timezone_at(lat, lon):
     from timezonefinder import TimezoneFinder
     tz_name = TimezoneFinder().timezone_at(lat=lat, lng=lon)
@@ -83,18 +92,23 @@ def _build_chart_payload(dt_local, lat, lon, *, house_system: str = "placidus", 
     cusp_list = [float(cusps[i]) for i in range(1, 13)] if len(cusps) >= 13 else [float(c) for c in cusps[:12]]
     if zodiac == "sidereal":
         swe.set_sid_mode(swe.SIDM_FAGAN_BRADLEY)
-    calc_flags = swe.FLG_MOSEPH
+    # FLG_SPEED is REQUIRED to compute planetary speed; without it, Swiss
+    # Ephemeris returns speed=0 for every body and retrograde detection silently
+    # fails. This was a critical credibility bug — Pluto/Mercury/Saturn retros
+    # would never light up in the UI.
+    calc_flags = swe.FLG_MOSEPH | swe.FLG_SPEED
     if zodiac == "sidereal":
         calc_flags |= swe.FLG_SIDEREAL
     planets = {}
     for planet_id, name in _planet_bodies(swe):
-        try:
-            result, _flag = swe.calc_ut(jd_ut, planet_id, calc_flags)
-        except Exception:
-            result, _flag = swe.calc_ut(jd_ut, planet_id, calc_flags | swe.FLG_SPEED)
+        result, _flag = swe.calc_ut(jd_ut, planet_id, calc_flags)
         longitude = float(result[0])
         speed = float(result[3]) if len(result) > 3 else 0.0
-        body = {"longitude": longitude, "house": _planet_house(longitude, cusp_list)}
+        body = {
+            "longitude": longitude,
+            "house": _planet_house(longitude, cusp_list),
+            "speed": speed,
+        }
         if speed < 0:
             body["retrograde"] = True
         planets[name] = body

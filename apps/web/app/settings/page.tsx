@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/AppShell';
 import {
   loadHomeView,
@@ -73,43 +71,67 @@ function OptionRow<T extends string>({
 }
 
 export default function SettingsPage() {
-  const router = useRouter();
   const [lang, setLangState] = useState<AppLang>('en');
   const [homeView, setHomeView] = useState<HomeViewMode>('daily-brief');
   const [house, setHouse] = useState<HouseSystem>('placidus');
   const [zodiac, setZodiac] = useState<ZodiacSystem>('tropical');
+  const [savedLang, setSavedLang] = useState<AppLang>('en');
+  const [savedHome, setSavedHome] = useState<HomeViewMode>('daily-brief');
+  const [savedHouse, setSavedHouse] = useState<HouseSystem>('placidus');
+  const [savedZodiac, setSavedZodiac] = useState<ZodiacSystem>('tropical');
   const [flash, setFlash] = useState(false);
 
-  const t = HOME_LANGS[lang];
-
-  const setLang = (l: AppLang) => {
-    setLangState(l);
-    saveAppLang(l);
-    ping();
-  };
-
-  const ping = () => {
-    setFlash(true);
-    setTimeout(() => setFlash(false), 1200);
-  };
+  // The Settings page itself uses the *saved* language for all text and
+  // direction. Picking a different language as a pending change does not
+  // flip the page; everything switches only after you press Save changes.
+  const t = HOME_LANGS[savedLang];
 
   useEffect(() => {
     const stored = loadAppLang();
-    if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
-      setLangState(stored);
-    }
-    const hv = loadHomeView();
-    if (hv) setHomeView(hv);
-    setHouse(loadHouseSystem());
-    setZodiac(loadZodiacSystem());
+    const startLang: AppLang =
+      stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar'
+        ? stored
+        : 'en';
+    setLangState(startLang);
+    setSavedLang(startLang);
+
+    const hv = loadHomeView() ?? 'daily-brief';
+    setHomeView(hv);
+    setSavedHome(hv);
+
+    const h = loadHouseSystem();
+    setHouse(h);
+    setSavedHouse(h);
+
+    const z = loadZodiacSystem();
+    setZodiac(z);
+    setSavedZodiac(z);
   }, []);
 
-  const onHomeView = (mode: HomeViewMode) => {
-    setHomeView(mode);
-    saveHomeView(mode);
-    ping();
-    if (mode === 'calendar') router.push('/calendar');
-    else if (mode === 'heatmap' || mode === 'daily-brief') router.push('/home');
+  const isDirty =
+    lang !== savedLang ||
+    homeView !== savedHome ||
+    house !== savedHouse ||
+    zodiac !== savedZodiac;
+
+  const saveAll = () => {
+    saveAppLang(lang);
+    saveHomeView(homeView);
+    saveHouseSystem(house);
+    saveZodiacSystem(zodiac);
+    setSavedLang(lang);
+    setSavedHome(homeView);
+    setSavedHouse(house);
+    setSavedZodiac(zodiac);
+    setFlash(true);
+    setTimeout(() => setFlash(false), 1500);
+  };
+
+  const discardAll = () => {
+    setLangState(savedLang);
+    setHomeView(savedHome);
+    setHouse(savedHouse);
+    setZodiac(savedZodiac);
   };
 
   const houseLabels: Record<HouseSystem, string> = {
@@ -131,11 +153,10 @@ export default function SettingsPage() {
 
   return (
     <AppShell
-      lang={lang}
-      setLang={setLang}
+      lang={savedLang}
+      setLang={(l) => setLangState(l)}
       dir={t.dir}
       navLabels={t.nav}
-      fontFamily={lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'}
     >
       <div className="max-w-2xl mx-auto px-4 py-6">
         <h1 className="fc text-xl tracking-wide mb-1" style={{ color: '#fbbf24' }}>
@@ -145,25 +166,12 @@ export default function SettingsPage() {
           {t.settingsSub}
         </p>
 
-        {flash && (
-          <div
-            className="fi text-xs mb-4 px-3 py-2 rounded-lg"
-            style={{
-              background: 'rgba(74,222,128,0.1)',
-              border: '1px solid rgba(74,222,128,0.3)',
-              color: '#4ade80',
-            }}
-          >
-            {t.saved}
-          </div>
-        )}
-
         <OptionRow
           label={t.homeViewLabel}
           value={homeView}
           options={HOME_OPTIONS}
           labels={t.viewLabels}
-          onChange={onHomeView}
+          onChange={setHomeView}
         />
 
         <OptionRow
@@ -171,7 +179,7 @@ export default function SettingsPage() {
           value={lang}
           options={['en', 'ru', 'fa', 'ar']}
           labels={langLabels}
-          onChange={setLang}
+          onChange={setLangState}
         />
 
         <OptionRow
@@ -179,11 +187,7 @@ export default function SettingsPage() {
           value={house}
           options={HOUSE_OPTIONS}
           labels={houseLabels}
-          onChange={(v) => {
-            setHouse(v);
-            saveHouseSystem(v);
-            ping();
-          }}
+          onChange={setHouse}
         />
 
         <OptionRow
@@ -191,20 +195,68 @@ export default function SettingsPage() {
           value={zodiac}
           options={ZODIAC_OPTIONS}
           labels={zodiacLabels}
-          onChange={(v) => {
-            setZodiac(v);
-            saveZodiacSystem(v);
-            ping();
-          }}
+          onChange={setZodiac}
         />
 
-        <Link
-          href="/dashboard"
-          className="fi text-sm no-underline inline-block mt-2"
-          style={{ color: '#fbbf24' }}
+        <div
+          className="mt-8 pt-6 flex flex-wrap items-center gap-3"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
         >
-          → Dashboard (full analysis)
-        </Link>
+          <button
+            type="button"
+            onClick={saveAll}
+            disabled={!isDirty}
+            className="fi text-xs px-5 py-2.5 rounded-lg border transition-all"
+            style={
+              isDirty
+                ? {
+                    borderColor: 'rgba(74,222,128,0.5)',
+                    color: '#4ade80',
+                    background: 'rgba(74,222,128,0.1)',
+                    cursor: 'pointer',
+                  }
+                : {
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    color: 'rgba(255,255,255,0.3)',
+                    background: 'transparent',
+                    cursor: 'not-allowed',
+                  }
+            }
+          >
+            {t.saveAll ?? 'Save changes'}
+          </button>
+          {isDirty && (
+            <button
+              type="button"
+              onClick={discardAll}
+              className="fi text-xs px-4 py-2.5 rounded-lg border transition-all"
+              style={{
+                borderColor: 'rgba(255,255,255,0.12)',
+                color: 'rgba(255,255,255,0.5)',
+                cursor: 'pointer',
+              }}
+            >
+              {t.discard ?? 'Discard'}
+            </button>
+          )}
+          {flash && !isDirty && (
+            <span
+              className="fi text-xs"
+              style={{ color: '#4ade80' }}
+            >
+              {t.saved}
+            </span>
+          )}
+          {isDirty && (
+            <span
+              className="fi text-xs"
+              style={{ color: 'rgba(251,191,36,0.7)' }}
+            >
+              {t.unsaved ?? 'Unsaved changes'}
+            </span>
+          )}
+        </div>
+
       </div>
     </AppShell>
   );

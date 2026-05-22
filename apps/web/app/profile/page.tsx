@@ -6,7 +6,7 @@ import {
   type ChartPlanet,
   type NatalChartLabels,
 } from '@/components/NatalChart';
-import { BottomNav } from '@/components/BottomNav';
+import { BottomNav, VaultPill } from '@/components/BottomNav';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import type { AppLang } from '@/lib/app-settings';
 import { loadBirthProfile, saveBirthProfile } from '@/lib/birth-profile';
@@ -41,10 +41,10 @@ const ASPECT_LABELS: Record<string, Record<string, string>> = {
 };
 
 const LANGS = {
-  en: { name:'EN', dir:'ltr', yourData:'Your Birth Data', nameLabel:'Name', bdate:'Birth Date', btime:'Birth Time', city:'Birth City', generate:'Generate Chart', loading:'Loading...', natalChart:'Natal Chart', element:'Element', planet:'Ruling Planet', stone:'Lucky Stone', color:'Power Color', lifePath:'Life Path Number', dashboard:'Dashboard', calendar:'Calendar', people:'People', profile:'Profile', placeholder:'Type a city name...', searching:'Searching...', noResults:'No cities found', chartEmpty:'Click Generate Chart', tablePlanet:'Planet', tableSign:'Sign', tableDegree:'Degree', tableHouse:'House', tableRetro:'Retrograde', retroYes:'Yes', retroNo:'—' },
-  ru: { name:'RU', dir:'ltr', yourData:'Ваши данные рождения', nameLabel:'Имя', bdate:'Дата рождения', btime:'Время рождения', city:'Город рождения', generate:'Создать карту', loading:'Загрузка...', natalChart:'Натальная карта', element:'Стихия', planet:'Управляющая планета', stone:'Счастливый камень', color:'Цвет силы', lifePath:'Число жизненного пути', dashboard:'Панель', calendar:'Календарь', people:'Люди', profile:'Профиль', placeholder:'Введите город...', searching:'Поиск...', noResults:'Города не найдены', chartEmpty:'Нажмите «Создать карту»', tablePlanet:'Планета', tableSign:'Знак', tableDegree:'Градус', tableHouse:'Дом', tableRetro:'Ретроград', retroYes:'Да', retroNo:'—' },
-  fa: { name:'FA', dir:'rtl', yourData:'اطلاعات تولد شما', nameLabel:'نام', bdate:'تاریخ تولد', btime:'زمان تولد', city:'شهر تولد', generate:'تولید نقشه', loading:'در حال بارگذاری...', natalChart:'نقشه تولدی', element:'عنصر', planet:'سیاره حاکم', stone:'سنگ خوش‌شانسی', color:'رنگ قدرت', lifePath:'عدد مسیر زندگی', dashboard:'داشبورد', calendar:'تقویم', people:'افراد', profile:'پروفایل', placeholder:'نام شهر را بنویسید...', searching:'جستجو...', noResults:'شهری یافت نشد', chartEmpty:'روی «تولید نقشه» کلیک کنید', tablePlanet:'سیاره', tableSign:'برج', tableDegree:'درجه', tableHouse:'خانه', tableRetro:'رتروگراد', retroYes:'بله', retroNo:'—' },
-  ar: { name:'AR', dir:'rtl', yourData:'بيانات ميلادك', nameLabel:'الاسم', bdate:'تاريخ الميلاد', btime:'وقت الميلاد', city:'مدينة الميلاد', generate:'إنشاء الخريطة', loading:'جاري التحميل...', natalChart:'خريطة الميلاد', element:'العنصر', planet:'الكوكب الحاكم', stone:'حجر الحظ', color:'لون القوة', lifePath:'رقم مسار الحياة', dashboard:'لوحة التحكم', calendar:'التقويم', people:'الأشخاص', profile:'الملف', placeholder:'اكتب اسم مدينة...', searching:'جاري البحث...', noResults:'لا توجد مدن', chartEmpty:'انقر «إنشاء الخريطة»', tablePlanet:'كوكب', tableSign:'برج', tableDegree:'درجة', tableHouse:'بيت', tableRetro:'راجع', retroYes:'نعم', retroNo:'—' },
+  en: { name:'EN', dir:'ltr', tagline:'Astrological Intelligence', yourData:'Your Birth Data', nameLabel:'Name', bdate:'Birth Date', btime:'Birth Time', city:'Birth City', generate:'Generate Chart', save:'Save Profile', saved:'Saved ✓', loading:'Loading...', natalChart:'Natal Chart', element:'Element', planet:'Ruling Planet', stone:'Lucky Stone', color:'Power Color', lifePath:'Life Path Number', dashboard:'Dashboard', calendar:'Calendar', people:'People', profile:'Profile', placeholder:'Type a city name...', searching:'Searching...', noResults:'No cities found', chartEmpty:'Click Generate Chart', elementsTitle:'Elemental balance', strengthsTitle:'Your chart strengths', elFire:'Fire', elEarth:'Earth', elAir:'Air', elWater:'Water' },
+  ru: { name:'RU', dir:'ltr', tagline:'Астрологический анализ', yourData:'Ваши данные рождения', nameLabel:'Имя', bdate:'Дата рождения', btime:'Время рождения', city:'Город рождения', generate:'Создать карту', save:'Сохранить профиль', saved:'Сохранено ✓', loading:'Загрузка...', natalChart:'Натальная карта', element:'Стихия', planet:'Управляющая планета', stone:'Счастливый камень', color:'Цвет силы', lifePath:'Число жизненного пути', dashboard:'Панель', calendar:'Календарь', people:'Люди', profile:'Профиль', placeholder:'Введите город...', searching:'Поиск...', noResults:'Города не найдены', chartEmpty:'Нажмите «Создать карту»', elementsTitle:'Баланс стихий', strengthsTitle:'Сильные стороны карты', elFire:'Огонь', elEarth:'Земля', elAir:'Воздух', elWater:'Вода' },
+  fa: { name:'FA', dir:'rtl', tagline:'هوش نجومی', yourData:'اطلاعات تولد شما', nameLabel:'نام', bdate:'تاریخ تولد', btime:'زمان تولد', city:'شهر تولد', generate:'تولید نقشه', save:'ذخیره پروفایل', saved:'ذخیره شد ✓', loading:'در حال بارگذاری...', natalChart:'نقشه تولدی', element:'عنصر', planet:'سیاره حاکم', stone:'سنگ خوش‌شانسی', color:'رنگ قدرت', lifePath:'عدد مسیر زندگی', dashboard:'داشبورد', calendar:'تقویم', people:'افراد', profile:'پروفایل', placeholder:'نام شهر را بنویسید...', searching:'جستجو...', noResults:'شهری یافت نشد', chartEmpty:'روی «تولید نقشه» کلیک کنید', elementsTitle:'عناصر وجودی', strengthsTitle:'نقاط قوت چارت شما', elFire:'آتش', elEarth:'خاک', elAir:'باد', elWater:'آب' },
+  ar: { name:'AR', dir:'rtl', tagline:'الذكاء الفلكي', yourData:'بيانات ميلادك', nameLabel:'الاسم', bdate:'تاريخ الميلاد', btime:'وقت الميلاد', city:'مدينة الميلاد', generate:'إنشاء الخريطة', save:'حفظ الملف', saved:'تم الحفظ ✓', loading:'جاري التحميل...', natalChart:'خريطة الميلاد', element:'العنصر', planet:'الكوكب الحاكم', stone:'حجر الحظ', color:'لون القوة', lifePath:'رقم مسار الحياة', dashboard:'لوحة التحكم', calendar:'التقويم', people:'الأشخاص', profile:'الملف', placeholder:'اكتب اسم مدينة...', searching:'جاري البحث...', noResults:'لا توجد مدن', chartEmpty:'انقر «إنشاء الخريطة»', elementsTitle:'التوازن العنصري', strengthsTitle:'نقاط قوة خريطتك', elFire:'نار', elEarth:'تراب', elAir:'هواء', elWater:'ماء' },
 };
 
 const ZODIAC_TRANS: Record<string, Record<string, string>> = {
@@ -109,6 +109,8 @@ function buildSignNames(lang: string): Record<string, string> {
   return out;
 }
 
+const PROFILE_NAME_KEY = 'planet-life-profile-name';
+
 export default function Profile() {
   const [lang, setLang] = useState<keyof typeof LANGS>('en');
   const [birthDate, setBirthDate] = useState('1990-06-15');
@@ -123,44 +125,63 @@ export default function Profile() {
   const [cities, setCities] = useState<any[]>([]);
   const [showCities, setShowCities] = useState(false);
   const [cityLoading, setCityLoading] = useState(false);
+  const [savedToast, setSavedToast] = useState(false);
   const cityRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<any>(null);
+  const toastTimerRef = useRef<number | null>(null);
   const t = LANGS[lang];
   const zodiac = getZodiac(birthDate);
   const lifePath = getLifePath(birthDate);
 
   useEffect(() => {
     const saved = loadBirthProfile();
+    const savedName = localStorage.getItem(PROFILE_NAME_KEY);
     if (saved) {
       setBirthDate(saved.birth_date);
       setBirthTime(saved.birth_time);
       setLocation(saved.location);
       setCitySearch(saved.location);
     }
+    if (savedName) setName(savedName);
   }, []);
 
   useEffect(() => {
+    return () => {
+      if (toastTimerRef.current != null) window.clearTimeout(toastTimerRef.current);
+    };
+  }, []);
+
+  const handleSaveProfile = useCallback(() => {
     saveBirthProfile({
       birth_date: birthDate,
       birth_time: birthTime,
       location,
       action_type: 'business_launch',
     });
-  }, [birthDate, birthTime, location]);
+    localStorage.setItem(PROFILE_NAME_KEY, name);
+    setSavedToast(true);
+    if (toastTimerRef.current != null) window.clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = window.setTimeout(() => {
+      setSavedToast(false);
+      toastTimerRef.current = null;
+    }, 2000);
+  }, [birthDate, birthTime, location, name]);
 
   const chartLabels: NatalChartLabels = useMemo(
     () => ({
       empty: t.chartEmpty,
-      tablePlanet: t.tablePlanet,
-      tableSign: t.tableSign,
-      tableDegree: t.tableDegree,
-      tableHouse: t.tableHouse,
-      tableRetro: t.tableRetro,
-      retroYes: t.retroYes,
-      retroNo: t.retroNo,
+      elementsTitle: t.elementsTitle,
+      strengthsTitle: t.strengthsTitle,
+      elements: {
+        fire: t.elFire,
+        earth: t.elEarth,
+        air: t.elAir,
+        water: t.elWater,
+      },
       planetNames: PLANET_LABELS[lang] ?? PLANET_LABELS.en,
       signNames: buildSignNames(lang),
       aspectLegend: ASPECT_LABELS[lang] ?? ASPECT_LABELS.en,
+      lang,
     }),
     [lang, t]
   );
@@ -198,7 +219,9 @@ export default function Profile() {
     setChartError('');
     setChartPlanets(null);
     try {
-      const res = await fetch('http://localhost:8000/api/business/chart', {
+      const apiBase =
+        process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
+      const res = await fetch(`${apiBase}/api/business/chart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -234,31 +257,45 @@ export default function Profile() {
   };
 
   return (
-    <div style={{direction:t.dir as any, fontFamily:(lang==='fa'||lang==='ar')?'Vazirmatn,sans-serif':'Inter,sans-serif'}} className="min-h-screen bg-[#070B14] text-white pb-20">
+    <div style={{direction:t.dir as any, fontFamily:(lang==='fa'||lang==='ar')?'Vazirmatn,sans-serif':'Inter,sans-serif'}} className="min-h-screen bg-[#070B14] text-white pl-20">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
         @import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
         .fc{font-family:'Cinzel',serif}.fi{font-family:'Inter',sans-serif}
-        input{background:rgba(255,255,255,0.04)!important;border:1px solid rgba(255,255,255,0.08)!important;color:white!important;border-radius:10px}
-        input:focus{border-color:rgba(251,191,36,0.35)!important;outline:none!important}
+        input,select{background:rgba(255,255,255,0.04)!important;border:1px solid rgba(255,255,255,0.08)!important;color:white!important;border-radius:10px;color-scheme:dark}
+        input:focus,select:focus{border-color:rgba(251,191,36,0.35)!important;outline:none!important}
+        select option{background:#0d1220!important;color:#ffffff!important}
+        input[type="time"]::-webkit-calendar-picker-indicator,
+        input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(1.4);opacity:0.9;cursor:pointer}
         .city-row:hover{background:rgba(251,191,36,0.06)}
       `}</style>
 
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+      <nav className="flex items-center justify-between px-6 py-3 border-b border-white/5">
         <Link href="/" className="flex items-center gap-3 no-underline">
-          <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+          <svg width="36" height="36" viewBox="0 0 30 30" fill="none">
             <circle cx="15" cy="15" r="13" stroke="#fbbf24" strokeWidth="0.5" opacity="0.4"/>
             <circle cx="15" cy="15" r="7" stroke="#fbbf24" strokeWidth="0.5" opacity="0.6"/>
             <circle cx="15" cy="15" r="2.5" fill="#fbbf24"/>
           </svg>
-          <span className="fc text-sm tracking-widest" style={{color:'#fbbf24'}}>Planet Life</span>
+          <div className="flex flex-col leading-tight">
+            <span className="fc text-lg tracking-widest" style={{color:'#fbbf24'}}>Planet Life</span>
+            <span className="fi text-[10px] tracking-wider" style={{color:'rgba(255,255,255,0.35)'}}>{t.tagline}</span>
+          </div>
         </Link>
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="fi text-sm text-white/40 hover:text-white transition">{t.dashboard}</Link>
-          <Link href="/calendar" className="fi text-sm text-white/40 hover:text-white transition">{t.calendar}</Link>
-          <Link href="/people" className="fi text-sm text-white/40 hover:text-white transition">{t.people}</Link>
-          <Link href="/profile" className="fi text-sm" style={{color:'#fbbf24'}}>{t.profile}</Link>
-          <div className="flex gap-1 ml-2">
+        <div className="flex items-center gap-3">
+          <VaultPill label={HOME_LANGS[(lang as AppLang) || 'en']?.nav?.['/vault'] ?? 'Vault'} />
+          <span
+            className="fi text-[10px] tracking-[0.18em] px-2.5 py-1 rounded-md uppercase"
+            title="Subscription tier — paywall ships in Sprint R3"
+            style={{
+              border: '1px solid rgba(251,191,36,0.18)',
+              background: 'rgba(251,191,36,0.04)',
+              color: 'rgba(251,191,36,0.65)',
+            }}
+          >
+            Free
+          </span>
+          <div className="flex gap-1">
             {(Object.keys(LANGS) as Array<keyof typeof LANGS>).map(l=>(
               <button key={l} onClick={()=>setLang(l)}
                 className="fi px-2.5 py-1 text-xs rounded-md border transition-all"
@@ -270,40 +307,40 @@ export default function Profile() {
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-5xl mx-auto px-4 py-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-          <div className="rounded-2xl p-6" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)'}}>
-            <div className="fc text-sm tracking-widest mb-5" style={{color:'#fbbf24'}}>{t.yourData}</div>
-            <div className="space-y-3">
+          <div className="rounded-2xl p-4" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)'}}>
+            <div className="fc text-sm tracking-widest mb-3" style={{color:'#fbbf24'}}>{t.yourData}</div>
+            <div className="space-y-2.5">
               <div>
-                <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.nameLabel}</label>
-                <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="..." className="fi w-full px-3 py-2.5 text-sm"/>
+                <label className="fi block text-[11px] mb-1" style={{color:'rgba(255,255,255,0.35)'}}>{t.nameLabel}</label>
+                <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="..." className="fi w-full px-3 py-2 text-sm"/>
               </div>
               <div>
-                <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.bdate}</label>
+                <label className="fi block text-[11px] mb-1" style={{color:'rgba(255,255,255,0.35)'}}>{t.bdate}</label>
                 <div className="grid grid-cols-3 gap-1">
-  <select value={birthDate.split('-')[2]} onChange={e=>setBirthDate(`${birthDate.split('-')[0]}-${birthDate.split('-')[1]}-${e.target.value}`)} className="fi px-2 py-2.5 text-sm">
+  <select value={birthDate.split('-')[2]} onChange={e=>setBirthDate(`${birthDate.split('-')[0]}-${birthDate.split('-')[1]}-${e.target.value}`)} className="fi px-2 py-2 text-sm">
     {Array.from({length:31},(_,i)=>String(i+1).padStart(2,'0')).map(d=><option key={d} value={d}>{d}</option>)}
   </select>
-  <select value={birthDate.split('-')[1]} onChange={e=>setBirthDate(`${birthDate.split('-')[0]}-${e.target.value}-${birthDate.split('-')[2]}`)} className="fi px-2 py-2.5 text-sm">
+  <select value={birthDate.split('-')[1]} onChange={e=>setBirthDate(`${birthDate.split('-')[0]}-${e.target.value}-${birthDate.split('-')[2]}`)} className="fi px-2 py-2 text-sm">
     {['01','02','03','04','05','06','07','08','09','10','11','12'].map((m,i)=><option key={m} value={m}>{['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i]}</option>)}
   </select>
-  <select value={birthDate.split('-')[0]} onChange={e=>setBirthDate(`${e.target.value}-${birthDate.split('-')[1]}-${birthDate.split('-')[2]}`)} className="fi px-2 py-2.5 text-sm">
+  <select value={birthDate.split('-')[0]} onChange={e=>setBirthDate(`${e.target.value}-${birthDate.split('-')[1]}-${birthDate.split('-')[2]}`)} className="fi px-2 py-2 text-sm">
     {Array.from({length:100},(_,i)=>String(new Date().getFullYear()-i)).map(y=><option key={y} value={y}>{y}</option>)}
   </select>
 </div>
               </div>
               <div>
-                <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.btime}</label>
-                <input type="time" value={birthTime} onChange={e=>setBirthTime(e.target.value)} className="fi w-full px-3 py-2.5 text-sm"/>
+                <label className="fi block text-[11px] mb-1" style={{color:'rgba(255,255,255,0.35)'}}>{t.btime}</label>
+                <input type="time" value={birthTime} onChange={e=>setBirthTime(e.target.value)} className="fi w-full px-3 py-2 text-sm"/>
               </div>
               <div ref={cityRef} className="relative">
-                <label className="fi block text-[11px] mb-1.5" style={{color:'rgba(255,255,255,0.35)'}}>{t.city}</label>
+                <label className="fi block text-[11px] mb-1" style={{color:'rgba(255,255,255,0.35)'}}>{t.city}</label>
                 <input type="text" value={citySearch} placeholder={t.placeholder}
                   onChange={e=>{setCitySearch(e.target.value);setLocation(e.target.value);searchCities(e.target.value);setShowCities(true);}}
                   onFocus={()=>citySearch.length>=2&&setShowCities(true)}
-                  className="fi w-full px-3 py-2.5 text-sm"/>
+                  className="fi w-full px-3 py-2 text-sm"/>
                 {showCities&&(cityLoading||cities.length>0)&&(
                   <div className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden shadow-2xl" style={{background:'#0d1220',border:'1px solid rgba(255,255,255,0.1)'}}>
                     {cityLoading&&<div className="fi px-4 py-3 text-xs" style={{color:'rgba(255,255,255,0.3)'}}>{t.searching}</div>}
@@ -317,8 +354,20 @@ export default function Profile() {
                   </div>
                 )}
               </div>
+              <button
+                type="button"
+                onClick={handleSaveProfile}
+                className="fc w-full py-2.5 rounded-xl text-sm tracking-widest border transition-colors"
+                style={{
+                  background: 'rgba(34,197,94,0.12)',
+                  borderColor: 'rgba(34,197,94,0.45)',
+                  color: '#86efac',
+                }}
+              >
+                {t.save}
+              </button>
               <button onClick={generateChart} disabled={loading}
-                className="fc w-full py-3 rounded-xl text-sm tracking-widest disabled:opacity-40"
+                className="fc w-full py-2.5 rounded-xl text-sm tracking-widest disabled:opacity-40"
                 style={{background:'linear-gradient(135deg,#d97706,#f59e0b)',color:'#000'}}>
                 {loading ? t.loading : t.generate}
               </button>
@@ -380,6 +429,16 @@ export default function Profile() {
 
         </div>
       </div>
+      {savedToast && (
+        <div
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] fi text-base px-6 py-3 rounded-xl shadow-2xl"
+          style={{ background: '#16a34a', color: '#ffffff' }}
+          role="status"
+          aria-live="polite"
+        >
+          {t.saved}
+        </div>
+      )}
       <BottomNav labels={HOME_LANGS[(lang as AppLang) || 'en'].nav} />
     </div>
   );

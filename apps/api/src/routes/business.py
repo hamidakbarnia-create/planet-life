@@ -81,7 +81,10 @@ async def get_birth_chart(request: BusinessAnalysisRequest):
         ]
         planets = {}
         for pid, name in bodies:
-            result, _ = swe.calc_ut(jd, pid, swe.FLG_MOSEPH)
+            # FLG_SPEED is REQUIRED for retrograde detection. Without it the
+            # speed component is 0 and every planet appears direct. (See
+            # apps/api/tests/test_retrograde_detection.py.)
+            result, _ = swe.calc_ut(jd, pid, swe.FLG_MOSEPH | swe.FLG_SPEED)
             lng = float(result[0])
             spd = float(result[3]) if len(result) > 3 else 0.0
             planets[name] = {

@@ -429,8 +429,12 @@ def _resolve_profile(activity_type: str) -> ActivityProfile:
     if key in ACTIVITY_PROFILES:
         return ACTIVITY_PROFILES[key]
 
-    # Aliases for API ergonomics
+    # Aliases for API ergonomics. Each Oracle question (lib/oracle-questions.ts)
+    # has an action_type; map them all to the closest existing profile so every
+    # module returns a distinct, meaningful score instead of falling back to the
+    # default "negotiation" profile.
     aliases = {
+        # Short aliases
         "launch": "business_launch",
         "startup": "business_launch",
         "deal": "negotiation",
@@ -442,6 +446,46 @@ def _resolve_profile(activity_type: str) -> ActivityProfile:
         "finance": "finance_transaction",
         "pr": "networking",
         "rest": "rest_recovery",
+
+        # Oracle: Business & Wealth
+        "loan_application": "finance_transaction",
+        "asset_trade": "investment",
+        "investor_meeting": "negotiation",
+
+        # Oracle: Love & People
+        "reconciliation": "negotiation",
+        "difficult_conversation": "negotiation",
+        "first_meeting": "networking",
+        "marriage_proposal": "negotiation",
+        "relationship_ending": "negotiation",
+
+        # Oracle: Travel & Place
+        "travel_start": "travel",
+        "business_trip": "travel",
+        "relocation": "real_estate",
+        "property_trade": "real_estate",
+        "lease_signing": "contract_signing",
+
+        # Oracle: Health & Body — closest profile is rest_recovery
+        "surgery": "rest_recovery",
+        "fasting_start": "rest_recovery",
+        "dental_visit": "rest_recovery",
+        "fertility_treatment": "rest_recovery",
+        "workout_routine": "creative_work",
+
+        # Oracle: Work & Voice
+        "social_media_post": "networking",
+        "job_interview": "negotiation",
+        "presentation": "networking",
+        "job_application": "networking",
+        "creative_project": "creative_work",
+
+        # Oracle: Luck & Crisis
+        "risk_taking": "investment",
+        "fresh_start": "business_launch",
+        "ending_chapter": "rest_recovery",
+        "major_decision": "negotiation",
+        "chance_event": "investment",
     }
     return ACTIVITY_PROFILES.get(aliases.get(key, DEFAULT_ACTIVITY), ACTIVITY_PROFILES[DEFAULT_ACTIVITY])
 

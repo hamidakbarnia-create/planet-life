@@ -13,14 +13,12 @@ import {
   type AppLang,
   type HomeViewMode,
 } from '@/lib/app-settings';
-import { getBirthProfile, loadBirthProfile } from '@/lib/birth-profile';
+import { loadBirthProfile } from '@/lib/birth-profile';
 import type { BirthProfile } from '@/lib/birth-profile';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
 import { fetchMonthScores } from '@/lib/calendar-scores';
 import { todayYMD } from '@/lib/calendar-utils';
 import { HOME_LANGS } from '@/lib/home-i18n';
-import { isDisclaimerAccepted } from '@/lib/disclaimers';
-
 export default function HomePage() {
   const router = useRouter();
   const today = new Date();
@@ -28,7 +26,7 @@ export default function HomePage() {
   const [ready, setReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [view, setView] = useState<HomeViewMode | null>(null);
-  const [profile, setProfile] = useState<BirthProfile>(() => getBirthProfile());
+  const [profile, setProfile] = useState<BirthProfile | null>(null);
   const [hasProfile, setHasProfile] = useState(false);
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
@@ -45,7 +43,6 @@ export default function HomePage() {
   };
 
   const initView = useCallback(() => {
-    if (!isDisclaimerAccepted()) return;
     const stored = loadHomeView();
     if (!stored) {
       setShowOnboarding(true);
@@ -66,9 +63,19 @@ export default function HomePage() {
       setLangState(storedLang);
     }
     const saved = loadBirthProfile();
-    if (saved) {
+    // loadBirthProfile returns null when nothing is saved.
+    // getBirthProfile() returns an empty default — never use it to set hasProfile.
+    if (
+      saved &&
+      saved.birth_date &&
+      saved.birth_time &&
+      saved.location
+    ) {
       setProfile(saved);
       setHasProfile(true);
+    } else {
+      setProfile(null);
+      setHasProfile(false);
     }
     initView();
   }, [initView]);
@@ -84,6 +91,7 @@ export default function HomePage() {
 
   const loadMonth = useCallback(async () => {
     if (view !== 'heatmap') return;
+    if (!profile || !profile.birth_date || !profile.birth_time || !profile.location) return;
     setLoadingMonth(true);
     try {
       const data = await fetchMonthScores(profile, year, month, (done, total) =>
@@ -130,7 +138,22 @@ export default function HomePage() {
     >
       {showOnboarding && <HomeViewOnboarding lang={lang} onChoose={handleChoose} />}
 
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="max-w-5xl mx-auto px-4 py-6">
+        {!hasProfile && !showOnboarding && (
+          <div
+            className="rounded-2xl p-4 fi text-sm mb-6"
+            style={{
+              background: 'rgba(251,191,36,0.06)',
+              border: '1px solid rgba(251,191,36,0.2)',
+              color: 'rgba(255,255,255,0.7)',
+            }}
+          >
+            Set up profile first{' '}
+            <Link href="/profile" style={{ color: '#fbbf24' }}>
+              {t.goProfile}
+            </Link>
+          </div>
+        )}
         {view === 'daily-brief' && (
           <DailyBriefView lang={lang} profile={profile} hasProfile={hasProfile} />
         )}

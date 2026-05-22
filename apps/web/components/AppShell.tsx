@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BottomNav } from './BottomNav';
+import { BottomNav, VaultPill } from './BottomNav';
+import { clearSession, loadSession, type AuthSession } from '@/lib/auth';
 
 type LangKey = 'en' | 'ru' | 'fa' | 'ar';
 
@@ -11,6 +13,13 @@ const LANG_OPTIONS: { key: LangKey; name: string }[] = [
   { key: 'fa', name: 'FA' },
   { key: 'ar', name: 'AR' },
 ];
+
+const TAGLINE: Record<LangKey, string> = {
+  en: 'Astrological Intelligence',
+  ru: 'Астрологический анализ',
+  fa: 'هوش نجومی',
+  ar: 'الذكاء الفلكي',
+};
 
 export function AppShell({
   children,
@@ -27,33 +36,105 @@ export function AppShell({
   navLabels?: Record<string, string>;
   fontFamily?: string;
 }) {
+  const [session, setSession] = useState<AuthSession | null>(null);
+  useEffect(() => {
+    setSession(loadSession());
+    const onStorage = () => setSession(loadSession());
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+  const sessionLabel = session?.identifier
+    ? session.method === 'google' || session.method === 'apple'
+      ? session.method === 'google' ? 'Google' : 'Apple'
+      : session.identifier
+    : null;
+  const signOut = () => {
+    clearSession();
+    setSession(null);
+  };
+  // Pick best font stack per language. RTL gets dedicated faces; the CSS
+  // in globals.css also handles .fc/.fi class overrides and line-height.
+  const stack =
+    fontFamily ??
+    (lang === 'ar'
+      ? 'var(--font-cairo), var(--font-vazirmatn), sans-serif'
+      : lang === 'fa'
+        ? 'var(--font-vazirmatn), var(--font-cairo), sans-serif'
+        : 'var(--font-geist-sans), sans-serif');
+
   return (
     <div
-      style={{
-        direction: dir,
-        fontFamily: fontFamily ?? 'Inter, sans-serif',
-      }}
-      className="min-h-screen bg-[#070B14] text-white pb-20"
+      dir={dir}
+      lang={lang}
+      style={{ fontFamily: stack }}
+      className="min-h-screen bg-[#070B14] text-white pl-20"
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
-        @import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
         .fc{font-family:'Cinzel',serif}
         .fi{font-family:'Inter',sans-serif}
       `}</style>
 
-      <header className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+      <header className="flex items-center justify-between px-6 py-3 border-b border-white/5">
         <Link href="/home" className="flex items-center gap-3 no-underline">
-          <svg width="28" height="28" viewBox="0 0 30 30" fill="none">
+          <svg width="36" height="36" viewBox="0 0 30 30" fill="none">
             <circle cx="15" cy="15" r="13" stroke="#fbbf24" strokeWidth="0.5" opacity="0.4" />
             <circle cx="15" cy="15" r="7" stroke="#fbbf24" strokeWidth="0.5" opacity="0.6" />
             <circle cx="15" cy="15" r="2.5" fill="#fbbf24" />
           </svg>
-          <span className="fc text-sm tracking-widest" style={{ color: '#fbbf24' }}>
-            Planet Life
-          </span>
+          <div className="flex flex-col leading-tight">
+            <span className="fc text-lg tracking-widest" style={{ color: '#fbbf24' }}>
+              Planet Life
+            </span>
+            <span className="fi text-[10px] tracking-wider" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              {TAGLINE[lang]}
+            </span>
+          </div>
         </Link>
-        <div className="flex gap-1">
+        <div className="flex items-center gap-2">
+          {session ? (
+            <button
+              type="button"
+              onClick={signOut}
+              className="fi text-xs px-3 py-1.5 rounded-md border transition-colors"
+              style={{
+                borderColor: 'rgba(74,222,128,0.35)',
+                background: 'rgba(74,222,128,0.08)',
+                color: '#86efac',
+              }}
+              title={sessionLabel ?? ''}
+            >
+              {sessionLabel && sessionLabel.length > 16
+                ? sessionLabel.slice(0, 14) + '…'
+                : sessionLabel}
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="fi text-xs px-3 py-1.5 rounded-md border transition-colors no-underline"
+              style={{
+                borderColor: 'rgba(251,191,36,0.45)',
+                background: 'rgba(251,191,36,0.08)',
+                color: '#fbbf24',
+              }}
+            >
+              Sign in
+            </Link>
+          )}
+          <VaultPill label={navLabels?.['/vault'] ?? 'Vault'} />
+          <Link
+            href="/upgrade"
+            className="fi text-[10px] tracking-[0.18em] px-2.5 py-1 rounded-md uppercase no-underline transition-all hover:opacity-100"
+            title="Free plan — tap to upgrade"
+            style={{
+              border: '1px solid rgba(251,191,36,0.18)',
+              background: 'rgba(251,191,36,0.04)',
+              color: 'rgba(251,191,36,0.65)',
+            }}
+          >
+            Free
+          </Link>
+          <div className="flex gap-1">
           {LANG_OPTIONS.map((l) => (
             <button
               key={l.key}
@@ -76,6 +157,7 @@ export function AppShell({
               {l.name}
             </button>
           ))}
+        </div>
         </div>
       </header>
 

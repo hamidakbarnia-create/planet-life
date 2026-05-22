@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0A0E1A;
+  --foreground: #ededed;
+  --input-bg: #131929;
+  --input-border: rgba(255, 255, 255, 0.12);
+  --input-text: #ededed;
+  --input-placeholder: rgba(255, 255, 255, 0.35);
+  --accent: #f59e0b;
 }
 
 @theme inline {
@@ -12,15 +17,97 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+}
+
+/* ── RTL typography polish ──────────────────────────────────────────────────
+   Persian/Arabic glyphs sit lower and have descenders (ی، گ، ج). They need
+   more line-height and a slightly larger optical size to read comfortably
+   on screens. Latin text keeps default proportions.
+*/
+[dir="rtl"] {
+  font-size: 1.06em;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+[dir="rtl"] .fc {
+  font-family: var(--font-vazirmatn), var(--font-cairo), 'Cinzel', serif;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+[dir="rtl"] .fi {
+  font-family: var(--font-vazirmatn), var(--font-cairo), var(--font-geist-sans), sans-serif;
+}
+
+[dir="rtl"][lang="ar"] .fc,
+[dir="rtl"][lang="ar"] .fi {
+  font-family: var(--font-cairo), var(--font-vazirmatn), sans-serif;
+}
+
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3 {
+  line-height: 1.5;
+}
+
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] button,
+[dir="rtl"] select {
+  font-family: inherit;
+  font-size: 1em;
+}
+
+/* ── Fix native form controls on dark background ─────────────────────────── */
+
+select,
+select option {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+}
+
+/* Chromium: option elements inside open dropdown */
+option {
+  background-color: #131929;
+  color: #ededed;
+}
+
+input,
+textarea,
+select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border-color: var(--input-border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* ── Time / date input icon tint (Fix 3 piggyback) ───────────────────────── */
+
+input[type="time"],
+input[type="date"] {
+  color-scheme: dark;          /* tells browser to render calendar/clock icons light */
+  color: var(--input-text);
+  background-color: var(--input-bg);
+}
+
+/* calendar/clock picker indicator SVG inherits from color-scheme: dark */
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.85) sepia(0.2) saturate(2) hue-rotate(10deg);
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator:hover,
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }

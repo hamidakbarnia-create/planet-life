@@ -5,6 +5,13 @@ import {
   findNatalAspects,
   type NatalAspect,
 } from '@/lib/natal-aspects';
+import {
+  computeChartStrengths,
+  computeElementBalance,
+  type ChartLang,
+  type ElementBalance,
+  type ElementKey,
+} from '@/lib/chart-insights';
 
 export interface ChartPlanet {
   longitude: number;
@@ -72,33 +79,19 @@ const SIGN_COLORS = [
   '#0ea5e9',
 ];
 
-const SIGN_NAMES = [
-  'Aries',
-  'Taurus',
-  'Gemini',
-  'Cancer',
-  'Leo',
-  'Virgo',
-  'Libra',
-  'Scorpio',
-  'Sagittarius',
-  'Capricorn',
-  'Aquarius',
-  'Pisces',
-];
-
 export type NatalChartLabels = {
   empty: string;
-  tablePlanet: string;
-  tableSign: string;
-  tableDegree: string;
-  tableHouse: string;
-  tableRetro: string;
-  retroYes: string;
-  retroNo: string;
+  /** "Existential elements" / "Elemental balance" section title */
+  elementsTitle: string;
+  /** "Your chart strengths" section title */
+  strengthsTitle: string;
+  /** Localised name for each element */
+  elements: Record<ElementKey, string>;
   planetNames: Record<string, string>;
   signNames: Record<string, string>;
   aspectLegend: Record<string, string>;
+  /** Language code used to pick the appropriate strength rule text */
+  lang: ChartLang;
 };
 
 type PlanetLayout = { displayDeg: number; radius: number };
@@ -116,13 +109,6 @@ function toXY(deg: number, radius: number) {
 
 function displayLongitude(lon: number, ascendant: number) {
   return lon - ascendant + 180;
-}
-
-function formatDegree(degInSign: number) {
-  const d = Math.floor(degInSign);
-  const m = Math.round((degInSign - d) * 60);
-  if (m >= 60) return `${d + 1}°00′`;
-  return `${d}°${String(m).padStart(2, '0')}′`;
 }
 
 function computeLayouts(
@@ -355,65 +341,130 @@ function AspectLegend({ labels }: { labels: NatalChartLabels }) {
   );
 }
 
-function NatalDegreesTable({
+/**
+ * Two-column block that replaces the old planet-by-planet table.
+ *   Left  — Elemental balance bars (fire / earth / air / water)
+ *   Right — 3-4 short, derived "chart strengths" bullets
+ */
+function ChartInsights({
   planets,
+  aspects,
   labels,
 }: {
   planets: Record<string, ChartPlanet>;
+  aspects: NatalAspect[];
   labels: NatalChartLabels;
 }) {
-  const rows = PLANET_ORDER.filter((n) => planets[n]);
+  const balance = computeElementBalance(planets);
+  const strengths = computeChartStrengths(planets, aspects, labels.lang, 4);
 
   return (
-    <div className="w-full mt-4 overflow-x-auto">
-      <table className="w-full fi text-xs border-collapse">
-        <thead>
-          <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            {[labels.tablePlanet, labels.tableSign, labels.tableDegree, labels.tableHouse, labels.tableRetro].map(
-              (h) => (
-                <th
-                  key={h}
-                  className="py-2 px-2 text-left font-medium"
-                  style={{ color: 'rgba(255,255,255,0.35)' }}
-                >
-                  {h}
-                </th>
-              )
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((name) => {
-            const p = planets[name];
-            const signIdx = Math.min(11, Math.max(0, (p.sign ?? 1) - 1));
-            const signName = SIGN_NAMES[signIdx];
-            const signLabel = labels.signNames[signName] ?? signName;
-            return (
-              <tr
-                key={name}
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+    <div className="w-full mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <ElementBalanceCard balance={balance} labels={labels} />
+      <StrengthsCard strengths={strengths} title={labels.strengthsTitle} />
+    </div>
+  );
+}
+
+const ELEMENT_ORDER: ElementKey[] = ['earth', 'water', 'fire', 'air'];
+
+function ElementBalanceCard({
+  balance,
+  labels,
+}: {
+  balance: ElementBalance;
+  labels: NatalChartLabels;
+}) {
+  return (
+    <div
+      className="rounded-xl p-4"
+      style={{
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.06)',
+      }}
+    >
+      <div
+        className="fi text-[11px] tracking-widest uppercase mb-3"
+        style={{ color: 'rgba(255,255,255,0.45)' }}
+      >
+        {labels.elementsTitle}
+      </div>
+      <div className="flex flex-col gap-2.5">
+        {ELEMENT_ORDER.map((key) => {
+          const pct = balance.percent[key];
+          const color = balance.color[key];
+          return (
+            <div key={key} className="flex items-center gap-2.5">
+              <div
+                className="fi text-xs w-12 shrink-0"
+                style={{ color }}
               >
-                <td className="py-2 px-2" style={{ color: PCOL[name] ?? '#fff' }}>
-                  <span className="mr-1.5">{PSYM[name]}</span>
-                  {labels.planetNames[name] ?? name}
-                </td>
-                <td className="py-2 px-2" style={{ color: SIGN_COLORS[signIdx] }}>
-                  {SIGN_GLYPHS[signIdx]} {signLabel}
-                </td>
-                <td className="py-2 px-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                  {formatDegree(p.degree)}
-                </td>
-                <td className="py-2 px-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                  {p.house}
-                </td>
-                <td className="py-2 px-2" style={{ color: p.retrograde ? '#f87171' : 'rgba(255,255,255,0.35)' }}>
-                  {p.retrograde ? labels.retroYes : labels.retroNo}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                {labels.elements[key]}
+              </div>
+              <div
+                className="flex-1 h-2 rounded-full overflow-hidden"
+                style={{ background: 'rgba(255,255,255,0.06)' }}
+              >
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${pct}%`,
+                    background: color,
+                    transition: 'width 600ms ease-out',
+                  }}
+                />
+              </div>
+              <div
+                className="fi text-[11px] w-9 text-right shrink-0"
+                style={{ color: 'rgba(255,255,255,0.65)' }}
+              >
+                {pct}%
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function StrengthsCard({
+  strengths,
+  title,
+}: {
+  strengths: string[];
+  title: string;
+}) {
+  return (
+    <div
+      className="rounded-xl p-4"
+      style={{
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.06)',
+      }}
+    >
+      <div
+        className="fi text-[11px] tracking-widest uppercase mb-3"
+        style={{ color: 'rgba(255,255,255,0.45)' }}
+      >
+        {title}
+      </div>
+      <ul className="flex flex-col gap-2">
+        {strengths.map((line, idx) => (
+          <li key={idx} className="flex items-start gap-2">
+            <span
+              className="mt-1.5 inline-block w-1.5 h-1.5 rounded-full shrink-0"
+              style={{ background: '#fbbf24' }}
+            />
+            <span
+              className="fi text-xs leading-relaxed"
+              style={{ color: 'rgba(255,255,255,0.85)' }}
+            >
+              {line}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -453,7 +504,7 @@ export function NatalChart({
         />
       </div>
       <AspectLegend labels={labels} />
-      <NatalDegreesTable planets={planets} labels={labels} />
+      <ChartInsights planets={planets} aspects={aspects} labels={labels} />
     </div>
   );
 }

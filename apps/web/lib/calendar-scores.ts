@@ -1,7 +1,10 @@
 import type { BirthProfile } from './birth-profile';
 import { chartPreferenceFields } from './app-settings';
 
-export const API_BASE = 'http://localhost:8000';
+// Backend base URL. Override at build/dev time with NEXT_PUBLIC_API_BASE
+// (e.g. when sharing the app over a Cloudflare/ngrok tunnel).
+export const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
 
 export type ScoreBand = 'green' | 'yellow' | 'orange' | 'red' | 'empty';
 
@@ -129,6 +132,19 @@ export function formatDateYMD(year: number, month: number, day: number): string 
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
+// Format an hour (0-23) for display. English uses 12-hour with AM/PM
+// (e.g. 18 -> "6:00 PM"), other locales keep 24-hour (e.g. "18:00") which
+// is the native convention there.
+export function formatHourLabel(hour: number, lang: string = 'en'): string {
+  const safe = ((hour % 24) + 24) % 24;
+  if (lang === 'en') {
+    const period = safe >= 12 ? 'PM' : 'AM';
+    const h12 = safe % 12 === 0 ? 12 : safe % 12;
+    return `${h12}:00 ${period}`;
+  }
+  return `${String(safe).padStart(2, '0')}:00`;
+}
+
 async function mapPool<T, R>(
   items: T[],
   concurrency: number,
@@ -162,19 +178,43 @@ export async function fetchMonthScores(
     formatDateYMD(year, month, i + 1)
   );
 
-  let done = 0;
-  const pairs = await mapPool(dates, 4, async (date) => {
-    const score = await fetchDayScore(profile, date);
-    done += 1;
-    onProgress?.(done, total);
-    return [date, score ?? -1] as const;
-  });
+  onProgress?.(0, total);
 
+  const prefs = chartPreferenceFields();
   const scores: Record<string, number> = {};
-  pairs.forEach(([date, score]) => {
-    if (score >= 0) scores[date] = score;
-  });
 
+  try {
+    const res = await fetch(`${API_BASE}/api/batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        birth_date: profile.birth_date,
+        birth_time: profile.birth_time,
+        location: profile.location,
+        action_type: profile.action_type,
+        dates,
+        house_system: prefs.house_system,
+        zodiac: prefs.zodiac,
+      }),
+    });
+    const data = await res.json();
+    if (data.scores && typeof data.scores === 'object') {
+      for (const [date, payload] of Object.entries(data.scores)) {
+        const entry = payload as {
+          executive?: { score?: number };
+          error?: string;
+        };
+        const score = entry.executive?.score;
+        if (typeof score === 'number' && !Number.isNaN(score)) {
+          scores[date] = score;
+        }
+      }
+    }
+  } catch {
+    // leave scores empty on failure
+  }
+
+  onProgress?.(total, total);
   saveMonthCache(year, month, profile.action_type, scores);
   return scores;
 }
@@ -183,14 +223,140 @@ export async function fetchHourlyScores(
   profile: BirthProfile,
   targetDate: string
 ): Promise<HourScore[]> {
+  const prefs = chartPreferenceFields();
+
+  // Prefer the new single-request hourly batch (parallelised on the backend).
+  try {
+    const res = await fetch(`${API_BASE}/api/batch-hourly`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        birth_date: profile.birth_date,
+        birth_time: profile.birth_time,
+        location: profile.location,
+        action_type: profile.action_type,
+        target_date: targetDate,
+        house_system: prefs.house_system,
+        zodiac: prefs.zodiac,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.hours && typeof data.hours === 'object') {
+        const out: HourScore[] = [];
+        for (let hour = 0; hour < 24; hour++) {
+          const entry = (data.hours as Record<string, { score?: number; error?: string }>)[
+            String(hour)
+          ];
+          const score = typeof entry?.score === 'number' ? entry.score : 0;
+          out.push({
+            hour,
+            time: `${String(hour).padStart(2, '0')}:00`,
+            score,
+            band: scoreToBand(entry?.score),
+          });
+        }
+        return out;
+      }
+    }
+  } catch {
+    // fall through to per-hour fallback
+  }
+
+  // Fallback: per-hour /analyze calls if the batch endpoint isn't available.
   const hours = Array.from({ length: 24 }, (_, h) => h);
-  const results = await mapPool(hours, 4, async (hour) => {
+  const results = await mapPool(hours, 12, async (hour) => {
     const time = `${String(hour).padStart(2, '0')}:00`;
     const score = await fetchDayScore(profile, targetDate, time);
     const s = score ?? 0;
     return { hour, time, score: s, band: scoreToBand(score) };
   });
   return results.sort((a, b) => a.hour - b.hour);
+}
+
+// ── Transit snapshot (per-day astrology details for the calendar) ──────────
+
+export interface PlanetTransit {
+  name: string;
+  longitude: number;
+  sign: string;
+  signIndex: number;
+  degreeInSign: number;
+  house?: number;
+  retrograde?: boolean;
+}
+
+const ZODIAC_SIGNS = [
+  'Aries',
+  'Taurus',
+  'Gemini',
+  'Cancer',
+  'Leo',
+  'Virgo',
+  'Libra',
+  'Scorpio',
+  'Sagittarius',
+  'Capricorn',
+  'Aquarius',
+  'Pisces',
+];
+
+function longitudeToSign(longitude: number) {
+  const lon = ((longitude % 360) + 360) % 360;
+  const signIndex = Math.floor(lon / 30);
+  return {
+    sign: ZODIAC_SIGNS[signIndex] ?? 'Aries',
+    signIndex,
+    degreeInSign: lon - signIndex * 30,
+  };
+}
+
+export async function fetchTransitSnapshot(
+  profile: BirthProfile,
+  targetDate: string,
+  targetTime?: string
+): Promise<PlanetTransit[]> {
+  const prefs = chartPreferenceFields();
+  try {
+    const res = await fetch(`${API_BASE}/api/transit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        birth_date: profile.birth_date,
+        birth_time: profile.birth_time,
+        location: profile.location,
+        target_date: targetDate,
+        ...(targetTime ? { target_time: targetTime } : {}),
+        house_system: prefs.house_system,
+        zodiac: prefs.zodiac,
+      }),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const planets = data?.transit ?? {};
+    const out: PlanetTransit[] = [];
+    for (const [name, raw] of Object.entries(planets)) {
+      const body = raw as {
+        longitude?: number;
+        house?: number;
+        retrograde?: boolean;
+      };
+      if (typeof body?.longitude !== 'number') continue;
+      const sign = longitudeToSign(body.longitude);
+      out.push({
+        name,
+        longitude: body.longitude,
+        sign: sign.sign,
+        signIndex: sign.signIndex,
+        degreeInSign: sign.degreeInSign,
+        house: body.house,
+        retrograde: body.retrograde === true,
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
 }
 
 export function isGoldenHour(score: number) {

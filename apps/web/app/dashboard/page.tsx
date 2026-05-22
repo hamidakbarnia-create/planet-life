@@ -5,10 +5,10 @@ import {
   type AstroLang,
   type AnalysisPayload,
 } from '@/lib/astrology-i18n';
-import { BottomNav } from '@/components/BottomNav';
+import { BottomNav, VaultPill } from '@/components/BottomNav';
 import { ActionDisclaimer } from '@/components/disclaimers/ActionDisclaimer';
 import { ModuleDisclaimerBanner } from '@/components/disclaimers/ModuleDisclaimerBanner';
-import { saveBirthProfile } from '@/lib/birth-profile';
+import { loadBirthProfile } from '@/lib/birth-profile';
 import type { DisclaimerLang } from '@/lib/disclaimers';
 import { HOME_LANGS } from '@/lib/home-i18n';
 
@@ -149,13 +149,18 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    saveBirthProfile({
-      birth_date: form.birth_date,
-      birth_time: form.birth_time,
-      location: form.location,
-      action_type: form.action_type,
-    });
-  }, [form.birth_date, form.birth_time, form.location, form.action_type]);
+    const saved = loadBirthProfile();
+    if (saved) {
+      setForm(f => ({
+        ...f,
+        birth_date: saved.birth_date,
+        birth_time: saved.birth_time,
+        location: saved.location,
+        action_type: saved.action_type || f.action_type,
+      }));
+      setCitySearch(saved.location);
+    }
+  }, []);
 
   const searchCities = useCallback((q: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -211,7 +216,7 @@ export default function Dashboard() {
 
   return (
     <div style={{ direction: t.dir as any, fontFamily: (lang==='fa'||lang==='ar') ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif', fontFeatureSettings: '"kern"' }}
-        className="min-h-screen bg-[#070B14] text-white pb-20">
+        className="min-h-screen bg-[#070B14] text-white pl-20">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
         @import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
@@ -247,20 +252,28 @@ export default function Dashboard() {
             <div className="fi text-[10px] tracking-wider" style={{color:'rgba(255,255,255,0.3)'}}>Astrological Intelligence</div>
           </div>
         </a>
-        <div className="flex items-center gap-4 mx-4">
-          <a href="/dashboard" className="fi text-sm" style={{color:'#fbbf24'}}>Dashboard</a>
-          <a href="/calendar" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>{t.calendar}</a>
-          <a href="/people" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>{t.people}</a>
-          <a href="/profile" className="fi text-sm" style={{color:'rgba(255,255,255,0.4)'}}>{t.profile}</a>
-        </div>
-        <div className="flex gap-1">
-          {(Object.keys(LANGS) as Array<keyof typeof LANGS>).map(l => (
-            <button key={l} onClick={() => setLang(l)}
-              className="fi px-2.5 py-1 text-xs rounded-md border transition-all"
-              style={lang===l ? {borderColor:'rgba(251,191,36,0.5)',color:'#fbbf24',background:'rgba(251,191,36,0.06)'} : {borderColor:'rgba(255,255,255,0.08)',color:'rgba(255,255,255,0.3)'}}>
-              {LANGS[l].name}
-            </button>
-          ))}
+        <div className="flex items-center gap-3">
+          <VaultPill label={HOME_LANGS[lang]?.nav?.['/vault'] ?? 'Vault'} />
+          <span
+            className="fi text-[10px] tracking-[0.18em] px-2.5 py-1 rounded-md uppercase"
+            title="Subscription tier — paywall ships in Sprint R3"
+            style={{
+              border: '1px solid rgba(251,191,36,0.18)',
+              background: 'rgba(251,191,36,0.04)',
+              color: 'rgba(251,191,36,0.65)',
+            }}
+          >
+            Free
+          </span>
+          <div className="flex gap-1">
+            {(Object.keys(LANGS) as Array<keyof typeof LANGS>).map(l => (
+              <button key={l} onClick={() => setLang(l)}
+                className="fi px-2.5 py-1 text-xs rounded-md border transition-all"
+                style={lang===l ? {borderColor:'rgba(251,191,36,0.5)',color:'#fbbf24',background:'rgba(251,191,36,0.06)'} : {borderColor:'rgba(255,255,255,0.08)',color:'rgba(255,255,255,0.3)'}}>
+                {LANGS[l].name}
+              </button>
+            ))}
+          </div>
         </div>
       </nav>
 

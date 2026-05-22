@@ -22,46 +22,64 @@ import {
   BAND_STYLES,
   fetchHourlyScores,
   fetchMonthScores,
+  fetchTransitSnapshot,
   formatDateYMD,
+  formatHourLabel,
   scoreToBand,
   type HourScore,
+  type PlanetTransit,
   type ScoreBand,
 } from '@/lib/calendar-scores';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import type { AppLang } from '@/lib/app-settings';
 import { todayYMD } from '@/lib/calendar-utils';
+import { GPS_TONE_STYLES, buildStrategicGps } from '@/lib/strategic-gps';
 
 type LangKey = AppLang;
 
-const LANGS: Record<
-  LangKey,
-  {
-    dir: 'ltr' | 'rtl';
+type LangPack = {
+  dir: 'ltr' | 'rtl';
+  title: string;
+  subtitle: string;
+  prev: string;
+  next: string;
+  loading: string;
+  noProfile: string;
+  goProfile: string;
+  selected: string;
+  hourly: string;
+  golden: string;
+  danger: string;
+  neutral: string;
+  export: string;
+  exportAll: string;
+  exportImportant: string;
+  exportNotify: string;
+  exportDownload: string;
+  exportDisabled: string;
+  score: string;
+  dayScore: string;
+  weekdays: string[];
+  nav: Record<string, string>;
+  months: string[];
+  legend: {
     title: string;
-    subtitle: string;
-    prev: string;
-    next: string;
-    loading: string;
-    noProfile: string;
-    goProfile: string;
-    selected: string;
-    hourly: string;
-    golden: string;
-    danger: string;
-    neutral: string;
-    export: string;
-    exportAll: string;
-    exportImportant: string;
-    exportNotify: string;
-    exportDownload: string;
-    exportDisabled: string;
-    score: string;
-    dayScore: string;
-    weekdays: string[];
-    nav: Record<string, string>;
-    months: string[];
-  }
-> = {
+    hint: string;
+    bands: { range: string; label: string; color: string }[];
+  };
+  transit: {
+    title: string;
+    hint: string;
+    retrograde: string;
+    in: string;
+    house: string;
+    empty: string;
+  };
+  signs: string[];
+  planets: Record<string, string>;
+};
+
+const LANGS: Record<LangKey, LangPack> = {
   en: {
     dir: 'ltr',
     title: 'Strategic Calendar',
@@ -105,6 +123,33 @@ const LANGS: Record<
       'November',
       'December',
     ],
+    legend: {
+      title: 'What the numbers mean',
+      hint: 'Each cell shows your daily readiness score (0–100) for this action.',
+      bands: [
+        { range: '85–100', label: 'Golden — make your move', color: '#4ade80' },
+        { range: '60–84', label: 'Favorable — go ahead', color: '#fbbf24' },
+        { range: '40–59', label: 'Neutral — proceed carefully', color: '#fb923c' },
+        { range: '0–39', label: 'Avoid — wait for a better day', color: '#f87171' },
+      ],
+    },
+    transit: {
+      title: 'Sky on this day',
+      hint: 'Live planetary positions transiting on the selected date.',
+      retrograde: 'Retrograde',
+      in: 'in',
+      house: 'House',
+      empty: 'No transit data yet.',
+    },
+    signs: [
+      'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+      'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
+    ],
+    planets: {
+      sun: 'Sun', moon: 'Moon', mercury: 'Mercury', venus: 'Venus', mars: 'Mars',
+      jupiter: 'Jupiter', saturn: 'Saturn', uranus: 'Uranus', neptune: 'Neptune',
+      pluto: 'Pluto', north_node: 'North Node',
+    },
   },
   ru: {
     dir: 'ltr',
@@ -149,6 +194,33 @@ const LANGS: Record<
       'Ноябрь',
       'Декабрь',
     ],
+    legend: {
+      title: 'Что означают числа',
+      hint: 'Каждая ячейка — ваш балл готовности (0–100) для этого действия.',
+      bands: [
+        { range: '85–100', label: 'Золотое окно — действуйте', color: '#4ade80' },
+        { range: '60–84', label: 'Благоприятно — вперёд', color: '#fbbf24' },
+        { range: '40–59', label: 'Нейтрально — осторожно', color: '#fb923c' },
+        { range: '0–39', label: 'Избегайте — подождите', color: '#f87171' },
+      ],
+    },
+    transit: {
+      title: 'Небо в этот день',
+      hint: 'Положения планет на выбранную дату.',
+      retrograde: 'Ретроград',
+      in: 'в',
+      house: 'Дом',
+      empty: 'Данных о транзитах пока нет.',
+    },
+    signs: [
+      'Овен', 'Телец', 'Близнецы', 'Рак', 'Лев', 'Дева',
+      'Весы', 'Скорпион', 'Стрелец', 'Козерог', 'Водолей', 'Рыбы',
+    ],
+    planets: {
+      sun: 'Солнце', moon: 'Луна', mercury: 'Меркурий', venus: 'Венера', mars: 'Марс',
+      jupiter: 'Юпитер', saturn: 'Сатурн', uranus: 'Уран', neptune: 'Нептун',
+      pluto: 'Плутон', north_node: 'Сев. узел',
+    },
   },
   fa: {
     dir: 'rtl',
@@ -193,6 +265,33 @@ const LANGS: Record<
       'نوامبر',
       'دسامبر',
     ],
+    legend: {
+      title: 'معنای اعداد',
+      hint: 'هر خانه امتیاز آمادگی روزانه شما (۰ تا ۱۰۰) برای این اقدام است.',
+      bands: [
+        { range: '۸۵ تا ۱۰۰', label: 'طلایی — اقدام کنید', color: '#4ade80' },
+        { range: '۶۰ تا ۸۴', label: 'مساعد — جلو بروید', color: '#fbbf24' },
+        { range: '۴۰ تا ۵۹', label: 'خنثی — با احتیاط', color: '#fb923c' },
+        { range: '۰ تا ۳۹', label: 'اجتناب کنید — صبر', color: '#f87171' },
+      ],
+    },
+    transit: {
+      title: 'آسمان این روز',
+      hint: 'موقعیت سیارات در روز انتخاب‌شده.',
+      retrograde: 'برگشتی',
+      in: 'در',
+      house: 'خانه',
+      empty: 'هنوز داده‌ای از ترانزیت‌ها نیست.',
+    },
+    signs: [
+      'حمل', 'ثور', 'جوزا', 'سرطان', 'اسد', 'سنبله',
+      'میزان', 'عقرب', 'قوس', 'جدی', 'دلو', 'حوت',
+    ],
+    planets: {
+      sun: 'خورشید', moon: 'ماه', mercury: 'عطارد', venus: 'زهره', mars: 'مریخ',
+      jupiter: 'مشتری', saturn: 'زحل', uranus: 'اورانوس', neptune: 'نپتون',
+      pluto: 'پلوتو', north_node: 'گره شمالی',
+    },
   },
   ar: {
     dir: 'rtl',
@@ -237,8 +336,46 @@ const LANGS: Record<
       'نوفمبر',
       'ديسمبر',
     ],
+    legend: {
+      title: 'معنى الأرقام',
+      hint: 'كل خلية تظهر درجة جاهزيتك اليومية (0–100) لهذا الإجراء.',
+      bands: [
+        { range: '85–100', label: 'ذهبي — تحرّك', color: '#4ade80' },
+        { range: '60–84', label: 'مواتٍ — تقدّم', color: '#fbbf24' },
+        { range: '40–59', label: 'محايد — بحذر', color: '#fb923c' },
+        { range: '0–39', label: 'تجنّب — انتظر', color: '#f87171' },
+      ],
+    },
+    transit: {
+      title: 'سماء هذا اليوم',
+      hint: 'مواقع الكواكب في التاريخ المحدد.',
+      retrograde: 'تراجعي',
+      in: 'في',
+      house: 'البيت',
+      empty: 'لا توجد بيانات عبور بعد.',
+    },
+    signs: [
+      'الحمل', 'الثور', 'الجوزاء', 'السرطان', 'الأسد', 'العذراء',
+      'الميزان', 'العقرب', 'القوس', 'الجدي', 'الدلو', 'الحوت',
+    ],
+    planets: {
+      sun: 'الشمس', moon: 'القمر', mercury: 'عطارد', venus: 'الزهرة', mars: 'المريخ',
+      jupiter: 'المشتري', saturn: 'زحل', uranus: 'أورانوس', neptune: 'نبتون',
+      pluto: 'بلوتو', north_node: 'العقدة الشمالية',
+    },
   },
 };
+
+const PLANET_GLYPHS: Record<string, string> = {
+  sun: '☉', moon: '☾', mercury: '☿', venus: '♀', mars: '♂',
+  jupiter: '♃', saturn: '♄', uranus: '♅', neptune: '♆',
+  pluto: '♇', north_node: '☊',
+};
+
+const PLANET_ORDER = [
+  'sun', 'moon', 'mercury', 'venus', 'mars',
+  'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'north_node',
+];
 
 function calendarCells(year: number, month: number) {
   const firstDow = new Date(year, month - 1, 1).getDay();
@@ -271,12 +408,18 @@ export default function CalendarPage() {
   );
   const [hourly, setHourly] = useState<HourScore[]>([]);
   const [loadingHourly, setLoadingHourly] = useState(false);
+  const [transit, setTransit] = useState<PlanetTransit[]>([]);
+  const [loadingTransit, setLoadingTransit] = useState(false);
   const [exportMode, setExportMode] = useState<CalendarExportMode>('important');
   const [hasProfile, setHasProfile] = useState(false);
   const [profile, setProfile] = useState<BirthProfile>(() => getBirthProfile());
 
   const t = LANGS[lang];
   const cells = useMemo(() => calendarCells(year, month), [year, month]);
+  const gps = useMemo(
+    () => buildStrategicGps(scores, hourly, lang),
+    [scores, hourly, lang]
+  );
 
   const setLang = (l: LangKey) => {
     setLangState(l);
@@ -319,10 +462,18 @@ export default function CalendarPage() {
     if (!selectedDate) return;
     let cancelled = false;
     setLoadingHourly(true);
+    setLoadingTransit(true);
+    // Kick off hourly + transit in parallel so the panel populates fast.
     fetchHourlyScores(profile, selectedDate).then((data) => {
       if (!cancelled) {
         setHourly(data);
         setLoadingHourly(false);
+      }
+    });
+    fetchTransitSnapshot(profile, selectedDate).then((data) => {
+      if (!cancelled) {
+        setTransit(data);
+        setLoadingTransit(false);
       }
     });
     return () => {
@@ -410,6 +561,140 @@ export default function CalendarPage() {
             </Link>
           </div>
         )}
+
+        <section
+          className="rounded-2xl p-4 mb-6"
+          style={{
+            background: 'linear-gradient(145deg, rgba(251,191,36,0.06), rgba(59,130,246,0.06))',
+            border: '1px solid rgba(251,191,36,0.18)',
+          }}
+        >
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <div
+                className="fi text-[10px] uppercase tracking-[0.28em] mb-1"
+                style={{ color: 'rgba(251,191,36,0.7)' }}
+              >
+                {gps.text.title}
+              </div>
+              <p className="fi text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                {gps.text.subtitle}
+              </p>
+            </div>
+            <div
+              className="fc text-3xl shrink-0"
+              style={{ color: GPS_TONE_STYLES[gps.monthTone].color }}
+            >
+              {gps.monthScore ?? '--'}
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-3">
+            <div
+              className="rounded-xl p-3"
+              style={{
+                background: GPS_TONE_STYLES[gps.monthTone].bg,
+                border: `1px solid ${GPS_TONE_STYLES[gps.monthTone].border}`,
+              }}
+            >
+              <div
+                className="fi text-[10px] uppercase tracking-widest mb-2"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {gps.text.macro}
+              </div>
+              <p className="fi text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                {gps.monthBody}
+              </p>
+              <div className="fi text-[10px] mt-3" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                {gps.goldenCount} {gps.text.goldenDays} · {gps.cautionCount} {gps.text.cautionDays}
+              </div>
+            </div>
+
+            <div
+              className="rounded-xl p-3"
+              style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.07)',
+              }}
+            >
+              <div
+                className="fi text-[10px] uppercase tracking-widest mb-2"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {gps.text.meso}
+              </div>
+              <div className="space-y-1.5">
+                {gps.weeks.map((week) => {
+                  const style = GPS_TONE_STYLES[week.tone];
+                  return (
+                    <div key={week.label} className="flex items-center gap-2">
+                      <span className="fi text-[10px] w-12" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                        {week.label}
+                      </span>
+                      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${week.score ?? 8}%`,
+                            background: style.color,
+                            opacity: week.score == null ? 0.25 : 0.9,
+                          }}
+                        />
+                      </div>
+                      <span className="fi text-[10px] w-12 text-end" style={{ color: style.color }}>
+                        {week.score ?? '--'} {week.score == null ? '' : week.action}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div
+              className="rounded-xl p-3"
+              style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.07)',
+              }}
+            >
+              <div
+                className="fi text-[10px] uppercase tracking-widest mb-2"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {gps.text.micro}
+              </div>
+              {loadingHourly ? (
+                <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {t.loading}
+                </div>
+              ) : gps.bestHour && gps.riskHour ? (
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="fi text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      {gps.text.bestHour}
+                    </span>
+                    <span className="fc text-base" style={{ color: '#4ade80' }}>
+                      {gps.bestHourLabel} · {gps.bestHour.score}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="fi text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      {gps.text.riskHour}
+                    </span>
+                    <span className="fc text-base" style={{ color: '#f87171' }}>
+                      {gps.riskHourLabel} · {gps.riskHour.score}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {gps.text.noHourly}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
 
         <div
           className="rounded-2xl p-4 mb-6"
@@ -500,6 +785,46 @@ export default function CalendarPage() {
           )}
         </div>
 
+        {/* Score legend — explains the numbers in each calendar cell */}
+        <div
+          className="rounded-2xl p-4 mb-6"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.07)',
+          }}
+        >
+          <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
+            <div className="fi text-[10px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              {t.legend.title}
+            </div>
+            <div className="fi text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              {t.legend.hint}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+            {t.legend.bands.map((b) => (
+              <div
+                key={b.range}
+                className="flex items-center gap-2 rounded-lg px-2 py-2"
+                style={{
+                  background: `${b.color}14`,
+                  border: `1px solid ${b.color}55`,
+                }}
+              >
+                <span
+                  className="fc text-[11px] font-semibold"
+                  style={{ color: b.color, minWidth: 52 }}
+                >
+                  {b.range}
+                </span>
+                <span className="fi text-[11px]" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                  {b.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {selectedDate && (
           <div
             className="rounded-2xl p-4 mb-6"
@@ -523,6 +848,70 @@ export default function CalendarPage() {
                 </div>
               )}
             </div>
+
+            {/* Transit snapshot — astrological details for this day */}
+            <div className="fi text-[10px] uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              {t.transit.title}
+            </div>
+            <p className="fi text-[11px] mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              {t.transit.hint}
+            </p>
+            {loadingTransit ? (
+              <div className="py-4 text-center fi text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                {t.loading}
+              </div>
+            ) : transit.length === 0 ? (
+              <div className="py-3 text-center fi text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                {t.transit.empty}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-5">
+                {PLANET_ORDER.map((name) => {
+                  const body = transit.find((p) => p.name === name);
+                  if (!body) return null;
+                  const signName = t.signs[body.signIndex] ?? body.sign;
+                  const deg = Math.floor(body.degreeInSign);
+                  const min = Math.floor((body.degreeInSign - deg) * 60);
+                  return (
+                    <div
+                      key={name}
+                      className="rounded-lg px-2.5 py-2 flex items-center gap-2"
+                      style={{
+                        background: body.retrograde
+                          ? 'rgba(248,113,113,0.08)'
+                          : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${
+                          body.retrograde
+                            ? 'rgba(248,113,113,0.35)'
+                            : 'rgba(255,255,255,0.07)'
+                        }`,
+                      }}
+                    >
+                      <span
+                        className="fc text-base shrink-0"
+                        style={{ color: body.retrograde ? '#f87171' : '#fbbf24', width: 18 }}
+                      >
+                        {PLANET_GLYPHS[name] ?? '•'}
+                      </span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="fc text-[11px] truncate" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                          {t.planets[name] ?? name}
+                          {body.retrograde && (
+                            <span className="fi text-[9px] ml-1" style={{ color: '#f87171' }}>
+                              ℞
+                            </span>
+                          )}
+                        </span>
+                        <span className="fi text-[10px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                          {deg}°{String(min).padStart(2, '0')}′ {t.transit.in} {signName}
+                          {body.house ? ` · ${t.transit.house} ${body.house}` : ''}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             <div className="fi text-[10px] uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
               {t.hourly}
@@ -551,8 +940,8 @@ export default function CalendarPage() {
                   return (
                     <div key={h.hour} className="mb-2">
                       <div className="flex items-center gap-2">
-                      <span className="fi text-[10px] w-10 shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                        {h.time}
+                      <span className="fi text-[10px] w-16 shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        {formatHourLabel(h.hour, lang)}
                       </span>
                       <div className="flex-1 h-6 rounded-md overflow-hidden relative" style={{ background: 'rgba(0,0,0,0.3)' }}>
                         <div
