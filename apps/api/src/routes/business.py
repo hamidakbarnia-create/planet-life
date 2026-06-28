@@ -11,11 +11,32 @@ from services.chart_data import (
     PlacidusLatitudeError,
     build_chart_payload,
     compute_birth_chart,
+    preview_birth_location,
 )
 from services.chart_monitor import log_chart_error
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+class LocationPreviewRequest(BaseModel):
+    location: str
+    latitude: float | None = None
+    longitude: float | None = None
+
+
+@router.post("/location-preview")
+async def location_preview(request: LocationPreviewRequest):
+    try:
+        return preview_birth_location(
+            location=request.location,
+            latitude=request.latitude,
+            longitude=request.longitude,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 class BusinessAnalysisRequest(BaseModel):
     birth_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")

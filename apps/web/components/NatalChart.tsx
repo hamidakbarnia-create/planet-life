@@ -113,7 +113,7 @@ function computeLayouts(
   planets: Record<string, ChartPlanet>,
   ascendant: number
 ): Record<string, PlanetLayout> {
-  const baseR = R_MID - 14;
+  const baseR = R_MID - 16;
   const items = PLANET_ORDER.filter((n) => planets[n]).map((name) => ({
     name,
     displayDeg: displayLongitude(planets[name].longitude, ascendant),
@@ -131,9 +131,9 @@ function computeLayouts(
       const prev = layouts[prevName];
       let diff = Math.abs(displayDeg - prev.displayDeg);
       if (diff > 180) diff = 360 - diff;
-      if (diff < 14) {
-        radius = prev.radius === baseR ? baseR + 16 : baseR;
-        if (diff < 8) displayDeg = prev.displayDeg + 4;
+      if (diff < 16) {
+        radius = prev.radius === baseR ? baseR + 18 : baseR;
+        if (diff < 10) displayDeg = prev.displayDeg + 5;
       }
     }
 
@@ -243,8 +243,8 @@ function NatalChartWheel({
                 y1={p1.y}
                 x2={p2.x}
                 y2={p2.y}
-                stroke="rgba(251,191,36,0.42)"
-                strokeWidth="1"
+                stroke="rgba(251,191,36,0.52)"
+                strokeWidth="1.1"
               />
               <text
                 x={label.x}
@@ -267,23 +267,27 @@ function NatalChartWheel({
             y1={toXY(ascDeg, R_OUTER + 4).y}
             x2={toXY(ascDeg, R_INNER).x}
             y2={toXY(ascDeg, R_INNER).y}
-            stroke="rgba(255,255,255,0.55)"
-            strokeWidth="1.4"
+            stroke="rgba(255,255,255,0.62)"
+            strokeWidth="1.5"
           />
           <line
             x1={toXY(dscDeg, R_OUTER + 4).x}
             y1={toXY(dscDeg, R_OUTER + 4).y}
             x2={toXY(dscDeg, R_INNER).x}
             y2={toXY(dscDeg, R_INNER).y}
-            stroke="rgba(255,255,255,0.55)"
-            strokeWidth="1.4"
+            stroke="rgba(255,255,255,0.62)"
+            strokeWidth="1.5"
           />
           <text
             data-testid="axis-ac"
             x={toXY(ascDeg, R_INNER - 10).x}
             y={toXY(ascDeg, R_INNER - 10).y}
-            fontSize="8"
-            fill="rgba(255,255,255,0.75)"
+            fontSize="9"
+            fontWeight="600"
+            fill="rgba(255,255,255,0.9)"
+            stroke="rgba(0,0,0,0.55)"
+            strokeWidth="0.4"
+            paintOrder="stroke"
             textAnchor="middle"
           >
             AC
@@ -292,8 +296,12 @@ function NatalChartWheel({
             data-testid="axis-dc"
             x={toXY(dscDeg, R_INNER - 10).x}
             y={toXY(dscDeg, R_INNER - 10).y}
-            fontSize="8"
-            fill="rgba(255,255,255,0.75)"
+            fontSize="9"
+            fontWeight="600"
+            fill="rgba(255,255,255,0.9)"
+            stroke="rgba(0,0,0,0.55)"
+            strokeWidth="0.4"
+            paintOrder="stroke"
             textAnchor="middle"
           >
             DC
@@ -332,8 +340,12 @@ function NatalChartWheel({
             data-testid="axis-mc"
             x={toXY(mcDeg, R_OUTER + 12).x}
             y={toXY(mcDeg, R_OUTER + 12).y}
-            fontSize="8"
-            fill="rgba(147,197,253,0.85)"
+            fontSize="9"
+            fontWeight="600"
+            fill="rgba(147,197,253,0.95)"
+            stroke="rgba(0,0,0,0.55)"
+            strokeWidth="0.4"
+            paintOrder="stroke"
             textAnchor="middle"
           >
             MC
@@ -342,8 +354,12 @@ function NatalChartWheel({
             data-testid="axis-ic"
             x={toXY(icDeg, R_OUTER + 12).x}
             y={toXY(icDeg, R_OUTER + 12).y}
-            fontSize="8"
-            fill="rgba(147,197,253,0.85)"
+            fontSize="9"
+            fontWeight="600"
+            fill="rgba(147,197,253,0.95)"
+            stroke="rgba(0,0,0,0.55)"
+            strokeWidth="0.4"
+            paintOrder="stroke"
             textAnchor="middle"
           >
             IC
@@ -366,8 +382,8 @@ function NatalChartWheel({
             x2={pB.x}
             y2={pB.y}
             stroke={color}
-            strokeWidth="1.2"
-            strokeOpacity="0.75"
+            strokeWidth="1"
+            strokeOpacity="0.58"
           />
         );
       })}
@@ -388,10 +404,10 @@ function NatalChartWheel({
             <circle
               cx={p.x}
               cy={p.y}
-              r="11"
-              fill="rgba(0,0,0,0.85)"
+              r="10"
+              fill="rgba(0,0,0,0.88)"
               stroke={col}
-              strokeWidth="1"
+              strokeWidth="1.1"
             />
             <text
               x={p.x}

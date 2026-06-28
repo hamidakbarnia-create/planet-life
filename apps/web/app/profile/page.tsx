@@ -5,21 +5,30 @@ import {
   NatalChart,
   type NatalChartLabels,
 } from '@/components/NatalChart';
-import { ChartDevPanel } from '@/components/ChartDevPanel';
+import { ChartDevPanelGate } from '@/components/ChartDevPanelGate';
 import { CalculationDetails } from '@/components/CalculationDetails';
+import { ChartTrustCard } from '@/components/ChartTrustCard';
+import { FaChartConfirmModal } from '@/components/FaChartConfirmModal';
 import { GeocodeConfirmDialog } from '@/components/GeocodeConfirmDialog';
 import {
   type ChartData,
   type CitySelection,
-  formatDms,
-  isDevEnvironment,
   validateChartResponse,
 } from '@/lib/chart-types';
 import { BottomNav, VaultPill } from '@/components/BottomNav';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import type { AppLang } from '@/lib/app-settings';
-import { CHART_TRUST_LINE } from '@/lib/chart-defaults';
 import { loadBirthProfile, saveBirthProfile } from '@/lib/birth-profile';
+import {
+  buildPreConfirmSummary,
+  chartApiCoordinatesFromResolved,
+  isPlaceholderCardContent,
+  resolveGenerateChartAction,
+} from '@/lib/chart-profile-ux';
+import {
+  fetchLocationPreview,
+  type ResolvedLocationPreview,
+} from '@/lib/location-resolve';
 
 const ZODIAC = [
   { sign: 'Aries', symbol: '♈', dates: 'Mar 21 – Apr 19', stone: 'Diamond', colorName: 'Red', color: '#ef4444', element: 'Fire', planet: 'Mars' },
@@ -137,6 +146,9 @@ export default function Profile() {
   const [showCities, setShowCities] = useState(false);
   const [cityLoading, setCityLoading] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
+  const [faConfirmOpen, setFaConfirmOpen] = useState(false);
+  const [preConfirmSummary, setPreConfirmSummary] = useState<ReturnType<typeof buildPreConfirmSummary> | null>(null);
+  const [resolvedLocation, setResolvedLocation] = useState<ResolvedLocationPreview | null>(null);
   const cityRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<any>(null);
   const toastTimerRef = useRef<number | null>(null);
@@ -197,50 +209,6 @@ export default function Profile() {
     [lang, t]
   );
 
-  const hasChart = !!chartData && Object.keys(chartData.planets).length > 0;
-  const planetCount = chartData ? Object.keys(chartData.planets).length : 0;
-  const ascValue =
-    hasChart && Number.isFinite(chartData!.ascendant)
-      ? formatDms(chartData!.ascendant)
-      : null;
-  const mcValue =
-    hasChart && Number.isFinite(chartData!.midheaven)
-      ? formatDms(chartData!.midheaven)
-      : null;
-  const coordsValue =
-    hasChart && chartData!.latitude && chartData!.longitude
-      ? `${chartData!.latitude.toFixed(4)}, ${chartData!.longitude.toFixed(4)}`
-      : selectedCity
-        ? `${selectedCity.lat.toFixed(4)}, ${selectedCity.lon.toFixed(4)}`
-        : null;
-  const tzValue = hasChart && chartData!.timezone ? chartData!.timezone : null;
-  const utcValue = hasChart && chartData!.utc_datetime ? chartData!.utc_datetime : null;
-  const houseCuspsValue =
-    hasChart && chartData!.houses.length === 12
-      ? `${chartData!.houses.length} cusps (Placidus)`
-      : null;
-
-  type VStatus = 'verified' | 'missing' | 'engine' | 'notConfirmed';
-  const verifyRows: { label: string; value: string; status: VStatus }[] = [
-    { label: t.vfTimezone, value: tzValue ?? t.vfNotAvailable, status: tzValue ? 'verified' : 'missing' },
-    { label: t.vfUtcTime, value: utcValue ?? t.vfNotAvailable, status: utcValue ? 'verified' : 'missing' },
-    { label: t.vfCoords, value: coordsValue ?? t.vfNotAvailable, status: coordsValue ? 'verified' : 'missing' },
-    { label: t.vfHouseSystem, value: hasChart ? chartData!.house_system : t.vfNotAvailable, status: hasChart ? 'verified' : 'missing' },
-    { label: t.vfAscendant, value: ascValue ?? t.vfNotAvailable, status: ascValue ? 'verified' : 'missing' },
-    { label: t.vfMc, value: mcValue ?? t.vfNotAvailable, status: mcValue ? 'verified' : 'missing' },
-    { label: t.vfHouseCusps, value: houseCuspsValue ?? t.vfRequiresEngine, status: houseCuspsValue ? 'verified' : 'engine' },
-    { label: t.vfPlanetPos, value: hasChart ? String(planetCount) : t.vfNotAvailable, status: hasChart ? 'verified' : 'missing' },
-    { label: t.vfAspectOrbs, value: t.vfRequiresEngine, status: 'engine' },
-    { label: t.vfEngine, value: hasChart ? 'Swiss Ephemeris (Moshier)' : t.vfNotConfirmed, status: hasChart ? 'verified' : 'notConfirmed' },
-  ];
-
-  const VERIFY_BADGE: Record<VStatus, { text: string; color: string; bg: string; border: string }> = {
-    verified: { text: t.badgeVerified, color: '#86efac', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.4)' },
-    missing: { text: t.badgeMissing, color: 'rgba(255,255,255,0.55)', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.14)' },
-    engine: { text: t.badgeEngine, color: '#fbbf24', bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.32)' },
-    notConfirmed: { text: t.badgeNotConfirmed, color: '#cbd5e1', bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.32)' },
-  };
-
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if(cityRef.current&&!cityRef.current.contains(e.target as Node))setShowCities(false);
@@ -274,20 +242,69 @@ export default function Profile() {
     setShowCities(false);
   };
 
-  const generateChart = async () => {
+  const handleGenerateClick = () => {
+    if (selectedCity && (!Number.isFinite(selectedCity.lat) || !Number.isFinite(selectedCity.lon))) {
+      setChartError('City selected from list must include latitude and longitude. Please pick the city again.');
+      return;
+    }
+
+    const action = resolveGenerateChartAction(lang);
+    if (action === 'show-confirm-modal') {
+      void openFaConfirmModal();
+      return;
+    }
+    void executeGenerateChart();
+  };
+
+  const openFaConfirmModal = async () => {
+    setChartError('');
+    setFaConfirmOpen(true);
+    setResolvedLocation(null);
+    setPreConfirmSummary(
+      buildPreConfirmSummary({
+        name,
+        birthDate,
+        birthTime,
+        location,
+        resolved: null,
+        resolving: true,
+      })
+    );
+
+    try {
+      const resolved = await fetchLocationPreview({
+        location,
+        latitude: selectedCity?.lat ?? null,
+        longitude: selectedCity?.lon ?? null,
+      });
+      setResolvedLocation(resolved);
+      setPreConfirmSummary(
+        buildPreConfirmSummary({
+          name,
+          birthDate,
+          birthTime,
+          location,
+          resolved,
+          resolving: false,
+        })
+      );
+    } catch (err) {
+      setFaConfirmOpen(false);
+      setPreConfirmSummary(null);
+      setChartError(err instanceof Error ? err.message : 'Location preview failed');
+    }
+  };
+
+  const executeGenerateChart = async () => {
+    setFaConfirmOpen(false);
     setLoading(true);
     setChartError('');
     setChartData(null);
 
-    if (selectedCity && (!Number.isFinite(selectedCity.lat) || !Number.isFinite(selectedCity.lon))) {
-      setChartError('City selected from list must include latitude and longitude. Please pick the city again.');
-      setLoading(false);
-      return;
-    }
-
     try {
       const apiBase =
         process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
+      const coords = chartApiCoordinatesFromResolved(resolvedLocation, selectedCity);
       const body: Record<string, unknown> = {
         birth_date: birthDate,
         birth_time: birthTime,
@@ -297,11 +314,10 @@ export default function Profile() {
         house_system: 'placidus',
         zodiac: 'tropical',
         node_type: 'mean',
+        ...coords,
       };
-      if (selectedCity) {
-        body.latitude = selectedCity.lat;
-        body.longitude = selectedCity.lon;
-        body.country = selectedCity.country ?? null;
+      if (selectedCity?.country) {
+        body.country = selectedCity.country;
       }
       const res = await fetch(`${apiBase}/api/business/chart`, {
         method: 'POST',
@@ -454,7 +470,7 @@ export default function Profile() {
               >
                 {t.save}
               </button>
-              <button onClick={generateChart} disabled={loading}
+              <button onClick={handleGenerateClick} disabled={loading}
                 className="fc w-full py-2.5 rounded-xl text-sm tracking-widest disabled:opacity-40"
                 style={{background:'linear-gradient(135deg,#d97706,#f59e0b)',color:'#000'}}>
                 {loading ? t.loading : t.generate}
@@ -475,18 +491,9 @@ export default function Profile() {
                   empty={!chartData}
                 />
               )}
-            {isDevEnvironment() && chartData && (
-              <ChartDevPanel chart={chartData} />
-            )}
-            {chartData && <CalculationDetails chart={chartData} />}
-            {chartData && (
-              <p
-                className="fi w-full mt-2 text-[11px] text-center leading-relaxed px-2"
-                style={{ color: 'rgba(255,255,255,0.45)' }}
-              >
-                {CHART_TRUST_LINE}
-              </p>
-            )}
+            {chartData && <ChartDevPanelGate chart={chartData} lang={lang} />}
+            {chartData && <CalculationDetails chart={chartData} lang={lang} />}
+            {chartData && <ChartTrustCard chart={chartData} lang={lang} />}
             {pendingGeocodeChart && !chartData && (
               <div
                 className="w-full mt-3 rounded-xl px-3 py-2.5 flex items-start gap-2"
@@ -498,52 +505,9 @@ export default function Profile() {
                 </span>
               </div>
             )}
-            {chartData && chartData.coordinate_source !== 'geocoded_fallback' && (
-              <div className="fi w-full mt-2 text-[11px] text-center" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                {chartData.latitude.toFixed(4)}, {chartData.longitude.toFixed(4)} · {chartData.timezone}
-                {chartData.coordinate_source === 'selected_city_coordinates' ? ' · verified city coordinates' : ''}
-              </div>
-            )}
             {chartError && (
               <p className="fi mt-3 text-xs text-center px-2" style={{color:'#fca5a5'}}>{chartError}</p>
             )}
-            <div
-              className="w-full mt-5 rounded-xl px-3 py-2.5 flex items-start gap-2"
-              style={{background:'rgba(251,191,36,0.06)',border:'1px solid rgba(251,191,36,0.18)'}}
-            >
-              <span className="fi text-sm leading-none mt-0.5" style={{color:'#fbbf24'}}>ⓘ</span>
-              <span className="fi text-[11px] leading-relaxed" style={{color:'rgba(255,255,255,0.55)'}}>{t.chartAccuracy}</span>
-            </div>
-            <div
-              className="w-full mt-4 rounded-xl p-4"
-              style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(251,191,36,0.22)' }}
-            >
-              <div className="fc text-sm tracking-widest" style={{ color: '#fbbf24' }}>{t.verifyTitle}</div>
-              <div className="fi text-[11px] leading-relaxed mt-1 mb-3" style={{ color: 'rgba(255,255,255,0.45)' }}>{t.verifySubtitle}</div>
-              <div className="flex flex-col gap-1.5">
-                {verifyRows.map((row) => {
-                  const b = VERIFY_BADGE[row.status];
-                  return (
-                    <div
-                      key={row.label}
-                      className="flex items-center justify-between gap-3 rounded-lg px-3 py-2"
-                      style={{ background: 'rgba(255,255,255,0.03)' }}
-                    >
-                      <div className="min-w-0">
-                        <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.82)' }}>{row.label}</div>
-                        <div className="fi text-[11px] leading-snug" style={{ color: 'rgba(255,255,255,0.45)' }}>{row.value}</div>
-                      </div>
-                      <span
-                        className="fi text-[10px] px-2 py-1 rounded-md whitespace-nowrap shrink-0"
-                        style={{ color: b.color, background: b.bg, border: `1px solid ${b.border}` }}
-                      >
-                        {b.text}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
           </div>
 
           <div className="space-y-4">
@@ -560,9 +524,9 @@ export default function Profile() {
                   {[
                     {label:t.element,value:tr(zodiac.element,lang)},
                     {label:t.planet,value:zodiac.planet},
-                    {label:t.wealthPotential,value:<span style={{color:'rgba(255,255,255,0.4)'}}>{t.comingSoon}</span>},
-                    {label:t.businessTiming,value:<span style={{color:'rgba(255,255,255,0.4)'}}>{t.comingSoon}</span>},
-                  ].map(item=>(
+                  ]
+                    .filter((item) => !isPlaceholderCardContent(typeof item.value === 'string' ? item.value : ''))
+                    .map(item=>(
                     <div key={item.label} className="rounded-xl p-3" style={{background:'rgba(255,255,255,0.03)'}}>
                       <div className="fi text-[10px] mb-1" style={{color:'rgba(255,255,255,0.3)'}}>{item.label}</div>
                       <div className="fi text-sm" style={{color:'rgba(255,255,255,0.8)'}}>{item.value}</div>
@@ -571,13 +535,6 @@ export default function Profile() {
                 </div>
               </div>
             )}
-            <div className="rounded-2xl p-5" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(251,191,36,0.1)'}}>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="fc text-3xl" style={{color:'rgba(255,255,255,0.25)'}}>—</div>
-                <div className="fi text-xs" style={{color:'rgba(255,255,255,0.35)'}}>{t.decisionStyle}</div>
-              </div>
-              <div className="fi text-xs leading-relaxed" style={{color:'rgba(255,255,255,0.4)'}}>{t.comingSoon}</div>
-            </div>
           </div>
 
         </div>
@@ -591,6 +548,17 @@ export default function Profile() {
         >
           {t.saved}
         </div>
+      )}
+      {faConfirmOpen && preConfirmSummary && (
+        <FaChartConfirmModal
+          summary={preConfirmSummary}
+          onConfirm={() => void executeGenerateChart()}
+          onEdit={() => {
+            setFaConfirmOpen(false);
+            setPreConfirmSummary(null);
+            setResolvedLocation(null);
+          }}
+        />
       )}
       {pendingGeocodeChart && (
         <GeocodeConfirmDialog

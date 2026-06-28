@@ -316,6 +316,23 @@ def compute_birth_chart(
         "calculation_timestamp": dt_now.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
+def preview_birth_location(
+    location: str,
+    latitude: float | None = None,
+    longitude: float | None = None,
+) -> dict[str, Any]:
+    """Resolve coordinates and IANA timezone — same path as chart API, no ephemeris."""
+    lat, lon, coordinate_source = resolve_location(location, latitude, longitude)
+    tz_name = _timezone_at(lat, lon)
+    return {
+        "latitude": lat,
+        "longitude": lon,
+        "timezone": tz_name,
+        "coordinate_source": coordinate_source,
+        "timezone_source": "IANA",
+    }
+
+
 def build_chart_payload(
     *,
     birth_date,
