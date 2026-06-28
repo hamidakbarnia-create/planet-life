@@ -15,8 +15,19 @@ import {
   analyzeSynergy,
   BADGE_STYLES,
   formatAspectLabel,
+  type SynastryAspect,
   type SynergyResult,
 } from '@/lib/synergy';
+import {
+  computeLifeAreas,
+  formatModularLine,
+  friendlyAspectLabel,
+  getAspectInsight,
+  LAYER_LABELS,
+  orbStars,
+  pickFeaturedAspects,
+  strengthLabel,
+} from '@/lib/synastry-i18n';
 
 export default function PersonSynergyPage() {
   const params = useParams();
@@ -25,6 +36,7 @@ export default function PersonSynergyPage() {
   const [result, setResult] = useState<SynergyResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [showSecondary, setShowSecondary] = useState(false);
   const [person, setPerson] = useState(
     () => (id ? getPerson(id) : null)
   );
@@ -91,6 +103,10 @@ export default function PersonSynergyPage() {
   }
 
   const badgeStyle = result ? BADGE_STYLES[result.badge] : null;
+  const featured = result
+    ? pickFeaturedAspects(result.harmony, result.tension)
+    : null;
+  const layers = LAYER_LABELS[lang];
 
   return (
     <AppShell
@@ -157,12 +173,18 @@ export default function PersonSynergyPage() {
               <SynergyBadgePill badge={result.badge} label={t.badges[result.badge]} />
             </div>
 
+            <Section title={t.lifeAreas} accent="#a78bfa">
+              {computeLifeAreas(lang, result.harmony, result.tension).map((area) => (
+                <LifeAreaBar key={area.key} label={area.label} pct={area.pct} dir={t.dir} />
+              ))}
+            </Section>
+
             <Section title={t.shared} accent="#4ade80">
               {result.harmony.length === 0 ? (
                 <p className="fi text-xs text-white/35">{t.noHarmony}</p>
               ) : (
                 result.harmony.slice(0, 8).map((row, i) => (
-                  <AspectRow key={i} text={formatAspectLabel(row)} color="#4ade80" />
+                  <AspectRow key={i} row={row} lang={lang} color="#4ade80" />
                 ))
               )}
             </Section>
@@ -172,10 +194,51 @@ export default function PersonSynergyPage() {
                 <p className="fi text-xs text-white/35">{t.noTension}</p>
               ) : (
                 result.tension.slice(0, 8).map((row, i) => (
-                  <AspectRow key={i} text={formatAspectLabel(row)} color="#f87171" />
+                  <AspectRow key={i} row={row} lang={lang} color="#f87171" />
                 ))
               )}
             </Section>
+
+            {featured && featured.featured.length > 0 && (
+              <Section title={t.keyConnections} accent="#c4b5fd">
+                {featured.featured.map((row, i) => (
+                  <InsightCard key={i} row={row} lang={lang} layers={layers} />
+                ))}
+              </Section>
+            )}
+
+            {featured && featured.secondary.length > 0 && (
+              <div
+                className="rounded-2xl overflow-hidden"
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setShowSecondary((v) => !v)}
+                  className="w-full flex items-center justify-between px-4 py-3 fi text-xs text-white/50 hover:text-white/70 transition-colors"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  <span>{layers.more}</span>
+                  <span className="text-white/30">{showSecondary ? '▲' : '▼'}</span>
+                </button>
+                {showSecondary && (
+                  <div className="px-4 pb-4 space-y-2 border-t border-white/5">
+                    {featured.secondary.map((row, i) => {
+                      const insight = getAspectInsight(lang, row);
+                      if (insight.kind !== 'modular') return null;
+                      return (
+                        <p key={i} className="fi text-[11px] leading-relaxed text-white/45">
+                          {formatModularLine(lang, insight.line)}
+                        </p>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
 
             <Section title={t.bestDays} accent="#fbbf24">
               {result.bestDays.length === 0 ? (
@@ -232,13 +295,144 @@ function Section({
   );
 }
 
-function AspectRow({ text, color }: { text: string; color: string }) {
+function LifeAreaBar({ label, pct, dir }: { label: string; pct: number; dir: 'ltr' | 'rtl' }) {
+  const tone = pct >= 70 ? '#4ade80' : pct >= 45 ? '#fbbf24' : '#f87171';
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <span className="fi text-xs text-white/70">{label}</span>
+        <span className="fc text-xs" style={{ color: tone }}>
+          {pct}%
+        </span>
+      </div>
+      <div
+        className="h-1.5 rounded-full overflow-hidden"
+        style={{ background: 'rgba(255,255,255,0.08)' }}
+      >
+        <div
+          className="h-full rounded-full transition-all"
+          style={{
+            width: `${pct}%`,
+            background: tone,
+            marginLeft: dir === 'rtl' ? 'auto' : undefined,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function StrengthStars({ orb, color }: { orb: number; color: string }) {
+  const filled = orbStars(orb);
+  return (
+    <span className="inline-flex gap-0.5 shrink-0" aria-hidden>
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="text-[9px] leading-none"
+          style={{ color: i < filled ? color : 'rgba(255,255,255,0.18)' }}
+        >
+          ★
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function InsightCard({
+  row,
+  lang,
+  layers,
+}: {
+  row: SynastryAspect;
+  lang: PeopleLang;
+  layers: (typeof LAYER_LABELS)['en'];
+}) {
+  const insight = getAspectInsight(lang, row);
+  const isTension = row.aspect === 'square' || row.aspect === 'opposition';
+  const accent = isTension ? '#f87171' : '#4ade80';
+
+  if (insight.kind === 'modular') {
+    return (
+      <div
+        className="rounded-xl px-3 py-2.5"
+        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        <div className="fi text-xs text-white/65 mb-1">{friendlyAspectLabel(lang, row)}</div>
+        <p className="fi text-[11px] leading-relaxed text-white/40">
+          {formatModularLine(lang, insight.line)}
+        </p>
+      </div>
+    );
+  }
+
+  const { story, strength, care } = insight.analysis;
+  return (
+    <div
+      className="rounded-xl px-3 py-3 space-y-2"
+      style={{
+        background: 'rgba(255,255,255,0.03)',
+        border: `1px solid ${accent}33`,
+      }}
+    >
+      <div className="flex items-center gap-2">
+        <span className="fi text-xs text-white/75">{friendlyAspectLabel(lang, row)}</span>
+        <StrengthStars orb={row.orb} color={accent} />
+      </div>
+      <p className="fi text-[10px] text-white/30">{formatAspectLabel(row, lang)}</p>
+      <div className="space-y-1.5 pt-1">
+        <LayerLine label={layers.story} text={story} />
+        <LayerLine label={layers.strength} text={strength} accent={accent} />
+        <LayerLine label={layers.care} text={care} accent="#fbbf24" />
+      </div>
+    </div>
+  );
+}
+
+function LayerLine({
+  label,
+  text,
+  accent,
+}: {
+  label: string;
+  text: string;
+  accent?: string;
+}) {
+  return (
+    <div>
+      <span className="fi text-[10px] uppercase tracking-wide" style={{ color: accent ?? 'rgba(255,255,255,0.35)' }}>
+        {label}
+      </span>
+      <p className="fi text-xs leading-relaxed text-white/60 mt-0.5">{text}</p>
+    </div>
+  );
+}
+
+function AspectRow({
+  row,
+  lang,
+  color,
+}: {
+  row: SynastryAspect;
+  lang: PeopleLang;
+  color: string;
+}) {
   return (
     <div className="flex items-start gap-2">
       <span style={{ color }} className="text-xs mt-0.5">
         ◆
       </span>
-      <span className="fi text-xs leading-relaxed text-white/55">{text}</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="fi text-xs leading-relaxed text-white/80">
+            {friendlyAspectLabel(lang, row)}
+          </span>
+          <StrengthStars orb={row.orb} color={color} />
+        </div>
+        <div className="fi text-[10px] leading-relaxed text-white/35 mt-0.5">
+          {formatAspectLabel(row, lang)} · {strengthLabel(lang, row.orb)}
+        </div>
+      </div>
     </div>
   );
 }

@@ -51,7 +51,7 @@ const ORACLE_LANGS: Record<
   }
 > = {
   en: {
-    title: 'The Oracle',
+    title: 'Ask a question',
     subtitle: 'Ask one question. Get one scored answer.',
     pickModule: 'Pick the area you want to ask about',
     pickQuestion: 'Pick your question',
@@ -62,7 +62,7 @@ const ORACLE_LANGS: Record<
     askAgain: 'Ask another',
     back: 'Back',
     noProfile:
-      'Save your birth date, time and city in Profile first — the Oracle reads against your natal chart.',
+      'Save your birth date, time and city in Profile first — the answer is built from your natal chart.',
     goProfile: 'Go to Profile',
     history: 'Recent questions',
     historyEmpty: 'No questions yet. Try one above.',
@@ -73,7 +73,7 @@ const ORACLE_LANGS: Record<
       'A 30-minute private session with Julia covers the full context behind this score.',
   },
   fa: {
-    title: 'وحی (Oracle)',
+    title: 'طرح سوال',
     subtitle: 'یک سوال بپرس. یک جواب نمره‌دار بگیر.',
     pickModule: 'حوزه‌ای که می‌خوای بپرسی رو انتخاب کن',
     pickQuestion: 'سوالت رو انتخاب کن',
@@ -84,7 +84,7 @@ const ORACLE_LANGS: Record<
     askAgain: 'یک سوال دیگه',
     back: 'بازگشت',
     noProfile:
-      'ابتدا تاریخ، ساعت و شهر تولدت رو در پروفایل ذخیره کن — وحی بر اساس چارت تولدت می‌خونه.',
+      'ابتدا تاریخ، ساعت و شهر تولدت رو در پروفایل ذخیره کن — پاسخ بر اساس چارت تولدت ساخته می‌شود.',
     goProfile: 'برو به پروفایل',
     history: 'سوال‌های اخیر',
     historyEmpty: 'هنوز سوالی نپرسیدی. بالا یکی رو امتحان کن.',
@@ -95,7 +95,7 @@ const ORACLE_LANGS: Record<
       'جلسه ۳۰ دقیقه‌ای خصوصی با جولیا، تمام زمینه پشت این امتیاز را پوشش می‌دهد.',
   },
   ru: {
-    title: 'Оракул',
+    title: 'Задать вопрос',
     subtitle: 'Один вопрос. Один точный ответ.',
     pickModule: 'Выберите область вопроса',
     pickQuestion: 'Выберите вопрос',
@@ -106,7 +106,7 @@ const ORACLE_LANGS: Record<
     askAgain: 'Спросить ещё',
     back: 'Назад',
     noProfile:
-      'Сначала сохраните дату, время и город рождения в Профиле — Оракул читает по вашей натальной карте.',
+      'Сначала сохраните дату, время и город рождения в Профиле — ответ строится по вашей натальной карте.',
     goProfile: 'В профиль',
     history: 'Недавние вопросы',
     historyEmpty: 'Пока вопросов нет. Попробуйте сверху.',
@@ -117,7 +117,7 @@ const ORACLE_LANGS: Record<
       '30-минутная частная сессия с Юлией раскроет весь контекст этой оценки.',
   },
   ar: {
-    title: 'العرّاف',
+    title: 'اطرح سؤالك',
     subtitle: 'سؤال واحد. إجابة واحدة بدرجة.',
     pickModule: 'اختر المجال الذي تريد السؤال عنه',
     pickQuestion: 'اختر سؤالك',
@@ -128,7 +128,7 @@ const ORACLE_LANGS: Record<
     askAgain: 'اسأل مرة أخرى',
     back: 'رجوع',
     noProfile:
-      'احفظ تاريخ ووقت ومدينة ميلادك في الملف الشخصي أولاً — العرّاف يقرأ من خريطة ميلادك.',
+      'احفظ تاريخ ووقت ومدينة ميلادك في الملف الشخصي أولاً — تُبنى الإجابة من خريطة ميلادك.',
     goProfile: 'الذهاب للملف',
     history: 'الأسئلة الأخيرة',
     historyEmpty: 'لا توجد أسئلة بعد. جرّب واحدًا أعلاه.',

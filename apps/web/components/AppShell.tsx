@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BottomNav, VaultPill } from './BottomNav';
 import { clearSession, loadSession, type AuthSession } from '@/lib/auth';
+import { loadTier, type MembershipTier } from '@/lib/membership';
 
 type LangKey = 'en' | 'ru' | 'fa' | 'ar';
 
@@ -37,11 +38,21 @@ export function AppShell({
   fontFamily?: string;
 }) {
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [tier, setTier] = useState<MembershipTier>('free');
   useEffect(() => {
     setSession(loadSession());
-    const onStorage = () => setSession(loadSession());
+    setTier(loadTier());
+    const onStorage = () => {
+      setSession(loadSession());
+      setTier(loadTier());
+    };
+    const onMembership = () => setTier(loadTier());
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    window.addEventListener('planet-life-membership-changed', onMembership);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('planet-life-membership-changed', onMembership);
+    };
   }, []);
   const sessionLabel = session?.identifier
     ? session.method === 'google' || session.method === 'apple'
@@ -52,6 +63,7 @@ export function AppShell({
     clearSession();
     setSession(null);
   };
+  const tierLabel = tier.toUpperCase();
   // Pick best font stack per language. RTL gets dedicated faces; the CSS
   // in globals.css also handles .fc/.fi class overrides and line-height.
   const stack =
@@ -125,14 +137,23 @@ export function AppShell({
           <Link
             href="/upgrade"
             className="fi text-[10px] tracking-[0.18em] px-2.5 py-1 rounded-md uppercase no-underline transition-all hover:opacity-100"
-            title="Free plan — tap to upgrade"
+            title={`${tierLabel} plan — tap to manage`}
             style={{
-              border: '1px solid rgba(251,191,36,0.18)',
-              background: 'rgba(251,191,36,0.04)',
-              color: 'rgba(251,191,36,0.65)',
+              border:
+                tier === 'free'
+                  ? '1px solid rgba(251,191,36,0.18)'
+                  : '1px solid rgba(74,222,128,0.32)',
+              background:
+                tier === 'free'
+                  ? 'rgba(251,191,36,0.04)'
+                  : 'rgba(74,222,128,0.08)',
+              color:
+                tier === 'free'
+                  ? 'rgba(251,191,36,0.65)'
+                  : '#86efac',
             }}
           >
-            Free
+            {tierLabel}
           </Link>
           <div className="flex gap-1">
           {LANG_OPTIONS.map((l) => (

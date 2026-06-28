@@ -3,12 +3,22 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import {
   NatalChart,
-  type ChartPlanet,
   type NatalChartLabels,
 } from '@/components/NatalChart';
+import { ChartDevPanel } from '@/components/ChartDevPanel';
+import { CalculationDetails } from '@/components/CalculationDetails';
+import { GeocodeConfirmDialog } from '@/components/GeocodeConfirmDialog';
+import {
+  type ChartData,
+  type CitySelection,
+  formatDms,
+  isDevEnvironment,
+  validateChartResponse,
+} from '@/lib/chart-types';
 import { BottomNav, VaultPill } from '@/components/BottomNav';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import type { AppLang } from '@/lib/app-settings';
+import { CHART_TRUST_LINE } from '@/lib/chart-defaults';
 import { loadBirthProfile, saveBirthProfile } from '@/lib/birth-profile';
 
 const ZODIAC = [
@@ -27,7 +37,7 @@ const ZODIAC = [
 ];
 
 const PLANET_LABELS: Record<string, Record<string, string>> = {
-  en: { sun:'Sun', moon:'Moon', mercury:'Mercury', venus:'Venus', mars:'Mars', jupiter:'Jupiter', saturn:'Saturn', uranus:'Uranus', neptune:'Neptune', pluto:'Pluto', north_node:'North Node' },
+  en: { sun:'Sun', moon:'Moon', mercury:'Mercury', venus:'Venus', mars:'Mars', jupiter:'Jupiter', saturn:'Saturn', uranus:'Uranus', neptune:'Neptune', pluto:'Pluto', north_node:'Mean Node (☊)' },
   ru: { sun:'Солнце', moon:'Луна', mercury:'Меркурий', venus:'Венера', mars:'Марс', jupiter:'Юпитер', saturn:'Сатурн', uranus:'Уран', neptune:'Нептун', pluto:'Плутон', north_node:'Северный узел' },
   fa: { sun:'خورشید', moon:'ماه', mercury:'عطارد', venus:'زهره', mars:'مریخ', jupiter:'مشتری', saturn:'زحل', uranus:'اورانوس', neptune:'نپتون', pluto:'پلوتون', north_node:'گره شمالی' },
   ar: { sun:'الشمس', moon:'القمر', mercury:'عطارد', venus:'الزهرة', mars:'المريخ', jupiter:'المشتري', saturn:'زحل', uranus:'أورانوس', neptune:'نبتون', pluto:'بلوتو', north_node:'العقدة الشمالية' },
@@ -41,10 +51,10 @@ const ASPECT_LABELS: Record<string, Record<string, string>> = {
 };
 
 const LANGS = {
-  en: { name:'EN', dir:'ltr', tagline:'Astrological Intelligence', yourData:'Your Birth Data', nameLabel:'Name', bdate:'Birth Date', btime:'Birth Time', city:'Birth City', generate:'Generate Chart', save:'Save Profile', saved:'Saved ✓', loading:'Loading...', natalChart:'Natal Chart', element:'Element', planet:'Ruling Planet', stone:'Lucky Stone', color:'Power Color', lifePath:'Life Path Number', dashboard:'Dashboard', calendar:'Calendar', people:'People', profile:'Profile', placeholder:'Type a city name...', searching:'Searching...', noResults:'No cities found', chartEmpty:'Click Generate Chart', elementsTitle:'Elemental balance', strengthsTitle:'Your chart strengths', elFire:'Fire', elEarth:'Earth', elAir:'Air', elWater:'Water' },
-  ru: { name:'RU', dir:'ltr', tagline:'Астрологический анализ', yourData:'Ваши данные рождения', nameLabel:'Имя', bdate:'Дата рождения', btime:'Время рождения', city:'Город рождения', generate:'Создать карту', save:'Сохранить профиль', saved:'Сохранено ✓', loading:'Загрузка...', natalChart:'Натальная карта', element:'Стихия', planet:'Управляющая планета', stone:'Счастливый камень', color:'Цвет силы', lifePath:'Число жизненного пути', dashboard:'Панель', calendar:'Календарь', people:'Люди', profile:'Профиль', placeholder:'Введите город...', searching:'Поиск...', noResults:'Города не найдены', chartEmpty:'Нажмите «Создать карту»', elementsTitle:'Баланс стихий', strengthsTitle:'Сильные стороны карты', elFire:'Огонь', elEarth:'Земля', elAir:'Воздух', elWater:'Вода' },
-  fa: { name:'FA', dir:'rtl', tagline:'هوش نجومی', yourData:'اطلاعات تولد شما', nameLabel:'نام', bdate:'تاریخ تولد', btime:'زمان تولد', city:'شهر تولد', generate:'تولید نقشه', save:'ذخیره پروفایل', saved:'ذخیره شد ✓', loading:'در حال بارگذاری...', natalChart:'نقشه تولدی', element:'عنصر', planet:'سیاره حاکم', stone:'سنگ خوش‌شانسی', color:'رنگ قدرت', lifePath:'عدد مسیر زندگی', dashboard:'داشبورد', calendar:'تقویم', people:'افراد', profile:'پروفایل', placeholder:'نام شهر را بنویسید...', searching:'جستجو...', noResults:'شهری یافت نشد', chartEmpty:'روی «تولید نقشه» کلیک کنید', elementsTitle:'عناصر وجودی', strengthsTitle:'نقاط قوت چارت شما', elFire:'آتش', elEarth:'خاک', elAir:'باد', elWater:'آب' },
-  ar: { name:'AR', dir:'rtl', tagline:'الذكاء الفلكي', yourData:'بيانات ميلادك', nameLabel:'الاسم', bdate:'تاريخ الميلاد', btime:'وقت الميلاد', city:'مدينة الميلاد', generate:'إنشاء الخريطة', save:'حفظ الملف', saved:'تم الحفظ ✓', loading:'جاري التحميل...', natalChart:'خريطة الميلاد', element:'العنصر', planet:'الكوكب الحاكم', stone:'حجر الحظ', color:'لون القوة', lifePath:'رقم مسار الحياة', dashboard:'لوحة التحكم', calendar:'التقويم', people:'الأشخاص', profile:'الملف', placeholder:'اكتب اسم مدينة...', searching:'جاري البحث...', noResults:'لا توجد مدن', chartEmpty:'انقر «إنشاء الخريطة»', elementsTitle:'التوازن العنصري', strengthsTitle:'نقاط قوة خريطتك', elFire:'نار', elEarth:'تراب', elAir:'هواء', elWater:'ماء' },
+  en: { name:'EN', dir:'ltr', tagline:'Astrological Intelligence', yourData:'Your Birth Data', nameLabel:'Name', bdate:'Birth Date', btime:'Birth Time', city:'Birth City', generate:'Generate Chart', save:'Save Profile', saved:'Saved ✓', loading:'Loading...', natalChart:'Natal Chart', element:'Element', planet:'Ruling Planet', stone:'Lucky Stone', color:'Power Color', lifePath:'Life Path Number', dashboard:'Dashboard', calendar:'Calendar', people:'People', profile:'Profile', placeholder:'Type a city name...', searching:'Searching...', noResults:'No cities found', chartEmpty:'Click Generate Chart', elementsTitle:'Elemental balance', strengthsTitle:'Your chart strengths', elFire:'Fire', elEarth:'Earth', elAir:'Air', elWater:'Water', wealthPotential:'Wealth Potential', businessTiming:'Business Timing', decisionStyle:'Decision Style', comingSoon:'Coming soon', chartAccuracy:'Chart accuracy depends on verified birth timezone, exact city coordinates, and Swiss Ephemeris calculation.', verifyTitle:'Chart Verification', verifySubtitle:'Professional validation requires exact birth timezone, city coordinates, Ascendant, MC, house cusps, and aspect orbs.', vfTimezone:'Birth timezone', vfUtcTime:'UTC birth time', vfCoords:'Birth city coordinates', vfHouseSystem:'House system', vfAscendant:'Ascendant', vfMc:'Midheaven / MC', vfHouseCusps:'House cusps', vfPlanetPos:'Planet positions', vfAspectOrbs:'Aspect orbs', vfEngine:'Calculation engine', vfNotAvailable:'Not available from current chart data', vfRequiresEngine:'Requires verified calculation engine output', vfNotConfirmed:'Not confirmed in frontend data', badgeVerified:'Verified', badgeMissing:'Missing', badgeEngine:'Requires engine output', badgeNotConfirmed:'Not confirmed' },
+  ru: { name:'RU', dir:'ltr', tagline:'Астрологический анализ', yourData:'Ваши данные рождения', nameLabel:'Имя', bdate:'Дата рождения', btime:'Время рождения', city:'Город рождения', generate:'Создать карту', save:'Сохранить профиль', saved:'Сохранено ✓', loading:'Загрузка...', natalChart:'Натальная карта', element:'Стихия', planet:'Управляющая планета', stone:'Счастливый камень', color:'Цвет силы', lifePath:'Число жизненного пути', dashboard:'Панель', calendar:'Календарь', people:'Люди', profile:'Профиль', placeholder:'Введите город...', searching:'Поиск...', noResults:'Города не найдены', chartEmpty:'Нажмите «Создать карту»', elementsTitle:'Баланс стихий', strengthsTitle:'Сильные стороны карты', elFire:'Огонь', elEarth:'Земля', elAir:'Воздух', elWater:'Вода', wealthPotential:'Потенциал богатства', businessTiming:'Тайминг бизнеса', decisionStyle:'Стиль решений', comingSoon:'Скоро', chartAccuracy:'Точность карты зависит от подтверждённого часового пояса рождения, точных координат города и расчёта по эфемеридам Swiss Ephemeris.', verifyTitle:'Проверка карты', verifySubtitle:'Профессиональная проверка требует точного часового пояса рождения, координат города, Асцендента, MC, куспидов домов и орбисов аспектов.', vfTimezone:'Часовой пояс рождения', vfUtcTime:'Время рождения по UTC', vfCoords:'Координаты города рождения', vfHouseSystem:'Система домов', vfAscendant:'Асцендент', vfMc:'Середина неба / MC', vfHouseCusps:'Куспиды домов', vfPlanetPos:'Положения планет', vfAspectOrbs:'Орбисы аспектов', vfEngine:'Расчётный движок', vfNotAvailable:'Недоступно из текущих данных карты', vfRequiresEngine:'Требуется вывод проверенного расчётного движка', vfNotConfirmed:'Не подтверждено в данных фронтенда', badgeVerified:'Подтверждено', badgeMissing:'Отсутствует', badgeEngine:'Нужен вывод движка', badgeNotConfirmed:'Не подтверждено' },
+  fa: { name:'FA', dir:'rtl', tagline:'هوش نجومی', yourData:'اطلاعات تولد شما', nameLabel:'نام', bdate:'تاریخ تولد', btime:'زمان تولد', city:'شهر تولد', generate:'تولید نقشه', save:'ذخیره پروفایل', saved:'ذخیره شد ✓', loading:'در حال بارگذاری...', natalChart:'نقشه تولد', element:'عنصر', planet:'سیاره حاکم', stone:'سنگ خوش‌شانسی', color:'رنگ قدرت', lifePath:'عدد مسیر زندگی', dashboard:'داشبورد', calendar:'تقویم', people:'افراد', profile:'پروفایل', placeholder:'نام شهر را بنویسید...', searching:'جستجو...', noResults:'شهری یافت نشد', chartEmpty:'روی «تولید نقشه» کلیک کنید', elementsTitle:'عناصر وجودی', strengthsTitle:'نقاط قوت چارت شما', elFire:'آتش', elEarth:'خاک', elAir:'باد', elWater:'آب', wealthPotential:'پتانسیل ثروت', businessTiming:'زمان‌بندی کسب‌وکار', decisionStyle:'سبک تصمیم‌گیری', comingSoon:'به‌زودی', chartAccuracy:'دقت نقشه به منطقه زمانی تأییدشده تولد، مختصات دقیق شهر و محاسبه‌ی Swiss Ephemeris بستگی دارد.', verifyTitle:'تأیید نقشه', verifySubtitle:'اعتبارسنجی حرفه‌ای به منطقه زمانی دقیق تولد، مختصات شهر، طالع، وسط‌السماء، نقاط ابتدای خانه‌ها و اوربِ جنبه‌ها نیاز دارد.', vfTimezone:'منطقه زمانی تولد', vfUtcTime:'زمان تولد به UTC', vfCoords:'مختصات شهر تولد', vfHouseSystem:'سیستم خانه‌ها', vfAscendant:'طالع (آسندانت)', vfMc:'وسط‌السماء / MC', vfHouseCusps:'ابتدای خانه‌ها', vfPlanetPos:'موقعیت سیارات', vfAspectOrbs:'اوربِ جنبه‌ها', vfEngine:'موتور محاسبه', vfNotAvailable:'از داده‌های فعلی نقشه در دسترس نیست', vfRequiresEngine:'نیازمند خروجی موتور محاسبه تأییدشده', vfNotConfirmed:'در داده‌های فرانت‌اند تأیید نشده', badgeVerified:'تأییدشده', badgeMissing:'موجود نیست', badgeEngine:'نیازمند خروجی موتور', badgeNotConfirmed:'تأیید نشده' },
+  ar: { name:'AR', dir:'rtl', tagline:'الذكاء الفلكي', yourData:'بيانات ميلادك', nameLabel:'الاسم', bdate:'تاريخ الميلاد', btime:'وقت الميلاد', city:'مدينة الميلاد', generate:'إنشاء الخريطة', save:'حفظ الملف', saved:'تم الحفظ ✓', loading:'جاري التحميل...', natalChart:'خريطة الميلاد', element:'العنصر', planet:'الكوكب الحاكم', stone:'حجر الحظ', color:'لون القوة', lifePath:'رقم مسار الحياة', dashboard:'لوحة التحكم', calendar:'التقويم', people:'الأشخاص', profile:'الملف', placeholder:'اكتب اسم مدينة...', searching:'جاري البحث...', noResults:'لا توجد مدن', chartEmpty:'انقر «إنشاء الخريطة»', elementsTitle:'التوازن العنصري', strengthsTitle:'نقاط قوة خريطتك', elFire:'نار', elEarth:'تراب', elAir:'هواء', elWater:'ماء', wealthPotential:'إمكانات الثروة', businessTiming:'توقيت الأعمال', decisionStyle:'أسلوب اتخاذ القرار', comingSoon:'قريباً', chartAccuracy:'تعتمد دقة الخريطة على المنطقة الزمنية المؤكدة للميلاد، والإحداثيات الدقيقة للمدينة، وحساب Swiss Ephemeris.', verifyTitle:'التحقق من الخريطة', verifySubtitle:'يتطلب التحقق المهني المنطقة الزمنية الدقيقة للميلاد، وإحداثيات المدينة، والطالع، ووسط السماء، وبدايات البيوت، وأوربات الجوانب.', vfTimezone:'المنطقة الزمنية للميلاد', vfUtcTime:'وقت الميلاد بتوقيت UTC', vfCoords:'إحداثيات مدينة الميلاد', vfHouseSystem:'نظام البيوت', vfAscendant:'الطالع', vfMc:'وسط السماء / MC', vfHouseCusps:'بدايات البيوت', vfPlanetPos:'مواقع الكواكب', vfAspectOrbs:'أوربات الجوانب', vfEngine:'محرك الحساب', vfNotAvailable:'غير متوفر من بيانات الخريطة الحالية', vfRequiresEngine:'يتطلب مخرجات محرك حساب موثّق', vfNotConfirmed:'غير مؤكد في بيانات الواجهة', badgeVerified:'مؤكد', badgeMissing:'مفقود', badgeEngine:'يتطلب مخرجات المحرك', badgeNotConfirmed:'غير مؤكد' },
 };
 
 const ZODIAC_TRANS: Record<string, Record<string, string>> = {
@@ -61,7 +71,7 @@ const LIFE_PATH: Record<number, Record<string, string>> = {
   5: { en:'The Explorer — Free-spirited, adventurous, versatile. Change fuels your soul.', ru:'Путешественник — Свободный, предприимчивый, разносторонний.', fa:'کاوشگر — آزاداندیش، ماجراجو، چندوجهی.', ar:'المستكشف — حر الروح، مغامر، متعدد المواهب.' },
   6: { en:'The Nurturer — Caring, responsible, harmonious. You heal and protect.', ru:'Опекун — Заботливый, ответственный, гармоничный.', fa:'پرورش‌دهنده — مراقب، مسئول، هماهنگ.', ar:'الراعي — رعاية، مسؤول، متناسق.' },
   7: { en:'The Seeker — Analytical, intuitive, spiritual. You seek deeper truth.', ru:'Искатель — Аналитический, интуитивный, духовный.', fa:'جستجوگر — تحلیلگر، شهودی، معنوی.', ar:'الباحث — تحليلي، حدسي، روحاني.' },
-  8: { en:'The Achiever — Powerful, ambitious, material mastery. Built for success.', ru:'Достигатель — Мощный, амбициозный, материальное мастерство.', fa:'دستاوردگر — قدرتمند، جاه‌طلب، تسلط مادی.', ar:'المنجز — قوي، طموح، إتقان مادي.' },
+  8: { en:'The Achiever — Powerful, ambitious, material mastery. Built for success.', ru:'Достигатель — Мощный, амбициозный, материальное мастерство.', fa:'پیشرو — قدرتمند، بلندپرواز، مسلط بر امور مادی. ساخته‌شده برای موفقیت.', ar:'المنجز — قوي، طموح، إتقان مادي.' },
   9: { en:'The Humanitarian — Compassionate, wise, universal. You serve the greater good.', ru:'Гуманист — Сострадательный, мудрый, универсальный.', fa:'بشردوست — دلسوز، حکیم، جهانی.', ar:'الإنساني — رحيم، حكيم، عالمي.' },
   11: { en:'Master Number 11 — Highly intuitive visionary. Spiritual illuminator.', ru:'Мастер-число 11 — Высокоинтуитивный провидец.', fa:'عدد استاد ۱۱ — بینش‌گر بسیار شهودی.', ar:'رقم الماستر 11 — رؤيوي بديهي للغاية.' },
   22: { en:'Master Number 22 — The Master Builder. Turns dreams into reality.', ru:'Мастер-число 22 — Великий Строитель.', fa:'عدد استاد ۲۲ — سازنده بزرگ.', ar:'رقم الماستر 22 — البنّاء العظيم.' },
@@ -115,14 +125,15 @@ export default function Profile() {
   const [lang, setLang] = useState<keyof typeof LANGS>('en');
   const [birthDate, setBirthDate] = useState('1990-06-15');
   const [birthTime, setBirthTime] = useState('14:30');
-  const [location, setLocation] = useState('New York');
+  const [location, setLocation] = useState('');
   const [name, setName] = useState('');
-  const [chartPlanets, setChartPlanets] = useState<Record<string, ChartPlanet> | null>(null);
-  const [ascendant, setAscendant] = useState(0);
+  const [chartData, setChartData] = useState<ChartData | null>(null);
+  const [pendingGeocodeChart, setPendingGeocodeChart] = useState<ChartData | null>(null);
+  const [selectedCity, setSelectedCity] = useState<CitySelection | null>(null);
   const [chartError, setChartError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [citySearch, setCitySearch] = useState('New York');
-  const [cities, setCities] = useState<any[]>([]);
+  const [citySearch, setCitySearch] = useState('');
+  const [cities, setCities] = useState<CitySelection[]>([]);
   const [showCities, setShowCities] = useState(false);
   const [cityLoading, setCityLoading] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
@@ -186,6 +197,50 @@ export default function Profile() {
     [lang, t]
   );
 
+  const hasChart = !!chartData && Object.keys(chartData.planets).length > 0;
+  const planetCount = chartData ? Object.keys(chartData.planets).length : 0;
+  const ascValue =
+    hasChart && Number.isFinite(chartData!.ascendant)
+      ? formatDms(chartData!.ascendant)
+      : null;
+  const mcValue =
+    hasChart && Number.isFinite(chartData!.midheaven)
+      ? formatDms(chartData!.midheaven)
+      : null;
+  const coordsValue =
+    hasChart && chartData!.latitude && chartData!.longitude
+      ? `${chartData!.latitude.toFixed(4)}, ${chartData!.longitude.toFixed(4)}`
+      : selectedCity
+        ? `${selectedCity.lat.toFixed(4)}, ${selectedCity.lon.toFixed(4)}`
+        : null;
+  const tzValue = hasChart && chartData!.timezone ? chartData!.timezone : null;
+  const utcValue = hasChart && chartData!.utc_datetime ? chartData!.utc_datetime : null;
+  const houseCuspsValue =
+    hasChart && chartData!.houses.length === 12
+      ? `${chartData!.houses.length} cusps (Placidus)`
+      : null;
+
+  type VStatus = 'verified' | 'missing' | 'engine' | 'notConfirmed';
+  const verifyRows: { label: string; value: string; status: VStatus }[] = [
+    { label: t.vfTimezone, value: tzValue ?? t.vfNotAvailable, status: tzValue ? 'verified' : 'missing' },
+    { label: t.vfUtcTime, value: utcValue ?? t.vfNotAvailable, status: utcValue ? 'verified' : 'missing' },
+    { label: t.vfCoords, value: coordsValue ?? t.vfNotAvailable, status: coordsValue ? 'verified' : 'missing' },
+    { label: t.vfHouseSystem, value: hasChart ? chartData!.house_system : t.vfNotAvailable, status: hasChart ? 'verified' : 'missing' },
+    { label: t.vfAscendant, value: ascValue ?? t.vfNotAvailable, status: ascValue ? 'verified' : 'missing' },
+    { label: t.vfMc, value: mcValue ?? t.vfNotAvailable, status: mcValue ? 'verified' : 'missing' },
+    { label: t.vfHouseCusps, value: houseCuspsValue ?? t.vfRequiresEngine, status: houseCuspsValue ? 'verified' : 'engine' },
+    { label: t.vfPlanetPos, value: hasChart ? String(planetCount) : t.vfNotAvailable, status: hasChart ? 'verified' : 'missing' },
+    { label: t.vfAspectOrbs, value: t.vfRequiresEngine, status: 'engine' },
+    { label: t.vfEngine, value: hasChart ? 'Swiss Ephemeris (Moshier)' : t.vfNotConfirmed, status: hasChart ? 'verified' : 'notConfirmed' },
+  ];
+
+  const VERIFY_BADGE: Record<VStatus, { text: string; color: string; bg: string; border: string }> = {
+    verified: { text: t.badgeVerified, color: '#86efac', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.4)' },
+    missing: { text: t.badgeMissing, color: 'rgba(255,255,255,0.55)', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.14)' },
+    engine: { text: t.badgeEngine, color: '#fbbf24', bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.32)' },
+    notConfirmed: { text: t.badgeNotConfirmed, color: '#cbd5e1', bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.32)' },
+  };
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if(cityRef.current&&!cityRef.current.contains(e.target as Node))setShowCities(false);
@@ -200,55 +255,74 @@ export default function Profile() {
     setCityLoading(true);
     debounceRef.current = setTimeout(async()=>{
       try{
-        const res=await fetch(`/api/cities?q=${encodeURIComponent(q)}`);
+        const res=await fetch(`/api/cities?q=${encodeURIComponent(q)}&lang=${lang}`);
         const data=await res.json();
         setCities(data);
       }catch{setCities([]);}
       setCityLoading(false);
     },300);
-  },[]);
+  },[lang]);
 
-  const selectCity = (city: any) => {
+  const selectCity = (city: CitySelection) => {
+    if (!Number.isFinite(city.lat) || !Number.isFinite(city.lon)) {
+      setChartError('Selected city is missing coordinates. Pick another result or type coordinates manually.');
+      return;
+    }
     setCitySearch(city.short);
     setLocation(city.short);
+    setSelectedCity(city);
     setShowCities(false);
   };
 
   const generateChart = async () => {
     setLoading(true);
     setChartError('');
-    setChartPlanets(null);
+    setChartData(null);
+
+    if (selectedCity && (!Number.isFinite(selectedCity.lat) || !Number.isFinite(selectedCity.lon))) {
+      setChartError('City selected from list must include latitude and longitude. Please pick the city again.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const apiBase =
         process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
+      const body: Record<string, unknown> = {
+        birth_date: birthDate,
+        birth_time: birthTime,
+        location: location,
+        action_type: 'business_launch',
+        target_date: new Date().toISOString().split('T')[0],
+        house_system: 'placidus',
+        zodiac: 'tropical',
+        node_type: 'mean',
+      };
+      if (selectedCity) {
+        body.latitude = selectedCity.lat;
+        body.longitude = selectedCity.lon;
+        body.country = selectedCity.country ?? null;
+      }
       const res = await fetch(`${apiBase}/api/business/chart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          birth_date: birthDate,
-          birth_time: birthTime,
-          location: location,
-          action_type: 'business_launch',
-          target_date: new Date().toISOString().split('T')[0],
-        }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (data.detail) {
         setChartError(typeof data.detail === 'string' ? data.detail : 'Chart request failed');
-      } else if (data.planets) {
-        const parsed: Record<string, ChartPlanet> = {};
-        Object.entries(data.planets).forEach(([name, info]) => {
-          const p = info as ChartPlanet;
-          parsed[name] = {
-            longitude: p.longitude,
-            sign: p.sign,
-            degree: p.degree,
-            house: p.house,
-            retrograde: Boolean(p.retrograde),
-          };
-        });
-        setChartPlanets(parsed);
-        setAscendant(typeof data.ascendant === 'number' ? data.ascendant : 0);
+      } else {
+        const result = validateChartResponse(data, location);
+        if (result.ok) {
+          if (selectedCity?.country) result.data.country = selectedCity.country;
+          if (result.data.coordinate_source === 'geocoded_fallback') {
+            setPendingGeocodeChart(result.data);
+          } else {
+            setChartData(result.data);
+          }
+        } else {
+          setChartError(`Chart data incomplete: ${result.errors.join(' ')}`);
+        }
       }
     } catch {
       setChartError('Cannot connect to API. Start the backend on port 8000.');
@@ -257,11 +331,10 @@ export default function Profile() {
   };
 
   return (
-    <div style={{direction:t.dir as any, fontFamily:(lang==='fa'||lang==='ar')?'Vazirmatn,sans-serif':'Inter,sans-serif'}} className="min-h-screen bg-[#070B14] text-white pl-20">
+    <div style={{direction:t.dir as any, fontFamily:lang==='ar'?"'Cairo','Vazirmatn',sans-serif":lang==='fa'?"'Vazirmatn',sans-serif":'Inter,sans-serif'}} className="min-h-screen bg-[#070B14] text-white pl-20">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
-        @import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
-        .fc{font-family:'Cinzel',serif}.fi{font-family:'Inter',sans-serif}
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&family=Vazirmatn:wght@300;400;500;600;700&family=Cairo:wght@300;400;600;700&display=swap');
+        .fc{font-family:'Cinzel','Vazirmatn','Cairo',serif}.fi{font-family:'Inter','Vazirmatn','Cairo',sans-serif}
         input,select{background:rgba(255,255,255,0.04)!important;border:1px solid rgba(255,255,255,0.08)!important;color:white!important;border-radius:10px;color-scheme:dark}
         input:focus,select:focus{border-color:rgba(251,191,36,0.35)!important;outline:none!important}
         select option{background:#0d1220!important;color:#ffffff!important}
@@ -307,10 +380,10 @@ export default function Profile() {
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-4 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="max-w-6xl mx-auto px-4 py-4 pb-28">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
 
-          <div className="rounded-2xl p-4" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)'}}>
+          <div className="rounded-2xl p-4 lg:col-span-1" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)'}}>
             <div className="fc text-sm tracking-widest mb-3" style={{color:'#fbbf24'}}>{t.yourData}</div>
             <div className="space-y-2.5">
               <div>
@@ -333,12 +406,27 @@ export default function Profile() {
               </div>
               <div>
                 <label className="fi block text-[11px] mb-1" style={{color:'rgba(255,255,255,0.35)'}}>{t.btime}</label>
-                <input type="time" value={birthTime} onChange={e=>setBirthTime(e.target.value)} className="fi w-full px-3 py-2 text-sm"/>
+                <div className="grid grid-cols-2 gap-1" dir="ltr">
+                  <select
+                    aria-label="hour"
+                    value={(birthTime.split(':')[0] ?? '14').padStart(2,'0')}
+                    onChange={e=>setBirthTime(`${e.target.value}:${(birthTime.split(':')[1] ?? '30').padStart(2,'0')}`)}
+                    className="fi px-2 py-2 text-sm">
+                    {Array.from({length:24},(_,i)=>String(i).padStart(2,'0')).map(h=><option key={h} value={h}>{h}</option>)}
+                  </select>
+                  <select
+                    aria-label="minute"
+                    value={(birthTime.split(':')[1] ?? '30').padStart(2,'0')}
+                    onChange={e=>setBirthTime(`${(birthTime.split(':')[0] ?? '14').padStart(2,'0')}:${e.target.value}`)}
+                    className="fi px-2 py-2 text-sm">
+                    {Array.from({length:60},(_,i)=>String(i).padStart(2,'0')).map(m=><option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
               </div>
               <div ref={cityRef} className="relative">
                 <label className="fi block text-[11px] mb-1" style={{color:'rgba(255,255,255,0.35)'}}>{t.city}</label>
                 <input type="text" value={citySearch} placeholder={t.placeholder}
-                  onChange={e=>{setCitySearch(e.target.value);setLocation(e.target.value);searchCities(e.target.value);setShowCities(true);}}
+                  onChange={e=>{setCitySearch(e.target.value);setLocation(e.target.value);setSelectedCity(null);searchCities(e.target.value);setShowCities(true);}}
                   onFocus={()=>citySearch.length>=2&&setShowCities(true)}
                   className="fi w-full px-3 py-2 text-sm"/>
                 {showCities&&(cityLoading||cities.length>0)&&(
@@ -374,7 +462,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="rounded-2xl p-6 flex flex-col items-center" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)'}}>
+          <div className="rounded-2xl p-6 flex flex-col items-center lg:col-span-2" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)'}}>
             <div className="fc text-sm tracking-widest mb-4" style={{color:'#fbbf24'}}>{t.natalChart}</div>
             {loading ? (
                 <div className="w-[320px] min-h-[320px] flex items-center justify-center">
@@ -382,15 +470,80 @@ export default function Profile() {
                 </div>
               ) : (
                 <NatalChart
-                  planets={chartPlanets}
-                  ascendant={ascendant}
+                  chart={chartData}
                   labels={chartLabels}
-                  empty={!chartPlanets}
+                  empty={!chartData}
                 />
               )}
+            {isDevEnvironment() && chartData && (
+              <ChartDevPanel chart={chartData} />
+            )}
+            {chartData && <CalculationDetails chart={chartData} />}
+            {chartData && (
+              <p
+                className="fi w-full mt-2 text-[11px] text-center leading-relaxed px-2"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {CHART_TRUST_LINE}
+              </p>
+            )}
+            {pendingGeocodeChart && !chartData && (
+              <div
+                className="w-full mt-3 rounded-xl px-3 py-2.5 flex items-start gap-2"
+                style={{ background: 'rgba(251,146,60,0.1)', border: '1px solid rgba(251,146,60,0.35)' }}
+              >
+                <span className="fi text-sm leading-none mt-0.5" style={{ color: '#fb923c' }}>⚠</span>
+                <span className="fi text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                  Geocoded location awaiting your confirmation in the dialog.
+                </span>
+              </div>
+            )}
+            {chartData && chartData.coordinate_source !== 'geocoded_fallback' && (
+              <div className="fi w-full mt-2 text-[11px] text-center" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                {chartData.latitude.toFixed(4)}, {chartData.longitude.toFixed(4)} · {chartData.timezone}
+                {chartData.coordinate_source === 'selected_city_coordinates' ? ' · verified city coordinates' : ''}
+              </div>
+            )}
             {chartError && (
               <p className="fi mt-3 text-xs text-center px-2" style={{color:'#fca5a5'}}>{chartError}</p>
             )}
+            <div
+              className="w-full mt-5 rounded-xl px-3 py-2.5 flex items-start gap-2"
+              style={{background:'rgba(251,191,36,0.06)',border:'1px solid rgba(251,191,36,0.18)'}}
+            >
+              <span className="fi text-sm leading-none mt-0.5" style={{color:'#fbbf24'}}>ⓘ</span>
+              <span className="fi text-[11px] leading-relaxed" style={{color:'rgba(255,255,255,0.55)'}}>{t.chartAccuracy}</span>
+            </div>
+            <div
+              className="w-full mt-4 rounded-xl p-4"
+              style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(251,191,36,0.22)' }}
+            >
+              <div className="fc text-sm tracking-widest" style={{ color: '#fbbf24' }}>{t.verifyTitle}</div>
+              <div className="fi text-[11px] leading-relaxed mt-1 mb-3" style={{ color: 'rgba(255,255,255,0.45)' }}>{t.verifySubtitle}</div>
+              <div className="flex flex-col gap-1.5">
+                {verifyRows.map((row) => {
+                  const b = VERIFY_BADGE[row.status];
+                  return (
+                    <div
+                      key={row.label}
+                      className="flex items-center justify-between gap-3 rounded-lg px-3 py-2"
+                      style={{ background: 'rgba(255,255,255,0.03)' }}
+                    >
+                      <div className="min-w-0">
+                        <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.82)' }}>{row.label}</div>
+                        <div className="fi text-[11px] leading-snug" style={{ color: 'rgba(255,255,255,0.45)' }}>{row.value}</div>
+                      </div>
+                      <span
+                        className="fi text-[10px] px-2 py-1 rounded-md whitespace-nowrap shrink-0"
+                        style={{ color: b.color, background: b.bg, border: `1px solid ${b.border}` }}
+                      >
+                        {b.text}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -407,8 +560,8 @@ export default function Profile() {
                   {[
                     {label:t.element,value:tr(zodiac.element,lang)},
                     {label:t.planet,value:zodiac.planet},
-                    {label:t.stone,value:tr(zodiac.stone,lang)},
-                    {label:t.color,value:<span style={{color:zodiac.color}}>◉ {tr(zodiac.colorName,lang)}</span>},
+                    {label:t.wealthPotential,value:<span style={{color:'rgba(255,255,255,0.4)'}}>{t.comingSoon}</span>},
+                    {label:t.businessTiming,value:<span style={{color:'rgba(255,255,255,0.4)'}}>{t.comingSoon}</span>},
                   ].map(item=>(
                     <div key={item.label} className="rounded-xl p-3" style={{background:'rgba(255,255,255,0.03)'}}>
                       <div className="fi text-[10px] mb-1" style={{color:'rgba(255,255,255,0.3)'}}>{item.label}</div>
@@ -420,10 +573,10 @@ export default function Profile() {
             )}
             <div className="rounded-2xl p-5" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(251,191,36,0.1)'}}>
               <div className="flex items-center gap-3 mb-2">
-                <div className="fc text-3xl" style={{color:'#fbbf24'}}>{lifePath}</div>
-                <div className="fi text-xs" style={{color:'rgba(255,255,255,0.35)'}}>{t.lifePath}</div>
+                <div className="fc text-3xl" style={{color:'rgba(255,255,255,0.25)'}}>—</div>
+                <div className="fi text-xs" style={{color:'rgba(255,255,255,0.35)'}}>{t.decisionStyle}</div>
               </div>
-              <div className="fi text-xs leading-relaxed" style={{color:'rgba(255,255,255,0.55)'}}>{LIFE_PATH[lifePath]?.[lang]||LIFE_PATH[lifePath]?.en||''}</div>
+              <div className="fi text-xs leading-relaxed" style={{color:'rgba(255,255,255,0.4)'}}>{t.comingSoon}</div>
             </div>
           </div>
 
@@ -438,6 +591,19 @@ export default function Profile() {
         >
           {t.saved}
         </div>
+      )}
+      {pendingGeocodeChart && (
+        <GeocodeConfirmDialog
+          chart={pendingGeocodeChart}
+          onConfirm={() => {
+            setChartData(pendingGeocodeChart);
+            setPendingGeocodeChart(null);
+          }}
+          onReject={() => {
+            setPendingGeocodeChart(null);
+            setChartError('Geocoded location not confirmed. Pick a city from the dropdown for verified coordinates.');
+          }}
+        />
       )}
       <BottomNav labels={HOME_LANGS[(lang as AppLang) || 'en'].nav} />
     </div>

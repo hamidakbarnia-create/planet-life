@@ -12,14 +12,14 @@ import {
   type ElementBalance,
   type ElementKey,
 } from '@/lib/chart-insights';
+import {
+  type ChartData,
+  type ChartPlanet,
+  displayLongitude,
+  normalizeDegrees,
+} from '@/lib/chart-types';
 
-export interface ChartPlanet {
-  longitude: number;
-  sign: number;
-  degree: number;
-  house: number;
-  retrograde: boolean;
-}
+export type { ChartPlanet };
 
 const PLANET_ORDER = [
   'sun',
@@ -81,16 +81,12 @@ const SIGN_COLORS = [
 
 export type NatalChartLabels = {
   empty: string;
-  /** "Existential elements" / "Elemental balance" section title */
   elementsTitle: string;
-  /** "Your chart strengths" section title */
   strengthsTitle: string;
-  /** Localised name for each element */
   elements: Record<ElementKey, string>;
   planetNames: Record<string, string>;
   signNames: Record<string, string>;
   aspectLegend: Record<string, string>;
-  /** Language code used to pick the appropriate strength rule text */
   lang: ChartLang;
 };
 
@@ -107,8 +103,10 @@ function toXY(deg: number, radius: number) {
   return { x: CX + radius * Math.cos(rad), y: CY + radius * Math.sin(rad) };
 }
 
-function displayLongitude(lon: number, ascendant: number) {
-  return lon - ascendant + 180;
+function midDisplayAngle(a: number, b: number): number {
+  let diff = b - a;
+  if (diff <= 0) diff += 360;
+  return normalizeDegrees(a + diff / 2);
 }
 
 function computeLayouts(
@@ -146,20 +144,32 @@ function computeLayouts(
 }
 
 function NatalChartWheel({
-  planets,
-  ascendant,
+  chart,
   aspects,
   layouts,
 }: {
-  planets: Record<string, ChartPlanet>;
-  ascendant: number;
+  chart: ChartData;
   aspects: NatalAspect[];
   layouts: Record<string, PlanetLayout>;
 }) {
+  const { planets, ascendant, midheaven, houses } = chart;
   const planetNames = PLANET_ORDER.filter((n) => planets[n]);
+  const dsc = normalizeDegrees(ascendant + 180);
+  const ic = normalizeDegrees(midheaven + 180);
+  const ascDeg = displayLongitude(ascendant, ascendant);
+  const dscDeg = displayLongitude(dsc, ascendant);
+  const mcDeg = displayLongitude(midheaven, ascendant);
+  const icDeg = displayLongitude(ic, ascendant);
 
   return (
-    <svg width="320" height="320" viewBox="0 0 320 320" style={{ maxWidth: '100%' }}>
+    <svg
+      data-testid="chart-wheel"
+      width="320"
+      height="320"
+      viewBox="0 0 320 320"
+      className="w-[320px] md:w-[420px] h-auto"
+      style={{ maxWidth: '100%' }}
+    >
       <circle
         cx={CX}
         cy={CY}
@@ -186,19 +196,19 @@ function NatalChartWheel({
       />
 
       {Array.from({ length: 12 }, (_, i) => {
-        const startDeg = i * 30 - ascendant + 180;
-        const midDeg = startDeg + 15;
+        const startDeg = displayLongitude(i * 30, ascendant);
+        const midDeg = displayLongitude(i * 30 + 15, ascendant);
         const p1 = toXY(startDeg, R_OUTER);
         const p2 = toXY(startDeg, R_MID);
         const ps = toXY(midDeg, R_OUTER + 14);
         return (
-          <g key={i}>
+          <g key={`sign-${i}`}>
             <line
               x1={p1.x}
               y1={p1.y}
               x2={p2.x}
               y2={p2.y}
-              stroke="rgba(251,191,36,0.22)"
+              stroke="rgba(251,191,36,0.18)"
               strokeWidth="0.5"
             />
             <text
@@ -215,41 +225,128 @@ function NatalChartWheel({
         );
       })}
 
+      {houses.length === 12 &&
+        houses.map((cusp, i) => {
+          const deg = displayLongitude(cusp, ascendant);
+          const p1 = toXY(deg, R_OUTER);
+          const p2 = toXY(deg, R_INNER);
+          const next = houses[(i + 1) % 12];
+          const labelDeg = midDisplayAngle(
+            displayLongitude(cusp, ascendant),
+            displayLongitude(next, ascendant)
+          );
+          const label = toXY(labelDeg, R_MID - 6);
+          return (
+            <g key={`house-${i + 1}`} data-testid={`house-cusp-${i + 1}`}>
+              <line
+                x1={p1.x}
+                y1={p1.y}
+                x2={p2.x}
+                y2={p2.y}
+                stroke="rgba(251,191,36,0.42)"
+                strokeWidth="1"
+              />
+              <text
+                x={label.x}
+                y={label.y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="7"
+                fill="rgba(255,255,255,0.55)"
+              >
+                {i + 1}
+              </text>
+            </g>
+          );
+        })}
+
       {Number.isFinite(ascendant) && (
-        <g>
+        <g data-testid="axis-asc-dsc">
           <line
-            x1={toXY(180, R_OUTER + 4).x}
-            y1={toXY(180, R_OUTER + 4).y}
-            x2={toXY(180, R_INNER).x}
-            y2={toXY(180, R_INNER).y}
-            stroke="rgba(255,255,255,0.45)"
-            strokeWidth="1.2"
+            x1={toXY(ascDeg, R_OUTER + 4).x}
+            y1={toXY(ascDeg, R_OUTER + 4).y}
+            x2={toXY(ascDeg, R_INNER).x}
+            y2={toXY(ascDeg, R_INNER).y}
+            stroke="rgba(255,255,255,0.55)"
+            strokeWidth="1.4"
           />
           <line
-            x1={toXY(0, R_OUTER + 4).x}
-            y1={toXY(0, R_OUTER + 4).y}
-            x2={toXY(0, R_INNER).x}
-            y2={toXY(0, R_INNER).y}
-            stroke="rgba(255,255,255,0.45)"
-            strokeWidth="1.2"
+            x1={toXY(dscDeg, R_OUTER + 4).x}
+            y1={toXY(dscDeg, R_OUTER + 4).y}
+            x2={toXY(dscDeg, R_INNER).x}
+            y2={toXY(dscDeg, R_INNER).y}
+            stroke="rgba(255,255,255,0.55)"
+            strokeWidth="1.4"
           />
           <text
-            x={toXY(183, R_INNER - 10).x}
-            y={toXY(183, R_INNER - 10).y}
+            data-testid="axis-ac"
+            x={toXY(ascDeg, R_INNER - 10).x}
+            y={toXY(ascDeg, R_INNER - 10).y}
             fontSize="8"
-            fill="rgba(255,255,255,0.65)"
+            fill="rgba(255,255,255,0.75)"
             textAnchor="middle"
           >
             AC
           </text>
           <text
-            x={toXY(3, R_INNER - 10).x}
-            y={toXY(3, R_INNER - 10).y}
+            data-testid="axis-dc"
+            x={toXY(dscDeg, R_INNER - 10).x}
+            y={toXY(dscDeg, R_INNER - 10).y}
             fontSize="8"
-            fill="rgba(255,255,255,0.65)"
+            fill="rgba(255,255,255,0.75)"
             textAnchor="middle"
           >
             DC
+          </text>
+        </g>
+      )}
+
+      {Number.isFinite(midheaven) && (
+        <g data-testid="axis-mc-ic">
+          <line
+            x1={toXY(mcDeg, R_OUTER + 4).x}
+            y1={toXY(mcDeg, R_OUTER + 4).y}
+            x2={toXY(icDeg, R_OUTER + 4).x}
+            y2={toXY(icDeg, R_OUTER + 4).y}
+            stroke="rgba(147,197,253,0.55)"
+            strokeWidth="1.2"
+            strokeDasharray="4 3"
+          />
+          <line
+            x1={toXY(mcDeg, R_OUTER + 4).x}
+            y1={toXY(mcDeg, R_OUTER + 4).y}
+            x2={toXY(mcDeg, R_INNER).x}
+            y2={toXY(mcDeg, R_INNER).y}
+            stroke="rgba(147,197,253,0.45)"
+            strokeWidth="1"
+          />
+          <line
+            x1={toXY(icDeg, R_OUTER + 4).x}
+            y1={toXY(icDeg, R_OUTER + 4).y}
+            x2={toXY(icDeg, R_INNER).x}
+            y2={toXY(icDeg, R_INNER).y}
+            stroke="rgba(147,197,253,0.45)"
+            strokeWidth="1"
+          />
+          <text
+            data-testid="axis-mc"
+            x={toXY(mcDeg, R_OUTER + 12).x}
+            y={toXY(mcDeg, R_OUTER + 12).y}
+            fontSize="8"
+            fill="rgba(147,197,253,0.85)"
+            textAnchor="middle"
+          >
+            MC
+          </text>
+          <text
+            data-testid="axis-ic"
+            x={toXY(icDeg, R_OUTER + 12).x}
+            y={toXY(icDeg, R_OUTER + 12).y}
+            fontSize="8"
+            fill="rgba(147,197,253,0.85)"
+            textAnchor="middle"
+          >
+            IC
           </text>
         </g>
       )}
@@ -284,6 +381,8 @@ function NatalChartWheel({
         const sym = PSYM[name] ?? name[0].toUpperCase();
         const col = PCOL[name] ?? '#fff';
         const body = planets[name];
+        const nodeLabel =
+          name === 'north_node' && chart.node_type === 'mean' ? ' (M)' : '';
         return (
           <g key={name}>
             <circle
@@ -304,6 +403,9 @@ function NatalChartWheel({
             >
               {sym}
             </text>
+            {nodeLabel && (
+              <title>Mean North Node (Astro-Seek compatible)</title>
+            )}
             {body.retrograde && (
               <text
                 x={p.x + 9}
@@ -324,6 +426,7 @@ function NatalChartWheel({
 
 function AspectLegend({ labels }: { labels: NatalChartLabels }) {
   const items = ['trine', 'square', 'sextile', 'opposition', 'conjunction'] as const;
+  const rtl = labels.lang === 'fa' || labels.lang === 'ar';
   return (
     <div className="flex flex-wrap justify-center gap-3 mt-3">
       {items.map((key) => (
@@ -332,7 +435,7 @@ function AspectLegend({ labels }: { labels: NatalChartLabels }) {
             className="inline-block w-5 h-0.5 rounded"
             style={{ background: ASPECT_COLORS[key] }}
           />
-          <span className="fi text-[10px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          <span className={`fi ${rtl ? 'text-xs' : 'text-[10px]'}`} style={{ color: 'rgba(255,255,255,0.45)' }}>
             {labels.aspectLegend[key] ?? key}
           </span>
         </div>
@@ -341,11 +444,6 @@ function AspectLegend({ labels }: { labels: NatalChartLabels }) {
   );
 }
 
-/**
- * Two-column block that replaces the old planet-by-planet table.
- *   Left  — Elemental balance bars (fire / earth / air / water)
- *   Right — 3-4 short, derived "chart strengths" bullets
- */
 function ChartInsights({
   planets,
   aspects,
@@ -361,7 +459,7 @@ function ChartInsights({
   return (
     <div className="w-full mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
       <ElementBalanceCard balance={balance} labels={labels} />
-      <StrengthsCard strengths={strengths} title={labels.strengthsTitle} />
+      <StrengthsCard strengths={strengths} title={labels.strengthsTitle} lang={labels.lang} />
     </div>
   );
 }
@@ -375,6 +473,7 @@ function ElementBalanceCard({
   balance: ElementBalance;
   labels: NatalChartLabels;
 }) {
+  const rtl = labels.lang === 'fa' || labels.lang === 'ar';
   return (
     <div
       className="rounded-xl p-4"
@@ -384,7 +483,7 @@ function ElementBalanceCard({
       }}
     >
       <div
-        className="fi text-[11px] tracking-widest uppercase mb-3"
+        className={`fi ${rtl ? 'text-xs' : 'text-[11px]'} tracking-widest uppercase mb-3`}
         style={{ color: 'rgba(255,255,255,0.45)' }}
       >
         {labels.elementsTitle}
@@ -396,7 +495,7 @@ function ElementBalanceCard({
           return (
             <div key={key} className="flex items-center gap-2.5">
               <div
-                className="fi text-xs w-12 shrink-0"
+                className={`fi ${rtl ? 'text-sm' : 'text-xs'} w-12 shrink-0`}
                 style={{ color }}
               >
                 {labels.elements[key]}
@@ -431,10 +530,13 @@ function ElementBalanceCard({
 function StrengthsCard({
   strengths,
   title,
+  lang,
 }: {
   strengths: string[];
   title: string;
+  lang: ChartLang;
 }) {
+  const rtl = lang === 'fa' || lang === 'ar';
   return (
     <div
       className="rounded-xl p-4"
@@ -444,7 +546,7 @@ function StrengthsCard({
       }}
     >
       <div
-        className="fi text-[11px] tracking-widest uppercase mb-3"
+        className={`fi ${rtl ? 'text-xs' : 'text-[11px]'} tracking-widest uppercase mb-3`}
         style={{ color: 'rgba(255,255,255,0.45)' }}
       >
         {title}
@@ -457,7 +559,7 @@ function StrengthsCard({
               style={{ background: '#fbbf24' }}
             />
             <span
-              className="fi text-xs leading-relaxed"
+              className={`fi ${rtl ? 'text-sm' : 'text-xs'} leading-relaxed`}
               style={{ color: 'rgba(255,255,255,0.85)' }}
             >
               {line}
@@ -470,17 +572,15 @@ function StrengthsCard({
 }
 
 export function NatalChart({
-  planets,
-  ascendant,
+  chart,
   labels,
   empty,
 }: {
-  planets: Record<string, ChartPlanet> | null;
-  ascendant: number;
+  chart: ChartData | null;
   labels: NatalChartLabels;
   empty?: boolean;
 }) {
-  if (empty || !planets || Object.keys(planets).length === 0) {
+  if (empty || !chart || Object.keys(chart.planets).length === 0) {
     return (
       <div className="w-[320px] h-[320px] flex items-center justify-center">
         <p className="fi text-xs text-center px-4" style={{ color: 'rgba(255,255,255,0.2)' }}>
@@ -490,21 +590,16 @@ export function NatalChart({
     );
   }
 
-  const aspects = findNatalAspects(planets);
-  const layouts = computeLayouts(planets, ascendant);
+  const aspects = findNatalAspects(chart.planets);
+  const layouts = computeLayouts(chart.planets, chart.ascendant);
 
   return (
     <div className="w-full flex flex-col items-center">
       <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '50%', padding: 6 }}>
-        <NatalChartWheel
-          planets={planets}
-          ascendant={ascendant}
-          aspects={aspects}
-          layouts={layouts}
-        />
+        <NatalChartWheel chart={chart} aspects={aspects} layouts={layouts} />
       </div>
       <AspectLegend labels={labels} />
-      <ChartInsights planets={planets} aspects={aspects} labels={labels} />
+      <ChartInsights planets={chart.planets} aspects={aspects} labels={labels} />
     </div>
   );
 }

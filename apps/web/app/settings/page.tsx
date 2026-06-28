@@ -3,13 +3,16 @@
 import { useEffect, useState } from 'react';
 import { AppShell } from '@/components/AppShell';
 import {
+  loadCalendarSystem,
   loadHomeView,
   loadHouseSystem,
   loadZodiacSystem,
+  saveCalendarSystem,
   saveHomeView,
   saveHouseSystem,
   saveZodiacSystem,
   type AppLang,
+  type CalendarSystem,
   type HomeViewMode,
   type HouseSystem,
   type ZodiacSystem,
@@ -20,6 +23,7 @@ import { HOME_LANGS } from '@/lib/home-i18n';
 const HOME_OPTIONS: HomeViewMode[] = ['daily-brief', 'calendar', 'heatmap'];
 const HOUSE_OPTIONS: HouseSystem[] = ['placidus', 'whole_sign'];
 const ZODIAC_OPTIONS: ZodiacSystem[] = ['tropical', 'sidereal'];
+const CALENDAR_OPTIONS: CalendarSystem[] = ['gregorian', 'shamsi', 'hijri'];
 
 function OptionRow<T extends string>({
   label,
@@ -71,19 +75,19 @@ function OptionRow<T extends string>({
 }
 
 export default function SettingsPage() {
-  const [lang, setLangState] = useState<AppLang>('en');
   const [homeView, setHomeView] = useState<HomeViewMode>('daily-brief');
   const [house, setHouse] = useState<HouseSystem>('placidus');
   const [zodiac, setZodiac] = useState<ZodiacSystem>('tropical');
+  const [calendar, setCalendar] = useState<CalendarSystem>('gregorian');
   const [savedLang, setSavedLang] = useState<AppLang>('en');
   const [savedHome, setSavedHome] = useState<HomeViewMode>('daily-brief');
   const [savedHouse, setSavedHouse] = useState<HouseSystem>('placidus');
   const [savedZodiac, setSavedZodiac] = useState<ZodiacSystem>('tropical');
-  const [flash, setFlash] = useState(false);
+  const [savedCalendar, setSavedCalendar] = useState<CalendarSystem>('gregorian');
 
-  // The Settings page itself uses the *saved* language for all text and
-  // direction. Picking a different language as a pending change does not
-  // flip the page; everything switches only after you press Save changes.
+  // The page text/direction follows the active language. Language applies
+  // instantly (see applyLang), so this updates the moment you switch it from
+  // either the header or the in-page selector.
   const t = HOME_LANGS[savedLang];
 
   useEffect(() => {
@@ -92,7 +96,6 @@ export default function SettingsPage() {
       stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar'
         ? stored
         : 'en';
-    setLangState(startLang);
     setSavedLang(startLang);
 
     const hv = loadHomeView() ?? 'daily-brief';
@@ -106,32 +109,43 @@ export default function SettingsPage() {
     const z = loadZodiacSystem();
     setZodiac(z);
     setSavedZodiac(z);
+
+    const c = loadCalendarSystem();
+    setCalendar(c);
+    setSavedCalendar(c);
   }, []);
 
+  // Language is special: the header switcher changes it live everywhere else
+  // in the app, so here it also applies instantly (from both the header and the
+  // in-page selector) instead of waiting for Save. The other settings stay on
+  // the Save / Discard batch.
+  const applyLang = (next: AppLang) => {
+    setSavedLang(next);
+    saveAppLang(next);
+  };
+
   const isDirty =
-    lang !== savedLang ||
     homeView !== savedHome ||
     house !== savedHouse ||
-    zodiac !== savedZodiac;
+    zodiac !== savedZodiac ||
+    calendar !== savedCalendar;
 
   const saveAll = () => {
-    saveAppLang(lang);
     saveHomeView(homeView);
     saveHouseSystem(house);
     saveZodiacSystem(zodiac);
-    setSavedLang(lang);
+    saveCalendarSystem(calendar);
     setSavedHome(homeView);
     setSavedHouse(house);
     setSavedZodiac(zodiac);
-    setFlash(true);
-    setTimeout(() => setFlash(false), 1500);
+    setSavedCalendar(calendar);
   };
 
   const discardAll = () => {
-    setLangState(savedLang);
     setHomeView(savedHome);
     setHouse(savedHouse);
     setZodiac(savedZodiac);
+    setCalendar(savedCalendar);
   };
 
   const houseLabels: Record<HouseSystem, string> = {
@@ -144,6 +158,12 @@ export default function SettingsPage() {
     sidereal: t.sidereal,
   };
 
+  const calendarLabels: Record<CalendarSystem, string> = {
+    gregorian: t.calendarGregorian,
+    shamsi: t.calendarShamsi,
+    hijri: t.calendarHijri,
+  };
+
   const langLabels: Record<AppLang, string> = {
     en: 'EN',
     ru: 'RU',
@@ -154,7 +174,7 @@ export default function SettingsPage() {
   return (
     <AppShell
       lang={savedLang}
-      setLang={(l) => setLangState(l)}
+      setLang={applyLang}
       dir={t.dir}
       navLabels={t.nav}
     >
@@ -176,10 +196,10 @@ export default function SettingsPage() {
 
         <OptionRow
           label={t.languageLabel}
-          value={lang}
+          value={savedLang}
           options={['en', 'ru', 'fa', 'ar']}
           labels={langLabels}
-          onChange={setLangState}
+          onChange={applyLang}
         />
 
         <OptionRow
@@ -198,63 +218,70 @@ export default function SettingsPage() {
           onChange={setZodiac}
         />
 
+        <OptionRow
+          label={t.calendarLabel}
+          value={calendar}
+          options={CALENDAR_OPTIONS}
+          labels={calendarLabels}
+          onChange={setCalendar}
+        />
+
         <div
-          className="mt-8 pt-6 flex flex-wrap items-center gap-3"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+          className="mt-8 pt-6 sticky bottom-0 flex flex-wrap items-center gap-3"
+          style={{
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            background: 'linear-gradient(180deg, rgba(7,11,20,0), rgba(7,11,20,0.92) 40%)',
+            paddingBottom: '1rem',
+          }}
         >
           <button
             type="button"
             onClick={saveAll}
             disabled={!isDirty}
-            className="fi text-xs px-5 py-2.5 rounded-lg border transition-all"
+            className="fi text-sm px-6 py-2.5 rounded-lg border transition-all"
             style={
               isDirty
                 ? {
-                    borderColor: 'rgba(74,222,128,0.5)',
-                    color: '#4ade80',
-                    background: 'rgba(74,222,128,0.1)',
+                    borderColor: 'rgba(74,222,128,0.6)',
+                    color: '#0a0f0a',
+                    background: '#4ade80',
                     cursor: 'pointer',
+                    fontWeight: 600,
                   }
                 : {
-                    borderColor: 'rgba(255,255,255,0.08)',
-                    color: 'rgba(255,255,255,0.3)',
-                    background: 'transparent',
+                    borderColor: 'rgba(255,255,255,0.14)',
+                    color: 'rgba(255,255,255,0.45)',
+                    background: 'rgba(255,255,255,0.04)',
                     cursor: 'not-allowed',
                   }
             }
           >
             {t.saveAll ?? 'Save changes'}
           </button>
-          {isDirty && (
-            <button
-              type="button"
-              onClick={discardAll}
-              className="fi text-xs px-4 py-2.5 rounded-lg border transition-all"
-              style={{
-                borderColor: 'rgba(255,255,255,0.12)',
-                color: 'rgba(255,255,255,0.5)',
-                cursor: 'pointer',
-              }}
-            >
-              {t.discard ?? 'Discard'}
-            </button>
-          )}
-          {flash && !isDirty && (
-            <span
-              className="fi text-xs"
-              style={{ color: '#4ade80' }}
-            >
-              {t.saved}
-            </span>
-          )}
-          {isDirty && (
-            <span
-              className="fi text-xs"
-              style={{ color: 'rgba(251,191,36,0.7)' }}
-            >
-              {t.unsaved ?? 'Unsaved changes'}
-            </span>
-          )}
+
+          <button
+            type="button"
+            onClick={discardAll}
+            disabled={!isDirty}
+            className="fi text-sm px-4 py-2.5 rounded-lg border transition-all"
+            style={{
+              borderColor: 'rgba(255,255,255,0.14)',
+              color: isDirty ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)',
+              background: 'transparent',
+              cursor: isDirty ? 'pointer' : 'not-allowed',
+            }}
+          >
+            {t.discard ?? 'Discard'}
+          </button>
+
+          {/* Persistent status — never auto-hides, so the user always knows
+              whether their settings are saved. */}
+          <span
+            className="fi text-xs ml-auto"
+            style={{ color: isDirty ? 'rgba(251,191,36,0.85)' : 'rgba(74,222,128,0.85)' }}
+          >
+            {isDirty ? (t.unsaved ?? 'Unsaved changes') : (t.saved ?? 'Saved ✓')}
+          </span>
         </div>
 
       </div>

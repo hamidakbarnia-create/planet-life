@@ -15,7 +15,7 @@
  * element dominance) and return the top N.
  */
 
-import type { ChartPlanet } from '@/components/NatalChart';
+import type { ChartPlanet } from '@/lib/chart-types';
 import {
   ASPECT_ANGLES,
   DEFAULT_ORBS,

@@ -8,6 +8,7 @@ type NavKey =
   | 'map'
   | 'ask'
   | 'people'
+  | 'pathfinder'
   | 'world'
   | 'me'
   | 'settings'
@@ -18,6 +19,7 @@ const TABS: { href: string; key: NavKey; fallback: string }[] = [
   { href: '/calendar', key: 'map', fallback: 'Map' },
   { href: '/ask', key: 'ask', fallback: 'Ask' },
   { href: '/people', key: 'people', fallback: 'People' },
+  { href: '/pathfinder', key: 'pathfinder', fallback: 'Path' },
   { href: '/world', key: 'world', fallback: 'World' },
   { href: '/profile', key: 'me', fallback: 'Me' },
   { href: '/settings', key: 'settings', fallback: 'Settings' },
@@ -75,6 +77,17 @@ function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
         <svg {...props}>
           <circle cx="12" cy="12" r="9" />
           <path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18" />
+        </svg>
+      );
+    case 'pathfinder':
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M3.5 13.5c4 2.2 10.5 1.2 17-3" />
+          <path d="M4.5 9.5c5.3-1.7 10.2-.9 15 2.4" />
+          <path d="M12 3.5c2.2 2.7 2.2 14.3 0 17" />
+          <path d="M12 3.5c-2.2 2.7-2.2 14.3 0 17" />
+          <path d="M17.2 6.2l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1z" />
         </svg>
       );
     case 'me':

@@ -421,7 +421,7 @@ export default function Dashboard() {
                     )}
                   </div>
 
-                  {st?.opportunity_factors?.length > 0 && (
+                  {Array.isArray(st?.opportunity_factors) && st.opportunity_factors.length > 0 && (
                     <div className="fade-up rounded-2xl p-5" style={{background:'rgba(74,222,128,0.03)',border:'1px solid rgba(74,222,128,0.1)',animationDelay:'160ms'}}>
                       <div className="fc text-xs tracking-wider mb-3" style={{color:'#4ade80'}}>{t.opps}</div>
                       <div className="space-y-2">
@@ -435,7 +435,7 @@ export default function Dashboard() {
                     </div>
                   )}
 
-                  {st?.risk_factors?.length > 0 && (
+                  {Array.isArray(st?.risk_factors) && st.risk_factors.length > 0 && (
                     <div className="fade-up rounded-2xl p-5" style={{background:'rgba(248,113,113,0.03)',border:'1px solid rgba(248,113,113,0.1)',animationDelay:'240ms'}}>
                       <div className="fc text-xs tracking-wider mb-3" style={{color:'#f87171'}}>{t.risks}</div>
                       <div className="space-y-2">
@@ -449,9 +449,9 @@ export default function Dashboard() {
                     </div>
                   )}
 
-                  {(st?.key_themes?.length > 0 || st?.timing_notes?.length > 0) && (
+                  {(Array.isArray(st?.key_themes) && st.key_themes.length > 0 || Array.isArray(st?.timing_notes) && st.timing_notes.length > 0) && (
                     <div className="fade-up grid grid-cols-2 gap-3" style={{animationDelay:'320ms'}}>
-                      {st?.key_themes?.length > 0 && (
+                      {Array.isArray(st?.key_themes) && st.key_themes.length > 0 && (
                         <div className="rounded-2xl p-4" style={{background:'rgba(251,191,36,0.03)',border:'1px solid rgba(251,191,36,0.08)'}}>
                           <div className="fc text-xs tracking-wider mb-3" style={{color:'#fbbf24'}}>{t.themes}</div>
                           {st.key_themes.slice(0,3).map((th: string, i: number) => (
@@ -459,7 +459,7 @@ export default function Dashboard() {
                           ))}
                         </div>
                       )}
-                      {st?.timing_notes?.length > 0 && (
+                      {Array.isArray(st?.timing_notes) && st.timing_notes.length > 0 && (
                         <div className="rounded-2xl p-4" style={{background:'rgba(96,165,250,0.03)',border:'1px solid rgba(96,165,250,0.08)'}}>
                           <div className="fc text-xs tracking-wider mb-3" style={{color:'#60a5fa'}}>{t.timing}</div>
                           {st.timing_notes.slice(0,3).map((tn: string, i: number) => (

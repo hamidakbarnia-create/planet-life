@@ -44,28 +44,28 @@ const JULIA_CARD: Record<
     title: 'Julia, Russian astrologer',
     body:
       'For deeper timing questions, Julia reviews the context behind the score and turns it into a practical decision.',
-    cta: 'Ask the Oracle',
+    cta: 'Ask a question',
   },
   ru: {
     eyebrow: 'Личный астролог',
     title: 'Юлия, российский астролог',
     body:
       'Для глубоких вопросов Юлия разбирает контекст оценки и переводит его в практическое решение.',
-    cta: 'Спросить Оракул',
+    cta: 'Задать вопрос',
   },
   fa: {
     eyebrow: 'منجم خصوصی',
     title: 'جولیا، منجم روسی',
     body:
       'برای سوال‌های عمیق‌تر، جولیا زمینه پشت امتیاز را بررسی می‌کند و آن را به یک تصمیم عملی تبدیل می‌کند.',
-    cta: 'پرسش از وحی',
+    cta: 'طرح سوال',
   },
   ar: {
     eyebrow: 'منجّمة خاصة',
     title: 'جوليا، منجّمة روسية',
     body:
       'للأسئلة الأعمق، تراجع جوليا السياق خلف الدرجة وتحوله إلى قرار عملي.',
-    cta: 'اسأل العرّاف',
+    cta: 'اطرح سؤالك',
   },
 };
 
@@ -412,7 +412,7 @@ export function DailyBriefView({
         </ul>
       </section>
 
-      <PeopleHomeRow />
+      <PeopleHomeRow lang={lang} />
 
       <JuliaTrustCard lang={lang} />
 
@@ -544,17 +544,24 @@ function HighlightCard({
 }) {
   const palette =
     accent === 'green'
-      ? { border: 'rgba(74,222,128,0.35)', text: '#4ade80', bg: 'rgba(74,222,128,0.05)' }
-      : { border: 'rgba(248,113,113,0.35)', text: '#f87171', bg: 'rgba(248,113,113,0.05)' };
+      ? { border: 'rgba(74,222,128,0.35)', text: '#4ade80', bg: 'rgba(74,222,128,0.05)', dot: '#4ade80' }
+      : { border: 'rgba(248,113,113,0.35)', text: '#f87171', bg: 'rgba(248,113,113,0.05)', dot: '#fbbf24' };
+  // A live, gently pulsing status dot so the box reads as an active monitor
+  // even when there is no window to show (empty state still feels alive).
   return (
     <div
       className="rounded-2xl p-4"
       style={{ background: palette.bg, border: `1px solid ${palette.border}` }}
     >
       <div
-        className="fi text-[10px] uppercase tracking-widest mb-1"
+        className="fi text-[10px] uppercase tracking-widest mb-1 flex items-center gap-1.5"
         style={{ color: 'rgba(255,255,255,0.45)' }}
       >
+        <span
+          aria-hidden
+          className="inline-block h-2 w-2 rounded-full animate-pulse shrink-0"
+          style={{ background: palette.dot, boxShadow: `0 0 6px ${palette.dot}` }}
+        />
         {label}
       </div>
       {loading ? (

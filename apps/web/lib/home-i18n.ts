@@ -1,4 +1,4 @@
-import type { AppLang, HomeViewMode, HouseSystem, ZodiacSystem } from './app-settings';
+import type { AppLang, HomeViewMode } from './app-settings';
 
 export const HOME_LANGS: Record<
   AppLang,
@@ -46,6 +46,10 @@ export const HOME_LANGS: Record<
     wholeSign: string;
     tropical: string;
     sidereal: string;
+    calendarLabel: string;
+    calendarGregorian: string;
+    calendarShamsi: string;
+    calendarHijri: string;
     saved: string;
     saveAll: string;
     discard: string;
@@ -60,6 +64,7 @@ export const HOME_LANGS: Record<
       '/calendar': 'Map',
       '/ask': 'Ask',
       '/people': 'People',
+      '/pathfinder': 'Pathfinder',
       '/world': 'World',
       '/profile': 'Me',
       '/vault': 'Vault',
@@ -110,6 +115,10 @@ export const HOME_LANGS: Record<
     wholeSign: 'Whole Sign',
     tropical: 'Tropical',
     sidereal: 'Sidereal',
+    calendarLabel: 'Calendar',
+    calendarGregorian: 'Gregorian',
+    calendarShamsi: 'Solar Hijri (Shamsi)',
+    calendarHijri: 'Lunar Hijri (Ghamari)',
     saved: 'Saved ✓',
     saveAll: 'Save changes',
     discard: 'Discard',
@@ -125,8 +134,9 @@ export const HOME_LANGS: Record<
     nav: {
       '/home': 'Сегодня',
       '/calendar': 'Карта',
-      '/ask': 'Оракул',
+      '/ask': 'Спросить',
       '/people': 'Люди',
+      '/pathfinder': 'Маршрут',
       '/world': 'Мир',
       '/profile': 'Я',
       '/vault': 'Хранилище',
@@ -177,6 +187,10 @@ export const HOME_LANGS: Record<
     wholeSign: 'Целознаковые дома',
     tropical: 'Тропический',
     sidereal: 'Сидерический',
+    calendarLabel: 'Календарь',
+    calendarGregorian: 'Григорианский',
+    calendarShamsi: 'Солнечная хиджра (Шамси)',
+    calendarHijri: 'Лунная хиджра (Камари)',
     saved: 'Сохранено ✓',
     saveAll: 'Сохранить',
     discard: 'Отменить',
@@ -192,8 +206,9 @@ export const HOME_LANGS: Record<
     nav: {
       '/home': 'امروز',
       '/calendar': 'نقشه',
-      '/ask': 'پرسش',
+      '/ask': 'طرح پرسش',
       '/people': 'افراد',
+      '/pathfinder': 'مسیر',
       '/world': 'جهان',
       '/profile': 'من',
       '/vault': 'محرمانه',
@@ -214,14 +229,14 @@ export const HOME_LANGS: Record<
     goldenHours: 'ساعات طلایی',
     warnings: 'هشدارها',
     synergyAlerts: 'هشدارهای هم‌افزایی',
-    noGolden: 'هنوز پنجره طلایی برای امروز یافت نشد.',
-    noWarnings: 'منطقه خطر برای امروز ثبت نشده.',
+    noGolden: 'هنوز بازهٔ طلایی برای امروز پیدا نشده.',
+    noWarnings: 'بازهٔ پرخطری برای امروز ثبت نشده.',
     noSynergy: 'هشداری نیست — افراد را اضافه کنید.',
     askAi: 'پرسش از هوش مصنوعی',
     askPlaceholder: 'امروز روی چه چیزی تمرکز کنم؟',
     askLoading: 'در حال خواندن آسمان…',
-    bestWindow: 'بهترین پنجره',
-    avoidWindow: 'پرهیز کنید',
+    bestWindow: 'بهترین بازه',
+    avoidWindow: 'بازهٔ پرهیز',
     hourlyLabel: 'پیش‌بینی ساعتی',
     noWindow: '—',
     todayLabel: 'امروز',
@@ -244,6 +259,10 @@ export const HOME_LANGS: Record<
     wholeSign: 'برج کامل',
     tropical: 'استوایی',
     sidereal: 'نجومی',
+    calendarLabel: 'تقویم',
+    calendarGregorian: 'میلادی',
+    calendarShamsi: 'هجری شمسی',
+    calendarHijri: 'هجری قمری',
     saved: 'ذخیره شد ✓',
     saveAll: 'ذخیره تغییرات',
     discard: 'لغو',
@@ -259,8 +278,9 @@ export const HOME_LANGS: Record<
     nav: {
       '/home': 'اليوم',
       '/calendar': 'الخريطة',
-      '/ask': 'الاستشارة',
+      '/ask': 'إسأل',
       '/people': 'الأشخاص',
+      '/pathfinder': 'المسار',
       '/world': 'العالم',
       '/profile': 'أنا',
       '/vault': 'الخزانة',
@@ -311,6 +331,10 @@ export const HOME_LANGS: Record<
     wholeSign: 'البروج الكاملة',
     tropical: 'استوائي',
     sidereal: 'النجمي',
+    calendarLabel: 'التقويم',
+    calendarGregorian: 'ميلادي',
+    calendarShamsi: 'هجري شمسي',
+    calendarHijri: 'هجري قمري',
     saved: 'تم الحفظ ✓',
     saveAll: 'حفظ التغييرات',
     discard: 'إلغاء',

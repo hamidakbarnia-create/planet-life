@@ -1,11 +1,13 @@
 export type HomeViewMode = 'daily-brief' | 'calendar' | 'heatmap';
 export type HouseSystem = 'placidus' | 'whole_sign';
 export type ZodiacSystem = 'tropical' | 'sidereal';
+export type CalendarSystem = 'gregorian' | 'shamsi' | 'hijri';
 export type AppLang = 'en' | 'ru' | 'fa' | 'ar';
 
 const HOME_VIEW_KEY = 'planet-life-home-view';
 const HOUSE_KEY = 'planet-life-house-system';
 const ZODIAC_KEY = 'planet-life-zodiac-system';
+const CALENDAR_KEY = 'planet-life-calendar-system';
 
 export function loadHomeView(): HomeViewMode | null {
   if (typeof window === 'undefined') return null;
@@ -45,6 +47,22 @@ export function loadZodiacSystem(): ZodiacSystem {
 export function saveZodiacSystem(system: ZodiacSystem): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(ZODIAC_KEY, system);
+}
+
+// Display calendar for dates across the app. Gregorian (Miladi) is the shared
+// default for every language; Persian users can pick Shamsi (Solar Hijri) and
+// Arabic users Ghamari (Lunar Hijri). This only affects how dates are shown,
+// not the underlying astronomical calculations.
+export function loadCalendarSystem(): CalendarSystem {
+  if (typeof window === 'undefined') return 'gregorian';
+  const v = localStorage.getItem(CALENDAR_KEY);
+  if (v === 'shamsi' || v === 'hijri' || v === 'gregorian') return v;
+  return 'gregorian';
+}
+
+export function saveCalendarSystem(system: CalendarSystem): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(CALENDAR_KEY, system);
 }
 
 /** Extra fields for chart/analyze API bodies */

@@ -1,11 +1,20 @@
 import sys, os
 sys.path.insert(0, r"C:\planet-life")
 
+import logging
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from packages.astro_engine.scoring import calculate_activity_score
-from services.chart_data import build_chart_payload
+from services.chart_data import (
+    ChartComputationError,
+    PlacidusLatitudeError,
+    build_chart_payload,
+    compute_birth_chart,
+)
+from services.chart_monitor import log_chart_error
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class BusinessAnalysisRequest(BaseModel):
@@ -17,6 +26,10 @@ class BusinessAnalysisRequest(BaseModel):
     target_time: str | None = Field(None, pattern=r"^\d{2}:\d{2}$")
     house_system: str = "placidus"
     zodiac: str = "tropical"
+    latitude: float | None = None
+    longitude: float | None = None
+    country: str | None = None
+    node_type: str = "mean"  # mean | true — Astro-Seek default reference uses Mean Node
 
 @router.post("/analyze")
 async def analyze_business(request: BusinessAnalysisRequest):
@@ -32,8 +45,10 @@ async def analyze_business(request: BusinessAnalysisRequest):
             zodiac=request.zodiac,
         )
     except ValueError as e:
+        log_chart_error("geocode_or_validation", str(e), location=request.location)
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
+        log_chart_error("computation", str(e), location=request.location)
         raise HTTPException(status_code=503, detail=f"Chart computation failed: {e}")
     try:
         result = calculate_activity_score(natal, transit, action)
@@ -44,63 +59,42 @@ async def analyze_business(request: BusinessAnalysisRequest):
         "strategic": result["strategic"],
         "technical": result["technical"],
     }
-def _get_house(longitude: float, cusps: list) -> int:
-    lon = longitude % 360.0
-    for i in range(12):
-        start = cusps[i] % 360.0
-        end = cusps[(i + 1) % 12] % 360.0
-        if start <= end:
-            if start <= lon < end:
-                return i + 1
-        else:
-            if lon >= start or lon < end:
-                return i + 1
-    return 1
 
 @router.post("/chart")
 async def get_birth_chart(request: BusinessAnalysisRequest):
     try:
-        import swisseph as swe
-        swe.set_ephe_path('')
-        from services.chart_data import resolve_coordinates, _local_datetime
-        from datetime import timezone
-        lat, lon = resolve_coordinates(request.location)
-        natal_dt = _local_datetime(request.birth_date, request.birth_time, lat, lon)
-        dt_utc = natal_dt.astimezone(timezone.utc)
-        jd = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day,
-            dt_utc.hour + dt_utc.minute/60.0 + dt_utc.second/3600.0, swe.GREG_CAL)
-        houses_data = swe.houses(jd, lat, lon, b"P")
-        cusps = houses_data[0]
-        ascmc = houses_data[1]
-        cusp_list = [float(cusps[i]) for i in range(0, 12)]
-        bodies = [
-            (swe.SUN,'sun'),(swe.MOON,'moon'),(swe.MERCURY,'mercury'),
-            (swe.VENUS,'venus'),(swe.MARS,'mars'),(swe.JUPITER,'jupiter'),
-            (swe.SATURN,'saturn'),(swe.URANUS,'uranus'),(swe.NEPTUNE,'neptune'),
-            (swe.PLUTO,'pluto'),(swe.TRUE_NODE,'north_node'),
-        ]
-        planets = {}
-        for pid, name in bodies:
-            # FLG_SPEED is REQUIRED for retrograde detection. Without it the
-            # speed component is 0 and every planet appears direct. (See
-            # apps/api/tests/test_retrograde_detection.py.)
-            result, _ = swe.calc_ut(jd, pid, swe.FLG_MOSEPH | swe.FLG_SPEED)
-            lng = float(result[0])
-            spd = float(result[3]) if len(result) > 3 else 0.0
-            planets[name] = {
-                "longitude": round(lng, 4),
-                "retrograde": spd < 0,
-                "house": _get_house(lng, cusp_list),
-                "sign": int(lng // 30) + 1,
-                "degree": round(lng % 30, 2),
-            }
-        return {
-            "planets": planets,
-            "ascendant": round(float(ascmc[0]), 4),
-            "midheaven": round(float(ascmc[1]), 4),
-            "houses": cusp_list,
-            "latitude": lat,
-            "longitude": lon,
-        }
+        return compute_birth_chart(
+            birth_date=request.birth_date,
+            birth_time=request.birth_time,
+            location=request.location,
+            latitude=request.latitude,
+            longitude=request.longitude,
+            house_system=request.house_system,
+            zodiac=request.zodiac,
+            node_type=request.node_type,
+            country=request.country,
+        )
+    except PlacidusLatitudeError as e:
+        log_chart_error(
+            "placidus_high_latitude",
+            str(e),
+            location=request.location,
+            latitude=request.latitude,
+            longitude=request.longitude,
+        )
+        raise HTTPException(status_code=422, detail=str(e))
+    except ValueError as e:
+        msg = str(e)
+        if "Could not resolve location" in msg:
+            log_chart_error("geocode_failed", msg, location=request.location)
+        elif "No timezone found" in msg:
+            log_chart_error("missing_timezone", msg, location=request.location)
+        else:
+            log_chart_error("validation", msg, location=request.location)
+        raise HTTPException(status_code=422, detail=msg)
+    except ChartComputationError as e:
+        log_chart_error("computation", str(e), location=request.location)
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
+        log_chart_error("computation", str(e), location=request.location)
         raise HTTPException(status_code=500, detail=str(e))

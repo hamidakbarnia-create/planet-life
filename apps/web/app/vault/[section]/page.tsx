@@ -8,6 +8,8 @@ import { HOME_LANGS } from '@/lib/home-i18n';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
 import type { AppLang } from '@/lib/app-settings';
 import { loadBirthProfile } from '@/lib/birth-profile';
+import { fetchNatalChart, type ChartPlanetBody } from '@/lib/chart-api';
+import { loadTier, type MembershipTier } from '@/lib/membership';
 import {
   fetchVaultMarsReading,
   type VaultReadingLayer,
@@ -81,6 +83,8 @@ const PREVIEW_LOCK_LANGS: Record<
     premium: string;
     expand: string;
     collapse: string;
+    unlockedBadge: string;
+    unlockedNote: string;
   }
 > = {
   en: {
@@ -91,6 +95,8 @@ const PREVIEW_LOCK_LANGS: Record<
     premium: 'Premium · R8',
     expand: 'Open',
     collapse: 'Close',
+    unlockedBadge: 'Unlocked',
+    unlockedNote: 'Unlocked with your membership — your live personal reading activates as each tool ships.',
   },
   ru: {
     sampleLabel: 'Пример разбора',
@@ -100,6 +106,8 @@ const PREVIEW_LOCK_LANGS: Record<
     premium: 'Премиум · R8',
     expand: 'Открыть',
     collapse: 'Закрыть',
+    unlockedBadge: 'Открыто',
+    unlockedNote: 'Открыто по подписке — живой персональный разбор появится по мере выхода инструментов.',
   },
   fa: {
     sampleLabel: 'نمونه خوانش',
@@ -109,6 +117,8 @@ const PREVIEW_LOCK_LANGS: Record<
     premium: 'پریمیوم · R8',
     expand: 'باز کن',
     collapse: 'ببند',
+    unlockedBadge: 'باز شد',
+    unlockedNote: 'با اشتراکت باز شد — خوانش زنده‌ی شخصی با آماده‌شدن هر ابزار فعال می‌شه.',
   },
   ar: {
     sampleLabel: 'قراءة تجريبية',
@@ -118,6 +128,8 @@ const PREVIEW_LOCK_LANGS: Record<
     premium: 'بريميوم · R8',
     expand: 'افتح',
     collapse: 'إغلاق',
+    unlockedBadge: 'مفتوح',
+    unlockedNote: 'مفتوح باشتراكك — تُفعّل قراءتك الشخصية الحيّة مع إطلاق كل أداة.',
   },
 };
 
@@ -531,6 +543,236 @@ function isValidSection(s: string | undefined): s is VaultSectionKey {
   return !!s && VALID.includes(s as VaultSectionKey);
 }
 
+const SIGN_NAMES: Record<AppLang, string[]> = {
+  en: ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'],
+  ru: ['Овен', 'Телец', 'Близнецы', 'Рак', 'Лев', 'Дева', 'Весы', 'Скорпион', 'Стрелец', 'Козерог', 'Водолей', 'Рыбы'],
+  fa: ['حمل', 'ثور', 'جوزا', 'سرطان', 'اسد', 'سنبله', 'میزان', 'عقرب', 'قوس', 'جدی', 'دلو', 'حوت'],
+  ar: ['الحمل', 'الثور', 'الجوزاء', 'السرطان', 'الأسد', 'العذراء', 'الميزان', 'العقرب', 'القوس', 'الجدي', 'الدلو', 'الحوت'],
+};
+
+type PersonalizedBlock = { label: string; text: string };
+
+type PersonalizedReading = {
+  headline: string;
+  blocks: PersonalizedBlock[];
+};
+
+function signLabel(lang: AppLang, sign?: number): string {
+  if (sign == null || sign < 1 || sign > 12) return '—';
+  return SIGN_NAMES[lang][sign - 1];
+}
+
+function planetLine(lang: AppLang, body?: ChartPlanetBody): string {
+  if (!body?.sign) return '';
+  const sign = signLabel(lang, body.sign);
+  const deg = body.degree != null ? ` ${body.degree.toFixed(1)}°` : '';
+  const house = body.house ? ` · H${body.house}` : '';
+  const rx = body.retrograde ? ' ℞' : '';
+  return `${sign}${deg}${house}${rx}`;
+}
+
+function buildLoungeReading(
+  itemIdx: number,
+  planets: Record<string, ChartPlanetBody>,
+  lang: AppLang,
+): PersonalizedReading {
+  const moon = planets.moon;
+  const venus = planets.venus;
+  const mars = planets.mars;
+  const sun = planets.sun;
+  const pluto = planets.pluto;
+
+  if (itemIdx === 0) {
+    const circles: Record<AppLang, PersonalizedReading> = {
+      en: {
+        headline: 'Your secret circles — matched from your chart',
+        blocks: [
+          { label: 'Moon circle', text: moon ? `Emotional core · Moon in ${planetLine(lang, moon)}` : 'Moon data not in chart response.' },
+          { label: 'Venus circle', text: venus ? `Desire & taste · Venus in ${planetLine(lang, venus)}` : 'Venus data not in chart response.' },
+          { label: 'Mars circle', text: mars ? `Drive & pursuit · Mars in ${planetLine(lang, mars)}` : 'Mars data not in chart response.' },
+        ],
+      },
+      ru: {
+        headline: 'Ваши секретные круги — по карте',
+        blocks: [
+          { label: 'Круг Луны', text: moon ? `Эмоциональное ядро · Луна в ${planetLine(lang, moon)}` : 'Данные Луны нет в ответе.' },
+          { label: 'Круг Венеры', text: venus ? `Желание и вкус · Венера в ${planetLine(lang, venus)}` : 'Данных Венеры нет.' },
+          { label: 'Круг Марса', text: mars ? `Импульс · Марс в ${planetLine(lang, mars)}` : 'Данных Марса нет.' },
+        ],
+      },
+      fa: {
+        headline: 'حلقه‌های سکرت تو — از روی چارت',
+        blocks: [
+          { label: 'حلقه ماه', text: moon ? `هسته احساسی · ماه در ${planetLine(lang, moon)}` : 'داده ماه در پاسخ نیست.' },
+          { label: 'حلقه زهره', text: venus ? `میل و سلیقه · زهره در ${planetLine(lang, venus)}` : 'داده زهره در پاسخ نیست.' },
+          { label: 'حلقه مریخ', text: mars ? `انگیزه · مریخ در ${planetLine(lang, mars)}` : 'داده مریخ در پاسخ نیست.' },
+        ],
+      },
+      ar: {
+        headline: 'دوائرك السرّية — من خريطتك',
+        blocks: [
+          { label: 'دائرة القمر', text: moon ? `النواة العاطفية · القمر في ${planetLine(lang, moon)}` : 'لا بيانات للقمر.' },
+          { label: 'دائرة الزهرة', text: venus ? `الرغبة والذوق · الزهرة في ${planetLine(lang, venus)}` : 'لا بيانات للزهرة.' },
+          { label: 'دائرة المريخ', text: mars ? `الدافع · المريخ في ${planetLine(lang, mars)}` : 'لا بيانات للمريخ.' },
+        ],
+      },
+    };
+    return circles[lang];
+  }
+
+  if (itemIdx === 1) {
+    const julia: Record<AppLang, PersonalizedReading> = {
+      en: {
+        headline: 'Julia (anonymous) — one line from your chart',
+        blocks: [
+          {
+            label: 'Your question channel',
+            text: moon && venus
+              ? `Moon in ${signLabel(lang, moon.sign)} (H${moon.house ?? '?'}) + Venus in ${signLabel(lang, venus.sign)} — you attract through ${signLabel(lang, venus.sign)} warmth with ${signLabel(lang, moon.sign)} emotional depth. Ask without naming yourself; Julia reads this geometry only.`
+              : 'Save birth data in Profile and regenerate — Julia needs Moon + Venus from your chart.',
+          },
+        ],
+      },
+      ru: {
+        headline: 'Юлия (анонимно) — одна строка по карте',
+        blocks: [
+          {
+            label: 'Канал вопроса',
+            text: moon && venus
+              ? `Луна в ${signLabel(lang, moon.sign)} (д.${moon.house ?? '?'}) + Венера в ${signLabel(lang, venus.sign)} — притяжение через ${signLabel(lang, venus.sign)} с эмоциональной глубиной ${signLabel(lang, moon.sign)}.`
+              : 'Сохраните данные рождения в Профиле.',
+          },
+        ],
+      },
+      fa: {
+        headline: 'جولیا (ناشناس) — یک خط از چارت',
+        blocks: [
+          {
+            label: 'کانال سوال',
+            text: moon && venus
+              ? `ماه در ${signLabel(lang, moon.sign)} (خانه ${moon.house ?? '?'}) + زهره در ${signLabel(lang, venus.sign)} — جذب از مسیر ${signLabel(lang, venus.sign)} با عمق احساسی ${signLabel(lang, moon.sign)}.`
+              : 'اطلاعات تولد را در پروفایل ذخیره کن.',
+          },
+        ],
+      },
+      ar: {
+        headline: 'جوليا (مجهول) — سطر من خريطتك',
+        blocks: [
+          {
+            label: 'قناة السؤال',
+            text: moon && venus
+              ? `القمر في ${signLabel(lang, moon.sign)} (البيت ${moon.house ?? '?'}) + الزهرة في ${signLabel(lang, venus.sign)} — جاذبية عبر ${signLabel(lang, venus.sign)} بعمق ${signLabel(lang, moon.sign)}.`
+              : 'احفظي بيانات الميلاد في الملف.',
+          },
+        ],
+      },
+    };
+    return julia[lang];
+  }
+
+  if (itemIdx === 2) {
+    const queens: Record<AppLang, PersonalizedReading> = {
+      en: {
+        headline: 'Verified Queens — your cosmic badge',
+        blocks: [
+          { label: 'Your Sun badge', text: sun ? `${signLabel(lang, sun.sign)} Sun · ${planetLine(lang, sun)}` : 'Sun placement not in chart response.' },
+          { label: 'Verification step 1', text: 'Light ID check — alias only, no real name in lounge.' },
+          { label: 'Verification step 2', text: 'Premium membership active — badge shows on your alias.' },
+        ],
+      },
+      ru: {
+        headline: 'Verified Queens — ваш космический значок',
+        blocks: [
+          { label: 'Значок Солнца', text: sun ? `Солнце ${signLabel(lang, sun.sign)} · ${planetLine(lang, sun)}` : 'Солнце не в ответе.' },
+          { label: 'Шаг 1', text: 'Лёгкая проверка — только псевдоним.' },
+          { label: 'Шаг 2', text: 'Активная подписка Премиум — значок у псевдонима.' },
+        ],
+      },
+      fa: {
+        headline: 'ملکه تأییدشده — نشان کیهانی تو',
+        blocks: [
+          { label: 'نشان خورشید', text: sun ? `خورشید ${signLabel(lang, sun.sign)} · ${planetLine(lang, sun)}` : 'خورشید در پاسخ نیست.' },
+          { label: 'مرحله ۱', text: 'چک سبک — فقط نام مستعار در لانژ.' },
+          { label: 'مرحله ۲', text: 'اشتراک پریمیوم فعال — نشان روی نام مستعار.' },
+        ],
+      },
+      ar: {
+        headline: 'ملكات موثّقات — شارة كونيتك',
+        blocks: [
+          { label: 'شارة الشمس', text: sun ? `شمس ${signLabel(lang, sun.sign)} · ${planetLine(lang, sun)}` : 'لا بيانات للشمس.' },
+          { label: 'الخطوة 1', text: 'تحقّق خفيف — اسم مستعار فقط.' },
+          { label: 'الخطوة 2', text: 'اشتراك بريميوم نشط — الشارة على الاسم المستعار.' },
+        ],
+      },
+    };
+    return queens[lang];
+  }
+
+  const trace: Record<AppLang, PersonalizedReading> = {
+    en: {
+      headline: 'Leave no trace — privacy from your chart',
+      blocks: [
+        {
+          label: 'Shadow signal',
+          text: mars && (mars.house === 8 || mars.house === 12)
+            ? `Mars in house ${mars.house} — you prefer discretion; one-tap wipe clears this session locally.`
+            : pluto
+              ? `Pluto in ${signLabel(lang, pluto.sign)} (H${pluto.house ?? '?'}) — deep privacy instinct; session data stays on this device until you wipe.`
+              : 'Session stays on this device until you clear it below.',
+        },
+        { label: 'What we store', text: 'Lounge aliases and readings are not uploaded until R10 chat ships.' },
+        { label: 'Wipe this session', text: 'Tap below to clear vault session keys from this browser.' },
+      ],
+    },
+    ru: {
+      headline: 'Без следа — приватность',
+      blocks: [
+        {
+          label: 'Теневой сигнал',
+          text: mars && (mars.house === 8 || mars.house === 12)
+            ? `Марс в ${mars.house} доме — дискретность; очистка сессии локально.`
+            : pluto
+              ? `Плутон в ${signLabel(lang, pluto.sign)} — инстинкт приватности.`
+              : 'Сессия только на этом устройстве.',
+        },
+        { label: 'Хранение', text: 'Чат загрузится в R10 — пока данные не уходят на сервер.' },
+        { label: 'Стереть сессию', text: 'Кнопка ниже очищает ключи vault в браузере.' },
+      ],
+    },
+    fa: {
+      headline: 'بدون ردپا — حریم خصوصی',
+      blocks: [
+        {
+          label: 'سیگنال سایه',
+          text: mars && (mars.house === 8 || mars.house === 12)
+            ? `مریخ در خانه ${mars.house} — تمایل به محرمانگی؛ پاک‌سازی محلی.`
+            : pluto
+              ? `پلوتو در ${signLabel(lang, pluto.sign)} — غریزه حریم خصوصی.`
+              : 'نشست فقط روی این دستگاه.',
+        },
+        { label: 'ذخیره‌سازی', text: 'چت در R10 — فعلاً داده به سرور نمی‌رود.' },
+        { label: 'پاک‌سازی', text: 'دکمه پایین کلیدهای vault این مرورگر را پاک می‌کند.' },
+      ],
+    },
+    ar: {
+      headline: 'بلا أثر — الخصوصية',
+      blocks: [
+        {
+          label: 'إشارة الظل',
+          text: mars && (mars.house === 8 || mars.house === 12)
+            ? `المريخ في البيت ${mars.house} — تفضيل التكتم.`
+            : pluto
+              ? `بلوتو في ${signLabel(lang, pluto.sign)} — غريزة الخصوصية.`
+              : 'الجلسة على هذا الجهاز فقط.',
+        },
+        { label: 'التخزين', text: 'الدردشة في R10 — لا رفع للخادم حالياً.' },
+        { label: 'مسح الجلسة', text: 'الزر أدناه يمسح مفاتيح vault من المتصفح.' },
+      ],
+    },
+  };
+  return trace[lang];
+}
+
 export default function VaultSectionPage() {
   const params = useParams();
   const raw = typeof params.section === 'string' ? params.section : '';
@@ -540,12 +782,28 @@ export default function VaultSectionPage() {
   const [liveLoading, setLiveLoading] = useState(false);
   const [liveError, setLiveError] = useState<'needProfile' | 'api' | null>(null);
   const [hasLiveApi, setHasLiveApi] = useState(false);
+  const [tier, setTier] = useState<MembershipTier>('free');
+  const [personalizedReading, setPersonalizedReading] = useState<PersonalizedReading | null>(null);
+  const [personalizedLoading, setPersonalizedLoading] = useState(false);
+  const [personalizedError, setPersonalizedError] = useState<'needProfile' | 'api' | null>(null);
+  const [wipeToast, setWipeToast] = useState(false);
 
   useEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
     }
+  }, []);
+
+  useEffect(() => {
+    setTier(loadTier());
+    const onChange = () => setTier(loadTier());
+    window.addEventListener('storage', onChange);
+    window.addEventListener('planet-life-membership-changed', onChange);
+    return () => {
+      window.removeEventListener('storage', onChange);
+      window.removeEventListener('planet-life-membership-changed', onChange);
+    };
   }, []);
 
   const setLang = (l: AppLang) => {
@@ -559,46 +817,82 @@ export default function VaultSectionPage() {
       setHasLiveApi(false);
       setLiveError(null);
       setLiveLoading(false);
+      setPersonalizedReading(null);
+      setPersonalizedError(null);
+      setPersonalizedLoading(false);
       return;
     }
     const sectionData = SECTION_LANGS[lang][raw];
     const idx = sectionData.items.findIndex((i) => i.label === openItem);
     const apiKey = (LIVE_ITEM_API[raw] ?? [])[idx];
-    if (!apiKey) {
-      setHasLiveApi(false);
-      setLiveReading(null);
+    const isPremium = tier === 'premium' || tier === 'vip';
+
+    setPersonalizedReading(null);
+    setPersonalizedError(null);
+    setPersonalizedLoading(false);
+
+    if (apiKey === 'mars') {
+      setHasLiveApi(true);
+      const profile = loadBirthProfile();
+      if (!profile) {
+        setLiveReading(null);
+        setLiveError('needProfile');
+        setLiveLoading(false);
+        return;
+      }
+      let cancelled = false;
+      setLiveLoading(true);
       setLiveError(null);
-      return;
+      fetchVaultMarsReading(profile, lang)
+        .then((res) => {
+          if (!cancelled) setLiveReading(res.reading);
+        })
+        .catch(() => {
+          if (!cancelled) setLiveError('api');
+        })
+        .finally(() => {
+          if (!cancelled) setLiveLoading(false);
+        });
+      return () => {
+        cancelled = true;
+      };
     }
-    setHasLiveApi(true);
-    if (apiKey !== 'mars') return;
 
-    const profile = loadBirthProfile();
-    if (!profile) {
-      setLiveReading(null);
-      setLiveError('needProfile');
-      setLiveLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-    setLiveLoading(true);
+    setHasLiveApi(false);
+    setLiveReading(null);
     setLiveError(null);
-    fetchVaultMarsReading(profile, lang)
-      .then((res) => {
-        if (!cancelled) setLiveReading(res.reading);
-      })
-      .catch(() => {
-        if (!cancelled) setLiveError('api');
-      })
-      .finally(() => {
-        if (!cancelled) setLiveLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [openItem, lang, raw]);
+    setLiveLoading(false);
 
+    if (isPremium && raw === 'lounge' && idx >= 0) {
+      const profile = loadBirthProfile();
+      if (!profile) {
+        setPersonalizedError('needProfile');
+        return;
+      }
+      let cancelled = false;
+      setPersonalizedLoading(true);
+      fetchNatalChart(profile.birth_date, profile.birth_time, profile.location)
+        .then((planets) => {
+          if (cancelled) return;
+          if (!planets) {
+            setPersonalizedError('api');
+            return;
+          }
+          setPersonalizedReading(buildLoungeReading(idx, planets, lang));
+        })
+        .catch(() => {
+          if (!cancelled) setPersonalizedError('api');
+        })
+        .finally(() => {
+          if (!cancelled) setPersonalizedLoading(false);
+        });
+      return () => {
+        cancelled = true;
+      };
+    }
+  }, [openItem, lang, raw, tier]);
+
+  const unlocked = tier === 'premium' || tier === 'vip';
   const t = SECTION_LANGS[lang];
   const rui = READING_UI[lang];
   const dir = HOME_LANGS[lang].dir;
@@ -680,6 +974,9 @@ export default function VaultSectionPage() {
               const itemApiKey = (LIVE_ITEM_API[raw] ?? [])[itemIdx];
               const showLive =
                 isOpen && hasLiveApi && itemApiKey === 'mars' && openItem === item.label;
+              const itemLive = !!itemApiKey || (unlocked && raw === 'lounge');
+              const showPersonalized =
+                isOpen && unlocked && raw === 'lounge' && !showLive;
               return (
                 <div
                   key={item.label}
@@ -725,18 +1022,18 @@ export default function VaultSectionPage() {
                       <span
                         className="fi text-[10px] px-2 py-1 rounded-full"
                         style={{
-                          background: itemApiKey
+                          background: itemLive
                             ? 'rgba(34,197,94,0.12)'
                             : 'rgba(244,114,182,0.1)',
-                          border: itemApiKey
+                          border: itemLive
                             ? '1px solid rgba(34,197,94,0.35)'
                             : '1px solid rgba(244,114,182,0.2)',
-                          color: itemApiKey
+                          color: itemLive
                             ? 'rgba(134,239,172,0.9)'
                             : 'rgba(244,114,182,0.7)',
                         }}
                       >
-                        {itemApiKey ? 'LIVE' : 'R8'}
+                        {itemLive ? 'LIVE' : 'R8'}
                       </span>
                       <svg
                         width="16"
@@ -863,6 +1160,125 @@ export default function VaultSectionPage() {
                             </div>
                           )}
                         </>
+                      ) : showPersonalized ? (
+                        <>
+                          <div
+                            className="fi text-[10px] tracking-[0.2em] uppercase mb-2"
+                            style={{ color: 'rgba(134,239,172,0.75)' }}
+                          >
+                            {rui.liveLabel}
+                          </div>
+                          {personalizedLoading && (
+                            <p className="fi text-xs py-4" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                              {rui.loading}
+                            </p>
+                          )}
+                          {!personalizedLoading && personalizedError === 'needProfile' && (
+                            <div className="mb-3">
+                              <p className="fi text-xs leading-relaxed mb-3" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                                {rui.needProfile}
+                              </p>
+                              <Link
+                                href="/profile"
+                                className="fc text-xs tracking-widest px-4 py-2 rounded-lg inline-flex no-underline"
+                                style={{
+                                  background: 'rgba(244,114,182,0.15)',
+                                  border: '1px solid rgba(244,114,182,0.35)',
+                                  color: '#fce7f3',
+                                }}
+                              >
+                                {rui.goProfile}
+                              </Link>
+                            </div>
+                          )}
+                          {!personalizedLoading && personalizedError === 'api' && (
+                            <p className="fi text-xs leading-relaxed" style={{ color: 'rgba(248,113,113,0.85)' }}>
+                              {rui.apiError}
+                            </p>
+                          )}
+                          {!personalizedLoading && personalizedReading && (
+                            <div className="space-y-3">
+                              <p className="fc text-sm leading-snug" style={{ color: '#fce7f3' }}>
+                                {personalizedReading.headline}
+                              </p>
+                              {personalizedReading.blocks.map((block) => (
+                                <div
+                                  key={block.label}
+                                  className="rounded-lg p-3"
+                                  style={{
+                                    background: 'rgba(0,0,0,0.22)',
+                                    border: '1px solid rgba(244,114,182,0.12)',
+                                  }}
+                                >
+                                  <div
+                                    className="fi text-[10px] tracking-[0.15em] uppercase mb-1.5"
+                                    style={{ color: 'rgba(244,114,182,0.55)' }}
+                                  >
+                                    {block.label}
+                                  </div>
+                                  <p className="fi text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.82)' }}>
+                                    {block.text}
+                                  </p>
+                                </div>
+                              ))}
+                              {itemIdx === 3 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    ['planet-life-vault-session', 'planet-life-vault-alias'].forEach((k) =>
+                                      localStorage.removeItem(k),
+                                    );
+                                    setWipeToast(true);
+                                    window.setTimeout(() => setWipeToast(false), 2000);
+                                  }}
+                                  className="fc text-xs tracking-widest px-4 py-2 rounded-lg w-full"
+                                  style={{
+                                    background: 'rgba(244,114,182,0.12)',
+                                    border: '1px solid rgba(244,114,182,0.35)',
+                                    color: '#fce7f3',
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  {lang === 'fa' ? 'پاک‌سازی نشست' : lang === 'ru' ? 'Стереть сессию' : lang === 'ar' ? 'مسح الجلسة' : 'Wipe session'}
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      ) : unlocked ? (
+                        <>
+                          <div
+                            className="fi text-[10px] tracking-[0.2em] uppercase mb-2 inline-flex items-center gap-1.5"
+                            style={{ color: 'rgba(134,239,172,0.85)' }}
+                          >
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <rect x="5" y="11" width="14" height="9" rx="2" />
+                              <path d="M8 11V7a4 4 0 0 1 7.5-2" />
+                            </svg>
+                            {lock.unlockedBadge}
+                          </div>
+                          <p
+                            className="fi text-xs leading-relaxed mb-2"
+                            style={{ color: 'rgba(255,255,255,0.72)' }}
+                          >
+                            {lock.teaser}
+                          </p>
+                          <p
+                            className="fi text-[11px] leading-relaxed"
+                            style={{ color: 'rgba(255,255,255,0.45)' }}
+                          >
+                            {lock.unlockedNote}
+                          </p>
+                        </>
                       ) : (
                         <>
                           <div
@@ -971,6 +1387,15 @@ export default function VaultSectionPage() {
           </div>
         </div>
       </div>
+      {wipeToast && (
+        <div
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] fi text-sm px-5 py-3 rounded-xl shadow-2xl"
+          style={{ background: '#831843', color: '#fce7f3', border: '1px solid rgba(244,114,182,0.4)' }}
+          role="status"
+        >
+          {lang === 'fa' ? 'نشست پاک شد' : lang === 'ru' ? 'Сессия очищена' : lang === 'ar' ? 'تم مسح الجلسة' : 'Session wiped'}
+        </div>
+      )}
     </AppShell>
   );
 }

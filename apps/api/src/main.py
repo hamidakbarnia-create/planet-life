@@ -13,6 +13,8 @@ from routes.business import router as business_router
 from routes.finance import router as finance_router
 from routes.real_estate import router as real_estate_router
 from routes.vault import router as vault_router
+from routes.pathfinder import router as pathfinder_router
+from routes.world import router as world_router
 from packages.astro_engine.scoring import calculate_activity_score
 from services.chart_data import build_chart_payload
 
@@ -35,6 +37,8 @@ app.include_router(business_router, prefix="/api/business", tags=["business"])
 app.include_router(finance_router, prefix="/api/finance", tags=["finance"])
 app.include_router(real_estate_router, prefix="/api/real-estate", tags=["real-estate"])
 app.include_router(vault_router, prefix="/api/vault", tags=["vault"])
+app.include_router(pathfinder_router, prefix="/api/pathfinder", tags=["pathfinder"])
+app.include_router(world_router, prefix="/api/world", tags=["world"])
 
 
 @app.get("/")

@@ -7,17 +7,25 @@ import { BADGE_STYLES } from '@/lib/synergy';
 import { initials, loadPeople, type Person } from '@/lib/people-storage';
 import { loadAppLang } from '@/lib/calendar-preferences';
 
-export function PeopleHomeRow() {
+export function PeopleHomeRow({ lang: langProp }: { lang?: PeopleLang } = {}) {
   const [people, setPeople] = useState<Person[]>([]);
-  const [lang, setLang] = useState<PeopleLang>('en');
+  const [lang, setLang] = useState<PeopleLang>(langProp ?? 'en');
+
+  // When the parent controls the language (e.g. the landing page), follow it
+  // live so the section title switches with the rest of the page.
+  useEffect(() => {
+    if (langProp) setLang(langProp);
+  }, [langProp]);
 
   useEffect(() => {
-    const stored = loadAppLang();
-    if (stored === 'ru' || stored === 'fa' || stored === 'ar' || stored === 'en') {
-      setLang(stored);
+    if (!langProp) {
+      const stored = loadAppLang();
+      if (stored === 'ru' || stored === 'fa' || stored === 'ar' || stored === 'en') {
+        setLang(stored);
+      }
     }
     setPeople(loadPeople().slice(0, 8));
-  }, []);
+  }, [langProp]);
 
   if (people.length === 0) return null;
 

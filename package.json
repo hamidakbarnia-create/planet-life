@@ -1,0 +1,12 @@
+{
+  "name": "planet-life",
+  "private": true,
+  "scripts": {
+    "astro:compat": "apps\\api\\.venv\\Scripts\\python.exe scripts\\astro_compat_report.py",
+    "test:pre-release": "apps\\api\\.venv\\Scripts\\python.exe -m pytest apps/api/tests -q && npm run test --prefix apps/web && npm run test:e2e --prefix apps/web && npm run astro:compat && npm run build --prefix apps/web",
+    "test:manual-charts": "apps\\api\\.venv\\Scripts\\python.exe scripts\\pre_release_manual_charts.py",
+    "test:api": "python -m pytest apps/api/tests -v",
+    "test:web": "npm run test --prefix apps/web",
+    "test:e2e": "npm run test:e2e --prefix apps/web"
+  }
+}

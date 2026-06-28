@@ -1,3 +1,5 @@
+import type { AstroLang } from './astrology-i18n';
+import { trAspect, trPlanet } from './astrology-i18n';
 import type { BirthProfile } from './birth-profile';
 import { fetchDayScore } from './calendar-scores';
 import { fetchNatalChart } from './chart-api';
@@ -185,8 +187,19 @@ export async function analyzeSynergy(
   return { ...syn, bestDays };
 }
 
-export function formatAspectLabel(row: SynastryAspect) {
-  const mp = row.myPlanet.replace('_', ' ');
-  const tp = row.theirPlanet.replace('_', ' ');
-  return `Your ${mp} ${row.aspect} their ${tp} · orb ${row.orb.toFixed(1)}°`;
+export function formatAspectLabel(row: SynastryAspect, lang: AstroLang = 'en') {
+  const mp = trPlanet(row.myPlanet, lang);
+  const tp = trPlanet(row.theirPlanet, lang);
+  const asp = trAspect(row.aspect, lang);
+  const orb = row.orb.toFixed(1);
+  switch (lang) {
+    case 'ru':
+      return `Ваш ${mp} ${asp} их ${tp} · орб ${orb}°`;
+    case 'fa':
+      return `${mp}ِ شما ${asp} با ${tp}ِ او · فاصله ${orb}°`;
+    case 'ar':
+      return `${mp} لديك ${asp} ${tp} لدى الطرف الآخر · مدار ${orb}°`;
+    default:
+      return `Your ${mp} ${asp} their ${tp} · orb ${orb}°`;
+  }
 }

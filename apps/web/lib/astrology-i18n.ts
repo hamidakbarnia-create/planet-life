@@ -162,12 +162,12 @@ function normalizePlanetKey(name: string): string {
     .join('_');
 }
 
-function trPlanet(name: string, lang: AstroLang): string {
+export function trPlanet(name: string, lang: AstroLang): string {
   const key = normalizePlanetKey(name);
   return PLANETS[key]?.[lang] ?? name;
 }
 
-function trAspect(name: string, lang: AstroLang): string {
+export function trAspect(name: string, lang: AstroLang): string {
   return ASPECTS[name.toLowerCase()]?.[lang] ?? name;
 }
 
@@ -304,10 +304,11 @@ export function translateRecommendation(text: string, lang: AstroLang): string {
         const act = trActivityLabel(m[1], l);
         const focus = trFocus(m[2], l);
         return {
+          en: `Strong window for ${act}: transits support ${focus}. Move decisively while monitoring details.`,
           ru: `Сильное окно для ${act}: транзиты поддерживают ${focus}. Действуйте решительно, следя за деталями.`,
           fa: `پنجره قوی برای ${act}: ترانزیت‌ها از ${focus} حمایت می‌کنند. با اطمینان پیش بروید و جزئیات را رصد کنید.`,
           ar: `نافذة قوية لـ${act}: العبورات تدعم ${focus}. تحرك بحزم مع مراقبة التفاصيل.`,
-        }[l];
+        }[l] ?? m[0] ?? '';
       },
     },
     {
@@ -315,11 +316,13 @@ export function translateRecommendation(text: string, lang: AstroLang): string {
       build: (m, l) => {
         const act = trActivityLabel(m[1], l);
         const focus = trFocus(m[2], l);
-        return {
+        const translated = {
+          en: `Good conditions for ${act}. Favor core priorities around ${focus}; keep contingency plans light.`,
           ru: `Хорошие условия для ${act}. Отдайте приоритет ${focus}; держите резервные планы простыми.`,
           fa: `شرایط خوب برای ${act}. اولویت را به ${focus} بدهید؛ برنامه‌های اضطراری را سبک نگه دارید.`,
           ar: `ظروف جيدة لـ${act}. أعطِ الأولوية لـ${focus}؛ اجعل خطط الطوارئ بسيطة.`,
         }[l];
+        return translated ?? m[0] ?? '';
       },
     },
     {
@@ -327,11 +330,13 @@ export function translateRecommendation(text: string, lang: AstroLang): string {
       build: (m, l) => {
         const act = trActivityLabel(m[1], l);
         const focus = trFocus(m[2], l);
-        return {
+        const translated = {
+          en: `Neutral-to-mixed timing. Viable for ${act} if ${focus} is well-prepared; avoid unnecessary risk.`,
           ru: `Нейтральное или смешанное время. Подходит для ${act}, если ${focus} хорошо подготовлены; избегайте лишнего риска.`,
           fa: `زمان‌بندی خنثی تا مختلط. برای ${act} مناسب است اگر ${focus} خوب آماده باشد؛ از ریسک غیرضروری اجتناب کنید.`,
           ar: `توقيت محايد إلى مختلط. مجدٍ لـ${act} إذا كان ${focus} جيد الإعداد؛ تجنب المخاطر غير الضرورية.`,
         }[l];
+        return translated ?? m[0] ?? '';
       },
     },
     {
@@ -339,11 +344,13 @@ export function translateRecommendation(text: string, lang: AstroLang): string {
       build: (m, l) => {
         const act = trActivityLabel(m[1], l);
         const focus = trFocus(m[2], l);
-        return {
+        const translated = {
+          en: `Friction in the sky. Delay or restructure ${act} unless urgent; shore up ${focus} before committing.`,
           ru: `Трение в небесах. Отложите или пересмотрите ${act}, если это не срочно; укрепите ${focus} перед обязательствами.`,
           fa: `اصطکاک در آسمان. ${act} را به تعویق بیندازید یا بازسازی کنید مگر فوری باشد؛ قبل از تعهد ${focus} را تقویت کنید.`,
           ar: `احتكاك في السماء. أجل أو أعد هيكلة ${act} ما لم يكن عاجلاً؛ عزز ${focus} قبل الالتزام.`,
         }[l];
+        return translated ?? m[0] ?? '';
       },
     },
     {
@@ -351,11 +358,13 @@ export function translateRecommendation(text: string, lang: AstroLang): string {
       build: (m, l) => {
         const act = trActivityLabel(m[1], l);
         const focus = trFocus(m[2], l);
-        return {
+        const translated = {
+          en: `Poor strategic timing for ${act}. Defer major moves; focus on research and stabilization instead of ${focus}.`,
           ru: `Слабое стратегическое время для ${act}. Отложите крупные шаги; сосредоточьтесь на исследовании и стабилизации вместо ${focus}.`,
           fa: `زمان‌بندی استراتژیک ضعیف برای ${act}. حرکت‌های بزرگ را به تعویق بیندازید؛ به جای ${focus} روی تحقیق و تثبیت تمرکز کنید.`,
           ar: `توقيت استراتيجي ضعيف لـ${act}. أجل الخطوات الكبرى؛ ركز على البحث والاستقرار بدلاً من ${focus}.`,
         }[l];
+        return translated ?? m[0] ?? '';
       },
     },
   ];

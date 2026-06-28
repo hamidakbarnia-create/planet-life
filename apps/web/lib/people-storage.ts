@@ -35,14 +35,20 @@ export function loadPeople(): Person[] {
   }
 }
 
-export function savePeople(people: Person[]): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(people));
+export function savePeople(people: Person[]): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(people));
+    return true;
+  } catch {
+    // Most likely a quota error from oversized photos.
+    return false;
+  }
 }
 
 export function addPerson(
   data: Omit<Person, 'id' | 'createdAt' | 'synergyScore' | 'synergyBadge' | 'synergyUpdatedAt'>
-): Person {
+): Person | null {
   const person: Person = {
     ...data,
     id: crypto.randomUUID(),
@@ -50,7 +56,7 @@ export function addPerson(
   };
   const people = loadPeople();
   people.push(person);
-  savePeople(people);
+  if (!savePeople(people)) return null;
   return person;
 }
 
@@ -59,7 +65,7 @@ export function updatePerson(id: string, patch: Partial<Person>): Person | null 
   const idx = people.findIndex((p) => p.id === id);
   if (idx < 0) return null;
   people[idx] = { ...people[idx], ...patch };
-  savePeople(people);
+  if (!savePeople(people)) return null;
   return people[idx];
 }
 

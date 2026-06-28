@@ -16,6 +16,7 @@ export function CityAutocomplete({
   placeholder,
   searchingLabel,
   noResultsLabel,
+  lang = 'en',
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -23,6 +24,7 @@ export function CityAutocomplete({
   placeholder: string;
   searchingLabel: string;
   noResultsLabel: string;
+  lang?: string;
 }) {
   const [cities, setCities] = useState<CityOption[]>([]);
   const [show, setShow] = useState(false);
@@ -47,14 +49,14 @@ export function CityAutocomplete({
     setLoading(true);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/cities?q=${encodeURIComponent(q)}`);
+        const res = await fetch(`/api/cities?q=${encodeURIComponent(q)}&lang=${lang}`);
         setCities(await res.json());
       } catch {
         setCities([]);
       }
       setLoading(false);
     }, 300);
-  }, []);
+  }, [lang]);
 
   return (
     <div ref={ref} className="relative">

@@ -6,6 +6,7 @@ import { AppShell } from '@/components/AppShell';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
 import type { AppLang } from '@/lib/app-settings';
+import { loadTier, saveTier, type MembershipTier } from '@/lib/membership';
 
 // /upgrade — pricing & tier comparison page.
 // This is the destination for every Vault unlock CTA, every paywalled
@@ -111,7 +112,7 @@ const LANGS: Record<AppLang, Copy> = {
         features: [
           'Daily cosmic score',
           '7-day calendar window',
-          '3 Oracle questions per day',
+          '3 questions per day',
           '2 people in your circle',
           'Single calendar (Gregorian)',
         ],
@@ -127,7 +128,7 @@ const LANGS: Record<AppLang, Copy> = {
             body: 'See the next week ahead so you can plan small things — meetings, posts, workouts — but not the full year-level pattern.',
           },
           {
-            heading: '3 Oracle questions / day',
+            heading: '3 questions / day',
             body: 'Ask three concrete questions per day (e.g. “Is tomorrow good to sign?”) and get a scored answer based on your chart.',
           },
           {
@@ -143,7 +144,7 @@ const LANGS: Record<AppLang, Copy> = {
         yearly: '320 AED · $89',
         cta: 'Go Pro',
         features: [
-          'Unlimited Oracle questions',
+          'Unlimited questions',
           'Full year calendar (macro · meso · micro)',
           '10 people in your circle',
           'Real-time golden-hour notifications',
@@ -154,8 +155,8 @@ const LANGS: Record<AppLang, Copy> = {
           'Founders, traders, freelancers, anyone who plans their week and wants their timing to actually work.',
         details: [
           {
-            heading: 'Unlimited Oracle',
-            body: 'Ask as many questions as you want — “best hour to send the deck”, “should I sign Tuesday or Thursday”, “is this flight day OK”. The Oracle never throttles you.',
+            heading: 'Unlimited questions',
+            body: 'Ask as many questions as you want — “best hour to send the deck”, “should I sign Tuesday or Thursday”, “is this flight day OK”. We never throttle you.',
           },
           {
             heading: 'Three-layer calendar',
@@ -323,7 +324,7 @@ const LANGS: Record<AppLang, Copy> = {
         features: [
           'Космическая оценка дня',
           'Календарь на 7 дней',
-          '3 вопроса Оракулу в день',
+          '3 вопроса в день',
           '2 человека в вашем круге',
           'Григорианский календарь',
         ],
@@ -339,7 +340,7 @@ const LANGS: Record<AppLang, Copy> = {
             body: 'Видите ближайшую неделю — встречи, посты, тренировки. Полная годовая картина — в Pro.',
           },
           {
-            heading: '3 вопроса Оракулу в день',
+            heading: '3 вопроса в день',
             body: 'Три конкретных вопроса с балльным ответом: «Хорошо ли подписать завтра?», «Когда писать инвестору?»',
           },
           {
@@ -355,7 +356,7 @@ const LANGS: Record<AppLang, Copy> = {
         yearly: '320 AED · $89',
         cta: 'Перейти на Pro',
         features: [
-          'Безлимит вопросов Оракулу',
+          'Безлимитные вопросы',
           'Календарь на год — макро/мезо/микро',
           '10 человек в круге',
           'Уведомления о золотых часах',
@@ -535,7 +536,7 @@ const LANGS: Record<AppLang, Copy> = {
         features: [
           'امتیاز کیهانی روزانه',
           'تقویم ۷ روز جلو',
-          'روزی ۳ سوال از وحی',
+          '۳ پرسش در روز',
           '۲ نفر تو حلقه‌ت',
           'فقط تقویم میلادی',
         ],
@@ -551,7 +552,7 @@ const LANGS: Record<AppLang, Copy> = {
             body: 'هفته جلو رو می‌بینی برای برنامه‌های کوچیک — جلسه، پست، تمرین. الگوی کل سال تو Pro هست.',
           },
           {
-            heading: 'روزی ۳ سوال',
+            heading: '۳ پرسش در روز',
             body: 'سه تا سوال مشخص با جواب نمره‌دار: «امضا فردا چطوره؟»، «کی پیام بدم به سرمایه‌گذار؟»',
           },
           {
@@ -567,7 +568,7 @@ const LANGS: Record<AppLang, Copy> = {
         yearly: '۳۲۰ درهم · ۸۹ دلار',
         cta: 'برو Pro',
         features: [
-          'سوال نامحدود از وحی',
+          'پرسش‌های نامحدود',
           'تقویم سال کامل (ماکرو/میسو/میکرو)',
           '۱۰ نفر تو حلقه‌ت',
           'هشدار ساعت طلایی',
@@ -578,7 +579,7 @@ const LANGS: Record<AppLang, Copy> = {
           'بنیان‌گذار، تریدر، فریلنسر — هر کی هفته‌ش رو برنامه‌ریزی می‌کنه و می‌خواد تایمینگش واقعاً جواب بده.',
         details: [
           {
-            heading: 'سوال نامحدود',
+            heading: 'پرسش‌های نامحدود',
             body: 'هر چقدر بخوای سوال بپرس: «بهترین ساعت برای فرستادن پرزنتیشن»، «سه‌شنبه یا پنج‌شنبه برای امضا»، «این پرواز خوبه؟»',
           },
           {
@@ -747,7 +748,7 @@ const LANGS: Record<AppLang, Copy> = {
         features: [
           'درجة اليوم الكونية',
           'تقويم 7 أيام',
-          '3 أسئلة للعرّاف يومياً',
+          '٣ أسئلة يومياً',
           'شخصان في دائرتك',
           'تقويم ميلادي فقط',
         ],
@@ -756,7 +757,7 @@ const LANGS: Record<AppLang, Copy> = {
         details: [
           { heading: 'درجة كونية يومية', body: 'كل صباح نحسب درجة من 0 إلى 100 من العبور الفعلي على خريطتك. رقم واحد يخبركِ: أخضر، محايد، أم احتكاك.' },
           { heading: 'تقويم 7 أيام', body: 'ترين الأسبوع القادم لخطط صغيرة. النمط السنوي الكامل في Pro.' },
-          { heading: '3 أسئلة يومياً', body: 'ثلاثة أسئلة محدّدة بإجابة بدرجة. مثال: «هل غداً مناسب للتوقيع؟»' },
+          { heading: '٣ أسئلة يومياً', body: 'ثلاثة أسئلة محدّدة بإجابة بدرجة. مثال: «هل غداً مناسب للتوقيع؟»' },
           { heading: 'شخصان', body: 'أضيفي شريكاً وصديقة لرؤية نوافذ التوافق الأساسية.' },
         ],
       },
@@ -767,7 +768,7 @@ const LANGS: Record<AppLang, Copy> = {
         yearly: '320 درهم · 89 دولار',
         cta: 'الترقية إلى Pro',
         features: [
-          'أسئلة عرّاف غير محدودة',
+          'أسئلة غير محدودة',
           'تقويم سنوي كامل',
           '10 أشخاص في دائرتك',
           'تنبيهات الساعة الذهبية',
@@ -878,12 +879,14 @@ export default function UpgradePage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successCode, setSuccessCode] = useState<string | null>(null);
+  const [currentTier, setCurrentTier] = useState<MembershipTier>('free');
 
   useEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
     }
+    setCurrentTier(loadTier());
     if (typeof window !== 'undefined') {
       try {
         const raw = localStorage.getItem('planet-life-upgrade-reservations');
@@ -969,6 +972,10 @@ export default function UpgradePage() {
       next.add(reserveTier);
       return next;
     });
+    // Demo activation: until real Stripe checkout (R3), completing the
+    // reservation grants the chosen tier so paywalled features unlock now.
+    saveTier(reserveTier);
+    setCurrentTier(reserveTier);
     setSuccessCode(code);
     setSubmitting(false);
   };
@@ -1067,6 +1074,7 @@ export default function UpgradePage() {
               const theme = TIER_THEME[key];
               const price = cycle === 'monthly' ? tier.monthly : tier.yearly;
               const sent = reservedTiers.has(key);
+              const isCurrent = currentTier === key && key !== 'free';
               return (
                 <div
                   key={key}
@@ -1255,15 +1263,17 @@ export default function UpgradePage() {
                       cursor: key === 'free' ? 'default' : 'pointer',
                     }}
                   >
-                    {sent
-                      ? lang === 'fa'
-                        ? 'دوباره رزرو ✓'
-                        : lang === 'ar'
-                          ? 'محجوز ✓ — احجزي مرة أخرى'
-                          : lang === 'ru'
-                            ? 'Забронировано ✓'
-                            : 'Reserved ✓'
-                      : tier.cta}
+                    {isCurrent
+                      ? `${t.current} ✓`
+                      : sent
+                        ? lang === 'fa'
+                          ? 'دوباره رزرو ✓'
+                          : lang === 'ar'
+                            ? 'محجوز ✓ — احجزي مرة أخرى'
+                            : lang === 'ru'
+                              ? 'Забронировано ✓'
+                              : 'Reserved ✓'
+                        : tier.cta}
                   </button>
                 </div>
               );

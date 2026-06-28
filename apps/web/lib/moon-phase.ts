@@ -61,12 +61,12 @@ export const MOON_PHASE_NAMES: Record<string, Record<MoonPhaseKey, string>> = {
   },
   fa: {
     new_moon: 'ماه نو',
-    waxing_crescent: 'هلال رو به افزایش',
-    first_quarter: 'تربیع اول',
-    waxing_gibbous: 'محدب رو به افزایش',
+    waxing_crescent: 'هلال رو به رشد',
+    first_quarter: 'نیم‌ماه اول',
+    waxing_gibbous: 'ماه رو به کمال',
     full_moon: 'ماه کامل',
-    waning_gibbous: 'محدب رو به کاهش',
-    last_quarter: 'تربیع آخر',
+    waning_gibbous: 'ماه رو به کاهش',
+    last_quarter: 'نیم‌ماه پایانی',
     waning_crescent: 'هلال رو به کاهش',
   },
   ar: {

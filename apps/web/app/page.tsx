@@ -6,6 +6,8 @@ import { PeopleHomeRow } from '@/components/PeopleHomeRow';
 
 type Lang = 'en' | 'ru' | 'fa' | 'ar';
 
+const LANG_OPTIONS: Lang[] = ['en', 'ru', 'fa', 'ar'];
+
 const LANDING: Record<
   Lang,
   {
@@ -156,6 +158,11 @@ export default function Home() {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
+  const changeLang = (nextLang: Lang) => {
+    localStorage.setItem('planet-life-lang', nextLang);
+    setLang(nextLang);
+  };
+
   const t = LANDING[lang];
   const fontFamily =
     lang === 'fa'
@@ -198,6 +205,22 @@ export default function Home() {
           >
             {t.nav.cta}
           </Link>
+          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] p-1">
+            {LANG_OPTIONS.map((code) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => changeLang(code)}
+                className="rounded-full px-2.5 py-1 text-[11px] font-medium uppercase transition"
+                style={{
+                  background: lang === code ? 'rgba(251,191,36,0.95)' : 'transparent',
+                  color: lang === code ? '#0A0E1A' : 'rgba(255,255,255,0.55)',
+                }}
+              >
+                {code}
+              </button>
+            ))}
+          </div>
         </div>
       </nav>
 
@@ -225,7 +248,7 @@ export default function Home() {
         </div>
       </section>
 
-      <PeopleHomeRow />
+      <PeopleHomeRow lang={lang} />
 
       <section id="features" className="px-8 py-20 max-w-5xl mx-auto">
         <h2 className="text-2xl font-semibold text-center mb-12">{t.domainsTitle}</h2>
