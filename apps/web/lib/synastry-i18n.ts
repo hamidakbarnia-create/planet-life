@@ -201,12 +201,12 @@ export function computeProfileInsightAreas(
     const set = new Set(section.planets);
     let score = profile.baseScore;
     for (const h of harmony) {
-      if (set.has(h.myPlanet) || set.has(h.theirPlanet)) {
+      if (set.has(h.myPlanet as any) || set.has(h.theirPlanet as any)) {
         score += section.harmonyWeight * orbStrength(h.orb);
       }
     }
     for (const t of tension) {
-      if (set.has(t.myPlanet) || set.has(t.theirPlanet)) {
+      if (set.has(t.myPlanet as any) || set.has(t.theirPlanet as any)) {
         score -= section.tensionWeight * orbStrength(t.orb);
       }
     }
@@ -811,3 +811,4 @@ export const LAYER_LABELS: Record<AppLang, { story: string; strength: string; ca
   fa: { story: 'داستان این زاویه', strength: 'نقطه قوت', care: 'مراقبت', more: 'ریز زوایا' },
   ar: { story: 'قصة هذا الجانب', strength: 'نقطة قوة', care: 'انتباه', more: 'جوانب إضافية' },
 };
+

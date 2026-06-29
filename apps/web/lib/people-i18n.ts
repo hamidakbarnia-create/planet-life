@@ -1,5 +1,16 @@
 export type PeopleLang = 'en' | 'ru' | 'fa' | 'ar';
 
+import type { SynergyBadge } from './people-storage';
+
+export type BadgeLabelMap = Record<'aligned' | 'caution' | 'tension', string>;
+
+export function getBadgeLabel(badges: BadgeLabelMap, badge: SynergyBadge): string {
+  if (badge === 'aligned' || badge === 'caution' || badge === 'tension') {
+    return badges[badge];
+  }
+  return String(badge);
+}
+
 export const PEOPLE_LANGS = {
   en: {
     dir: 'ltr' as const,

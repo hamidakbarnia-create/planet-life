@@ -31,13 +31,13 @@ export const PROFILE_INTELLIGENCE_DIMENSIONS: Record<
     { key: 'innovation', planets: ['jupiter', 'mercury', 'sun'], icon: '✦' },
     { key: 'negotiation', planets: ['mercury', 'venus', 'jupiter'], icon: '⇄' },
     { key: 'ownership', planets: ['saturn', 'sun', 'mars'], icon: '⬡' },
-    { key: 'exit_strategy', planets: ['saturn', 'jupiter', 'pluto'], icon: '↗' },
+    { key: 'exit_strategy', planets: ['saturn', 'jupiter', 'mars'], icon: '↗' },
   ],
   investor: [
     { key: 'governance', planets: ['saturn', 'sun', 'jupiter'], icon: '⬢' },
     { key: 'transparency', planets: ['mercury', 'saturn', 'jupiter'], icon: '◎' },
     { key: 'capital_growth', planets: ['jupiter', 'venus', 'saturn'], icon: '↗' },
-    { key: 'exit_timing', planets: ['saturn', 'jupiter', 'pluto'], icon: '⏱' },
+    { key: 'exit_timing', planets: ['saturn', 'jupiter', 'mars'], icon: '⏱' },
     { key: 'board_dynamics', planets: ['sun', 'saturn', 'mercury'], icon: '⊞' },
   ],
   client: [

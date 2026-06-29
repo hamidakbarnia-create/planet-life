@@ -9,7 +9,7 @@ import { HOME_LANGS } from '@/lib/home-i18n';
 import { PersonAvatar } from '@/components/PersonAvatar';
 import { getBirthProfile } from '@/lib/birth-profile';
 import { saveAppLang } from '@/lib/calendar-preferences';
-import { PEOPLE_LANGS, type PeopleLang } from '@/lib/people-i18n';
+import { PEOPLE_LANGS, getBadgeLabel, type PeopleLang } from '@/lib/people-i18n';
 import { getPerson, updatePerson } from '@/lib/people-storage';
 import { resolveRelationshipProfileStrict } from '@/lib/relationship-profile';
 import { relationshipProfileLabel } from '@/lib/relationship-profile-i18n';
@@ -146,7 +146,7 @@ export default function PersonSynergyPage() {
           <SynergyIntelligenceDashboard
             view={dashboardView}
             lang={lang}
-            badgeLabel={t.badges[dashboardView.overall.badge]}
+            badgeLabel={getBadgeLabel(t.badges, dashboardView.overall.badge)}
             dir={t.dir}
           />
         )}

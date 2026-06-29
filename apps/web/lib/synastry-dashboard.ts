@@ -19,7 +19,8 @@ import {
   profileIntelligenceSectionTitle,
 } from './synastry-dashboard-i18n';
 import type { SynastryReason, SynastryReasoning } from './synastry-reasoning';
-import type { SynergyBadge, SynergyResult, SynastryAspect } from './synergy';
+import type { SynergyResult, SynastryAspect } from './synergy';
+import type { SynergyBadge } from './people-storage';
 
 const PLANET_CONTEXT_HOUSE: Record<string, number> = {
   sun: 5,
@@ -94,12 +95,12 @@ function computeDimensionPct(
   const set = new Set(dimension.planets);
   let score = profile.baseScore;
   for (const h of harmony) {
-    if (set.has(h.myPlanet) || set.has(h.theirPlanet)) {
+    if (set.has(h.myPlanet as any) || set.has(h.theirPlanet as any)) {
       score += 11 * orbStrength(h.orb);
     }
   }
   for (const t of tension) {
-    if (set.has(t.myPlanet) || set.has(t.theirPlanet)) {
+    if (set.has(t.myPlanet as any) || set.has(t.theirPlanet as any)) {
       score -= 12 * orbStrength(t.orb);
     }
   }
@@ -321,3 +322,6 @@ export function dashboardContainsBusinessIntelligence(view: SynergyDashboardView
 export function dashboardSectionLabels(lang: AppLang) {
   return DASHBOARD_SECTION_LABELS[lang] ?? DASHBOARD_SECTION_LABELS.en;
 }
+
+
+
