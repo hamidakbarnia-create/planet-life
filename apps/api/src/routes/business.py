@@ -5,11 +5,11 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from packages.astro_engine.scoring import calculate_activity_score
+from packages.astro_engine.scoring_context import CONTEXT_ASK_ELECTIONAL
+from services.scoring_pipeline import score_with_context
 from services.chart_data import (
     ChartComputationError,
     PlacidusLatitudeError,
-    build_chart_payload,
     compute_birth_chart,
     preview_birth_location,
 )
@@ -49,6 +49,9 @@ class BusinessAnalysisRequest(BaseModel):
     zodiac: str = "tropical"
     latitude: float | None = None
     longitude: float | None = None
+    evaluation_location: str | None = None
+    evaluation_latitude: float | None = None
+    evaluation_longitude: float | None = None
     country: str | None = None
     node_type: str = "mean"  # mean | true — Astro-Seek default reference uses Mean Node
 
@@ -56,12 +59,19 @@ class BusinessAnalysisRequest(BaseModel):
 async def analyze_business(request: BusinessAnalysisRequest):
     action = request.action_type.lower().strip()
     try:
-        natal, transit = build_chart_payload(
+        result, _, transit = score_with_context(
             birth_date=request.birth_date,
             birth_time=request.birth_time,
             location=request.location,
             target_date=request.target_date,
             target_time=request.target_time,
+            action_type=action,
+            context=CONTEXT_ASK_ELECTIONAL,
+            latitude=request.latitude,
+            longitude=request.longitude,
+            evaluation_location=request.evaluation_location,
+            evaluation_latitude=request.evaluation_latitude,
+            evaluation_longitude=request.evaluation_longitude,
             house_system=request.house_system,
             zodiac=request.zodiac,
         )
@@ -71,14 +81,11 @@ async def analyze_business(request: BusinessAnalysisRequest):
     except Exception as e:
         log_chart_error("computation", str(e), location=request.location)
         raise HTTPException(status_code=503, detail=f"Chart computation failed: {e}")
-    try:
-        result = calculate_activity_score(natal, transit, action)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Scoring failed: {e}")
     return {
         "executive": result["executive"],
         "strategic": result["strategic"],
         "technical": result["technical"],
+        "location_context": transit.get("evaluation", {}),
     }
 
 @router.post("/chart")

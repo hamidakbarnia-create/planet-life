@@ -10,6 +10,17 @@ import { loadBirthProfile } from '@/lib/birth-profile';
 import type { BirthProfile } from '@/lib/birth-profile';
 import { API_BASE } from '@/lib/calendar-scores';
 import {
+  ActionLocationPicker,
+  canScoreWithLocation,
+} from '@/components/ActionLocationPicker';
+import {
+  buildScoringLocationPayload,
+  formatCalculatedFor,
+  requiresTargetLocation,
+  type LocationRole,
+  type UserLocation,
+} from '@/lib/user-locations';
+import {
   ORACLE_MODULES,
   buildOracleAnswer,
   findModule,
@@ -42,6 +53,8 @@ const ORACLE_LANGS: Record<
     back: string;
     noProfile: string;
     goProfile: string;
+    noCurrentLocation: string;
+    calculatedFor: string;
     history: string;
     historyEmpty: string;
     clearHistory: string;
@@ -64,6 +77,9 @@ const ORACLE_LANGS: Record<
     noProfile:
       'Save your birth date, time and city in Profile first — the answer is built from your natal chart.',
     goProfile: 'Go to Profile',
+    noCurrentLocation:
+      'Add your current living city in Profile, or search where this action happens.',
+    calculatedFor: 'Calculated for',
     history: 'Recent questions',
     historyEmpty: 'No questions yet. Try one above.',
     clearHistory: 'Clear',
@@ -86,6 +102,9 @@ const ORACLE_LANGS: Record<
     noProfile:
       'ابتدا تاریخ، ساعت و شهر تولدت رو در پروفایل ذخیره کن — پاسخ بر اساس چارت تولدت ساخته می‌شود.',
     goProfile: 'برو به پروفایل',
+    noCurrentLocation:
+      'شهر محل زندگی فعلی را در پروفایل اضافه کن، یا محل انجام این کار را جستجو کن.',
+    calculatedFor: 'محاسبه‌شده برای',
     history: 'سوال‌های اخیر',
     historyEmpty: 'هنوز سوالی نپرسیدی. بالا یکی رو امتحان کن.',
     clearHistory: 'پاک کن',
@@ -108,6 +127,9 @@ const ORACLE_LANGS: Record<
     noProfile:
       'Сначала сохраните дату, время и город рождения в Профиле — ответ строится по вашей натальной карте.',
     goProfile: 'В профиль',
+    noCurrentLocation:
+      'Добавьте текущий город в Профиле или найдите город, где произойдёт действие.',
+    calculatedFor: 'Расчёт для',
     history: 'Недавние вопросы',
     historyEmpty: 'Пока вопросов нет. Попробуйте сверху.',
     clearHistory: 'Очистить',
@@ -130,6 +152,9 @@ const ORACLE_LANGS: Record<
     noProfile:
       'احفظ تاريخ ووقت ومدينة ميلادك في الملف الشخصي أولاً — تُبنى الإجابة من خريطة ميلادك.',
     goProfile: 'الذهاب للملف',
+    noCurrentLocation:
+      'أضف مدينة إقامتك الحالية في الملف، أو ابحث عن مكان حدوث الإجراء.',
+    calculatedFor: 'محسوب لـ',
     history: 'الأسئلة الأخيرة',
     historyEmpty: 'لا توجد أسئلة بعد. جرّب واحدًا أعلاه.',
     clearHistory: 'مسح',
@@ -152,6 +177,14 @@ interface OracleHistoryEntry {
   time: string | null;
   score: number | null;
   band: 'gold' | 'green' | 'yellow' | 'red' | 'unknown';
+  locationContext?: {
+    city: string;
+    country?: string;
+    role: LocationRole;
+    latitude?: number;
+    longitude?: number;
+  };
+  calculatedFor?: string;
 }
 
 function loadHistory(): OracleHistoryEntry[] {
@@ -225,6 +258,9 @@ export default function OracleAskPage() {
   const [score, setScore] = useState<number | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [history, setHistory] = useState<OracleHistoryEntry[]>(() => loadHistory());
+  const [questionLocation, setQuestionLocation] = useState<UserLocation | null>(null);
+  const [locationRole, setLocationRole] = useState<LocationRole>('current');
+  const [calculatedFor, setCalculatedFor] = useState<string | null>(null);
 
   const t = ORACLE_LANGS[lang];
   const homeNav = HOME_LANGS[lang].nav;
@@ -240,6 +276,21 @@ export default function OracleAskPage() {
     localStorage.setItem('planet-life-lang', l);
   };
 
+  useEffect(() => {
+    if (!profile || !selectedQuestion) return;
+    if (requiresTargetLocation(selectedModule ?? undefined)) {
+      setQuestionLocation(null);
+      setLocationRole('target');
+      return;
+    }
+    if (profile.current_location?.confirmed && profile.current_location.city) {
+      setQuestionLocation(profile.current_location);
+      setLocationRole('current');
+    } else {
+      setQuestionLocation(null);
+    }
+  }, [profile, selectedQuestion, selectedModule, selectedQuestionId]);
+
   const reset = () => {
     setSelectedModule(null);
     setSelectedQuestionId(null);
@@ -247,13 +298,20 @@ export default function OracleAskPage() {
     setTime('');
     setScore(null);
     setHasAnswered(false);
+    setQuestionLocation(null);
+    setCalculatedFor(null);
   };
 
   const handleAsk = async () => {
     if (!profile || !selectedQuestion) return;
+    if (!canScoreWithLocation(profile, questionLocation)) return;
+    const locFields = buildScoringLocationPayload(profile, questionLocation);
+    if (!locFields) return;
+
     setLoading(true);
     setHasAnswered(false);
     setScore(null);
+    setCalculatedFor(null);
     try {
       const res = await fetch(`${API_BASE}/api/business/analyze`, {
         method: 'POST',
@@ -261,10 +319,10 @@ export default function OracleAskPage() {
         body: JSON.stringify({
           birth_date: profile.birth_date,
           birth_time: profile.birth_time,
-          location: profile.location,
           action_type: selectedQuestion.actionType,
           target_date: date,
           ...(time ? { target_time: time } : {}),
+          ...locFields,
           ...chartPreferenceFields(),
         }),
       });
@@ -272,8 +330,14 @@ export default function OracleAskPage() {
       const s: number | null =
         typeof data?.executive?.score === 'number' ? data.executive.score : null;
       setScore(s);
+      const evalLabel =
+        data?.location_context?.calculated_for ??
+        data?.location_context?.evaluation_location ??
+        locFields.evaluation_location;
+      setCalculatedFor(evalLabel);
       const answer = buildOracleAnswer(selectedQuestion, s, date, time || undefined, lang);
       const historyOrdinal = history.length + 1;
+      const activeLoc = questionLocation ?? profile.current_location!;
       const entry: OracleHistoryEntry = {
         id: `${selectedQuestion.id}-${date}-${time || 'day'}-${historyOrdinal}`,
         ts: historyOrdinal,
@@ -283,6 +347,14 @@ export default function OracleAskPage() {
         time: time || null,
         score: s,
         band: answer.band,
+        calculatedFor: evalLabel,
+        locationContext: {
+          city: activeLoc.city,
+          country: activeLoc.country,
+          role: locationRole,
+          latitude: activeLoc.latitude,
+          longitude: activeLoc.longitude,
+        },
       };
       const next = [entry, ...history];
       setHistory(next);
@@ -470,9 +542,36 @@ export default function OracleAskPage() {
                     />
                   </div>
                 )}
+                {profile && (
+                  <ActionLocationPicker
+                    profile={profile}
+                    lang={lang}
+                    value={questionLocation}
+                    onChange={(loc, role) => {
+                      setQuestionLocation(loc);
+                      setLocationRole(role);
+                    }}
+                    requireTarget={requiresTargetLocation(selectedModule ?? undefined)}
+                  />
+                )}
+                {!canScoreWithLocation(profile!, questionLocation) && (
+                  <p
+                    className="fi text-xs"
+                    style={{ color: 'rgba(251,146,60,0.9)' }}
+                  >
+                    {t.noCurrentLocation}{' '}
+                    <Link href="/profile" style={{ color: '#fbbf24' }}>
+                      {t.goProfile}
+                    </Link>
+                  </p>
+                )}
                 <button
                   type="button"
-                  disabled={!hasProfile || loading}
+                  disabled={
+                    !hasProfile ||
+                    loading ||
+                    !canScoreWithLocation(profile!, questionLocation)
+                  }
                   onClick={handleAsk}
                   className="w-full fc py-3 rounded-xl text-sm tracking-wide disabled:opacity-40"
                   style={{
@@ -524,6 +623,14 @@ export default function OracleAskPage() {
               >
                 {answer.body}
               </p>
+              {calculatedFor && (
+                <p
+                  className="fi text-[11px] mt-3 pt-3 border-t border-white/10"
+                  style={{ color: 'rgba(255,255,255,0.55)' }}
+                >
+                  {formatCalculatedFor(calculatedFor, lang)}
+                </p>
+              )}
             </div>
 
             <div
@@ -628,6 +735,7 @@ export default function OracleAskPage() {
                       >
                         {h.date}
                         {h.time ? ` · ${h.time}` : ''}
+                        {h.calculatedFor ? ` · ${h.calculatedFor}` : ''}
                       </div>
                     </div>
                     {h.score != null && (

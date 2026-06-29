@@ -1,6 +1,14 @@
 import { test, expect, type Page } from '@playwright/test';
 
-const FIXTURES = ['rafsanjan', 'london', 'new-york'] as const;
+const FIXTURES = ['rafsanjan', 'tehran', 'london', 'new-york', 'reykjavik'] as const;
+
+const FIXTURE_BUTTON: Record<(typeof FIXTURES)[number], RegExp> = {
+  rafsanjan: /Rafsanjan/i,
+  tehran: /Tehran/i,
+  london: /London/i,
+  'new-york': /New York/i,
+  reykjavik: /Reykjavik/i,
+};
 
 async function preparePage(page: Page) {
   await page.addInitScript(() => {
@@ -13,9 +21,7 @@ for (const fixtureId of FIXTURES) {
     await preparePage(page);
     await page.goto('/dev/chart-test');
     if (fixtureId !== 'rafsanjan') {
-      await page.getByRole('button', {
-        name: fixtureId === 'london' ? /London/i : /New York/i,
-      }).click();
+      await page.getByRole('button', { name: FIXTURE_BUTTON[fixtureId] }).click();
     }
 
     const wheel = page.getByTestId('chart-wheel');
@@ -36,9 +42,20 @@ for (const fixtureId of FIXTURES) {
   });
 }
 
-test('rafsanjan ASC at left (270°)', async ({ page }) => {
+test('rafsanjan quadrant cardinal angles', async ({ page }) => {
   await preparePage(page);
   await page.goto('/dev/chart-test');
-  await expect(page.getByText(/ASC screen: 270\.00°/)).toBeVisible();
-  await expect(page.getByText(/DSC screen: 90\.00°/)).toBeVisible();
+  await expect(page.getByTestId('asc-screen')).toContainText('270.00');
+  await expect(page.getByTestId('dsc-screen')).toContainText('90.00');
+  await expect(page.getByTestId('mc-screen')).toContainText('0.00');
+  await expect(page.getByTestId('ic-screen')).toContainText('180.00');
+});
+
+test('uniform projection toggle changes MC screen', async ({ page }) => {
+  await preparePage(page);
+  await page.goto('/dev/chart-test');
+  await expect(page.getByTestId('mc-screen')).toContainText('0.00');
+  await page.getByTestId('projection-uniform').click();
+  const mcText = await page.getByTestId('mc-screen').textContent();
+  expect(mcText).not.toContain('0.00');
 });

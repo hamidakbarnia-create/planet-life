@@ -32,6 +32,13 @@ import {
 } from '@/lib/calendar-scores';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import type { AppLang } from '@/lib/app-settings';
+import {
+  hasConfirmedCurrentLocation,
+  formatCalculatedFor,
+  locationLabel,
+  logLocationDebug,
+  resolveCalendarEvaluationLocation,
+} from '@/lib/user-locations';
 import { todayYMD } from '@/lib/calendar-utils';
 import { GPS_TONE_STYLES, buildStrategicGps } from '@/lib/strategic-gps';
 
@@ -46,6 +53,8 @@ type LangPack = {
   loading: string;
   noProfile: string;
   goProfile: string;
+  noCurrentLocation: string;
+  timingLocation: string;
   selected: string;
   hourly: string;
   golden: string;
@@ -89,6 +98,9 @@ const LANGS: Record<LangKey, LangPack> = {
     loading: 'Reading the sky…',
     noProfile: 'Set your birth data on Profile first.',
     goProfile: 'Go to Profile',
+    noCurrentLocation:
+      'Add your current living city in Profile — calendar timing uses where you live now, not your birth city.',
+    timingLocation: 'Timing location',
     selected: 'Selected day',
     hourly: 'Hourly timeline',
     golden: 'Golden window',
@@ -160,6 +172,9 @@ const LANGS: Record<LangKey, LangPack> = {
     loading: 'Читаем небо…',
     noProfile: 'Сначала укажите данные рождения в Профиле.',
     goProfile: 'В профиль',
+    noCurrentLocation:
+      'Добавьте текущий город в Профиле — календарь использует место проживания, а не город рождения.',
+    timingLocation: 'Город для тайминга',
     selected: 'Выбранный день',
     hourly: 'Почасовой таймлайн',
     golden: 'Золотое окно',
@@ -231,6 +246,9 @@ const LANGS: Record<LangKey, LangPack> = {
     loading: 'در حال خواندن آسمان…',
     noProfile: 'ابتدا اطلاعات تولد را در پروفایل وارد کنید.',
     goProfile: 'رفتن به پروفایل',
+    noCurrentLocation:
+      'شهر محل زندگی فعلی را در پروفایل اضافه کن — تقویم از محل زندگی فعلی استفاده می‌کند، نه شهر تولد.',
+    timingLocation: 'مکان زمان‌بندی',
     selected: 'روز انتخاب‌شده',
     hourly: 'خط زمانی ساعتی',
     golden: 'پنجره طلایی',
@@ -302,6 +320,9 @@ const LANGS: Record<LangKey, LangPack> = {
     loading: 'نقرأ السماء…',
     noProfile: 'أدخل بيانات الميلاد في الملف أولاً.',
     goProfile: 'الذهاب للملف',
+    noCurrentLocation:
+      'أضف مدينة إقامتك الحالية في الملف — التقويم يستخدم مكان إقامتك الآن وليس مدينة الميلاد.',
+    timingLocation: 'موقع التوقيت',
     selected: 'اليوم المحدد',
     hourly: 'الجدول الزمني بالساعة',
     golden: 'نافذة ذهبية',
@@ -413,6 +434,11 @@ export default function CalendarPage() {
   const [exportMode, setExportMode] = useState<CalendarExportMode>('important');
   const [hasProfile, setHasProfile] = useState(false);
   const [profile, setProfile] = useState<BirthProfile>(() => getBirthProfile());
+  const evalLocation = useMemo(
+    () => resolveCalendarEvaluationLocation(profile),
+    [profile]
+  );
+  const hasCurrentLocation = hasConfirmedCurrentLocation(profile);
 
   const t = LANGS[lang];
   const cells = useMemo(() => calendarCells(year, month), [year, month]);
@@ -427,18 +453,30 @@ export default function CalendarPage() {
   };
 
   useEffect(() => {
+    const refreshProfile = () => {
+      const saved = loadBirthProfile();
+      if (saved) {
+        setProfile(saved);
+        setHasProfile(true);
+        const evalLoc = resolveCalendarEvaluationLocation(saved);
+        logLocationDebug('calendar loaded profile', saved);
+        logLocationDebug('calendar evaluation location', evalLoc);
+      } else {
+        setHasProfile(false);
+      }
+    };
     const stored = localStorage.getItem('planet-life-lang');
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
     }
     setExportMode(loadExportMode());
-    const saved = loadBirthProfile();
-    if (saved) {
-      setProfile(saved);
-      setHasProfile(true);
-    } else {
-      setHasProfile(false);
-    }
+    refreshProfile();
+    window.addEventListener('focus', refreshProfile);
+    document.addEventListener('visibilitychange', refreshProfile);
+    return () => {
+      window.removeEventListener('focus', refreshProfile);
+      document.removeEventListener('visibilitychange', refreshProfile);
+    };
   }, []);
 
   const loadMonth = useCallback(async () => {
@@ -544,7 +582,28 @@ export default function CalendarPage() {
           <p className="fi text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
             {t.subtitle}
           </p>
+          {hasProfile && evalLocation && (
+            <p className="fi text-[11px] mt-2" style={{ color: 'rgba(74,222,128,0.85)' }}>
+              {formatCalculatedFor(locationLabel(evalLocation), lang)}
+            </p>
+          )}
         </div>
+
+        {hasProfile && !hasCurrentLocation && (
+          <div
+            className="rounded-2xl p-4 mb-6 fi text-sm"
+            style={{
+              background: 'rgba(251,146,60,0.06)',
+              border: '1px solid rgba(251,146,60,0.25)',
+              color: 'rgba(255,255,255,0.75)',
+            }}
+          >
+            {t.noCurrentLocation}{' '}
+            <Link href="/profile" style={{ color: '#fbbf24' }}>
+              {t.goProfile}
+            </Link>
+          </div>
+        )}
 
         {!hasProfile && (
           <div

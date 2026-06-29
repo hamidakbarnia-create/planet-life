@@ -1,0 +1,494 @@
+{
+  "meta": {
+    "center": [
+      298.0,
+      315.0
+    ],
+    "radius": 286.0,
+    "image_size": [
+      637,
+      1024
+    ],
+    "n_points": 53,
+    "strengths_h_max": 146.28111267089844
+  },
+  "points": [
+    {
+      "id": "H1_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 324.5797,
+      "px": 155.02177959263605,
+      "py": 317.49569412053154,
+      "screen_deg": 269.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "H2_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 6.3816,
+      "px": 175.42507599959796,
+      "py": 388.65044471213776,
+      "screen_deg": 239.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "H3_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 40.2751,
+      "px": 275.62987149924703,
+      "py": 456.2394327051047,
+      "screen_deg": 189.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "H4_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 66.7118,
+      "px": 295.50430587946846,
+      "py": 457.97822040736395,
+      "screen_deg": 181.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "H5_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 89.9578,
+      "px": 342.1894301956175,
+      "py": 451.00108183020694,
+      "screen_deg": 162.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "H6_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 114.1636,
+      "px": 424.2615057788265,
+      "py": 382.1344334783824,
+      "screen_deg": 118.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "H7_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 144.5797,
+      "px": 440.97822040736395,
+      "py": 317.49569412053154,
+      "screen_deg": 91.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "H8_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 186.3816,
+      "px": 412.20487793676284,
+      "py": 228.9404516892571,
+      "screen_deg": 53.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "H9_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 220.2751,
+      "px": 346.90888049557066,
+      "py": 180.62395522761508,
+      "screen_deg": 20.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "H10_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 246.7118,
+      "px": 290.51595825725894,
+      "py": 172.19597653009595,
+      "screen_deg": 357.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "H11_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 269.9578,
+      "px": 228.6722243047738,
+      "py": 189.9293818790664,
+      "screen_deg": 331.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "H12_cusp",
+      "kind": "cusp",
+      "ecliptic_lon": 294.1636,
+      "px": 183.7951220632371,
+      "py": 228.94045168925715,
+      "screen_deg": 307.0,
+      "confidence": 0.9
+    },
+    {
+      "id": "ASC",
+      "kind": "angle",
+      "ecliptic_lon": 324.5797,
+      "px": 155.02177959263605,
+      "py": 317.49569412053154,
+      "screen_deg": 269.0,
+      "confidence": 1.0
+    },
+    {
+      "id": "MC",
+      "kind": "angle",
+      "ecliptic_lon": 246.7118,
+      "px": 280.5726838930639,
+      "py": 173.06590031529095,
+      "screen_deg": 353.0,
+      "confidence": 0.4321897625923157
+    },
+    {
+      "id": "DSC",
+      "kind": "angle",
+      "ecliptic_lon": 144.5797,
+      "px": 440.97822040736395,
+      "py": 317.49569412053154,
+      "screen_deg": 91.0,
+      "confidence": 0.6710140705108643
+    },
+    {
+      "id": "IC",
+      "kind": "angle",
+      "ecliptic_lon": 66.7118,
+      "px": 339.8091537753513,
+      "py": 451.7515801027141,
+      "screen_deg": 163.0,
+      "confidence": 0.4007812440395355
+    },
+    {
+      "id": "Z01_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 0.0,
+      "px": 78.30497994484179,
+      "py": 431.8139142523853,
+      "screen_deg": 242.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "Z02_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 30.0,
+      "px": 134.75939240658204,
+      "py": 502.78683775103013,
+      "screen_deg": 221.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "Z03_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 60.0,
+      "px": 293.65749223027507,
+      "py": 563.7821035088133,
+      "screen_deg": 181.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "Z04_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 90.0,
+      "px": 370.7479275691113,
+      "py": 552.9477493787225,
+      "screen_deg": 163.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "Z05_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 120.0,
+      "px": 506.67801071618044,
+      "py": 450.517084692439,
+      "screen_deg": 123.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "Z06_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 150.0,
+      "px": 546.7821035088133,
+      "py": 319.3425077697249,
+      "screen_deg": 91.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "Z07_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 180.0,
+      "px": 494.07283571242453,
+      "py": 161.8111117094697,
+      "screen_deg": 52.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "Z08_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 210.0,
+      "px": 426.15177379911967,
+      "py": 101.71963223930041,
+      "screen_deg": 31.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "Z09_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 240.0,
+      "px": 315.35680579701324,
+      "py": 66.78611301435055,
+      "screen_deg": 4.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "Z10_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 270.0,
+      "px": 166.14548867349393,
+      "py": 103.98867271435813,
+      "screen_deg": 328.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "Z11_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 300.0,
+      "px": 80.37712446957559,
+      "py": 194.36967029030637,
+      "screen_deg": 299.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "Z12_0deg",
+      "kind": "zodiac",
+      "ecliptic_lon": 330.0,
+      "px": 49.217896491186735,
+      "py": 319.3425077697249,
+      "screen_deg": 269.0,
+      "confidence": 0.7
+    },
+    {
+      "id": "tick_10",
+      "kind": "tick",
+      "ecliptic_lon": 10.0,
+      "px": 115.22148956482863,
+      "py": 504.2726882651059,
+      "screen_deg": 224.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_50",
+      "kind": "tick",
+      "ecliptic_lon": 50.0,
+      "px": 256.83896355861447,
+      "py": 574.8805561773927,
+      "screen_deg": 189.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_80",
+      "kind": "tick",
+      "ecliptic_lon": 80.0,
+      "px": 374.92884294664645,
+      "py": 566.6229073889939,
+      "screen_deg": 163.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_100",
+      "kind": "tick",
+      "ecliptic_lon": 100.0,
+      "px": 463.58678129303325,
+      "py": 519.4826453785581,
+      "screen_deg": 141.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_140",
+      "kind": "tick",
+      "ecliptic_lon": 140.0,
+      "px": 561.0799255495497,
+      "py": 319.59207718177805,
+      "screen_deg": 91.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_160",
+      "kind": "tick",
+      "ecliptic_lon": 160.0,
+      "px": 549.6229073889939,
+      "py": 238.0711570533535,
+      "screen_deg": 73.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_190",
+      "kind": "tick",
+      "ecliptic_lon": 190.0,
+      "px": 480.77851043517137,
+      "py": 125.7273117348941,
+      "screen_deg": 44.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_220",
+      "kind": "tick",
+      "ecliptic_lon": 220.0,
+      "px": 387.99234011184996,
+      "py": 67.74807761881178,
+      "screen_deg": 20.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_250",
+      "kind": "tick",
+      "ecliptic_lon": 250.0,
+      "px": 279.64567662844564,
+      "py": 52.52094709563505,
+      "screen_deg": 356.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_260",
+      "kind": "tick",
+      "ecliptic_lon": 260.0,
+      "px": 212.33650719923293,
+      "py": 66.21515238830776,
+      "screen_deg": 341.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_290",
+      "kind": "tick",
+      "ecliptic_lon": 290.0,
+      "px": 87.86302459635624,
+      "py": 156.65043110823314,
+      "screen_deg": 307.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_310",
+      "kind": "tick",
+      "ecliptic_lon": 310.0,
+      "px": 41.62374855370888,
+      "py": 255.81087858104226,
+      "screen_deg": 283.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_320",
+      "kind": "tick",
+      "ecliptic_lon": 320.0,
+      "px": 34.92007445045033,
+      "py": 319.59207718177805,
+      "screen_deg": 269.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "tick_340",
+      "kind": "tick",
+      "ecliptic_lon": 340.0,
+      "px": 42.6957885022598,
+      "py": 378.6544891701846,
+      "screen_deg": 256.0,
+      "confidence": 0.5
+    },
+    {
+      "id": "sun",
+      "kind": "planet",
+      "ecliptic_lon": 336.1499,
+      "px": 147.76190476190476,
+      "py": 352.26190476190476,
+      "screen_deg": 256.4242817102387,
+      "confidence": 0.75
+    },
+    {
+      "id": "moon",
+      "kind": "planet",
+      "ecliptic_lon": 350.9973,
+      "px": 158.21621621621622,
+      "py": 394.4594594594595,
+      "screen_deg": 240.38413074812507,
+      "confidence": 0.75
+    },
+    {
+      "id": "mercury",
+      "kind": "planet",
+      "ecliptic_lon": 309.3184,
+      "px": 156.0,
+      "py": 263.4347826086956,
+      "screen_deg": 289.9577481751113,
+      "confidence": 0.75
+    },
+    {
+      "id": "venus",
+      "kind": "planet",
+      "ecliptic_lon": 297.0498,
+      "px": 160.05,
+      "py": 225.325,
+      "screen_deg": 303.0260573289487,
+      "confidence": 0.75
+    },
+    {
+      "id": "jupiter",
+      "kind": "planet",
+      "ecliptic_lon": 220.3286,
+      "px": 321.0,
+      "py": 173.52,
+      "screen_deg": 9.23363448278016,
+      "confidence": 0.75
+    },
+    {
+      "id": "uranus",
+      "kind": "planet",
+      "ecliptic_lon": 244.5526,
+      "px": 290.6666666666667,
+      "py": 147.3,
+      "screen_deg": 357.4961148553272,
+      "confidence": 0.75
+    },
+    {
+      "id": "neptune",
+      "kind": "planet",
+      "ecliptic_lon": 266.7496,
+      "px": 224.53968253968253,
+      "py": 171.14285714285714,
+      "screen_deg": 332.9489762349343,
+      "confidence": 0.75
+    },
+    {
+      "id": "north_node",
+      "kind": "planet",
+      "ecliptic_lon": 110.2674,
+      "px": 424.7692307692308,
+      "py": 415.61538461538464,
+      "screen_deg": 128.4386558091144,
+      "confidence": 0.75
+    },
+    {
+      "id": "house_num_1",
+      "kind": "house_num",
+      "ecliptic_lon": 345.48064999999997,
+      "px": 209.96597561111628,
+      "py": 349.02344706077605,
+      "screen_deg": 248.86944746040876,
+      "confidence": 0.55
+    },
+    {
+      "id": "house_num_2",
+      "kind": "house_num",
+      "ecliptic_lon": 233.49345,
+      "px": 296.6006460328119,
+      "py": 220.630374545225,
+      "screen_deg": 359.15045545384896,
+      "confidence": 0.55
+    },
+    {
+      "id": "house_num_3",
+      "kind": "house_num",
+      "ecliptic_lon": 282.0607,
+      "px": 248.28630369414444,
+      "py": 234.77448785075183,
+      "screen_deg": 328.2145645545396,
+      "confidence": 0.55
+    }
+  ]
+}

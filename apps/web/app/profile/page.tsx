@@ -19,6 +19,14 @@ import { BottomNav, VaultPill } from '@/components/BottomNav';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import type { AppLang } from '@/lib/app-settings';
 import { loadBirthProfile, saveBirthProfile } from '@/lib/birth-profile';
+import type { UserLocation } from '@/lib/user-locations';
+import {
+  clearCalendarScoreCaches,
+  currentLocationNeedsConfirm,
+  logLocationDebug,
+  sameUserLocation,
+  saveCalendarEvaluationOverride,
+} from '@/lib/user-locations';
 import {
   buildPreConfirmSummary,
   chartApiCoordinatesFromResolved,
@@ -60,10 +68,10 @@ const ASPECT_LABELS: Record<string, Record<string, string>> = {
 };
 
 const LANGS = {
-  en: { name:'EN', dir:'ltr', tagline:'Astrological Intelligence', yourData:'Your Birth Data', nameLabel:'Name', bdate:'Birth Date', btime:'Birth Time', city:'Birth City', generate:'Generate Chart', save:'Save Profile', saved:'Saved ✓', loading:'Loading...', natalChart:'Natal Chart', element:'Element', planet:'Ruling Planet', stone:'Lucky Stone', color:'Power Color', lifePath:'Life Path Number', dashboard:'Dashboard', calendar:'Calendar', people:'People', profile:'Profile', placeholder:'Type a city name...', searching:'Searching...', noResults:'No cities found', chartEmpty:'Click Generate Chart', elementsTitle:'Elemental balance', strengthsTitle:'Your chart strengths', elFire:'Fire', elEarth:'Earth', elAir:'Air', elWater:'Water', wealthPotential:'Wealth Potential', businessTiming:'Business Timing', decisionStyle:'Decision Style', comingSoon:'Coming soon', chartAccuracy:'Chart accuracy depends on verified birth timezone, exact city coordinates, and Swiss Ephemeris calculation.', verifyTitle:'Chart Verification', verifySubtitle:'Professional validation requires exact birth timezone, city coordinates, Ascendant, MC, house cusps, and aspect orbs.', vfTimezone:'Birth timezone', vfUtcTime:'UTC birth time', vfCoords:'Birth city coordinates', vfHouseSystem:'House system', vfAscendant:'Ascendant', vfMc:'Midheaven / MC', vfHouseCusps:'House cusps', vfPlanetPos:'Planet positions', vfAspectOrbs:'Aspect orbs', vfEngine:'Calculation engine', vfNotAvailable:'Not available from current chart data', vfRequiresEngine:'Requires verified calculation engine output', vfNotConfirmed:'Not confirmed in frontend data', badgeVerified:'Verified', badgeMissing:'Missing', badgeEngine:'Requires engine output', badgeNotConfirmed:'Not confirmed' },
-  ru: { name:'RU', dir:'ltr', tagline:'Астрологический анализ', yourData:'Ваши данные рождения', nameLabel:'Имя', bdate:'Дата рождения', btime:'Время рождения', city:'Город рождения', generate:'Создать карту', save:'Сохранить профиль', saved:'Сохранено ✓', loading:'Загрузка...', natalChart:'Натальная карта', element:'Стихия', planet:'Управляющая планета', stone:'Счастливый камень', color:'Цвет силы', lifePath:'Число жизненного пути', dashboard:'Панель', calendar:'Календарь', people:'Люди', profile:'Профиль', placeholder:'Введите город...', searching:'Поиск...', noResults:'Города не найдены', chartEmpty:'Нажмите «Создать карту»', elementsTitle:'Баланс стихий', strengthsTitle:'Сильные стороны карты', elFire:'Огонь', elEarth:'Земля', elAir:'Воздух', elWater:'Вода', wealthPotential:'Потенциал богатства', businessTiming:'Тайминг бизнеса', decisionStyle:'Стиль решений', comingSoon:'Скоро', chartAccuracy:'Точность карты зависит от подтверждённого часового пояса рождения, точных координат города и расчёта по эфемеридам Swiss Ephemeris.', verifyTitle:'Проверка карты', verifySubtitle:'Профессиональная проверка требует точного часового пояса рождения, координат города, Асцендента, MC, куспидов домов и орбисов аспектов.', vfTimezone:'Часовой пояс рождения', vfUtcTime:'Время рождения по UTC', vfCoords:'Координаты города рождения', vfHouseSystem:'Система домов', vfAscendant:'Асцендент', vfMc:'Середина неба / MC', vfHouseCusps:'Куспиды домов', vfPlanetPos:'Положения планет', vfAspectOrbs:'Орбисы аспектов', vfEngine:'Расчётный движок', vfNotAvailable:'Недоступно из текущих данных карты', vfRequiresEngine:'Требуется вывод проверенного расчётного движка', vfNotConfirmed:'Не подтверждено в данных фронтенда', badgeVerified:'Подтверждено', badgeMissing:'Отсутствует', badgeEngine:'Нужен вывод движка', badgeNotConfirmed:'Не подтверждено' },
-  fa: { name:'FA', dir:'rtl', tagline:'هوش نجومی', yourData:'اطلاعات تولد شما', nameLabel:'نام', bdate:'تاریخ تولد', btime:'زمان تولد', city:'شهر تولد', generate:'تولید نقشه', save:'ذخیره پروفایل', saved:'ذخیره شد ✓', loading:'در حال بارگذاری...', natalChart:'نقشه تولد', element:'عنصر', planet:'سیاره حاکم', stone:'سنگ خوش‌شانسی', color:'رنگ قدرت', lifePath:'عدد مسیر زندگی', dashboard:'داشبورد', calendar:'تقویم', people:'افراد', profile:'پروفایل', placeholder:'نام شهر را بنویسید...', searching:'جستجو...', noResults:'شهری یافت نشد', chartEmpty:'روی «تولید نقشه» کلیک کنید', elementsTitle:'عناصر وجودی', strengthsTitle:'نقاط قوت چارت شما', elFire:'آتش', elEarth:'خاک', elAir:'باد', elWater:'آب', wealthPotential:'پتانسیل ثروت', businessTiming:'زمان‌بندی کسب‌وکار', decisionStyle:'سبک تصمیم‌گیری', comingSoon:'به‌زودی', chartAccuracy:'دقت نقشه به منطقه زمانی تأییدشده تولد، مختصات دقیق شهر و محاسبه‌ی Swiss Ephemeris بستگی دارد.', verifyTitle:'تأیید نقشه', verifySubtitle:'اعتبارسنجی حرفه‌ای به منطقه زمانی دقیق تولد، مختصات شهر، طالع، وسط‌السماء، نقاط ابتدای خانه‌ها و اوربِ جنبه‌ها نیاز دارد.', vfTimezone:'منطقه زمانی تولد', vfUtcTime:'زمان تولد به UTC', vfCoords:'مختصات شهر تولد', vfHouseSystem:'سیستم خانه‌ها', vfAscendant:'طالع (آسندانت)', vfMc:'وسط‌السماء / MC', vfHouseCusps:'ابتدای خانه‌ها', vfPlanetPos:'موقعیت سیارات', vfAspectOrbs:'اوربِ جنبه‌ها', vfEngine:'موتور محاسبه', vfNotAvailable:'از داده‌های فعلی نقشه در دسترس نیست', vfRequiresEngine:'نیازمند خروجی موتور محاسبه تأییدشده', vfNotConfirmed:'در داده‌های فرانت‌اند تأیید نشده', badgeVerified:'تأییدشده', badgeMissing:'موجود نیست', badgeEngine:'نیازمند خروجی موتور', badgeNotConfirmed:'تأیید نشده' },
-  ar: { name:'AR', dir:'rtl', tagline:'الذكاء الفلكي', yourData:'بيانات ميلادك', nameLabel:'الاسم', bdate:'تاريخ الميلاد', btime:'وقت الميلاد', city:'مدينة الميلاد', generate:'إنشاء الخريطة', save:'حفظ الملف', saved:'تم الحفظ ✓', loading:'جاري التحميل...', natalChart:'خريطة الميلاد', element:'العنصر', planet:'الكوكب الحاكم', stone:'حجر الحظ', color:'لون القوة', lifePath:'رقم مسار الحياة', dashboard:'لوحة التحكم', calendar:'التقويم', people:'الأشخاص', profile:'الملف', placeholder:'اكتب اسم مدينة...', searching:'جاري البحث...', noResults:'لا توجد مدن', chartEmpty:'انقر «إنشاء الخريطة»', elementsTitle:'التوازن العنصري', strengthsTitle:'نقاط قوة خريطتك', elFire:'نار', elEarth:'تراب', elAir:'هواء', elWater:'ماء', wealthPotential:'إمكانات الثروة', businessTiming:'توقيت الأعمال', decisionStyle:'أسلوب اتخاذ القرار', comingSoon:'قريباً', chartAccuracy:'تعتمد دقة الخريطة على المنطقة الزمنية المؤكدة للميلاد، والإحداثيات الدقيقة للمدينة، وحساب Swiss Ephemeris.', verifyTitle:'التحقق من الخريطة', verifySubtitle:'يتطلب التحقق المهني المنطقة الزمنية الدقيقة للميلاد، وإحداثيات المدينة، والطالع، ووسط السماء، وبدايات البيوت، وأوربات الجوانب.', vfTimezone:'المنطقة الزمنية للميلاد', vfUtcTime:'وقت الميلاد بتوقيت UTC', vfCoords:'إحداثيات مدينة الميلاد', vfHouseSystem:'نظام البيوت', vfAscendant:'الطالع', vfMc:'وسط السماء / MC', vfHouseCusps:'بدايات البيوت', vfPlanetPos:'مواقع الكواكب', vfAspectOrbs:'أوربات الجوانب', vfEngine:'محرك الحساب', vfNotAvailable:'غير متوفر من بيانات الخريطة الحالية', vfRequiresEngine:'يتطلب مخرجات محرك حساب موثّق', vfNotConfirmed:'غير مؤكد في بيانات الواجهة', badgeVerified:'مؤكد', badgeMissing:'مفقود', badgeEngine:'يتطلب مخرجات المحرك', badgeNotConfirmed:'غير مؤكد' },
+  en: { name:'EN', dir:'ltr', tagline:'Astrological Intelligence', yourData:'Your Birth Data', currentSection:'Current living location', currentCity:'Current city', confirmCurrent:'Use as current living location', currentConfirmed:'Current location confirmed', currentPickFromList:'Pick a city from the list to confirm coordinates.', currentSaveFailed:'Could not resolve city coordinates. Select a city from the dropdown.', nameLabel:'Name', bdate:'Birth Date', btime:'Birth Time', city:'Birth City', generate:'Generate Chart', save:'Save Profile', saved:'Saved ✓', loading:'Loading...', natalChart:'Natal Chart', element:'Element', planet:'Ruling Planet', stone:'Lucky Stone', color:'Power Color', lifePath:'Life Path Number', dashboard:'Dashboard', calendar:'Calendar', people:'People', profile:'Profile', placeholder:'Type a city name...', searching:'Searching...', noResults:'No cities found', chartEmpty:'Click Generate Chart', elementsTitle:'Elemental balance', strengthsTitle:'Your chart strengths', elFire:'Fire', elEarth:'Earth', elAir:'Air', elWater:'Water', wealthPotential:'Wealth Potential', businessTiming:'Business Timing', decisionStyle:'Decision Style', comingSoon:'Coming soon', chartAccuracy:'Chart accuracy depends on verified birth timezone, exact city coordinates, and Swiss Ephemeris calculation.', verifyTitle:'Chart Verification', verifySubtitle:'Professional validation requires exact birth timezone, city coordinates, Ascendant, MC, house cusps, and aspect orbs.', vfTimezone:'Birth timezone', vfUtcTime:'UTC birth time', vfCoords:'Birth city coordinates', vfHouseSystem:'House system', vfAscendant:'Ascendant', vfMc:'Midheaven / MC', vfHouseCusps:'House cusps', vfPlanetPos:'Planet positions', vfAspectOrbs:'Aspect orbs', vfEngine:'Calculation engine', vfNotAvailable:'Not available from current chart data', vfRequiresEngine:'Requires verified calculation engine output', vfNotConfirmed:'Not confirmed in frontend data', badgeVerified:'Verified', badgeMissing:'Missing', badgeEngine:'Requires engine output', badgeNotConfirmed:'Not confirmed' },
+  ru: { name:'RU', dir:'ltr', tagline:'Астрологический анализ', yourData:'Ваши данные рождения', currentSection:'Текущее место жительства', currentCity:'Текущий город', confirmCurrent:'Использовать как текущий город', currentConfirmed:'Текущий город подтверждён', nameLabel:'Имя', bdate:'Дата рождения', btime:'Время рождения', city:'Город рождения', generate:'Создать карту', save:'Сохранить профиль', saved:'Сохранено ✓', loading:'Загрузка...', natalChart:'Натальная карта', element:'Стихия', planet:'Управляющая планета', stone:'Счастливый камень', color:'Цвет силы', lifePath:'Число жизненного пути', dashboard:'Панель', calendar:'Календарь', people:'Люди', profile:'Профиль', placeholder:'Введите город...', searching:'Поиск...', noResults:'Города не найдены', chartEmpty:'Нажмите «Создать карту»', elementsTitle:'Баланс стихий', strengthsTitle:'Сильные стороны карты', elFire:'Огонь', elEarth:'Земля', elAir:'Воздух', elWater:'Вода', wealthPotential:'Потенциал богатства', businessTiming:'Тайминг бизнеса', decisionStyle:'Стиль решений', comingSoon:'Скоро', chartAccuracy:'Точность карты зависит от подтверждённого часового пояса рождения, точных координат города и расчёта по эфемеридам Swiss Ephemeris.', verifyTitle:'Проверка карты', verifySubtitle:'Профессиональная проверка требует точного часового пояса рождения, координат города, Асцендента, MC, куспидов домов и орбисов аспектов.', vfTimezone:'Часовой пояс рождения', vfUtcTime:'Время рождения по UTC', vfCoords:'Координаты города рождения', vfHouseSystem:'Система домов', vfAscendant:'Асцендент', vfMc:'Середина неба / MC', vfHouseCusps:'Куспиды домов', vfPlanetPos:'Положения планет', vfAspectOrbs:'Орбисы аспектов', vfEngine:'Расчётный движок', vfNotAvailable:'Недоступно из текущих данных карты', vfRequiresEngine:'Требуется вывод проверенного расчётного движка', vfNotConfirmed:'Не подтверждено в данных фронтенда', badgeVerified:'Подтверждено', badgeMissing:'Отсутствует', badgeEngine:'Нужен вывод движка', badgeNotConfirmed:'Не подтверждено' },
+  fa: { name:'FA', dir:'rtl', tagline:'هوش نجومی', yourData:'اطلاعات تولد شما', currentSection:'محل زندگی فعلی', currentCity:'شهر فعلی', confirmCurrent:'تأیید به‌عنوان محل زندگی فعلی', currentConfirmed:'محل زندگی فعلی تأیید شد', nameLabel:'نام', bdate:'تاریخ تولد', btime:'زمان تولد', city:'شهر تولد', generate:'تولید نقشه', save:'ذخیره پروفایل', saved:'ذخیره شد ✓', loading:'در حال بارگذاری...', natalChart:'نقشه تولد', element:'عنصر', planet:'سیاره حاکم', stone:'سنگ خوش‌شانسی', color:'رنگ قدرت', lifePath:'عدد مسیر زندگی', dashboard:'داشبورد', calendar:'تقویم', people:'افراد', profile:'پروفایل', placeholder:'نام شهر را بنویسید...', searching:'جستجو...', noResults:'شهری یافت نشد', chartEmpty:'روی «تولید نقشه» کلیک کنید', elementsTitle:'عناصر وجودی', strengthsTitle:'نقاط قوت چارت شما', elFire:'آتش', elEarth:'خاک', elAir:'باد', elWater:'آب', wealthPotential:'پتانسیل ثروت', businessTiming:'زمان‌بندی کسب‌وکار', decisionStyle:'سبک تصمیم‌گیری', comingSoon:'به‌زودی', chartAccuracy:'دقت نقشه به منطقه زمانی تأییدشده تولد، مختصات دقیق شهر و محاسبه‌ی Swiss Ephemeris بستگی دارد.', verifyTitle:'تأیید نقشه', verifySubtitle:'اعتبارسنجی حرفه‌ای به منطقه زمانی دقیق تولد، مختصات شهر، طالع، وسط‌السماء، نقاط ابتدای خانه‌ها و اوربِ جنبه‌ها نیاز دارد.', vfTimezone:'منطقه زمانی تولد', vfUtcTime:'زمان تولد به UTC', vfCoords:'مختصات شهر تولد', vfHouseSystem:'سیستم خانه‌ها', vfAscendant:'طالع (آسندانت)', vfMc:'وسط‌السماء / MC', vfHouseCusps:'ابتدای خانه‌ها', vfPlanetPos:'موقعیت سیارات', vfAspectOrbs:'اوربِ جنبه‌ها', vfEngine:'موتور محاسبه', vfNotAvailable:'از داده‌های فعلی نقشه در دسترس نیست', vfRequiresEngine:'نیازمند خروجی موتور محاسبه تأییدشده', vfNotConfirmed:'در داده‌های فرانت‌اند تأیید نشده', badgeVerified:'تأییدشده', badgeMissing:'موجود نیست', badgeEngine:'نیازمند خروجی موتور', badgeNotConfirmed:'تأیید نشده' },
+  ar: { name:'AR', dir:'rtl', tagline:'الذكاء الفلكي', yourData:'بيانات ميلادك', currentSection:'مكان الإقامة الحالي', currentCity:'المدينة الحالية', confirmCurrent:'تأكيد كمكان الإقامة الحالي', currentConfirmed:'تم تأكيد مكان الإقامة', nameLabel:'الاسم', bdate:'تاريخ الميلاد', btime:'وقت الميلاد', city:'مدينة الميلاد', generate:'إنشاء الخريطة', save:'حفظ الملف', saved:'تم الحفظ ✓', loading:'جاري التحميل...', natalChart:'خريطة الميلاد', element:'العنصر', planet:'الكوكب الحاكم', stone:'حجر الحظ', color:'لون القوة', lifePath:'رقم مسار الحياة', dashboard:'لوحة التحكم', calendar:'التقويم', people:'الأشخاص', profile:'الملف', placeholder:'اكتب اسم مدينة...', searching:'جاري البحث...', noResults:'لا توجد مدن', chartEmpty:'انقر «إنشاء الخريطة»', elementsTitle:'التوازن العنصري', strengthsTitle:'نقاط قوة خريطتك', elFire:'نار', elEarth:'تراب', elAir:'هواء', elWater:'ماء', wealthPotential:'إمكانات الثروة', businessTiming:'توقيت الأعمال', decisionStyle:'أسلوب اتخاذ القرار', comingSoon:'قريباً', chartAccuracy:'تعتمد دقة الخريطة على المنطقة الزمنية المؤكدة للميلاد، والإحداثيات الدقيقة للمدينة، وحساب Swiss Ephemeris.', verifyTitle:'التحقق من الخريطة', verifySubtitle:'يتطلب التحقق المهني المنطقة الزمنية الدقيقة للميلاد، وإحداثيات المدينة، والطالع، ووسط السماء، وبدايات البيوت، وأوربات الجوانب.', vfTimezone:'المنطقة الزمنية للميلاد', vfUtcTime:'وقت الميلاد بتوقيت UTC', vfCoords:'إحداثيات مدينة الميلاد', vfHouseSystem:'نظام البيوت', vfAscendant:'الطالع', vfMc:'وسط السماء / MC', vfHouseCusps:'بدايات البيوت', vfPlanetPos:'مواقع الكواكب', vfAspectOrbs:'أوربات الجوانب', vfEngine:'محرك الحساب', vfNotAvailable:'غير متوفر من بيانات الخريطة الحالية', vfRequiresEngine:'يتطلب مخرجات محرك حساب موثّق', vfNotConfirmed:'غير مؤكد في بيانات الواجهة', badgeVerified:'مؤكد', badgeMissing:'مفقود', badgeEngine:'يتطلب مخرجات المحرك', badgeNotConfirmed:'غير مؤكد' },
 };
 
 const ZODIAC_TRANS: Record<string, Record<string, string>> = {
@@ -102,6 +110,13 @@ function getZodiac(d: string) {
   if((m===12&&day>=22)||(m===1&&day<=19))return ZODIAC[9];
   if((m===1&&day>=20)||(m===2&&day<=18))return ZODIAC[10];
   return ZODIAC[11];
+}
+
+/** Rising sign from Swiss Ephemeris ascendant longitude (0° Aries … 360°). */
+function getZodiacFromAscendant(ascendant: number) {
+  const normalized = ((ascendant % 360) + 360) % 360;
+  const index = Math.min(Math.floor(normalized / 30), 11);
+  return ZODIAC[index];
 }
 
 function getLifePath(d: string): number {
@@ -149,11 +164,25 @@ export default function Profile() {
   const [faConfirmOpen, setFaConfirmOpen] = useState(false);
   const [preConfirmSummary, setPreConfirmSummary] = useState<ReturnType<typeof buildPreConfirmSummary> | null>(null);
   const [resolvedLocation, setResolvedLocation] = useState<ResolvedLocationPreview | null>(null);
+  const [currentCitySearch, setCurrentCitySearch] = useState('');
+  const [currentSelectedCity, setCurrentSelectedCity] = useState<CitySelection | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<UserLocation | null>(null);
+  const [currentCities, setCurrentCities] = useState<CitySelection[]>([]);
+  const [showCurrentCities, setShowCurrentCities] = useState(false);
+  const [currentCityLoading, setCurrentCityLoading] = useState(false);
+  const [currentLocationError, setCurrentLocationError] = useState('');
   const cityRef = useRef<HTMLDivElement>(null);
+  const currentCityRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<any>(null);
+  const currentDebounceRef = useRef<any>(null);
   const toastTimerRef = useRef<number | null>(null);
   const t = LANGS[lang];
-  const zodiac = getZodiac(birthDate);
+  const zodiac = useMemo(() => {
+    if (chartData && Number.isFinite(chartData.ascendant)) {
+      return getZodiacFromAscendant(chartData.ascendant);
+    }
+    return getZodiac(birthDate);
+  }, [chartData, birthDate]);
   const lifePath = getLifePath(birthDate);
 
   useEffect(() => {
@@ -164,6 +193,10 @@ export default function Profile() {
       setBirthTime(saved.birth_time);
       setLocation(saved.location);
       setCitySearch(saved.location);
+      if (saved.current_location?.city) {
+        setCurrentLocation(saved.current_location);
+        setCurrentCitySearch(saved.current_location.city);
+      }
     }
     if (savedName) setName(savedName);
   }, []);
@@ -174,13 +207,70 @@ export default function Profile() {
     };
   }, []);
 
-  const handleSaveProfile = useCallback(() => {
-    saveBirthProfile({
+  const buildConfirmedCurrentLocation = async (
+    city: CitySelection
+  ): Promise<UserLocation> => {
+    const resolved = await fetchLocationPreview({
+      location: city.short,
+      latitude: city.lat,
+      longitude: city.lon,
+    });
+    return {
+      city: city.short,
+      country: city.country,
+      latitude: city.lat,
+      longitude: city.lon,
+      timezone: resolved.timezone,
+      coordinate_source: resolved.coordinate_source,
+      confirmed: true,
+    };
+  };
+
+  const handleSaveProfile = useCallback(async () => {
+    setCurrentLocationError('');
+    const previous = loadBirthProfile();
+    let locToSave = currentLocation;
+
+    if (currentLocationNeedsConfirm(currentSelectedCity, currentLocation)) {
+      if (!currentSelectedCity) {
+        setCurrentLocationError(t.currentPickFromList);
+        return;
+      }
+      try {
+        locToSave = await buildConfirmedCurrentLocation(currentSelectedCity);
+        setCurrentLocation(locToSave);
+        setCurrentSelectedCity(null);
+      } catch (err) {
+        setCurrentLocationError(
+          err instanceof Error ? err.message : t.currentSaveFailed
+        );
+        return;
+      }
+    }
+
+    const profileToSave = {
       birth_date: birthDate,
       birth_time: birthTime,
       location,
-      action_type: 'business_launch',
-    });
+      action_type: 'business_launch' as const,
+      ...(locToSave?.confirmed ? { current_location: locToSave } : {}),
+    };
+
+    logLocationDebug('profile save payload', profileToSave);
+    saveBirthProfile(profileToSave);
+
+    if (!sameUserLocation(previous?.current_location, locToSave)) {
+      saveCalendarEvaluationOverride(null);
+      clearCalendarScoreCaches();
+      logLocationDebug('cleared calendar override + score caches', {
+        from: previous?.current_location?.city,
+        to: locToSave?.city,
+      });
+    }
+
+    const persisted = loadBirthProfile();
+    logLocationDebug('profile after persistence', persisted);
+
     localStorage.setItem(PROFILE_NAME_KEY, name);
     setSavedToast(true);
     if (toastTimerRef.current != null) window.clearTimeout(toastTimerRef.current);
@@ -188,7 +278,16 @@ export default function Profile() {
       setSavedToast(false);
       toastTimerRef.current = null;
     }, 2000);
-  }, [birthDate, birthTime, location, name]);
+  }, [
+    birthDate,
+    birthTime,
+    location,
+    name,
+    currentLocation,
+    currentSelectedCity,
+    t.currentPickFromList,
+    t.currentSaveFailed,
+  ]);
 
   const chartLabels: NatalChartLabels = useMemo(
     () => ({
@@ -212,10 +311,48 @@ export default function Profile() {
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if(cityRef.current&&!cityRef.current.contains(e.target as Node))setShowCities(false);
+      if(currentCityRef.current&&!currentCityRef.current.contains(e.target as Node))setShowCurrentCities(false);
     };
     document.addEventListener('mousedown', handler);
     return ()=>document.removeEventListener('mousedown',handler);
   },[]);
+
+  const searchCurrentCities = useCallback((q: string) => {
+    if(currentDebounceRef.current)clearTimeout(currentDebounceRef.current);
+    if(q.length<2){setCurrentCities([]);return;}
+    setCurrentCityLoading(true);
+    currentDebounceRef.current = setTimeout(async()=>{
+      try{
+        const res=await fetch(`/api/cities?q=${encodeURIComponent(q)}&lang=${lang}`);
+        const data=await res.json();
+        setCurrentCities(data);
+      }catch{setCurrentCities([]);}
+      setCurrentCityLoading(false);
+    },300);
+  },[lang]);
+
+  const selectCurrentCity = (city: CitySelection) => {
+    if (!Number.isFinite(city.lat) || !Number.isFinite(city.lon)) return;
+    setCurrentCitySearch(city.short);
+    setCurrentSelectedCity(city);
+    setCurrentLocationError('');
+    setShowCurrentCities(false);
+  };
+
+  const confirmCurrentLocation = async () => {
+    if (!currentSelectedCity) return;
+    setCurrentLocationError('');
+    try {
+      const loc = await buildConfirmedCurrentLocation(currentSelectedCity);
+      setCurrentLocation(loc);
+      setCurrentSelectedCity(null);
+      logLocationDebug('current location confirmed', loc);
+    } catch (err) {
+      setCurrentLocationError(
+        err instanceof Error ? err.message : t.currentSaveFailed
+      );
+    }
+  };
 
   const searchCities = useCallback((q: string) => {
     if(debounceRef.current)clearTimeout(debounceRef.current);
@@ -458,9 +595,46 @@ export default function Profile() {
                   </div>
                 )}
               </div>
+              <div className="pt-2 border-t border-white/10">
+                <div className="fi text-[10px] uppercase tracking-widest mb-2" style={{color:'rgba(251,191,36,0.65)'}}>{t.currentSection}</div>
+                <div ref={currentCityRef} className="relative mb-2">
+                  <label className="fi block text-[11px] mb-1" style={{color:'rgba(255,255,255,0.35)'}}>{t.currentCity}</label>
+                  <input type="text" value={currentCitySearch} placeholder={t.placeholder}
+                    onChange={e=>{setCurrentCitySearch(e.target.value);setCurrentSelectedCity(null);searchCurrentCities(e.target.value);setShowCurrentCities(true);}}
+                    onFocus={()=>currentCitySearch.length>=2&&setShowCurrentCities(true)}
+                    className="fi w-full px-3 py-2 text-sm"/>
+                  {showCurrentCities&&(currentCityLoading||currentCities.length>0)&&(
+                    <div className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden shadow-2xl" style={{background:'#0d1220',border:'1px solid rgba(255,255,255,0.1)'}}>
+                      {currentCityLoading&&<div className="fi px-4 py-3 text-xs" style={{color:'rgba(255,255,255,0.3)'}}>{t.searching}</div>}
+                      {!currentCityLoading&&currentCities.length===0&&<div className="fi px-4 py-3 text-xs" style={{color:'rgba(255,255,255,0.3)'}}>{t.noResults}</div>}
+                      {currentCities.map((city,i)=>(
+                        <div key={i} className="city-row px-4 py-2.5 cursor-pointer transition-colors" onMouseDown={()=>selectCurrentCity(city)}>
+                          <div className="fi text-sm" style={{color:'rgba(255,255,255,0.8)'}}>{city.short}</div>
+                          <div className="fi text-[11px] truncate" style={{color:'rgba(255,255,255,0.3)'}}>{city.name}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {currentSelectedCity &&
+                  currentLocationNeedsConfirm(currentSelectedCity, currentLocation) && (
+                  <button type="button" onClick={() => void confirmCurrentLocation()}
+                    className="fi w-full py-2 mb-2 rounded-lg text-xs border border-emerald-500/40"
+                    style={{color:'#86efac',background:'rgba(34,197,94,0.08)'}}>
+                    {t.confirmCurrent}
+                  </button>
+                )}
+                {currentLocation?.confirmed &&
+                  !currentLocationNeedsConfirm(currentSelectedCity, currentLocation) && (
+                  <p className="fi text-[11px] mb-2" style={{color:'rgba(74,222,128,0.85)'}}>{t.currentConfirmed}: {currentLocation.city}{currentLocation.country ? `, ${currentLocation.country}` : ''}</p>
+                )}
+                {currentLocationError && (
+                  <p className="fi text-[11px] mb-2" style={{color:'#fca5a5'}}>{currentLocationError}</p>
+                )}
+              </div>
               <button
                 type="button"
-                onClick={handleSaveProfile}
+                onClick={() => void handleSaveProfile()}
                 className="fc w-full py-2.5 rounded-xl text-sm tracking-widest border transition-colors"
                 style={{
                   background: 'rgba(34,197,94,0.12)',

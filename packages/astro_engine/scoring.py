@@ -11,6 +11,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Final, Mapping, Sequence
 
+from packages.astro_engine.scoring_context import ScoringContext, CONTEXT_NATAL
+
 # ---------------------------------------------------------------------------
 # Aspect geometry
 # ---------------------------------------------------------------------------
@@ -162,6 +164,50 @@ ACTIVITY_PROFILES: Final[dict[str, ActivityProfile]] = {
 
 DEFAULT_ACTIVITY: Final[str] = "negotiation"
 BASE_SCORE: Final[float] = 50.0
+
+BENEFIC_TRANSIT: Final[frozenset[str]] = frozenset(
+    {"sun", "venus", "jupiter", "mercury", "moon", "north_node"}
+)
+PRESSURE_TRANSIT: Final[frozenset[str]] = frozenset(
+    {"mars", "saturn", "neptune", "pluto", "uranus"}
+)
+
+# Local transit house scoring — positive / caution houses per activity family.
+TRANSIT_HOUSE_RULES: Final[dict[str, dict[str, tuple[int, ...]]]] = {
+    "business_launch": {
+        "positive": (10, 2, 6, 11, 1),
+        "caution": (12, 8),
+        "positive_planets": ("sun", "jupiter", "venus", "mercury", "moon", "mars"),
+        "caution_planets": ("mars", "saturn", "neptune", "pluto"),
+    },
+    "contract_signing": {
+        "positive": (3, 7, 10, 11),
+        "caution": (12, 8),
+        "positive_planets": ("mercury", "venus", "jupiter", "sun"),
+        "caution_planets": ("mars", "saturn", "neptune", "pluto"),
+    },
+    "real_estate": {
+        "positive": (4, 2, 10, 11),
+        "caution": (4, 8, 12),
+        "positive_planets": ("moon", "venus", "jupiter", "saturn"),
+        "caution_planets": ("mars", "saturn", "neptune", "uranus"),
+    },
+    "negotiation": {
+        "positive": (3, 7, 11, 5),
+        "caution": (12, 8, 7),
+        "positive_planets": ("venus", "moon", "jupiter", "mercury"),
+        "caution_planets": ("mars", "saturn", "neptune", "pluto"),
+    },
+    "default": {
+        "positive": (1, 10, 11, 2),
+        "caution": (12, 8),
+        "positive_planets": ("sun", "venus", "jupiter", "mercury", "moon"),
+        "caution_planets": ("mars", "saturn", "neptune", "pluto"),
+    },
+}
+
+ANGULAR_ORBS: Final[dict[str, float]] = {"strong": 3.0, "medium": 6.0, "weak": 10.0}
+ANGULAR_WEIGHT: Final[dict[str, float]] = {"strong": 1.0, "medium": 0.6, "weak": 0.35}
 
 
 # ---------------------------------------------------------------------------
@@ -372,6 +418,144 @@ def _retrograde_penalty(transit: dict[str, dict[str, Any]], profile: ActivityPro
     return min(penalty, 10.0)
 
 
+def _transit_house_rules_key(activity_type: str) -> str:
+    key = activity_type.strip().lower().replace("-", "_").replace(" ", "_")
+    if key in ("business_launch", "contract_signing", "real_estate", "negotiation"):
+        return key
+    if key in ("contract", "sign", "lease_signing"):
+        return "contract_signing"
+    if key in ("property", "property_trade", "relocation"):
+        return "real_estate"
+    if key in ("launch", "startup", "fresh_start"):
+        return "business_launch"
+    if key in (
+        "reconciliation",
+        "first_meeting",
+        "marriage_proposal",
+        "relationship_ending",
+        "difficult_conversation",
+    ):
+        return "negotiation"
+    return "default"
+
+
+def _transit_local_house_score(
+    transit_data: Mapping[str, Any],
+    activity_type: str,
+) -> tuple[float, list[str]]:
+    """Score transiting planets in local houses at evaluation location."""
+    rules = TRANSIT_HOUSE_RULES[_transit_house_rules_key(activity_type)]
+    transit = _extract_bodies(transit_data)
+    positive_h = set(rules["positive"])
+    caution_h = set(rules["caution"])
+    pos_planets = set(rules["positive_planets"])
+    caution_planets = set(rules["caution_planets"])
+
+    score = 0.0
+    notes: list[str] = []
+    for name, body in transit.items():
+        house = _house(body)
+        if house is None:
+            continue
+        weight = _planet_weight(name, _resolve_profile(activity_type))
+        if house in positive_h and name in pos_planets:
+            pts = 2.2 * weight
+            score += pts
+            notes.append(f"+ Transit {name} in house {house} (supportive)")
+        elif house in caution_h and name in caution_planets:
+            pts = -2.0 * weight
+            score += pts
+            notes.append(f"- Transit {name} in house {house} (caution)")
+        if body.get("retrograde") and name in ("mercury", "venus", "mars") and house in caution_h:
+            score -= 1.5 * weight
+            notes.append(f"- Retrograde {name} in house {house}")
+
+    score = max(-15.0, min(15.0, score))
+    return score, notes
+
+
+def _chart_angles(transit_data: Mapping[str, Any]) -> dict[str, float]:
+    asc = transit_data.get("ascendant")
+    mc = transit_data.get("midheaven")
+    if asc is None or mc is None:
+        return {}
+    asc_f = float(asc) % 360.0
+    mc_f = float(mc) % 360.0
+    return {
+        "asc": asc_f,
+        "mc": mc_f,
+        "dsc": (asc_f + 180.0) % 360.0,
+        "ic": (mc_f + 180.0) % 360.0,
+    }
+
+
+def _nearest_angle_band(lon: float, angle: float) -> str | None:
+    diff = _angular_separation(lon, angle)
+    if diff <= ANGULAR_ORBS["strong"]:
+        return "strong"
+    if diff <= ANGULAR_ORBS["medium"]:
+        return "medium"
+    if diff <= ANGULAR_ORBS["weak"]:
+        return "weak"
+    return None
+
+
+def _transit_angular_score(
+    transit_data: Mapping[str, Any],
+    activity_type: str,
+) -> tuple[float, list[str]]:
+    """Score planets near local ASC / MC / DSC / IC."""
+    angles = _chart_angles(transit_data)
+    if not angles:
+        return 0.0, []
+
+    rules_key = _transit_house_rules_key(activity_type)
+    if rules_key == "real_estate":
+        favored_angles = ("ic", "asc", "mc")
+        pressure_angles = ("ic", "mc", "asc", "dsc")
+    elif rules_key == "contract_signing":
+        favored_angles = ("mc", "asc", "dsc")
+        pressure_angles = ("dsc", "mc", "asc")
+    else:
+        favored_angles = ("mc", "asc")
+        pressure_angles = ("mc", "asc", "dsc")
+
+    transit = _extract_bodies(transit_data)
+    score = 0.0
+    notes: list[str] = []
+
+    for name, body in transit.items():
+        lon = _longitude(body)
+        if lon is None:
+            continue
+        weight = _planet_weight(name, _resolve_profile(activity_type))
+        best_band: str | None = None
+        best_angle = ""
+        for angle_name, angle_val in angles.items():
+            band = _nearest_angle_band(lon, angle_val)
+            if band is None:
+                continue
+            if best_band is None or ANGULAR_WEIGHT[band] > ANGULAR_WEIGHT[best_band]:
+                best_band = band
+                best_angle = angle_name
+
+        if best_band is None:
+            continue
+
+        mult = ANGULAR_WEIGHT[best_band]
+        if name in BENEFIC_TRANSIT and best_angle in favored_angles:
+            pts = 3.5 * mult * weight
+            score += pts
+            notes.append(f"+ {name} near {best_angle.upper()} ({best_band})")
+        elif name in PRESSURE_TRANSIT and best_angle in pressure_angles:
+            pts = -3.0 * mult * weight
+            score += pts
+            notes.append(f"- {name} near {best_angle.upper()} ({best_band})")
+
+    score = max(-12.0, min(12.0, score))
+    return score, notes
+
+
 def _clamp_score(value: float) -> int:
     return int(max(0, min(100, round(value))))
 
@@ -498,6 +682,7 @@ def calculate_activity_score(
     user_natal_data: dict,
     current_transit_data: dict,
     activity_type: str,
+    scoring_context: ScoringContext | None = None,
 ) -> dict:
     """
     Calculate a strategic time score from 0 to 100 based on transits and natal placements.
@@ -519,6 +704,7 @@ def calculate_activity_score(
         Three-layer payload: ``executive``, ``strategic``, ``technical``.
     """
     profile = _resolve_profile(activity_type)
+    ctx = scoring_context or CONTEXT_NATAL
     natal = _extract_bodies(user_natal_data)
     transit = _extract_bodies(current_transit_data)
 
@@ -553,9 +739,52 @@ def calculate_activity_score(
         elif contribution <= -4.0:
             risks.append(label)
 
-    house_adj = _house_bonus(natal, profile)
-    retro_adj = -_retrograde_penalty(transit, profile)
-    final_score = _clamp_score(BASE_SCORE + total_delta + house_adj + retro_adj)
+    house_adj = _house_bonus(natal, profile) if ctx.include_natal_house_bonus else 0.0
+    retro_pen = _retrograde_penalty(transit, profile)
+    retro_adj = -retro_pen
+
+    transit_house_score = 0.0
+    transit_house_notes: list[str] = []
+    if ctx.include_transit_house_score:
+        transit_house_score, transit_house_notes = _transit_local_house_score(
+            current_transit_data, activity_type
+        )
+
+    transit_angular_score = 0.0
+    transit_angular_notes: list[str] = []
+    if ctx.include_transit_angular_score:
+        transit_angular_score, transit_angular_notes = _transit_angular_score(
+            current_transit_data, activity_type
+        )
+
+    aspect_score = round(total_delta, 2)
+    final_score = _clamp_score(
+        BASE_SCORE
+        + total_delta
+        + house_adj
+        + retro_adj
+        + transit_house_score
+        + transit_angular_score
+    )
+
+    eval_meta = current_transit_data.get("evaluation") or {}
+    calculated_for = eval_meta.get("calculated_for") or eval_meta.get("evaluation_location")
+    location_component_score = round(transit_house_score + transit_angular_score, 2)
+
+    component_breakdown = {
+        "aspect_score": aspect_score,
+        "natal_house_bonus": round(house_adj, 2),
+        "transit_house_score": round(transit_house_score, 2),
+        "transit_angular_score": round(transit_angular_score, 2),
+        "location_component_score": location_component_score,
+        "retrograde_penalty": round(retro_adj, 2),
+        "final_score": final_score,
+        "location_mode": ctx.location_mode,
+        "calculated_for": calculated_for,
+        "resolved_local_datetime": eval_meta.get("resolved_local_datetime"),
+        "resolved_utc_datetime": eval_meta.get("resolved_utc_datetime"),
+        "timezone": eval_meta.get("timezone") or eval_meta.get("evaluation_timezone"),
+    }
 
     key_themes = _build_key_themes(profile, opportunities, risks, final_score)
     timing_notes = _build_timing_notes(transit, profile, retro_adj)
@@ -572,10 +801,15 @@ def calculate_activity_score(
             "score": final_score,
             "base_score": BASE_SCORE,
             "adjustments": {
-                "aspects": round(total_delta, 2),
+                "aspects": aspect_score,
                 "natal_house_alignment": round(house_adj, 2),
+                "transit_house_score": round(transit_house_score, 2),
+                "transit_angular_score": round(transit_angular_score, 2),
                 "transit_retrograde": round(retro_adj, 2),
             },
+            "component_breakdown": component_breakdown,
+            "transit_house_notes": transit_house_notes[:8],
+            "transit_angular_notes": transit_angular_notes[:8],
             "key_themes": key_themes,
             "opportunity_factors": opportunities[:6],
             "risk_factors": risks[:6],
@@ -585,14 +819,24 @@ def calculate_activity_score(
         "technical": {
             "activity_type": activity_type,
             "resolved_activity": profile.label,
+            "scoring_context": {
+                "location_mode": ctx.location_mode,
+                "include_natal_house_bonus": ctx.include_natal_house_bonus,
+                "include_transit_house_score": ctx.include_transit_house_score,
+                "include_transit_angular_score": ctx.include_transit_angular_score,
+            },
             "natal_points_used": sorted(natal.keys()),
             "transit_points_used": sorted(transit.keys()),
             "aspects_evaluated": raw_contributions,
             "aspect_count": len(raw_contributions),
+            "component_breakdown": component_breakdown,
             "calculation_metadata": {
                 "base_score": BASE_SCORE,
                 "orbs": dict(orb_table),
-                "formula": "score = clamp(50 + sum(aspect_contributions) + house_bonus - retrograde_penalty)",
+                "formula": (
+                    "score = clamp(50 + aspects + natal_house_bonus? + "
+                    "transit_house_score? + transit_angular_score? - retrograde_penalty)"
+                ),
             },
         },
     }

@@ -12,6 +12,7 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 from packages.astro_engine.scoring import calculate_activity_score
+from packages.astro_engine.scoring_context import CONTEXT_NATAL, CONTEXT_PATHFINDER
 from services.chart_data import (
     _HOUSE_SYSTEMS,
     _import_swisseph,
@@ -628,7 +629,7 @@ def best_times(
                 house_system=house_system,
                 zodiac=zodiac,
             )
-            result = calculate_activity_score(natal, transit, action)
+            result = calculate_activity_score(natal, transit, action, CONTEXT_PATHFINDER)
             # Transiting planets crossing this city's relocated angles activate
             # the location on that date — location- AND date-dependent.
             transit_angularity = _angularity_delta(

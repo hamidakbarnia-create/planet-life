@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { RAFSANJAN_CHART } from './chart-fixtures';
 import {
   assertNoNaNScreenAngles,
   computeScreenAngles,
@@ -8,6 +9,7 @@ import {
   type ChartApiResponse,
   type ChartData,
 } from './chart-types';
+import { projectEclipticLongitude } from './natal-wheel';
 
 function minimalValidResponse(overrides: Partial<ChartApiResponse> = {}): ChartApiResponse {
   const planets: ChartApiResponse['planets'] = {};
@@ -25,9 +27,12 @@ function minimalValidResponse(overrides: Partial<ChartApiResponse> = {}): ChartA
   }
   return {
     planets,
-    ascendant: 324.6,
-    midheaven: 246.72,
-    houses: [324.6, 350, 20, 50, 80, 110, 144.6, 170, 200, 230, 260, 290],
+    ascendant: 324.58,
+    midheaven: 246.71,
+    houses: [
+      324.58, 6.38, 40.28, 66.71, 89.96, 114.16,
+      144.58, 186.38, 220.28, 246.71, 269.96, 294.16,
+    ],
     latitude: 30.402184,
     longitude: 55.994178,
     timezone: 'Asia/Tehran',
@@ -44,13 +49,13 @@ function minimalValidResponse(overrides: Partial<ChartApiResponse> = {}): ChartA
   };
 }
 
-describe('displayLongitude', () => {
-  it('places ASC at 270° (left)', () => {
+describe('displayLongitude (legacy uniform — dev comparison only)', () => {
+  it('places ASC at 270° under uniform rotation', () => {
     const asc = 324.6;
     expect(displayLongitude(asc, asc)).toBeCloseTo(270, 5);
   });
 
-  it('places DSC at 90° (right)', () => {
+  it('places DSC at 90° under uniform rotation', () => {
     const asc = 324.6;
     expect(displayLongitude(asc + 180, asc)).toBeCloseTo(90, 5);
   });
@@ -61,38 +66,44 @@ describe('displayLongitude', () => {
   });
 });
 
-describe('computeScreenAngles', () => {
-  const chart: ChartData = {
-    planets: {
-      sun: { longitude: 336.08, sign: 12, degree: 6.08, house: 1, retrograde: false },
-    },
-    ascendant: 324.6,
-    midheaven: 246.72,
-    houses: [324.6, 350, 20, 50, 80, 110, 144.6, 170, 200, 230, 260, 290],
-    latitude: 30.402184,
-    longitude: 55.994178,
-    timezone: 'Asia/Tehran',
-    local_datetime: '1982-02-25T05:47:00+03:30',
-    utc_datetime: '1982-02-25 02:17:00',
-    julian_day: 2445025.59513889,
-    house_system: 'placidus',
-    zodiac: 'tropical',
-    node_type: 'mean',
-    location: 'Rafsanjan',
-  };
+describe('computeScreenAngles (quadrant projection)', () => {
+  const chart: ChartData = RAFSANJAN_CHART;
 
-  it('MC and IC use the same transform as ASC', () => {
+  it('fixes cardinal angles for Rafsanjan', () => {
     const angles = computeScreenAngles(chart);
     expect(angles.ascendant).toBeCloseTo(270, 5);
-    expect(angles.midheaven).toBeCloseTo(displayLongitude(chart.midheaven, chart.ascendant), 5);
-    expect(angles.ic).toBeCloseTo(displayLongitude(chart.midheaven + 180, chart.ascendant), 5);
+    expect(angles.midheaven).toBeCloseTo(0, 5);
+    expect(angles.ic).toBeCloseTo(180, 5);
     expect(angles.descendant).toBeCloseTo(90, 5);
   });
 
-  it('all house cusps use the same transform', () => {
+  it('projects planets through quadrant model', () => {
+    const angles = computeScreenAngles(chart);
+    expect(angles.sun).toBeCloseTo(
+      projectEclipticLongitude(chart.planets.sun.longitude, chart),
+      5
+    );
+    expect(angles.moon).toBeCloseTo(
+      projectEclipticLongitude(chart.planets.moon.longitude, chart),
+      5
+    );
+    expect(angles.mercury).toBeCloseTo(
+      projectEclipticLongitude(chart.planets.mercury.longitude, chart),
+      5
+    );
+    expect(angles.venus).toBeCloseTo(
+      projectEclipticLongitude(chart.planets.venus.longitude, chart),
+      5
+    );
+  });
+
+  it('uses quadrant projection for house cusps', () => {
     const angles = computeScreenAngles(chart);
     chart.houses.forEach((cusp, i) => {
-      expect(angles[`house_${i + 1}`]).toBeCloseTo(displayLongitude(cusp, chart.ascendant), 5);
+      expect(angles[`house_${i + 1}`]).toBeCloseTo(
+        projectEclipticLongitude(cusp, chart),
+        5
+      );
     });
   });
 

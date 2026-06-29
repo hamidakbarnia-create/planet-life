@@ -225,7 +225,12 @@ def _build_chart_payload(dt_local, lat, lon, *, house_system: str = "placidus", 
         if speed < 0:
             body["retrograde"] = True
         planets[name] = body
-    return {"planets": planets}
+    return {
+        "planets": planets,
+        "ascendant": round(float(ascmc[0]), 4),
+        "midheaven": round(float(ascmc[1]), 4),
+        "houses": [round(c, 4) for c in cusp_list],
+    }
 
 
 def compute_birth_chart(
@@ -342,15 +347,69 @@ def build_chart_payload(
     target_time=None,
     house_system: str = "placidus",
     zodiac: str = "tropical",
+    latitude: float | None = None,
+    longitude: float | None = None,
+    evaluation_location: str | None = None,
+    evaluation_latitude: float | None = None,
+    evaluation_longitude: float | None = None,
 ):
-    lat, lon = resolve_coordinates(location)
-    natal_dt = _local_datetime(birth_date, birth_time, lat, lon)
-    transit_dt = _local_datetime(target_date, target_time or birth_time, lat, lon)
+    """Build natal + transit charts with separate birth and evaluation locations.
+
+  Natal planets/houses use birth location. Transit planets and local houses for
+  timing/scoring use evaluation_location (current living or target action city).
+    """
+    from services.location_context import (
+        build_location_context_meta,
+        resolve_evaluation_coords,
+    )
+
+    (
+        birth_lat,
+        birth_lon,
+        birth_src,
+        eval_lat,
+        eval_lon,
+        eval_src,
+        eval_label,
+    ) = resolve_evaluation_coords(
+        location,
+        birth_latitude=latitude,
+        birth_longitude=longitude,
+        evaluation_location=evaluation_location,
+        evaluation_latitude=evaluation_latitude,
+        evaluation_longitude=evaluation_longitude,
+    )
+    natal_dt = _local_datetime(birth_date, birth_time, birth_lat, birth_lon)
+    effective_transit_time = target_time if target_time is not None else "12:00"
+    transit_dt = _local_datetime(target_date, effective_transit_time, eval_lat, eval_lon)
+    eval_tz = _timezone_at(eval_lat, eval_lon)
     chart_kw = {"house_system": house_system, "zodiac": zodiac}
-    user_natal_data = _build_chart_payload(natal_dt, lat, lon, **chart_kw)
-    current_transit_data = _build_chart_payload(transit_dt, lat, lon, **chart_kw)
+    user_natal_data = _build_chart_payload(natal_dt, birth_lat, birth_lon, **chart_kw)
+    current_transit_data = _build_chart_payload(transit_dt, eval_lat, eval_lon, **chart_kw)
+    location_meta = build_location_context_meta(
+        birth_location=location,
+        birth_lat=birth_lat,
+        birth_lon=birth_lon,
+        birth_src=birth_src,
+        evaluation_location=eval_label,
+        eval_lat=eval_lat,
+        eval_lon=eval_lon,
+        eval_src=eval_src,
+    )
     current_transit_data["evaluation"] = {
-        "target_date": target_date, "location": location,
-        "latitude": lat, "longitude": lon,
+        "target_date": target_date,
+        "target_time": effective_transit_time,
+        "resolved_local_datetime": transit_dt.isoformat(),
+        "resolved_utc_datetime": transit_dt.astimezone(timezone.utc)
+        .replace(tzinfo=timezone.utc)
+        .isoformat()
+        .replace("+00:00", "Z"),
+        "timezone": eval_tz,
+        "location_role": "evaluation",
+        **location_meta,
+        # Legacy keys kept for older clients
+        "location": eval_label,
+        "latitude": eval_lat,
+        "longitude": eval_lon,
     }
     return user_natal_data, current_transit_data

@@ -1,5 +1,10 @@
 import type { BirthProfile } from './birth-profile';
 import { chartPreferenceFields } from './app-settings';
+import {
+  buildScoringLocationPayload,
+  resolveCalendarEvaluationLocation,
+  type UserLocation,
+} from './user-locations';
 
 // Backend base URL. Override at build/dev time with NEXT_PUBLIC_API_BASE
 // (e.g. when sharing the app over a Cloudflare/ngrok tunnel).
@@ -60,18 +65,42 @@ export const BAND_STYLES: Record<
   },
 };
 
-function cacheKey(year: number, month: number, action: string) {
-  return `planet-life-cal-${year}-${String(month).padStart(2, '0')}-${action}`;
+function cacheKey(year: number, month: number, action: string, evalCity?: string) {
+  const loc = evalCity ? evalCity.replace(/\s+/g, '_') : 'default';
+  return `planet-life-cal-${year}-${String(month).padStart(2, '0')}-${action}-${loc}`;
+}
+
+export function scoringLocationFields(
+  profile: BirthProfile,
+  evaluation?: UserLocation | null
+): Record<string, string | number> | null {
+  const payload = buildScoringLocationPayload(
+    profile,
+    evaluation ?? resolveCalendarEvaluationLocation(profile)
+  );
+  if (!payload) return null;
+  const out: Record<string, string | number> = {
+    location: payload.location,
+    evaluation_location: payload.evaluation_location,
+  };
+  if (payload.evaluation_latitude != null) {
+    out.evaluation_latitude = payload.evaluation_latitude;
+  }
+  if (payload.evaluation_longitude != null) {
+    out.evaluation_longitude = payload.evaluation_longitude;
+  }
+  return out;
 }
 
 export function loadMonthCache(
   year: number,
   month: number,
-  action: string
+  action: string,
+  evalCity?: string
 ): Record<string, number> | null {
   if (typeof window === 'undefined') return null;
   try {
-    const raw = localStorage.getItem(cacheKey(year, month, action));
+    const raw = localStorage.getItem(cacheKey(year, month, action, evalCity));
     if (!raw) return null;
     const { scores, savedAt } = JSON.parse(raw) as {
       scores: Record<string, number>;
@@ -88,11 +117,12 @@ export function saveMonthCache(
   year: number,
   month: number,
   action: string,
-  scores: Record<string, number>
+  scores: Record<string, number>,
+  evalCity?: string
 ) {
   if (typeof window === 'undefined') return;
   localStorage.setItem(
-    cacheKey(year, month, action),
+    cacheKey(year, month, action, evalCity),
     JSON.stringify({ scores, savedAt: Date.now() })
   );
 }
@@ -100,8 +130,11 @@ export function saveMonthCache(
 export async function fetchDayScore(
   profile: BirthProfile,
   targetDate: string,
-  targetTime?: string
+  targetTime?: string,
+  evaluation?: UserLocation | null
 ): Promise<number | null> {
+  const locFields = scoringLocationFields(profile, evaluation);
+  if (!locFields) return null;
   try {
     const res = await fetch(`${API_BASE}/api/business/analyze`, {
       method: 'POST',
@@ -109,10 +142,10 @@ export async function fetchDayScore(
       body: JSON.stringify({
         birth_date: profile.birth_date,
         birth_time: profile.birth_time,
-        location: profile.location,
         action_type: profile.action_type,
         target_date: targetDate,
         ...(targetTime ? { target_time: targetTime } : {}),
+        ...locFields,
         ...chartPreferenceFields(),
       }),
     });
@@ -168,9 +201,15 @@ export async function fetchMonthScores(
   profile: BirthProfile,
   year: number,
   month: number,
-  onProgress?: (done: number, total: number) => void
+  onProgress?: (done: number, total: number) => void,
+  evaluation?: UserLocation | null
 ): Promise<Record<string, number>> {
-  const cached = loadMonthCache(year, month, profile.action_type);
+  const evalLoc = evaluation ?? resolveCalendarEvaluationLocation(profile);
+  const evalLabel = evalLoc?.city;
+  const locFields = scoringLocationFields(profile, evalLoc);
+  if (!locFields) return {};
+
+  const cached = loadMonthCache(year, month, profile.action_type, evalLabel);
   if (cached) return cached;
 
   const total = daysInMonth(year, month);
@@ -190,11 +229,11 @@ export async function fetchMonthScores(
       body: JSON.stringify({
         birth_date: profile.birth_date,
         birth_time: profile.birth_time,
-        location: profile.location,
         action_type: profile.action_type,
         dates,
         house_system: prefs.house_system,
         zodiac: prefs.zodiac,
+        ...locFields,
       }),
     });
     const data = await res.json();
@@ -215,14 +254,20 @@ export async function fetchMonthScores(
   }
 
   onProgress?.(total, total);
-  saveMonthCache(year, month, profile.action_type, scores);
+  saveMonthCache(year, month, profile.action_type, scores, evalLabel);
   return scores;
 }
 
 export async function fetchHourlyScores(
   profile: BirthProfile,
-  targetDate: string
+  targetDate: string,
+  evaluation?: UserLocation | null
 ): Promise<HourScore[]> {
+  const locFields = scoringLocationFields(
+    profile,
+    evaluation ?? resolveCalendarEvaluationLocation(profile)
+  );
+  if (!locFields) return [];
   const prefs = chartPreferenceFields();
 
   // Prefer the new single-request hourly batch (parallelised on the backend).
@@ -233,11 +278,11 @@ export async function fetchHourlyScores(
       body: JSON.stringify({
         birth_date: profile.birth_date,
         birth_time: profile.birth_time,
-        location: profile.location,
         action_type: profile.action_type,
         target_date: targetDate,
         house_system: prefs.house_system,
         zodiac: prefs.zodiac,
+        ...locFields,
       }),
     });
     if (res.ok) {
@@ -267,7 +312,7 @@ export async function fetchHourlyScores(
   const hours = Array.from({ length: 24 }, (_, h) => h);
   const results = await mapPool(hours, 12, async (hour) => {
     const time = `${String(hour).padStart(2, '0')}:00`;
-    const score = await fetchDayScore(profile, targetDate, time);
+    const score = await fetchDayScore(profile, targetDate, time, evaluation);
     const s = score ?? 0;
     return { hour, time, score: s, band: scoreToBand(score) };
   });
@@ -314,8 +359,14 @@ function longitudeToSign(longitude: number) {
 export async function fetchTransitSnapshot(
   profile: BirthProfile,
   targetDate: string,
-  targetTime?: string
+  targetTime?: string,
+  evaluation?: UserLocation | null
 ): Promise<PlanetTransit[]> {
+  const locFields = scoringLocationFields(
+    profile,
+    evaluation ?? resolveCalendarEvaluationLocation(profile)
+  );
+  if (!locFields) return [];
   const prefs = chartPreferenceFields();
   try {
     const res = await fetch(`${API_BASE}/api/transit`, {
@@ -324,11 +375,11 @@ export async function fetchTransitSnapshot(
       body: JSON.stringify({
         birth_date: profile.birth_date,
         birth_time: profile.birth_time,
-        location: profile.location,
         target_date: targetDate,
         ...(targetTime ? { target_time: targetTime } : {}),
         house_system: prefs.house_system,
         zodiac: prefs.zodiac,
+        ...locFields,
       }),
     });
     if (!res.ok) return [];

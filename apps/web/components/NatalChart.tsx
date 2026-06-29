@@ -15,9 +15,12 @@ import {
 import {
   type ChartData,
   type ChartPlanet,
-  displayLongitude,
   normalizeDegrees,
 } from '@/lib/chart-types';
+import {
+  projectEclipticLongitude,
+  type WheelProjectionMode,
+} from '@/lib/natal-wheel';
 
 export type { ChartPlanet };
 
@@ -111,12 +114,14 @@ function midDisplayAngle(a: number, b: number): number {
 
 function computeLayouts(
   planets: Record<string, ChartPlanet>,
-  ascendant: number
+  chart: ChartData,
+  mode: WheelProjectionMode
 ): Record<string, PlanetLayout> {
   const baseR = R_MID - 16;
+  const altR = baseR + 18;
   const items = PLANET_ORDER.filter((n) => planets[n]).map((name) => ({
     name,
-    displayDeg: displayLongitude(planets[name].longitude, ascendant),
+    displayDeg: projectEclipticLongitude(planets[name].longitude, chart, mode),
   }));
 
   items.sort((a, b) => a.displayDeg - b.displayDeg);
@@ -124,20 +129,18 @@ function computeLayouts(
 
   items.forEach((item, i) => {
     let radius = baseR;
-    let displayDeg = item.displayDeg;
 
     if (i > 0) {
       const prevName = items[i - 1].name;
       const prev = layouts[prevName];
-      let diff = Math.abs(displayDeg - prev.displayDeg);
+      let diff = Math.abs(item.displayDeg - prev.displayDeg);
       if (diff > 180) diff = 360 - diff;
-      if (diff < 16) {
-        radius = prev.radius === baseR ? baseR + 18 : baseR;
-        if (diff < 10) displayDeg = prev.displayDeg + 5;
+      if (diff < 14) {
+        radius = prev.radius === baseR ? altR : baseR;
       }
     }
 
-    layouts[item.name] = { displayDeg, radius };
+    layouts[item.name] = { displayDeg: item.displayDeg, radius };
   });
 
   return layouts;
@@ -147,19 +150,22 @@ function NatalChartWheel({
   chart,
   aspects,
   layouts,
+  projectionMode,
 }: {
   chart: ChartData;
   aspects: NatalAspect[];
   layouts: Record<string, PlanetLayout>;
+  projectionMode: WheelProjectionMode;
 }) {
   const { planets, ascendant, midheaven, houses } = chart;
   const planetNames = PLANET_ORDER.filter((n) => planets[n]);
   const dsc = normalizeDegrees(ascendant + 180);
   const ic = normalizeDegrees(midheaven + 180);
-  const ascDeg = displayLongitude(ascendant, ascendant);
-  const dscDeg = displayLongitude(dsc, ascendant);
-  const mcDeg = displayLongitude(midheaven, ascendant);
-  const icDeg = displayLongitude(ic, ascendant);
+  const project = (lon: number) => projectEclipticLongitude(lon, chart, projectionMode);
+  const ascDeg = project(ascendant);
+  const dscDeg = project(dsc);
+  const mcDeg = project(midheaven);
+  const icDeg = project(ic);
 
   return (
     <svg
@@ -196,8 +202,8 @@ function NatalChartWheel({
       />
 
       {Array.from({ length: 12 }, (_, i) => {
-        const startDeg = displayLongitude(i * 30, ascendant);
-        const midDeg = displayLongitude(i * 30 + 15, ascendant);
+        const startDeg = project(i * 30);
+        const midDeg = project(i * 30 + 15);
         const p1 = toXY(startDeg, R_OUTER);
         const p2 = toXY(startDeg, R_MID);
         const ps = toXY(midDeg, R_OUTER + 14);
@@ -227,14 +233,11 @@ function NatalChartWheel({
 
       {houses.length === 12 &&
         houses.map((cusp, i) => {
-          const deg = displayLongitude(cusp, ascendant);
+          const deg = project(cusp);
           const p1 = toXY(deg, R_OUTER);
           const p2 = toXY(deg, R_INNER);
           const next = houses[(i + 1) % 12];
-          const labelDeg = midDisplayAngle(
-            displayLongitude(cusp, ascendant),
-            displayLongitude(next, ascendant)
-          );
+          const labelDeg = midDisplayAngle(project(cusp), project(next));
           const label = toXY(labelDeg, R_MID - 6);
           return (
             <g key={`house-${i + 1}`} data-testid={`house-cusp-${i + 1}`}>
@@ -591,10 +594,12 @@ export function NatalChart({
   chart,
   labels,
   empty,
+  projectionMode = 'quadrant',
 }: {
   chart: ChartData | null;
   labels: NatalChartLabels;
   empty?: boolean;
+  projectionMode?: WheelProjectionMode;
 }) {
   if (empty || !chart || Object.keys(chart.planets).length === 0) {
     return (
@@ -607,12 +612,17 @@ export function NatalChart({
   }
 
   const aspects = findNatalAspects(chart.planets);
-  const layouts = computeLayouts(chart.planets, chart.ascendant);
+  const layouts = computeLayouts(chart.planets, chart, projectionMode);
 
   return (
     <div className="w-full flex flex-col items-center">
       <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '50%', padding: 6 }}>
-        <NatalChartWheel chart={chart} aspects={aspects} layouts={layouts} />
+        <NatalChartWheel
+          chart={chart}
+          aspects={aspects}
+          layouts={layouts}
+          projectionMode={projectionMode}
+        />
       </div>
       <AspectLegend labels={labels} />
       <ChartInsights planets={chart.planets} aspects={aspects} labels={labels} />

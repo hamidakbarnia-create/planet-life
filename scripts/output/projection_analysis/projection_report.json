@@ -1,0 +1,79 @@
+{
+  "chart": {
+    "asc": 324.5797,
+    "mc": 246.7118,
+    "ic": 66.7118,
+    "dsc": 144.5797,
+    "cusps": [
+      324.5797,
+      6.3816,
+      40.2751,
+      66.7118,
+      89.9578,
+      114.1636,
+      144.5797,
+      186.3816,
+      220.2751,
+      246.7118,
+      269.9578,
+      294.1636
+    ]
+  },
+  "models": {
+    "A: Uniform ASC (Planet Life)": {
+      "anchor_rms": 118.70053043354524,
+      "anchor_errors": {
+        "ASC": 0.0,
+        "MC": 167.8679,
+        "IC": 167.86790000000002,
+        "DSC": 0.0
+      }
+    },
+    "B: Uniform DSC (Kerykeion classic)": {
+      "anchor_rms": 118.70053043354524,
+      "anchor_errors": {
+        "ASC": 0.0,
+        "MC": 167.8679,
+        "IC": 167.86790000000002,
+        "DSC": 0.0
+      }
+    },
+    "C: Kerykeion modern formula": {
+      "anchor_rms": 84.1528664111033,
+      "anchor_errors": {
+        "ASC": 90.0,
+        "MC": 77.86789999999996,
+        "IC": 77.8679,
+        "DSC": 90.0
+      }
+    },
+    "D: Quadrant 4x90 (pro Western hypothesis)": {
+      "anchor_rms": 0.0,
+      "anchor_errors": {
+        "ASC": 0.0,
+        "MC": 0.0,
+        "IC": 0.0,
+        "DSC": 0.0
+      }
+    },
+    "E: Affine LSQ (4 anchors)": {
+      "anchor_rms": 99.02412334136243,
+      "anchor_errors": {
+        "ASC": 144.30433750214513,
+        "MC": 111.50797376564847,
+        "IC": 35.69566249785481,
+        "DSC": 68.49202623435161
+      }
+    },
+    "F: Single-scale CCW from ASC": {
+      "anchor_rms": 92.15883677752437,
+      "anchor_errors": {
+        "ASC": 0.0,
+        "MC": 180.0,
+        "IC": 28.044649977718677,
+        "DSC": 28.044649977718706
+      }
+    }
+  },
+  "best_model": "D: Quadrant 4x90 (pro Western hypothesis)"
+}

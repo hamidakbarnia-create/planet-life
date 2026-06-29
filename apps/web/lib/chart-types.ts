@@ -249,21 +249,16 @@ export function parseChartResponse(raw: ChartApiResponse, fallbackLocation: stri
   return result.ok ? result.data : null;
 }
 
-export function computeScreenAngles(chart: ChartData): Record<string, number> {
-  const asc = chart.ascendant;
-  const out: Record<string, number> = {
-    ascendant: displayLongitude(asc, asc),
-    midheaven: displayLongitude(chart.midheaven, asc),
-    ic: displayLongitude(normalizeDegrees(chart.midheaven + 180), asc),
-    descendant: displayLongitude(normalizeDegrees(asc + 180), asc),
-  };
-  chart.houses.forEach((cusp, i) => {
-    out[`house_${i + 1}`] = displayLongitude(cusp, asc);
-  });
-  Object.entries(chart.planets).forEach(([name, p]) => {
-    out[name] = displayLongitude(p.longitude, asc);
-  });
-  return out;
+import {
+  computeProjectedScreenAngles,
+  type WheelProjectionMode,
+} from '@/lib/natal-wheel';
+
+export function computeScreenAngles(
+  chart: ChartData,
+  mode: WheelProjectionMode = 'quadrant'
+): Record<string, number> {
+  return computeProjectedScreenAngles(chart, mode);
 }
 
 export function assertNoNaNScreenAngles(chart: ChartData): boolean {

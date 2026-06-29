@@ -15,7 +15,8 @@ from routes.real_estate import router as real_estate_router
 from routes.vault import router as vault_router
 from routes.pathfinder import router as pathfinder_router
 from routes.world import router as world_router
-from packages.astro_engine.scoring import calculate_activity_score
+from packages.astro_engine.scoring_context import CONTEXT_CALENDAR_DAY, CONTEXT_CALENDAR_HOURLY
+from services.scoring_pipeline import score_with_context
 from services.chart_data import build_chart_payload
 
 # Shared threadpool for parallelizing chart computations.
@@ -57,22 +58,41 @@ class BatchDayRequest(BaseModel):
     dates: list[str]                  # ["2025-06-01", "2025-06-02", ...]
     house_system: str = "placidus"
     zodiac: str = "tropical"
+    evaluation_location: str | None = None
+    evaluation_latitude: float | None = None
+    evaluation_longitude: float | None = None
 
 
-def _score_one(birth_date, birth_time, location, action, target_date,
-               target_time, house_system, zodiac):
+def _score_one(
+    birth_date,
+    birth_time,
+    location,
+    action,
+    target_date,
+    target_time,
+    house_system,
+    zodiac,
+    evaluation_location=None,
+    evaluation_latitude=None,
+    evaluation_longitude=None,
+):
     """Synchronous worker run inside a thread."""
     try:
-        natal, transit = build_chart_payload(
+        result, _, transit = score_with_context(
             birth_date=birth_date,
             birth_time=birth_time,
             location=location,
             target_date=target_date,
             target_time=target_time,
+            action_type=action,
+            context=CONTEXT_CALENDAR_HOURLY if target_time else CONTEXT_CALENDAR_DAY,
+            evaluation_location=evaluation_location,
+            evaluation_latitude=evaluation_latitude,
+            evaluation_longitude=evaluation_longitude,
             house_system=house_system,
             zodiac=zodiac,
         )
-        score = calculate_activity_score(natal, transit, action)
+        score = result
         return {
             "executive": score["executive"],
             "strategic": score["strategic"],
@@ -96,7 +116,8 @@ async def batch_score(request: BatchDayRequest):
     # per unique location instead of once per date).
     try:
         from services.chart_data import resolve_coordinates
-        resolve_coordinates(request.location)
+        eval_loc = request.evaluation_location or request.location
+        resolve_coordinates(eval_loc)
     except Exception:
         pass
 
@@ -112,6 +133,9 @@ async def batch_score(request: BatchDayRequest):
             None,
             request.house_system,
             request.zodiac,
+            request.evaluation_location,
+            request.evaluation_latitude,
+            request.evaluation_longitude,
         )
         for target_date in request.dates
     ]
@@ -136,6 +160,9 @@ class HourlyBatchRequest(BaseModel):
     hours: Optional[list[int]] = None  # default: 0..23
     house_system: str = "placidus"
     zodiac: str = "tropical"
+    evaluation_location: str | None = None
+    evaluation_latitude: float | None = None
+    evaluation_longitude: float | None = None
 
 
 @app.post("/api/batch-hourly")
@@ -150,7 +177,8 @@ async def batch_hourly(request: HourlyBatchRequest):
 
     try:
         from services.chart_data import resolve_coordinates
-        resolve_coordinates(request.location)
+        eval_loc = request.evaluation_location or request.location
+        resolve_coordinates(eval_loc)
     except Exception:
         pass
 
@@ -166,6 +194,9 @@ async def batch_hourly(request: HourlyBatchRequest):
             f"{h:02d}:00",
             request.house_system,
             request.zodiac,
+            request.evaluation_location,
+            request.evaluation_latitude,
+            request.evaluation_longitude,
         )
         for h in hours
     ]
@@ -189,6 +220,9 @@ class TransitSnapshotRequest(BaseModel):
     target_time: Optional[str] = None
     house_system: str = "placidus"
     zodiac: str = "tropical"
+    evaluation_location: str | None = None
+    evaluation_latitude: float | None = None
+    evaluation_longitude: float | None = None
 
 
 @app.post("/api/transit")
@@ -205,8 +239,15 @@ async def transit_snapshot(request: TransitSnapshotRequest):
             target_time=request.target_time,
             house_system=request.house_system,
             zodiac=request.zodiac,
+            evaluation_location=request.evaluation_location,
+            evaluation_latitude=request.evaluation_latitude,
+            evaluation_longitude=request.evaluation_longitude,
         )
-        return {"natal": natal.get("planets", {}), "transit": transit.get("planets", {})}
+        return {
+            "natal": natal.get("planets", {}),
+            "transit": transit.get("planets", {}),
+            "location_context": transit.get("evaluation", {}),
+        }
 
     try:
         return await loop.run_in_executor(_BATCH_EXECUTOR, _compute)

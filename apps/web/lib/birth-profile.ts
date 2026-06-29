@@ -1,8 +1,13 @@
+import type { UserLocation } from './user-locations';
+
 export interface BirthProfile {
   birth_date: string;
   birth_time: string;
+  /** Birth city — used only for natal chart identity */
   location: string;
   action_type: string;
+  /** Where the user currently lives — used for calendar and default Ask timing */
+  current_location?: UserLocation;
 }
 
 const STORAGE_KEY = 'planet-life-birth-profile';
@@ -25,6 +30,7 @@ export function loadBirthProfile(): BirthProfile | null {
       ...DEFAULT_PROFILE,
       ...parsed,
       action_type: parsed.action_type || DEFAULT_PROFILE.action_type,
+      current_location: parsed.current_location,
     };
   } catch {
     return null;

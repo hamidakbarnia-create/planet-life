@@ -1,0 +1,95 @@
+==============================================================================
+PHASE 2: PIXEL-LEVEL PROJECTION VALIDATION
+==============================================================================
+Reference image: c__Users_akbar_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_horoscope-fullsvg-chart4def-1400_radix_astroseek-25-2-1982_05-47-a00bcabd-a017-4498-86a3-6bd24cb9880b.png
+Wheel center=(298.0, 315.0)  radius=286.0px
+Extracted reference points: 53
+
+Points by kind:
+  angle       : 4
+  cusp        : 12
+  house_num   : 3
+  planet      : 8
+  tick        : 14
+  zodiac      : 12
+
+==============================================================================
+MODEL FIT RESULTS (sorted by RMS angular error)
+==============================================================================
+Model                                         RMS°   Mean°    Max°   RMS px   Max px
+------------------------------------------------------------------------------
+Piecewise house linear (12 DOF)               4.66    3.48   14.26     23.3     71.2
+Quadrant (4 free spans)                       5.39    4.19   17.00     26.9     84.9
+Quadrant 4x90 (fixed anchors)                 5.92    4.56   17.00     29.5     84.9
+PCHIP spline (12 knot angles)                19.13    7.20  130.67     95.5    652.3
+Nonlinear warp (sinusoidal)                  93.27   81.40  164.39    465.6    820.6
+Two-scale piecewise uniform                  96.17   83.42  173.26    480.1    864.9
+Uniform rotation                             96.52   84.27  171.64    481.8    856.8
+Affine (scale+offset from ASC)               98.69   85.13  169.08    492.6    844.0
+
+==============================================================================
+PER-POINT-TYPE RMS (top 3 models)
+==============================================================================
+  Piecewise house linear (12 DOF):
+    angle        n= 4  RMS= 7.35°  max=14.26°
+    cusp         n=12  RMS= 2.67°  max= 5.62°
+    house_num    n= 3  RMS= 7.11°  max= 9.41°
+    planet       n= 8  RMS= 3.92°  max= 7.40°
+    tick         n=14  RMS= 3.99°  max= 7.60°
+    zodiac       n=12  RMS= 5.42°  max=13.83°
+  Quadrant (4 free spans):
+    angle        n= 4  RMS= 9.22°  max=17.00°
+    cusp         n=12  RMS= 5.32°  max= 9.68°
+    house_num    n= 3  RMS= 7.46°  max= 9.20°
+    planet       n= 8  RMS= 3.94°  max= 7.44°
+    tick         n=14  RMS= 3.13°  max= 6.32°
+    zodiac       n=12  RMS= 5.99°  max=12.64°
+  Quadrant 4x90 (fixed anchors):
+    angle        n= 4  RMS= 9.22°  max=17.00°
+    cusp         n=12  RMS= 5.77°  max=14.30°
+    house_num    n= 3  RMS= 9.05°  max=12.50°
+    planet       n= 8  RMS= 6.03°  max=14.02°
+    tick         n=14  RMS= 4.02°  max= 6.29°
+    zodiac       n=12  RMS= 5.43°  max= 9.92°
+
+==============================================================================
+OPTIMIZED 12-DOF CUSP ANGLES vs QUADRANT MODEL
+==============================================================================
+  Mean cusp angle delta: 3.98°  max: 8.67°
+  RMS cusp angle delta:  4.64°
+
+==============================================================================
+PARSIMONY (AIC-style penalized score — lower is better)
+==============================================================================
+  Quadrant (4 free spans)                     AIC=   186.5  DOF=4
+  Piecewise house linear (12 DOF)             AIC=   187.1  DOF=12
+  Quadrant 4x90 (fixed anchors)               AIC=   188.5  DOF=0
+  PCHIP spline (12 knot angles)               AIC=   336.9  DOF=12
+  Uniform rotation                            AIC=   486.4  DOF=1
+  Nonlinear warp (sinusoidal)                 AIC=   488.8  DOF=4
+  Two-scale piecewise uniform                 AIC=   490.0  DOF=3
+  Affine (scale+offset from ASC)              AIC=   490.7  DOF=2
+
+==============================================================================
+STATISTICAL CONCLUSION
+==============================================================================
+Best-fitting model: Piecewise house linear (12 DOF)
+  RMS angular error: 4.66°
+  RMS pixel error:   23.3 px (at r=286)
+  Max error:         14.26° (71.2 px)
+  Margin over 2nd place (Quadrant (4 free spans)): 0.73° (1.2x)
+
+INTERPRETATION:
+  Lowest RMS: Piecewise house linear (12 DOF) (4.66°)
+  Fixed quadrant (0 DOF): 5.92° RMS — parsimonious baseline
+  Best AIC (parsimony-adjusted): Quadrant (4 free spans)
+
+STATEMENT: "Quadrant interpolation is the best-fitting parsimonious model identified."
+  (12-DOF fit improves RMS by only 1.26° — within measurement noise.)
+  We do NOT claim knowledge of Astro-Seek source code — only pixel fit quality.
+
+Output files:
+  C:\planet-life\scripts\output\projection_validation\reference_points.json
+  C:\planet-life\scripts\output\projection_validation\model_results.json
+  C:\planet-life\scripts\output\projection_validation\residual_heatmap_polar.png
+  C:\planet-life\scripts\output\projection_validation\residual_wheel_overlay.png

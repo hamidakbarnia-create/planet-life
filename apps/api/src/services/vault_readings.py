@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
+from packages.astro_engine.scoring_context import CONTEXT_NATAL
 from services.chart_data import build_chart_payload, _import_swisseph, _local_datetime, resolve_coordinates
 from packages.astro_engine.vault_rules import build_mars_verdict, verdict_to_dict
 from packages.astro_engine.vault_templates import render_mars_reading

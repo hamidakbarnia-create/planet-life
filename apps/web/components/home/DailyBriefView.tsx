@@ -19,6 +19,7 @@ import {
   BAND_STYLES,
   type HourScore,
 } from '@/lib/calendar-scores';
+import { hasConfirmedCurrentLocation } from '@/lib/user-locations';
 import { todayYMD } from '@/lib/calendar-utils';
 import { loadPeople } from '@/lib/people-storage';
 import { PEOPLE_LANGS } from '@/lib/people-i18n';
@@ -111,7 +112,8 @@ export function DailyBriefView({
       !profile ||
       !profile.birth_date ||
       !profile.birth_time ||
-      !profile.location
+      !profile.location ||
+      !hasConfirmedCurrentLocation(profile)
     ) {
       setDayLoading(false);
       setHourlyLoading(false);
