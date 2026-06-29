@@ -16,6 +16,7 @@ from routes.vault import router as vault_router
 from routes.pathfinder import router as pathfinder_router
 from routes.world import router as world_router
 from packages.astro_engine.scoring_context import CONTEXT_CALENDAR_DAY, CONTEXT_CALENDAR_HOURLY
+from schemas.score_breakdown import build_scoring_response, validate_component_breakdown
 from services.scoring_pipeline import score_with_context
 from services.chart_data import build_chart_payload
 
@@ -93,10 +94,9 @@ def _score_one(
             zodiac=zodiac,
         )
         score = result
+        payload = build_scoring_response(score)
         return {
-            "executive": score["executive"],
-            "strategic": score["strategic"],
-            "technical": score["technical"],
+            **payload,
             "transit": transit.get("planets", {}),
         }
     except Exception as e:
@@ -206,7 +206,12 @@ async def batch_hourly(request: HourlyBatchRequest):
         if "error" in payload:
             results[h] = {"error": payload["error"]}
         else:
-            results[h] = {"score": payload["executive"].get("score")}
+            breakdown = payload["strategic"]["component_breakdown"]
+            validate_component_breakdown(breakdown)
+            results[h] = {
+                "score": payload["executive"].get("score"),
+                "component_breakdown": breakdown,
+            }
     return {"hours": results}
 
 

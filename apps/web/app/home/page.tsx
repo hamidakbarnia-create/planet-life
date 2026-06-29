@@ -16,7 +16,7 @@ import {
 import { loadBirthProfile } from '@/lib/birth-profile';
 import type { BirthProfile } from '@/lib/birth-profile';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
-import { fetchMonthScores } from '@/lib/calendar-scores';
+import { fetchMonthScores, type ScoreBreakdown } from '@/lib/calendar-scores';
 import { todayYMD } from '@/lib/calendar-utils';
 import { HOME_LANGS } from '@/lib/home-i18n';
 export default function HomePage() {
@@ -30,7 +30,11 @@ export default function HomePage() {
   const [hasProfile, setHasProfile] = useState(false);
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
-  const [scores, setScores] = useState<Record<string, number>>({});
+  const [monthScoreData, setMonthScoreData] = useState<{
+    scores: Record<string, number>;
+    breakdowns: Record<string, ScoreBreakdown | null>;
+  }>({ scores: {}, breakdowns: {} });
+  const scores = monthScoreData.scores;
   const [loadingMonth, setLoadingMonth] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
 
@@ -94,10 +98,13 @@ export default function HomePage() {
     if (!profile || !profile.birth_date || !profile.birth_time || !profile.location) return;
     setLoadingMonth(true);
     try {
-      const data = await fetchMonthScores(profile, year, month, (done, total) =>
-        setProgress({ done, total })
+      const { scores: monthScores, breakdowns } = await fetchMonthScores(
+        profile,
+        year,
+        month,
+        (done, total) => setProgress({ done, total })
       );
-      setScores(data);
+      setMonthScoreData({ scores: monthScores, breakdowns });
     } finally {
       setLoadingMonth(false);
     }

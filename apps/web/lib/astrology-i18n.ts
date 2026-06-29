@@ -390,6 +390,8 @@ export function translateStringList(
   return items.map((item) => fn(item, lang));
 }
 
+import type { ScoreBreakdown } from './score-breakdown';
+
 export interface AnalysisPayload {
   executive: {
     score: number;
@@ -404,6 +406,8 @@ export interface AnalysisPayload {
     key_themes?: string[];
     timing_notes?: string[];
   };
+  /** Normalized score decomposition — populated by analyze API adapter. */
+  scoreBreakdown?: ScoreBreakdown | null;
 }
 
 export function translateAnalysis(
@@ -435,5 +439,5 @@ export function translateAnalysis(
     st.timing_notes = translateStringList(st.timing_notes, lang, 'timing');
   }
 
-  return { executive: ex, strategic: st };
+  return { executive: ex, strategic: st, scoreBreakdown: data.scoreBreakdown };
 }

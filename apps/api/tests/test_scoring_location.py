@@ -465,6 +465,7 @@ def test_component_breakdown_includes_debug_fields():
         "location_mode",
         "calculated_for",
         "location_component_score",
+        "target_time",
     ):
         assert key in bd
         assert bd[key] is not None

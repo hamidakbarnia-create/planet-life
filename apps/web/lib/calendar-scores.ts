@@ -1,6 +1,13 @@
 import type { BirthProfile } from './birth-profile';
 import { chartPreferenceFields } from './app-settings';
 import {
+  extractAnalyzeScoreBreakdown,
+  extractHourlyScoreBreakdown,
+  parseAnalyzeResponse,
+  type MonthScoresResult,
+  type ScoreBreakdown,
+} from './score-breakdown';
+import {
   buildScoringLocationPayload,
   resolveCalendarEvaluationLocation,
   type UserLocation,
@@ -17,6 +24,7 @@ export interface DayScore {
   date: string;
   score: number;
   rating?: string;
+  breakdown?: ScoreBreakdown | null;
 }
 
 export interface HourScore {
@@ -24,7 +32,10 @@ export interface HourScore {
   time: string;
   score: number;
   band: ScoreBand;
+  breakdown?: ScoreBreakdown | null;
 }
+
+export type { MonthScoresResult, ScoreBreakdown };
 
 export function scoreToBand(score: number | null | undefined): ScoreBand {
   if (score == null || Number.isNaN(score)) return 'empty';
@@ -133,8 +144,18 @@ export async function fetchDayScore(
   targetTime?: string,
   evaluation?: UserLocation | null
 ): Promise<number | null> {
+  const detail = await fetchDayScoreDetail(profile, targetDate, targetTime, evaluation);
+  return detail.score;
+}
+
+export async function fetchDayScoreDetail(
+  profile: BirthProfile,
+  targetDate: string,
+  targetTime?: string,
+  evaluation?: UserLocation | null
+): Promise<{ score: number | null; breakdown: ScoreBreakdown | null }> {
   const locFields = scoringLocationFields(profile, evaluation);
-  if (!locFields) return null;
+  if (!locFields) return { score: null, breakdown: null };
   try {
     const res = await fetch(`${API_BASE}/api/business/analyze`, {
       method: 'POST',
@@ -150,10 +171,9 @@ export async function fetchDayScore(
       }),
     });
     const data = await res.json();
-    if (data.detail) return null;
-    return data.executive?.score ?? null;
+    return parseAnalyzeResponse(data);
   } catch {
-    return null;
+    return { score: null, breakdown: null };
   }
 }
 
@@ -203,14 +223,14 @@ export async function fetchMonthScores(
   month: number,
   onProgress?: (done: number, total: number) => void,
   evaluation?: UserLocation | null
-): Promise<Record<string, number>> {
+): Promise<MonthScoresResult> {
   const evalLoc = evaluation ?? resolveCalendarEvaluationLocation(profile);
   const evalLabel = evalLoc?.city;
   const locFields = scoringLocationFields(profile, evalLoc);
-  if (!locFields) return {};
+  if (!locFields) return { scores: {}, breakdowns: {} };
 
   const cached = loadMonthCache(year, month, profile.action_type, evalLabel);
-  if (cached) return cached;
+  if (cached) return { scores: cached, breakdowns: {} };
 
   const total = daysInMonth(year, month);
   const dates = Array.from({ length: total }, (_, i) =>
@@ -221,6 +241,7 @@ export async function fetchMonthScores(
 
   const prefs = chartPreferenceFields();
   const scores: Record<string, number> = {};
+  const breakdowns: Record<string, ScoreBreakdown | null> = {};
 
   try {
     const res = await fetch(`${API_BASE}/api/batch`, {
@@ -247,6 +268,7 @@ export async function fetchMonthScores(
         if (typeof score === 'number' && !Number.isNaN(score)) {
           scores[date] = score;
         }
+        breakdowns[date] = extractAnalyzeScoreBreakdown(payload);
       }
     }
   } catch {
@@ -255,7 +277,7 @@ export async function fetchMonthScores(
 
   onProgress?.(total, total);
   saveMonthCache(year, month, profile.action_type, scores, evalLabel);
-  return scores;
+  return { scores, breakdowns };
 }
 
 export async function fetchHourlyScores(
@@ -299,6 +321,7 @@ export async function fetchHourlyScores(
             time: `${String(hour).padStart(2, '0')}:00`,
             score,
             band: scoreToBand(entry?.score),
+            breakdown: extractHourlyScoreBreakdown(entry),
           });
         }
         return out;
@@ -312,9 +335,15 @@ export async function fetchHourlyScores(
   const hours = Array.from({ length: 24 }, (_, h) => h);
   const results = await mapPool(hours, 12, async (hour) => {
     const time = `${String(hour).padStart(2, '0')}:00`;
-    const score = await fetchDayScore(profile, targetDate, time, evaluation);
-    const s = score ?? 0;
-    return { hour, time, score: s, band: scoreToBand(score) };
+    const detail = await fetchDayScoreDetail(profile, targetDate, time, evaluation);
+    const s = detail.score ?? 0;
+    return {
+      hour,
+      time,
+      score: s,
+      band: scoreToBand(detail.score),
+      breakdown: detail.breakdown,
+    };
   });
   return results.sort((a, b) => a.hour - b.hour);
 }

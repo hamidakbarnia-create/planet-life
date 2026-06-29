@@ -6,6 +6,8 @@ import { AppShell } from '@/components/AppShell';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import type { AppLang } from '@/lib/app-settings';
 import { chartPreferenceFields } from '@/lib/app-settings';
+import { AnalysisResultBreakdown } from '@/components/AnalysisResultBreakdown';
+import { parseAnalyzeResponse, type ScoreBreakdown } from '@/lib/score-breakdown';
 import { loadBirthProfile } from '@/lib/birth-profile';
 import type { BirthProfile } from '@/lib/birth-profile';
 import { API_BASE } from '@/lib/calendar-scores';
@@ -185,6 +187,7 @@ interface OracleHistoryEntry {
     longitude?: number;
   };
   calculatedFor?: string;
+  scoreBreakdown?: ScoreBreakdown | null;
 }
 
 function loadHistory(): OracleHistoryEntry[] {
@@ -256,6 +259,7 @@ export default function OracleAskPage() {
   const [time, setTime] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [score, setScore] = useState<number | null>(null);
+  const [scoreBreakdown, setScoreBreakdown] = useState<ScoreBreakdown | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [history, setHistory] = useState<OracleHistoryEntry[]>(() => loadHistory());
   const [questionLocation, setQuestionLocation] = useState<UserLocation | null>(null);
@@ -297,6 +301,7 @@ export default function OracleAskPage() {
     setDate(todayYMD());
     setTime('');
     setScore(null);
+    setScoreBreakdown(null);
     setHasAnswered(false);
     setQuestionLocation(null);
     setCalculatedFor(null);
@@ -311,6 +316,7 @@ export default function OracleAskPage() {
     setLoading(true);
     setHasAnswered(false);
     setScore(null);
+    setScoreBreakdown(null);
     setCalculatedFor(null);
     try {
       const res = await fetch(`${API_BASE}/api/business/analyze`, {
@@ -327,15 +333,22 @@ export default function OracleAskPage() {
         }),
       });
       const data = await res.json();
-      const s: number | null =
-        typeof data?.executive?.score === 'number' ? data.executive.score : null;
-      setScore(s);
+      const parsed = parseAnalyzeResponse(data);
+      setScore(parsed.score);
+      setScoreBreakdown(parsed.breakdown);
       const evalLabel =
+        parsed.breakdown?.calculatedFor ??
         data?.location_context?.calculated_for ??
         data?.location_context?.evaluation_location ??
         locFields.evaluation_location;
       setCalculatedFor(evalLabel);
-      const answer = buildOracleAnswer(selectedQuestion, s, date, time || undefined, lang);
+      const answer = buildOracleAnswer(
+        selectedQuestion,
+        parsed.score,
+        date,
+        time || undefined,
+        lang
+      );
       const historyOrdinal = history.length + 1;
       const activeLoc = questionLocation ?? profile.current_location!;
       const entry: OracleHistoryEntry = {
@@ -345,9 +358,10 @@ export default function OracleAskPage() {
         questionId: selectedQuestion.id,
         date,
         time: time || null,
-        score: s,
+        score: parsed.score,
         band: answer.band,
         calculatedFor: evalLabel,
+        scoreBreakdown: parsed.breakdown,
         locationContext: {
           city: activeLoc.city,
           country: activeLoc.country,
@@ -361,6 +375,7 @@ export default function OracleAskPage() {
       saveHistory(next);
     } catch {
       setScore(null);
+      setScoreBreakdown(null);
     } finally {
       setLoading(false);
       setHasAnswered(true);
@@ -633,6 +648,8 @@ export default function OracleAskPage() {
               )}
             </div>
 
+            <AnalysisResultBreakdown breakdown={scoreBreakdown} />
+
             <div
               className="rounded-2xl p-4 mb-4"
               style={{
@@ -710,12 +727,13 @@ export default function OracleAskPage() {
                 return (
                   <li
                     key={h.id}
-                    className="rounded-lg px-3 py-2 flex items-center gap-3"
+                    className="rounded-lg px-3 py-2"
                     style={{
                       background: 'rgba(255,255,255,0.02)',
                       border: '1px solid rgba(255,255,255,0.06)',
                     }}
                   >
+                    <div className="flex items-center gap-3">
                     <span
                       className="fc text-base shrink-0"
                       style={{ color: m?.color ?? '#fbbf24', width: 22 }}
@@ -745,6 +763,10 @@ export default function OracleAskPage() {
                       >
                         {h.score}
                       </span>
+                    )}
+                    </div>
+                    {h.scoreBreakdown && (
+                      <AnalysisResultBreakdown breakdown={h.scoreBreakdown} compact />
                     )}
                   </li>
                 );

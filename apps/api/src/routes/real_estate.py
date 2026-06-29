@@ -3,6 +3,7 @@ sys.path.insert(0, r"C:\planet-life")
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+from schemas.score_breakdown import ActivityScoreResponse, build_scoring_response
 from packages.astro_engine.scoring_context import CONTEXT_PROPERTY
 from services.scoring_pipeline import score_with_context
 
@@ -23,7 +24,7 @@ class RealEstateAnalysisRequest(BaseModel):
     evaluation_latitude: float | None = None
     evaluation_longitude: float | None = None
 
-@router.post("/analyze")
+@router.post("/analyze", response_model=ActivityScoreResponse)
 async def analyze_real_estate(request: RealEstateAnalysisRequest):
     action = request.action_type.lower().strip()
     if action not in REAL_ESTATE_ACTIONS:
@@ -45,8 +46,4 @@ async def analyze_real_estate(request: RealEstateAnalysisRequest):
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Chart computation failed: {e}")
-    return {
-        "executive": result["executive"],
-        "strategic": result["strategic"],
-        "technical": result["technical"],
-    }
+    return build_scoring_response(result)

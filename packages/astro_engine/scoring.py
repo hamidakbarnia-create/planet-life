@@ -784,6 +784,7 @@ def calculate_activity_score(
         "resolved_local_datetime": eval_meta.get("resolved_local_datetime"),
         "resolved_utc_datetime": eval_meta.get("resolved_utc_datetime"),
         "timezone": eval_meta.get("timezone") or eval_meta.get("evaluation_timezone"),
+        "target_time": eval_meta.get("target_time"),
     }
 
     key_themes = _build_key_themes(profile, opportunities, risks, final_score)

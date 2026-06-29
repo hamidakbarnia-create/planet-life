@@ -5,6 +5,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+from schemas.score_breakdown import ActivityScoreResponse, build_scoring_response
 from packages.astro_engine.scoring_context import CONTEXT_ASK_ELECTIONAL
 from services.scoring_pipeline import score_with_context
 from services.chart_data import (
@@ -55,7 +56,7 @@ class BusinessAnalysisRequest(BaseModel):
     country: str | None = None
     node_type: str = "mean"  # mean | true — Astro-Seek default reference uses Mean Node
 
-@router.post("/analyze")
+@router.post("/analyze", response_model=ActivityScoreResponse)
 async def analyze_business(request: BusinessAnalysisRequest):
     action = request.action_type.lower().strip()
     try:
@@ -81,12 +82,7 @@ async def analyze_business(request: BusinessAnalysisRequest):
     except Exception as e:
         log_chart_error("computation", str(e), location=request.location)
         raise HTTPException(status_code=503, detail=f"Chart computation failed: {e}")
-    return {
-        "executive": result["executive"],
-        "strategic": result["strategic"],
-        "technical": result["technical"],
-        "location_context": transit.get("evaluation", {}),
-    }
+    return build_scoring_response(result, location_context=transit.get("evaluation", {}))
 
 @router.post("/chart")
 async def get_birth_chart(request: BusinessAnalysisRequest):

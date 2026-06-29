@@ -5,6 +5,8 @@ import {
   type AstroLang,
   type AnalysisPayload,
 } from '@/lib/astrology-i18n';
+import { AnalysisResultBreakdown } from '@/components/AnalysisResultBreakdown';
+import { parseAnalyzeResponse } from '@/lib/score-breakdown';
 import { BottomNav, VaultPill } from '@/components/BottomNav';
 import { ActionDisclaimer } from '@/components/disclaimers/ActionDisclaimer';
 import { ModuleDisclaimerBanner } from '@/components/disclaimers/ModuleDisclaimerBanner';
@@ -198,7 +200,12 @@ export default function Dashboard() {
       const data = await res.json();
       if (data.detail) setError(data.detail);
       else {
-        setRawResult(data); setTimeout(() => setAnimated(true), 100);
+        const parsed = parseAnalyzeResponse(data);
+        setRawResult({
+          ...data,
+          scoreBreakdown: parsed.breakdown,
+        });
+        setTimeout(() => setAnimated(true), 100);
       }
     } catch {
       setError('Cannot connect to API. Make sure the backend is running on port 8000.');
@@ -412,6 +419,8 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
+
+                  <AnalysisResultBreakdown breakdown={result.scoreBreakdown} />
 
                   <div className="fade-up rounded-2xl p-5" style={{background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.07)',animationDelay:'80ms'}}>
                     <div className="fi text-[10px] tracking-widest mb-2 uppercase" style={{color:'rgba(255,255,255,0.25)'}}>{t.rec}</div>

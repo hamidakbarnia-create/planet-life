@@ -22,6 +22,7 @@ import {
   BAND_STYLES,
   fetchHourlyScores,
   fetchMonthScores,
+  type ScoreBreakdown,
   fetchTransitSnapshot,
   formatDateYMD,
   formatHourLabel,
@@ -421,7 +422,11 @@ export default function CalendarPage() {
   const [lang, setLangState] = useState<LangKey>('en');
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
-  const [scores, setScores] = useState<Record<string, number>>({});
+  const [monthScoreData, setMonthScoreData] = useState<{
+    scores: Record<string, number>;
+    breakdowns: Record<string, ScoreBreakdown | null>;
+  }>({ scores: {}, breakdowns: {} });
+  const scores = monthScoreData.scores;
   const [loadingMonth, setLoadingMonth] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [selectedDate, setSelectedDate] = useState<string | null>(
@@ -483,10 +488,13 @@ export default function CalendarPage() {
     setLoadingMonth(true);
     setProgress({ done: 0, total: 0 });
     try {
-      const data = await fetchMonthScores(profile, year, month, (done, total) =>
-        setProgress({ done, total })
+      const { scores: monthScores, breakdowns } = await fetchMonthScores(
+        profile,
+        year,
+        month,
+        (done, total) => setProgress({ done, total })
       );
-      setScores(data);
+      setMonthScoreData({ scores: monthScores, breakdowns });
     } finally {
       setLoadingMonth(false);
     }
