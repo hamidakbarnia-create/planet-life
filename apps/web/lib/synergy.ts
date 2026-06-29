@@ -5,30 +5,18 @@ import { fetchDayScore } from './calendar-scores';
 import { fetchNatalChart } from './chart-api';
 import { detectAspect } from './natal-aspects';
 import type { Person, SynergyBadge } from './people-storage';
-
-const SYNASTRY_PLANETS = [
-  'sun',
-  'moon',
-  'mercury',
-  'venus',
-  'mars',
-  'jupiter',
-  'saturn',
-] as const;
+import {
+  aspectSynastryWeight,
+  pickProfileRecommendations,
+  resolveMeetingActionType,
+  resolveRelationshipProfileStrict,
+  SYNASTRY_PLANETS,
+  type RelationshipProfile,
+} from './relationship-profile';
+import { buildSynastryReasoning, type SynastryReasoning } from './synastry-reasoning';
 
 const HARMONY_ASPECTS = new Set(['trine', 'sextile', 'conjunction']);
 const TENSION_ASPECTS = new Set(['square', 'opposition']);
-
-const HARMONY_WEIGHT: Record<string, number> = {
-  trine: 8,
-  sextile: 6,
-  conjunction: 5,
-};
-
-const TENSION_WEIGHT: Record<string, number> = {
-  square: 8,
-  opposition: 7,
-};
 
 export interface SynastryAspect {
   myPlanet: string;
@@ -43,6 +31,9 @@ export interface SynergyResult {
   harmony: SynastryAspect[];
   tension: SynastryAspect[];
   bestDays: MeetingDay[];
+  profileKey: string;
+  reasoning: SynastryReasoning;
+  recommendations: string[];
 }
 
 export interface MeetingDay {
@@ -92,7 +83,8 @@ function orbStrength(orb: number, max = 8) {
 
 export function computeSynastry(
   mine: Record<string, { longitude: number }>,
-  theirs: Record<string, { longitude: number }>
+  theirs: Record<string, { longitude: number }>,
+  profile: RelationshipProfile
 ): { score: number; badge: SynergyBadge; harmony: SynastryAspect[]; tension: SynastryAspect[] } {
   const harmony: SynastryAspect[] = [];
   const tension: SynastryAspect[] = [];
@@ -114,13 +106,13 @@ export function computeSynastry(
     }
   }
 
-  let score = 50;
+  let score = profile.baseScore;
   for (const h of harmony) {
-    const w = HARMONY_WEIGHT[h.aspect] ?? 4;
+    const w = aspectSynastryWeight(profile, h.aspect, 'harmony');
     score += w * orbStrength(h.orb);
   }
   for (const t of tension) {
-    const w = TENSION_WEIGHT[t.aspect] ?? 6;
+    const w = aspectSynastryWeight(profile, t.aspect, 'tension');
     score -= w * orbStrength(t.orb);
   }
 
@@ -139,24 +131,24 @@ function nextWeekDates(): string[] {
   return out;
 }
 
-export async function findBestMeetingDays(
+async function fetchMeetingDaysForAction(
   myProfile: BirthProfile,
-  person: Person
+  person: Person,
+  actionType: string
 ): Promise<MeetingDay[]> {
   const theirProfile: BirthProfile = {
     birth_date: person.birth_date,
     birth_time: person.birth_time,
     location: person.location,
-    action_type: 'negotiation',
+    action_type: actionType,
   };
-  const myNegotiation = { ...myProfile, action_type: 'negotiation' };
-
+  const myActionProfile = { ...myProfile, action_type: actionType };
   const days = nextWeekDates();
   const results: MeetingDay[] = [];
 
   for (const date of days) {
     const [myScore, theirScore] = await Promise.all([
-      fetchDayScore(myNegotiation, date),
+      fetchDayScore(myActionProfile, date),
       fetchDayScore(theirProfile, date),
     ]);
     if (myScore == null || theirScore == null) continue;
@@ -171,20 +163,51 @@ export async function findBestMeetingDays(
   return results.sort((a, b) => b.combined - a.combined).slice(0, 3);
 }
 
+export async function findBestMeetingDays(
+  myProfile: BirthProfile,
+  person: Person,
+  profile: RelationshipProfile
+): Promise<MeetingDay[]> {
+  const preferred = resolveMeetingActionType(profile, 'preferred');
+  const preferredDays = await fetchMeetingDaysForAction(myProfile, person, preferred);
+  if (preferredDays.length > 0) {
+    return preferredDays;
+  }
+
+  const fallback = resolveMeetingActionType(profile, 'fallback');
+  if (fallback === preferred) {
+    return preferredDays;
+  }
+  return fetchMeetingDaysForAction(myProfile, person, fallback);
+}
+
 export async function analyzeSynergy(
   myProfile: BirthProfile,
   person: Person
 ): Promise<SynergyResult | null> {
+  const resolved = resolveRelationshipProfileStrict(person.relationship);
+  if (!resolved.ok) {
+    return null;
+  }
+  const profile = resolved.profile;
   const [mine, theirs] = await Promise.all([
     fetchNatalChart(myProfile.birth_date, myProfile.birth_time, myProfile.location),
     fetchNatalChart(person.birth_date, person.birth_time, person.location),
   ]);
   if (!mine || !theirs) return null;
 
-  const syn = computeSynastry(mine, theirs);
-  const bestDays = await findBestMeetingDays(myProfile, person);
+  const syn = computeSynastry(mine, theirs, profile);
+  const bestDays = await findBestMeetingDays(myProfile, person, profile);
+  const reasoning = buildSynastryReasoning(profile, syn.score, syn.harmony, syn.tension);
+  const recommendations = pickProfileRecommendations(profile, syn.badge);
 
-  return { ...syn, bestDays };
+  return {
+    ...syn,
+    bestDays,
+    profileKey: profile.key,
+    reasoning,
+    recommendations,
+  };
 }
 
 export function formatAspectLabel(row: SynastryAspect, lang: AstroLang = 'en') {

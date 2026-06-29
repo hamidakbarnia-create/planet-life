@@ -204,6 +204,7 @@ export default function Dashboard() {
         setRawResult({
           ...data,
           scoreBreakdown: parsed.breakdown,
+          scoreReasoning: parsed.reasoning,
         });
         setTimeout(() => setAnimated(true), 100);
       }

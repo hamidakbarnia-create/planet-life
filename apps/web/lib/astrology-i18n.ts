@@ -391,6 +391,7 @@ export function translateStringList(
 }
 
 import type { ScoreBreakdown } from './score-breakdown';
+import type { ScoreReasoning } from './score-reasoning';
 
 export interface AnalysisPayload {
   executive: {
@@ -408,6 +409,8 @@ export interface AnalysisPayload {
   };
   /** Normalized score decomposition — populated by analyze API adapter. */
   scoreBreakdown?: ScoreBreakdown | null;
+  /** Deterministic reasoning — populated by analyze API adapter. */
+  scoreReasoning?: ScoreReasoning | null;
 }
 
 export function translateAnalysis(
@@ -439,5 +442,5 @@ export function translateAnalysis(
     st.timing_notes = translateStringList(st.timing_notes, lang, 'timing');
   }
 
-  return { executive: ex, strategic: st, scoreBreakdown: data.scoreBreakdown };
+  return { executive: ex, strategic: st, scoreBreakdown: data.scoreBreakdown, scoreReasoning: data.scoreReasoning };
 }

@@ -30,7 +30,7 @@ async def analyze_finance(request: FinanceAnalysisRequest):
     if action not in FINANCE_ACTIONS:
         raise HTTPException(status_code=422, detail=f"Unknown finance action '{action}'.")
     try:
-        result, _, _ = score_with_context(
+        result, natal, transit = score_with_context(
             birth_date=request.birth_date,
             birth_time=request.birth_time,
             location=request.location,
@@ -46,4 +46,10 @@ async def analyze_finance(request: FinanceAnalysisRequest):
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Chart computation failed: {e}")
-    return build_scoring_response(result)
+    return build_scoring_response(
+        result,
+        natal=natal,
+        transit=transit,
+        activity_type=action,
+        context=CONTEXT_ASK_ELECTIONAL,
+    )

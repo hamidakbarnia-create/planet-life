@@ -7,6 +7,8 @@ import {
   type MonthScoresResult,
   type ScoreBreakdown,
 } from './score-breakdown';
+import { extractBatchDayReasoning } from './score-reasoning';
+import type { ScoreReasoning } from './score-reasoning';
 import {
   buildScoringLocationPayload,
   resolveCalendarEvaluationLocation,
@@ -36,6 +38,7 @@ export interface HourScore {
 }
 
 export type { MonthScoresResult, ScoreBreakdown };
+export type { ScoreReasoning } from './score-reasoning';
 
 export function scoreToBand(score: number | null | undefined): ScoreBand {
   if (score == null || Number.isNaN(score)) return 'empty';
@@ -227,10 +230,10 @@ export async function fetchMonthScores(
   const evalLoc = evaluation ?? resolveCalendarEvaluationLocation(profile);
   const evalLabel = evalLoc?.city;
   const locFields = scoringLocationFields(profile, evalLoc);
-  if (!locFields) return { scores: {}, breakdowns: {} };
+  if (!locFields) return { scores: {}, breakdowns: {}, reasoning: {} };
 
   const cached = loadMonthCache(year, month, profile.action_type, evalLabel);
-  if (cached) return { scores: cached, breakdowns: {} };
+  if (cached) return { scores: cached, breakdowns: {}, reasoning: {} };
 
   const total = daysInMonth(year, month);
   const dates = Array.from({ length: total }, (_, i) =>
@@ -242,6 +245,7 @@ export async function fetchMonthScores(
   const prefs = chartPreferenceFields();
   const scores: Record<string, number> = {};
   const breakdowns: Record<string, ScoreBreakdown | null> = {};
+  const reasoning: Record<string, ScoreReasoning | null> = {};
 
   try {
     const res = await fetch(`${API_BASE}/api/batch`, {
@@ -269,6 +273,7 @@ export async function fetchMonthScores(
           scores[date] = score;
         }
         breakdowns[date] = extractAnalyzeScoreBreakdown(payload);
+        reasoning[date] = extractBatchDayReasoning(payload);
       }
     }
   } catch {
@@ -277,7 +282,7 @@ export async function fetchMonthScores(
 
   onProgress?.(total, total);
   saveMonthCache(year, month, profile.action_type, scores, evalLabel);
-  return { scores, breakdowns };
+  return { scores, breakdowns, reasoning };
 }
 
 export async function fetchHourlyScores(

@@ -15,6 +15,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
+from packages.astro_engine.scoring_context import ScoringContext
+from schemas.score_reasoning import ScoreReasoning, build_reasoning_payload
+
 LocationMode = Literal[
     "birthOnly",
     "currentLiving",
@@ -110,6 +113,7 @@ class ActivityScoreResponse(BaseModel):
     strategic: StrategicScoreLayer
     technical: TechnicalScoreLayer
     location_context: dict[str, Any] | None = None
+    reasoning: ScoreReasoning | None = None
 
 
 class HourlyScoreEntry(BaseModel):
@@ -151,6 +155,10 @@ def build_scoring_response(
     result: dict[str, Any],
     *,
     location_context: dict[str, Any] | None = None,
+    natal: dict[str, Any] | None = None,
+    transit: dict[str, Any] | None = None,
+    activity_type: str | None = None,
+    context: ScoringContext | None = None,
 ) -> dict[str, Any]:
     """
     Build a consistent API response dict and validate component_breakdown
@@ -169,4 +177,17 @@ def build_scoring_response(
     }
     if location_context is not None:
         payload["location_context"] = location_context
+
+    reasoning = build_reasoning_payload(
+        result,
+        natal=natal,
+        transit=transit,
+        activity_type=activity_type or technical.get("activity_type"),
+        context=context,
+    )
+    if reasoning is not None:
+        payload["reasoning"] = reasoning.model_dump()
+    else:
+        payload["reasoning"] = None
+
     return payload

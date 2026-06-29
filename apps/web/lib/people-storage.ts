@@ -1,9 +1,6 @@
-export type RelationshipType =
-  | 'spouse'
-  | 'business_partner'
-  | 'family'
-  | 'friend'
-  | 'rival';
+import type { RelationshipType } from './relationship-profile';
+
+export type { RelationshipType, RelationshipProfileKey } from './relationship-profile';
 
 export type SynergyBadge = 'aligned' | 'caution' | 'tension';
 
@@ -41,7 +38,6 @@ export function savePeople(people: Person[]): boolean {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(people));
     return true;
   } catch {
-    // Most likely a quota error from oversized photos.
     return false;
   }
 }

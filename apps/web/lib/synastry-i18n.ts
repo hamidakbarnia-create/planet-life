@@ -1,5 +1,13 @@
 import type { AppLang } from './app-settings';
 import type { SynastryAspect } from './synergy';
+import {
+  planetSynastryWeight,
+  aspectSynastryWeight,
+  type RelationshipProfile,
+  type InsightSectionKey,
+} from './relationship-profile';
+import { insightSectionLabel } from './relationship-profile-i18n';
+import { profileAllowsRomanticDeepCopy } from './relationship-profile-validation';
 
 // Turns raw synastry aspects (e.g. "your Saturn conjunction their Moon, orb 0.1°")
 // into human, psychological language plus a strength rating — so a non-expert
@@ -158,18 +166,21 @@ export function friendlyAspectLabel(lang: AppLang, row: SynastryAspect): string 
 // the score is composed. Deterministic from the same aspects.
 
 export interface LifeAreaScore {
-  key: 'emotion' | 'stability' | 'communication';
+  key: InsightSectionKey;
   label: string;
   pct: number;
 }
 
-const AREA_PLANETS: Record<LifeAreaScore['key'], Set<string>> = {
+/** @deprecated Use computeProfileInsightAreas — kept for backward compatibility. */
+export type ProfileInsightArea = LifeAreaScore;
+
+const AREA_PLANETS: Record<'emotion' | 'stability' | 'communication', Set<string>> = {
   emotion: new Set(['sun', 'moon', 'venus']),
   stability: new Set(['saturn', 'sun', 'jupiter']),
   communication: new Set(['mercury', 'moon']),
 };
 
-const AREA_LABELS: Record<AppLang, Record<LifeAreaScore['key'], string>> = {
+const LEGACY_AREA_LABELS: Record<AppLang, Record<'emotion' | 'stability' | 'communication', string>> = {
   en: { emotion: 'Affection & intimacy', stability: 'Stability & commitment', communication: 'Everyday understanding' },
   ru: { emotion: 'Чувства и близость', stability: 'Стабильность и обязательства', communication: 'Повседневное понимание' },
   fa: { emotion: 'عاطفه و صمیمیت', stability: 'ثبات و تعهد بلندمدت', communication: 'تفاهم روزمره و کلامی' },
@@ -180,13 +191,45 @@ function orbStrength(orb: number, max = 8): number {
   return Math.max(0, 1 - orb / max);
 }
 
-export function computeLifeAreas(
+export function computeProfileInsightAreas(
   lang: AppLang,
+  profile: RelationshipProfile,
   harmony: SynastryAspect[],
   tension: SynastryAspect[]
 ): LifeAreaScore[] {
-  const labels = AREA_LABELS[lang] ?? AREA_LABELS.en;
-  return (Object.keys(AREA_PLANETS) as LifeAreaScore['key'][]).map((key) => {
+  return profile.insightSections.map((section) => {
+    const set = new Set(section.planets);
+    let score = profile.baseScore;
+    for (const h of harmony) {
+      if (set.has(h.myPlanet) || set.has(h.theirPlanet)) {
+        score += section.harmonyWeight * orbStrength(h.orb);
+      }
+    }
+    for (const t of tension) {
+      if (set.has(t.myPlanet) || set.has(t.theirPlanet)) {
+        score -= section.tensionWeight * orbStrength(t.orb);
+      }
+    }
+    return {
+      key: section.key,
+      label: insightSectionLabel(lang, section.key),
+      pct: Math.max(0, Math.min(100, Math.round(score))),
+    };
+  });
+}
+
+/** Legacy generic life areas — delegates to friend profile shape when no profile given. */
+export function computeLifeAreas(
+  lang: AppLang,
+  harmony: SynastryAspect[],
+  tension: SynastryAspect[],
+  profile?: RelationshipProfile
+): LifeAreaScore[] {
+  if (profile) {
+    return computeProfileInsightAreas(lang, profile, harmony, tension);
+  }
+  const labels = LEGACY_AREA_LABELS[lang] ?? LEGACY_AREA_LABELS.en;
+  return (Object.keys(AREA_PLANETS) as Array<'emotion' | 'stability' | 'communication'>).map((key) => {
     const set = AREA_PLANETS[key];
     let score = 50;
     for (const h of harmony) {
@@ -195,7 +238,9 @@ export function computeLifeAreas(
     for (const t of tension) {
       if (set.has(t.myPlanet) || set.has(t.theirPlanet)) score -= 12 * orbStrength(t.orb);
     }
-    return { key, label: labels[key], pct: Math.max(0, Math.min(100, Math.round(score))) };
+    const mappedKey: InsightSectionKey =
+      key === 'emotion' ? 'emotional_bond' : key === 'stability' ? 'stability' : 'communication';
+    return { key: mappedKey, label: labels[key], pct: Math.max(0, Math.min(100, Math.round(score))) };
   });
 }
 
@@ -692,11 +737,15 @@ export function formatModularLine(lang: AppLang, line: ModularLine): string {
   return `${line.theme}${sep}${line.impact}${sep}${line.tip}`;
 }
 
-export function getAspectInsight(lang: AppLang, row: SynastryAspect): AspectInsight {
+export function getAspectInsight(
+  lang: AppLang,
+  row: SynastryAspect,
+  profile?: RelationshipProfile
+): AspectInsight {
   const tone = aspectTone(row.aspect);
   const key = pairKey(row.myPlanet, row.theirPlanet);
   const deep = DEEP_COPY[key]?.[tone]?.[lang] ?? DEEP_COPY[key]?.[tone]?.en;
-  if (deep && isCorePair(row.myPlanet, row.theirPlanet)) {
+  if (deep && isCorePair(row.myPlanet, row.theirPlanet) && (!profile || profileAllowsRomanticDeepCopy(profile))) {
     return { kind: 'deep', analysis: deep };
   }
   return { kind: 'modular', line: buildModularLine(lang, row) };
@@ -712,9 +761,17 @@ const ASPECT_WEIGHT: Record<string, number> = {
   conjunction: 10, opposition: 8, square: 7, trine: 6, sextile: 5,
 };
 
-export function aspectInfluence(row: SynastryAspect): number {
-  const pw = Math.max(PLANET_WEIGHT[row.myPlanet] ?? 4, PLANET_WEIGHT[row.theirPlanet] ?? 4);
-  const aw = ASPECT_WEIGHT[row.aspect] ?? 5;
+export function aspectInfluence(
+  row: SynastryAspect,
+  profile?: RelationshipProfile
+): number {
+  const pw = profile
+    ? planetSynastryWeight(profile, row.myPlanet, row.theirPlanet)
+    : Math.max(PLANET_WEIGHT[row.myPlanet] ?? 4, PLANET_WEIGHT[row.theirPlanet] ?? 4);
+  const tone = HARMONY_ASPECT_SET.has(row.aspect) ? 'harmony' : 'tension';
+  const aw = profile
+    ? aspectSynastryWeight(profile, row.aspect, tone)
+    : ASPECT_WEIGHT[row.aspect] ?? 5;
   const tight = Math.max(0, 1 - row.orb / 8);
   return pw * aw * (0.5 + tight);
 }
@@ -731,15 +788,20 @@ export interface FeaturedAspects {
 
 export function pickFeaturedAspects(
   harmony: SynastryAspect[],
-  tension: SynastryAspect[]
+  tension: SynastryAspect[],
+  profile?: RelationshipProfile
 ): FeaturedAspects {
-  const topHarmony = [...harmony].sort((a, b) => aspectInfluence(b) - aspectInfluence(a)).slice(0, 3);
-  const topTension = [...tension].sort((a, b) => aspectInfluence(b) - aspectInfluence(a)).slice(0, 1);
+  const topHarmony = [...harmony]
+    .sort((a, b) => aspectInfluence(b, profile) - aspectInfluence(a, profile))
+    .slice(0, 3);
+  const topTension = [...tension]
+    .sort((a, b) => aspectInfluence(b, profile) - aspectInfluence(a, profile))
+    .slice(0, 1);
   const featured = [...topHarmony, ...topTension];
   const featuredKeys = new Set(featured.map(aspectRowKey));
   const secondary = [...harmony, ...tension]
     .filter((r) => !featuredKeys.has(aspectRowKey(r)))
-    .sort((a, b) => aspectInfluence(b) - aspectInfluence(a));
+    .sort((a, b) => aspectInfluence(b, profile) - aspectInfluence(a, profile));
   return { featured, featuredKeys, secondary };
 }
 

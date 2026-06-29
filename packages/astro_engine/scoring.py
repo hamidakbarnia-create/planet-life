@@ -669,7 +669,16 @@ def _resolve_profile(activity_type: str) -> ActivityProfile:
         "fresh_start": "business_launch",
         "ending_chapter": "rest_recovery",
         "major_decision": "negotiation",
-        "chance_event": "investment",
+        # Oracle: Relationship meeting semantics (synastry best-days)
+        "romantic_meeting": "networking",
+        "relationship_repair": "rest_recovery",
+        "shared_life_planning": "real_estate",
+        "social_meeting": "networking",
+        "mentorship_session": "networking",
+        "family_discussion": "negotiation",
+        "investor_pitch": "investment",
+        "client_meeting": "contract_signing",
+        "cofounder_planning": "business_launch",
     }
     return ACTIVITY_PROFILES.get(aliases.get(key, DEFAULT_ACTIVITY), ACTIVITY_PROFILES[DEFAULT_ACTIVITY])
 

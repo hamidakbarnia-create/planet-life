@@ -11,6 +11,8 @@ import { getBirthProfile } from '@/lib/birth-profile';
 import { saveAppLang } from '@/lib/calendar-preferences';
 import { PEOPLE_LANGS, type PeopleLang } from '@/lib/people-i18n';
 import { getPerson, updatePerson } from '@/lib/people-storage';
+import { resolveRelationshipProfileStrict } from '@/lib/relationship-profile';
+import { relationshipProfileLabel } from '@/lib/relationship-profile-i18n';
 import {
   analyzeSynergy,
   BADGE_STYLES,
@@ -102,9 +104,11 @@ export default function PersonSynergyPage() {
     );
   }
 
+  const profileResolved = person ? resolveRelationshipProfileStrict(person.relationship) : null;
+  const profile = profileResolved?.ok ? profileResolved.profile : null;
   const badgeStyle = result ? BADGE_STYLES[result.badge] : null;
-  const featured = result
-    ? pickFeaturedAspects(result.harmony, result.tension)
+  const featured = result && profile
+    ? pickFeaturedAspects(result.harmony, result.tension, profile)
     : null;
   const layers = LAYER_LABELS[lang];
 
@@ -138,7 +142,10 @@ export default function PersonSynergyPage() {
               {person.name}
             </h1>
             <p className="fi text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              {t.relationships[person.relationship]} · {t.synergy}
+              {profile
+                ? relationshipProfileLabel(lang, profile.key)
+                : t.relationships.friend}{' '}
+              · {t.synergy}
             </p>
           </div>
         </div>
@@ -174,9 +181,10 @@ export default function PersonSynergyPage() {
             </div>
 
             <Section title={t.lifeAreas} accent="#a78bfa">
-              {computeLifeAreas(lang, result.harmony, result.tension).map((area) => (
-                <LifeAreaBar key={area.key} label={area.label} pct={area.pct} dir={t.dir} />
-              ))}
+              {profile &&
+                computeLifeAreas(lang, result.harmony, result.tension, profile).map((area) => (
+                  <LifeAreaBar key={area.key} label={area.label} pct={area.pct} dir={t.dir} />
+                ))}
             </Section>
 
             <Section title={t.shared} accent="#4ade80">
@@ -202,7 +210,7 @@ export default function PersonSynergyPage() {
             {featured && featured.featured.length > 0 && (
               <Section title={t.keyConnections} accent="#c4b5fd">
                 {featured.featured.map((row, i) => (
-                  <InsightCard key={i} row={row} lang={lang} layers={layers} />
+                  <InsightCard key={i} row={row} lang={lang} layers={layers} profile={profile} />
                 ))}
               </Section>
             )}
@@ -227,7 +235,7 @@ export default function PersonSynergyPage() {
                 {showSecondary && (
                   <div className="px-4 pb-4 space-y-2 border-t border-white/5">
                     {featured.secondary.map((row, i) => {
-                      const insight = getAspectInsight(lang, row);
+                      const insight = getAspectInsight(lang, row, profile ?? undefined);
                       if (insight.kind !== 'modular') return null;
                       return (
                         <p key={i} className="fi text-[11px] leading-relaxed text-white/45">
@@ -343,12 +351,14 @@ function InsightCard({
   row,
   lang,
   layers,
+  profile,
 }: {
   row: SynastryAspect;
   lang: PeopleLang;
   layers: (typeof LAYER_LABELS)['en'];
+  profile?: import('@/lib/relationship-profile').RelationshipProfile | null;
 }) {
-  const insight = getAspectInsight(lang, row);
+  const insight = getAspectInsight(lang, row, profile ?? undefined);
   const isTension = row.aspect === 'square' || row.aspect === 'opposition';
   const accent = isTension ? '#f87171' : '#4ade80';
 

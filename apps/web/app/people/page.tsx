@@ -18,12 +18,11 @@ import {
   type Person,
   type RelationshipType,
 } from '@/lib/people-storage';
+import { relationshipProfileKeys } from '@/lib/relationship-profile';
+import { relationshipProfileLabel } from '@/lib/relationship-profile-i18n';
 
 const RELATIONSHIPS: RelationshipType[] = [
-  'spouse',
-  'business_partner',
-  'family',
-  'friend',
+  ...relationshipProfileKeys(),
   'rival',
 ];
 
@@ -41,6 +40,11 @@ export default function PeoplePage() {
   const [photoDataUrl, setPhotoDataUrl] = useState<string | undefined>();
 
   const t = PEOPLE_LANGS[lang];
+
+  const relLabel = (r: RelationshipType) => {
+    if (r === 'rival') return t.relationships.rival;
+    return relationshipProfileLabel(lang, r);
+  };
 
   const setLang = (l: PeopleLang) => {
     setLangState(l);
@@ -286,7 +290,7 @@ export default function PeoplePage() {
               >
                 {RELATIONSHIPS.map((r) => (
                   <option key={r} value={r}>
-                    {t.relationships[r]}
+                    {relLabel(r)}
                   </option>
                 ))}
               </select>
@@ -319,7 +323,7 @@ export default function PeoplePage() {
 
         <ul className="space-y-2">
           {people.map((p) => {
-            const rel = t.relationships[p.relationship];
+            const rel = relLabel(p.relationship);
             const badgeStyle = p.synergyBadge ? BADGE_STYLES[p.synergyBadge] : null;
             return (
               <li key={p.id}>

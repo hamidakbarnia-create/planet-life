@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
 import { HOME_LANGS } from '@/lib/home-i18n';
@@ -8,6 +8,7 @@ import type { AppLang } from '@/lib/app-settings';
 import { chartPreferenceFields } from '@/lib/app-settings';
 import { AnalysisResultBreakdown } from '@/components/AnalysisResultBreakdown';
 import { parseAnalyzeResponse, type ScoreBreakdown } from '@/lib/score-breakdown';
+import type { ScoreReasoning } from '@/lib/score-reasoning';
 import { loadBirthProfile } from '@/lib/birth-profile';
 import type { BirthProfile } from '@/lib/birth-profile';
 import { API_BASE } from '@/lib/calendar-scores';
@@ -188,6 +189,7 @@ interface OracleHistoryEntry {
   };
   calculatedFor?: string;
   scoreBreakdown?: ScoreBreakdown | null;
+  scoreReasoning?: ScoreReasoning | null;
 }
 
 function loadHistory(): OracleHistoryEntry[] {
@@ -260,6 +262,7 @@ export default function OracleAskPage() {
   const [loading, setLoading] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [scoreBreakdown, setScoreBreakdown] = useState<ScoreBreakdown | null>(null);
+  const [scoreReasoning, setScoreReasoning] = useState<ScoreReasoning | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [history, setHistory] = useState<OracleHistoryEntry[]>(() => loadHistory());
   const [questionLocation, setQuestionLocation] = useState<UserLocation | null>(null);
@@ -302,6 +305,7 @@ export default function OracleAskPage() {
     setTime('');
     setScore(null);
     setScoreBreakdown(null);
+    setScoreReasoning(null);
     setHasAnswered(false);
     setQuestionLocation(null);
     setCalculatedFor(null);
@@ -317,6 +321,7 @@ export default function OracleAskPage() {
     setHasAnswered(false);
     setScore(null);
     setScoreBreakdown(null);
+    setScoreReasoning(null);
     setCalculatedFor(null);
     try {
       const res = await fetch(`${API_BASE}/api/business/analyze`, {
@@ -336,6 +341,7 @@ export default function OracleAskPage() {
       const parsed = parseAnalyzeResponse(data);
       setScore(parsed.score);
       setScoreBreakdown(parsed.breakdown);
+      setScoreReasoning(parsed.reasoning);
       const evalLabel =
         parsed.breakdown?.calculatedFor ??
         data?.location_context?.calculated_for ??
@@ -362,6 +368,7 @@ export default function OracleAskPage() {
         band: answer.band,
         calculatedFor: evalLabel,
         scoreBreakdown: parsed.breakdown,
+        scoreReasoning: parsed.reasoning,
         locationContext: {
           city: activeLoc.city,
           country: activeLoc.country,
@@ -376,6 +383,7 @@ export default function OracleAskPage() {
     } catch {
       setScore(null);
       setScoreBreakdown(null);
+    setScoreReasoning(null);
     } finally {
       setLoading(false);
       setHasAnswered(true);

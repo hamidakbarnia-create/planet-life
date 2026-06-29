@@ -60,7 +60,7 @@ class BusinessAnalysisRequest(BaseModel):
 async def analyze_business(request: BusinessAnalysisRequest):
     action = request.action_type.lower().strip()
     try:
-        result, _, transit = score_with_context(
+        result, natal, transit = score_with_context(
             birth_date=request.birth_date,
             birth_time=request.birth_time,
             location=request.location,
@@ -82,7 +82,14 @@ async def analyze_business(request: BusinessAnalysisRequest):
     except Exception as e:
         log_chart_error("computation", str(e), location=request.location)
         raise HTTPException(status_code=503, detail=f"Chart computation failed: {e}")
-    return build_scoring_response(result, location_context=transit.get("evaluation", {}))
+    return build_scoring_response(
+        result,
+        location_context=transit.get("evaluation", {}),
+        natal=natal,
+        transit=transit,
+        activity_type=action,
+        context=CONTEXT_ASK_ELECTIONAL,
+    )
 
 @router.post("/chart")
 async def get_birth_chart(request: BusinessAnalysisRequest):

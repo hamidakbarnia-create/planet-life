@@ -79,7 +79,7 @@ def _score_one(
 ):
     """Synchronous worker run inside a thread."""
     try:
-        result, _, transit = score_with_context(
+        result, natal, transit = score_with_context(
             birth_date=birth_date,
             birth_time=birth_time,
             location=location,
@@ -94,7 +94,14 @@ def _score_one(
             zodiac=zodiac,
         )
         score = result
-        payload = build_scoring_response(score)
+        scoring_context = CONTEXT_CALENDAR_HOURLY if target_time else CONTEXT_CALENDAR_DAY
+        payload = build_scoring_response(
+            score,
+            natal=natal if not target_time else None,
+            transit=transit if not target_time else None,
+            activity_type=action if not target_time else None,
+            context=scoring_context if not target_time else None,
+        )
         return {
             **payload,
             "transit": transit.get("planets", {}),
