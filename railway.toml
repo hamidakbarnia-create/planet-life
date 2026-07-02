@@ -6,7 +6,6 @@
 
 [build]
 builder = "NIXPACKS"
-buildCommand = "python -m pip install -r apps/api/requirements.txt"
 watchPatterns = [
   "apps/api/**",
   "packages/astro_engine/**",

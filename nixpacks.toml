@@ -1,5 +1,8 @@
 # Force Railway/Nixpacks to build the API as Python 3.11 even though the repo
 # root has a package.json used only for local dev scripts (frontend is on Cloudflare).
+#
+# Nix python311 is minimal and has no pip module. python311Full includes pip/venv.
+# Dependencies install into /opt/venv to avoid Nix PEP 668 externally-managed errors.
 
 providers = ["python"]
 
@@ -7,13 +10,15 @@ providers = ["python"]
 NIXPACKS_PYTHON_VERSION = "3.11"
 
 [phases.setup]
-nixPkgs = ["python311", "gcc"]
+nixPkgs = ["python311Full", "gcc"]
 
 [phases.install]
 dependsOn = ["setup"]
+paths = ["/opt/venv/bin"]
 cmds = [
-  "python -m pip install --upgrade pip",
-  "python -m pip install -r apps/api/requirements.txt",
+  "python -m venv /opt/venv",
+  ". /opt/venv/bin/activate && python -m pip install --upgrade pip setuptools wheel",
+  ". /opt/venv/bin/activate && python -m pip install -r apps/api/requirements.txt",
 ]
 
 [start]

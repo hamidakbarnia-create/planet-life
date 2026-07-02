@@ -65,11 +65,15 @@ This monorepo has a root `package.json` for local dev scripts only. Without
    NEXT_PUBLIC_API_BASE=https://<your-railway-service>.up.railway.app
    ```
 
-### Build command (`railway.toml` + `nixpacks.toml`)
+### Install (handled by `nixpacks.toml` install phase)
 
 ```bash
+python -m venv /opt/venv
+python -m pip install --upgrade pip setuptools wheel
 python -m pip install -r apps/api/requirements.txt
 ```
+
+Nix `python311` has no pip; `nixpacks.toml` uses `python311Full` and installs into `/opt/venv`.
 
 ### Start command (`railway.toml` + `nixpacks.toml`)
 
