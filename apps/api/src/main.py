@@ -1,9 +1,9 @@
-import sys
-import os
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
-sys.path.insert(0, r"C:\planet-life")
+from repo_path import ensure_repo_on_path
+
+ensure_repo_on_path()
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware

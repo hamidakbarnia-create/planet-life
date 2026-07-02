@@ -1,0 +1,11 @@
+# Planet Life API — Railway deployment (monorepo root).
+# Frontend (apps/web) deploys separately to Cloudflare Workers.
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "pip install -r apps/api/requirements.txt"
+
+[deploy]
+startCommand = "cd apps/api/src && python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/"
+restartPolicyType = "ON_FAILURE"
