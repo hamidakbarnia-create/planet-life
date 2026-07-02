@@ -465,9 +465,9 @@ export default function PathfinderPage() {
             </button>
 
             {blocked && (
-              <div className="mt-4 rounded-2xl p-4 fi text-sm" style={{ background: 'rgba(244,114,182,0.08)', border: '1px solid rgba(244,114,182,0.22)', color: 'rgba(255,255,255,0.78)' }}>
+              <div className="mt-4 rounded-2xl p-4 fi text-sm" style={{ background: 'rgba(48,92,222,0.08)', border: '1px solid rgba(48,92,222,0.22)', color: 'rgba(255,255,255,0.78)' }}>
                 {labels.freeTeaser}{' '}
-                <Link href="/upgrade" className="text-pink-300 underline">{labels.upgrade}</Link>
+                <Link href="/upgrade" className="underline" style={{ color: '#93B4FF' }}>{labels.upgrade}</Link>
               </div>
             )}
             {error && <div className="fi mt-4 text-sm text-red-300">{error}</div>}

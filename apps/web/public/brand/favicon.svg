@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none" role="img" aria-label="METIORO">
+  <title>METIORO</title>
+  <rect width="36" height="36" rx="8" fill="#0A0F1C"/>
+  <defs>
+    <linearGradient id="metioroBlueIcon" x1="4" y1="22" x2="30" y2="6" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.55" stop-color="#305CDE"/>
+      <stop offset="1" stop-color="#305CDE"/>
+    </linearGradient>
+    <linearGradient id="metioroGoldIcon" x1="24" y1="4" x2="30" y2="10" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2CF75"/>
+      <stop offset="0.55" stop-color="#D4AF37"/>
+      <stop offset="1" stop-color="#B59410"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(2 1) scale(0.11)">
+    <path d="M28 104V36L78 88L128 36V104H104V86L78 112L52 86V104H28Z" fill="#FFFFFF"/>
+    <path d="M54 96L188 28L202 40L72 108L54 96Z" fill="url(#metioroBlueIcon)"/>
+    <path d="M214 12L220 30L238 36L220 42L214 60L208 42L190 36L208 30L214 12Z" fill="url(#metioroGoldIcon)"/>
+  </g>
+</svg>

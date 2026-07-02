@@ -97,7 +97,7 @@ const LANGS: Record<LangKey, LangPack> = {
     subtitle: 'Golden timing windows from your natal blueprint',
     prev: 'Prev',
     next: 'Next',
-    loading: 'Reading the sky…',
+    loading: 'Analyzing…',
     noProfile: 'Set your birth data on Profile first.',
     goProfile: 'Go to Profile',
     noCurrentLocation:
@@ -171,7 +171,7 @@ const LANGS: Record<LangKey, LangPack> = {
     subtitle: 'Золотые окна по вашей натальной карте',
     prev: 'Назад',
     next: 'Вперёд',
-    loading: 'Читаем небо…',
+    loading: 'Анализ…',
     noProfile: 'Сначала укажите данные рождения в Профиле.',
     goProfile: 'В профиль',
     noCurrentLocation:
@@ -245,7 +245,7 @@ const LANGS: Record<LangKey, LangPack> = {
     subtitle: 'پنجره‌های طلایی از نقشه تولد شما',
     prev: 'قبلی',
     next: 'بعدی',
-    loading: 'در حال خواندن آسمان…',
+    loading: 'در حال تحلیل…',
     noProfile: 'ابتدا اطلاعات تولد را در پروفایل وارد کنید.',
     goProfile: 'رفتن به پروفایل',
     noCurrentLocation:
@@ -319,7 +319,7 @@ const LANGS: Record<LangKey, LangPack> = {
     subtitle: 'نوافذ ذهبية من خريطة ميلادك',
     prev: 'السابق',
     next: 'التالي',
-    loading: 'نقرأ السماء…',
+    loading: 'جاري التحليل…',
     noProfile: 'أدخل بيانات الميلاد في الملف أولاً.',
     goProfile: 'الذهاب للملف',
     noCurrentLocation:
@@ -556,7 +556,7 @@ export default function CalendarPage() {
       dayScore: t.dayScore,
     });
     if (!ics) return;
-    downloadIcs(ics, `planet-life-${year}-${String(month).padStart(2, '0')}.ics`);
+    downloadIcs(ics, `metioro-${year}-${String(month).padStart(2, '0')}.ics`);
   };
 
   const handleDownloadDay = () => {
@@ -568,7 +568,7 @@ export default function CalendarPage() {
       { golden: t.golden, danger: t.danger }
     );
     if (!ics) return;
-    downloadIcs(ics, `planet-life-${selectedDate}-hourly.ics`);
+    downloadIcs(ics, `metioro-${selectedDate}-hourly.ics`);
   };
 
   const selectedScore = selectedDate ? scores[selectedDate] : undefined;

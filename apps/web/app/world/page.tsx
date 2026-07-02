@@ -22,10 +22,10 @@ import {
 import { skySignalParts, skySignalDetail, strengthFromOrb, orbText, toneColor } from '@/lib/world-i18n';
 
 const LIVE_LABELS: Record<AppLang, { live: string; free: string; cosmic: string; context: string; noRead: string; loading: string; openFull: string; searchFigure: string; searchCity: string; close: string; fullRead: string; sources: string; searchPlaceholder: string; cityPlaceholder: string; searchBtn: string; searchHint: string; cityHint: string; foundFigure: string; missingFigure: string; foundCity: string; missingCity: string }> = {
-  en: { live: 'LIVE', free: 'Free', cosmic: 'What the stars say', context: "What's happening", noRead: 'The sky is quiet on this theme right now.', loading: 'Reading the sky…', openFull: 'Open full reading', searchFigure: 'Search a figure', searchCity: 'Search a city', close: 'Close', fullRead: 'Full cosmic reading', sources: 'Live sources', searchPlaceholder: 'e.g. Trump, Musk, Ronaldo…', cityPlaceholder: 'e.g. Dubai, Istanbul, London…', searchBtn: 'Search', searchHint: 'Search any public figure to see live news + the current sky.', cityHint: 'Search any city to see property-market news + the current real-estate sky.', foundFigure: 'Reading current transits to this person\u2019s own chart.', missingFigure: 'No birth data on file for this name yet \u2014 showing live news with the global sky.', foundCity: 'Reading the sky over this city\u2019s local angles right now.', missingCity: 'Could not locate that city \u2014 showing live news with the global sky.' },
-  ru: { live: 'LIVE', free: 'Бесплатно', cosmic: 'Что говорят звёзды', context: 'Что происходит', noRead: 'Небо сейчас спокойно по этой теме.', loading: 'Читаем небо…', openFull: 'Открыть полный разбор', searchFigure: 'Искать персону', searchCity: 'Искать город', close: 'Закрыть', fullRead: 'Полный космический разбор', sources: 'Живые источники', searchPlaceholder: 'напр. Трамп, Маск, Роналду…', cityPlaceholder: 'напр. Дубай, Стамбул, Лондон…', searchBtn: 'Найти', searchHint: 'Найдите любую публичную персону — живые новости + текущее небо.', cityHint: 'Найдите любой город — новости рынка недвижимости + текущее небо недвижимости.', foundFigure: 'Читаем текущие транзиты к натальной карте этого человека.', missingFigure: 'Данных о рождении для этого имени пока нет — показываем живые новости и общее небо.', foundCity: 'Читаем небо над локальными углами этого города прямо сейчас.', missingCity: 'Не удалось найти этот город — показываем живые новости и общее небо.' },
-  fa: { live: 'زنده', free: 'رایگان', cosmic: 'ستارگان چه می‌گویند', context: 'چه خبر است', noRead: 'آسمان فعلاً در این موضوع آرام است.', loading: 'در حال خواندن آسمان…', openFull: 'باز کردن خوانش کامل', searchFigure: 'جستجوی شخص', searchCity: 'جستجوی شهر', close: 'بستن', fullRead: 'خوانش کامل کیهانی', sources: 'منابع زنده', searchPlaceholder: 'مثلاً ترامپ، ماسک، رونالدو…', cityPlaceholder: 'مثلاً دبی، استانبول، لندن…', searchBtn: 'جستجو', searchHint: 'هر شخصیت عمومی را جستجو کن تا خبرهای زنده و آسمان امروز را ببینی.', cityHint: 'هر شهر را جستجو کن تا خبرهای بازار ملک و آسمان امروزِ املاک را ببینی.', foundFigure: 'گذرهای کنونی روی چارت تولدِ همین شخص خوانده می‌شود.', missingFigure: 'هنوز دادهٔ تولدی برای این نام نداریم — خبرهای زنده همراه آسمان کلی نمایش داده می‌شود.', foundCity: 'آسمان روی زوایای محلیِ همین شهر همین حالا خوانده می‌شود.', missingCity: 'این شهر پیدا نشد — خبرهای زنده همراه آسمان کلی نمایش داده می‌شود.' },
-  ar: { live: 'مباشر', free: 'مجاني', cosmic: 'ماذا تقول النجوم', context: 'ما الذي يجري', noRead: 'السماء هادئة في هذا الموضوع الآن.', loading: 'نقرأ السماء…', openFull: 'افتح القراءة الكاملة', searchFigure: 'ابحث عن شخصية', searchCity: 'ابحث عن مدينة', close: 'إغلاق', fullRead: 'قراءة كونية كاملة', sources: 'مصادر مباشرة', searchPlaceholder: 'مثل ترامب، ماسك، رونالدو…', cityPlaceholder: 'مثل دبي، إسطنبول، لندن…', searchBtn: 'بحث', searchHint: 'ابحث عن أي شخصية عامة لرؤية الأخبار الحيّة والسماء الحالية.', cityHint: 'ابحث عن أي مدينة لرؤية أخبار العقار والسماء الحالية للعقار.', foundFigure: 'نقرأ العبور الحالي إلى خريطة ميلاد هذا الشخص.', missingFigure: 'لا تتوفّر بيانات ميلاد لهذا الاسم بعد — نعرض الأخبار الحيّة مع السماء العامة.', foundCity: 'نقرأ السماء فوق الزوايا المحلية لهذه المدينة الآن.', missingCity: 'تعذّر تحديد هذه المدينة — نعرض الأخبار الحيّة مع السماء العامة.' },
+  en: { live: 'LIVE', free: 'Free', cosmic: 'Location insight', context: "What's happening", noRead: 'No notable signals on this theme right now.', loading: 'Analyzing…', openFull: 'Open full reading', searchFigure: 'Search a figure', searchCity: 'Search a city', close: 'Close', fullRead: 'Full insight read', sources: 'Live sources', searchPlaceholder: 'e.g. Trump, Musk, Ronaldo…', cityPlaceholder: 'e.g. Dubai, Istanbul, London…', searchBtn: 'Search', searchHint: 'Search any public figure to see live news plus current decision signals.', cityHint: 'Search any city to see property-market news plus current location signals.', foundFigure: 'Analyzing current transits against this person\u2019s chart.', missingFigure: 'No birth data on file for this name yet \u2014 showing live news with global signals.', foundCity: 'Analyzing location signals for this city right now.', missingCity: 'Could not locate that city \u2014 showing live news with global signals.' },
+  ru: { live: 'LIVE', free: 'Бесплатно', cosmic: 'Локационный инсайт', context: 'Что происходит', noRead: 'Заметных сигналов по этой теме сейчас нет.', loading: 'Анализ…', openFull: 'Открыть полный разбор', searchFigure: 'Искать персону', searchCity: 'Искать город', close: 'Закрыть', fullRead: 'Полный аналитический разбор', sources: 'Живые источники', searchPlaceholder: 'напр. Трамп, Маск, Роналду…', cityPlaceholder: 'напр. Дубай, Стамбул, Лондон…', searchBtn: 'Найти', searchHint: 'Найдите любую публичную персону — живые новости и текущие сигналы решений.', cityHint: 'Найдите любой город — новости рынка недвижимости и сигналы по локации.', foundFigure: 'Анализируем текущие транзиты к натальной карте этого человека.', missingFigure: 'Данных о рождении для этого имени пока нет — показываем живые новости и глобальные сигналы.', foundCity: 'Анализируем сигналы для этого города прямо сейчас.', missingCity: 'Не удалось найти этот город — показываем живые новости и глобальные сигналы.' },
+  fa: { live: 'زنده', free: 'رایگان', cosmic: 'بینش موقعیت', context: 'چه خبر است', noRead: 'فعلاً سیگنال قابل‌توجهی در این موضوع نیست.', loading: 'در حال تحلیل…', openFull: 'باز کردن خوانش کامل', searchFigure: 'جستجوی شخص', searchCity: 'جستجوی شهر', close: 'بستن', fullRead: 'خوانش کامل بینش', sources: 'منابع زنده', searchPlaceholder: 'مثلاً ترامپ، ماسک، رونالدو…', cityPlaceholder: 'مثلاً دبی، استانبول، لندن…', searchBtn: 'جستجو', searchHint: 'هر شخصیت عمومی را جستجو کن تا خبرهای زنده و سیگنال‌های تصمیم فعلی را ببینی.', cityHint: 'هر شهر را جستجو کن تا خبرهای بازار ملک و سیگنال‌های موقعیت فعلی را ببینی.', foundFigure: 'گذرهای کنونی روی چارت تولدِ همین شخص تحلیل می‌شود.', missingFigure: 'هنوز دادهٔ تولدی برای این نام نداریم — خبرهای زنده همراه سیگنال‌های کلی نمایش داده می‌شود.', foundCity: 'سیگنال‌های موقعیت برای همین شهر همین حالا تحلیل می‌شود.', missingCity: 'این شهر پیدا نشد — خبرهای زنده همراه سیگنال‌های کلی نمایش داده می‌شود.' },
+  ar: { live: 'مباشر', free: 'مجاني', cosmic: 'رؤية الموقع', context: 'ما الذي يجري', noRead: 'لا توجد إشارات بارزة في هذا الموضوع الآن.', loading: 'جاري التحليل…', openFull: 'افتح القراءة الكاملة', searchFigure: 'ابحث عن شخصية', searchCity: 'ابحث عن مدينة', close: 'إغلاق', fullRead: 'قراءة رؤية كاملة', sources: 'مصادر مباشرة', searchPlaceholder: 'مثل ترامب، ماسك، رونالدو…', cityPlaceholder: 'مثل دبي، إسطنبول، لندن…', searchBtn: 'بحث', searchHint: 'ابحث عن أي شخصية عامة لرؤية الأخبار الحيّة وإشارات القرار الحالية.', cityHint: 'ابحث عن أي مدينة لرؤية أخبار العقار وإشارات الموقع الحالية.', foundFigure: 'نحلّل العبور الحالي مقابل خريطة ميلاد هذا الشخص.', missingFigure: 'لا تتوفّر بيانات ميلاد لهذا الاسم بعد — نعرض الأخبار الحيّة مع الإشارات العامة.', foundCity: 'نحلّل إشارات الموقع لهذه المدينة الآن.', missingCity: 'تعذّر تحديد هذه المدينة — نعرض الأخبار الحيّة مع الإشارات العامة.' },
 };
 
 // World tab — Macro-level public-facing content engine.
@@ -57,7 +57,7 @@ const WORLD_LANGS: Record<
   en: {
     title: 'World',
     subtitle:
-      'Cosmic intelligence on the markets, world leaders, and the cities that shape your life.',
+      'Decision intelligence on the markets, world leaders, and the cities that shape your life.',
     comingSoon: 'Sprint 6',
     explore: 'Preview',
     sections: {
@@ -91,7 +91,7 @@ const WORLD_LANGS: Record<
       },
       dailyBrief: {
         title: 'World Brief',
-        sub: 'A 60-second cosmic snapshot of the day',
+        sub: 'Your daily style insight in 60 seconds',
         tagline:
           'Every morning, one short note: who is under tension, what asset is in motion, where the next golden hour is.',
         tags: ['Daily', 'Free'],
@@ -101,7 +101,7 @@ const WORLD_LANGS: Record<
   ru: {
     title: 'Мир',
     subtitle:
-      'Космическая разведка по рынкам, лидерам и городам, формирующим вашу жизнь.',
+      'Интеллект решений по рынкам, лидерам и городам, формирующим вашу жизнь.',
     comingSoon: 'Спринт 6',
     explore: 'Предпросмотр',
     sections: {
@@ -135,7 +135,7 @@ const WORLD_LANGS: Record<
       },
       dailyBrief: {
         title: 'Мировой обзор',
-        sub: 'Космический снимок дня за 60 секунд',
+        sub: 'Ежедневный стилевой инсайт за 60 секунд',
         tagline:
           'Каждое утро короткая заметка: кто под напряжением, какой актив в движении, где следующий золотой час.',
         tags: ['Ежедневно', 'Бесплатно'],
@@ -145,7 +145,7 @@ const WORLD_LANGS: Record<
   fa: {
     title: 'جهان',
     subtitle:
-      'هوش کیهانی دربارهٔ بازارها، رهبران جهان و شهرهایی که زندگی‌ات را شکل می‌دهند.',
+      'هوش تصمیم دربارهٔ بازارها، رهبران جهان و شهرهایی که زندگی‌ات را شکل می‌دهند.',
     comingSoon: 'اسپرینت ۶',
     explore: 'پیش‌نمایش',
     sections: {
@@ -179,7 +179,7 @@ const WORLD_LANGS: Record<
       },
       dailyBrief: {
         title: 'جهان در یک نگاه',
-        sub: 'نگاه شصت‌ثانیه‌ای به کیهان امروز',
+        sub: 'بینش روزانهٔ استایل در ۶۰ ثانیه',
         tagline:
           'هر بامداد، یک یادداشت کوتاه: چه کسی تحت فشار است، کدام دارایی در حرکت است و ساعت طلایی بعدی کجاست.',
         tags: ['روزانه', 'رایگان'],
@@ -189,7 +189,7 @@ const WORLD_LANGS: Record<
   ar: {
     title: 'العالم',
     subtitle:
-      'استخبارات كونية على الأسواق وقادة العالم والمدن التي تشكّل حياتك.',
+      'ذكاء القرار على الأسواق وقادة العالم والمدن التي تشكّل حياتك.',
     comingSoon: 'سبرنت ٦',
     explore: 'معاينة',
     sections: {
@@ -223,7 +223,7 @@ const WORLD_LANGS: Record<
       },
       dailyBrief: {
         title: 'موجز العالم',
-        sub: 'لقطة كونية لليوم في 60 ثانية',
+        sub: 'رؤية يومية للأسلوب في 60 ثانية',
         tagline:
           'كل صباح ملاحظة قصيرة: من تحت الضغط، أي أصل في حركة، وأين الساعة الذهبية القادمة.',
         tags: ['يومي', 'مجاني'],

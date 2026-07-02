@@ -8,6 +8,8 @@ import {
   resolveDisclaimerLang,
   type DisclaimerLang,
 } from '@/lib/disclaimers';
+import { BrandLogo } from '@/components/BrandLogo';
+import type { BrandLang } from '@/lib/brand';
 
 export function DisclaimerOnboarding({
   onAccepted,
@@ -61,10 +63,7 @@ export function DisclaimerOnboarding({
         }}
       >
         <div className="flex justify-center mb-6">
-          <svg width="40" height="40" viewBox="0 0 30 30" fill="none">
-            <circle cx="15" cy="15" r="13" stroke="#fbbf24" strokeWidth="0.5" opacity="0.5" />
-            <circle cx="15" cy="15" r="2.5" fill="#fbbf24" />
-          </svg>
+          <BrandLogo lang={lang as BrandLang} href={null} size="md" showTagline={false} />
         </div>
 
         <h1

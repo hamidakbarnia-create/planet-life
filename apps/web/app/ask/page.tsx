@@ -34,7 +34,7 @@ import {
 } from '@/lib/oracle-questions';
 import { todayYMD } from '@/lib/calendar-utils';
 
-// Sprint 1 of the Oracle (column A of the Planet Life vision).
+// Sprint 1 of the Oracle (column A of the METIORO vision).
 // User picks a module → a concrete question → date (+ optional time).
 // We hit the existing /api/business/analyze endpoint with the question's
 // action_type and turn the executive score into a templated answer in
@@ -73,8 +73,8 @@ const ORACLE_LANGS: Record<
     pickQuestion: 'Pick your question',
     pickDate: 'When?',
     optionalTime: 'Time (optional)',
-    askButton: 'Read the sky',
-    asking: 'Reading the sky…',
+    askButton: 'Analyze',
+    asking: 'Analyzing…',
     askAgain: 'Ask another',
     back: 'Back',
     noProfile:
@@ -98,8 +98,8 @@ const ORACLE_LANGS: Record<
     pickQuestion: 'سوالت رو انتخاب کن',
     pickDate: 'چه روزی؟',
     optionalTime: 'ساعت (اختیاری)',
-    askButton: 'آسمان را بخوان',
-    asking: 'در حال خواندن آسمان…',
+    askButton: 'تحلیل',
+    asking: 'در حال تحلیل…',
     askAgain: 'یک سوال دیگه',
     back: 'بازگشت',
     noProfile:
@@ -123,8 +123,8 @@ const ORACLE_LANGS: Record<
     pickQuestion: 'Выберите вопрос',
     pickDate: 'Когда?',
     optionalTime: 'Время (необязательно)',
-    askButton: 'Прочитать небо',
-    asking: 'Читаем небо…',
+    askButton: 'Анализировать',
+    asking: 'Анализ…',
     askAgain: 'Спросить ещё',
     back: 'Назад',
     noProfile:
@@ -148,8 +148,8 @@ const ORACLE_LANGS: Record<
     pickQuestion: 'اختر سؤالك',
     pickDate: 'متى؟',
     optionalTime: 'الوقت (اختياري)',
-    askButton: 'اقرأ السماء',
-    asking: 'نقرأ السماء…',
+    askButton: 'تحليل',
+    asking: 'جاري التحليل…',
     askAgain: 'اسأل مرة أخرى',
     back: 'رجوع',
     noProfile:

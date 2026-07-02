@@ -1,4 +1,4 @@
-/** Planet Life natal chart calculation defaults — single source for UI and docs. */
+/** METIORO natal chart calculation defaults — single source for UI and docs. */
 export const CHART_DEFAULTS = {
   zodiac: 'Tropical',
   zodiacKey: 'tropical',

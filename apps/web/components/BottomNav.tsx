@@ -2,6 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  COLORS,
+  COLORS_RGBA,
+  SURFACES,
+  VAULT_PILL_GLOW,
+  VAULT_PILL_STYLE,
+} from '@/lib/brand-theme';
 
 type NavKey =
   | 'today'
@@ -30,7 +37,7 @@ const TABS: { href: string; key: NavKey; fallback: string }[] = [
 // component is still exported so headers can render the same lock SVG.
 
 function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
-  const stroke = active ? '#fbbf24' : 'rgba(255,255,255,0.55)';
+  const stroke = active ? COLORS.goldMain : SURFACES.navInactive;
   const props = {
     width: 22,
     height: 22,
@@ -112,7 +119,7 @@ function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
           height={22}
           viewBox="0 0 24 24"
           fill="none"
-          stroke={active ? '#f9a8d4' : 'rgba(244,114,182,0.85)'}
+          stroke={active ? COLORS.goldHighlight : COLORS.goldMain}
           strokeWidth={1.6}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -121,7 +128,7 @@ function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
           <path d="M8 11V8a4 4 0 0 1 8 0v3" />
           <path
             d="M12 14.5c-.5-1-2-1-2 .2 0 1 1 1.6 2 2.3 1-.7 2-1.3 2-2.3 0-1.2-1.5-1.2-2-.2z"
-            fill={active ? '#f9a8d4' : 'rgba(244,114,182,0.85)'}
+            fill={active ? COLORS.goldHighlight : COLORS.goldMain}
           />
         </svg>
       );
@@ -136,9 +143,9 @@ export function BottomNav({ labels }: { labels?: Record<string, string> }) {
       className="fixed top-0 left-0 bottom-0 z-40 w-20 flex flex-col"
       style={{
         background:
-          'linear-gradient(180deg, rgba(8,12,24,0.96) 0%, rgba(10,14,28,0.96) 50%, rgba(14,10,30,0.96) 100%)',
+          `linear-gradient(180deg, ${COLORS.navy} 0%, ${COLORS.black} 100%)`,
         backdropFilter: 'blur(16px)',
-        borderRight: '1px solid rgba(251,191,36,0.06)',
+        borderRight: `1px solid ${COLORS_RGBA.goldMain12}`,
         direction: 'ltr',
         boxShadow: 'inset -1px 0 0 rgba(255,255,255,0.02), 4px 0 24px rgba(0,0,0,0.4)',
       }}
@@ -149,7 +156,7 @@ export function BottomNav({ labels }: { labels?: Record<string, string> }) {
         className="absolute inset-0 pointer-events-none opacity-40"
         style={{
           background:
-            'radial-gradient(circle at 50% 20%, rgba(251,191,36,0.06), transparent 50%), radial-gradient(circle at 50% 85%, rgba(244,114,182,0.05), transparent 50%)',
+            `radial-gradient(circle at 50% 20%, ${COLORS_RGBA.royalBlue12}, transparent 50%), radial-gradient(circle at 50% 85%, ${COLORS_RGBA.goldMain12}, transparent 50%)`,
         }}
       />
 
@@ -164,12 +171,12 @@ export function BottomNav({ labels }: { labels?: Record<string, string> }) {
               href={tab.href}
               className="group flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl no-underline transition-all"
               style={{
-                color: active ? '#fbbf24' : 'rgba(255,255,255,0.5)',
+                color: active ? COLORS.goldMain : SURFACES.navInactive,
                 background: active
-                  ? 'linear-gradient(180deg, rgba(251,191,36,0.12), rgba(251,191,36,0.04))'
+                  ? `linear-gradient(180deg, ${COLORS_RGBA.goldMain18}, ${COLORS_RGBA.goldMain12})`
                   : 'transparent',
                 boxShadow: active
-                  ? 'inset 0 0 0 1px rgba(251,191,36,0.18), 0 0 16px rgba(251,191,36,0.08)'
+                  ? `inset 0 0 0 1px ${COLORS_RGBA.goldMain28}, 0 0 16px ${COLORS_RGBA.goldMain12}`
                   : 'none',
               }}
             >
@@ -193,9 +200,7 @@ export function BottomNav({ labels }: { labels?: Record<string, string> }) {
 }
 
 /**
- * Top-right Vault entry button. High-visibility, pulsing pink/rose CTA
- * that pulls the user into the curiosity-driven inner sanctum from any
- * page header.
+ * Top-right Vault entry button — Premium gold CTA.
  */
 export function VaultPill({ label }: { label?: string }) {
   return (
@@ -203,21 +208,13 @@ export function VaultPill({ label }: { label?: string }) {
       href="/vault"
       title="Open the Vault"
       className="group relative no-underline inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all overflow-hidden"
-      style={{
-        background:
-          'linear-gradient(135deg, rgba(244,114,182,0.22), rgba(168,85,247,0.18))',
-        border: '1px solid rgba(244,114,182,0.45)',
-        color: '#fce7f3',
-        boxShadow:
-          '0 0 18px rgba(244,114,182,0.25), inset 0 0 0 1px rgba(255,255,255,0.05)',
-      }}
+      style={VAULT_PILL_STYLE}
     >
       <span
         aria-hidden
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            'radial-gradient(circle at 50% 50%, rgba(244,114,182,0.25), transparent 70%)',
+          background: VAULT_PILL_GLOW,
           animation: 'vault-pill-pulse 2.4s ease-in-out infinite',
           opacity: 0.6,
         }}
@@ -227,7 +224,7 @@ export function VaultPill({ label }: { label?: string }) {
         height="14"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#f9a8d4"
+        stroke={COLORS.goldHighlight}
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"

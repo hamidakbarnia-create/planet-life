@@ -58,10 +58,10 @@ const PLANET_NAMES: Record<AppLang, Record<string, string>> = {
 };
 
 const LABELS: Record<AppLang, { skyToday: string; moonPhase: string; sunIn: string; moonIn: string; retrograde: string; noRetro: string; loading: string }> = {
-  en: { skyToday: "Today's sky", moonPhase: 'Moon phase', sunIn: 'Sun in', moonIn: 'Moon in', retrograde: 'Retrograde', noRetro: 'No planets are retrograde today.', loading: 'Reading the sky…' },
-  ru: { skyToday: 'Небо сегодня', moonPhase: 'Фаза Луны', sunIn: 'Солнце в', moonIn: 'Луна в', retrograde: 'Ретроград', noRetro: 'Сегодня нет ретроградных планет.', loading: 'Читаем небо…' },
-  fa: { skyToday: 'آسمان امروز', moonPhase: 'فاز ماه', sunIn: 'خورشید در', moonIn: 'ماه در', retrograde: 'رتروگراد', noRetro: 'امروز هیچ سیاره‌ای رتروگراد نیست.', loading: 'در حال خواندن آسمان…' },
-  ar: { skyToday: 'سماء اليوم', moonPhase: 'مرحلة القمر', sunIn: 'الشمس في', moonIn: 'القمر في', retrograde: 'تراجع', noRetro: 'لا كواكب متراجعة اليوم.', loading: 'نقرأ السماء…' },
+  en: { skyToday: "Today's sky", moonPhase: 'Moon phase', sunIn: 'Sun in', moonIn: 'Moon in', retrograde: 'Retrograde', noRetro: 'No planets are retrograde today.', loading: 'Analyzing…' },
+  ru: { skyToday: 'Небо сегодня', moonPhase: 'Фаза Луны', sunIn: 'Солнце в', moonIn: 'Луна в', retrograde: 'Ретроград', noRetro: 'Сегодня нет ретроградных планет.', loading: 'Анализ…' },
+  fa: { skyToday: 'آسمان امروز', moonPhase: 'فاز ماه', sunIn: 'خورشید در', moonIn: 'ماه در', retrograde: 'رتروگراد', noRetro: 'امروز هیچ سیاره‌ای رتروگراد نیست.', loading: 'در حال تحلیل…' },
+  ar: { skyToday: 'سماء اليوم', moonPhase: 'مرحلة القمر', sunIn: 'الشمس في', moonIn: 'القمر في', retrograde: 'تراجع', noRetro: 'لا كواكب متراجعة اليوم.', loading: 'جاري التحليل…' },
 };
 
 function MoonGlyph({ fraction, size = 80 }: { fraction: number; size?: number }) {

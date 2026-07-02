@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     // roads and shops. Higher limit because we filter client-side below.
     const res = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=15&addressdetails=1&accept-language=${lang}`,
-      { headers: { 'User-Agent': 'PlanetLifeApp/1.0', 'Accept-Language': lang } }
+      { headers: { 'User-Agent': 'METIORO/1.0', 'Accept-Language': lang } }
     );
     const data = await res.json();
     const places = (Array.isArray(data) ? data : [])

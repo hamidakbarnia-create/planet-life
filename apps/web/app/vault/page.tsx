@@ -80,7 +80,7 @@ const VAULT_LANGS: Record<
           'Patterns of secrecy and trust in any chart. Read with care. We show signals, never verdicts.',
       },
       look: {
-        title: 'Cosmic Look',
+        title: 'Style Timing',
         sub: 'Color · Scent · Style of the day',
         preview:
           'Today the Moon is in Scorpio — wear black velvet. Today Venus is loud — wear honey. Daily.',
@@ -137,7 +137,7 @@ const VAULT_LANGS: Record<
           'Паттерны скрытности и доверия в любой карте. Мы показываем сигналы — не приговоры.',
       },
       look: {
-        title: 'Космический образ',
+        title: 'Стиль и тайминг',
         sub: 'Цвет · Аромат · Стиль дня',
         preview:
           'Сегодня Луна в Скорпионе — чёрный бархат. Сегодня Венера громкая — медовые тона. Ежедневно.',
@@ -194,7 +194,7 @@ const VAULT_LANGS: Record<
           'الگوهای پنهان‌کاری و اعتماد در هر چارت. ما نشانه می‌دهیم — نه حکم.',
       },
       look: {
-        title: 'استایل کیهانی',
+        title: 'زمان‌بندی استایل',
         sub: 'رنگ · عطر · استایل روز',
         preview:
           'امروز ماه در عقرب است — مخمل مشکی. امروز ونوس بلند است — عسلی. هر روز.',
@@ -251,7 +251,7 @@ const VAULT_LANGS: Record<
           'أنماط الكتمان والثقة في أي خريطة. نعرض إشارات — لا أحكاماً.',
       },
       look: {
-        title: 'الإطلالة الكونية',
+        title: 'توقيت الأسلوب',
         sub: 'لون · عطر · أسلوب اليوم',
         preview:
           'اليوم القمر في العقرب — مخمل أسود. اليوم الزهرة عالية — لون العسل. يومياً.',
@@ -332,7 +332,7 @@ export default function VaultPage() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(244,114,182,0.10), transparent 60%), radial-gradient(ellipse 50% 50% at 50% 100%, rgba(168,85,247,0.06), transparent 60%)',
+              'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(212,175,55,0.10), transparent 60%), radial-gradient(ellipse 50% 50% at 50% 100%, rgba(181,148,16,0.06), transparent 60%)',
           }}
         />
 
@@ -343,10 +343,10 @@ export default function VaultPage() {
               className="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 relative"
               style={{
                 background:
-                  'radial-gradient(circle, rgba(244,114,182,0.18), rgba(168,85,247,0.06))',
-                border: '1px solid rgba(244,114,182,0.35)',
+                  'radial-gradient(circle, rgba(212,175,55,0.18), rgba(181,148,16,0.06))',
+                border: '1px solid rgba(212,175,55,0.35)',
                 boxShadow:
-                  '0 0 60px rgba(244,114,182,0.25), inset 0 0 0 1px rgba(244,114,182,0.15)',
+                  '0 0 60px rgba(212,175,55,0.25), inset 0 0 0 1px rgba(212,175,55,0.15)',
               }}
             >
               <svg
@@ -354,7 +354,7 @@ export default function VaultPage() {
                 height="40"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#f9a8d4"
+                stroke="#D4AF37"
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -363,14 +363,14 @@ export default function VaultPage() {
                 <path d="M8 11V8a4 4 0 0 1 8 0v3" />
                 <path
                   d="M12 14.5c-.5-1-2-1-2 .2 0 1 1 1.6 2 2.3 1-.7 2-1.3 2-2.3 0-1.2-1.5-1.2-2-.2z"
-                  fill="#f9a8d4"
+                  fill="#D4AF37"
                 />
               </svg>
             </div>
 
             <div
               className="fc text-[11px] tracking-[0.3em] mb-3"
-              style={{ color: 'rgba(244,114,182,0.7)' }}
+              style={{ color: 'rgba(212,175,55,0.7)' }}
             >
               {t.eyebrow}
             </div>
@@ -378,7 +378,7 @@ export default function VaultPage() {
               className="fc text-4xl md:text-5xl mb-4"
               style={{
                 background:
-                  'linear-gradient(135deg, #f9a8d4, #d8b4fe)',
+                  'linear-gradient(135deg, #F2CF75, #D4AF37)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 letterSpacing: '0.05em',
@@ -398,13 +398,13 @@ export default function VaultPage() {
           <div id="vault-grid" className="mb-8 scroll-mt-6">
             <div
               className="fi text-[11px] tracking-[0.25em] uppercase mb-4 text-center"
-              style={{ color: 'rgba(244,114,182,0.55)' }}
+              style={{ color: 'rgba(212,175,55,0.55)' }}
             >
               {t.inside}
               {entered && (
                 <span
                   className="block mt-2 normal-case tracking-normal text-[11px]"
-                  style={{ color: 'rgba(244,114,182,0.75)' }}
+                  style={{ color: 'rgba(212,175,55,0.75)' }}
                 >
                   {lang === 'fa'
                     ? 'روی هر کارت بزن — واردش می‌شی'
@@ -431,7 +431,7 @@ export default function VaultPage() {
                         height="14"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="#f9a8d4"
+                        stroke="#D4AF37"
                         strokeWidth="1.5"
                       >
                         <rect x="5" y="11" width="14" height="9" rx="2" />
@@ -449,7 +449,7 @@ export default function VaultPage() {
                           height="14"
                           viewBox="0 0 24 24"
                           fill="none"
-                          stroke="#f9a8d4"
+                          stroke="#D4AF37"
                           strokeWidth="1.8"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -460,13 +460,13 @@ export default function VaultPage() {
                     )}
                     <h3
                       className="fc text-base mb-1"
-                      style={{ color: '#f9a8d4', letterSpacing: '0.03em' }}
+                      style={{ color: '#D4AF37', letterSpacing: '0.03em' }}
                     >
                       {s.title}
                     </h3>
                     <div
                       className="fi text-[10px] tracking-wider mb-2"
-                      style={{ color: 'rgba(244,114,182,0.5)' }}
+                      style={{ color: 'rgba(212,175,55,0.5)' }}
                     >
                       {s.sub}
                     </div>
@@ -484,11 +484,11 @@ export default function VaultPage() {
                   background:
                     'linear-gradient(135deg, rgba(40,20,40,0.6), rgba(20,14,28,0.6))',
                   border: entered
-                    ? '1px solid rgba(244,114,182,0.28)'
-                    : '1px solid rgba(244,114,182,0.12)',
+                    ? '1px solid rgba(212,175,55,0.28)'
+                    : '1px solid rgba(212,175,55,0.12)',
                   boxShadow: entered
-                    ? '0 0 24px rgba(244,114,182,0.12), inset 0 0 0 1px rgba(244,114,182,0.08)'
-                    : 'inset 0 0 0 1px rgba(244,114,182,0.04), 0 0 24px rgba(244,114,182,0.04)',
+                    ? '0 0 24px rgba(212,175,55,0.12), inset 0 0 0 1px rgba(212,175,55,0.08)'
+                    : 'inset 0 0 0 1px rgba(212,175,55,0.04), 0 0 24px rgba(212,175,55,0.04)',
                   cursor: entered ? 'pointer' : 'default',
                 };
                 return entered ? (
@@ -513,8 +513,8 @@ export default function VaultPage() {
           <div
             className="rounded-xl p-4 mb-8 text-center"
             style={{
-              background: 'rgba(244,114,182,0.04)',
-              border: '1px solid rgba(244,114,182,0.12)',
+              background: 'rgba(212,175,55,0.04)',
+              border: '1px solid rgba(212,175,55,0.12)',
             }}
           >
             <p
@@ -534,15 +534,15 @@ export default function VaultPage() {
               className="fc text-sm tracking-widest no-underline px-8 py-3.5 rounded-xl inline-flex items-center gap-2 transition-all hover:scale-[1.02]"
               style={{
                 background: entered
-                  ? 'linear-gradient(135deg, rgba(74,222,128,0.18), rgba(34,197,94,0.12))'
-                  : 'linear-gradient(135deg, rgba(244,114,182,0.3), rgba(168,85,247,0.28))',
+                  ? 'linear-gradient(135deg, rgba(11,23,54,0.95), rgba(10,15,28,0.95))'
+                  : 'linear-gradient(135deg, rgba(212,175,55,0.3), rgba(181,148,16,0.28))',
                 border: entered
-                  ? '1px solid rgba(74,222,128,0.4)'
-                  : '1px solid rgba(244,114,182,0.5)',
-                color: entered ? '#bbf7d0' : '#fce7f3',
+                  ? '1px solid rgba(212,175,55,0.45)'
+                  : '1px solid rgba(212,175,55,0.5)',
+                color: entered ? '#F2CF75' : '#F2CF75',
                 boxShadow: entered
-                  ? '0 0 24px rgba(74,222,128,0.18)'
-                  : '0 0 30px rgba(244,114,182,0.3), inset 0 0 0 1px rgba(255,255,255,0.05)',
+                  ? '0 0 24px rgba(212,175,55,0.18)'
+                  : '0 0 30px rgba(212,175,55,0.3), inset 0 0 0 1px rgba(255,255,255,0.05)',
                 letterSpacing: '0.15em',
                 cursor: entered ? 'default' : 'pointer',
               }}

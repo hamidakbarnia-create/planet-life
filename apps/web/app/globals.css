@@ -1,26 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0A0E1A;
-  --foreground: #ededed;
-  --input-bg: #131929;
-  --input-border: rgba(255, 255, 255, 0.12);
-  --input-text: #ededed;
-  --input-placeholder: rgba(255, 255, 255, 0.35);
-  --accent: #f59e0b;
+  --background: #0A0F1C;
+  --foreground: #F6F8FC;
+  --input-bg: #1A2333;
+  --input-border: rgba(230, 234, 241, 0.12);
+  --input-text: #F6F8FC;
+  --input-placeholder: rgba(246, 248, 252, 0.35);
+  --accent: #305CDE;
+  --brand-royal-blue: #305CDE;
+  --brand-navy: #0B1736;
+  --brand-gold: #D4AF37;
+  --brand-gold-highlight: #F2CF75;
+  --brand-charcoal: #1A2333;
+  --brand-black: #0A0F1C;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sora), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+  font-family: var(--font-sora), var(--font-geist-sans, Arial, Helvetica, sans-serif);
 }
 
 /* ── RTL typography polish ──────────────────────────────────────────────────

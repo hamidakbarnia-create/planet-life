@@ -37,7 +37,7 @@ const READING_UI: Record<
     needProfile:
       'Save your birth date, time and city in Profile — then this reading is built from your real Mars.',
     goProfile: 'Go to Profile',
-    apiError: 'Could not reach the stars. Is the API running on port 8000?',
+    apiError: 'Could not reach METIORO. Is the API running on port 8000?',
   },
   fa: {
     liveLabel: 'خوانش تو',
@@ -231,7 +231,7 @@ const SECTION_LANGS: Record<
       coming: 'Horary-style timing in Sprint R8. Educational only.',
     },
     look: {
-      title: 'Cosmic Look',
+      title: 'Style Timing',
       sub: 'Color · Scent · Style',
       intro:
         'What to wear, smell, and post today so you hit maximum attraction in real life and on camera.',
@@ -323,7 +323,7 @@ const SECTION_LANGS: Record<
       coming: 'Тайминг в R8. Только обучение.',
     },
     look: {
-      title: 'Космический образ',
+      title: 'Стиль и тайминг',
       sub: 'Цвет · Аромат · Стиль',
       intro: 'Что надеть и когда постить для максимального эффекта.',
       items: [
@@ -412,7 +412,7 @@ const SECTION_LANGS: Record<
       coming: 'تایمینگ در R8. فقط آموزشی.',
     },
     look: {
-      title: 'استایل کیهانی',
+      title: 'زمان‌بندی استایل',
       sub: 'رنگ · عطر · استایل',
       intro: 'امروز چه بپوشی و کی پست بذاری برای بیشترین جذابیت.',
       items: [
@@ -501,7 +501,7 @@ const SECTION_LANGS: Record<
       coming: 'توقيت في R8. تعليمي فقط.',
     },
     look: {
-      title: 'الإطلالة الكونية',
+      title: 'توقيت الأسلوب',
       sub: 'لون · عطر · أسلوب',
       intro: 'ماذا ترتدين ومتى تنشرين لأقصى جاذبية.',
       items: [
@@ -673,7 +673,7 @@ function buildLoungeReading(
   if (itemIdx === 2) {
     const queens: Record<AppLang, PersonalizedReading> = {
       en: {
-        headline: 'Verified Queens — your cosmic badge',
+        headline: 'Verified Queens — your insight badge',
         blocks: [
           { label: 'Your Sun badge', text: sun ? `${signLabel(lang, sun.sign)} Sun · ${planetLine(lang, sun)}` : 'Sun placement not in chart response.' },
           { label: 'Verification step 1', text: 'Light ID check — alias only, no real name in lounge.' },
@@ -681,7 +681,7 @@ function buildLoungeReading(
         ],
       },
       ru: {
-        headline: 'Verified Queens — ваш космический значок',
+        headline: 'Verified Queens — ваш значок инсайта',
         blocks: [
           { label: 'Значок Солнца', text: sun ? `Солнце ${signLabel(lang, sun.sign)} · ${planetLine(lang, sun)}` : 'Солнце не в ответе.' },
           { label: 'Шаг 1', text: 'Лёгкая проверка — только псевдоним.' },
@@ -689,7 +689,7 @@ function buildLoungeReading(
         ],
       },
       fa: {
-        headline: 'ملکه تأییدشده — نشان کیهانی تو',
+        headline: 'ملکه تأییدشده — نشان بینش تو',
         blocks: [
           { label: 'نشان خورشید', text: sun ? `خورشید ${signLabel(lang, sun.sign)} · ${planetLine(lang, sun)}` : 'خورشید در پاسخ نیست.' },
           { label: 'مرحله ۱', text: 'چک سبک — فقط نام مستعار در لانژ.' },
@@ -697,7 +697,7 @@ function buildLoungeReading(
         ],
       },
       ar: {
-        headline: 'ملكات موثّقات — شارة كونيتك',
+        headline: 'ملكات موثّقات — شارة الرؤية الخاصة بك',
         blocks: [
           { label: 'شارة الشمس', text: sun ? `شمس ${signLabel(lang, sun.sign)} · ${planetLine(lang, sun)}` : 'لا بيانات للشمس.' },
           { label: 'الخطوة 1', text: 'تحقّق خفيف — اسم مستعار فقط.' },
@@ -905,7 +905,7 @@ export default function VaultSectionPage() {
           <p className="fi text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
             Section not found.
           </p>
-          <Link href="/vault" className="fi text-sm mt-4 inline-block" style={{ color: '#f9a8d4' }}>
+          <Link href="/vault" className="fi text-sm mt-4 inline-block" style={{ color: '#D4AF37' }}>
             {t.back}
           </Link>
         </div>
@@ -929,7 +929,7 @@ export default function VaultSectionPage() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'radial-gradient(ellipse 50% 30% at 50% 0%, rgba(244,114,182,0.12), transparent 70%)',
+              'radial-gradient(ellipse 50% 30% at 50% 0%, rgba(212,175,55,0.12), transparent 70%)',
           }}
         />
 
@@ -937,7 +937,7 @@ export default function VaultSectionPage() {
           <Link
             href="/vault"
             className="fi text-xs no-underline inline-block mb-6"
-            style={{ color: 'rgba(244,114,182,0.75)' }}
+            style={{ color: 'rgba(212,175,55,0.75)' }}
           >
             {t.back}
           </Link>
@@ -945,7 +945,7 @@ export default function VaultSectionPage() {
           <div className="mb-2">
             <span
               className="fi text-[10px] tracking-[0.25em] uppercase"
-              style={{ color: 'rgba(244,114,182,0.5)' }}
+              style={{ color: 'rgba(212,175,55,0.5)' }}
             >
               {t.vaultHome}
             </span>
@@ -953,14 +953,14 @@ export default function VaultSectionPage() {
           <h1
             className="fc text-3xl md:text-4xl mb-2"
             style={{
-              background: 'linear-gradient(135deg, #f9a8d4, #d8b4fe)',
+              background: 'linear-gradient(135deg, #F2CF75, #D4AF37)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}
           >
             {section.title}
           </h1>
-          <p className="fi text-xs mb-4" style={{ color: 'rgba(244,114,182,0.55)' }}>
+          <p className="fi text-xs mb-4" style={{ color: 'rgba(212,175,55,0.55)' }}>
             {section.sub}
           </p>
           <p className="fi text-sm leading-relaxed mb-8" style={{ color: 'rgba(255,255,255,0.7)' }}>
@@ -985,10 +985,10 @@ export default function VaultSectionPage() {
                     background:
                       'linear-gradient(135deg, rgba(40,20,40,0.55), rgba(20,14,28,0.55))',
                     border: isOpen
-                      ? '1px solid rgba(244,114,182,0.35)'
-                      : '1px solid rgba(244,114,182,0.15)',
+                      ? '1px solid rgba(212,175,55,0.35)'
+                      : '1px solid rgba(212,175,55,0.15)',
                     boxShadow: isOpen
-                      ? '0 0 28px rgba(244,114,182,0.12)'
+                      ? '0 0 28px rgba(212,175,55,0.12)'
                       : 'none',
                   }}
                 >
@@ -1007,7 +1007,7 @@ export default function VaultSectionPage() {
                     <div className="flex-1">
                       <div
                         className="fc text-sm mb-1"
-                        style={{ color: '#f9a8d4' }}
+                        style={{ color: '#D4AF37' }}
                       >
                         {item.label}
                       </div>
@@ -1024,13 +1024,13 @@ export default function VaultSectionPage() {
                         style={{
                           background: itemLive
                             ? 'rgba(34,197,94,0.12)'
-                            : 'rgba(244,114,182,0.1)',
+                            : 'rgba(212,175,55,0.1)',
                           border: itemLive
                             ? '1px solid rgba(34,197,94,0.35)'
-                            : '1px solid rgba(244,114,182,0.2)',
+                            : '1px solid rgba(212,175,55,0.2)',
                           color: itemLive
                             ? 'rgba(134,239,172,0.9)'
-                            : 'rgba(244,114,182,0.7)',
+                            : 'rgba(212,175,55,0.7)',
                         }}
                       >
                         {itemLive ? 'LIVE' : 'R8'}
@@ -1040,7 +1040,7 @@ export default function VaultSectionPage() {
                         height="16"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="rgba(244,114,182,0.7)"
+                        stroke="rgba(212,175,55,0.7)"
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -1058,7 +1058,7 @@ export default function VaultSectionPage() {
                     <div
                       className="px-4 pb-4 pt-2"
                       style={{
-                        borderTop: '1px solid rgba(244,114,182,0.1)',
+                        borderTop: '1px solid rgba(212,175,55,0.1)',
                       }}
                     >
                       {showLive ? (
@@ -1089,9 +1089,9 @@ export default function VaultSectionPage() {
                                 href="/profile"
                                 className="fc text-xs tracking-widest px-4 py-2 rounded-lg inline-flex no-underline"
                                 style={{
-                                  background: 'rgba(244,114,182,0.15)',
-                                  border: '1px solid rgba(244,114,182,0.35)',
-                                  color: '#fce7f3',
+                                  background: 'rgba(212,175,55,0.15)',
+                                  border: '1px solid rgba(212,175,55,0.35)',
+                                  color: '#F2CF75',
                                 }}
                               >
                                 {rui.goProfile}
@@ -1111,7 +1111,7 @@ export default function VaultSectionPage() {
                               {liveReading.headline && (
                                 <p
                                   className="fc text-sm leading-snug"
-                                  style={{ color: '#fce7f3' }}
+                                  style={{ color: '#F2CF75' }}
                                 >
                                   {liveReading.headline}
                                 </p>
@@ -1120,9 +1120,9 @@ export default function VaultSectionPage() {
                                 <span
                                   className="fi text-[10px] px-2 py-0.5 rounded-full inline-block"
                                   style={{
-                                    background: 'rgba(244,114,182,0.12)',
-                                    border: '1px solid rgba(244,114,182,0.25)',
-                                    color: 'rgba(244,114,182,0.85)',
+                                    background: 'rgba(212,175,55,0.12)',
+                                    border: '1px solid rgba(212,175,55,0.25)',
+                                    color: 'rgba(212,175,55,0.85)',
                                   }}
                                 >
                                   {liveReading.intensity}
@@ -1139,12 +1139,12 @@ export default function VaultSectionPage() {
                                     className="rounded-lg p-3"
                                     style={{
                                       background: 'rgba(0,0,0,0.22)',
-                                      border: '1px solid rgba(244,114,182,0.12)',
+                                      border: '1px solid rgba(212,175,55,0.12)',
                                     }}
                                   >
                                     <div
                                       className="fi text-[10px] tracking-[0.15em] uppercase mb-1.5"
-                                      style={{ color: 'rgba(244,114,182,0.55)' }}
+                                      style={{ color: 'rgba(212,175,55,0.55)' }}
                                     >
                                       {label}
                                     </div>
@@ -1182,9 +1182,9 @@ export default function VaultSectionPage() {
                                 href="/profile"
                                 className="fc text-xs tracking-widest px-4 py-2 rounded-lg inline-flex no-underline"
                                 style={{
-                                  background: 'rgba(244,114,182,0.15)',
-                                  border: '1px solid rgba(244,114,182,0.35)',
-                                  color: '#fce7f3',
+                                  background: 'rgba(212,175,55,0.15)',
+                                  border: '1px solid rgba(212,175,55,0.35)',
+                                  color: '#F2CF75',
                                 }}
                               >
                                 {rui.goProfile}
@@ -1198,7 +1198,7 @@ export default function VaultSectionPage() {
                           )}
                           {!personalizedLoading && personalizedReading && (
                             <div className="space-y-3">
-                              <p className="fc text-sm leading-snug" style={{ color: '#fce7f3' }}>
+                              <p className="fc text-sm leading-snug" style={{ color: '#F2CF75' }}>
                                 {personalizedReading.headline}
                               </p>
                               {personalizedReading.blocks.map((block) => (
@@ -1207,12 +1207,12 @@ export default function VaultSectionPage() {
                                   className="rounded-lg p-3"
                                   style={{
                                     background: 'rgba(0,0,0,0.22)',
-                                    border: '1px solid rgba(244,114,182,0.12)',
+                                    border: '1px solid rgba(212,175,55,0.12)',
                                   }}
                                 >
                                   <div
                                     className="fi text-[10px] tracking-[0.15em] uppercase mb-1.5"
-                                    style={{ color: 'rgba(244,114,182,0.55)' }}
+                                    style={{ color: 'rgba(212,175,55,0.55)' }}
                                   >
                                     {block.label}
                                   </div>
@@ -1233,9 +1233,9 @@ export default function VaultSectionPage() {
                                   }}
                                   className="fc text-xs tracking-widest px-4 py-2 rounded-lg w-full"
                                   style={{
-                                    background: 'rgba(244,114,182,0.12)',
-                                    border: '1px solid rgba(244,114,182,0.35)',
-                                    color: '#fce7f3',
+                                    background: 'rgba(212,175,55,0.12)',
+                                    border: '1px solid rgba(212,175,55,0.35)',
+                                    color: '#F2CF75',
                                     cursor: 'pointer',
                                   }}
                                 >
@@ -1283,7 +1283,7 @@ export default function VaultSectionPage() {
                         <>
                           <div
                             className="fi text-[10px] tracking-[0.2em] uppercase mb-2"
-                            style={{ color: 'rgba(244,114,182,0.6)' }}
+                            style={{ color: 'rgba(212,175,55,0.6)' }}
                           >
                             {lock.sampleLabel}
                           </div>
@@ -1291,7 +1291,7 @@ export default function VaultSectionPage() {
                             className="rounded-lg p-3 mb-3 relative overflow-hidden"
                             style={{
                               background: 'rgba(0,0,0,0.25)',
-                              border: '1px dashed rgba(244,114,182,0.18)',
+                              border: '1px dashed rgba(212,175,55,0.18)',
                             }}
                           >
                             <p
@@ -1319,7 +1319,7 @@ export default function VaultSectionPage() {
                                 height="22"
                                 viewBox="0 0 24 24"
                                 fill="none"
-                                stroke="#f9a8d4"
+                                stroke="#D4AF37"
                                 strokeWidth="1.6"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
@@ -1341,9 +1341,9 @@ export default function VaultSectionPage() {
                             className="fc text-xs tracking-widest px-4 py-2 rounded-lg inline-flex items-center gap-2 transition-all hover:scale-[1.02] no-underline"
                             style={{
                               background:
-                                'linear-gradient(135deg, rgba(244,114,182,0.28), rgba(168,85,247,0.22))',
-                              border: '1px solid rgba(244,114,182,0.4)',
-                              color: '#fce7f3',
+                                'linear-gradient(135deg, rgba(212,175,55,0.28), rgba(181,148,16,0.22))',
+                              border: '1px solid rgba(212,175,55,0.4)',
+                              color: '#F2CF75',
                               letterSpacing: '0.12em',
                               cursor: 'pointer',
                             }}
@@ -1374,8 +1374,8 @@ export default function VaultSectionPage() {
           <div
             className="rounded-xl p-4 text-center"
             style={{
-              background: 'rgba(244,114,182,0.05)',
-              border: '1px solid rgba(244,114,182,0.12)',
+              background: 'rgba(212,175,55,0.05)',
+              border: '1px solid rgba(212,175,55,0.12)',
             }}
           >
             <p className="fi text-xs mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -1390,7 +1390,7 @@ export default function VaultSectionPage() {
       {wipeToast && (
         <div
           className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] fi text-sm px-5 py-3 rounded-xl shadow-2xl"
-          style={{ background: '#831843', color: '#fce7f3', border: '1px solid rgba(244,114,182,0.4)' }}
+          style={{ background: '#0B1736', color: '#F2CF75', border: '1px solid rgba(212,175,55,0.4)' }}
           role="status"
         >
           {lang === 'fa' ? 'نشست پاک شد' : lang === 'ru' ? 'Сессия очищена' : lang === 'ar' ? 'تم مسح الجلسة' : 'Session wiped'}

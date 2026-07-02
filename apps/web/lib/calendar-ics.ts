@@ -14,7 +14,7 @@ function escapeIcs(text: string) {
 }
 
 function uid(date: string, suffix: string) {
-  return `${date}-${suffix}@planet-life`;
+  return `${date}-${suffix}@metioro.com`;
 }
 
 export function buildMonthIcs(
@@ -27,7 +27,7 @@ export function buildMonthIcs(
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Planet Life//Calendar//EN',
+    'PRODID:-//METIORO//Calendar//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
   ];
@@ -65,7 +65,7 @@ export function buildMonthIcs(
     );
     lines.push(`SUMMARY:${escapeIcs(summary)}`);
     lines.push(
-      `DESCRIPTION:${escapeIcs(`Planet Life score ${score}/100. Band: ${band}.`)}`
+      `DESCRIPTION:${escapeIcs(`METIORO score ${score}/100. Band: ${band}.`)}`
     );
     lines.push('END:VEVENT');
   }
@@ -85,7 +85,7 @@ export function buildDayHourlyIcs(
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Planet Life//Hourly//EN',
+    'PRODID:-//METIORO//Hourly//EN',
     'CALSCALE:GREGORIAN',
   ];
 
@@ -110,7 +110,7 @@ export function buildDayHourlyIcs(
       ? `${labels.golden} ${pad(hour)}:00 (${score})`
       : isDangerHour(score)
         ? `${labels.danger} ${pad(hour)}:00 (${score})`
-        : `Planet Life ${pad(hour)}:00 — ${score}/100`;
+        : `METIORO ${pad(hour)}:00 — ${score}/100`;
 
     lines.push('BEGIN:VEVENT');
     lines.push(`UID:${uid(date, `h${hour}`)}`);

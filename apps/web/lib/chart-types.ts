@@ -1,5 +1,5 @@
 /**
- * Planet Life chart model — single source of truth between API and renderer.
+ * METIORO chart model — single source of truth between API and renderer.
  * Swiss Ephemeris raw values are normalized here; the renderer must not recalculate.
  */
 

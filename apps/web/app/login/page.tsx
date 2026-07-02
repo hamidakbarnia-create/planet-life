@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { BrandLogo } from '@/components/BrandLogo';
 import { isAuthed, saveSession, type AuthMethod } from '@/lib/auth';
+import { BRAND_I18N } from '@/lib/brand';
+import type { BrandLang } from '@/lib/brand';
 
 type Tab = 'email' | 'phone';
 type Step = 'identifier' | 'code' | 'success';
@@ -11,7 +14,7 @@ type Step = 'identifier' | 'code' | 'success';
 const LANGS = {
   en: {
     dir: 'ltr', name: 'EN',
-    tagline: 'Astrological Intelligence',
+    tagline: BRAND_I18N.en.tagline,
     welcomeTitle: 'Welcome back',
     welcomeSub: 'Sign in to sync your charts, people, and saved windows.',
     emailTab: 'Email',
@@ -41,7 +44,7 @@ const LANGS = {
   },
   ru: {
     dir: 'ltr', name: 'RU',
-    tagline: 'Астрологический анализ',
+    tagline: BRAND_I18N.ru.tagline,
     welcomeTitle: 'С возвращением',
     welcomeSub: 'Войдите, чтобы синхронизировать карты, людей и окна.',
     emailTab: 'Email',
@@ -71,7 +74,7 @@ const LANGS = {
   },
   fa: {
     dir: 'rtl', name: 'FA',
-    tagline: 'هوش نجومی',
+    tagline: BRAND_I18N.fa.tagline,
     welcomeTitle: 'خوش آمدید',
     welcomeSub: 'وارد شوید تا نمودارها، افراد و پنجره‌های ذخیره‌شده هم‌گام شوند.',
     emailTab: 'ایمیل',
@@ -101,7 +104,7 @@ const LANGS = {
   },
   ar: {
     dir: 'rtl', name: 'AR',
-    tagline: 'الذكاء الفلكي',
+    tagline: BRAND_I18N.ar.tagline,
     welcomeTitle: 'مرحباً بعودتك',
     welcomeSub: 'سجّل الدخول لمزامنة خرائطك وأشخاصك ونوافذك المحفوظة.',
     emailTab: 'البريد',
@@ -237,21 +240,7 @@ export default function LoginPage() {
       `}</style>
 
       <header className="flex items-center justify-between px-6 py-5">
-        <Link href="/" className="flex items-center gap-3 no-underline">
-          <svg width="36" height="36" viewBox="0 0 30 30" fill="none">
-            <circle cx="15" cy="15" r="13" stroke="#fbbf24" strokeWidth="0.5" opacity="0.4" />
-            <circle cx="15" cy="15" r="7" stroke="#fbbf24" strokeWidth="0.5" opacity="0.6" />
-            <circle cx="15" cy="15" r="2.5" fill="#fbbf24" />
-          </svg>
-          <div className="flex flex-col leading-tight">
-            <span className="fc text-lg tracking-widest" style={{ color: '#fbbf24' }}>
-              Planet Life
-            </span>
-            <span className="fi text-[10px] tracking-wider" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              {t.tagline}
-            </span>
-          </div>
-        </Link>
+        <BrandLogo lang={lang as BrandLang} href="/" size="md" showTagline />
         <div className="flex gap-1">
           {(Object.keys(LANGS) as LangKey[]).map((l) => (
             <button
