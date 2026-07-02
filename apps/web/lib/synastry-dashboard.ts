@@ -5,8 +5,9 @@
 
 import type { AppLang } from './app-settings';
 import { trAspect, trPlanet } from './astrology-i18n';
-import type { RelationshipProfile, RelationshipProfileKey } from './relationship-profile';
+import type { RelationshipProfile, RelationshipProfileKey, RelationshipType } from './relationship-profile';
 import { relationshipProfileLabel } from './relationship-profile-i18n';
+import { localizedRecommendationTemplates } from './relationship-recommendations-i18n';
 import {
   BUSINESS_INTELLIGENCE_KEYS,
   PROFILE_INTELLIGENCE_DIMENSIONS,
@@ -16,8 +17,12 @@ import {
 import {
   DASHBOARD_SECTION_LABELS,
   intelligenceDimensionLabel,
-  profileIntelligenceSectionTitle,
+  relationshipDashboardSectionTitle,
 } from './synastry-dashboard-i18n';
+import {
+  localizedExecutiveSummary,
+  localizedReasonExplanation,
+} from './synastry-reasoning-i18n';
 import type { SynastryReason, SynastryReasoning } from './synastry-reasoning';
 import type { SynergyResult, SynastryAspect } from './synergy';
 import type { SynergyBadge } from './people-storage';
@@ -131,6 +136,7 @@ function cardTitle(
   reason: SynastryReason,
   tone: 'strength' | 'risk'
 ): string {
+  const labels = DASHBOARD_SECTION_LABELS[lang] ?? DASHBOARD_SECTION_LABELS.en;
   const dim = bestDimension(profileKey, reason);
   if (!dim) {
     return intelligenceDimensionLabel(lang, reason.category);
@@ -140,20 +146,12 @@ function cardTitle(
       return intelligenceDimensionLabel(lang, 'leadership_conflict');
     }
     const base = intelligenceDimensionLabel(lang, dim.key);
-    return base.includes('Conflict') ? base : `${base} Risk`;
+    if (lang === 'en') {
+      return base.includes('Conflict') ? base : `${base}${labels.riskSuffix}`;
+    }
+    return `${base}${labels.riskSuffix}`;
   }
   return intelligenceDimensionLabel(lang, dim.key);
-}
-
-function shortExplanation(reason: SynastryReason, lang: AppLang): string {
-  const my = trPlanet(reason.evidence.my_planet, lang);
-  const their = trPlanet(reason.evidence.their_planet, lang);
-  const asp = trAspect(reason.evidence.aspect, lang);
-  const tone =
-    reason.evidence.tone === 'harmony'
-      ? 'supports'
-      : 'challenges';
-  return `Strong ${my}/${their} ${asp} ${tone} this area. ${reason.explanation.split('.')[0]}.`;
 }
 
 function inferHouse(profile: RelationshipProfile, reason: SynastryReason): string {
@@ -169,6 +167,7 @@ function inferHouse(profile: RelationshipProfile, reason: SynastryReason): strin
 function buildCards(
   lang: AppLang,
   profileKey: RelationshipProfileKey,
+  displayType: RelationshipType,
   allReasons: SynastryReason[],
   tone: 'strength' | 'risk'
 ): DashboardCard[] {
@@ -187,7 +186,7 @@ function buildCards(
         icon: dim?.icon ?? (tone === 'strength' ? '↑' : '↓'),
         title: cardTitle(lang, profileKey, reason, tone),
         scoreContribution: reason.score,
-        explanation: shortExplanation(reason, lang),
+        explanation: localizedReasonExplanation(lang, displayType, reason),
         evidenceId: `evidence-${reasonIndex}`,
       };
     });
@@ -207,17 +206,23 @@ function linkEvidenceIds(reasoning: SynastryReasoning, category?: string): strin
 }
 
 function buildRecommendations(
+  lang: AppLang,
   profile: RelationshipProfile,
   reasoning: SynastryReasoning
 ): DashboardRecommendations {
+  const templates = localizedRecommendationTemplates(
+    lang,
+    profile.key,
+    profile.recommendationTemplates
+  );
   return {
-    doMore: profile.recommendationTemplates.aligned.map((text, i) => ({
+    doMore: templates.aligned.map((text, i) => ({
       text,
       evidenceIds: linkEvidenceIds(reasoning).length
         ? linkEvidenceIds(reasoning)
         : [`evidence-${i % Math.max(reasoning.reasons.length, 1)}`],
     })),
-    watchCarefully: profile.recommendationTemplates.caution.map((text, i) => ({
+    watchCarefully: templates.caution.map((text, i) => ({
       text,
       evidenceIds: linkEvidenceIds(
         reasoning,
@@ -229,7 +234,7 @@ function buildRecommendations(
           )
         : [`evidence-${i % Math.max(reasoning.reasons.length, 1)}`],
     })),
-    avoid: profile.recommendationTemplates.tension.map((text, i) => ({
+    avoid: templates.tension.map((text, i) => ({
       text,
       evidenceIds: reasoning.reasons
         .map((r, idx) => ({ r, idx }))
@@ -278,24 +283,31 @@ function buildEvidence(
 export function buildSynergyDashboardView(
   lang: AppLang,
   profile: RelationshipProfile,
-  result: SynergyResult
+  result: SynergyResult,
+  relationshipType?: RelationshipType
 ): SynergyDashboardView {
   const { reasoning, harmony, tension, score, badge } = result;
-  const recommendations = buildRecommendations(profile, reasoning);
+  const displayType = relationshipType ?? profile.key;
+  const recommendations = buildRecommendations(lang, profile, reasoning);
 
   return {
     overall: {
       score,
       confidence: reasoning.confidence,
       profileKey: profile.key,
-      profileLabel: relationshipProfileLabel(lang, profile.key),
-      relationshipTypeLabel: relationshipProfileLabel(lang, profile.key),
-      summary: reasoning.summary,
+      profileLabel: relationshipProfileLabel(lang, displayType),
+      relationshipTypeLabel: relationshipProfileLabel(lang, displayType),
+      summary: localizedExecutiveSummary(
+        lang,
+        displayType,
+        score,
+        profile.scoringPriorities[0] ?? 'communication'
+      ),
       badge,
     },
-    sectionTitle: profileIntelligenceSectionTitle(lang, profile.key),
-    strengths: buildCards(lang, profile.key, reasoning.reasons, 'strength'),
-    risks: buildCards(lang, profile.key, reasoning.reasons, 'risk'),
+    sectionTitle: relationshipDashboardSectionTitle(lang, displayType),
+    strengths: buildCards(lang, profile.key, displayType, reasoning.reasons, 'strength'),
+    risks: buildCards(lang, profile.key, displayType, reasoning.reasons, 'risk'),
     profileIntelligence: PROFILE_INTELLIGENCE_DIMENSIONS[profile.key].map((dim) => ({
       key: dim.key,
       label: intelligenceDimensionLabel(lang, dim.key),

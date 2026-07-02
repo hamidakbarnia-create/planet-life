@@ -1,5 +1,6 @@
 import type { AppLang } from './app-settings';
-import type { RelationshipProfileKey } from './relationship-profile';
+import type { RelationshipProfileKey, RelationshipType } from './relationship-profile';
+import { relationshipProfileLabel } from './relationship-profile-i18n';
 
 type DimensionLabels = Record<string, string>;
 
@@ -203,6 +204,12 @@ export const DASHBOARD_SECTION_LABELS: Record<
     orb: string;
     importance: string;
     evidenceFor: string;
+    noStrengths: string;
+    noRisks: string;
+    riskSuffix: string;
+    importanceHigh: string;
+    importanceMedium: string;
+    importanceLow: string;
   }
 > = {
   en: {
@@ -224,6 +231,12 @@ export const DASHBOARD_SECTION_LABELS: Record<
     orb: 'Orb',
     importance: 'Importance',
     evidenceFor: 'Evidence',
+    noStrengths: 'No dominant strengths in current aspects.',
+    noRisks: 'No dominant risks in current aspects.',
+    riskSuffix: ' Risk',
+    importanceHigh: 'high',
+    importanceMedium: 'medium',
+    importanceLow: 'low',
   },
   ru: {
     overall: 'Общая совместимость',
@@ -244,6 +257,12 @@ export const DASHBOARD_SECTION_LABELS: Record<
     orb: 'Орб',
     importance: 'Важность',
     evidenceFor: 'Доказательство',
+    noStrengths: 'Нет выраженных сильных сторон в текущих аспектах.',
+    noRisks: 'Нет выраженных рисков в текущих аспектах.',
+    riskSuffix: ' — риск',
+    importanceHigh: 'высокая',
+    importanceMedium: 'средняя',
+    importanceLow: 'низкая',
   },
   fa: {
     overall: 'سازگاری کلی',
@@ -264,6 +283,12 @@ export const DASHBOARD_SECTION_LABELS: Record<
     orb: 'فاصله',
     importance: 'اهمیت',
     evidenceFor: 'شاهد',
+    noStrengths: 'در جنبه‌های فعلی، نقطه قوت برجسته‌ای دیده نمی‌شود.',
+    noRisks: 'در جنبه‌های فعلی، ریسک برجسته‌ای دیده نمی‌شود.',
+    riskSuffix: ' — ریسک',
+    importanceHigh: 'بالا',
+    importanceMedium: 'متوسط',
+    importanceLow: 'پایین',
   },
   ar: {
     overall: 'التوافق العام',
@@ -284,6 +309,12 @@ export const DASHBOARD_SECTION_LABELS: Record<
     orb: 'المدار',
     importance: 'الأهمية',
     evidenceFor: 'دليل',
+    noStrengths: 'لا نقاط قوة بارزة في الجوانب الحالية.',
+    noRisks: 'لا مخاطر بارزة في الجوانب الحالية.',
+    riskSuffix: ' — خطر',
+    importanceHigh: 'عالية',
+    importanceMedium: 'متوسطة',
+    importanceLow: 'منخفضة',
   },
 };
 
@@ -291,25 +322,168 @@ export function intelligenceDimensionLabel(lang: AppLang, key: string): string {
   return DIMENSION_LABELS[lang]?.[key] ?? DIMENSION_LABELS.en[key] ?? key.replace(/_/g, ' ');
 }
 
+const PROFILE_INTELLIGENCE_SECTION_TITLES: Record<
+  AppLang,
+  Record<RelationshipProfileKey, string>
+> = {
+  en: {
+    spouse: 'Spouse Relationship Analysis',
+    romantic_partner: 'Romantic Relationship Analysis',
+    business_partner: 'Business Partnership Analysis',
+    cofounder: 'Co-founder Analysis',
+    investor: 'Investor Relationship Analysis',
+    client: 'Client Relationship Analysis',
+    friend: 'Friendship Analysis',
+    family: 'Family Relationship Analysis',
+    parent_child: 'Parent–Child Relationship Analysis',
+    employee: 'Professional Relationship Analysis',
+    employer: 'Employer Relationship Analysis',
+    mentor: 'Mentorship Analysis',
+  },
+  ru: {
+    spouse: 'Анализ отношений с супругом',
+    romantic_partner: 'Анализ романтических отношений',
+    business_partner: 'Анализ делового партнёрства',
+    cofounder: 'Анализ отношений с сооснователем',
+    investor: 'Анализ отношений с инвестором',
+    client: 'Анализ отношений с клиентом',
+    friend: 'Анализ дружеских отношений',
+    family: 'Анализ семейных отношений',
+    parent_child: 'Анализ отношений родителя и ребёнка',
+    employee: 'Анализ профессиональных отношений',
+    employer: 'Анализ отношений с работодателем',
+    mentor: 'Анализ наставничества',
+  },
+  fa: {
+    spouse: 'رابطه همسر',
+    romantic_partner: 'رابطه عاطفی',
+    business_partner: 'شراکت تجاری',
+    cofounder: 'همکاری با هم‌بنیان‌گذار',
+    investor: 'رابطه با سرمایه‌گذار',
+    client: 'رابطه با مشتری',
+    friend: 'دوستی',
+    family: 'رابطه خانوادگی',
+    parent_child: 'رابطه والد و فرزند',
+    employee: 'همکاری',
+    employer: 'رابطه با کارفرما',
+    mentor: 'راهنمایی',
+  },
+  ar: {
+    spouse: 'تحليل العلاقة الزوجية',
+    romantic_partner: 'تحليل العلاقة العاطفية',
+    business_partner: 'تحليل الشراكة التجارية',
+    cofounder: 'تحليل علاقة الشريك المؤسس',
+    investor: 'تحليل العلاقة مع المستثمر',
+    client: 'تحليل العلاقة مع العميل',
+    friend: 'تحليل الصداقة',
+    family: 'تحليل العلاقة العائلية',
+    parent_child: 'تحليل علاقة الوالدين والأبناء',
+    employee: 'تحليل العلاقة المهنية',
+    employer: 'تحليل العلاقة مع صاحب العمل',
+    mentor: 'تحليل علاقة الإرشاد',
+  },
+};
+
 export function profileIntelligenceSectionTitle(
   lang: AppLang,
   profileKey: RelationshipProfileKey
 ): string {
-  const profileName = {
-    en: {
-      business_partner: 'Business Partner Intelligence',
-      cofounder: 'Co-founder Intelligence',
-      investor: 'Investor Intelligence',
-      client: 'Client Intelligence',
-      spouse: 'Spouse Intelligence',
-      romantic_partner: 'Romantic Intelligence',
-      friend: 'Friendship Intelligence',
-      family: 'Family Intelligence',
-      parent_child: 'Parent / Child Intelligence',
-      employee: 'Employee Intelligence',
-      employer: 'Employer Intelligence',
-      mentor: 'Mentorship Intelligence',
-    },
-  } as const;
-  return profileName.en[profileKey] ?? DASHBOARD_SECTION_LABELS[lang].profileIntelligence;
+  return (
+    PROFILE_INTELLIGENCE_SECTION_TITLES[lang]?.[profileKey] ??
+    PROFILE_INTELLIGENCE_SECTION_TITLES.en[profileKey] ??
+    DASHBOARD_SECTION_LABELS[lang].profileIntelligence
+  );
+}
+
+const EXTENDED_SECTION_TITLES: Record<AppLang, Partial<Record<RelationshipType, string>>> = {
+  en: {
+    mother: 'Relationship with Mother',
+    father: 'Relationship with Father',
+    son: 'Relationship with Son',
+    daughter: 'Relationship with Daughter',
+    brother: 'Relationship with Brother',
+    sister: 'Relationship with Sister',
+    colleague: 'Colleague Collaboration',
+    professional: 'Professional Relationship',
+    competitor: 'Competitor Dynamics',
+    rival: 'Competitor Dynamics',
+  },
+  fa: {
+    mother: 'رابطه مادر',
+    father: 'رابطه پدر',
+    son: 'رابطه پسر',
+    daughter: 'رابطه دختر',
+    brother: 'رابطه برادر',
+    sister: 'رابطه خواهر',
+    colleague: 'همکاری',
+    professional: 'رابطه با کارفرما',
+    competitor: 'رابطه با رقیب',
+    rival: 'رابطه با رقیب',
+  },
+  ru: {
+    mother: 'Отношения с матерью',
+    father: 'Отношения с отцом',
+    son: 'Отношения с сыном',
+    daughter: 'Отношения с дочерью',
+    brother: 'Отношения с братом',
+    sister: 'Отношения с сестрой',
+    colleague: 'Коллегиальное взаимодействие',
+    professional: 'Профессиональные отношения',
+    competitor: 'Отношения с конкурентом',
+    rival: 'Отношения с конкурентом',
+  },
+  ar: {
+    mother: 'العلاقة مع الأم',
+    father: 'العلاقة مع الأب',
+    son: 'العلاقة مع الابن',
+    daughter: 'العلاقة مع الابنة',
+    brother: 'العلاقة مع الأخ',
+    sister: 'العلاقة مع الأخت',
+    colleague: 'التعاون المهني',
+    professional: 'العلاقة المهنية',
+    competitor: 'العلاقة مع المنافس',
+    rival: 'العلاقة مع المنافس',
+  },
+};
+
+export function relationshipDashboardSectionTitle(
+  lang: AppLang,
+  relationshipType: RelationshipType
+): string {
+  const extended =
+    EXTENDED_SECTION_TITLES[lang]?.[relationshipType] ??
+    EXTENDED_SECTION_TITLES.en[relationshipType];
+  if (extended) return extended;
+
+  if (relationshipType in PROFILE_INTELLIGENCE_SECTION_TITLES.en) {
+    return profileIntelligenceSectionTitle(lang, relationshipType as RelationshipProfileKey);
+  }
+
+  return relationshipProfileLabel(lang, relationshipType);
+}
+
+const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+
+function toLocalizedNumber(value: number, lang: AppLang): string {
+  const text = String(value);
+  if (lang !== 'fa' && lang !== 'ar') return text;
+  return text.replace(/\d/g, (digit) => PERSIAN_DIGITS[Number(digit)] ?? digit);
+}
+
+export function formatImportanceLabel(
+  lang: AppLang,
+  level: 'high' | 'medium' | 'low'
+): string {
+  const labels = DASHBOARD_SECTION_LABELS[lang] ?? DASHBOARD_SECTION_LABELS.en;
+  if (level === 'high') return labels.importanceHigh;
+  if (level === 'medium') return labels.importanceMedium;
+  return labels.importanceLow;
+}
+
+export function formatEvidenceLabel(lang: AppLang, evidenceId: string): string {
+  const labels = DASHBOARD_SECTION_LABELS[lang] ?? DASHBOARD_SECTION_LABELS.en;
+  const match = evidenceId.match(/^evidence-(\d+)$/);
+  if (!match) return labels.evidenceFor;
+  const index = Number.parseInt(match[1], 10);
+  return `${labels.evidenceFor} ${toLocalizedNumber(index + 1, lang)}`;
 }

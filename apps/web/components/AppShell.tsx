@@ -73,18 +73,20 @@ export function AppShell({
       : lang === 'fa'
         ? 'var(--font-vazirmatn), var(--font-cairo), sans-serif'
         : 'var(--font-geist-sans), sans-serif');
+  const headingFont =
+    lang === 'ar' || lang === 'fa' ? stack : "'Cinzel', var(--font-geist-sans), serif";
+  const bodyFont = stack;
 
   return (
     <div
       dir={dir}
       lang={lang}
-      style={{ fontFamily: stack }}
+      style={{ fontFamily: bodyFont }}
       className="min-h-screen bg-[#070B14] text-white pl-20"
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
-        .fc{font-family:'Cinzel',serif}
-        .fi{font-family:'Inter',sans-serif}
+        .fc{font-family:${headingFont}}
+        .fi{font-family:${bodyFont}}
       `}</style>
 
       <header className="flex items-center justify-between px-6 py-3 border-b border-white/5">

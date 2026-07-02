@@ -69,6 +69,17 @@ describe('relationship profile strict resolution', () => {
     }
   });
 
+  it('maps extended relationship types to scoring profiles', () => {
+    expect(resolveRelationshipProfileStrict('mother').ok).toBe(true);
+    if (resolveRelationshipProfileStrict('mother').ok) {
+      expect(resolveRelationshipProfileStrict('mother').profile.key).toBe('parent_child');
+    }
+    expect(resolveRelationshipProfileStrict('colleague').profile?.key).toBe('employee');
+    expect(resolveRelationshipProfileStrict('professional').profile?.key).toBe('employer');
+    expect(resolveRelationshipProfileStrict('competitor').profile?.key).toBe('business_partner');
+    expect(resolveRelationshipProfileStrict('sister').profile?.key).toBe('family');
+  });
+
   it('rejects unknown profiles instead of falling back to friend or romantic', () => {
     const unknown = resolveRelationshipProfileStrict('mystery_connection');
     expect(unknown.ok).toBe(false);

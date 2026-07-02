@@ -7,6 +7,7 @@ import {
   dashboardSectionLabels,
   type SynergyDashboardView,
 } from '@/lib/synastry-dashboard';
+import { formatEvidenceLabel, formatImportanceLabel } from '@/lib/synastry-dashboard-i18n';
 import { SynergyBadgePill } from '@/components/SynergyBadge';
 
 export interface SynergyIntelligenceDashboardProps {
@@ -81,9 +82,11 @@ function IntelBar({ label, pct, icon }: { label: string; pct: number; icon: stri
 function FactorCard({
   card,
   tone,
+  lang,
 }: {
   card: SynergyDashboardView['strengths'][number];
   tone: 'positive' | 'negative';
+  lang: AppLang;
 }) {
   const accent = tone === 'positive' ? '#4ade80' : '#f87171';
   const sign = card.scoreContribution > 0 ? '+' : '';
@@ -105,7 +108,7 @@ function FactorCard({
           </div>
           <p className="fi text-[11px] leading-relaxed text-white/45 mt-1">{card.explanation}</p>
           <p className="fi text-[10px] text-white/25 mt-1" data-testid={`evidence-link-${card.evidenceId}`}>
-            → {card.evidenceId.replace('-', ' ')}
+            → {formatEvidenceLabel(lang, card.evidenceId)}
           </p>
         </div>
       </div>
@@ -117,10 +120,12 @@ function RecommendationList({
   items,
   accent,
   groupId,
+  lang,
 }: {
   items: Array<{ text: string; evidenceIds: string[] }>;
   accent: string;
   groupId: string;
+  lang: AppLang;
 }) {
   if (items.length === 0) {
     return <p className="fi text-[11px] text-white/30">—</p>;
@@ -131,12 +136,12 @@ function RecommendationList({
         <li
           key={`${groupId}-${i}`}
           className="rounded-lg px-3 py-2"
-          style={{ background: 'rgba(255,255,255,0.02)', borderLeft: `2px solid ${accent}` }}
+          style={{ background: 'rgba(255,255,255,0.02)', borderInlineStart: `2px solid ${accent}` }}
         >
           <p className="fi text-xs text-white/70">{item.text}</p>
           {item.evidenceIds.length > 0 && (
             <p className="fi text-[10px] text-white/30 mt-1">
-              {item.evidenceIds.join(' · ')}
+              {item.evidenceIds.map((id) => formatEvidenceLabel(lang, id)).join(' · ')}
             </p>
           )}
         </li>
@@ -165,7 +170,7 @@ export function SynergyIntelligenceDashboard({
             {view.overall.score}
           </div>
           <SynergyBadgePill badge={view.overall.badge} label={badgeLabel} />
-          <div className="grid grid-cols-2 gap-3 mt-4 text-left">
+          <div className="grid grid-cols-2 gap-3 mt-4 text-start">
             <div>
               <div className="fi text-[10px] uppercase tracking-wide text-white/35">{labels.confidence}</div>
               <div className="fc text-sm text-white/80">{Math.round(view.overall.confidence * 100)}%</div>
@@ -177,16 +182,18 @@ export function SynergyIntelligenceDashboard({
               </div>
             </div>
           </div>
-          <p className="fi text-xs leading-relaxed text-white/55 mt-3 text-left">{view.overall.summary}</p>
+          <p className="fi text-xs leading-relaxed text-white/55 mt-3 text-start">{view.overall.summary}</p>
         </div>
       </DashboardSection>
 
       <DashboardSection title={labels.strengths} accent="#4ade80" testId="section-strengths">
         <div className="space-y-2">
           {view.strengths.length === 0 ? (
-            <p className="fi text-[11px] text-white/35">No dominant strengths in current aspects.</p>
+            <p className="fi text-[11px] text-white/35">{labels.noStrengths}</p>
           ) : (
-            view.strengths.map((card) => <FactorCard key={card.id} card={card} tone="positive" />)
+            view.strengths.map((card) => (
+              <FactorCard key={card.id} card={card} tone="positive" lang={lang} />
+            ))
           )}
         </div>
       </DashboardSection>
@@ -194,9 +201,11 @@ export function SynergyIntelligenceDashboard({
       <DashboardSection title={labels.risks} accent="#f87171" testId="section-risks">
         <div className="space-y-2">
           {view.risks.length === 0 ? (
-            <p className="fi text-[11px] text-white/35">No dominant risks in current aspects.</p>
+            <p className="fi text-[11px] text-white/35">{labels.noRisks}</p>
           ) : (
-            view.risks.map((card) => <FactorCard key={card.id} card={card} tone="negative" />)
+            view.risks.map((card) => (
+              <FactorCard key={card.id} card={card} tone="negative" lang={lang} />
+            ))
           )}
         </div>
       </DashboardSection>
@@ -217,7 +226,7 @@ export function SynergyIntelligenceDashboard({
         <div className="space-y-4">
           <div>
             <h3 className="fi text-[10px] uppercase tracking-wide text-emerald-400/80 mb-2">{labels.doMore}</h3>
-            <RecommendationList items={view.recommendations.doMore} accent="#4ade80" groupId="do-more" />
+            <RecommendationList items={view.recommendations.doMore} accent="#4ade80" groupId="do-more" lang={lang} />
           </div>
           <div>
             <h3 className="fi text-[10px] uppercase tracking-wide text-amber-400/80 mb-2">{labels.watchCarefully}</h3>
@@ -225,18 +234,19 @@ export function SynergyIntelligenceDashboard({
               items={view.recommendations.watchCarefully}
               accent="#fbbf24"
               groupId="watch"
+              lang={lang}
             />
           </div>
           <div>
             <h3 className="fi text-[10px] uppercase tracking-wide text-red-400/80 mb-2">{labels.avoid}</h3>
-            <RecommendationList items={view.recommendations.avoid} accent="#f87171" groupId="avoid" />
+            <RecommendationList items={view.recommendations.avoid} accent="#f87171" groupId="avoid" lang={lang} />
           </div>
         </div>
       </DashboardSection>
 
       <DashboardSection title={labels.evidence} accent="#c4b5fd" testId="section-evidence">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-start border-collapse">
             <thead>
               <tr className="fi text-[10px] uppercase tracking-wide text-white/35">
                 <th className="pb-2 pr-2 font-normal">{labels.planet}</th>
@@ -258,7 +268,7 @@ export function SynergyIntelligenceDashboard({
                   <td className="py-2 pr-2">{row.house}</td>
                   <td className="py-2 pr-2">{row.orb.toFixed(1)}°</td>
                   <td className="py-2" style={{ color: importanceColor(row.importance) }}>
-                    {row.importance}
+                    {formatImportanceLabel(lang, row.importance)}
                   </td>
                 </tr>
               ))}

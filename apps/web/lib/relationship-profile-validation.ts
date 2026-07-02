@@ -41,8 +41,17 @@ export type ResolveRelationshipProfileResult =
   | { ok: true; profile: RelationshipProfile; source: 'known' | 'legacy_alias' }
   | { ok: false; error: RelationshipProfileValidationError };
 
-const LEGACY_ALIASES: Record<string, RelationshipProfileKey> = {
+const RELATIONSHIP_TYPE_ALIASES: Record<string, RelationshipProfileKey> = {
   rival: 'business_partner',
+  competitor: 'business_partner',
+  mother: 'parent_child',
+  father: 'parent_child',
+  son: 'parent_child',
+  daughter: 'parent_child',
+  brother: 'family',
+  sister: 'family',
+  colleague: 'employee',
+  professional: 'employer',
 };
 
 function normalizeRelationshipType(type: string): string {
@@ -65,10 +74,10 @@ export function resolveRelationshipProfileStrict(
 
   const raw = normalizeRelationshipType(String(type));
 
-  if (raw in LEGACY_ALIASES) {
+  if (raw in RELATIONSHIP_TYPE_ALIASES) {
     return {
       ok: true,
-      profile: RELATIONSHIP_PROFILES[LEGACY_ALIASES[raw]],
+      profile: RELATIONSHIP_PROFILES[RELATIONSHIP_TYPE_ALIASES[raw]],
       source: 'legacy_alias',
     };
   }

@@ -18,13 +18,10 @@ import {
   type Person,
   type RelationshipType,
 } from '@/lib/people-storage';
-import { relationshipProfileKeys } from '@/lib/relationship-profile';
 import { relationshipProfileLabel } from '@/lib/relationship-profile-i18n';
+import { RELATIONSHIP_PICKER_TYPES } from '@/lib/relationship-profile';
 
-const RELATIONSHIPS: RelationshipType[] = [
-  ...relationshipProfileKeys(),
-  'rival',
-];
+const RELATIONSHIPS = RELATIONSHIP_PICKER_TYPES;
 
 export default function PeoplePage() {
   const [lang, setLangState] = useState<PeopleLang>('en');
@@ -41,10 +38,7 @@ export default function PeoplePage() {
 
   const t = PEOPLE_LANGS[lang];
 
-  const relLabel = (r: RelationshipType) => {
-    if (r === 'rival') return t.relationships.rival;
-    return relationshipProfileLabel(lang, r);
-  };
+  const relLabel = (r: RelationshipType) => relationshipProfileLabel(lang, r);
 
   const setLang = (l: PeopleLang) => {
     setLangState(l);

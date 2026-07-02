@@ -80,8 +80,8 @@ describe('SynergyIntelligenceDashboard', () => {
     expect(businessView.profileIntelligence.map((i) => i.label)).not.toEqual(
       spouseView.profileIntelligence.map((i) => i.label)
     );
-    expect(businessView.sectionTitle).toContain('Business Partner');
-    expect(spouseView.sectionTitle).toContain('Spouse');
+    expect(businessView.sectionTitle).toBe('Business Partnership Analysis');
+    expect(spouseView.sectionTitle).toBe('Spouse Relationship Analysis');
   });
 
   it('never shows romantic intelligence cards for business_partner', () => {
@@ -162,5 +162,133 @@ describe('SynergyIntelligenceDashboard', () => {
     if (view.strengths[0]) {
       expect(screen.getByTestId(`evidence-link-${view.strengths[0].evidenceId}`)).toBeTruthy();
     }
+  });
+
+  it('localizes FA spouse recommendations and group labels', () => {
+    const view = buildSynergyDashboardView(
+      'fa',
+      RELATIONSHIP_PROFILES.spouse,
+      buildResult('spouse')
+    );
+
+    render(
+      <SynergyIntelligenceDashboard view={view} lang="fa" badgeLabel="هم‌راستا" dir="rtl" />
+    );
+
+    expect(screen.getByText('رابطه همسر')).toBeTruthy();
+    expect(screen.getByText('بیشتر انجام دهید')).toBeTruthy();
+    expect(screen.getByText('با دقت مراقب باشید')).toBeTruthy();
+    expect(screen.getByText('اجتناب کنید')).toBeTruthy();
+
+    const englishTemplates = RELATIONSHIP_PROFILES.spouse.recommendationTemplates;
+    for (const text of [
+      ...englishTemplates.aligned,
+      ...englishTemplates.caution,
+      ...englishTemplates.tension,
+    ]) {
+      expect(screen.queryByText(text)).toBeNull();
+    }
+
+    for (const rec of [
+      ...view.recommendations.doMore,
+      ...view.recommendations.watchCarefully,
+      ...view.recommendations.avoid,
+    ]) {
+      expect(rec.text).toMatch(/[\u0600-\u06FF]/);
+    }
+  });
+
+  it('does not display raw evidence ids in FA recommendations UI', () => {
+    const view = buildSynergyDashboardView(
+      'fa',
+      RELATIONSHIP_PROFILES.spouse,
+      buildResult('spouse')
+    );
+
+    const { container } = render(
+      <SynergyIntelligenceDashboard view={view} lang="fa" badgeLabel="هم‌راستا" dir="rtl" />
+    );
+
+    expect(container.textContent).not.toMatch(/evidence-\d+/);
+    expect(screen.getByTestId('evidence-link-evidence-0').textContent).toContain('شاهد');
+  });
+
+  it('localizes AR spouse recommendations and summary', () => {
+    const view = buildSynergyDashboardView(
+      'ar',
+      RELATIONSHIP_PROFILES.spouse,
+      buildResult('spouse')
+    );
+
+    render(
+      <SynergyIntelligenceDashboard view={view} lang="ar" badgeLabel="متناسق" dir="rtl" />
+    );
+
+    const englishTemplates = RELATIONSHIP_PROFILES.spouse.recommendationTemplates;
+    for (const text of [
+      ...englishTemplates.aligned,
+      ...englishTemplates.caution,
+      ...englishTemplates.tension,
+    ]) {
+      expect(screen.queryByText(text)).toBeNull();
+    }
+
+    expect(view.overall.summary).toMatch(/[\u0600-\u06FF]/);
+    expect(view.overall.summary).not.toContain('compatibility scores');
+  });
+
+  it('localizes RU spouse recommendations and summary', () => {
+    const view = buildSynergyDashboardView(
+      'ru',
+      RELATIONSHIP_PROFILES.spouse,
+      buildResult('spouse')
+    );
+
+    render(
+      <SynergyIntelligenceDashboard view={view} lang="ru" badgeLabel="Совместимо" />
+    );
+
+    const englishTemplates = RELATIONSHIP_PROFILES.spouse.recommendationTemplates;
+    for (const text of englishTemplates.aligned) {
+      expect(screen.queryByText(text)).toBeNull();
+    }
+
+    expect(view.overall.summary).toMatch(/[А-Яа-яЁё]/);
+    expect(view.overall.summary).not.toContain('compatibility scores');
+  });
+
+  it('shows stored relationship type on dashboard, not scoring profile key', () => {
+    const view = buildSynergyDashboardView(
+      'fa',
+      RELATIONSHIP_PROFILES.parent_child,
+      buildResult('spouse'),
+      'mother'
+    );
+
+    render(
+      <SynergyIntelligenceDashboard view={view} lang="fa" badgeLabel="تنش" dir="rtl" />
+    );
+
+    expect(screen.getByTestId('dashboard-profile-label').textContent).toBe('مادر');
+    expect(screen.getByText('رابطه مادر')).toBeTruthy();
+    expect(view.overall.summary).toContain('مادر');
+    expect(view.overall.summary).not.toContain('والد / فرزند');
+  });
+
+  it('still renders English recommendations and labels in EN', () => {
+    const view = buildSynergyDashboardView(
+      'en',
+      RELATIONSHIP_PROFILES.spouse,
+      buildResult('spouse')
+    );
+
+    render(<SynergyIntelligenceDashboard view={view} lang="en" badgeLabel="Aligned" />);
+
+    expect(screen.getByText('Do More')).toBeTruthy();
+    expect(screen.getByText('Watch Carefully')).toBeTruthy();
+    expect(screen.getByText('Avoid')).toBeTruthy();
+    expect(
+      screen.getByText(RELATIONSHIP_PROFILES.spouse.recommendationTemplates.aligned[0]!)
+    ).toBeTruthy();
   });
 });

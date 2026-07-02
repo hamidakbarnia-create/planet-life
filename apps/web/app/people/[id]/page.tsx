@@ -78,9 +78,9 @@ export default function PersonSynergyPage() {
   const profile = profileResolved?.ok ? profileResolved.profile : null;
 
   const dashboardView = useMemo(() => {
-    if (!result || !profile) return null;
-    return buildSynergyDashboardView(lang, profile, result);
-  }, [lang, profile, result]);
+    if (!result || !profile || !person) return null;
+    return buildSynergyDashboardView(lang, profile, result, person.relationship);
+  }, [lang, profile, result, person]);
 
   if (!person) {
     return (
@@ -102,7 +102,6 @@ export default function PersonSynergyPage() {
       setLang={setLang}
       dir={t.dir}
       navLabels={HOME_LANGS[lang].nav}
-      fontFamily={lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'}
     >
       <div className="max-w-lg mx-auto px-4 py-6">
         <Link
@@ -124,8 +123,7 @@ export default function PersonSynergyPage() {
               {person.name}
             </h1>
             <p className="fi text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              {profile ? relationshipProfileLabel(lang, profile.key) : t.relationships.friend} ·{' '}
-              {t.synergy}
+              {relationshipProfileLabel(lang, person.relationship)} · {t.synergy}
             </p>
           </div>
         </div>

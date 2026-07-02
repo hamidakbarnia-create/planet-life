@@ -98,6 +98,7 @@ export function DailyBriefView({
   const today = todayYMD();
   const [dayScore, setDayScore] = useState<number | null>(null);
   const [dayLoading, setDayLoading] = useState(true);
+  const [scoreFetchComplete, setScoreFetchComplete] = useState(false);
   const [hourly, setHourly] = useState<HourScore[]>([]);
   const [hourlyLoading, setHourlyLoading] = useState(true);
   const [synergyAlerts, setSynergyAlerts] = useState<string[]>([]);
@@ -106,16 +107,18 @@ export function DailyBriefView({
   const [aiAnswer, setAiAnswer] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
+  const profileReady =
+    hasProfile &&
+    !!profile &&
+    !!profile.birth_date &&
+    !!profile.birth_time &&
+    !!profile.location &&
+    hasConfirmedCurrentLocation(profile);
+
   useEffect(() => {
-    if (
-      !hasProfile ||
-      !profile ||
-      !profile.birth_date ||
-      !profile.birth_time ||
-      !profile.location ||
-      !hasConfirmedCurrentLocation(profile)
-    ) {
+    if (!profileReady) {
       setDayLoading(false);
+      setScoreFetchComplete(false);
       setHourlyLoading(false);
       setDayScore(null);
       setHourly([]);
@@ -123,6 +126,7 @@ export function DailyBriefView({
     }
     let cancelled = false;
     setDayLoading(true);
+    setScoreFetchComplete(false);
     setHourlyLoading(true);
     setDayScore(null);
     setHourly([]);
@@ -136,7 +140,10 @@ export function DailyBriefView({
         if (!cancelled) setDayScore(null);
       })
       .finally(() => {
-        if (!cancelled) setDayLoading(false);
+        if (!cancelled) {
+          setDayLoading(false);
+          setScoreFetchComplete(true);
+        }
       });
 
     fetchHourlyScores(profile, today)
@@ -171,7 +178,9 @@ export function DailyBriefView({
     return () => {
       cancelled = true;
     };
-  }, [hasProfile, profile, today, lang]);
+  }, [profileReady, profile, today, lang]);
+
+  const showScoreCalculating = profileReady && (!scoreFetchComplete || dayLoading);
 
   const askAi = useCallback(async () => {
     const q = aiQuestion.trim();
@@ -276,20 +285,21 @@ export function DailyBriefView({
           >
             {t.todayScore}
           </div>
-          {dayLoading ? (
+          {showScoreCalculating ? (
             <div
-              className="fi text-sm"
+              className="fi text-sm text-center"
               style={{ color: 'rgba(255,255,255,0.4)' }}
+              data-testid="daily-score-loading"
             >
-              {t.loading}
+              {t.calculatingScore}
             </div>
-          ) : (
+          ) : dayScore != null ? (
             <div className="flex items-baseline justify-center gap-1">
               <div
                 className="fc text-5xl leading-none"
                 style={{ color: scoreStyle.text }}
               >
-                {dayScore != null ? dayScore : '—'}
+                {dayScore}
               </div>
               <div
                 className="fi text-xs"
@@ -297,6 +307,13 @@ export function DailyBriefView({
               >
                 /100
               </div>
+            </div>
+          ) : (
+            <div
+              className="fc text-5xl leading-none"
+              style={{ color: scoreStyle.text }}
+            >
+              —
             </div>
           )}
           <div

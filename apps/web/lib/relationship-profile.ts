@@ -40,8 +40,40 @@ export type RelationshipProfileKey =
   | 'investor'
   | 'client';
 
-/** Stored on Person — includes legacy values normalized at read time. */
-export type RelationshipType = RelationshipProfileKey | 'rival';
+/** Stored on Person — extended labels map to scoring profiles via aliases. */
+export type RelationshipType =
+  | RelationshipProfileKey
+  | 'mother'
+  | 'father'
+  | 'brother'
+  | 'sister'
+  | 'son'
+  | 'daughter'
+  | 'professional'
+  | 'colleague'
+  | 'competitor'
+  | 'rival';
+
+/** Ordered options shown when adding/editing a person. */
+export const RELATIONSHIP_PICKER_TYPES: RelationshipType[] = [
+  'spouse',
+  'romantic_partner',
+  'mother',
+  'father',
+  'brother',
+  'sister',
+  'son',
+  'daughter',
+  'family',
+  'friend',
+  'professional',
+  'business_partner',
+  'investor',
+  'client',
+  'colleague',
+  'mentor',
+  'competitor',
+];
 
 export type ReasoningCategory =
   | 'emotional_bond'

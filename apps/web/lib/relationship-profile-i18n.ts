@@ -1,5 +1,9 @@
 import type { AppLang } from './app-settings';
-import type { InsightSectionKey, RelationshipProfileKey } from './relationship-profile';
+import type {
+  InsightSectionKey,
+  RelationshipProfileKey,
+  RelationshipType,
+} from './relationship-profile';
 
 type SectionLabels = Record<InsightSectionKey, string>;
 
@@ -54,62 +58,102 @@ const SECTION_LABELS: Record<AppLang, SectionLabels> = {
   },
 };
 
-const PROFILE_LABELS: Record<AppLang, Record<RelationshipProfileKey, string>> = {
+const RELATIONSHIP_TYPE_LABELS: Record<AppLang, Record<RelationshipType, string>> = {
   en: {
     spouse: 'Spouse',
-    romantic_partner: 'Romantic partner',
-    business_partner: 'Business partner',
-    cofounder: 'Co-founder',
-    employee: 'Employee',
-    employer: 'Employer',
+    romantic_partner: 'Romantic Partner',
+    mother: 'Mother',
+    father: 'Father',
+    brother: 'Brother',
+    sister: 'Sister',
+    son: 'Son',
+    daughter: 'Daughter',
+    family: 'Family Member',
     friend: 'Friend',
-    family: 'Family',
-    parent_child: 'Parent / child',
-    mentor: 'Mentor',
+    professional: 'Professional',
+    business_partner: 'Business Partner',
     investor: 'Investor',
     client: 'Client',
+    colleague: 'Colleague',
+    mentor: 'Mentor',
+    competitor: 'Competitor',
+    cofounder: 'Co-founder',
+    employee: 'Colleague',
+    employer: 'Professional',
+    parent_child: 'Parent / Child',
+    rival: 'Competitor',
   },
   ru: {
     spouse: 'Супруг(а)',
     romantic_partner: 'Романтический партнёр',
-    business_partner: 'Деловой партнёр',
-    cofounder: 'Сооснователь',
-    employee: 'Сотрудник',
-    employer: 'Работодатель',
+    mother: 'Мать',
+    father: 'Отец',
+    brother: 'Брат',
+    sister: 'Сестра',
+    son: 'Сын',
+    daughter: 'Дочь',
+    family: 'Член семьи',
     friend: 'Друг',
-    family: 'Семья',
-    parent_child: 'Родитель / ребёнок',
-    mentor: 'Наставник',
+    professional: 'Профессиональные отношения',
+    business_partner: 'Деловой партнёр',
     investor: 'Инвестор',
     client: 'Клиент',
+    colleague: 'Коллега',
+    mentor: 'Наставник',
+    competitor: 'Конкурент',
+    cofounder: 'Сооснователь',
+    employee: 'Коллега',
+    employer: 'Профессиональные отношения',
+    parent_child: 'Родитель / ребёнок',
+    rival: 'Конкурент',
   },
   fa: {
     spouse: 'همسر',
     romantic_partner: 'شریک عاطفی',
-    business_partner: 'شریک تجاری',
-    cofounder: 'هم‌بنیان‌گذار',
-    employee: 'کارمند',
-    employer: 'کارفرما',
+    mother: 'مادر',
+    father: 'پدر',
+    brother: 'برادر',
+    sister: 'خواهر',
+    son: 'پسر',
+    daughter: 'دختر',
+    family: 'عضو خانواده',
     friend: 'دوست',
-    family: 'خانواده',
-    parent_child: 'والد / فرزند',
-    mentor: 'مربی',
+    professional: 'حرفه‌ای',
+    business_partner: 'شریک تجاری',
     investor: 'سرمایه‌گذار',
     client: 'مشتری',
+    colleague: 'همکار',
+    mentor: 'راهنما (منتور)',
+    competitor: 'رقیب',
+    cofounder: 'شریک کسب‌وکار',
+    employee: 'همکار',
+    employer: 'کارفرما',
+    parent_child: 'والد / فرزند',
+    rival: 'رقیب',
   },
   ar: {
     spouse: 'زوج/ة',
     romantic_partner: 'شريك عاطفي',
-    business_partner: 'شريك عمل',
-    cofounder: 'مؤسس مشارك',
-    employee: 'موظف',
-    employer: 'صاحب عمل',
+    mother: 'أم',
+    father: 'أب',
+    brother: 'أخ',
+    sister: 'أخت',
+    son: 'ابن',
+    daughter: 'ابنة',
+    family: 'فرد من العائلة',
     friend: 'صديق',
-    family: 'عائلة',
-    parent_child: 'والد / طفل',
-    mentor: 'مرشد',
+    professional: 'علاقة مهنية',
+    business_partner: 'شريك عمل',
     investor: 'مستثمر',
     client: 'عميل',
+    colleague: 'زميل',
+    mentor: 'مرشد',
+    competitor: 'منافس',
+    cofounder: 'مؤسس مشارك',
+    employee: 'زميل',
+    employer: 'علاقة مهنية',
+    parent_child: 'والد / طفل',
+    rival: 'منافس',
   },
 };
 
@@ -117,9 +161,8 @@ export function insightSectionLabel(lang: AppLang, key: InsightSectionKey): stri
   return SECTION_LABELS[lang]?.[key] ?? SECTION_LABELS.en[key];
 }
 
-export function relationshipProfileLabel(
-  lang: AppLang,
-  key: RelationshipProfileKey
-): string {
-  return PROFILE_LABELS[lang]?.[key] ?? PROFILE_LABELS.en[key];
+export function relationshipProfileLabel(lang: AppLang, key: RelationshipType): string {
+  return RELATIONSHIP_TYPE_LABELS[lang]?.[key] ?? RELATIONSHIP_TYPE_LABELS.en[key];
 }
+
+export { localizedRecommendationTemplates } from './relationship-recommendations-i18n';

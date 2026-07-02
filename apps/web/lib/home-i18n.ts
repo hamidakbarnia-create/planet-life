@@ -32,6 +32,7 @@ export const HOME_LANGS: Record<
     todayLabel: string;
     heatmapTitle: string;
     loading: string;
+    calculatingScore: string;
     noProfile: string;
     goProfile: string;
     months: string[];
@@ -98,6 +99,7 @@ export const HOME_LANGS: Record<
     todayLabel: 'Today',
     heatmapTitle: 'Monthly heatmap',
     loading: 'Reading the sky…',
+    calculatingScore: 'Calculating…',
     noProfile: 'Set up profile first',
     goProfile: 'Go to Profile',
     months: [
@@ -170,6 +172,7 @@ export const HOME_LANGS: Record<
     todayLabel: 'Сегодня',
     heatmapTitle: 'Транзитные календари',
     loading: 'Читаем небо…',
+    calculatingScore: 'Вычисление…',
     noProfile: 'Сначала укажите данные рождения в Профиле.',
     goProfile: 'В профиль',
     months: [
@@ -242,6 +245,7 @@ export const HOME_LANGS: Record<
     todayLabel: 'امروز',
     heatmapTitle: 'نقشه حرارتی ماهانه',
     loading: 'در حال خواندن آسمان…',
+    calculatingScore: 'در حال محاسبه...',
     noProfile: 'ابتدا اطلاعات تولد را در پروفایل وارد کنید.',
     goProfile: 'رفتن به پروفایل',
     months: [
@@ -314,6 +318,7 @@ export const HOME_LANGS: Record<
     todayLabel: 'اليوم',
     heatmapTitle: 'خريطة حرارية شهرية',
     loading: 'نقرأ السماء…',
+    calculatingScore: 'جاري الحساب…',
     noProfile: 'أدخل بيانات الميلاد في الملف أولاً.',
     goProfile: 'إلى الملف',
     months: [
