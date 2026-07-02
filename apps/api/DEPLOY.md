@@ -48,23 +48,34 @@ Health check: `GET http://localhost:8000/` → `{"status":"healthy","platform":"
 
 ## Railway
 
-1. Create a new Railway service from this GitHub repo (repo root).
-2. Railway reads `railway.toml` at the repo root automatically.
-3. No extra environment variables are required for the API today.
-4. After deploy, copy the public URL and set it on the frontend:
+This monorepo has a root `package.json` for local dev scripts only. Without
+`nixpacks.toml`, Railway/Nixpacks may detect Node instead of Python.
+
+**Frontend (`apps/web`) is not deployed on Railway** — it uses Cloudflare Workers.
+
+1. Create **one** Railway service from this GitHub repo (repo root).
+2. If Railway auto-imports a Node/web service from `package.json`, delete it or
+   disable auto-deploy; keep a single Python API service.
+3. Railway reads `railway.toml` and `nixpacks.toml` at the repo root.
+4. Python **3.11** is pinned via `.python-version` and `NIXPACKS_PYTHON_VERSION`.
+5. No extra environment variables are required for the API today.
+6. After deploy, copy the public URL and set it on the frontend:
 
    ```
    NEXT_PUBLIC_API_BASE=https://<your-railway-service>.up.railway.app
    ```
 
-### Start command (also in `railway.toml`)
+### Build command (`railway.toml` + `nixpacks.toml`)
+
+```bash
+python -m pip install -r apps/api/requirements.txt
+```
+
+### Start command (`railway.toml` + `nixpacks.toml`)
 
 ```bash
 cd apps/api/src && python -m uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
 
-### Build command
-
-```bash
-pip install -r apps/api/requirements.txt
-```
+`PYTHONPATH` is not required — `apps/api/src/repo_path.py` adds the monorepo root
+at runtime so `packages/astro_engine` imports work from the repo root deploy.

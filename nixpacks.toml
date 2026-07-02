@@ -1,0 +1,20 @@
+# Force Railway/Nixpacks to build the API as Python 3.11 even though the repo
+# root has a package.json used only for local dev scripts (frontend is on Cloudflare).
+
+providers = ["python"]
+
+[variables]
+NIXPACKS_PYTHON_VERSION = "3.11"
+
+[phases.setup]
+nixPkgs = ["python311", "gcc"]
+
+[phases.install]
+dependsOn = ["setup"]
+cmds = [
+  "python -m pip install --upgrade pip",
+  "python -m pip install -r apps/api/requirements.txt",
+]
+
+[start]
+cmd = "cd apps/api/src && python -m uvicorn main:app --host 0.0.0.0 --port $PORT"

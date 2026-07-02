@@ -1,9 +1,19 @@
 # Planet Life API — Railway deployment (monorepo root).
 # Frontend (apps/web) deploys separately to Cloudflare Workers.
+#
+# Nixpacks would otherwise detect Node from the root package.json; nixpacks.toml
+# at the repo root forces Python 3.11 for this service.
 
 [build]
 builder = "NIXPACKS"
-buildCommand = "pip install -r apps/api/requirements.txt"
+buildCommand = "python -m pip install -r apps/api/requirements.txt"
+watchPatterns = [
+  "apps/api/**",
+  "packages/astro_engine/**",
+  "railway.toml",
+  "nixpacks.toml",
+  ".python-version",
+]
 
 [deploy]
 startCommand = "cd apps/api/src && python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
