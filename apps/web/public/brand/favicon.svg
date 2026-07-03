@@ -2,20 +2,21 @@
   <title>METIORO</title>
   <rect width="36" height="36" rx="8" fill="#0A0F1C"/>
   <defs>
-    <linearGradient id="metioroBlueIcon" x1="4" y1="22" x2="30" y2="6" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFFFFF"/>
-      <stop offset="0.55" stop-color="#305CDE"/>
+    <linearGradient id="mf-swoosh" x1="3" y1="28" x2="33" y2="4" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFEF"/>
+      <stop offset="0.4" stop-color="#305CDE"/>
       <stop offset="1" stop-color="#305CDE"/>
     </linearGradient>
-    <linearGradient id="metioroGoldIcon" x1="24" y1="4" x2="30" y2="10" gradientUnits="userSpaceOnUse">
+    <linearGradient id="mf-gold" x1="29" y1="3" x2="33" y2="8" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#F2CF75"/>
       <stop offset="0.55" stop-color="#D4AF37"/>
       <stop offset="1" stop-color="#B59410"/>
     </linearGradient>
   </defs>
-  <g transform="translate(2 1) scale(0.11)">
-    <path d="M28 104V36L78 88L128 36V104H104V86L78 112L52 86V104H28Z" fill="#FFFFFF"/>
-    <path d="M54 96L188 28L202 40L72 108L54 96Z" fill="url(#metioroBlueIcon)"/>
-    <path d="M214 12L220 30L238 36L220 42L214 60L208 42L190 36L208 30L214 12Z" fill="url(#metioroGoldIcon)"/>
+  <g transform="translate(1.5 3.5) scale(0.115)">
+    <path d="M6 184 L6 6 L62 6 L62 72 L104 184 Z" fill="#FFFFEF"/>
+    <path d="M24 184 L88 184 L214 50 L286 10 L278 4 L194 42 L68 184 Z" fill="url(#mf-swoosh)"/>
+    <path d="M108 184 L108 38 L120 38 L134 52 L134 184 Z" fill="#305CDE"/>
+    <path d="M280 4 L284 12 L292 15 L284 18 L280 26 L276 18 L268 15 L276 12 Z" fill="url(#mf-gold)"/>
   </g>
 </svg>

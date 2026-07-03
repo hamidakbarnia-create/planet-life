@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 292 198" fill="none" role="img" aria-label="METIORO mark">
+  <title>METIORO mark</title>
+  <defs>
+    <linearGradient id="mi-swoosh" x1="24" y1="188" x2="288" y2="8" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B1736"/>
+      <stop offset="0.45" stop-color="#1E3A8A"/>
+      <stop offset="0.72" stop-color="#305CDE"/>
+      <stop offset="1" stop-color="#305CDE"/>
+    </linearGradient>
+    <linearGradient id="mi-gold" x1="270" y1="4" x2="294" y2="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2CF75"/>
+      <stop offset="0.55" stop-color="#D4AF37"/>
+      <stop offset="1" stop-color="#B59410"/>
+    </linearGradient>
+  </defs>
+  <path d="M6 184 L6 6 L62 6 L62 72 L104 184 Z" fill="#0B1736"/>
+  <path d="M24 184 L88 184 L214 50 L286 10 L278 4 L194 42 L68 184 Z" fill="url(#mi-swoosh)"/>
+  <path d="M108 184 L108 38 L120 38 L134 52 L134 184 Z" fill="#305CDE"/>
+  <path d="M280 4 L284 12 L292 15 L284 18 L280 26 L276 18 L268 15 L276 12 Z" fill="url(#mi-gold)"/>
+</svg>
