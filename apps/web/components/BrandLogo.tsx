@@ -21,13 +21,13 @@ type BrandLogoProps = {
 
 function logoHeight(size: BrandLogoProps['size'], showTagline: boolean): number {
   if (size === 'lg') return showTagline ? 88 : 72;
-  if (size === 'sm') return showTagline ? 44 : 36;
+  if (size === 'sm') return showTagline ? 44 : 48;
   return showTagline ? 52 : 40;
 }
 
 function logoWidth(size: BrandLogoProps['size'], showTagline: boolean): number {
   if (size === 'lg') return showTagline ? 280 : 220;
-  if (size === 'sm') return showTagline ? 160 : 120;
+  if (size === 'sm') return showTagline ? 160 : 140;
   return showTagline ? 200 : 150;
 }
 
@@ -53,7 +53,7 @@ function LogoImage({
         width: 'auto',
         maxWidth: width,
         objectFit: 'contain',
-        objectPosition: showTagline ? 'center' : 'left center',
+        objectPosition: showTagline ? 'center' : 'left top',
       }}
     />
   );
