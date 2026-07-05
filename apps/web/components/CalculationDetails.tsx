@@ -13,9 +13,10 @@ import {
 type Props = {
   chart: ChartData;
   lang?: ProfileLang;
+  embedded?: boolean;
 };
 
-export function CalculationDetails({ chart, lang = 'en' }: Props) {
+export function CalculationDetails({ chart, lang = 'en', embedded = false }: Props) {
   const [open, setOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const labels = getCalculationDetailsLabels(lang);
@@ -69,18 +70,18 @@ export function CalculationDetails({ chart, lang = 'en' }: Props) {
 
   return (
     <div
-      className="w-full mt-4 rounded-xl overflow-hidden"
+      className={`w-full overflow-hidden ${embedded ? '' : 'mt-4 rounded-xl'}`}
       dir={rtl ? 'rtl' : 'ltr'}
       data-testid="calculation-details"
-      style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+      style={embedded ? undefined : { border: '1px solid rgba(255,255,255,0.08)' }}
     >
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={`fi w-full flex items-center justify-between px-4 py-3 transition-colors ${rtl ? 'text-right' : 'text-left'}`}
-        style={{ background: 'rgba(255,255,255,0.03)' }}
+        style={{ background: embedded ? 'transparent' : 'rgba(255,255,255,0.03)' }}
       >
-        <span className="text-xs tracking-widest uppercase" style={{ color: '#fbbf24' }}>
+        <span className="mio-eyebrow fi" style={{ margin: 0 }}>
           {labels.title}
         </span>
         <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>

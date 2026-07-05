@@ -595,15 +595,27 @@ export function NatalChart({
   labels,
   empty,
   projectionMode = 'quadrant',
+  showInsights = true,
+  observatory = false,
 }: {
   chart: ChartData | null;
   labels: NatalChartLabels;
   empty?: boolean;
   projectionMode?: WheelProjectionMode;
+  showInsights?: boolean;
+  observatory?: boolean;
 }) {
   if (empty || !chart || Object.keys(chart.planets).length === 0) {
+    if (observatory) {
+      return (
+        <div className="mio-chart-empty">
+          <div className="mio-chart-empty__ring" aria-hidden />
+          <p className="mio-chart-empty__text fi">{labels.empty}</p>
+        </div>
+      );
+    }
     return (
-      <div className="w-[320px] h-[320px] flex items-center justify-center">
+      <div className="flex items-center justify-center w-[320px] h-[320px]">
         <p className="fi text-xs text-center px-4" style={{ color: 'rgba(255,255,255,0.2)' }}>
           {labels.empty}
         </p>
@@ -615,8 +627,11 @@ export function NatalChart({
   const layouts = computeLayouts(chart.planets, chart, projectionMode);
 
   return (
-    <div className="w-full flex flex-col items-center">
-      <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '50%', padding: 6 }}>
+    <div className={`w-full flex flex-col items-center ${observatory ? 'mio-chart-stage' : ''}`}>
+      <div
+        className={observatory ? 'mio-chart-stage__wheel' : ''}
+        style={observatory ? undefined : { background: 'rgba(0,0,0,0.3)', borderRadius: '50%', padding: 6 }}
+      >
         <NatalChartWheel
           chart={chart}
           aspects={aspects}
@@ -625,7 +640,21 @@ export function NatalChart({
         />
       </div>
       <AspectLegend labels={labels} />
-      <ChartInsights planets={chart.planets} aspects={aspects} labels={labels} />
+      {showInsights && (
+        <ChartInsights planets={chart.planets} aspects={aspects} labels={labels} />
+      )}
     </div>
   );
+}
+
+/** Elemental balance + strengths — render below first viewport on Profile. */
+export function NatalChartAnalysis({
+  chart,
+  labels,
+}: {
+  chart: ChartData;
+  labels: NatalChartLabels;
+}) {
+  const aspects = findNatalAspects(chart.planets);
+  return <ChartInsights planets={chart.planets} aspects={aspects} labels={labels} />;
 }
