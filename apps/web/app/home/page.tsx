@@ -146,7 +146,7 @@ export default function HomePage() {
     >
       {showOnboarding && <HomeViewOnboarding lang={lang} onChoose={handleChoose} />}
 
-      <div className="max-w-5xl mx-auto px-4 py-6">
+      <div className="metioro-home">
         {!hasProfile && !showOnboarding && (
           <div
             className="rounded-2xl p-4 fi text-sm mb-6"
@@ -156,7 +156,7 @@ export default function HomePage() {
               color: 'rgba(255,255,255,0.7)',
             }}
           >
-            Set up profile first{' '}
+            {t.noProfile}{' '}
             <Link href="/profile" style={{ color: '#fbbf24' }}>
               {t.goProfile}
             </Link>

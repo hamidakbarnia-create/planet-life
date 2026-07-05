@@ -1,0 +1,701 @@
+/* METIORO Sprint 1A — Global application shell */
+
+:root {
+  --metioro-sidebar-w: 92px;
+  --metioro-header-h: 84px;
+  --metioro-mobile-nav-h: 76px;
+  --metioro-safe-top: env(safe-area-inset-top, 0px);
+  --metioro-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --metioro-safe-left: env(safe-area-inset-left, 0px);
+  --metioro-safe-right: env(safe-area-inset-right, 0px);
+  --metioro-navy: #060a14;
+  --metioro-navy-mid: #0b1736;
+  --metioro-gold: #d4af37;
+  --metioro-gold-soft: rgba(212, 175, 55, 0.22);
+}
+
+/* ── Shell root — chrome geometry is always LTR regardless of language ───── */
+
+.metioro-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  direction: ltr;
+  background: #0a0f1c;
+  margin-left: 0;
+  margin-right: 0;
+  padding-bottom: calc(var(--metioro-mobile-nav-h) + var(--metioro-safe-bottom));
+}
+
+@media (min-width: 768px) {
+  .metioro-shell {
+    margin-left: var(--metioro-sidebar-w);
+    margin-right: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+
+.metioro-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: row;
+  direction: ltr;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+  width: 100%;
+  min-height: calc(var(--metioro-header-h) + var(--metioro-safe-top));
+  padding: calc(var(--metioro-safe-top) + 10px) max(20px, var(--metioro-safe-right)) 10px max(20px, var(--metioro-safe-left));
+  background: rgba(6, 10, 20, 0.97);
+  border-bottom: 1px solid var(--metioro-gold-soft);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 40px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  isolation: isolate;
+}
+
+.metioro-header__brand {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.metioro-header__actions {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  direction: ltr;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  padding-inline: 4px;
+}
+
+.metioro-header__actions::-webkit-scrollbar {
+  display: none;
+}
+
+.metioro-header__actions > * {
+  flex-shrink: 0;
+}
+
+.metioro-header-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+/* ── Main content area ──────────────────────────────────────────────────── */
+
+.metioro-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 767px) {
+  .metioro-main {
+    padding-inline: 16px;
+    padding-bottom: var(--mio-space-4, 16px);
+  }
+}
+
+/* Home and other non-profile pages — align with shell content geometry */
+.metioro-home {
+  width: 100%;
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: var(--mio-space-6, 24px) var(--mio-space-4, 16px);
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .metioro-home {
+    padding: var(--mio-space-6, 24px) 20px 28px;
+  }
+}
+
+/* ── Desktop sidebar (physical left, always LTR geometry) ─────────────────── */
+
+.metioro-sidebar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--metioro-sidebar-w);
+  z-index: 90;
+  direction: ltr;
+  background: linear-gradient(180deg, var(--metioro-navy-mid) 0%, var(--metioro-navy) 45%, #04070f 100%);
+  border-right: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.55);
+}
+
+@media (min-width: 768px) {
+  .metioro-sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.metioro-sidebar__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  padding-top: calc(var(--metioro-header-h) + var(--metioro-safe-top) + 16px);
+  padding-bottom: 16px;
+  padding-inline: 10px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.metioro-sidebar__inner::-webkit-scrollbar {
+  display: none;
+}
+
+.metioro-sidebar__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 62px;
+  padding: 10px 6px;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.metioro-sidebar__icon {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metioro-sidebar__label {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.25;
+  max-width: 76px;
+  white-space: normal;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.metioro-sidebar__link--active {
+  color: #f2cf75;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1));
+  box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.45), inset 4px 0 0 var(--metioro-gold), 0 4px 20px rgba(212, 175, 55, 0.14);
+}
+
+.metioro-sidebar__link--idle {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.metioro-sidebar__link--idle:hover {
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Mobile bottom tab bar ────────────────────────────────────────────────── */
+
+.metioro-mobile-nav {
+  display: flex;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  direction: ltr;
+  height: calc(var(--metioro-mobile-nav-h) + var(--metioro-safe-bottom));
+  padding-bottom: var(--metioro-safe-bottom);
+  padding-inline: max(0px, var(--metioro-safe-left)) max(0px, var(--metioro-safe-right));
+  background: linear-gradient(0deg, #04070f 0%, var(--metioro-navy) 50%, var(--metioro-navy-mid) 100%);
+  border-top: 1px solid var(--metioro-gold-soft);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+@media (min-width: 768px) {
+  .metioro-mobile-nav {
+    display: none !important;
+  }
+}
+
+.metioro-mobile-nav__link {
+  position: relative;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 10px 4px;
+  text-decoration: none;
+}
+
+.metioro-mobile-nav__link--active {
+  color: #f2cf75;
+}
+
+.metioro-mobile-nav__link--active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18%;
+  right: 18%;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(90deg, transparent, var(--metioro-gold), transparent);
+}
+
+.metioro-mobile-nav__link--idle {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.metioro-mobile-nav__label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-inline: 2px;
+}
+
+/* ── Profile page layout ──────────────────────────────────────────────────── */
+
+.metioro-profile {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding: 14px 20px 20px;
+}
+
+@media (max-width: 767px) {
+  .metioro-profile {
+    padding: 12px 0 16px;
+  }
+}
+
+.metioro-profile-hero {
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 13px;
+  background:
+    radial-gradient(ellipse 80% 120% at 10% 0%, rgba(48, 92, 222, 0.18), transparent 55%),
+    radial-gradient(ellipse 60% 80% at 90% 100%, rgba(212, 175, 55, 0.12), transparent 50%),
+    linear-gradient(135deg, rgba(11, 23, 54, 0.95), rgba(6, 10, 20, 0.98));
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28);
+}
+
+.metioro-profile-hero__title {
+  font-size: 1.125rem;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: #fff;
+  margin: 0;
+}
+
+.metioro-profile-hero__subtitle {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+}
+
+.metioro-hero-snapshot__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 10px;
+}
+
+.metioro-hero-snapshot__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+}
+
+@media (min-width: 640px) {
+  .metioro-hero-snapshot__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .metioro-hero-snapshot__grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
+.metioro-hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.metioro-hero-stat__label {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.metioro-hero-stat__value {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metioro-hero-stat__value--ready {
+  color: #86efac;
+}
+
+.metioro-hero-stat__value--pending {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.metioro-hero-stat__value--loading {
+  color: #f2cf75;
+}
+
+.metioro-profile-grid {
+  display: grid;
+  gap: 13px;
+  grid-template-columns: 1fr;
+  direction: ltr;
+  align-items: start;
+}
+
+/* RTL text inside panels — column order stays birth | chart | identity */
+.metioro-profile[dir="rtl"] .metioro-profile-hero,
+.metioro-profile[dir="rtl"] .metioro-panel,
+.metioro-profile[dir="rtl"] .metioro-profile-secondary > * {
+  direction: rtl;
+  text-align: right;
+}
+
+.metioro-profile[dir="rtl"] .metioro-hero-snapshot__head,
+.metioro-profile[dir="rtl"] .metioro-birth-date-head {
+  flex-direction: row-reverse;
+}
+
+.metioro-profile[dir="rtl"] .metioro-hero-stat {
+  text-align: right;
+}
+
+.metioro-profile-secondary [data-testid='calculation-details'] {
+  margin-top: 0;
+  border: none;
+  border-radius: 0;
+}
+
+.metioro-profile[dir="rtl"] .metioro-field-label,
+.metioro-profile[dir="rtl"] .metioro-panel__title,
+.metioro-profile[dir="rtl"] .metioro-profile-hero__title,
+.metioro-profile[dir="rtl"] .metioro-profile-hero__subtitle {
+  text-align: right;
+}
+
+.metioro-profile[dir="rtl"] .metioro-identity-value {
+  text-align: left;
+}
+
+/* Time/number inputs stay LTR for readability */
+.metioro-profile[dir="rtl"] [dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+}
+
+.metioro-profile[dir="rtl"] .metioro-signature-body {
+  direction: rtl;
+  text-align: right;
+}
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .metioro-profile-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .metioro-profile-col--chart {
+    grid-column: 1 / -1;
+    order: 2;
+  }
+
+  .metioro-profile-col--birth {
+    order: 1;
+  }
+
+  .metioro-profile-col--insight {
+    order: 3;
+  }
+}
+
+@media (min-width: 1100px) {
+  .metioro-profile-grid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 4.5fr) minmax(0, 2.5fr);
+  }
+}
+
+.metioro-profile-col--insight {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.metioro-panel {
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.metioro-panel__title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.85);
+  margin: 0 0 10px;
+}
+
+.metioro-birth-date-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.metioro-birth-date-head .metioro-field-label {
+  margin-bottom: 0;
+}
+
+.metioro-select--inline {
+  width: auto;
+  min-width: 0;
+  max-width: 46%;
+  padding: 6px 8px;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.metioro-birth-display-alt {
+  margin-top: 6px;
+  color: rgba(212, 175, 55, 0.75);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.metioro-field-label {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 6px;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.metioro-input,
+.metioro-select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  color-scheme: dark;
+}
+
+.metioro-input:focus,
+.metioro-select:focus {
+  outline: none;
+  border-color: rgba(212, 175, 55, 0.4) !important;
+}
+
+.metioro-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.metioro-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.metioro-btn--primary {
+  background: linear-gradient(135deg, #f2cf75, #d4af37, #b59410);
+  color: #0a0f1c;
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+.metioro-btn--secondary {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.82);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.metioro-identity-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.metioro-identity-row:last-child {
+  border-bottom: none;
+}
+
+.metioro-identity-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.metioro-identity-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: end;
+}
+
+.metioro-profile-secondary {
+  margin-top: 13px;
+  display: grid;
+  gap: 13px;
+  direction: ltr;
+}
+
+.metioro-profile-secondary .metioro-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.metioro-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.metioro-chart-wrap canvas,
+.metioro-chart-wrap svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.metioro-signature-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.metioro-signature-item {
+  display: flex;
+  flex-direction: row;
+  direction: ltr;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.metioro-signature-icon {
+  flex-shrink: 0;
+  font-size: 16px;
+  line-height: 1.4;
+  opacity: 0.85;
+}
+
+.metioro-signature-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.metioro-signature-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.metioro-signature-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metioro-signature-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
