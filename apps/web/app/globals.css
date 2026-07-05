@@ -23,12 +23,15 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  scroll-padding-top: calc(var(--metioro-header-h) + var(--metioro-safe-top));
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sora), var(--font-geist-sans, Arial, Helvetica, sans-serif);
 }
-
 /* ── RTL typography polish ──────────────────────────────────────────────────
    Persian/Arabic glyphs sit lower and have descenders (ی، گ، ج). They need
    more line-height and a slightly larger optical size to read comfortably

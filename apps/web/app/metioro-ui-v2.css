@@ -60,10 +60,14 @@
   background-size: 100% 100%;
 }
 
-/* Keep page content above the cosmic star field without overriding shell positioning */
+/* Keep page content above the cosmic star field; header stays above scrollable main */
+.mio-app-bg > .metioro-header {
+  z-index: 110;
+}
+
 .mio-app-bg > .metioro-main {
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
 /* ── Glass card system ───────────────────────────────────────────────────── */
@@ -110,6 +114,127 @@
   border-radius: var(--mio-radius-md);
 }
 
+.mio-glass--signature {
+  background:
+    linear-gradient(145deg, rgba(12, 22, 44, 0.92), rgba(6, 10, 20, 0.96)),
+    radial-gradient(ellipse 80% 60% at 100% 0%, rgba(212, 175, 55, 0.12), transparent 55%);
+  border-color: rgba(212, 175, 55, 0.22);
+  box-shadow:
+    var(--mio-glass-shadow),
+    var(--mio-glass-highlight),
+    inset 0 0 0 1px rgba(212, 175, 55, 0.08);
+}
+
+/* ── Page header ─────────────────────────────────────────────────────────── */
+
+.mio-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mio-space-4);
+  margin-bottom: var(--mio-space-4);
+}
+
+.mio-page-header__eyebrow {
+  margin: 0 0 var(--mio-space-1);
+  font-size: var(--mio-heading-sm);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.82);
+}
+
+.mio-page-header__title {
+  margin: 0;
+  font-size: var(--mio-heading-lg);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.mio-page-header__subtitle {
+  margin: var(--mio-space-1) 0 0;
+  font-size: var(--mio-caption);
+  color: rgba(255, 255, 255, 0.48);
+  line-height: 1.45;
+}
+
+.mio-page-header__trailing {
+  flex-shrink: 0;
+}
+
+/* ── Alert banner ────────────────────────────────────────────────────────── */
+
+.mio-alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mio-space-2) var(--mio-space-3);
+  padding: var(--mio-space-3) var(--mio-space-4);
+  border-radius: var(--mio-radius-md);
+  font-size: var(--mio-body);
+  line-height: 1.45;
+  margin-bottom: var(--mio-space-4);
+}
+
+.mio-alert--warning {
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.24);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.mio-alert--info {
+  background: rgba(48, 92, 222, 0.1);
+  border: 1px solid rgba(48, 92, 222, 0.28);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.mio-alert--success {
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.24);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.mio-alert__action {
+  color: var(--mio-gold);
+  text-decoration: none;
+  font-size: var(--mio-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mio-alert__action:hover {
+  color: #f2cf75;
+}
+
+/* ── Segment control ───────────────────────────────────────────────────────── */
+
+.mio-segment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mio-space-2);
+}
+
+.mio-segment__option {
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: var(--mio-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.52);
+  font-size: var(--mio-caption);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.mio-segment__option--active {
+  border-color: rgba(212, 175, 55, 0.45);
+  background: rgba(212, 175, 55, 0.1);
+  color: #f2cf75;
+}
+
 /* ── Typography scale ────────────────────────────────────────────────────── */
 
 .mio-eyebrow {
@@ -153,8 +278,9 @@
   overflow: hidden;
   border-radius: var(--mio-radius-xl);
   padding: var(--mio-space-4) var(--mio-space-5);
-  min-height: 140px;
+  min-height: 112px;
   margin-bottom: var(--mio-space-3);
+  scroll-margin-top: calc(var(--metioro-header-h, 84px) + var(--metioro-safe-top, 0px) + 12px);
   border: 1px solid rgba(212, 175, 55, 0.2);
   background:
     radial-gradient(ellipse 70% 100% at 0% 50%, var(--mio-blue-glow), transparent 60%),
@@ -272,7 +398,7 @@
   width: 100%;
   max-width: 1440px;
   margin-inline: auto;
-  padding: 0 var(--mio-space-4) var(--mio-space-5);
+  padding: 0 0 var(--mio-space-5);
 }
 
 @media (max-width: 767px) {
@@ -289,31 +415,30 @@
   align-items: start;
 }
 
-/* Mobile / narrow: observatory content order */
-.mio-obs-slot--identity { order: 1; }
-.mio-obs-slot--chart { order: 2; }
+/* Mobile / narrow: chart-first observatory order */
+.mio-obs-slot--chart { order: 1; }
+.mio-obs-slot--identity { order: 2; }
 .mio-obs-slot--signature { order: 3; }
 .mio-obs-slot--cultural { order: 4; }
 .mio-obs-slot--birth { order: 5; }
-.mio-obs-slot--transparency { order: 6; }
-.mio-obs-slot--analysis { order: 7; }
+.mio-obs-slot--analysis { order: 6; }
+.mio-obs-slot--transparency { order: 7; }
 
 @media (min-width: 768px) and (max-width: 1099px) {
   .mio-obs-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
-      'identity identity'
       'chart chart'
-      'signature cultural'
+      'identity signature'
       'birth birth'
-      'transparency transparency'
-      'analysis analysis';
+      'analysis analysis'
+      'transparency transparency';
   }
 
   .mio-obs-slot--identity { grid-area: identity; order: unset; }
   .mio-obs-slot--chart { grid-area: chart; order: unset; }
   .mio-obs-slot--signature { grid-area: signature; order: unset; }
-  .mio-obs-slot--cultural { grid-area: cultural; order: unset; }
+  .mio-obs-slot--cultural { grid-area: cultural; order: unset; display: none; }
   .mio-obs-slot--birth { grid-area: birth; order: unset; }
   .mio-obs-slot--transparency { grid-area: transparency; order: unset; }
   .mio-obs-slot--analysis { grid-area: analysis; order: unset; }
@@ -321,12 +446,10 @@
 
 @media (min-width: 1100px) {
   .mio-obs-grid {
-    grid-template-columns: minmax(0, 29fr) minmax(0, 46fr) minmax(0, 25fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 1fr);
     grid-template-areas:
-      'birth chart identity'
-      'birth chart signature'
-      'birth chart cultural'
-      'birth chart .'
+      'chart chart chart'
+      'identity signature birth'
       'analysis analysis analysis'
       'transparency transparency transparency';
   }
@@ -335,9 +458,94 @@
   .mio-obs-slot--chart { grid-area: chart; order: unset; }
   .mio-obs-slot--identity { grid-area: identity; order: unset; }
   .mio-obs-slot--signature { grid-area: signature; order: unset; }
-  .mio-obs-slot--cultural { grid-area: cultural; order: unset; }
+  .mio-obs-slot--cultural { grid-area: cultural; order: unset; display: none; }
   .mio-obs-slot--transparency { grid-area: transparency; order: unset; }
   .mio-obs-slot--analysis { grid-area: analysis; order: unset; }
+}
+
+/* Birth controls — collapsible when chart exists */
+.mio-birth-collapsible__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--mio-space-3);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+.mio-birth-collapsible__chevron {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
+}
+
+.mio-birth-collapsible__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mio-space-2);
+  margin-top: var(--mio-space-3);
+}
+
+.mio-birth-collapsible--collapsed .mio-birth-collapsible__body {
+  display: none;
+}
+
+.mio-birth-collapsible__summary {
+  font-size: var(--mio-caption);
+  color: rgba(255, 255, 255, 0.48);
+  margin-top: var(--mio-space-1);
+}
+
+/* Home dashboard grid */
+.mio-home-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mio-space-3);
+}
+
+.mio-home-grid {
+  display: grid;
+  gap: var(--mio-space-3);
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .mio-home-grid--primary {
+    grid-template-columns: minmax(0, 1fr) minmax(140px, 168px);
+  }
+
+  .mio-home-grid--windows {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .mio-home-grid--wide {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    align-items: start;
+  }
+}
+
+.mio-home-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mio-space-2);
+  min-height: 100%;
+  padding: var(--mio-space-4);
+  border-radius: var(--mio-radius-lg);
+}
+
+.mio-home-score__value {
+  font-size: 2.75rem;
+  line-height: 1;
+  font-weight: 700;
 }
 
 .mio-obs-slot--chart .mio-glass {
@@ -610,6 +818,169 @@
   margin-top: 0;
   border: none;
   border-radius: 0;
+}
+
+/* ── Modal (birth confirm, etc.) ─────────────────────────────────────────── */
+
+.mio-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mio-space-4);
+  background: rgba(3, 5, 8, 0.74);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.mio-modal {
+  width: min(680px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: var(--mio-space-5);
+  border-radius: var(--mio-radius-xl);
+}
+
+.mio-modal__eyebrow {
+  margin: 0 0 var(--mio-space-1);
+  font-size: var(--mio-heading-sm);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.72);
+}
+
+.mio-modal__title {
+  margin: 0 0 var(--mio-space-2);
+  font-size: var(--mio-heading-md);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  line-height: 1.25;
+}
+
+.mio-modal__body {
+  margin: 0 0 var(--mio-space-4);
+  font-size: var(--mio-body);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.mio-modal__notice {
+  margin-bottom: var(--mio-space-3);
+  padding: var(--mio-space-2) var(--mio-space-3);
+  border-radius: var(--mio-radius-sm);
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+}
+
+.mio-modal__notice-text {
+  margin: 0;
+  font-size: var(--mio-caption);
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: pre-line;
+}
+
+.mio-modal__rows {
+  margin: 0 0 var(--mio-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mio-modal__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--mio-space-3);
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: var(--mio-caption);
+}
+
+.mio-modal__row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.mio-modal__label {
+  flex: 0 0 auto;
+  max-width: 42%;
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.4;
+}
+
+.mio-modal__value {
+  flex: 1 1 auto;
+  margin: 0;
+  text-align: end;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.mio-modal__value--multiline {
+  white-space: pre-line;
+}
+
+.mio-modal[dir='ltr'] .mio-modal__value {
+  font-variant-numeric: tabular-nums;
+}
+
+.mio-modal__actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: stretch;
+  gap: 13px;
+  margin-top: var(--mio-space-2);
+}
+
+.mio-modal[dir='rtl'] .mio-modal__actions {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+}
+
+.mio-modal .mio-modal__btn.metioro-btn {
+  width: auto;
+  min-width: 148px;
+  flex: 0 1 auto;
+  min-height: 50px;
+  padding: 0 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.mio-modal .mio-modal__btn.metioro-btn:focus-visible {
+  outline: 2px solid rgba(212, 175, 55, 0.65);
+  outline-offset: 2px;
+}
+
+@media (max-width: 520px) {
+  .mio-modal {
+    padding: var(--mio-space-4);
+  }
+
+  .mio-modal__actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+
+  .mio-modal[dir='rtl'] .mio-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .mio-modal .mio-modal__btn.metioro-btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+  }
 }
 
 /* ── Toast ───────────────────────────────────────────────────────────────── */

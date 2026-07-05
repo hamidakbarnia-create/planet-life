@@ -26,6 +26,7 @@
   margin-left: 0;
   margin-right: 0;
   padding-bottom: calc(var(--metioro-mobile-nav-h) + var(--metioro-safe-bottom));
+  scroll-padding-top: calc(var(--metioro-header-h) + var(--metioro-safe-top));
 }
 
 @media (min-width: 768px) {
@@ -41,7 +42,7 @@
 .metioro-header {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 110;
   display: flex;
   flex-direction: row;
   direction: ltr;
@@ -52,11 +53,9 @@
   width: 100%;
   min-height: calc(var(--metioro-header-h) + var(--metioro-safe-top));
   padding: calc(var(--metioro-safe-top) + 10px) max(20px, var(--metioro-safe-right)) 10px max(20px, var(--metioro-safe-left));
-  background: rgba(6, 10, 20, 0.97);
+  background: var(--metioro-navy);
   border-bottom: 1px solid var(--metioro-gold-soft);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 40px rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(24px) saturate(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
   isolation: isolate;
 }
 
@@ -113,7 +112,7 @@
   overflow-x: hidden;
   overflow-y: visible;
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
 @media (max-width: 767px) {
@@ -124,17 +123,37 @@
 }
 
 /* Home and other non-profile pages — align with shell content geometry */
+.metioro-page--dashboard,
 .metioro-home {
   width: 100%;
   max-width: 64rem;
   margin-inline: auto;
-  padding: var(--mio-space-6, 24px) var(--mio-space-4, 16px);
+  padding: var(--mio-space-4) var(--mio-space-4) var(--mio-space-5);
+  box-sizing: border-box;
+}
+
+.metioro-page--observatory {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding: var(--mio-space-4) var(--mio-space-4) var(--mio-space-5);
   box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
+  .metioro-page--dashboard,
   .metioro-home {
-    padding: var(--mio-space-6, 24px) 20px 28px;
+    padding: var(--mio-space-4) 20px var(--mio-space-5);
+  }
+
+  .metioro-page--observatory {
+    padding: var(--mio-space-4) 20px var(--mio-space-5);
+  }
+}
+
+@media (max-width: 767px) {
+  .metioro-page--observatory {
+    padding-inline: 0;
   }
 }
 
