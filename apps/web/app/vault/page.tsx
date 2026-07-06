@@ -326,7 +326,7 @@ export default function VaultPage() {
       navLabels={HOME_LANGS[lang].nav}
       fontFamily={fontFamily}
     >
-      <div className="relative min-h-[calc(100vh-60px)] overflow-hidden">
+      <div className="relative overflow-hidden">
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none"

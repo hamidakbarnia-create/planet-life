@@ -19,3 +19,7 @@ apps/web/qa-screenshots/
 apps/web/public/brand/_history/
 apps/web/public/brand/_preview/
 apps/web/public/brand/preview-logos.html
+
+# Playwright / test artifacts
+apps/web/.playwright-browsers/
+apps/web/test-results/

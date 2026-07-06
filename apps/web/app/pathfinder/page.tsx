@@ -227,7 +227,7 @@ function lineColor(line: PathfinderLine) {
 function GlobePreview({ note, title }: { note: string; title: string }) {
   return (
     <div
-      className="relative overflow-hidden rounded-3xl min-h-[280px]"
+      className="relative overflow-hidden rounded-3xl min-h-[200px]"
       style={{
         background:
           'radial-gradient(circle at 45% 38%, rgba(96,165,250,0.5), rgba(20,30,60,0.55) 35%, rgba(4,8,18,0.95) 70%), radial-gradient(circle at 70% 20%, rgba(251,191,36,0.25), transparent 28%)',

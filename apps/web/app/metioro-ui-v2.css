@@ -84,11 +84,13 @@
 .mio-glass--primary {
   background: linear-gradient(145deg, rgba(12, 22, 44, 0.88), rgba(6, 10, 20, 0.92));
   border-color: rgba(212, 175, 55, 0.18);
+  padding: var(--mio-space-3) var(--mio-space-4);
 }
 
 .mio-glass--secondary {
   background: rgba(255, 255, 255, 0.025);
   border-color: rgba(255, 255, 255, 0.07);
+  padding: var(--mio-space-3) var(--mio-space-4);
 }
 
 .mio-glass--metric {
@@ -119,6 +121,7 @@
     linear-gradient(145deg, rgba(12, 22, 44, 0.92), rgba(6, 10, 20, 0.96)),
     radial-gradient(ellipse 80% 60% at 100% 0%, rgba(212, 175, 55, 0.12), transparent 55%);
   border-color: rgba(212, 175, 55, 0.22);
+  padding: var(--mio-space-3) var(--mio-space-4);
   box-shadow:
     var(--mio-glass-shadow),
     var(--mio-glass-highlight),
@@ -277,8 +280,8 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--mio-radius-xl);
-  padding: var(--mio-space-4) var(--mio-space-5);
-  min-height: 112px;
+  padding: var(--mio-space-3) var(--mio-space-4);
+  min-height: 96px;
   margin-bottom: var(--mio-space-3);
   scroll-margin-top: calc(var(--metioro-header-h, 84px) + var(--metioro-safe-top, 0px) + 12px);
   border: 1px solid rgba(212, 175, 55, 0.2);
@@ -291,16 +294,16 @@
 
 @media (max-width: 767px) {
   .mio-obs-hero {
-    min-height: 180px;
-    padding: var(--mio-space-4);
+    min-height: 132px;
+    padding: var(--mio-space-3);
   }
 }
 
 .mio-obs-hero__orbit {
   position: absolute;
   inset: -20% -10% auto auto;
-  width: 280px;
-  height: 280px;
+  width: 200px;
+  height: 200px;
   border: 1px solid rgba(212, 175, 55, 0.12);
   border-radius: 50%;
   pointer-events: none;
@@ -398,7 +401,7 @@
   width: 100%;
   max-width: 1440px;
   margin-inline: auto;
-  padding: 0 0 var(--mio-space-5);
+  padding: 0 0 var(--mio-space-4);
 }
 
 @media (max-width: 767px) {
@@ -415,10 +418,14 @@
   align-items: start;
 }
 
-/* Mobile / narrow: chart-first observatory order */
-.mio-obs-slot--chart { order: 1; }
-.mio-obs-slot--identity { order: 2; }
-.mio-obs-slot--signature { order: 3; }
+.mio-obs-dashboard[dir='rtl'] .mio-obs-grid {
+  direction: rtl;
+}
+
+/* Mobile / narrow: decision summary before chart */
+.mio-obs-slot--identity { order: 1; }
+.mio-obs-slot--signature { order: 2; }
+.mio-obs-slot--chart { order: 3; }
 .mio-obs-slot--cultural { order: 4; }
 .mio-obs-slot--birth { order: 5; }
 .mio-obs-slot--analysis { order: 6; }
@@ -428,8 +435,8 @@
   .mio-obs-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
-      'chart chart'
       'identity signature'
+      'chart chart'
       'birth birth'
       'analysis analysis'
       'transparency transparency';
@@ -448,8 +455,8 @@
   .mio-obs-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 1fr);
     grid-template-areas:
-      'chart chart chart'
       'identity signature birth'
+      'chart chart chart'
       'analysis analysis analysis'
       'transparency transparency transparency';
   }
@@ -516,7 +523,16 @@
 
 @media (min-width: 768px) {
   .mio-home-grid--primary {
-    grid-template-columns: minmax(0, 1fr) minmax(140px, 168px);
+    grid-template-columns: minmax(132px, 156px) minmax(0, 1fr);
+    grid-template-areas: 'score cosmos';
+  }
+
+  .mio-home-score {
+    grid-area: score;
+  }
+
+  .mio-home-cosmos {
+    grid-area: cosmos;
   }
 
   .mio-home-grid--windows {
@@ -537,19 +553,33 @@
   align-items: center;
   justify-content: center;
   gap: var(--mio-space-2);
-  min-height: 100%;
-  padding: var(--mio-space-4);
+  min-height: 0;
+  padding: var(--mio-space-3);
   border-radius: var(--mio-radius-lg);
 }
 
 .mio-home-score__value {
-  font-size: 2.75rem;
+  font-size: 2.25rem;
   line-height: 1;
   font-weight: 700;
 }
 
+.mio-home-cosmos {
+  opacity: 0.92;
+}
+
+.mio-home-cosmos .mio-glass--primary {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 .mio-obs-slot--chart .mio-glass {
-  padding: var(--mio-space-4);
+  padding: var(--mio-space-3);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.mio-obs-slot--chart .mio-eyebrow {
+  color: rgba(255, 255, 255, 0.42);
+  letter-spacing: 0.14em;
 }
 
 /* ── Premium empty / unlock states ───────────────────────────────────────── */
@@ -598,8 +628,8 @@
   text-align: center;
   gap: var(--mio-space-3);
   width: 100%;
-  min-height: 280px;
-  padding: var(--mio-space-4);
+  min-height: 180px;
+  padding: var(--mio-space-3);
   background: radial-gradient(circle, rgba(0, 0, 0, 0.35) 0%, transparent 72%);
   border-radius: 50%;
 }
@@ -643,20 +673,27 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  padding: var(--mio-space-2);
-  background: radial-gradient(circle, rgba(0, 0, 0, 0.45) 0%, transparent 72%);
+  max-width: 360px;
+  margin-inline: auto;
+  padding: var(--mio-space-1);
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.35) 0%, transparent 72%);
   border-radius: 50%;
 }
 
 .mio-chart-stage__wheel svg {
-  width: min(580px, 100%);
+  width: min(360px, 100%);
   height: auto;
-  max-height: 580px;
+  max-height: 360px;
 }
 
 @media (max-width: 767px) {
+  .mio-chart-stage__wheel {
+    max-width: 220px;
+  }
+
   .mio-chart-stage__wheel svg {
-    width: min(340px, 100%);
+    width: min(220px, 100%);
+    max-height: 220px;
   }
 }
 
@@ -676,9 +713,9 @@
 .mio-sig-metric {
   display: flex;
   flex-direction: row;
-  direction: ltr;
   align-items: flex-start;
   gap: var(--mio-space-3);
+  min-width: 0;
 }
 
 .mio-sig-metric__icon {
@@ -754,12 +791,22 @@
 /* ── Identity rows ───────────────────────────────────────────────────────── */
 
 .mio-id-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
   align-items: baseline;
-  gap: var(--mio-space-3);
+  gap: var(--mio-space-2) var(--mio-space-3);
   padding: 7px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mio-id-row .mio-label {
+  min-width: 0;
+}
+
+.mio-id-row .mio-value {
+  min-width: 0;
+  text-align: end;
+  word-break: break-word;
 }
 
 .mio-id-row:last-child {
@@ -772,7 +819,6 @@
   margin-top: var(--mio-space-3);
   display: grid;
   gap: var(--mio-space-3);
-  direction: ltr;
 }
 
 .mio-analysis-grid {
@@ -787,11 +833,109 @@
   }
 }
 
+/* ── Chart insight cards (elemental balance, strengths) ──────────────────── */
+
+.mio-insight-card {
+  border-radius: var(--mio-radius-md);
+  padding: var(--mio-space-3);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.mio-insight-card__title {
+  margin: 0 0 var(--mio-space-2);
+  font-size: var(--mio-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.mio-element-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mio-space-2);
+}
+
+.mio-element-row {
+  display: grid;
+  grid-template-columns: minmax(2.75rem, 3.5rem) minmax(0, 1fr) 2.35rem;
+  align-items: center;
+  column-gap: var(--mio-space-2);
+}
+
+.mio-element-row__label {
+  font-size: var(--mio-caption);
+  text-align: start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mio-element-row__track {
+  height: 0.5rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mio-element-row__fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 600ms ease-out;
+}
+
+.mio-element-row__pct {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: end;
+  font-size: var(--mio-caption);
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+}
+
+.mio-strengths-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mio-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mio-strengths-list__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mio-space-2);
+  min-width: 0;
+}
+
+.mio-strengths-list__bullet {
+  margin-top: 0.45rem;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #fbbf24;
+}
+
+.mio-strengths-list__text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--mio-caption);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+  overflow-wrap: anywhere;
+}
+
 /* ── RTL content (shell stays LTR) ───────────────────────────────────────── */
 
 .mio-obs-dashboard[dir='rtl'] .mio-glass,
 .mio-obs-dashboard[dir='rtl'] .mio-obs-hero,
-.mio-obs-dashboard[dir='rtl'] .mio-obs-below > * {
+.mio-obs-dashboard[dir='rtl'] .mio-obs-below > *,
+.mio-obs-dashboard[dir='rtl'] .mio-insight-card {
   direction: rtl;
   text-align: right;
 }
@@ -805,13 +949,40 @@
   text-align: right;
 }
 
+.mio-obs-dashboard[dir='rtl'] .mio-id-row {
+  direction: rtl;
+  text-align: right;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-id-row .mio-label {
+  text-align: right;
+}
+
 .mio-obs-dashboard[dir='rtl'] .mio-id-row .mio-value {
   text-align: left;
 }
 
-.mio-obs-dashboard[dir='rtl'] [dir='ltr'] {
+.mio-obs-dashboard[dir='rtl'] .mio-element-row__label {
+  text-align: right;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-strengths-list__item {
+  flex-direction: row-reverse;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-strengths-list__text {
+  text-align: right;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-sig-metric {
+  flex-direction: row-reverse;
+  direction: rtl;
+}
+
+.mio-obs-dashboard[dir='rtl'] [dir='ltr'],
+.mio-obs-dashboard[dir='rtl'] .mio-element-row__pct {
   direction: ltr;
-  text-align: left;
+  text-align: end;
 }
 
 .mio-obs-below [data-testid='calculation-details'] {
@@ -997,4 +1168,126 @@
   color: #fff;
   font-size: var(--mio-body);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Persian (fa) typography & profile density ─────────────────────────── */
+
+html[lang='fa'],
+.metioro-main[lang='fa'],
+main[lang='fa'] {
+  --mio-label: 8px;
+  --mio-caption: 10px;
+  --mio-body: 12px;
+  --mio-value: 13px;
+  --mio-heading-sm: 0.65rem;
+  --mio-heading-md: 1rem;
+  --mio-heading-lg: 1.18rem;
+}
+
+html[lang='fa'] .mio-glass--primary,
+html[lang='fa'] .mio-glass--secondary,
+html[lang='fa'] .mio-glass--signature,
+html[lang='fa'] .mio-insight-card,
+.metioro-main[lang='fa'] .mio-glass--primary,
+.metioro-main[lang='fa'] .mio-glass--secondary,
+.metioro-main[lang='fa'] .mio-glass--signature,
+.metioro-main[lang='fa'] .mio-insight-card,
+main[lang='fa'] .mio-glass--primary,
+main[lang='fa'] .mio-glass--secondary,
+main[lang='fa'] .mio-glass--signature,
+main[lang='fa'] .mio-insight-card {
+  padding: var(--mio-space-2) var(--mio-space-3);
+}
+
+html[lang='fa'] .mio-glass--metric,
+.metioro-main[lang='fa'] .mio-glass--metric,
+main[lang='fa'] .mio-glass--metric {
+  padding: var(--mio-space-2);
+}
+
+html[lang='fa'] .mio-eyebrow,
+html[lang='fa'] .mio-insight-card__title,
+html[lang='fa'] .mio-label,
+.metioro-main[lang='fa'] .mio-eyebrow,
+.metioro-main[lang='fa'] .mio-insight-card__title,
+.metioro-main[lang='fa'] .mio-label,
+main[lang='fa'] .mio-eyebrow,
+main[lang='fa'] .mio-insight-card__title,
+main[lang='fa'] .mio-label {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html[lang='fa'] .mio-obs-grid,
+html[lang='fa'] .mio-analysis-grid,
+html[lang='fa'] .mio-sig-grid,
+html[lang='fa'] .mio-obs-below,
+.metioro-main[lang='fa'] .mio-obs-grid,
+.metioro-main[lang='fa'] .mio-analysis-grid,
+.metioro-main[lang='fa'] .mio-sig-grid,
+.metioro-main[lang='fa'] .mio-obs-below {
+  gap: var(--mio-space-2);
+}
+
+html[lang='fa'] .mio-obs-hero,
+.metioro-main[lang='fa'] .mio-obs-hero {
+  margin-bottom: var(--mio-space-2);
+  padding: var(--mio-space-2) var(--mio-space-3);
+}
+
+html[lang='fa'] .mio-obs-hero__tagline,
+.metioro-main[lang='fa'] .mio-obs-hero__tagline {
+  margin-bottom: var(--mio-space-2);
+  line-height: 1.55;
+}
+
+html[lang='fa'] .mio-id-row,
+.metioro-main[lang='fa'] .mio-id-row {
+  padding: 4px 0;
+  gap: var(--mio-space-1) var(--mio-space-2);
+}
+
+html[lang='fa'] .mio-element-row,
+.metioro-main[lang='fa'] .mio-element-row {
+  grid-template-columns: minmax(2.5rem, 3rem) minmax(0, 1fr) 2.1rem;
+  column-gap: var(--mio-space-1);
+}
+
+html[lang='fa'] .mio-element-row__label,
+.metioro-main[lang='fa'] .mio-element-row__label {
+  font-size: 11px;
+}
+
+html[lang='fa'] .mio-strengths-list__text,
+.metioro-main[lang='fa'] .mio-strengths-list__text {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+html[lang='fa'] .mio-obs-metric__value,
+html[lang='fa'] .mio-value,
+.metioro-main[lang='fa'] .mio-obs-metric__value,
+.metioro-main[lang='fa'] .mio-value {
+  font-size: 12px;
+}
+
+html[lang='fa'] .mio-value--lg,
+.metioro-main[lang='fa'] .mio-value--lg {
+  font-size: 0.95rem;
+}
+
+html[lang='fa'] .mio-home-score__value,
+.metioro-main[lang='fa'] .mio-home-score__value {
+  font-size: 2rem;
+}
+
+html[lang='fa'] .mio-ltr-num,
+html[lang='fa'] .mio-element-row__pct,
+html[lang='fa'] [dir='ltr'],
+.metioro-main[lang='fa'] .mio-ltr-num,
+.metioro-main[lang='fa'] .mio-element-row__pct,
+.metioro-main[lang='fa'] [dir='ltr'] {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
 }

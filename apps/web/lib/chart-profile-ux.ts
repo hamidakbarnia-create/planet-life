@@ -1,6 +1,6 @@
 import type { ChartData, CitySelection, CoordinateSource } from '@/lib/chart-types';
 import { CHART_DEFAULTS } from '@/lib/chart-defaults';
-import { FA_CHART_CONFIRM } from '@/lib/chart-profile-i18n';
+import { getChartConfirmLabels, type ProfileLang } from '@/lib/chart-profile-i18n';
 import type { ResolvedLocationPreview } from '@/lib/location-resolve';
 
 export type PreConfirmSummary = {
@@ -31,9 +31,17 @@ export function shouldShowPreChartConfirm(lang: string): boolean {
   return lang === 'fa';
 }
 
-/** Dev panel only in NODE_ENV development — not bundled for production. */
+/** Dev panel only when NODE_ENV is development AND dev flag is enabled. */
 export function shouldRenderChartDevPanel(): boolean {
-  return process.env.NODE_ENV === 'development';
+  if (process.env.NODE_ENV !== 'development') return false;
+  if (typeof window === 'undefined') return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('dev') === '1') return true;
+    return window.localStorage.getItem('metioro-dev-panel') === '1';
+  } catch {
+    return false;
+  }
 }
 
 export function shouldWarnGeocodeFallback(
@@ -66,11 +74,13 @@ export function formatConfirmCoordinates(
 
 export function resolveConfirmDisplayValue(
   value: string | null | undefined,
-  resolving: boolean
+  resolving: boolean,
+  lang: ProfileLang = 'fa'
 ): string {
-  if (resolving) return FA_CHART_CONFIRM.resolving;
+  const labels = getChartConfirmLabels(lang);
+  if (resolving) return labels.resolving;
   if (value && value.trim()) return value;
-  return FA_CHART_CONFIRM.unknown;
+  return labels.unknown;
 }
 
 export function buildPreConfirmSummary(params: {

@@ -25,11 +25,21 @@ from services.chart_data import build_chart_payload
 # so threads give us real parallelism on multi-core machines.
 _BATCH_EXECUTOR = ThreadPoolExecutor(max_workers=8, thread_name_prefix="batch")
 
-app = FastAPI(title="Planet Life API", version="1.0.0")
+app = FastAPI(
+    title="METIORO API",
+    description="METIORO personal decision intelligence platform API",
+    version="1.0.0",
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://metioro.com",
+        "https://www.metioro.com",
+        "https://planet-life-web.planet-life.workers.dev",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -45,7 +55,7 @@ app.include_router(world_router, prefix="/api/world", tags=["world"])
 
 @app.get("/")
 def health_check():
-    return {"status": "healthy", "platform": "Planet Life"}
+    return {"status": "healthy", "platform": "METIORO"}
 
 
 # ── Batch endpoint ────────────────────────────────────────────────────────────

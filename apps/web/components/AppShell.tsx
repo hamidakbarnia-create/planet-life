@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BottomNav, VaultPill } from './BottomNav';
+import { DesktopSidebar, MobileTabBar, VaultPill } from './BottomNav';
 import { BrandLogo } from './BrandLogo';
 import { clearSession, loadSession, type AuthSession } from '@/lib/auth';
 import { type BrandLang } from '@/lib/brand';
@@ -41,6 +41,7 @@ export function AppShell({
 }) {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [tier, setTier] = useState<MembershipTier>('free');
+
   useEffect(() => {
     setSession(loadSession());
     setTier(loadTier());
@@ -56,42 +57,54 @@ export function AppShell({
       window.removeEventListener('planet-life-membership-changed', onMembership);
     };
   }, []);
+
   const sessionLabel = session?.identifier
     ? session.method === 'google' || session.method === 'apple'
-      ? session.method === 'google' ? 'Google' : 'Apple'
+      ? session.method === 'google'
+        ? 'Google'
+        : 'Apple'
       : session.identifier
     : null;
+
   const signOut = () => {
     clearSession();
     setSession(null);
   };
+
   const tierLabel = tier.toUpperCase();
   const headingFont = brandHeadingFont(lang);
   const bodyFont = brandBodyFont(lang, fontFamily);
 
   return (
     <div
-      dir={dir}
+      dir="ltr"
       lang={lang}
-      style={{ fontFamily: bodyFont, background: SURFACES.appBackground }}
-      className="min-h-screen text-white pl-20"
+      className="metioro-shell mio-app-bg text-white"
+      style={{ fontFamily: bodyFont }}
     >
       <style>{`
         .fc{font-family:${headingFont}}
         .fi{font-family:${bodyFont}}
       `}</style>
 
-      <header
-        className="flex items-center justify-between px-6 py-3 border-b"
-        style={{ borderColor: SURFACES.headerBorder }}
-      >
-        <BrandLogo lang={lang} size="md" showTagline />
-        <div className="flex items-center gap-2">
+      <DesktopSidebar labels={navLabels} />
+
+      <header className="metioro-header">
+        <div className="metioro-header__brand">
+          <div className="hidden md:block">
+            <BrandLogo lang={lang} size="shell" showTagline href="/home" />
+          </div>
+          <div className="md:hidden">
+            <BrandLogo lang={lang} size="sm" showTagline={false} href="/home" />
+          </div>
+        </div>
+
+        <div className="metioro-header__actions">
           {session ? (
             <button
               type="button"
               onClick={signOut}
-              className="fi text-xs px-3 py-1.5 rounded-md border transition-colors"
+              className="metioro-header-chip fi border transition-colors"
               style={{
                 borderColor: COLORS_RGBA.royalBlue28,
                 background: COLORS_RGBA.royalBlue12,
@@ -106,54 +119,56 @@ export function AppShell({
           ) : (
             <Link
               href="/login"
-              className="fi text-xs px-3 py-1.5 rounded-md border transition-colors no-underline"
+              className="metioro-header-chip fi border transition-colors no-underline"
               style={{
                 borderColor: COLORS_RGBA.royalBlue45,
                 background: COLORS_RGBA.royalBlue12,
                 color: '#93B4FF',
               }}
             >
-              Sign in
+              {navLabels?.signIn ?? 'Sign in'}
             </Link>
           )}
           <VaultPill label={navLabels?.['/vault'] ?? 'Vault'} />
           <Link
             href="/upgrade"
-            className="fi text-[10px] tracking-[0.18em] px-2.5 py-1 rounded-md uppercase no-underline transition-all hover:opacity-100"
-            title={`${tierLabel} plan — tap to manage`}
+            className="metioro-header-chip fi text-[10px] tracking-[0.18em] uppercase no-underline"
+            title={`${tierLabel} plan`}
             style={tierBadgeStyle(tier)}
           >
             {tierLabel}
           </Link>
           <div className="flex gap-1">
-          {LANG_OPTIONS.map((l) => (
-            <button
-              key={l.key}
-              type="button"
-              onClick={() => setLang(l.key)}
-              className="fi px-2.5 py-1 text-xs rounded-md border transition-all"
-              style={
-                lang === l.key
-                  ? {
-                      borderColor: SURFACES.langActiveBorder,
-                      color: SURFACES.langActiveText,
-                      background: SURFACES.langActiveBg,
-                    }
-                  : {
-                      borderColor: COLORS_RGBA.white08,
-                      color: COLORS_RGBA.white45,
-                    }
-              }
-            >
-              {l.name}
-            </button>
-          ))}
-        </div>
+            {LANG_OPTIONS.map((l) => (
+              <button
+                key={l.key}
+                type="button"
+                onClick={() => setLang(l.key)}
+                className="metioro-header-chip fi border transition-all"
+                style={
+                  lang === l.key
+                    ? {
+                        borderColor: SURFACES.langActiveBorder,
+                        color: SURFACES.langActiveText,
+                        background: SURFACES.langActiveBg,
+                      }
+                    : {
+                        borderColor: COLORS_RGBA.white08,
+                        color: COLORS_RGBA.white45,
+                      }
+                }
+              >
+                {l.name}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
-      <main>{children}</main>
-      <BottomNav labels={navLabels} />
+      <main dir={dir} lang={lang} className="metioro-main">
+        {children}
+      </main>
+      <MobileTabBar labels={navLabels} />
     </div>
   );
 }

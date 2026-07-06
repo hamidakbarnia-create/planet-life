@@ -77,6 +77,22 @@ describe('FaChartConfirmModal', () => {
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
+  it('uses updated Persian CTA copy', () => {
+    render(
+      <FaChartConfirmModal summary={baseSummary} onConfirm={vi.fn()} onEdit={vi.fn()} lang="fa" />
+    );
+    expect(screen.getByTestId('fa-chart-confirm-submit').textContent).toBe('تأیید و ساخت نمودار');
+    expect(screen.getByTestId('fa-chart-confirm-edit').textContent).toBe('ویرایش اطلاعات');
+  });
+
+  it('renders English CTA copy when lang is en', () => {
+    render(
+      <FaChartConfirmModal summary={baseSummary} onConfirm={vi.fn()} onEdit={vi.fn()} lang="en" />
+    );
+    expect(screen.getByTestId('fa-chart-confirm-submit').textContent).toBe('Confirm & Create Chart');
+    expect(screen.getByTestId('fa-chart-confirm-edit').textContent).toBe('Edit Details');
+  });
+
   it('edit button triggers onEdit without confirm', () => {
     const onConfirm = vi.fn();
     const onEdit = vi.fn();

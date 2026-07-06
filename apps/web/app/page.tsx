@@ -1,12 +1,26 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PeopleHomeRow } from '@/components/PeopleHomeRow';
 import { BrandLogo } from '@/components/BrandLogo';
 import { SiteFooter } from '@/components/SiteFooter';
-import { BRAND } from '@/lib/brand';
 import { COLORS, COLORS_RGBA, primaryCtaStyle } from '@/lib/brand-theme';
+
+const CinematicHero = dynamic(
+  () => import('@/components/CinematicHero').then((m) => m.CinematicHero),
+  {
+    ssr: false,
+    loading: () => (
+      <section
+        className="flex min-h-[62vh] items-center justify-center"
+        style={{ background: '#0B1736' }}
+        aria-hidden
+      />
+    ),
+  },
+);
 
 type Lang = 'en' | 'ru' | 'fa' | 'ar';
 
@@ -223,46 +237,11 @@ export default function Home() {
         </div>
       </nav>
 
-      <section className="flex flex-col items-center justify-center text-center px-6 py-32">
-        <div className="mb-8">
-          <BrandLogo lang={lang} href="/" size="lg" showTagline onDark />
-        </div>
-        <div
-          className="text-sm font-medium mb-4 tracking-widest uppercase"
-          style={{ color: '#93B4FF' }}
-        >
-          {t.eyebrow}
-        </div>
-        <h1 className="text-5xl font-semibold max-w-3xl leading-tight mb-6">
-          {t.headlineA}{' '}
-          <span style={{ color: COLORS.royalBlue }}>{t.headlineHighlight}</span>
-        </h1>
-        <p className="text-white/50 max-w-xl text-lg mb-10">{t.sub}</p>
-        <div className="flex gap-4">
-          <Link
-            href="/home"
-            className="px-6 py-3 rounded-lg font-medium transition hover:opacity-90 text-sm"
-            style={primaryCtaStyle('royal')}
-          >
-            {t.analyzeBtn}
-          </Link>
-          <Link
-            href="/profile"
-            className="px-6 py-3 rounded-lg text-sm transition hover:opacity-90"
-            style={{
-              border: `1px solid ${COLORS_RGBA.white10}`,
-              background: COLORS.navy,
-              color: COLORS.lightGray,
-            }}
-          >
-            {t.profileBtn}
-          </Link>
-        </div>
-      </section>
+      <CinematicHero />
 
       <PeopleHomeRow lang={lang} />
 
-      <section id="features" className="px-8 py-20 max-w-5xl mx-auto">
+      <section id="features" className="px-8 py-12 max-w-5xl mx-auto">
         <h2 className="text-2xl font-semibold text-center mb-12">{t.domainsTitle}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {t.domains.map((f) => (
@@ -282,7 +261,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="how" className="px-8 py-20 max-w-3xl mx-auto text-center">
+      <section id="how" className="px-8 py-12 max-w-3xl mx-auto text-center">
         <h2 className="text-2xl font-semibold mb-12">{t.howTitle}</h2>
         <div className="flex flex-col gap-8">
           {t.steps.map((s) => (
@@ -302,7 +281,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="text-center py-20 px-6">
+      <section className="text-center py-12 px-6">
         <h2 className="text-3xl font-semibold mb-4">{t.ctaTitle}</h2>
         <p className="text-white/50 mb-8">{t.ctaSub}</p>
         <Link

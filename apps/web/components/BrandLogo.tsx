@@ -12,7 +12,7 @@ export const METIORO_LOGO_DARK_SRC = '/metioro-logo-dark.svg';
 type BrandLogoProps = {
   lang?: BrandLang;
   href?: string | null;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'shell';
   showTagline?: boolean;
   /** Use white wordmark variant for dark app chrome (default true). */
   onDark?: boolean;
@@ -20,15 +20,17 @@ type BrandLogoProps = {
 };
 
 function logoHeight(size: BrandLogoProps['size'], showTagline: boolean): number {
+  if (size === 'shell') return showTagline ? 86 : 68;
   if (size === 'lg') return showTagline ? 88 : 72;
-  if (size === 'sm') return showTagline ? 44 : 48;
-  return showTagline ? 52 : 40;
+  if (size === 'sm') return showTagline ? 48 : 56;
+  return showTagline ? 64 : 52;
 }
 
 function logoWidth(size: BrandLogoProps['size'], showTagline: boolean): number {
+  if (size === 'shell') return showTagline ? 300 : 88;
   if (size === 'lg') return showTagline ? 280 : 220;
-  if (size === 'sm') return showTagline ? 160 : 140;
-  return showTagline ? 200 : 150;
+  if (size === 'sm') return showTagline ? 160 : 80;
+  return showTagline ? 240 : 180;
 }
 
 function LogoImage({
@@ -52,8 +54,9 @@ function LogoImage({
         height,
         width: 'auto',
         maxWidth: width,
+        minWidth: showTagline ? undefined : 56,
         objectFit: 'contain',
-        objectPosition: showTagline ? 'center' : 'left top',
+        objectPosition: showTagline ? 'center' : 'left center',
       }}
     />
   );

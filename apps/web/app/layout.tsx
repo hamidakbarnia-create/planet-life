@@ -4,6 +4,8 @@ import { DisclaimerGate } from "@/components/DisclaimerGate";
 import { BRAND } from "@/lib/brand";
 import { rootMetadata } from "@/lib/site-metadata";
 import "./globals.css";
+import "./metioro-shell.css";
+import "./metioro-ui-v2.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +39,7 @@ export const metadata: Metadata = rootMetadata;
 
 export const viewport: Viewport = {
   themeColor: BRAND.themeColor,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

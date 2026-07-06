@@ -11,13 +11,16 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "test:e2e:update": "playwright test --update-snapshots"
+    "test:e2e": "playwright test --project=e2e",
+    "test:e2e:update": "playwright test --project=e2e --update-snapshots",
+    "visual:baseline": "playwright test --project=visual --update-snapshots",
+    "visual:diff": "playwright test --project=visual && node tests/visual/write-current.mjs && node tests/visual/diff-report.mjs"
   },
   "dependencies": {
     "next": "16.2.6",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "three": "^0.175.0"
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.20.1",
@@ -28,9 +31,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.175.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "jsdom": "^29.1.1",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.2.6",

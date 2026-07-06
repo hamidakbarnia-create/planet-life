@@ -6,7 +6,6 @@ import {
   COLORS,
   COLORS_RGBA,
   SURFACES,
-  VAULT_PILL_GLOW,
   VAULT_PILL_STYLE,
 } from '@/lib/brand-theme';
 
@@ -17,30 +16,34 @@ type NavKey =
   | 'people'
   | 'pathfinder'
   | 'world'
-  | 'me'
+  | 'profile'
   | 'settings'
   | 'vault';
 
-const TABS: { href: string; key: NavKey; fallback: string }[] = [
+const DESKTOP_TABS: { href: string; key: NavKey; fallback: string }[] = [
   { href: '/home', key: 'today', fallback: 'Today' },
   { href: '/calendar', key: 'map', fallback: 'Map' },
   { href: '/ask', key: 'ask', fallback: 'Ask' },
   { href: '/people', key: 'people', fallback: 'People' },
-  { href: '/pathfinder', key: 'pathfinder', fallback: 'Path' },
+  { href: '/pathfinder', key: 'pathfinder', fallback: 'Pathfinder' },
   { href: '/world', key: 'world', fallback: 'World' },
-  { href: '/profile', key: 'me', fallback: 'Me' },
+  { href: '/profile', key: 'profile', fallback: 'My Profile' },
   { href: '/settings', key: 'settings', fallback: 'Settings' },
 ];
 
-// Vault has been moved out of the sidebar list and promoted to a
-// top-right header button (see AppShell + page-level navs). The icon
-// component is still exported so headers can render the same lock SVG.
+const MOBILE_TABS: { href: string; key: NavKey; fallback: string }[] = [
+  { href: '/home', key: 'today', fallback: 'Today' },
+  { href: '/ask', key: 'ask', fallback: 'Ask' },
+  { href: '/people', key: 'people', fallback: 'People' },
+  { href: '/pathfinder', key: 'pathfinder', fallback: 'Pathfinder' },
+  { href: '/profile', key: 'profile', fallback: 'My Profile' },
+];
 
-function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
+function NavIcon({ name, active, size = 22 }: { name: NavKey; active: boolean; size?: number }) {
   const stroke = active ? COLORS.goldMain : SURFACES.navInactive;
   const props = {
-    width: 22,
-    height: 22,
+    width: size,
+    height: size,
     viewBox: '0 0 24 24',
     fill: 'none' as const,
     stroke,
@@ -92,12 +95,10 @@ function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
           <circle cx="12" cy="12" r="8.5" />
           <path d="M3.5 13.5c4 2.2 10.5 1.2 17-3" />
           <path d="M4.5 9.5c5.3-1.7 10.2-.9 15 2.4" />
-          <path d="M12 3.5c2.2 2.7 2.2 14.3 0 17" />
-          <path d="M12 3.5c-2.2 2.7-2.2 14.3 0 17" />
           <path d="M17.2 6.2l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1z" />
         </svg>
       );
-    case 'me':
+    case 'profile':
       return (
         <svg {...props}>
           <circle cx="12" cy="9" r="3.2" />
@@ -115,8 +116,8 @@ function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
     case 'vault':
       return (
         <svg
-          width={22}
-          height={22}
+          width={size}
+          height={size}
           viewBox="0 0 24 24"
           fill="none"
           stroke={active ? COLORS.goldHighlight : COLORS.goldMain}
@@ -126,99 +127,109 @@ function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
         >
           <rect x="5" y="11" width="14" height="9" rx="2" />
           <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-          <path
-            d="M12 14.5c-.5-1-2-1-2 .2 0 1 1 1.6 2 2.3 1-.7 2-1.3 2-2.3 0-1.2-1.5-1.2-2-.2z"
-            fill={active ? COLORS.goldHighlight : COLORS.goldMain}
-          />
         </svg>
       );
   }
 }
 
-export function BottomNav({ labels }: { labels?: Record<string, string> }) {
+function isActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(href + '/');
+}
+
+function SidebarLink({
+  href,
+  navKey,
+  label,
+  active,
+}: {
+  href: string;
+  navKey: NavKey;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`metioro-sidebar__link ${active ? 'metioro-sidebar__link--active' : 'metioro-sidebar__link--idle'}`}
+    >
+      <span className="metioro-sidebar__icon" aria-hidden>
+        <NavIcon name={navKey} active={active} size={24} />
+      </span>
+      <span className="metioro-sidebar__label fi">{label}</span>
+    </Link>
+  );
+}
+
+/** Desktop sidebar — hidden below 768px */
+export function DesktopSidebar({ labels }: { labels?: Record<string, string> }) {
   const pathname = usePathname();
 
   return (
-    <nav
-      className="fixed top-0 left-0 bottom-0 z-40 w-20 flex flex-col"
-      style={{
-        background:
-          `linear-gradient(180deg, ${COLORS.navy} 0%, ${COLORS.black} 100%)`,
-        backdropFilter: 'blur(16px)',
-        borderRight: `1px solid ${COLORS_RGBA.goldMain12}`,
-        direction: 'ltr',
-        boxShadow: 'inset -1px 0 0 rgba(255,255,255,0.02), 4px 0 24px rgba(0,0,0,0.4)',
-      }}
-    >
-      {/* subtle starfield accent */}
-      <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none opacity-40"
-        style={{
-          background:
-            `radial-gradient(circle at 50% 20%, ${COLORS_RGBA.royalBlue12}, transparent 50%), radial-gradient(circle at 50% 85%, ${COLORS_RGBA.goldMain12}, transparent 50%)`,
-        }}
-      />
-
-      <div className="relative flex flex-col gap-1 px-2 pt-16 pb-3 flex-1">
-        {TABS.map((tab) => {
-          const active =
-            pathname === tab.href || pathname.startsWith(tab.href + '/');
-          const label = labels?.[tab.href] ?? tab.fallback;
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className="group flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl no-underline transition-all"
-              style={{
-                color: active ? COLORS.goldMain : SURFACES.navInactive,
-                background: active
-                  ? `linear-gradient(180deg, ${COLORS_RGBA.goldMain18}, ${COLORS_RGBA.goldMain12})`
-                  : 'transparent',
-                boxShadow: active
-                  ? `inset 0 0 0 1px ${COLORS_RGBA.goldMain28}, 0 0 16px ${COLORS_RGBA.goldMain12}`
-                  : 'none',
-              }}
-            >
-              <NavIcon name={tab.key} active={active} />
-              <span
-                className="text-[10px] font-medium tracking-wide text-center leading-tight"
-                style={{
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {label}
-              </span>
-            </Link>
-          );
-        })}
+    <nav className="metioro-sidebar" aria-label="Main navigation">
+      <div className="metioro-sidebar__inner">
+        {DESKTOP_TABS.map((tab) => (
+          <SidebarLink
+            key={tab.href}
+            href={tab.href}
+            navKey={tab.key}
+            label={labels?.[tab.href] ?? tab.fallback}
+            active={isActive(pathname, tab.href)}
+          />
+        ))}
       </div>
-
     </nav>
   );
 }
 
-/**
- * Top-right Vault entry button — Premium gold CTA.
- */
+/** Mobile bottom tab bar — hidden at 768px and above */
+export function MobileTabBar({ labels }: { labels?: Record<string, string> }) {
+  const pathname = usePathname();
+
+  return (
+    <nav className="metioro-mobile-nav" aria-label="Mobile navigation">
+      {MOBILE_TABS.map((tab) => {
+        const active = isActive(pathname, tab.href);
+        const label = labels?.[tab.href] ?? tab.fallback;
+        return (
+          <Link
+            key={tab.href}
+            href={tab.href}
+            className={`metioro-mobile-nav__link ${active ? 'metioro-mobile-nav__link--active' : 'metioro-mobile-nav__link--idle'}`}
+          >
+            <span className="metioro-sidebar__icon" aria-hidden>
+              <NavIcon name={tab.key} active={active} size={26} />
+            </span>
+            <span className="metioro-mobile-nav__label fi">{label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+/** @deprecated Use DesktopSidebar + MobileTabBar */
+export function BottomNav({ labels }: { labels?: Record<string, string> }) {
+  return (
+    <>
+      <DesktopSidebar labels={labels} />
+      <MobileTabBar labels={labels} />
+    </>
+  );
+}
+
 export function VaultPill({ label }: { label?: string }) {
   return (
     <Link
       href="/vault"
       title="Open the Vault"
-      className="group relative no-underline inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all overflow-hidden"
-      style={VAULT_PILL_STYLE}
+      className="no-underline inline-flex items-center gap-2 shrink-0 rounded-full transition-opacity hover:opacity-90"
+      style={{
+        ...VAULT_PILL_STYLE,
+        paddingInline: '16px',
+        paddingBlock: '8px',
+        boxShadow: `0 0 18px ${COLORS_RGBA.goldMain18}`,
+      }}
     >
-      <span
-        aria-hidden
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: VAULT_PILL_GLOW,
-          animation: 'vault-pill-pulse 2.4s ease-in-out infinite',
-          opacity: 0.6,
-        }}
-      />
       <svg
         width="14"
         height="14"
@@ -228,22 +239,13 @@ export function VaultPill({ label }: { label?: string }) {
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="relative"
       >
         <rect x="5" y="11" width="14" height="9" rx="2" />
         <path d="M8 11V8a4 4 0 0 1 8 0v3" />
       </svg>
-      <span
-        className="relative fc text-[11px] font-semibold tracking-[0.18em] uppercase"
-      >
+      <span className="fc text-[11px] font-semibold tracking-[0.18em] uppercase whitespace-nowrap">
         {label ?? 'Vault'}
       </span>
-      <style>{`
-        @keyframes vault-pill-pulse {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 0.85; }
-        }
-      `}</style>
     </Link>
   );
 }

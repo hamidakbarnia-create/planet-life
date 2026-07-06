@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
+import { AlertBanner } from '@/components/ui/AlertBanner';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { DailyBriefView } from '@/components/home/DailyBriefView';
 import { HomeViewOnboarding } from '@/components/home/HomeViewOnboarding';
 import { MonthHeatmapGrid } from '@/components/home/MonthHeatmapGrid';
@@ -146,45 +147,23 @@ export default function HomePage() {
     >
       {showOnboarding && <HomeViewOnboarding lang={lang} onChoose={handleChoose} />}
 
-      <div className="metioro-home">
+      <div className="metioro-page--dashboard">
         {!hasProfile && !showOnboarding && (
-          <div
-            className="rounded-2xl p-4 fi text-sm mb-6"
-            style={{
-              background: 'rgba(251,191,36,0.06)',
-              border: '1px solid rgba(251,191,36,0.2)',
-              color: 'rgba(255,255,255,0.7)',
-            }}
-          >
-            {t.noProfile}{' '}
-            <Link href="/profile" style={{ color: '#fbbf24' }}>
-              {t.goProfile}
-            </Link>
-          </div>
+          <AlertBanner actionHref="/profile" actionLabel={t.goProfile}>
+            {t.noProfile}
+          </AlertBanner>
         )}
         {view === 'daily-brief' && (
           <DailyBriefView lang={lang} profile={profile} hasProfile={hasProfile} />
         )}
 
         {view === 'heatmap' && (
-          <div className="space-y-4">
-            <h1 className="fc text-xl tracking-wide" style={{ color: '#fbbf24' }}>
-              {t.heatmapTitle}
-            </h1>
+          <div className="mio-home-dashboard">
+            <PageHeader title={t.heatmapTitle} />
             {!hasProfile && (
-              <div
-                className="rounded-2xl p-4 fi text-sm"
-                style={{
-                  background: 'rgba(251,191,36,0.06)',
-                  border: '1px solid rgba(251,191,36,0.2)',
-                  color: 'rgba(255,255,255,0.7)',
-                }}
-              >
-                {t.noProfile}{' '}
-                <Link href="/profile" style={{ color: '#fbbf24' }}>
-                  {t.goProfile}
-                </Link>
-              </div>
+              <AlertBanner actionHref="/profile" actionLabel={t.goProfile}>
+                {t.noProfile}
+              </AlertBanner>
             )}
             <div className="flex items-center justify-between">
               <button
@@ -218,7 +197,7 @@ export default function HomePage() {
         )}
 
         {view === 'calendar' && !showOnboarding && (
-          <div className="py-12 text-center fi text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <div className="py-12 text-center fi text-sm mio-caption">
             {t.loading}
           </div>
         )}

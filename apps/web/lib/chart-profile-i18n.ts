@@ -2,9 +2,56 @@ import type { AppLang } from '@/lib/app-settings';
 
 export type ProfileLang = AppLang | 'en';
 
-export const FA_CHART_CONFIRM = {
+export type ChartConfirmLabels = {
+  title: string;
+  body: string;
+  fields: {
+    name: string;
+    birthDate: string;
+    birthTime: string;
+    city: string;
+    timezone: string;
+    coordinates: string;
+    zodiac: string;
+    houseSystem: string;
+    nodeType: string;
+  };
+  confirm: string;
+  edit: string;
+  geocodeWarning: string;
+  geocodeConfirm: string;
+  resolving: string;
+  unknown: string;
+};
+
+const CHART_CONFIRM_EN: ChartConfirmLabels = {
+  title: 'Confirm birth details',
+  body:
+    'Review the details below before creating your natal chart. Birth time, city, and timezone directly affect the ascendant, houses, and planetary positions.',
+  fields: {
+    name: 'Name',
+    birthDate: 'Birth date',
+    birthTime: 'Birth time',
+    city: 'Birth city',
+    timezone: 'Timezone',
+    coordinates: 'Coordinates',
+    zodiac: 'Zodiac system',
+    houseSystem: 'House system',
+    nodeType: 'Node type',
+  },
+  confirm: 'Confirm & Create Chart',
+  edit: 'Edit Details',
+  geocodeWarning:
+    'City coordinates and timezone were resolved from the geographic database.\nIf the wrong city was selected, ascendant, houses, and aspects may change.',
+  geocodeConfirm: 'Coordinates look correct',
+  resolving: 'Fetching coordinates…',
+  unknown: 'Unknown',
+};
+
+const CHART_CONFIRM_FA: ChartConfirmLabels = {
   title: 'تأیید اطلاعات تولد',
-  body: 'برای محاسبه دقیق نقشه تولد، لطفاً اطلاعات زیر را بررسی و تأیید کنید. دقت زمان تولد، شهر تولد و منطقه زمانی روی طالع، خانه‌ها و جایگاه سیارات اثر مستقیم دارد.',
+  body:
+    'برای محاسبه دقیق نمودار تولد، لطفاً اطلاعات زیر را بررسی و تأیید کنید. دقت زمان تولد، شهر تولد و منطقه زمانی روی طالع، خانه‌ها و جایگاه سیارات اثر مستقیم دارد.',
   fields: {
     name: 'نام',
     birthDate: 'تاریخ تولد',
@@ -16,14 +63,78 @@ export const FA_CHART_CONFIRM = {
     houseSystem: 'سیستم خانه‌ها',
     nodeType: 'نوع گره ماه',
   },
-  confirm: 'تأیید و تولید نقشه',
+  confirm: 'تأیید و ساخت نمودار',
   edit: 'ویرایش اطلاعات',
   geocodeWarning:
     'مختصات و منطقه زمانی شهر از پایگاه داده جغرافیایی استخراج شده‌اند.\nاگر شهر اشتباه انتخاب شده باشد، محاسبه طالع، خانه‌ها و زوایا ممکن است تغییر کند.',
   geocodeConfirm: 'مختصات درست است',
-  resolving: 'در حال دریافت مختصات...',
+  resolving: 'در حال دریافت مختصات…',
   unknown: 'نامشخص',
-} as const;
+};
+
+const CHART_CONFIRM_RU: ChartConfirmLabels = {
+  title: 'Подтверждение данных рождения',
+  body:
+    'Проверьте данные ниже перед созданием натальной карты. Время рождения, город и часовой пояс напрямую влияют на асцендент, дома и положения планет.',
+  fields: {
+    name: 'Имя',
+    birthDate: 'Дата рождения',
+    birthTime: 'Время рождения',
+    city: 'Город рождения',
+    timezone: 'Часовой пояс',
+    coordinates: 'Координаты',
+    zodiac: 'Система зодиака',
+    houseSystem: 'Система домов',
+    nodeType: 'Тип узла',
+  },
+  confirm: 'Подтвердить и создать карту',
+  edit: 'Изменить данные',
+  geocodeWarning:
+    'Координаты и часовой пояс города получены из географической базы.\nЕсли выбран неверный город, асцендент, дома и аспекты могут измениться.',
+  geocodeConfirm: 'Координаты верны',
+  resolving: 'Получение координат…',
+  unknown: 'Неизвестно',
+};
+
+const CHART_CONFIRM_AR: ChartConfirmLabels = {
+  title: 'تأكيد بيانات الميلاد',
+  body:
+    'راجع البيانات أدناه قبل إنشاء مخطط الميلاد. وقت الميلاد والمدينة والمنطقة الزمنية تؤثر مباشرة على الطالع والبيوت ومواقع الكواكب.',
+  fields: {
+    name: 'الاسم',
+    birthDate: 'تاريخ الميلاد',
+    birthTime: 'وقت الميلاد',
+    city: 'مدينة الميلاد',
+    timezone: 'المنطقة الزمنية',
+    coordinates: 'الإحداثيات',
+    zodiac: 'نظام الطالع',
+    houseSystem: 'نظام البيوت',
+    nodeType: 'نوع العقدة',
+  },
+  confirm: 'تأكيد وإنشاء المخطط',
+  edit: 'تعديل البيانات',
+  geocodeWarning:
+    'تم استخراج إحداثيات المدينة والمنطقة الزمنية من قاعدة البيانات الجغرافية.\nإذا اختيرت مدينة خاطئة، قد يتغير الطالع والبيوت والزوايا.',
+  geocodeConfirm: 'الإحداثيات صحيحة',
+  resolving: 'جاري جلب الإحداثيات…',
+  unknown: 'غير معروف',
+};
+
+/** @deprecated Use getChartConfirmLabels('fa') */
+export const FA_CHART_CONFIRM = CHART_CONFIRM_FA;
+
+export function getChartConfirmLabels(lang: ProfileLang): ChartConfirmLabels {
+  switch (lang) {
+    case 'fa':
+      return CHART_CONFIRM_FA;
+    case 'ru':
+      return CHART_CONFIRM_RU;
+    case 'ar':
+      return CHART_CONFIRM_AR;
+    default:
+      return CHART_CONFIRM_EN;
+  }
+}
 
 export type CalculationDetailsLabels = {
   title: string;

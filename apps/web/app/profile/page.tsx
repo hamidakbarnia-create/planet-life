@@ -480,7 +480,7 @@ export default function Profile() {
         .city-row:hover{background:rgba(212,175,55,0.08)}
       `}</style>
 
-      <div className="metioro-page--observatory mio-obs-dashboard" dir={t.dir}>
+      <div className="metioro-page--observatory mio-obs-dashboard" dir={t.dir} lang={lang}>
         <section className="mio-obs-hero" aria-label={t.heroTitle}>
           <div className="mio-obs-hero__orbit" aria-hidden />
           <div className="mio-obs-hero__glow" aria-hidden />
@@ -509,44 +509,6 @@ export default function Profile() {
         </section>
 
         <div className="mio-obs-grid">
-          <div className="mio-obs-slot mio-obs-slot--chart">
-            <GlassCard variant="primary" eyebrow={t.natalChart}>
-              {loading ? (
-                <div className="w-full min-h-[200px] flex items-center justify-center">
-                  <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                    {t.loading}
-                  </div>
-                </div>
-              ) : (
-                <NatalChart
-                  chart={chartData}
-                  labels={chartLabels}
-                  empty={!chartData}
-                  observatory
-                  showInsights={false}
-                />
-              )}
-            {pendingGeocodeChart && !chartData && (
-              <div
-                className="w-full mt-3 rounded-xl px-3 py-2.5 flex items-start gap-2"
-                style={{ background: 'rgba(251,146,60,0.1)', border: '1px solid rgba(251,146,60,0.35)' }}
-              >
-                <span className="fi text-sm leading-none mt-0.5" style={{ color: '#fb923c' }}>
-                  ⚠
-                </span>
-                <span className="fi text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
-                  {t.geocodePending}
-                </span>
-              </div>
-            )}
-            {chartError && (
-              <p className="fi mt-3 text-xs text-center px-2" style={{ color: '#fca5a5' }}>
-                {chartError}
-              </p>
-            )}
-            </GlassCard>
-          </div>
-
           <div className="mio-obs-slot mio-obs-slot--identity">
             <GlassCard variant="secondary" eyebrow={t.identitySnapshotTitle}>
               {identity && personalSignature ? (
@@ -608,6 +570,44 @@ export default function Profile() {
               ) : (
                 <ProfileUnlockEmpty message={t.chartUnlockMessage} />
               )}
+            </GlassCard>
+          </div>
+
+          <div className="mio-obs-slot mio-obs-slot--chart">
+            <GlassCard variant="secondary" eyebrow={t.natalChart}>
+              {loading ? (
+                <div className="w-full min-h-[140px] flex items-center justify-center">
+                  <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                    {t.loading}
+                  </div>
+                </div>
+              ) : (
+                <NatalChart
+                  chart={chartData}
+                  labels={chartLabels}
+                  empty={!chartData}
+                  observatory
+                  showInsights={false}
+                />
+              )}
+            {pendingGeocodeChart && !chartData && (
+              <div
+                className="w-full mt-3 rounded-xl px-3 py-2.5 flex items-start gap-2"
+                style={{ background: 'rgba(251,146,60,0.1)', border: '1px solid rgba(251,146,60,0.35)' }}
+              >
+                <span className="fi text-sm leading-none mt-0.5" style={{ color: '#fb923c' }}>
+                  ⚠
+                </span>
+                <span className="fi text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                  {t.geocodePending}
+                </span>
+              </div>
+            )}
+            {chartError && (
+              <p className="fi mt-3 text-xs text-center px-2" style={{ color: '#fca5a5' }}>
+                {chartError}
+              </p>
+            )}
             </GlassCard>
           </div>
 

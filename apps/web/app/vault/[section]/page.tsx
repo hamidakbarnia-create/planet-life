@@ -901,7 +901,7 @@ export default function VaultSectionPage() {
   if (!isValidSection(raw)) {
     return (
       <AppShell lang={lang} setLang={setLang} dir={dir} navLabels={HOME_LANGS[lang].nav} fontFamily={fontFamily}>
-        <div className="max-w-lg mx-auto px-6 py-20 text-center">
+        <div className="max-w-lg mx-auto px-6 py-12 text-center">
           <p className="fi text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
             Section not found.
           </p>
@@ -923,7 +923,7 @@ export default function VaultSectionPage() {
       navLabels={HOME_LANGS[lang].nav}
       fontFamily={fontFamily}
     >
-      <div className="relative min-h-[calc(100vh-60px)] overflow-hidden">
+      <div className="relative overflow-hidden">
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none"

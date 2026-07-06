@@ -1,4 +1,4 @@
-# Planet Life API — deployment
+# METIORO API — deployment
 
 FastAPI backend for chart scoring, vault readings, pathfinder, and world overlays.
 
@@ -44,7 +44,7 @@ cd apps/api/src
 python -m uvicorn main:app --reload --port 8000
 ```
 
-Health check: `GET http://localhost:8000/` → `{"status":"healthy","platform":"Planet Life"}`
+Health check: `GET http://localhost:8000/` → `{"status":"healthy","platform":"METIORO"}`
 
 ## Railway
 

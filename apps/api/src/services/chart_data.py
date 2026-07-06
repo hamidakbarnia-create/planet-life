@@ -81,7 +81,7 @@ def resolve_coordinates(location):
             raise ValueError("Invalid coordinates.")
         return lat, lon
     from geopy.geocoders import Nominatim
-    geolocator = Nominatim(user_agent="planet-life-api/1.0")
+    geolocator = Nominatim(user_agent="METIORO-API/1.0")
     result = geolocator.geocode(location.strip(), timeout=10)
     if result is None:
         raise ValueError(f"Could not resolve location: {location!r}")
