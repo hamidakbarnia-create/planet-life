@@ -23,3 +23,11 @@ apps/web/public/brand/preview-logos.html
 # Playwright / test artifacts
 apps/web/.playwright-browsers/
 apps/web/test-results/
+
+# Playwright
+apps/web/.playwright-browsers/
+apps/web/test-results/
+
+# Logs
+*.log
+
