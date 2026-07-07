@@ -315,7 +315,7 @@ Domain modules own **when** a style applies. Per ADR-DS-001 Principle 3, maps mu
 | `red` | `color.status.danger` | **NO** — raw `#f87171` | Domain | ACTIVE |
 | `empty` | `color.status.neutral` | **NO** — raw rgba literals | Domain | ACTIVE |
 
-**Violation:** All entries use inline hex/rgba. Refactor deferred to future ADR.
+**Violation:** All entries use inline hex/rgba. Consumption contract: [ADR-DS-002](../../governance/adr/ADR-DS-002-runtime-semantic-token-consumption.md). Implementation deferred.
 
 ### `GPS_TONE_STYLES` (`lib/strategic-gps.ts`)
 
@@ -395,9 +395,9 @@ Documented only — **no consolidation in DS-01**.
 
 | Map | Location | Tier | Consumes semantic tokens? | Action |
 |-----|----------|------|---------------------------|--------|
-| `BAND_STYLES` | `calendar-scores.ts` | 3 | **Violates** ADR-DS-001 § Principle 3 | Documented; refactor in future ADR |
-| `GPS_TONE_STYLES` | `strategic-gps.ts` | 3 | **Violates** | Documented; refactor in future ADR |
-| `BADGE_STYLES` | `synergy.ts` | 3 | **Violates** | Documented; refactor in future ADR |
+| `BAND_STYLES` | `calendar-scores.ts` | 3 | **Violates** ADR-DS-001 § Principle 3 | [ADR-DS-002](../../governance/adr/ADR-DS-002-runtime-semantic-token-consumption.md) — implementation deferred |
+| `GPS_TONE_STYLES` | `strategic-gps.ts` | 3 | **Violates** | ADR-DS-002 — implementation deferred |
+| `BADGE_STYLES` | `synergy.ts` | 3 | **Violates** | ADR-DS-002 — implementation deferred |
 | `TIER_THEME` | `brand-theme.ts` | 0–2 | Partial — uses `COLORS`/`GRADIENTS` (Tier 0) | ACTIVE (compliant enough for Tier 0) |
 | `SURFACES` | `brand-theme.ts` | 1–2 | Uses `COLORS_RGBA` | ACTIVE |
 
@@ -436,6 +436,7 @@ Domain map files include DS-01 registry comments marking ADR-DS-001 Principle 3 
 | Document | Role |
 |----------|------|
 | [ADR-DS-001](../../governance/adr/ADR-DS-001-design-system-architecture.md) | Target architecture |
+| [ADR-DS-002](../../governance/adr/ADR-DS-002-runtime-semantic-token-consumption.md) | Runtime map consumption contract |
 | [Design System Inventory](./README.md) | Historical snapshot (pre-authority) |
 | [design-token-inventory.md](./design-token-inventory.md) | Historical value index |
 | [UI Audit](../ui-audit/README.md) | Evidence baseline |
