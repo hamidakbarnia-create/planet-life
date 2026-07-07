@@ -19,6 +19,9 @@
 | ADR-0003 | Logo Selection | Proposed | — |
 | ADR-0004 | Trust Architecture | Superseded | 2026-07-05 |
 | ADR-0005 | Decision Engine Facade — First Runtime Migration | Accepted | 2026-07-05 |
+| ADR-DS-001 | Design System Architecture v1 | Proposed | 2026-07-07 |
+
+**ADR-DS-001 note:** Target architecture for design tokens. Implementation: [design-token-registry.md](../design/system/design-token-registry.md) (DS-01).
 
 **ADR-0001 note:** Superseded by [METIORO_CONSTITUTION.md](./METIORO_CONSTITUTION.md) (Chapter 0, Chapter 5, Appendix A) and [DOCUMENT_HIERARCHY.md](./DOCUMENT_HIERARCHY.md). Governance hierarchy is a constitutional and meta-governance concern, not an architecture decision record.
 

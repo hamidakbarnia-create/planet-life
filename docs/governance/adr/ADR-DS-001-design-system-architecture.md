@@ -327,6 +327,8 @@ Upon acceptance, this ADR should be:
 
 Until accepted, the provisional inventory remains authoritative for **what exists**; this ADR is authoritative for **what architecture future work must follow**.
 
+**DS-01 update (2026-07-07):** Canonical registry implemented at [design-token-registry.md](../../design/system/design-token-registry.md). Inventory files are historical.
+
 ---
 
 ## Governance Review
@@ -346,3 +348,4 @@ Until accepted, the provisional inventory remains authoritative for **what exist
 | Date | Status | Summary |
 |------|--------|---------|
 | 2026-07-07 | Proposed | Initial architecture decision from UI Audit + Design Inventory |
+| 2026-07-07 | Proposed | DS-01: registry authority established at `design-token-registry.md` |

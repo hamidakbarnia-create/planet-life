@@ -48,6 +48,12 @@ export function scoreToBand(score: number | null | undefined): ScoreBand {
   return 'red';
 }
 
+/**
+ * Tier 3 domain presentation map (DS-01 registry).
+ * ADR-DS-001 Principle 3: currently defines raw palette literals — does not consume
+ * semantic tokens yet. Refactor deferred to a future design-system ADR.
+ * @see docs/design/system/design-token-registry.md
+ */
 export const BAND_STYLES: Record<
   ScoreBand,
   { bg: string; border: string; text: string }

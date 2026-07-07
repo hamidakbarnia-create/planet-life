@@ -1,6 +1,9 @@
 /**
  * METIORO Brand Identity v1.0 — design tokens.
  * Single source for colors, gradients, typography, tier styling, and copy.
+ *
+ * Tier 0 brand primitives — governed by docs/design/system/design-token-registry.md
+ * @see ADR-DS-001
  */
 
 import type { CSSProperties } from 'react';

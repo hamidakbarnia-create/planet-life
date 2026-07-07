@@ -1,4 +1,5 @@
 /* METIORO UI Foundation V2 — Premium AI Observatory */
+/* Token authority: docs/design/system/design-token-registry.md (ADR-DS-001) */
 
 :root {
   --mio-space-1: 4px;
@@ -25,6 +26,8 @@
   --mio-label: 9px;
   --mio-caption: 11px;
   --mio-body: 13px;
+  /* DS-01 registry: alias for type.bodySm — was referenced but undefined */
+  --mio-body-sm: var(--mio-body);
   --mio-value: 15px;
   --mio-heading-sm: 0.7rem;
   --mio-heading-md: 1.125rem;

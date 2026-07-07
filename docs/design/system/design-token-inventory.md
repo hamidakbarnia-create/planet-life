@@ -1,6 +1,10 @@
 # Design Token Inventory
 
-Master index of every design token currently defined in the application. Duplicates are listed separately — not merged.
+> **Status:** HISTORICAL — superseded by [design-token-registry.md](./design-token-registry.md)  
+> **Purpose:** Point-in-time value index from Design System Inventory v1 (2026-07-07).  
+> Do not use for new token registration. Retained for audit trail.
+
+Master index of every design token defined at inventory time. Duplicates are listed separately — not merged.
 
 ---
 
@@ -98,11 +102,11 @@ Master index of every design token currently defined in the application. Duplica
 | `--mio-heading-md` | `1.125rem` | `1rem` |
 | `--mio-heading-lg` | `1.35rem` | `1.18rem` |
 
-### Referenced but undefined
+### Referenced but undefined (resolved in DS-01)
 
-| Token | Usage |
-|-------|-------|
-| `--mio-body-sm` | Referenced in `metioro-ui-v2.css` (empty-state text) — **no `:root` definition found** |
+| Token | Resolution |
+|-------|------------|
+| `--mio-body-sm` | DS-01: alias `--mio-body-sm: var(--mio-body)` — see [registry](./design-token-registry.md) |
 
 ---
 
@@ -292,8 +296,9 @@ Each tier defines: `tint`, `ring`, `glow`, `badgeBg`, `badgeText`, `ctaBg`, `cta
 
 ## Cross-references
 
-| Topic | Detail file |
-|-------|-------------|
+| Topic | Authority / detail file |
+|-------|-------------------------|
+| **Token governance** | [design-token-registry.md](./design-token-registry.md) |
 | Typography tokens | [typography-token-inventory.md](./typography-token-inventory.md) |
 | Spacing tokens | [spacing-inventory.md](./spacing-inventory.md) |
 | Color tokens | [color-token-inventory.md](./color-token-inventory.md) |

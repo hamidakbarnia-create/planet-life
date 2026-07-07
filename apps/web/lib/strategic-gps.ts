@@ -223,6 +223,11 @@ export function buildStrategicGps(
   };
 }
 
+/**
+ * Tier 3 domain presentation map (DS-01 registry).
+ * ADR-DS-001 Principle 3: raw literals — semantic token consumption deferred.
+ * @see docs/design/system/design-token-registry.md
+ */
 export const GPS_TONE_STYLES: Record<GpsTone, { color: string; bg: string; border: string }> = {
   green: { color: '#4ade80', bg: 'rgba(74,222,128,0.08)', border: 'rgba(74,222,128,0.35)' },
   yellow: { color: '#fbbf24', bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.35)' },

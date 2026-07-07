@@ -49,6 +49,11 @@ export function synergyBadge(score: number): SynergyBadge {
   return 'tension';
 }
 
+/**
+ * Tier 3 domain presentation map (DS-01 registry).
+ * ADR-DS-001 Principle 3: raw literals — semantic token consumption deferred.
+ * @see docs/design/system/design-token-registry.md
+ */
 export const BADGE_STYLES: Record<
   SynergyBadge,
   { bg: string; border: string; text: string; label: string }

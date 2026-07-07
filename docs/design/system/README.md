@@ -1,7 +1,22 @@
-# METIORO Design System Inventory v1
+# METIORO Design System
 
-> **Status:** Complete (inventory only)  
-> **Authority:** Design System Inventory Sprint  
+> **Token authority:** [design-token-registry.md](./design-token-registry.md) (canonical)  
+> **Historical inventory:** Design System Inventory v1 (2026-07-07) — snapshot only
+
+---
+
+## Design Token Registry (DS-01)
+
+**[design-token-registry.md](./design-token-registry.md)** is the single Design Token Authority, governed by [ADR-DS-001](../../governance/adr/ADR-DS-001-design-system-architecture.md).
+
+All new tokens must be registered there before use in code.
+
+---
+
+## Design System Inventory v1 (historical)
+
+> **Status:** Historical snapshot (pre-DS-01)  
+> **Authority:** Superseded by [design-token-registry.md](./design-token-registry.md)  
 > **Date:** 2026-07-07  
 > **Input:** [UI Audit Step 0](../ui-audit/README.md)
 
@@ -48,7 +63,8 @@ This sprint is an inventory. It is not a redesign.
 
 | File | Contents |
 |------|----------|
-| [design-token-inventory.md](./design-token-inventory.md) | Master token index across all sources |
+| **[design-token-registry.md](./design-token-registry.md)** | **Canonical token authority (DS-01)** |
+| [design-token-inventory.md](./design-token-inventory.md) | Historical value index (pre-registry) |
 | [typography-token-inventory.md](./typography-token-inventory.md) | Font families, type scale, language overrides |
 | [spacing-inventory.md](./spacing-inventory.md) | Spacing scale, gaps, padding, layout rhythm |
 | [color-token-inventory.md](./color-token-inventory.md) | Colors grouped by role (duplicates preserved) |
