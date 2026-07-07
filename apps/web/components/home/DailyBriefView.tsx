@@ -25,7 +25,8 @@ import { hasConfirmedCurrentLocation } from '@/lib/user-locations';
 import { todayYMD } from '@/lib/calendar-utils';
 import { loadPeople } from '@/lib/people-storage';
 import { PEOPLE_LANGS } from '@/lib/people-i18n';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 
 const LOCALE_MAP: Record<AppLang, string> = {
   en: 'en-US',
@@ -118,7 +119,7 @@ export function DailyBriefView({
     !!profile.location &&
     hasConfirmedCurrentLocation(profile);
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     if (!profileReady) {
       setDayLoading(false);
       setScoreFetchComplete(false);

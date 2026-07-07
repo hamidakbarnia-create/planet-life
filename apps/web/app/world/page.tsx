@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
 import { HOME_LANGS } from '@/lib/home-i18n';
@@ -448,7 +449,7 @@ export default function WorldPage() {
   const [realEstateSignals, setRealEstateSignals] = useState<SkySignal[] | null>(null);
   const [realEstateNotice, setRealEstateNotice] = useState<string>('');
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
@@ -472,8 +473,8 @@ export default function WorldPage() {
     setLiveLoading(false);
   }, []);
 
-  useEffect(() => {
-    loadLive(lang);
+  useQueuedEffect(() => {
+    void loadLive(lang);
   }, [lang, loadLive]);
 
   const setLang = (l: AppLang) => {

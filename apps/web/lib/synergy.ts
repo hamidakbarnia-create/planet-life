@@ -12,6 +12,7 @@ import {
   resolveRelationshipProfileStrict,
   SYNASTRY_PLANETS,
   type RelationshipProfile,
+  type SynastryPlanet,
 } from './relationship-profile';
 import { buildSynastryReasoning, type SynastryReasoning } from './synastry-reasoning';
 
@@ -19,8 +20,8 @@ const HARMONY_ASPECTS = new Set(['trine', 'sextile', 'conjunction']);
 const TENSION_ASPECTS = new Set(['square', 'opposition']);
 
 export interface SynastryAspect {
-  myPlanet: string;
-  theirPlanet: string;
+  myPlanet: SynastryPlanet;
+  theirPlanet: SynastryPlanet;
   aspect: string;
   orb: number;
 }

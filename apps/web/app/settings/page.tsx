@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import { AppShell } from '@/components/AppShell';
 import {
   loadCalendarSystem,
@@ -90,7 +91,7 @@ export default function SettingsPage() {
   // either the header or the in-page selector.
   const t = HOME_LANGS[savedLang];
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const stored = loadAppLang();
     const startLang: AppLang =
       stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar'

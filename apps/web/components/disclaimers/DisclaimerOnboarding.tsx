@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   acceptDisclaimer,
   DISCLAIMER_LANGS,
@@ -16,14 +16,13 @@ export function DisclaimerOnboarding({
 }: {
   onAccepted: () => void;
 }) {
-  const [lang, setLang] = useState<DisclaimerLang>('en');
+  const [lang, setLang] = useState<DisclaimerLang>(() =>
+    typeof window !== 'undefined' ? resolveDisclaimerLang() : 'en'
+  );
   const [checked, setChecked] = useState(false);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    if (!isDisclaimerAccepted()) setVisible(true);
-    setLang(resolveDisclaimerLang());
-  }, []);
+  const [visible, setVisible] = useState(
+    () => typeof window !== 'undefined' && !isDisclaimerAccepted()
+  );
 
   if (!visible) return null;
 

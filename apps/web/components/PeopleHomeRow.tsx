@@ -1,27 +1,27 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { PEOPLE_LANGS, type PeopleLang } from '@/lib/people-i18n';
 import { BADGE_STYLES } from '@/lib/synergy';
 import { initials, loadPeople, type Person } from '@/lib/people-storage';
 import { loadAppLang } from '@/lib/calendar-preferences';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 
 export function PeopleHomeRow({ lang: langProp }: { lang?: PeopleLang } = {}) {
   const [people, setPeople] = useState<Person[]>([]);
-  const [lang, setLang] = useState<PeopleLang>(langProp ?? 'en');
+  const [storedLang, setStoredLang] = useState<PeopleLang>(() => {
+    const stored = loadAppLang();
+    if (stored === 'ru' || stored === 'fa' || stored === 'ar' || stored === 'en') return stored;
+    return 'en';
+  });
+  const lang = langProp ?? storedLang;
 
-  // When the parent controls the language (e.g. the landing page), follow it
-  // live so the section title switches with the rest of the page.
-  useEffect(() => {
-    if (langProp) setLang(langProp);
-  }, [langProp]);
-
-  useEffect(() => {
+  useQueuedEffect(() => {
     if (!langProp) {
       const stored = loadAppLang();
       if (stored === 'ru' || stored === 'fa' || stored === 'ar' || stored === 'en') {
-        setLang(stored);
+        setStoredLang(stored);
       }
     }
     setPeople(loadPeople().slice(0, 8));

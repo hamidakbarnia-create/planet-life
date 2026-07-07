@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { getBirthProfile } from '@/lib/birth-profile';
 import type { AppLang } from '@/lib/app-settings';
 import { chartPreferenceFields } from '@/lib/app-settings';
-import { HOME_LANGS } from '@/lib/home-i18n';
 import { COLORS } from '@/lib/brand-theme';
 import { API_BASE, fetchTransitSnapshot } from '@/lib/calendar-scores';
 import { getMoonPhase, MOON_PHASE_NAMES } from '@/lib/moon-phase';

@@ -100,12 +100,12 @@ function computeDimensionPct(
   const set = new Set(dimension.planets);
   let score = profile.baseScore;
   for (const h of harmony) {
-    if (set.has(h.myPlanet as any) || set.has(h.theirPlanet as any)) {
+    if (set.has(h.myPlanet) || set.has(h.theirPlanet)) {
       score += 11 * orbStrength(h.orb);
     }
   }
   for (const t of tension) {
-    if (set.has(t.myPlanet as any) || set.has(t.theirPlanet as any)) {
+    if (set.has(t.myPlanet) || set.has(t.theirPlanet)) {
       score -= 12 * orbStrength(t.orb);
     }
   }

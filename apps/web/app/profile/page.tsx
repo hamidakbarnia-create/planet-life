@@ -19,6 +19,7 @@ import {
 } from '@/lib/chart-types';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import { loadBirthProfile, saveBirthProfile } from '@/lib/birth-profile';
 import type { UserLocation } from '@/lib/user-locations';
 import {
@@ -92,8 +93,8 @@ export default function Profile() {
   const [currentLocationError, setCurrentLocationError] = useState('');
   const cityRef = useRef<HTMLDivElement>(null);
   const currentCityRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<any>(null);
-  const currentDebounceRef = useRef<any>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimerRef = useRef<number | null>(null);
   const t = PROFILE_LANGS[lang];
   const months = HOME_LANGS[lang].months;
@@ -152,7 +153,7 @@ export default function Profile() {
       ? 'mio-obs-metric__value--ready'
       : 'mio-obs-metric__value--pending';
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const storedLang = loadAppLang();
     if (storedLang === 'en' || storedLang === 'ru' || storedLang === 'fa' || storedLang === 'ar') {
       setLangState(storedLang);
@@ -178,7 +179,7 @@ export default function Profile() {
     };
   }, []);
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     if (chartData) setBirthFormOpen(false);
   }, [chartData]);
 

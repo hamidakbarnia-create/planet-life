@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   translateAnalysis,
   type AstroLang,
@@ -16,6 +16,8 @@ import type { DisclaimerLang } from '@/lib/disclaimers';
 import { BRAND_I18N } from '@/lib/brand';
 import type { BrandLang } from '@/lib/brand';
 import { HOME_LANGS } from '@/lib/home-i18n';
+import type { CitySelection } from '@/lib/chart-types';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 
 const API = 'http://localhost:8000';
 
@@ -128,14 +130,14 @@ export default function Dashboard() {
   const [rawResult, setRawResult] = useState<AnalysisPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [cities, setCities] = useState<any[]>([]);
+  const [cities, setCities] = useState<CitySelection[]>([]);
   const [citySearch, setCitySearch] = useState('New York');
   const [showCities, setShowCities] = useState(false);
   const [cityLoading, setCityLoading] = useState(false);
   const [animated, setAnimated] = useState(false);
   const [moduleBannerDismissed, setModuleBannerDismissed] = useState(false);
   const cityRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<any>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const t = LANGS[lang];
 
   const result = useMemo(
@@ -153,7 +155,7 @@ export default function Dashboard() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const saved = loadBirthProfile();
     if (saved) {
       setForm(f => ({
@@ -181,7 +183,7 @@ export default function Dashboard() {
     }, 300);
   }, []);
 
-  const selectCity = (city: any) => {
+  const selectCity = (city: CitySelection) => {
     setCitySearch(city.short);
     setForm(f => ({ ...f, location: city.short }));
     setShowCities(false);
@@ -226,7 +228,7 @@ export default function Dashboard() {
   const getMsgKey = (s: number) => s >= 65 ? 'high' : s >= 45 ? 'mid' : 'low';
 
   return (
-    <div style={{ direction: t.dir as any, fontFamily: (lang==='fa'||lang==='ar') ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif', fontFeatureSettings: '"kern"' }}
+    <div style={{ direction: t.dir as 'ltr' | 'rtl', fontFamily: (lang==='fa'||lang==='ar') ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif', fontFeatureSettings: '"kern"' }}
         className="min-h-screen bg-[#070B14] text-white pl-20">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');

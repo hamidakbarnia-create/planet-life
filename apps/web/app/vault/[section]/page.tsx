@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { AppShell } from '@/components/AppShell';
@@ -782,13 +783,15 @@ export default function VaultSectionPage() {
   const [liveLoading, setLiveLoading] = useState(false);
   const [liveError, setLiveError] = useState<'needProfile' | 'api' | null>(null);
   const [hasLiveApi, setHasLiveApi] = useState(false);
-  const [tier, setTier] = useState<MembershipTier>('free');
+  const [tier, setTier] = useState<MembershipTier>(() =>
+    typeof window !== 'undefined' ? loadTier() : 'free'
+  );
   const [personalizedReading, setPersonalizedReading] = useState<PersonalizedReading | null>(null);
   const [personalizedLoading, setPersonalizedLoading] = useState(false);
   const [personalizedError, setPersonalizedError] = useState<'needProfile' | 'api' | null>(null);
   const [wipeToast, setWipeToast] = useState(false);
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
@@ -796,7 +799,6 @@ export default function VaultSectionPage() {
   }, []);
 
   useEffect(() => {
-    setTier(loadTier());
     const onChange = () => setTier(loadTier());
     window.addEventListener('storage', onChange);
     window.addEventListener('planet-life-membership-changed', onChange);
@@ -811,7 +813,7 @@ export default function VaultSectionPage() {
     saveAppLang(l);
   };
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     if (!isValidSection(raw) || !openItem) {
       setLiveReading(null);
       setHasLiveApi(false);

@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import { AppShell } from '@/components/AppShell';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { CityAutocomplete } from '@/components/CityAutocomplete';
@@ -47,7 +48,7 @@ export default function PeoplePage() {
 
   const refresh = () => setPeople(loadPeople());
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const stored = localStorage.getItem('planet-life-lang');
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);

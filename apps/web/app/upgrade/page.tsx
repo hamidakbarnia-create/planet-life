@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
 import { BrandLogo } from '@/components/BrandLogo';
@@ -881,7 +882,7 @@ export default function UpgradePage() {
   const [successCode, setSuccessCode] = useState<string | null>(null);
   const [currentTier, setCurrentTier] = useState<MembershipTier>('free');
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);

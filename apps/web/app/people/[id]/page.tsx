@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import { AppShell } from '@/components/AppShell';
 import { SynergyIntelligenceDashboard } from '@/components/SynergyIntelligenceDashboard';
 import { HOME_LANGS } from '@/lib/home-i18n';
@@ -32,14 +33,14 @@ export default function PersonSynergyPage() {
     saveAppLang(l);
   };
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const stored = localStorage.getItem('planet-life-lang');
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
     }
   }, []);
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     if (!id) return;
     const p = getPerson(id);
     setPerson(p);

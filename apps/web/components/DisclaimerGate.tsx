@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import { usePathname } from 'next/navigation';
 import { DisclaimerOnboarding } from './disclaimers/DisclaimerOnboarding';
 import { isDisclaimerAccepted } from '@/lib/disclaimers';
@@ -19,7 +20,7 @@ export function DisclaimerGate({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [accepted, setAccepted] = useState(false);
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     setAccepted(isDisclaimerAccepted());
     setReady(true);
   }, []);

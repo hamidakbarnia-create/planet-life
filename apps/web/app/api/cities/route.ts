@@ -1,5 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface NominatimAddress {
+  city?: string;
+  town?: string;
+  village?: string;
+  suburb?: string;
+  country?: string;
+  country_code?: string;
+}
+
+interface NominatimPlace {
+  class: string;
+  type: string;
+  name?: string;
+  display_name?: string;
+  lat: string;
+  lon: string;
+  address?: NominatimAddress;
+}
+
 // Which OSM place types we accept as a "place" the user can pick. This is
 // intentionally broad: besides cities and towns it includes suburbs, districts
 // and neighbourhoods (e.g. Shemiran / شمیران in Tehran province) and villages,
@@ -32,16 +51,16 @@ export async function GET(req: NextRequest) {
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=15&addressdetails=1&accept-language=${lang}`,
       { headers: { 'User-Agent': 'METIORO/1.0', 'Accept-Language': lang } }
     );
-    const data = await res.json();
+    const data: unknown = await res.json();
     const places = (Array.isArray(data) ? data : [])
       // Keep settlements / districts / neighbourhoods; drop highways, shops, etc.
       .filter(
-        (item: any) =>
+        (item: NominatimPlace) =>
           item.class === 'place' ||
           (item.class === 'boundary' && item.type === 'administrative') ||
           PLACE_TYPES.has(item.type)
       )
-      .map((item: any) => {
+      .map((item: NominatimPlace) => {
         const short =
           item.name ||
           item.address?.city ||

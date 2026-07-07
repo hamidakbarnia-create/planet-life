@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
 import { HOME_LANGS } from '@/lib/home-i18n';
@@ -286,7 +287,7 @@ export default function VaultPage() {
   const [lang, setLangState] = useState<AppLang>('en');
   const [entered, setEntered] = useState(false);
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);

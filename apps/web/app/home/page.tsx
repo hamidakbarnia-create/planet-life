@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/AppShell';
 import { AlertBanner } from '@/components/ui/AlertBanner';
@@ -20,6 +20,7 @@ import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
 import { fetchMonthScores, type ScoreBreakdown, type ScoreReasoning } from '@/lib/calendar-scores';
 import { todayYMD } from '@/lib/calendar-utils';
 import { HOME_LANGS } from '@/lib/home-i18n';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 export default function HomePage() {
   const router = useRouter();
   const today = new Date();
@@ -48,7 +49,24 @@ export default function HomePage() {
     saveAppLang(l);
   };
 
-  const initView = useCallback(() => {
+  useQueuedEffect(() => {
+    const storedLang = loadAppLang();
+    if (storedLang === 'en' || storedLang === 'ru' || storedLang === 'fa' || storedLang === 'ar') {
+      setLangState(storedLang);
+    }
+    const saved = loadBirthProfile();
+    if (
+      saved &&
+      saved.birth_date &&
+      saved.birth_time &&
+      saved.location
+    ) {
+      setProfile(saved);
+      setHasProfile(true);
+    } else {
+      setProfile(null);
+      setHasProfile(false);
+    }
     const stored = loadHomeView();
     if (!stored) {
       setShowOnboarding(true);
@@ -62,29 +80,6 @@ export default function HomePage() {
     }
     setReady(true);
   }, [router]);
-
-  useEffect(() => {
-    const storedLang = loadAppLang();
-    if (storedLang === 'en' || storedLang === 'ru' || storedLang === 'fa' || storedLang === 'ar') {
-      setLangState(storedLang);
-    }
-    const saved = loadBirthProfile();
-    // loadBirthProfile returns null when nothing is saved.
-    // getBirthProfile() returns an empty default — never use it to set hasProfile.
-    if (
-      saved &&
-      saved.birth_date &&
-      saved.birth_time &&
-      saved.location
-    ) {
-      setProfile(saved);
-      setHasProfile(true);
-    } else {
-      setProfile(null);
-      setHasProfile(false);
-    }
-    initView();
-  }, [initView]);
 
   const handleChoose = (mode: HomeViewMode) => {
     saveHomeView(mode);
@@ -112,8 +107,8 @@ export default function HomePage() {
     }
   }, [profile, year, month, view]);
 
-  useEffect(() => {
-    loadMonth();
+  useQueuedEffect(() => {
+    void loadMonth();
   }, [loadMonth]);
 
   const shiftMonth = (delta: number) => {

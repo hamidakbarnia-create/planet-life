@@ -39,12 +39,14 @@ export function AppShell({
   navLabels?: Record<string, string>;
   fontFamily?: string;
 }) {
-  const [session, setSession] = useState<AuthSession | null>(null);
-  const [tier, setTier] = useState<MembershipTier>('free');
+  const [session, setSession] = useState<AuthSession | null>(() =>
+    typeof window !== 'undefined' ? loadSession() : null
+  );
+  const [tier, setTier] = useState<MembershipTier>(() =>
+    typeof window !== 'undefined' ? loadTier() : 'free'
+  );
 
   useEffect(() => {
-    setSession(loadSession());
-    setTier(loadTier());
     const onStorage = () => {
       setSession(loadSession());
       setTier(loadTier());

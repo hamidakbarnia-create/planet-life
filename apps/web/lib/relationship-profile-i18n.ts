@@ -1,7 +1,6 @@
 import type { AppLang } from './app-settings';
 import type {
   InsightSectionKey,
-  RelationshipProfileKey,
   RelationshipType,
 } from './relationship-profile';
 

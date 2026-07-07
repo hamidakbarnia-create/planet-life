@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
 import { ActionDisclaimer } from '@/components/disclaimers/ActionDisclaimer';
@@ -459,7 +460,7 @@ export default function CalendarPage() {
     saveAppLang(l);
   };
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const refreshProfile = () => {
       const saved = loadBirthProfile();
       if (saved) {
@@ -502,11 +503,11 @@ export default function CalendarPage() {
     }
   }, [profile, year, month]);
 
-  useEffect(() => {
-    loadMonth();
+  useQueuedEffect(() => {
+    void loadMonth();
   }, [loadMonth]);
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     if (!selectedDate) return;
     let cancelled = false;
     setLoadingHourly(true);

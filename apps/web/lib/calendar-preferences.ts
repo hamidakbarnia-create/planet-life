@@ -1,7 +1,16 @@
+import type { AppLang } from './app-settings';
+
 export type CalendarExportMode = 'all' | 'important' | 'notifications';
 
 const EXPORT_KEY = 'planet-life-calendar-export';
 const LANG_KEY = 'planet-life-lang';
+
+/** Stored app language, or `en` when unset (client-safe). */
+export function readAppLang(): AppLang {
+  const stored = loadAppLang();
+  if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') return stored;
+  return 'en';
+}
 
 export function loadExportMode(): CalendarExportMode {
   if (typeof window === 'undefined') return 'important';

@@ -201,12 +201,12 @@ export function computeProfileInsightAreas(
     const set = new Set(section.planets);
     let score = profile.baseScore;
     for (const h of harmony) {
-      if (set.has(h.myPlanet as any) || set.has(h.theirPlanet as any)) {
+      if (set.has(h.myPlanet) || set.has(h.theirPlanet)) {
         score += section.harmonyWeight * orbStrength(h.orb);
       }
     }
     for (const t of tension) {
-      if (set.has(t.myPlanet as any) || set.has(t.theirPlanet as any)) {
+      if (set.has(t.myPlanet) || set.has(t.theirPlanet)) {
         score -= section.tensionWeight * orbStrength(t.orb);
       }
     }

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { BrandLogo } from '@/components/BrandLogo';
 import { isAuthed, saveSession, type AuthMethod } from '@/lib/auth';
 import { BRAND_I18N } from '@/lib/brand';
@@ -151,7 +151,7 @@ export default function LoginPage() {
 
   const t = LANGS[lang];
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     if (typeof window === 'undefined') return;
     const stored = localStorage.getItem('planet-life-lang');
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {

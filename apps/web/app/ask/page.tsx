@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
 import { HOME_LANGS } from '@/lib/home-i18n';
@@ -262,7 +263,7 @@ export default function OracleAskPage() {
   const [loading, setLoading] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [scoreBreakdown, setScoreBreakdown] = useState<ScoreBreakdown | null>(null);
-  const [scoreReasoning, setScoreReasoning] = useState<ScoreReasoning | null>(null);
+  const [, setScoreReasoning] = useState<ScoreReasoning | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [history, setHistory] = useState<OracleHistoryEntry[]>(() => loadHistory());
   const [questionLocation, setQuestionLocation] = useState<UserLocation | null>(null);
@@ -283,7 +284,7 @@ export default function OracleAskPage() {
     localStorage.setItem('planet-life-lang', l);
   };
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     if (!profile || !selectedQuestion) return;
     if (requiresTargetLocation(selectedModule ?? undefined)) {
       setQuestionLocation(null);
