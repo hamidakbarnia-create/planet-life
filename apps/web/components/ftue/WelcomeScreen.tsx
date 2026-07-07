@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react';
 import { BrandLogo } from '@/components/BrandLogo';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { isAuthed } from '@/lib/auth';
+import { trackFtueEvent } from '@/lib/ftue-analytics';
 import { WELCOME_COPY } from '@/lib/ftue-i18n';
 import { ftueTodayPath, isFtueComplete } from '@/lib/ftue-storage';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
@@ -31,6 +32,7 @@ export function WelcomeScreen() {
       };
     }
     setReady(true);
+    trackFtueEvent('ftue_welcome_view');
 
     return () => {
       window.removeEventListener('online', onOnline);
@@ -40,6 +42,7 @@ export function WelcomeScreen() {
 
   const handleGetStarted = useCallback(() => {
     if (!online) return;
+    trackFtueEvent('ftue_welcome_start');
     router.push('/login');
   }, [online, router]);
 
