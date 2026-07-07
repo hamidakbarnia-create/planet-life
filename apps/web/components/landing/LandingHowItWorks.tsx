@@ -1,29 +1,51 @@
-import type { LandingCopy } from '@/lib/landing-i18n';
-import { COLORS } from '@/lib/brand-theme';
+import type { LandingHowCopy } from '@/lib/landing-i18n';
+import { COLORS_RGBA } from '@/lib/brand-theme';
 
 type LandingHowItWorksProps = {
-  copy: LandingCopy;
+  copy: LandingHowCopy;
 };
 
 export function LandingHowItWorks({ copy }: LandingHowItWorksProps) {
   return (
-    <section id="how" className="px-8 py-12 max-w-3xl mx-auto text-center">
-      <h2 className="text-2xl font-semibold mb-12">{copy.howTitle}</h2>
-      <div className="flex flex-col gap-8">
-        {copy.steps.map((s) => (
-          <div key={s.step} className="flex items-start gap-6 text-left">
-            <div
-              className="font-semibold text-lg min-w-[2rem]"
-              style={{ color: COLORS.royalBlue }}
-            >
-              {s.step}
+    <section
+      id="how"
+      aria-labelledby="landing-how-heading"
+      className="px-5 py-14 md:px-8 md:py-20"
+    >
+      <div className="mx-auto max-w-3xl text-center">
+        <h2 id="landing-how-heading" className="mb-10 text-2xl font-semibold md:mb-12">
+          {copy.title}
+        </h2>
+
+        <div className="mb-10 flex flex-col items-center gap-3 md:mb-12">
+          {copy.steps.map((step, index) => (
+            <div key={step} className="flex flex-col items-center gap-3">
+              <div
+                className="rounded-full border px-5 py-2 text-sm font-medium"
+                style={{
+                  borderColor: COLORS_RGBA.royalBlue45,
+                  background: COLORS_RGBA.royalBlue12,
+                  color: '#93B4FF',
+                }}
+              >
+                {step}
+              </div>
+              {index < copy.steps.length - 1 && (
+                <span className="text-white/25" aria-hidden>
+                  ↓
+                </span>
+              )}
             </div>
-            <div>
-              <div className="font-medium mb-1">{s.title}</div>
-              <div className="text-white/50 text-sm">{s.desc}</div>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <div className="mx-auto mb-8 max-w-lg space-y-2 text-sm leading-relaxed text-white/55 md:text-base">
+          {copy.philosophy.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </div>
+
+        <p className="text-sm text-white/55">{copy.note}</p>
       </div>
     </section>
   );

@@ -1,22 +1,27 @@
 import Link from 'next/link';
-import type { LandingCopy } from '@/lib/landing-i18n';
+import type { LandingCtaCopy } from '@/lib/landing-i18n';
 import { primaryCtaStyle } from '@/lib/brand-theme';
 
 type LandingCtaProps = {
-  copy: LandingCopy;
+  copy: LandingCtaCopy;
 };
 
 export function LandingCta({ copy }: LandingCtaProps) {
   return (
-    <section className="text-center py-12 px-6">
-      <h2 className="text-3xl font-semibold mb-4">{copy.ctaTitle}</h2>
-      <p className="text-white/50 mb-8">{copy.ctaSub}</p>
+    <section
+      aria-labelledby="landing-cta-heading"
+      className="px-5 py-16 text-center md:px-8 md:py-20"
+    >
+      <h2 id="landing-cta-heading" className="mb-4 text-3xl font-semibold md:text-4xl">
+        {copy.title}
+      </h2>
+      <p className="mx-auto mb-8 max-w-md text-white/50">{copy.subtitle}</p>
       <Link
         href="/home"
-        className="px-8 py-3 rounded-lg font-medium transition hover:opacity-90 inline-block"
+        className="inline-flex rounded-lg px-8 py-3 font-medium transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#305CDE]"
         style={primaryCtaStyle('royal')}
       >
-        {copy.ctaBtn}
+        {copy.btn}
       </Link>
     </section>
   );

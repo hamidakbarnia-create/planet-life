@@ -15,11 +15,11 @@ type LandingNavProps = {
 export function LandingNav({ lang, copy, onLangChange }: LandingNavProps) {
   return (
     <nav
-      className="flex items-center justify-between px-8 py-5 border-b"
+      className="flex flex-col items-stretch justify-between gap-4 border-b px-5 py-4 md:flex-row md:items-center md:gap-6 md:px-8 md:py-5"
       style={{ borderColor: 'rgba(255,255,255,0.08)' }}
     >
       <BrandLogo lang={lang} href="/" size="sm" showTagline={false} />
-      <div className="flex items-center gap-6 text-sm text-white/60">
+      <div className="flex flex-wrap items-center justify-end gap-3 text-sm text-white/60 md:gap-6">
         <a href="#features" className="hover:text-white transition">
           {copy.nav.features}
         </a>
@@ -42,10 +42,10 @@ export function LandingNav({ lang, copy, onLangChange }: LandingNavProps) {
               key={code}
               type="button"
               onClick={() => onLangChange(code)}
-              className="rounded-full px-2.5 py-1 text-[11px] font-medium uppercase transition"
+                className="min-h-11 min-w-11 rounded-full px-3 py-2 text-[11px] font-medium uppercase transition"
               style={{
                 background: lang === code ? COLORS.royalBlue : 'transparent',
-                color: lang === code ? COLORS.white : 'rgba(255,255,255,0.55)',
+                  color: lang === code ? COLORS.white : 'rgba(255,255,255,0.65)',
               }}
             >
               {code}

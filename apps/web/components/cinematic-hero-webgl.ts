@@ -5,7 +5,6 @@ import {
   BufferGeometry,
   Color,
   Group,
-  Line,
   LineBasicMaterial,
   LineSegments,
   Mesh,
@@ -49,7 +48,6 @@ function createLineStates(count: number): LineState[] {
   const states: LineState[] = [];
   for (let i = 0; i < count; i += 1) {
     const angle = Math.random() * Math.PI * 2;
-    const radius = 2 + Math.random() * 5;
     const cx = (Math.random() - 0.5) * 8;
     const cy = (Math.random() - 0.5) * 4;
     const len = 0.6 + Math.random() * 2.2;
@@ -65,16 +63,6 @@ function createLineStates(count: number): LineState[] {
     });
   }
   return states;
-}
-
-function buildCompassArcPoints(radius: number, startAngle: number, endAngle: number, segments: number): Vector3[] {
-  const points: Vector3[] = [];
-  for (let i = 0; i <= segments; i += 1) {
-    const t = i / segments;
-    const angle = lerp(startAngle, endAngle, t);
-    points.push(new Vector3(Math.cos(angle) * radius, Math.sin(angle) * radius, 0));
-  }
-  return points;
 }
 
 export function createCinematicHeroEngine(
@@ -135,61 +123,6 @@ export function createCinematicHeroEngine(
   }
   root.add(nodeGroup);
 
-  const compassGroup = new Group();
-  const arcPoints = buildCompassArcPoints(3.2, Math.PI * 0.15, Math.PI * 1.05, 64);
-  const arcPositions = new Float32Array(arcPoints.length * 3);
-  arcPoints.forEach((p, i) => {
-    arcPositions[i * 3] = p.x;
-    arcPositions[i * 3 + 1] = p.y;
-    arcPositions[i * 3 + 2] = p.z;
-  });
-  const arcGeometry = new BufferGeometry();
-  arcGeometry.setAttribute('position', new BufferAttribute(arcPositions, 3));
-  const arcMaterial = new LineBasicMaterial({
-    color: new Color(CINEMATIC_COLORS.gold),
-    transparent: true,
-    opacity: 0,
-  });
-  const compassArc = new Line(arcGeometry, arcMaterial);
-  compassGroup.add(compassArc);
-
-  const sweepGeometry = new BufferGeometry().setFromPoints([new Vector3(0, 0, 0), new Vector3(3.2, 0, 0)]);
-  const sweepMaterial = new LineBasicMaterial({
-    color: new Color(CINEMATIC_COLORS.gold),
-    transparent: true,
-    opacity: 0,
-  });
-  const radarSweep = new Line(sweepGeometry, sweepMaterial);
-  compassGroup.add(radarSweep);
-  root.add(compassGroup);
-
-  const pathGroup = new Group();
-  const mainPathPositions = new Float32Array([
-    -6, 0, -1, 0, 0, -1, 0, 0, -1, 8, 0, -6,
-  ]);
-  const mainPathGeometry = new BufferGeometry();
-  mainPathGeometry.setAttribute('position', new BufferAttribute(mainPathPositions, 3));
-  const mainPathMaterial = new LineBasicMaterial({
-    color: new Color(CINEMATIC_COLORS.line),
-    transparent: true,
-    opacity: 0.35,
-  });
-  const mainPath = new LineSegments(mainPathGeometry, mainPathMaterial);
-  pathGroup.add(mainPath);
-
-  const marker = new Mesh(
-    new BoxGeometry(1, 1, 1),
-    new MeshBasicMaterial({
-      color: new Color(CINEMATIC_COLORS.gold),
-      transparent: true,
-      opacity: 0,
-    }),
-  );
-  marker.scale.set(0.14, 0.14, 0.14);
-  marker.position.set(0, 0, -1);
-  pathGroup.add(marker);
-  root.add(pathGroup);
-
   const tempA = new Vector3();
   const tempB = new Vector3();
 
@@ -208,13 +141,11 @@ export function createCinematicHeroEngine(
 
     const fieldP = sceneProgress(progress, CINEMATIC_SCENES[0]);
     const noiseP = sceneProgress(progress, CINEMATIC_SCENES[1]);
-    const instrumentP = sceneProgress(progress, CINEMATIC_SCENES[2]);
     const alignmentP = sceneProgress(progress, CINEMATIC_SCENES[3]);
-    const coordinateP = sceneProgress(progress, CINEMATIC_SCENES[4]);
     const pathP = sceneProgress(progress, CINEMATIC_SCENES[5]);
 
     const alignmentMix = clamp01(alignmentP + Math.max(0, progress - CINEMATIC_SCENES[3].start) * 0.5);
-    const lineOpacity = lerp(0.12, 0.55, fieldP + noiseP * 0.6);
+    const lineOpacity = lerp(0.12, 0.42, fieldP + noiseP * 0.5);
     const driftScale = lerp(1, 0.25, alignmentMix);
 
     for (let i = 0; i < lineStates.length; i += 1) {
@@ -241,28 +172,14 @@ export function createCinematicHeroEngine(
 
     nodeMeshes.forEach((mesh, i) => {
       const mat = mesh.material as MeshBasicMaterial;
-      mat.opacity = lerp(0, 0.65, noiseP) * (1 - alignmentMix * 0.85);
+      mat.opacity = lerp(0, 0.35, noiseP) * (1 - alignmentMix * 0.9);
       mesh.position.x += Math.sin(elapsedSeconds * 0.5 + i) * 0.002 * driftScale;
       mesh.position.y += Math.cos(elapsedSeconds * 0.42 + i) * 0.002 * driftScale;
     });
 
-    arcMaterial.opacity = lerp(0, 0.95, instrumentP);
-    sweepMaterial.opacity = lerp(0, 0.55, instrumentP) * (1 - pathP * 0.6);
-    radarSweep.rotation.z = elapsedSeconds * 0.55;
-
-    const markerMat = marker.material as MeshBasicMaterial;
-    markerMat.opacity = lerp(0, 1, coordinateP);
-    const markerPulse = 1 + Math.sin(elapsedSeconds * 2.2) * 0.08 * coordinateP;
-    marker.scale.setScalar(0.14 * markerPulse);
-
-    const forwardExtent = lerp(0, 8, pathP);
-    mainPathPositions[9] = forwardExtent;
-    mainPathGeometry.attributes.position.needsUpdate = true;
-    mainPathMaterial.opacity = lerp(0.2, 0.85, alignmentMix + pathP * 0.4);
-
-    camera.position.z = lerp(9, 4.2, pathP);
-    camera.position.y = lerp(0, -0.15, pathP);
-    camera.lookAt(lerp(0, 2.5, pathP), 0, lerp(0, -3, pathP));
+    camera.position.z = lerp(9, 7.2, pathP);
+    camera.position.y = lerp(0, -0.08, pathP);
+    camera.lookAt(lerp(0, 0.6, pathP), 0, 0);
 
     root.rotation.z = lerp(0.04, 0, alignmentMix);
 
@@ -272,20 +189,16 @@ export function createCinematicHeroEngine(
   const dispose = () => {
     geometry.dispose();
     lineMaterial.dispose();
-    arcGeometry.dispose();
-    arcMaterial.dispose();
-    sweepGeometry.dispose();
-    sweepMaterial.dispose();
-    mainPathGeometry.dispose();
-    mainPathMaterial.dispose();
-    marker.geometry.dispose();
-    (marker.material as MeshBasicMaterial).dispose();
-    nodeMeshes.forEach((mesh) => {
-      (mesh.material as MeshBasicMaterial).dispose();
-    });
-    nodeGeometry.dispose();
+    markerDispose(nodeMeshes, nodeGeometry);
     renderer.dispose();
   };
 
   return { update, resize, dispose };
+}
+
+function markerDispose(nodeMeshes: Mesh[], nodeGeometry: BoxGeometry) {
+  nodeMeshes.forEach((mesh) => {
+    (mesh.material as MeshBasicMaterial).dispose();
+  });
+  nodeGeometry.dispose();
 }
