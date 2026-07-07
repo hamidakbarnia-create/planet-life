@@ -1,18 +1,12 @@
-import { loadBirthProfile } from './birth-profile';
+import { getProfileRepository, isProfileRecordComplete } from '@/lib/profile';
 import { ftueTodayPath, isFtueComplete } from './ftue-storage';
 
-/** Interim until GET /api/v1/profile ships (Sprint 2). */
+/** True when a complete birth profile exists locally (repository-backed). */
 export function hasLocalBirthProfile(): boolean {
-  const profile = loadBirthProfile();
-  if (!profile) return false;
-  return Boolean(
-    profile.birth_date?.trim() &&
-      profile.birth_time?.trim() &&
-      profile.location?.trim()
-  );
+  const repo = getProfileRepository();
+  return isProfileRecordComplete(repo.loadProfile());
 }
 
-/** Post-auth destination per ONBOARDING_FLOW.md */
 export function resolvePostAuthPath(): string {
   if (isFtueComplete()) return ftueTodayPath();
   if (hasLocalBirthProfile()) return '/onboarding/preparing';

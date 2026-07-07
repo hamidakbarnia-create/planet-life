@@ -1,33 +1,42 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { loadBirthProfile, saveBirthProfile } from './birth-profile';
 import {
   ftueTodayPath,
   markFtueComplete,
 } from './ftue-storage';
+import { getProfileRepository, resetProfileRepositoryForTests } from './profile';
 import { hasLocalBirthProfile, resolvePostAuthPath } from './ftue-routing';
+
+const sampleProfile = {
+  birth_date: '1990-06-15',
+  birth_time: '14:30',
+  birth_place: {
+    name: 'New York, New York, United States',
+    short: 'New York',
+    lat: 40.7128,
+    lon: -74.006,
+  },
+  action_type: 'business_launch',
+};
 
 describe('ftue-routing', () => {
   beforeEach(() => {
     localStorage.clear();
+    resetProfileRepositoryForTests();
   });
 
   afterEach(() => {
     localStorage.clear();
+    resetProfileRepositoryForTests();
   });
 
   it('detects incomplete profile', () => {
     expect(hasLocalBirthProfile()).toBe(false);
   });
 
-  it('detects complete local profile', () => {
-    saveBirthProfile({
-      birth_date: '1990-06-15',
-      birth_time: '14:30',
-      location: 'New York',
-      action_type: 'business_launch',
-    });
+  it('detects complete local profile via repository', () => {
+    getProfileRepository().saveProfile(sampleProfile);
     expect(hasLocalBirthProfile()).toBe(true);
-    expect(loadBirthProfile()?.location).toBe('New York');
+    expect(getProfileRepository().loadProfile()?.birth_place.short).toBe('New York');
   });
 
   it('routes new users to profile onboarding', () => {
@@ -35,11 +44,14 @@ describe('ftue-routing', () => {
   });
 
   it('routes profile holders to preparing', () => {
-    saveBirthProfile({
-      birth_date: '1990-06-15',
-      birth_time: '14:30',
-      location: 'Paris',
-      action_type: 'business_launch',
+    getProfileRepository().saveProfile({
+      ...sampleProfile,
+      birth_place: {
+        name: 'Paris, Île-de-France, France',
+        short: 'Paris',
+        lat: 48.8566,
+        lon: 2.3522,
+      },
     });
     expect(resolvePostAuthPath()).toBe('/onboarding/preparing');
   });

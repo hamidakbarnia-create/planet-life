@@ -13,6 +13,32 @@ export const WELCOME_COPY = {
   disclaimerLink: 'Educational use disclaimer',
 } as const;
 
+export const PROFILE_ONBOARDING_COPY = {
+  step: 'Step 3 of 3',
+  title: 'Your birth context',
+  sub: 'We use date, time, and city to anchor timing — not personality labels.',
+  nameLabel: 'Name (optional)',
+  namePlaceholder: 'How we address you',
+  dateLabel: 'Birth date',
+  timeLabel: 'Birth time',
+  timeHint: 'Use local time at birth. Approximate time is OK.',
+  cityLabel: 'Birth city',
+  cityPlaceholder: 'Start typing a city…',
+  citySearching: 'Searching cities…',
+  cityNoResults: 'No cities found',
+  whyTitle: 'Why we need this',
+  whyBody:
+    'Date, time, and place set the astronomical reference for timing windows. We show the reasoning behind every suggestion.',
+  save: 'Save and continue',
+  saving: 'Saving…',
+  back: 'Back to sign in',
+  discardTitle: 'Discard profile progress?',
+  discardBody: 'Unsaved changes will be kept as a draft unless you discard.',
+  discardConfirm: 'Discard draft',
+  discardCancel: 'Keep editing',
+  required: 'Required',
+} as const;
+
 export const LOGIN_FTUE_COPY = {
   title: 'Sign in to continue',
   sub: 'Save your profile and decision guidance securely.',

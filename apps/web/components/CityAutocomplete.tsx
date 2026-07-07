@@ -17,6 +17,9 @@ export function CityAutocomplete({
   searchingLabel,
   noResultsLabel,
   lang = 'en',
+  inputId,
+  ariaInvalid,
+  ariaDescribedBy,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -25,12 +28,17 @@ export function CityAutocomplete({
   searchingLabel: string;
   noResultsLabel: string;
   lang?: string;
+  inputId?: string;
+  ariaInvalid?: boolean;
+  ariaDescribedBy?: string;
 }) {
   const [cities, setCities] = useState<CityOption[]>([]);
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const listboxId = inputId ? `${inputId}-listbox` : undefined;
+  const listOpen = show && (loading || cities.length > 0);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -61,7 +69,14 @@ export function CityAutocomplete({
   return (
     <div ref={ref} className="relative">
       <input
+        id={inputId}
         type="text"
+        role="combobox"
+        aria-expanded={listOpen}
+        aria-controls={listOpen ? listboxId : undefined}
+        aria-autocomplete="list"
+        aria-invalid={ariaInvalid || undefined}
+        aria-describedby={ariaDescribedBy}
         value={value}
         placeholder={placeholder}
         onChange={(e) => {
@@ -77,8 +92,10 @@ export function CityAutocomplete({
           color: 'white',
         }}
       />
-      {show && (loading || cities.length > 0) && (
+      {listOpen && (
         <div
+          id={listboxId}
+          role="listbox"
           className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden shadow-2xl"
           style={{
             background: '#0d1220',
@@ -98,6 +115,8 @@ export function CityAutocomplete({
           {cities.map((city, i) => (
             <div
               key={i}
+              role="option"
+              aria-selected={false}
               className="px-4 py-2.5 cursor-pointer transition-colors hover:bg-amber-500/10"
               onMouseDown={() => {
                 onSelect(city);

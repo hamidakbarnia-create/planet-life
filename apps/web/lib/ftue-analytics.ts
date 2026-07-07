@@ -8,22 +8,34 @@ export type FtueEventName =
   | 'ftue_auth_oauth_unavailable'
   | 'ftue_auth_rate_limited';
 
+export type ProfileEventName =
+  | 'profile.view'
+  | 'profile.started'
+  | 'profile.saved'
+  | 'profile.validation_failed'
+  | 'profile.completed';
+
+export type AnalyticsEventName = FtueEventName | ProfileEventName;
+
 const QUEUE_KEY = 'planet-life-ftue-events';
 const MAX_QUEUE = 100;
 
-export interface FtueAnalyticsEvent {
-  event: FtueEventName;
+export interface AnalyticsEvent {
+  event: AnalyticsEventName;
   timestamp: string;
   properties: Record<string, unknown>;
 }
 
-export function trackFtueEvent(
-  event: FtueEventName,
+/** @deprecated use AnalyticsEvent */
+export type FtueAnalyticsEvent = AnalyticsEvent;
+
+function enqueueAnalyticsEvent(
+  event: AnalyticsEventName,
   properties: Record<string, unknown> = {}
 ): void {
   if (typeof window === 'undefined') return;
 
-  const payload: FtueAnalyticsEvent = {
+  const payload: AnalyticsEvent = {
     event,
     timestamp: new Date().toISOString(),
     properties: { mvp_mode: true, ...properties },
@@ -31,7 +43,7 @@ export function trackFtueEvent(
 
   try {
     const raw = localStorage.getItem(QUEUE_KEY);
-    const queue: FtueAnalyticsEvent[] = raw ? (JSON.parse(raw) as FtueAnalyticsEvent[]) : [];
+    const queue: AnalyticsEvent[] = raw ? (JSON.parse(raw) as AnalyticsEvent[]) : [];
     queue.push(payload);
     while (queue.length > MAX_QUEUE) queue.shift();
     localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
@@ -40,15 +52,36 @@ export function trackFtueEvent(
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    console.info('[ftue-analytics]', payload);
+    console.info('[analytics]', payload);
   }
 }
 
-export function readFtueEventQueue(): FtueAnalyticsEvent[] {
+export function trackAnalyticsEvent(
+  event: AnalyticsEventName,
+  properties: Record<string, unknown> = {}
+): void {
+  enqueueAnalyticsEvent(event, properties);
+}
+
+export function trackFtueEvent(
+  event: FtueEventName,
+  properties: Record<string, unknown> = {}
+): void {
+  enqueueAnalyticsEvent(event, properties);
+}
+
+export function trackProfileEvent(
+  event: ProfileEventName,
+  properties: Record<string, unknown> = {}
+): void {
+  enqueueAnalyticsEvent(event, properties);
+}
+
+export function readFtueEventQueue(): AnalyticsEvent[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(QUEUE_KEY);
-    return raw ? (JSON.parse(raw) as FtueAnalyticsEvent[]) : [];
+    return raw ? (JSON.parse(raw) as AnalyticsEvent[]) : [];
   } catch {
     return [];
   }

@@ -1,5 +1,7 @@
 'use client';
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Suspense, useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { BirthProfileOnboardingScreen } from '@/components/ftue/BirthProfileOnboardingScreen';
 import {
   NatalChart,
   NatalChartAnalysis,
@@ -64,6 +66,28 @@ function ProfileUnlockEmpty({ message }: { message: string }) {
 }
 
 export default function Profile() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          className="min-h-screen flex items-center justify-center"
+          style={{ background: '#070B14' }}
+          aria-busy="true"
+        />
+      }
+    >
+      <ProfileRoute />
+    </Suspense>
+  );
+}
+
+function ProfileRoute() {
+  const onboarding = useSearchParams().get('onboarding') === '1';
+  if (onboarding) return <BirthProfileOnboardingScreen />;
+  return <ProfileEditor />;
+}
+
+function ProfileEditor() {
   const [lang, setLangState] = useState<ProfileLang>('en');
   const [calendarType, setCalendarType] = useState<CalendarType>('gregorian');
   const [birthDate, setBirthDate] = useState('1990-06-15');
