@@ -14,9 +14,13 @@ const PUBLIC_LEGAL_PATHS = new Set([
   '/contact',
 ]);
 
+/** FTUE entry routes run before disclaimer (accepted after auth per ONBOARDING_FLOW). */
+const FTUE_PUBLIC_PATHS = new Set(['/welcome', '/login']);
+
 export function DisclaimerGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isPublicLegalPage = PUBLIC_LEGAL_PATHS.has(pathname);
+  const isPublicLegalPage =
+    PUBLIC_LEGAL_PATHS.has(pathname) || FTUE_PUBLIC_PATHS.has(pathname);
   const [ready, setReady] = useState(false);
   const [accepted, setAccepted] = useState(false);
 
