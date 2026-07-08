@@ -73,6 +73,45 @@ export const TODAY_COPY = {
   personalizedDefault: 'Your timing context is ready for today.',
 } as const;
 
+export const ASK_COPY = {
+  step: 'Step 6 of 8',
+  title: 'Ask METIORO',
+  sub: 'Your first question helps introduce how METIORO delivers personalized guidance.',
+  inputLabel: 'Your question',
+  inputPlaceholder: 'What would you like guidance on?',
+  suggestionsLabel: 'Suggested topics',
+  submit: 'Get guidance',
+  charCounter: (count: number, max: number) => `${count} of ${max} characters`,
+} as const;
+
+export const ASK_SUGGESTIONS = [
+  {
+    id: 'career',
+    label: 'Career',
+    text: 'What should I focus on in my career this week?',
+  },
+  {
+    id: 'relationships',
+    label: 'Relationships',
+    text: 'How can I strengthen an important relationship right now?',
+  },
+  {
+    id: 'todays-focus',
+    label: "Today's focus",
+    text: 'What deserves my attention most today?',
+  },
+  {
+    id: 'energy',
+    label: 'Energy',
+    text: 'How can I use my energy wisely today?',
+  },
+  {
+    id: 'opportunities',
+    label: 'Opportunities',
+    text: 'What opportunity should I pay attention to right now?',
+  },
+] as const;
+
 export const LOGIN_FTUE_COPY = {
   title: 'Sign in to continue',
   sub: 'Save your profile and decision guidance securely.',
