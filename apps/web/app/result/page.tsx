@@ -10,15 +10,18 @@ export default function ResultPage() {
   const ready = useClientReady();
   const [lang, setLang] = useAppLang();
   const t = HOME_LANGS[lang];
-  const copy = getResultCopy(lang);
+  const loadingLabel = getResultCopy(lang).loadingLabel;
 
   if (!ready) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center"
+        className="min-h-screen flex items-center justify-center fi text-sm text-white/50"
         style={{ background: '#070B14' }}
         aria-busy="true"
-      />
+        aria-live="polite"
+      >
+        {loadingLabel}
+      </div>
     );
   }
 
@@ -30,7 +33,7 @@ export default function ResultPage() {
       navLabels={t.nav}
       fontFamily={lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'}
     >
-      <ResultScreen copy={copy} lang={lang} />
+      <ResultScreen lang={lang} />
     </AppShell>
   );
 }

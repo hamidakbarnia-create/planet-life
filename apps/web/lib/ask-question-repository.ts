@@ -1,8 +1,12 @@
+import type { AskSuggestionId } from './ftue-i18n';
+
 export interface FtueAskQuestion {
-  text: string;
   submitted_at: number;
   source: 'typed' | 'suggestion';
-  suggestion_id?: string;
+  /** Original user-entered text for typed questions. */
+  text?: string;
+  /** Stable locale-independent id for suggested questions. */
+  suggestion_id?: AskSuggestionId;
 }
 
 export interface AskQuestionRepository {

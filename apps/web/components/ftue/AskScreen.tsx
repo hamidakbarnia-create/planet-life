@@ -5,7 +5,7 @@ import { useId, useRef, useState } from 'react';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
 import { trackAskEvent } from '@/lib/ftue-analytics';
 import type { AppLang } from '@/lib/app-settings';
-import type { AskCopy } from '@/lib/ftue-i18n';
+import type { AskCopy, AskSuggestion, AskSuggestionId } from '@/lib/ftue-i18n';
 import {
   getProfileRepository,
   isProfileRecordComplete,
@@ -31,6 +31,7 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
   const counterId = `${formId}-counter`;
 
   const [question, setQuestion] = useState('');
+  const [selectedSuggestionId, setSelectedSuggestionId] = useState<AskSuggestionId | null>(null);
   const initRef = useRef(false);
   const startedRef = useRef(false);
 
@@ -62,13 +63,15 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
       return;
     }
     markStarted();
+    setSelectedSuggestionId(null);
     setQuestion(value);
   };
 
-  const handleSuggestion = (id: string, text: string) => {
+  const handleSuggestion = (suggestion: AskSuggestion) => {
     markStarted();
-    trackAskEvent('ftue.ask.question_selected', { suggestion_id: id });
-    setQuestion(text);
+    trackAskEvent('ftue.ask.question_selected', { suggestion_id: suggestion.id });
+    setSelectedSuggestionId(suggestion.id);
+    setQuestion(suggestion.text);
   };
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -83,17 +86,33 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
       return;
     }
 
-    const matchedSuggestion = suggestions.find((s) => s.text === text);
-    askRepo.saveQuestion({
-      text,
-      submitted_at: askSubmittedAt(),
-      source: matchedSuggestion ? 'suggestion' : 'typed',
-      suggestion_id: matchedSuggestion?.id,
-    });
-    trackAskEvent('ftue.ask.submitted', {
-      source: matchedSuggestion ? 'suggestion' : 'typed',
-      length: text.length,
-    });
+    const activeSuggestion = selectedSuggestionId
+      ? suggestions.find((s) => s.id === selectedSuggestionId)
+      : undefined;
+    const isUnmodifiedSuggestion =
+      activeSuggestion != null && activeSuggestion.text === text;
+
+    if (isUnmodifiedSuggestion) {
+      askRepo.saveQuestion({
+        submitted_at: askSubmittedAt(),
+        source: 'suggestion',
+        suggestion_id: activeSuggestion.id,
+      });
+      trackAskEvent('ftue.ask.submitted', {
+        source: 'suggestion',
+        length: text.length,
+      });
+    } else {
+      askRepo.saveQuestion({
+        submitted_at: askSubmittedAt(),
+        source: 'typed',
+        text,
+      });
+      trackAskEvent('ftue.ask.submitted', {
+        source: 'typed',
+        length: text.length,
+      });
+    }
     router.push('/result');
   };
 
@@ -150,7 +169,7 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
               <button
                 key={suggestion.id}
                 type="button"
-                onClick={() => handleSuggestion(suggestion.id, suggestion.text)}
+                onClick={() => handleSuggestion(suggestion)}
                 className="ask-chip fi text-sm px-3.5 py-2 rounded-full border border-white/15 text-white/75 hover:text-white hover:border-amber-400/40 transition-colors"
               >
                 {suggestion.label}

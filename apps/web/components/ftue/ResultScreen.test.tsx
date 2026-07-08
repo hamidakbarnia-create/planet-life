@@ -6,10 +6,12 @@ import {
   resetAskQuestionRepositoryForTests,
 } from '@/lib/ask-question-repository';
 import { saveSession } from '@/lib/auth';
-import { getResultCopy } from '@/lib/ftue-i18n';
 import type { AppLang } from '@/lib/app-settings';
 import { isFtueComplete } from '@/lib/ftue-storage';
 import { getProfileRepository, resetProfileRepositoryForTests } from '@/lib/profile';
+import { buildResultShareText, getResultCopy } from '@/lib/ftue-i18n';
+import { fetchValidatedResultChart } from '@/lib/chart-api';
+import { RAFSANJAN_CHART } from '@/lib/chart-fixtures';
 
 const replace = vi.fn();
 const push = vi.fn();
@@ -18,8 +20,18 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace, push }),
 }));
 
+vi.mock('@/lib/chart-api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/chart-api')>();
+  return {
+    ...actual,
+    fetchValidatedResultChart: vi.fn(),
+  };
+});
+
+const mockFetchValidatedResultChart = vi.mocked(fetchValidatedResultChart);
+
 function renderResult(lang: AppLang = 'en') {
-  return render(<ResultScreen copy={getResultCopy(lang)} lang={lang} />);
+  return render(<ResultScreen lang={lang} />);
 }
 
 describe('ResultScreen', () => {
@@ -50,6 +62,7 @@ describe('ResultScreen', () => {
     push.mockClear();
     vi.spyOn(console, 'info').mockImplementation(() => {});
     saveSession({ method: 'email', identifier: 'user@test.com', verifiedAt: Date.now() });
+    mockFetchValidatedResultChart.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -65,7 +78,7 @@ describe('ResultScreen', () => {
     renderResult('en');
 
     expect(
-      await screen.findByRole('heading', { name: /your first metioro insight/i })
+      await screen.findByRole('heading', { name: /your journey begins/i })
     ).toBeTruthy();
     expect(screen.getByText(sampleQuestion.text)).toBeTruthy();
     expect(screen.getByText(/early preview/i)).toBeTruthy();
@@ -124,27 +137,161 @@ describe('ResultScreen', () => {
     getAskQuestionRepository().saveQuestion(sampleQuestion);
     renderResult('en');
 
-    await screen.findByRole('heading', { name: /your first metioro insight/i });
+    await screen.findByRole('heading', { name: /your journey begins/i });
 
-    let queue = localStorage.getItem('planet-life-ftue-events');
-    expect(queue).toContain('ftue.result.view');
-    expect(queue).toContain('ftue.result.started');
+    await waitFor(() => {
+      const queue = localStorage.getItem('planet-life-ftue-events');
+      expect(queue).toContain('ftue.result.view');
+      expect(queue).toContain('ftue.result.started');
+    });
 
     fireEvent.click(screen.getByRole('button', { name: /complete onboarding/i }));
-    queue = localStorage.getItem('planet-life-ftue-events');
-    expect(queue).toContain('ftue.result.completed');
+    await waitFor(() => {
+      const queue = localStorage.getItem('planet-life-ftue-events');
+      expect(queue).toContain('ftue.result.completed');
+    });
   });
 
-  it('updates copy when parent passes a new locale', async () => {
+  it('localizes a stored suggestion when the active locale changes', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion({
+      submitted_at: Date.now(),
+      source: 'suggestion',
+      suggestion_id: 'career',
+    });
+    const { rerender } = renderResult('en');
+    await screen.findByRole('heading', { name: /your journey begins/i });
+    expect(
+      screen.getByText('What should I focus on in my career this week?')
+    ).toBeTruthy();
+
+    rerender(<ResultScreen lang="fa" />);
+
+    expect(
+      screen.getByText('این هفته روی چه چیزی در مسیر شغلی‌ام تمرکز کنم؟')
+    ).toBeTruthy();
+  });
+
+  it('keeps typed question text when the active locale changes', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion({
+      submitted_at: Date.now(),
+      source: 'typed',
+      text: 'My own question in English',
+    });
+    const { rerender } = renderResult('en');
+    await screen.findByRole('heading', { name: /your journey begins/i });
+    expect(screen.getByText('My own question in English')).toBeTruthy();
+
+    rerender(<ResultScreen lang="fa" />);
+
+    expect(screen.getByText('My own question in English')).toBeTruthy();
+  });
+
+  it('updates copy when the active locale changes', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     getAskQuestionRepository().saveQuestion(sampleQuestion);
     const { rerender } = renderResult('en');
-    await screen.findByRole('heading', { name: /your first metioro insight/i });
+    await screen.findByRole('heading', { name: /your journey begins/i });
 
-    rerender(<ResultScreen copy={getResultCopy('fa')} lang="fa" />);
+    rerender(<ResultScreen lang="fa" />);
 
-    expect(screen.getByRole('heading', { name: /اولین بینش METIORO شما/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /آغاز مسیر شما/i })).toBeTruthy();
     expect(screen.getByText(/پیش‌نمایش اولیه/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /تکمیل فرآیند شروع/i })).toBeTruthy();
+  });
+
+  it('localizes the loading label when the active locale changes', () => {
+    const { rerender } = renderResult('en');
+    expect(screen.getByText('Loading…')).toBeTruthy();
+
+    rerender(<ResultScreen lang="fa" />);
+    expect(screen.getByText('در حال بارگذاری…')).toBeTruthy();
+  });
+
+  it('shows a localized empty chart state when chart data is unavailable', async () => {
+    mockFetchValidatedResultChart.mockResolvedValue(null);
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(sampleQuestion);
+    renderResult('en');
+
+    expect(await screen.findByText(/chart preview unavailable/i)).toBeTruthy();
+    expect(document.querySelector('[data-result-chart="empty"]')).toBeTruthy();
+  });
+
+  it('shows a localized loading chart state before chart data resolves', async () => {
+    mockFetchValidatedResultChart.mockImplementation(
+      () => new Promise(() => {})
+    );
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(sampleQuestion);
+    renderResult('en');
+
+    await screen.findByRole('heading', { name: /your journey begins/i });
+    expect(screen.getByText(/loading your chart/i)).toBeTruthy();
+    expect(document.querySelector('[data-result-chart="loading"]')).toBeTruthy();
+  });
+
+  it('renders the chart when validated chart data is available', async () => {
+    mockFetchValidatedResultChart.mockResolvedValue(RAFSANJAN_CHART);
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(sampleQuestion);
+    renderResult('en');
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-result-chart="ready"]')).toBeTruthy();
+    });
+    expect(screen.getByRole('heading', { name: /your journey begins/i })).toBeTruthy();
+  });
+
+  it('does not crash when chart data is incomplete', async () => {
+    mockFetchValidatedResultChart.mockResolvedValue({
+      ...RAFSANJAN_CHART,
+      planets: {},
+    });
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(sampleQuestion);
+    renderResult('en');
+
+    expect(await screen.findByText(/chart preview unavailable/i)).toBeTruthy();
+  });
+
+  it('uses the new localized title in each language', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(sampleQuestion);
+
+    const { rerender } = renderResult('en');
+    expect(await screen.findByRole('heading', { name: 'Your Journey Begins' })).toBeTruthy();
+
+    rerender(<ResultScreen lang="fa" />);
+    expect(screen.getByRole('heading', { name: 'آغاز مسیر شما' })).toBeTruthy();
+
+    rerender(<ResultScreen lang="ar" />);
+    expect(screen.getByRole('heading', { name: 'بداية رحلتك' })).toBeTruthy();
+
+    rerender(<ResultScreen lang="ru" />);
+    expect(screen.getByRole('heading', { name: 'Начало вашего пути' })).toBeTruthy();
+  });
+
+  it('shares only safe insight content without profile or location fields', async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { share });
+
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(sampleQuestion);
+    renderResult('en');
+
+    fireEvent.click(await screen.findByRole('button', { name: /share insight/i }));
+
+    await waitFor(() => {
+      expect(share).toHaveBeenCalled();
+    });
+
+    const payload = share.mock.calls[0][0] as { title: string; text: string };
+    expect(payload.title).toBe('Your Journey Begins');
+    expect(payload.text).toBe(buildResultShareText(getResultCopy('en'), sampleQuestion.text));
+    expect(payload.text).not.toMatch(/New York|40\.7128|1990-06-15|14:30|Alex|United States/i);
+
+    vi.unstubAllGlobals();
   });
 });

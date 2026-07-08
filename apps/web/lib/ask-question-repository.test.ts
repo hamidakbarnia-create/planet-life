@@ -15,7 +15,7 @@ describe('ask-question-repository', () => {
     resetAskQuestionRepositoryForTests();
   });
 
-  it('saves and loads a question', () => {
+  it('saves and loads a typed question', () => {
     const repo = getAskQuestionRepository();
     const question = {
       text: 'What should I focus on today?',
@@ -26,10 +26,20 @@ describe('ask-question-repository', () => {
     expect(repo.loadQuestion()).toEqual(question);
   });
 
+  it('saves and loads a suggestion by id', () => {
+    const repo = getAskQuestionRepository();
+    const question = {
+      submitted_at: Date.now(),
+      source: 'suggestion' as const,
+      suggestion_id: 'career' as const,
+    };
+    repo.saveQuestion(question);
+    expect(repo.loadQuestion()).toEqual(question);
+  });
+
   it('clears a stored question', () => {
     const repo = getAskQuestionRepository();
     repo.saveQuestion({
-      text: 'Test',
       submitted_at: Date.now(),
       source: 'suggestion',
       suggestion_id: 'career',

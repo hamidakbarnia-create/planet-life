@@ -1,33 +1,105 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { ChartSkeleton } from '@/components/ChartSkeleton';
+import { NatalChart, type NatalChartLabels } from '@/components/NatalChart';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
+import { fetchValidatedResultChart } from '@/lib/chart-api';
+import type { ChartData } from '@/lib/chart-types';
+import {
+  hasStoredAskQuestion,
+  resolveStoredAskQuestionText,
+} from '@/lib/resolve-ask-question';
 import { trackResultEvent } from '@/lib/ftue-analytics';
-import type { ResultCopy } from '@/lib/ftue-i18n';
+import { buildResultShareText, getResultCopy } from '@/lib/ftue-i18n';
 import type { AppLang } from '@/lib/app-settings';
 import { ftueTodayPath, markFtueComplete } from '@/lib/ftue-storage';
+import {
+  ASPECT_LABELS,
+  buildSignNames,
+  PLANET_LABELS,
+  PROFILE_LANGS,
+} from '@/lib/profile-i18n';
 import {
   getProfileRepository,
   isProfileRecordComplete,
 } from '@/lib/profile';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 
-export function ResultScreen({ copy, lang }: { copy: ResultCopy; lang: AppLang }) {
+type ResultChartPhase = 'loading' | 'empty' | 'ready';
+
+export function ResultScreen({ lang }: { lang: AppLang }) {
   const router = useRouter();
   const authed = useRequireAuth();
   const profileRepo = getProfileRepository();
   const askRepo = getAskQuestionRepository();
-  const c = copy;
+  const c = getResultCopy(lang);
   const initRef = useRef(false);
   const startedRef = useRef(false);
+  const [chartPhase, setChartPhase] = useState<ResultChartPhase>('loading');
+  const [chartData, setChartData] = useState<ChartData | null>(null);
 
   const profileComplete = isProfileRecordComplete(profileRepo.loadProfile());
   const storedQuestion = askRepo.loadQuestion();
-  const hasQuestion = Boolean(storedQuestion?.text.trim());
-  const questionText = storedQuestion?.text.trim() ?? '';
+  const hasQuestion = hasStoredAskQuestion(storedQuestion);
+  const questionText = storedQuestion
+    ? resolveStoredAskQuestionText(storedQuestion, lang)
+    : '';
+
+  const chartLabels: NatalChartLabels = useMemo(() => {
+    const t = PROFILE_LANGS[lang] ?? PROFILE_LANGS.en;
+    return {
+      empty: c.chartEmptyLabel,
+      elementsTitle: t.elementsTitle,
+      strengthsTitle: t.strengthsTitle,
+      elements: {
+        fire: t.elFire,
+        earth: t.elEarth,
+        air: t.elAir,
+        water: t.elWater,
+      },
+      planetNames: PLANET_LABELS[lang] ?? PLANET_LABELS.en,
+      signNames: buildSignNames(lang),
+      aspectLegend: ASPECT_LABELS[lang] ?? ASPECT_LABELS.en,
+      lang,
+    };
+  }, [lang, c.chartEmptyLabel]);
+
+  useQueuedEffect(() => {
+    if (!authed || !profileComplete || !hasQuestion) return;
+
+    let cancelled = false;
+
+    async function loadChart() {
+      setChartPhase('loading');
+      setChartData(null);
+
+      const currentProfile = profileRepo.loadProfile();
+      if (!currentProfile || !isProfileRecordComplete(currentProfile)) {
+        if (!cancelled) setChartPhase('empty');
+        return;
+      }
+
+      const data = await fetchValidatedResultChart(currentProfile);
+      if (cancelled) return;
+
+      if (data && Object.keys(data.planets).length > 0) {
+        setChartData(data);
+        setChartPhase('ready');
+        return;
+      }
+
+      setChartPhase('empty');
+    }
+
+    void loadChart();
+    return () => {
+      cancelled = true;
+    };
+  }, [authed, profileComplete, hasQuestion, profileRepo]);
 
   useQueuedEffect(() => {
     if (!authed || initRef.current) return;
@@ -58,12 +130,30 @@ export function ResultScreen({ copy, lang }: { copy: ResultCopy; lang: AppLang }
     router.push(ftueTodayPath());
   };
 
+  const handleShare = async () => {
+    const text = buildResultShareText(c, questionText);
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: c.title, text });
+      } catch {
+        // User dismissed the share sheet.
+      }
+      return;
+    }
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    }
+  };
+
   if (!authed || !profileComplete || !hasQuestion) {
     return (
       <div
-        className="min-h-[50vh] flex items-center justify-center"
+        className="min-h-[50vh] flex items-center justify-center fi text-sm text-white/50"
         aria-busy="true"
-      />
+        aria-live="polite"
+      >
+        {c.loadingLabel}
+      </div>
     );
   }
 
@@ -81,13 +171,47 @@ export function ResultScreen({ copy, lang }: { copy: ResultCopy; lang: AppLang }
         <p className="fi text-sm text-white/85 leading-relaxed">{questionText}</p>
       </section>
 
+      <section
+        className="mb-5 flex flex-col items-center"
+        aria-busy={chartPhase === 'loading'}
+        aria-live="polite"
+        data-result-chart={chartPhase}
+      >
+        {chartPhase === 'loading' && (
+          <>
+            <ChartSkeleton size={220} />
+            <p className="fi text-xs text-white/40 mt-2">{c.chartLoadingLabel}</p>
+          </>
+        )}
+        {chartPhase === 'empty' && (
+          <p className="fi text-xs text-white/40 text-center py-6" role="status">
+            {c.chartEmptyLabel}
+          </p>
+        )}
+        {chartPhase === 'ready' && chartData && (
+          <NatalChart chart={chartData} labels={chartLabels} showInsights={false} />
+        )}
+      </section>
+
       <GlassCard className="w-full p-5 mb-5" eyebrow={c.insightEyebrow}>
         <p className="fi text-sm text-white/80 leading-relaxed">{c.insightBody}</p>
       </GlassCard>
 
-      <p className="fi text-xs text-white/40 text-center leading-relaxed mb-6 px-2">
+      <p className="fi text-xs text-white/40 text-center leading-relaxed mb-4 px-2">
         {c.previewNote}
       </p>
+
+      <button
+        type="button"
+        onClick={() => void handleShare()}
+        className="result-share w-full fi py-3 rounded-xl text-sm text-white/70 mb-3"
+        style={{
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.1)',
+        }}
+      >
+        {c.shareLabel}
+      </button>
 
       <button
         type="button"
@@ -103,6 +227,7 @@ export function ResultScreen({ copy, lang }: { copy: ResultCopy; lang: AppLang }
 
       <style>{`
         .result-cta:focus-visible{outline:2px solid rgba(251,191,36,0.7);outline-offset:2px}
+        .result-share:focus-visible{outline:2px solid rgba(255,255,255,0.35);outline-offset:2px}
       `}</style>
     </div>
   );
