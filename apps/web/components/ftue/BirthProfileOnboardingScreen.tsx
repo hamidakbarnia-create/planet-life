@@ -93,27 +93,24 @@ export function BirthProfileOnboardingScreen() {
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      setDraft((current) => {
-        const result = validateProfileDraft(current);
-        if (!result.valid) {
-          setErrors(result.errors);
-          trackProfileEvent('profile.validation_failed', {
-            fields: Object.keys(result.errors),
-          });
-          return current;
-        }
+      const result = validateProfileDraft(draft);
+      if (!result.valid) {
+        setErrors(result.errors);
+        trackProfileEvent('profile.validation_failed', {
+          fields: Object.keys(result.errors),
+        });
+        return;
+      }
 
-        setSaving(true);
-        const record = draftToProfileRecord(current);
-        repo.saveProfile(record);
-        repo.clearDraft();
-        trackProfileEvent('profile.saved');
-        trackProfileEvent('profile.completed');
-        router.replace('/onboarding/preparing');
-        return current;
-      });
+      setSaving(true);
+      const record = draftToProfileRecord(draft);
+      repo.saveProfile(record);
+      repo.clearDraft();
+      trackProfileEvent('profile.saved');
+      trackProfileEvent('profile.completed');
+      router.replace('/onboarding/preparing');
     },
-    [repo, router]
+    [draft, repo, router]
   );
 
   const handleBack = useCallback(() => {
