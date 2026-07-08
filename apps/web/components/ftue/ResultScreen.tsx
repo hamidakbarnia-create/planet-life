@@ -6,7 +6,8 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
 import { trackResultEvent } from '@/lib/ftue-analytics';
-import { RESULT_COPY } from '@/lib/ftue-i18n';
+import type { ResultCopy } from '@/lib/ftue-i18n';
+import type { AppLang } from '@/lib/app-settings';
 import { ftueTodayPath, markFtueComplete } from '@/lib/ftue-storage';
 import {
   getProfileRepository,
@@ -14,12 +15,12 @@ import {
 } from '@/lib/profile';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 
-export function ResultScreen() {
+export function ResultScreen({ copy, lang }: { copy: ResultCopy; lang: AppLang }) {
   const router = useRouter();
   const authed = useRequireAuth();
   const profileRepo = getProfileRepository();
   const askRepo = getAskQuestionRepository();
-  const c = RESULT_COPY;
+  const c = copy;
   const initRef = useRef(false);
   const startedRef = useRef(false);
 
@@ -67,7 +68,7 @@ export function ResultScreen() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="max-w-2xl mx-auto px-4 py-6" data-ftue-screen="result" data-lang={lang}>
       <header className="mb-6">
         <p className="fi text-xs uppercase tracking-widest text-amber-400/80 mb-2">{c.step}</p>
         <h1 className="fc text-2xl tracking-wide text-white mb-2">{c.title}</h1>

@@ -266,6 +266,57 @@ export const RESULT_COPY = {
   cta: 'Complete onboarding',
 } as const;
 
+export type ResultCopy = {
+  step: string;
+  title: string;
+  questionLabel: string;
+  insightEyebrow: string;
+  insightBody: string;
+  previewNote: string;
+  cta: string;
+};
+
+export const RESULT_LANGS: Record<AppLang, ResultCopy> = {
+  en: RESULT_COPY,
+  ru: {
+    step: 'Шаг 7 из 8',
+    title: 'Ваш первый инсайт METIORO',
+    questionLabel: 'Ваш вопрос',
+    insightEyebrow: 'Ранний просмотр',
+    insightBody:
+      'Сегодня лучше сосредоточиться на ясности, приоритетах и одном осознанном действии. Начните с заданного вопроса, выберите самый маленький полезный шаг и вернитесь позже за более глубоким руководством.',
+    previewNote:
+      'Это ваш первый персональный просмотр. Полный движок рекомендаций улучшится по мере того, как METIORO изучает ваш контекст.',
+    cta: 'Завершить онбординг',
+  },
+  fa: {
+    step: 'گام ۷ از ۸',
+    title: 'اولین بینش METIORO شما',
+    questionLabel: 'پرسش شما',
+    insightEyebrow: 'پیش‌نمایش اولیه',
+    insightBody:
+      'امروز بهترین استفاده برای وضوح، اولویت‌بندی و یک اقدام آگاهانه است. از پرسشی که مطرح کردید شروع کنید، کوچک‌ترین گام مفید بعدی را انتخاب کنید و بعداً برای راهنمایی عمیق‌تر بازگردید.',
+    previewNote:
+      'این اولین پیش‌نمایش شخصی‌سازی‌شده شماست. موتور راهنمایی کامل با شناخت بیشتر METIORO از زمینه شما بهتر می‌شود.',
+    cta: 'تکمیل فرآیند شروع',
+  },
+  ar: {
+    step: 'الخطوة ٧ من ٨',
+    title: 'أول رؤية METIORO لك',
+    questionLabel: 'سؤالك',
+    insightEyebrow: 'معاينة مبكرة',
+    insightBody:
+      'اليوم يُستخدم أفضل للوضوح وترتيب الأولويات واتخاذ إجراء واحد مدروس. ابدأ بالسؤال الذي طرحته، واختر أصغر خطوة مفيدة تالية، وعد لاحقًا للحصول على إرشاد أعمق.',
+    previewNote:
+      'هذه معاينتك الشخصية الأولى. سيتحسّن محرك الإرشاد الكامل مع تعلّم METIORO سياقك.',
+    cta: 'إكمال الإعداد',
+  },
+};
+
+export function getResultCopy(lang: AppLang): ResultCopy {
+  return RESULT_LANGS[lang] ?? RESULT_LANGS.en;
+}
+
 export const LOGIN_FTUE_COPY = {
   title: 'Sign in to continue',
   sub: 'Save your profile and decision guidance securely.',

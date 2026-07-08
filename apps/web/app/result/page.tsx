@@ -1,31 +1,16 @@
 'use client';
 
-import { useState } from 'react';
 import { AppShell } from '@/components/AppShell';
 import { ResultScreen } from '@/components/ftue/ResultScreen';
-import type { AppLang } from '@/lib/app-settings';
-import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
+import { getResultCopy } from '@/lib/ftue-i18n';
 import { HOME_LANGS } from '@/lib/home-i18n';
-import { useQueuedEffect } from '@/lib/use-queued-effect';
+import { useAppLang, useClientReady } from '@/lib/use-app-lang';
 
 export default function ResultPage() {
-  const [lang, setLangState] = useState<AppLang>('en');
-  const [ready, setReady] = useState(false);
-
+  const ready = useClientReady();
+  const [lang, setLang] = useAppLang();
   const t = HOME_LANGS[lang];
-
-  const setLang = (l: AppLang) => {
-    setLangState(l);
-    saveAppLang(l);
-  };
-
-  useQueuedEffect(() => {
-    const stored = loadAppLang();
-    if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
-      setLangState(stored);
-    }
-    setReady(true);
-  }, []);
+  const copy = getResultCopy(lang);
 
   if (!ready) {
     return (
@@ -45,7 +30,7 @@ export default function ResultPage() {
       navLabels={t.nav}
       fontFamily={lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'}
     >
-      <ResultScreen />
+      <ResultScreen copy={copy} lang={lang} />
     </AppShell>
   );
 }

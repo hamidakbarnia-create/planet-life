@@ -5,6 +5,8 @@ export type CalendarExportMode = 'all' | 'important' | 'notifications';
 const EXPORT_KEY = 'planet-life-calendar-export';
 const LANG_KEY = 'planet-life-lang';
 
+export const APP_LANG_CHANGED_EVENT = 'planet-life-lang-changed';
+
 /** Stored app language, or `en` when unset (client-safe). */
 export function readAppLang(): AppLang {
   const stored = loadAppLang();
@@ -32,4 +34,5 @@ export function loadAppLang(): string | null {
 export function saveAppLang(lang: string): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(LANG_KEY, lang);
+  window.dispatchEvent(new Event(APP_LANG_CHANGED_EVENT));
 }

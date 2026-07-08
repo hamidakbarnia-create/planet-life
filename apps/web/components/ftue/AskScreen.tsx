@@ -5,7 +5,7 @@ import { useId, useRef, useState } from 'react';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
 import { trackAskEvent } from '@/lib/ftue-analytics';
 import type { AppLang } from '@/lib/app-settings';
-import { getAskCopy } from '@/lib/ftue-i18n';
+import type { AskCopy } from '@/lib/ftue-i18n';
 import {
   getProfileRepository,
   isProfileRecordComplete,
@@ -19,12 +19,12 @@ function askSubmittedAt(): number {
   return Date.now();
 }
 
-export function AskScreen({ lang }: { lang: AppLang }) {
+export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
   const router = useRouter();
   const authed = useRequireAuth();
   const repo = getProfileRepository();
   const askRepo = getAskQuestionRepository();
-  const c = getAskCopy(lang);
+  const c = copy;
   const suggestions = c.suggestions;
   const formId = useId();
   const inputId = `${formId}-question`;
@@ -109,7 +109,7 @@ export function AskScreen({ lang }: { lang: AppLang }) {
   const charCount = question.length;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="max-w-2xl mx-auto px-4 py-6" data-ftue-screen="ask" data-lang={lang}>
       <header className="mb-6">
         <p className="fi text-xs uppercase tracking-widest text-amber-400/80 mb-2">{c.step}</p>
         <h1 className="fc text-2xl tracking-wide text-white mb-2">{c.title}</h1>

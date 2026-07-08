@@ -6,6 +6,8 @@ import {
   resetAskQuestionRepositoryForTests,
 } from '@/lib/ask-question-repository';
 import { saveSession } from '@/lib/auth';
+import { getResultCopy } from '@/lib/ftue-i18n';
+import type { AppLang } from '@/lib/app-settings';
 import { isFtueComplete } from '@/lib/ftue-storage';
 import { getProfileRepository, resetProfileRepositoryForTests } from '@/lib/profile';
 
@@ -15,6 +17,10 @@ const push = vi.fn();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace, push }),
 }));
+
+function renderResult(lang: AppLang = 'en') {
+  return render(<ResultScreen copy={getResultCopy(lang)} lang={lang} />);
+}
 
 describe('ResultScreen', () => {
   const sampleProfile = {
@@ -56,7 +62,7 @@ describe('ResultScreen', () => {
   it('renders Result screen when profile and question exist', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     getAskQuestionRepository().saveQuestion(sampleQuestion);
-    render(<ResultScreen />);
+    renderResult('en');
 
     expect(
       await screen.findByRole('heading', { name: /your first metioro insight/i })
@@ -68,7 +74,7 @@ describe('ResultScreen', () => {
 
   it('redirects to profile onboarding when birth profile is missing', async () => {
     getAskQuestionRepository().saveQuestion(sampleQuestion);
-    render(<ResultScreen />);
+    renderResult('en');
 
     await waitFor(() => {
       expect(replace).toHaveBeenCalledWith('/profile?onboarding=1');
@@ -80,7 +86,7 @@ describe('ResultScreen', () => {
 
   it('redirects to ask when question is missing', async () => {
     getProfileRepository().saveProfile(sampleProfile);
-    render(<ResultScreen />);
+    renderResult('en');
 
     await waitFor(() => {
       expect(replace).toHaveBeenCalledWith('/ask');
@@ -93,7 +99,7 @@ describe('ResultScreen', () => {
   it('displays the static insight text', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     getAskQuestionRepository().saveQuestion(sampleQuestion);
-    render(<ResultScreen />);
+    renderResult('en');
 
     expect(
       await screen.findByText(
@@ -105,7 +111,7 @@ describe('ResultScreen', () => {
   it('marks FTUE complete and navigates to /home on completion', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     getAskQuestionRepository().saveQuestion(sampleQuestion);
-    render(<ResultScreen />);
+    renderResult('en');
 
     fireEvent.click(await screen.findByRole('button', { name: /complete onboarding/i }));
 
@@ -116,7 +122,7 @@ describe('ResultScreen', () => {
   it('fires analytics events on view and completion', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     getAskQuestionRepository().saveQuestion(sampleQuestion);
-    render(<ResultScreen />);
+    renderResult('en');
 
     await screen.findByRole('heading', { name: /your first metioro insight/i });
 
@@ -127,5 +133,18 @@ describe('ResultScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: /complete onboarding/i }));
     queue = localStorage.getItem('planet-life-ftue-events');
     expect(queue).toContain('ftue.result.completed');
+  });
+
+  it('updates copy when parent passes a new locale', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(sampleQuestion);
+    const { rerender } = renderResult('en');
+    await screen.findByRole('heading', { name: /your first metioro insight/i });
+
+    rerender(<ResultScreen copy={getResultCopy('fa')} lang="fa" />);
+
+    expect(screen.getByRole('heading', { name: /اولین بینش METIORO شما/i })).toBeTruthy();
+    expect(screen.getByText(/پیش‌نمایش اولیه/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /تکمیل فرآیند شروع/i })).toBeTruthy();
   });
 });
