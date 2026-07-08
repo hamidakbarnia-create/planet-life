@@ -1,3 +1,5 @@
+import type { AppLang } from './app-settings';
+
 export const WELCOME_COPY = {
   headline: 'Know your best next move.',
   subline: 'Structured timing guidance with visible reasoning.',
@@ -84,33 +86,173 @@ export const ASK_COPY = {
   charCounter: (count: number, max: number) => `${count} of ${max} characters`,
 } as const;
 
-export const ASK_SUGGESTIONS = [
-  {
-    id: 'career',
-    label: 'Career',
-    text: 'What should I focus on in my career this week?',
+export type AskSuggestion = {
+  id: 'career' | 'relationships' | 'todays-focus' | 'energy' | 'opportunities';
+  label: string;
+  text: string;
+};
+
+export type AskCopy = {
+  step: string;
+  title: string;
+  sub: string;
+  inputLabel: string;
+  inputPlaceholder: string;
+  suggestionsLabel: string;
+  submit: string;
+  charCounter: (count: number, max: number) => string;
+  suggestions: readonly AskSuggestion[];
+};
+
+export const ASK_LANGS: Record<AppLang, AskCopy> = {
+  en: {
+    ...ASK_COPY,
+    suggestions: [
+      {
+        id: 'career',
+        label: 'Career',
+        text: 'What should I focus on in my career this week?',
+      },
+      {
+        id: 'relationships',
+        label: 'Relationships',
+        text: 'How can I strengthen an important relationship right now?',
+      },
+      {
+        id: 'todays-focus',
+        label: "Today's focus",
+        text: 'What deserves my attention most today?',
+      },
+      {
+        id: 'energy',
+        label: 'Energy',
+        text: 'How can I use my energy wisely today?',
+      },
+      {
+        id: 'opportunities',
+        label: 'Opportunities',
+        text: 'What opportunity should I pay attention to right now?',
+      },
+    ],
   },
-  {
-    id: 'relationships',
-    label: 'Relationships',
-    text: 'How can I strengthen an important relationship right now?',
+  ru: {
+    step: 'Шаг 6 из 8',
+    title: 'Спросить METIORO',
+    sub: 'Ваш первый вопрос показывает, как METIORO даёт персональные рекомендации.',
+    inputLabel: 'Ваш вопрос',
+    inputPlaceholder: 'О чём вы хотите спросить?',
+    suggestionsLabel: 'Темы для вопроса',
+    submit: 'Получить рекомендацию',
+    charCounter: (count, max) => `${count} из ${max} символов`,
+    suggestions: [
+      {
+        id: 'career',
+        label: 'Карьера',
+        text: 'На чём мне сфокусироваться в карьере на этой неделе?',
+      },
+      {
+        id: 'relationships',
+        label: 'Отношения',
+        text: 'Как укрепить важные отношения прямо сейчас?',
+      },
+      {
+        id: 'todays-focus',
+        label: 'Фокус на сегодня',
+        text: 'Что заслуживает моего внимания сегодня?',
+      },
+      {
+        id: 'energy',
+        label: 'Энергия',
+        text: 'Как разумно распорядиться энергией сегодня?',
+      },
+      {
+        id: 'opportunities',
+        label: 'Возможности',
+        text: 'На какую возможность обратить внимание?',
+      },
+    ],
   },
-  {
-    id: 'todays-focus',
-    label: "Today's focus",
-    text: 'What deserves my attention most today?',
+  fa: {
+    step: 'گام ۶ از ۸',
+    title: 'از METIORO بپرسید',
+    sub: 'اولین پرسش شما نشان می‌دهد METIORO چگونه راهنمایی شخصی‌سازی‌شده ارائه می‌دهد.',
+    inputLabel: 'پرسش شما',
+    inputPlaceholder: 'دربارهٔ چه موضوعی راهنمایی می‌خواهید؟',
+    suggestionsLabel: 'موضوعات پیشنهادی',
+    submit: 'دریافت راهنمایی',
+    charCounter: (count, max) => `${count} از ${max} نویسه`,
+    suggestions: [
+      {
+        id: 'career',
+        label: 'شغل',
+        text: 'این هفته روی چه چیزی در مسیر شغلی‌ام تمرکز کنم؟',
+      },
+      {
+        id: 'relationships',
+        label: 'روابط',
+        text: 'چطور می‌توانم یک رابطه مهم را همین حالا تقویت کنم؟',
+      },
+      {
+        id: 'todays-focus',
+        label: 'تمرکز امروز',
+        text: 'امروز چه چیزی بیش از همه شایسته توجه من است؟',
+      },
+      {
+        id: 'energy',
+        label: 'انرژی',
+        text: 'چطور می‌توانم امروز انرژی‌ام را هوشمندانه مدیریت کنم؟',
+      },
+      {
+        id: 'opportunities',
+        label: 'فرصت‌ها',
+        text: 'به کدام فرصت باید همین حالا توجه کنم؟',
+      },
+    ],
   },
-  {
-    id: 'energy',
-    label: 'Energy',
-    text: 'How can I use my energy wisely today?',
+  ar: {
+    step: 'الخطوة ٦ من ٨',
+    title: 'اسأل METIORO',
+    sub: 'سؤالك الأول يوضح كيف يقدّم METIORO إرشادًا شخصيًا.',
+    inputLabel: 'سؤالك',
+    inputPlaceholder: 'في أي موضوع تريد الإرشاد؟',
+    suggestionsLabel: 'مواضيع مقترحة',
+    submit: 'احصل على الإرشاد',
+    charCounter: (count, max) => `${count} من ${max} حرفًا`,
+    suggestions: [
+      {
+        id: 'career',
+        label: 'المهنة',
+        text: 'على ماذا يجب أن أركّز في مسيرتي المهنية هذا الأسبوع؟',
+      },
+      {
+        id: 'relationships',
+        label: 'العلاقات',
+        text: 'كيف أقوّي علاقة مهمة الآن؟',
+      },
+      {
+        id: 'todays-focus',
+        label: 'تركيز اليوم',
+        text: 'ما الذي يستحق اهتمامي اليوم؟',
+      },
+      {
+        id: 'energy',
+        label: 'الطاقة',
+        text: 'كيف أستخدم طاقتي بحكمة اليوم؟',
+      },
+      {
+        id: 'opportunities',
+        label: 'الفرص',
+        text: 'أي فرصة يجب أن أنتبه لها الآن؟',
+      },
+    ],
   },
-  {
-    id: 'opportunities',
-    label: 'Opportunities',
-    text: 'What opportunity should I pay attention to right now?',
-  },
-] as const;
+};
+
+export function getAskCopy(lang: AppLang): AskCopy {
+  return ASK_LANGS[lang] ?? ASK_LANGS.en;
+}
+
+export const ASK_SUGGESTIONS = ASK_LANGS.en.suggestions;
 
 export const RESULT_COPY = {
   step: 'Step 7 of 8',

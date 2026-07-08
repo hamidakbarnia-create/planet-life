@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useId, useRef, useState } from 'react';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
 import { trackAskEvent } from '@/lib/ftue-analytics';
-import { ASK_COPY, ASK_SUGGESTIONS } from '@/lib/ftue-i18n';
+import type { AppLang } from '@/lib/app-settings';
+import { getAskCopy } from '@/lib/ftue-i18n';
 import {
   getProfileRepository,
   isProfileRecordComplete,
@@ -14,12 +15,17 @@ import { useRequireAuth } from '@/hooks/use-require-auth';
 
 const MAX_CHARS = 500;
 
-export function AskScreen() {
+function askSubmittedAt(): number {
+  return Date.now();
+}
+
+export function AskScreen({ lang }: { lang: AppLang }) {
   const router = useRouter();
   const authed = useRequireAuth();
   const repo = getProfileRepository();
   const askRepo = getAskQuestionRepository();
-  const c = ASK_COPY;
+  const c = getAskCopy(lang);
+  const suggestions = c.suggestions;
   const formId = useId();
   const inputId = `${formId}-question`;
   const counterId = `${formId}-counter`;
@@ -77,10 +83,10 @@ export function AskScreen() {
       return;
     }
 
-    const matchedSuggestion = ASK_SUGGESTIONS.find((s) => s.text === text);
+    const matchedSuggestion = suggestions.find((s) => s.text === text);
     askRepo.saveQuestion({
       text,
-      submitted_at: Date.now(),
+      submitted_at: askSubmittedAt(),
       source: matchedSuggestion ? 'suggestion' : 'typed',
       suggestion_id: matchedSuggestion?.id,
     });
@@ -140,7 +146,7 @@ export function AskScreen() {
             {c.suggestionsLabel}
           </legend>
           <div className="flex flex-wrap gap-2">
-            {ASK_SUGGESTIONS.map((suggestion) => (
+            {suggestions.map((suggestion) => (
               <button
                 key={suggestion.id}
                 type="button"

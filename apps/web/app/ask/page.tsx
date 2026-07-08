@@ -45,7 +45,7 @@ export default function AskPage() {
       navLabels={t.nav}
       fontFamily={lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'}
     >
-      <AskScreen />
+      <AskScreen lang={lang} />
     </AppShell>
   );
 }

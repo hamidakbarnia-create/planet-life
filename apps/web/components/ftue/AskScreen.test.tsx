@@ -48,7 +48,7 @@ describe('AskScreen', () => {
 
   it('renders the Ask screen', async () => {
     getProfileRepository().saveProfile(sampleProfile);
-    render(<AskScreen />);
+    render(<AskScreen lang="en" />);
 
     expect(await screen.findByRole('heading', { name: /ask metioro/i })).toBeTruthy();
     expect(screen.getByLabelText(/your question/i)).toBeTruthy();
@@ -57,7 +57,7 @@ describe('AskScreen', () => {
   });
 
   it('redirects to profile onboarding when birth profile is missing', async () => {
-    render(<AskScreen />);
+    render(<AskScreen lang="en" />);
 
     await waitFor(() => {
       expect(replace).toHaveBeenCalledWith('/profile?onboarding=1');
@@ -66,7 +66,7 @@ describe('AskScreen', () => {
 
   it('disables submit when the question is empty', async () => {
     getProfileRepository().saveProfile(sampleProfile);
-    render(<AskScreen />);
+    render(<AskScreen lang="en" />);
 
     const submit = await screen.findByRole('button', { name: /get guidance/i });
     expect(submit).toHaveProperty('disabled', true);
@@ -74,7 +74,7 @@ describe('AskScreen', () => {
 
   it('enables submit after typing a question', async () => {
     getProfileRepository().saveProfile(sampleProfile);
-    render(<AskScreen />);
+    render(<AskScreen lang="en" />);
 
     const input = await screen.findByLabelText(/your question/i);
     fireEvent.change(input, { target: { value: 'What should I do today?' } });
@@ -85,7 +85,7 @@ describe('AskScreen', () => {
 
   it('fills the textbox when a suggestion is clicked', async () => {
     getProfileRepository().saveProfile(sampleProfile);
-    render(<AskScreen />);
+    render(<AskScreen lang="en" />);
 
     fireEvent.click(await screen.findByRole('button', { name: /career/i }));
 
@@ -95,7 +95,7 @@ describe('AskScreen', () => {
 
   it('stores the question and navigates to /result on submit', async () => {
     getProfileRepository().saveProfile(sampleProfile);
-    render(<AskScreen />);
+    render(<AskScreen lang="en" />);
 
     const input = await screen.findByLabelText(/your question/i);
     fireEvent.change(input, { target: { value: 'What should I do today?' } });
@@ -109,7 +109,7 @@ describe('AskScreen', () => {
 
   it('fires analytics events on view, interaction, and submit', async () => {
     getProfileRepository().saveProfile(sampleProfile);
-    render(<AskScreen />);
+    render(<AskScreen lang="en" />);
 
     await screen.findByRole('heading', { name: /ask metioro/i });
 
@@ -129,5 +129,18 @@ describe('AskScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: /get guidance/i }));
     queue = localStorage.getItem('planet-life-ftue-events');
     expect(queue).toContain('ftue.ask.submitted');
+  });
+
+  it('updates copy when lang changes without remounting', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    const { rerender } = render(<AskScreen lang="en" />);
+    await screen.findByRole('heading', { name: /ask metioro/i });
+
+    rerender(<AskScreen lang="fa" />);
+
+    expect(screen.getByRole('heading', { name: /از METIORO بپرسید/i })).toBeTruthy();
+    expect(screen.getByLabelText(/پرسش شما/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /دریافت راهنمایی/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /شغل/i })).toBeTruthy();
   });
 });
