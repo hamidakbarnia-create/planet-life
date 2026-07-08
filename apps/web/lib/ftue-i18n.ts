@@ -112,6 +112,18 @@ export const ASK_SUGGESTIONS = [
   },
 ] as const;
 
+export const RESULT_COPY = {
+  step: 'Step 7 of 8',
+  title: 'Your first METIORO insight',
+  questionLabel: 'Your question',
+  insightEyebrow: 'Early preview',
+  insightBody:
+    'Today is best used for clarity, prioritization, and one deliberate action. Start with the question you asked, choose the smallest useful next step, and return later for deeper guidance.',
+  previewNote:
+    'This is your first personalized preview. The full guidance engine will improve as METIORO learns your context.',
+  cta: 'Complete onboarding',
+} as const;
+
 export const LOGIN_FTUE_COPY = {
   title: 'Sign in to continue',
   sub: 'Save your profile and decision guidance securely.',

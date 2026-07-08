@@ -34,12 +34,20 @@ export type AskEventName =
   | 'ftue.ask.submitted'
   | 'ftue.ask.validation_failed';
 
+export type ResultEventName =
+  | 'ftue.result.view'
+  | 'ftue.result.started'
+  | 'ftue.result.completed'
+  | 'ftue.result.missing_question'
+  | 'ftue.result.missing_profile';
+
 export type AnalyticsEventName =
   | FtueEventName
   | ProfileEventName
   | PreparingEventName
   | TodayEventName
-  | AskEventName;
+  | AskEventName
+  | ResultEventName;
 
 const QUEUE_KEY = 'planet-life-ftue-events';
 const MAX_QUEUE = 100;
@@ -117,6 +125,13 @@ export function trackTodayEvent(
 
 export function trackAskEvent(
   event: AskEventName,
+  properties: Record<string, unknown> = {}
+): void {
+  enqueueAnalyticsEvent(event, properties);
+}
+
+export function trackResultEvent(
+  event: ResultEventName,
   properties: Record<string, unknown> = {}
 ): void {
   enqueueAnalyticsEvent(event, properties);
