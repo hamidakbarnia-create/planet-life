@@ -1,10 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import {
-  ftueTodayPath,
-  markFtueComplete,
-} from './ftue-storage';
+import { ftueTodayPath, markFtueComplete } from './ftue-storage';
 import { getProfileRepository, resetProfileRepositoryForTests } from './profile';
-import { hasLocalBirthProfile, resolvePostAuthPath } from './ftue-routing';
+import {
+  hasLocalBirthProfile,
+  resolvePostAuthPath,
+  resolvePreparingCompletePath,
+} from './ftue-routing';
 
 const sampleProfile = {
   birth_date: '1990-06-15',
@@ -59,5 +60,10 @@ describe('ftue-routing', () => {
   it('routes ftue-complete users to today', () => {
     markFtueComplete();
     expect(resolvePostAuthPath()).toBe(ftueTodayPath());
+  });
+
+  it('resolves preparing complete path with optional score error', () => {
+    expect(resolvePreparingCompletePath()).toBe('/home');
+    expect(resolvePreparingCompletePath({ scoreError: true })).toBe('/home?score_error=1');
   });
 });

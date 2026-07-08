@@ -12,3 +12,9 @@ export function resolvePostAuthPath(): string {
   if (hasLocalBirthProfile()) return '/onboarding/preparing';
   return '/profile?onboarding=1';
 }
+
+/** Destination after preparing completes (Today ships as /home interim). */
+export function resolvePreparingCompletePath(options?: { scoreError?: boolean }): string {
+  const base = ftueTodayPath();
+  return options?.scoreError ? `${base}?score_error=1` : base;
+}

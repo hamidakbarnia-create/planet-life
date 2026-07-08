@@ -15,7 +15,13 @@ export type ProfileEventName =
   | 'profile.validation_failed'
   | 'profile.completed';
 
-export type AnalyticsEventName = FtueEventName | ProfileEventName;
+export type PreparingEventName =
+  | 'ftue.preparing.view'
+  | 'ftue.preparing.started'
+  | 'ftue.preparing.completed'
+  | 'ftue.preparing.failed';
+
+export type AnalyticsEventName = FtueEventName | ProfileEventName | PreparingEventName;
 
 const QUEUE_KEY = 'planet-life-ftue-events';
 const MAX_QUEUE = 100;
@@ -72,6 +78,13 @@ export function trackFtueEvent(
 
 export function trackProfileEvent(
   event: ProfileEventName,
+  properties: Record<string, unknown> = {}
+): void {
+  enqueueAnalyticsEvent(event, properties);
+}
+
+export function trackPreparingEvent(
+  event: PreparingEventName,
   properties: Record<string, unknown> = {}
 ): void {
   enqueueAnalyticsEvent(event, properties);

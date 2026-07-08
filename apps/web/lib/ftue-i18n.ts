@@ -39,6 +39,21 @@ export const PROFILE_ONBOARDING_COPY = {
   required: 'Required',
 } as const;
 
+export const PREPARING_COPY = {
+  step: 'Step 4 of 8',
+  title: 'Preparing your first insight',
+  sub: 'METIORO is building timing context from your birth profile. This usually takes a few seconds.',
+  statusLoading: 'Preparing your intelligence…',
+  statusSuccess: 'Ready — opening your brief',
+  statusError: 'Preparation paused',
+  offlineError: 'Connect to prepare your brief.',
+  retry: 'Try again',
+  continueAnyway: 'Continue without score',
+  stepDone: 'Complete',
+  stepActive: 'In progress',
+  stepPending: 'Waiting',
+} as const;
+
 export const LOGIN_FTUE_COPY = {
   title: 'Sign in to continue',
   sub: 'Save your profile and decision guidance securely.',
