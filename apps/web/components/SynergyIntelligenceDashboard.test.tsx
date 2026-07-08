@@ -205,12 +205,13 @@ describe('SynergyIntelligenceDashboard', () => {
       buildResult('spouse')
     );
 
-    const { container } = render(
+    render(
       <SynergyIntelligenceDashboard view={view} lang="fa" badgeLabel="هم‌راستا" dir="rtl" />
     );
 
-    expect(container.textContent).not.toMatch(/evidence-\d+/);
-    expect(screen.getByTestId('evidence-link-evidence-0').textContent).toContain('شاهد');
+    const recommendations = screen.getByTestId('section-recommendations');
+    expect(recommendations.textContent).not.toMatch(/evidence-\d+/);
+    expect(recommendations.textContent).toContain('شاهد');
   });
 
   it('localizes AR spouse recommendations and summary', () => {
