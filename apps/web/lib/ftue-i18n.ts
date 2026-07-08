@@ -54,6 +54,25 @@ export const PREPARING_COPY = {
   stepPending: 'Waiting',
 } as const;
 
+export const TODAY_COPY = {
+  step: 'Step 5 of 8',
+  title: 'Your Today is ready',
+  briefEyebrow: 'Today brief',
+  briefBody:
+    'Your timing context is set. Focus on one decision at a time — ask a specific question to see scored guidance for your situation.',
+  previewNote:
+    'Early preview — this is your first personalized insight. It will grow richer as you use METIORO.',
+  scoreUnavailable: 'Score unavailable today. You can still ask your first question.',
+  cta: 'Ask your first question',
+  personalizedWithNameAndCity: (name: string, city: string) =>
+    `${name}, your timing context is anchored to ${city}.`,
+  personalizedWithName: (name: string) =>
+    `${name}, your timing context is ready for today.`,
+  personalizedWithCity: (city: string) =>
+    `Your timing context is anchored to ${city}.`,
+  personalizedDefault: 'Your timing context is ready for today.',
+} as const;
+
 export const LOGIN_FTUE_COPY = {
   title: 'Sign in to continue',
   sub: 'Save your profile and decision guidance securely.',

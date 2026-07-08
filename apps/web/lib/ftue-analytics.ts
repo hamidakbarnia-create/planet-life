@@ -21,7 +21,17 @@ export type PreparingEventName =
   | 'ftue.preparing.completed'
   | 'ftue.preparing.failed';
 
-export type AnalyticsEventName = FtueEventName | ProfileEventName | PreparingEventName;
+export type TodayEventName =
+  | 'ftue.today.view'
+  | 'ftue.today.started'
+  | 'ftue.today.cta_clicked'
+  | 'ftue.today.missing_profile';
+
+export type AnalyticsEventName =
+  | FtueEventName
+  | ProfileEventName
+  | PreparingEventName
+  | TodayEventName;
 
 const QUEUE_KEY = 'planet-life-ftue-events';
 const MAX_QUEUE = 100;
@@ -85,6 +95,13 @@ export function trackProfileEvent(
 
 export function trackPreparingEvent(
   event: PreparingEventName,
+  properties: Record<string, unknown> = {}
+): void {
+  enqueueAnalyticsEvent(event, properties);
+}
+
+export function trackTodayEvent(
+  event: TodayEventName,
   properties: Record<string, unknown> = {}
 ): void {
   enqueueAnalyticsEvent(event, properties);
