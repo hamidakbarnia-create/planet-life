@@ -71,9 +71,11 @@ describe('TodayPlaceholderScreen', () => {
 
     await screen.findByRole('heading', { name: /your today is ready/i });
 
-    const queue = localStorage.getItem('planet-life-ftue-events');
-    expect(queue).toContain('ftue.today.view');
-    expect(queue).toContain('ftue.today.started');
+    await waitFor(() => {
+      const queue = localStorage.getItem('planet-life-ftue-events');
+      expect(queue).toContain('ftue.today.view');
+      expect(queue).toContain('ftue.today.started');
+    });
   });
 
   it('routes to /ask when CTA is clicked', async () => {

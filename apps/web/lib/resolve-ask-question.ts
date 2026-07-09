@@ -1,8 +1,11 @@
 import type { AppLang } from './app-settings';
 import type { FtueAskQuestion } from './ask-question-repository';
 import { getAskCopy, type AskSuggestionId } from './ftue-i18n';
+import { findGuidedQuestion, resolveGuidedQuestionText } from './question-library';
 
 export function getSuggestionText(lang: AppLang, id: AskSuggestionId): string | null {
+  const fromLibrary = findGuidedQuestion(id);
+  if (fromLibrary) return resolveGuidedQuestionText(fromLibrary, lang);
   const match = getAskCopy(lang).suggestions.find((s) => s.id === id);
   return match?.text ?? null;
 }

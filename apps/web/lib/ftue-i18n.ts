@@ -92,7 +92,7 @@ export type AskSuggestion = {
   text: string;
 };
 
-export type AskSuggestionId = AskSuggestion['id'];
+export type AskSuggestionId = string;
 
 export type AskCopy = {
   step: string;

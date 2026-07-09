@@ -9,6 +9,7 @@ import { saveSession } from '@/lib/auth';
 import { getAskCopy } from '@/lib/ftue-i18n';
 import type { AppLang } from '@/lib/app-settings';
 import { getProfileRepository, resetProfileRepositoryForTests } from '@/lib/profile';
+import { questionsByCategory } from '@/lib/question-library';
 
 const replace = vi.fn();
 const push = vi.fn();
@@ -19,6 +20,18 @@ vi.mock('next/navigation', () => ({
 
 function renderAsk(lang: AppLang = 'en') {
   return render(<AskScreen copy={getAskCopy(lang)} lang={lang} />);
+}
+
+function clickCareerFocusQuestion() {
+  fireEvent.click(
+    screen.getByRole('button', {
+      name: /what should i focus on in my career this week/i,
+    })
+  );
+}
+
+function getCategoryTab(name: RegExp) {
+  return screen.getByRole('tab', { name });
 }
 
 describe('AskScreen', () => {
@@ -59,7 +72,7 @@ describe('AskScreen', () => {
     expect(await screen.findByRole('heading', { name: /ask metioro/i })).toBeTruthy();
     expect(screen.getByLabelText(/your question/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /get guidance/i })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /career/i })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: /career & work/i })).toBeTruthy();
   });
 
   it('redirects to profile onboarding when birth profile is missing', async () => {
@@ -89,11 +102,36 @@ describe('AskScreen', () => {
     expect(submit).toHaveProperty('disabled', false);
   });
 
-  it('fills the textbox when a suggestion is clicked', async () => {
+  it('shows eight questions for the selected category', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
+    await screen.findByRole('tab', { name: /career & work/i });
 
-    fireEvent.click(await screen.findByRole('button', { name: /career/i }));
+    const careerQuestions = questionsByCategory('career-work');
+    for (const guided of careerQuestions) {
+      expect(
+        screen.getByRole('button', { name: new RegExp(guided.labels.en, 'i') })
+      ).toBeTruthy();
+    }
+
+    fireEvent.click(getCategoryTab(/love & people/i));
+    const relationshipQuestions = questionsByCategory('relationships');
+    for (const guided of relationshipQuestions) {
+      expect(
+        screen.getByRole('button', { name: new RegExp(guided.labels.en, 'i') })
+      ).toBeTruthy();
+    }
+    expect(
+      screen.queryByRole('button', { name: /what should i focus on in my career this week/i })
+    ).toBeNull();
+  });
+
+  it('fills the textbox when a guided question is clicked', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('en');
+    await screen.findByRole('tab', { name: /career & work/i });
+
+    clickCareerFocusQuestion();
 
     const input = screen.getByLabelText(/your question/i) as HTMLTextAreaElement;
     expect(input.value).toBe('What should I focus on in my career this week?');
@@ -102,13 +140,14 @@ describe('AskScreen', () => {
   it('stores a suggestion by id without locale-specific text', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
+    await screen.findByRole('tab', { name: /career & work/i });
 
-    fireEvent.click(await screen.findByRole('button', { name: /career/i }));
+    clickCareerFocusQuestion();
     fireEvent.click(screen.getByRole('button', { name: /get guidance/i }));
 
     const stored = getAskQuestionRepository().loadQuestion();
     expect(stored?.source).toBe('suggestion');
-    expect(stored?.suggestion_id).toBe('career');
+    expect(stored?.suggestion_id).toBe('career-focus-week');
     expect(stored?.text).toBeUndefined();
     expect(push).toHaveBeenCalledWith('/result');
   });
@@ -116,8 +155,9 @@ describe('AskScreen', () => {
   it('stores edited suggestion text as typed', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
+    await screen.findByRole('tab', { name: /career & work/i });
 
-    fireEvent.click(await screen.findByRole('button', { name: /career/i }));
+    clickCareerFocusQuestion();
     const input = screen.getByLabelText(/your question/i);
     fireEvent.change(input, { target: { value: 'Custom career question' } });
     fireEvent.click(screen.getByRole('button', { name: /get guidance/i }));
@@ -161,7 +201,12 @@ describe('AskScreen', () => {
       expect(queue).toContain('ftue.ask.started');
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /relationships/i }));
+    fireEvent.click(getCategoryTab(/love & people/i));
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: /how can i strengthen an important relationship right now/i,
+      })
+    );
     await waitFor(() => {
       const queue = localStorage.getItem('planet-life-ftue-events');
       expect(queue).toContain('ftue.ask.question_selected');
@@ -174,17 +219,34 @@ describe('AskScreen', () => {
     });
   });
 
-  it('updates copy when parent passes a new locale', async () => {
+  it('updates category labels when parent passes a new locale', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     const { rerender } = renderAsk('en');
-    await screen.findByRole('heading', { name: /ask metioro/i });
+    await screen.findByRole('tab', { name: /career & work/i });
 
     rerender(<AskScreen copy={getAskCopy('fa')} lang="fa" />);
 
     expect(screen.getByRole('heading', { name: /از METIORO بپرسید/i })).toBeTruthy();
     expect(screen.getByLabelText(/پرسش شما/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /دریافت راهنمایی/i })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /شغل/i })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: /مسیر شغلی و کار/i })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: /عشق و افراد/i })).toBeTruthy();
+  });
+
+  it('updates question labels when parent passes a new locale', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    const { rerender } = renderAsk('en');
+    await screen.findByRole('tab', { name: /career & work/i });
+    clickCareerFocusQuestion();
+
+    rerender(<AskScreen copy={getAskCopy('fa')} lang="fa" />);
+
+    const input = screen.getByLabelText(/پرسش شما/i) as HTMLTextAreaElement;
+    expect(input.value).toBe('این هفته روی چه چیزی در مسیر شغلی‌ام تمرکز کنم؟');
+    expect(
+      screen.getByRole('button', {
+        name: /این هفته روی چه چیزی در مسیر شغلی‌ام تمرکز کنم/i,
+      })
+    ).toBeTruthy();
   });
 });
-

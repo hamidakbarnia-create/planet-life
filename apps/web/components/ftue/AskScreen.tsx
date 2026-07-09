@@ -1,19 +1,30 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { useRequireAuth } from '@/hooks/use-require-auth';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
-import { trackAskEvent } from '@/lib/ftue-analytics';
 import type { AppLang } from '@/lib/app-settings';
-import type { AskCopy, AskSuggestion, AskSuggestionId } from '@/lib/ftue-i18n';
+import { trackAskEvent } from '@/lib/ftue-analytics';
+import type { AskCopy } from '@/lib/ftue-i18n';
 import {
   getProfileRepository,
   isProfileRecordComplete,
 } from '@/lib/profile';
+import {
+  findGuidedQuestion,
+  getAllQuestionCategories,
+  questionsByCategory,
+  resolveCategoryLabel,
+  resolveGuidedQuestionText,
+  type GuidedQuestionId,
+  type QuestionCategoryId,
+} from '@/lib/question-library';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
-import { useRequireAuth } from '@/hooks/use-require-auth';
 
 const MAX_CHARS = 500;
+const QUESTION_CATEGORIES = getAllQuestionCategories();
+const DEFAULT_CATEGORY_ID = QUESTION_CATEGORIES[0]?.id ?? 'career-work';
 
 function askSubmittedAt(): number {
   return Date.now();
@@ -25,19 +36,29 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
   const repo = getProfileRepository();
   const askRepo = getAskQuestionRepository();
   const c = copy;
-  const suggestions = c.suggestions;
   const formId = useId();
   const inputId = `${formId}-question`;
   const counterId = `${formId}-counter`;
 
   const [question, setQuestion] = useState('');
-  const [selectedSuggestionId, setSelectedSuggestionId] = useState<AskSuggestionId | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] =
+    useState<QuestionCategoryId>(DEFAULT_CATEGORY_ID);
+  const [selectedSuggestionId, setSelectedSuggestionId] = useState<GuidedQuestionId | null>(null);
   const initRef = useRef(false);
   const startedRef = useRef(false);
 
+  const categoryQuestions = questionsByCategory(selectedCategoryId);
   const profileComplete = isProfileRecordComplete(repo.loadProfile());
   const trimmed = question.trim();
   const canSubmit = trimmed.length > 0 && trimmed.length <= MAX_CHARS;
+
+  useEffect(() => {
+    if (!selectedSuggestionId) return;
+    const guidedQuestion = findGuidedQuestion(selectedSuggestionId);
+    if (guidedQuestion) {
+      setQuestion(resolveGuidedQuestionText(guidedQuestion, lang));
+    }
+  }, [lang, selectedSuggestionId]);
 
   const markStarted = () => {
     if (startedRef.current) return;
@@ -67,11 +88,17 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     setQuestion(value);
   };
 
-  const handleSuggestion = (suggestion: AskSuggestion) => {
+  const handleCategory = (categoryId: QuestionCategoryId) => {
+    setSelectedCategoryId(categoryId);
+  };
+
+  const handleGuidedQuestion = (questionId: GuidedQuestionId) => {
+    const guidedQuestion = findGuidedQuestion(questionId);
+    if (!guidedQuestion) return;
     markStarted();
-    trackAskEvent('ftue.ask.question_selected', { suggestion_id: suggestion.id });
-    setSelectedSuggestionId(suggestion.id);
-    setQuestion(suggestion.text);
+    trackAskEvent('ftue.ask.question_selected', { suggestion_id: questionId });
+    setSelectedSuggestionId(questionId);
+    setQuestion(resolveGuidedQuestionText(guidedQuestion, lang));
   };
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -86,17 +113,20 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
       return;
     }
 
-    const activeSuggestion = selectedSuggestionId
-      ? suggestions.find((s) => s.id === selectedSuggestionId)
+    const guidedQuestion = selectedSuggestionId
+      ? findGuidedQuestion(selectedSuggestionId)
       : undefined;
+    const canonicalText = guidedQuestion
+      ? resolveGuidedQuestionText(guidedQuestion, lang)
+      : '';
     const isUnmodifiedSuggestion =
-      activeSuggestion != null && activeSuggestion.text === text;
+      guidedQuestion != null && canonicalText === text;
 
-    if (isUnmodifiedSuggestion) {
+    if (isUnmodifiedSuggestion && selectedSuggestionId) {
       askRepo.saveQuestion({
         submitted_at: askSubmittedAt(),
         source: 'suggestion',
-        suggestion_id: activeSuggestion.id,
+        suggestion_id: selectedSuggestionId,
       });
       trackAskEvent('ftue.ask.submitted', {
         source: 'suggestion',
@@ -164,15 +194,40 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
           <legend className="fi text-xs uppercase tracking-widest text-white/45 mb-3">
             {c.suggestionsLabel}
           </legend>
-          <div className="flex flex-wrap gap-2">
-            {suggestions.map((suggestion) => (
+          <div
+            className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1"
+            role="tablist"
+            aria-label={c.suggestionsLabel}
+          >
+            {QUESTION_CATEGORIES.map((category) => {
+              const selected = category.id === selectedCategoryId;
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => handleCategory(category.id)}
+                  className={`ask-chip fi text-sm px-3.5 py-2 rounded-full border shrink-0 transition-colors ${
+                    selected
+                      ? 'border-amber-400/40 text-white'
+                      : 'border-white/15 text-white/75 hover:text-white hover:border-amber-400/40'
+                  }`}
+                >
+                  {resolveCategoryLabel(category, lang)}
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap gap-2 mt-3" role="tabpanel">
+            {categoryQuestions.map((guidedQuestion) => (
               <button
-                key={suggestion.id}
+                key={guidedQuestion.id}
                 type="button"
-                onClick={() => handleSuggestion(suggestion)}
+                onClick={() => handleGuidedQuestion(guidedQuestion.id)}
                 className="ask-chip fi text-sm px-3.5 py-2 rounded-full border border-white/15 text-white/75 hover:text-white hover:border-amber-400/40 transition-colors"
               >
-                {suggestion.label}
+                {resolveGuidedQuestionText(guidedQuestion, lang)}
               </button>
             ))}
           </div>
