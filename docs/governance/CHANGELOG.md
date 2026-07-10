@@ -2,13 +2,37 @@
 
 > Status: Review
 
-**Version:** 1.2.0
+**Version:** 1.3.0
 
 **Authority:** This document derives from [METIORO_CONSTITUTION.md](./METIORO_CONSTITUTION.md) (governance instrument).
 
 **Purpose:** Version history of the METIORO governance structure itself.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for governance releases.
+
+---
+
+## [1.3.0] — 2026-07-10
+
+### Added
+
+- [GOVERNANCE.md](./GOVERNANCE.md) — Review Protocol and Sprint Protocol (Rule 0, Review Question Zero, four pre-sprint questions, eight-stage execution cycle)
+- [ADR-0006](../adr/ADR-0006-Decision-API-Contract-v1.md) — Decision API Contract v1 (**LOCKED**)
+- Sprint & Workstream Status Registry in [MASTER_STATUS.md](../MASTER_STATUS.md)
+
+### Changed
+
+- [MASTER_STATUS.md](../MASTER_STATUS.md) — registered as authoritative sprint/workstream status registry; implicit status forbidden
+- [DOCUMENT_STATUS.md](../DOCUMENT_STATUS.md) — MASTER_STATUS authority and ADR-0006 registration
+- [DOCUMENT_HIERARCHY.md](./DOCUMENT_HIERARCHY.md) — Level 5 placement for MASTER_STATUS and GOVERNANCE
+- [ADR_INDEX.md](./ADR_INDEX.md) — ADR-0006 LOCKED entry
+- [README.md](./README.md) — GOVERNANCE.md in Contents
+
+### Documented
+
+- Phase 1 (FTUE Infrastructure) closed at tag `ftue-pipeline-complete`
+- UI Audit status CLOSED with evidence commit `2384ecc`
+- Phase 6 sequencing locked (6A Backend Bridge · 6B Decision Signal · 6C Evidence Pipeline)
 
 ---
 

@@ -53,6 +53,7 @@ Cursor and other AI agents may maintain structure, links, references, and consis
 
 | Document | Role |
 |----------|------|
+| [GOVERNANCE.md](./GOVERNANCE.md) | Review Protocol and Sprint Protocol — operational execution rules |
 | [DOCUMENT_HIERARCHY.md](./DOCUMENT_HIERARCHY.md) | Defines authority levels and document placement |
 | [DECISION_LOG.md](./DECISION_LOG.md) | Register of permanent project decisions |
 | [ADR_INDEX.md](./ADR_INDEX.md) | Index of Architecture Decision Records |

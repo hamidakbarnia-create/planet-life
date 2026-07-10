@@ -1,10 +1,10 @@
 # METIORO Master Status
 
-> **Document type:** Navigation and status index only  
-> **Last updated:** 2026-07-10  
-> **Authority:** Summarizes existing repository artifacts — does not create governance
+> **Document type:** Sprint & workstream status registry
+> **Last updated:** 2026-07-10
+> **Authority:** Authoritative registry for sprint and workstream status per [GOVERNANCE.md](./governance/GOVERNANCE.md). Summarizes repository artifacts — does not override Constitution, Decision Log LOCKED entries, Token Registry, or LOCKED ADRs.
 
-**Quick links:** [Governance](./governance/README.md) · [Design Token Registry](./design/system/design-token-registry.md) · [Performance Baseline](./performance/BASELINE.md) · [UI Audit](./design/ui-audit/README.md)
+**Quick links:** [Governance](./governance/GOVERNANCE.md) · [Governance hub](./governance/README.md) · [Design Token Registry](./design/system/design-token-registry.md) · [Performance Baseline](./performance/BASELINE.md) · [UI Audit](./design/ui-audit/README.md)
 
 ---
 
@@ -231,6 +231,37 @@ Approved or documented engineering work only (no new feature proposals):
 
 ---
 
+## Sprint & Workstream Status Registry
+
+> **Maintenance:** Project owner updates this table when a sprint opens, closes, or changes status.
+> **Rule:** No sprint or workstream may be treated as active without an explicit row here. Implicit status is forbidden ([GOVERNANCE.md](./governance/GOVERNANCE.md)).
+
+| ID | Sprint / workstream | Status | Evidence |
+|----|---------------------|--------|----------|
+| **UI-AUDIT** | UI Audit — Step 0 Inspection | **CLOSED** | commit `2384ecc`; [ui-audit/README.md](./design/ui-audit/README.md); [DOCUMENT_STATUS.md](./DOCUMENT_STATUS.md) |
+| **DS-01** | Design Token Registry authority | **CLOSED** | commit `72c6131`; [design-token-registry.md](./design/system/design-token-registry.md) |
+| **LANDING-V1** | Landing Experience v1 | **CLOSED** | [performance/HISTORY.md](./performance/HISTORY.md) |
+| **FTUE-INFRA** | Phase 1 — FTUE Infrastructure | **CLOSED** | tag `ftue-pipeline-complete` @ `d90f127` |
+| **SPRINT-3A** | Question Library foundation | **CLOSED** | commit `aa2682b` |
+| **SPRINT-3B** | Guided Question UI | **CLOSED** | commit `3050c8e` |
+| **SPRINT-4A** | Unified ask resolution contract | **CLOSED** | commit `09e0c65` |
+| **SPRINT-4B** | Decision request mapping layer | **CLOSED** | commit `48543f2` |
+| **SPRINT-4C** | Decision execution readiness boundary | **CLOSED** | commit `2a94693` |
+| **SPRINT-5A** | Deterministic decision engine facade | **CLOSED** | commit `b60bf68` |
+| **SPRINT-5B** | Result runtime pipeline integration | **CLOSED** | commit `d90f127` |
+| **ADR-DS-001** | Design System Architecture v1 | **PROPOSED** | [ADR-DS-001](./governance/adr/ADR-DS-001-design-system-architecture.md) |
+| **ADR-DS-002** | Runtime Semantic Token Consumption | **PROPOSED** | [ADR-DS-002](./governance/adr/ADR-DS-002-runtime-semantic-token-consumption.md) |
+| **DS-02** | DS-02 runtime token migration (implementation) | **OPEN** | Blocked on ADR-DS-002 acceptance |
+| **ENG-HYGIENE** | Engineering hygiene (lint + CI gate) | **OPEN** | [ENGINEERING_READINESS.md](./ENGINEERING_READINESS.md) |
+| **ONE-SENTENCE** | One Sentence Position proposal | **PROPOSED** | [one-sentence-position.md](./brand/one-sentence-position.md) |
+| **PHASE-6A** | Backend Bridge | **PLANNED** | [ADR-0006](./adr/ADR-0006-Decision-API-Contract-v1.md) LOCKED |
+| **PHASE-6B** | Decision Signal Experience & Explainability | **PLANNED** | Phase 6 sequence below |
+| **PHASE-6C** | Evidence Pipeline | **PLANNED** | Phase 6 sequence below |
+
+**Allowed status values:** `CLOSED` · `OPEN` · `PROPOSED` · `PLANNED` — no other value is valid.
+
+---
+
 ## Sprint Log
 
 ### Phase 1 — FTUE Infrastructure (closed)
@@ -241,8 +272,8 @@ Phase 1 (FTUE Infrastructure) closed at tag ftue-pipeline-complete.
 
 Sprint 5B closed — runtime now traverses the complete decision pipeline. Decision output intentionally remains unused until the Decision Engine runtime integration sprint. No user-visible behavior changed.
 
-**UI Audit status:** CLOSED.  
-**Evidence:** commit 2384ecc; docs/design/ui-audit/README.md; docs/DOCUMENT_STATUS.md.  
+**UI Audit status:** CLOSED.
+**Evidence:** commit 2384ecc; docs/design/ui-audit/README.md; docs/DOCUMENT_STATUS.md.
 Open design-system ADRs and documented UI inconsistencies are separate workstreams and do not reopen the audit.
 
 ### Phase 6 sequencing (locked)
@@ -267,7 +298,7 @@ Governance foundation, UI audit, design inventory, token registry (DS-01), and d
 
 ## Guiding Principle
 
-> **Every implementation must be traceable to an approved decision.**  
+> **Every implementation must be traceable to an approved decision.**
 > **No implementation may introduce a new architectural decision.**
 
 Traceability chain: Constitution → Decision Log / ADR → Registry / Spec → Code.
@@ -291,4 +322,8 @@ Traceability chain: Constitution → Decision Log / ADR → Registry / Spec → 
 
 ## Maintenance
 
-Update this file when: a Decision Log entry reaches LOCKED; an ADR is Accepted; a sprint completes (DS-02+); deployment or build status changes; or performance baseline is superseded. Do not use this file to propose strategy, new ADRs, or design changes.
+**Maintainer:** Project owner.
+
+Update this file when: a Decision Log entry reaches LOCKED; an ADR is Accepted or LOCKED; a sprint or workstream changes status in the registry table above; deployment or build status changes; or performance baseline is superseded.
+
+Do not use this file to propose strategy or new ADRs. New ADRs belong in [ADR_INDEX.md](./governance/ADR_INDEX.md) through the Review Protocol ([GOVERNANCE.md](./governance/GOVERNANCE.md)).

@@ -19,6 +19,7 @@
 | ADR-0003 | Logo Selection | Proposed | — |
 | ADR-0004 | Trust Architecture | Superseded | 2026-07-05 |
 | ADR-0005 | Decision Engine Facade — First Runtime Migration | Accepted | 2026-07-05 |
+| ADR-0006 | Decision API Contract v1 | LOCKED | 2026-07-10 |
 | ADR-DS-001 | Design System Architecture v1 | Proposed | 2026-07-07 |
 | ADR-DS-002 | Runtime Semantic Token Consumption | Proposed | 2026-07-07 |
 
@@ -29,6 +30,8 @@
 **ADR-0001 note:** Superseded by [METIORO_CONSTITUTION.md](./METIORO_CONSTITUTION.md) (Chapter 0, Chapter 5, Appendix A) and [DOCUMENT_HIERARCHY.md](./DOCUMENT_HIERARCHY.md). Governance hierarchy is a constitutional and meta-governance concern, not an architecture decision record.
 
 **ADR-0004 note:** Superseded by [TRUST_ARCHITECTURE.md](./TRUST_ARCHITECTURE.md) (Level 1 governance document). Trust Architecture is not an architecture decision record.
+
+**ADR-0006 note:** LOCKED HTTP contract for `POST /api/v1/decision/evaluate`. Full text: [ADR-0006-Decision-API-Contract-v1.md](../adr/ADR-0006-Decision-API-Contract-v1.md). Supersedes requires v2 ADR.
 
 ---
 

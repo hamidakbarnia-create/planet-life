@@ -1,7 +1,7 @@
 # Documentation Status
 
-> **Audit date:** 2026-07-07  
-> **Scope:** Repository-wide documentation classification (analysis only — no documents modified)  
+> **Audit date:** 2026-07-07
+> **Scope:** Repository-wide documentation classification (analysis only — no documents modified)
 > **Status categories used:** Active · Canonical · Proposed · Historical · Legacy · Archive Candidate
 
 This index classifies every Markdown documentation file in the repository. It does not create governance, modify authority, or remove historical material.
@@ -16,7 +16,7 @@ This index classifies every Markdown documentation file in the repository. It do
 | **ADRs** | [ADR_INDEX.md](./governance/ADR_INDEX.md) + accepted ADR files | Index lists ADR-0002/0003 as Proposed with **no standalone files** — index-only records |
 | **Brand Constitution** | [METIORO_CONSTITUTION.md](./governance/METIORO_CONSTITUTION.md) + [BRAND_IDENTITY_STANDARD.md](./governance/BRAND_IDENTITY_STANDARD.md) | [ROADMAP.md](../ROADMAP.md) (legacy positioning/taglines); [one-sentence-position.md](./brand/one-sentence-position.md) (proposal only) |
 | **Design Token Registry** | [design-token-registry.md](./design/system/design-token-registry.md) | [design-token-inventory.md](./design/system/design-token-inventory.md) and tier inventories (historical); ui-audit token inventories (evidence snapshots) |
-| **MASTER_STATUS** | [MASTER_STATUS.md](./MASTER_STATUS.md) (navigation/status index — summarizes, does not legislate) | Must not be cited as overriding Constitution, Decision Log LOCKED entries, or Token Registry |
+| **MASTER_STATUS** | [MASTER_STATUS.md](./MASTER_STATUS.md) | **Sprint & workstream status registry** — authoritative for sprint/workstream status rows | Must not override Constitution, Decision Log LOCKED entries, Token Registry, or LOCKED ADRs | [GOVERNANCE.md](./governance/GOVERNANCE.md) |
 
 ---
 
@@ -37,7 +37,8 @@ This index classifies every Markdown documentation file in the repository. It do
 
 | Document | Location | Purpose | Authority | Status | Superseded by | Notes |
 |----------|----------|---------|-----------|--------|---------------|-------|
-| Master Status | `docs/MASTER_STATUS.md` | Project entry-point: executive summary, locked decisions summary, surface map, next sprint pointer | Navigation index (summarizes artifacts) | **Canonical** | — | Correctly disclaims governance creation. [MASTER_STATUS.md](./MASTER_STATUS.md) labels ROADMAP as legacy |
+| Master Status | `docs/MASTER_STATUS.md` | Sprint & workstream status registry; project entry-point summary | **Sprint status authority** per [GOVERNANCE.md](./governance/GOVERNANCE.md) | **Canonical** | — | Maintained by project owner; implicit sprint status forbidden |
+| Governance Protocols | `docs/governance/GOVERNANCE.md` | Review Protocol and Sprint Protocol | Derives from Constitution | **Active** | — | Complements Review Protocol; does not replace it |
 | Documentation Status | `docs/DOCUMENT_STATUS.md` | This audit — classifies all documentation | Meta (this audit) | **Active** | — | Created by governance cleanup sprint |
 | Governance hub | `docs/governance/README.md` | Directory index and governance foundation overview | Derives from Constitution (Level 0) | **Active** | — | Status: Review |
 | METIORO Constitution | `docs/governance/METIORO_CONSTITUTION.md` | Supreme authority: product identity, hierarchy, explainability, change process | **Level 0 — supreme** | **Canonical** | — | Status: Review (pending owner acceptance); still canonical by self-declaration §0.1 |
@@ -66,7 +67,8 @@ This index classifies every Markdown documentation file in the repository. It do
 
 | Document | Location | Purpose | Authority | Status | Superseded by | Notes |
 |----------|----------|---------|-----------|--------|---------------|-------|
-| ADR-0005 Decision Engine Facade | `docs/adr/ADR-0005-Decision-Engine-Facade-First-Runtime-Migration.md` | First facade runtime migration pattern (finance analyze) | **Accepted ADR** | **Canonical** | — | Lives outside `docs/governance/adr/` — placement inconsistency |
+| ADR-0005 Decision Engine Facade | `docs/adr/ADR-0005-Decision-Engine-Facade-First-Runtime-Migration.md` | First facade runtime migration pattern (finance analyze) | **Accepted ADR** | **Canonical** | — | Lives in `docs/adr/` |
+| ADR-0006 Decision API Contract v1 | `docs/adr/ADR-0006-Decision-API-Contract-v1.md` | LOCKED HTTP contract for Phase 6A backend bridge | **LOCKED ADR** | **Canonical** | — | `POST /api/v1/decision/evaluate` |
 
 ### `docs/brand/`
 

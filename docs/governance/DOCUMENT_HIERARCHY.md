@@ -104,8 +104,10 @@ Documents at this level define day-to-day workflows — handoffs, roadmaps, spri
 
 | Document | Status | Location |
 |----------|--------|----------|
+| [GOVERNANCE.md](./GOVERNANCE.md) | Review | `docs/governance/GOVERNANCE.md` |
 | Strategic Roadmap | *Existing* | `ROADMAP.md` (root) |
 | Handoff Notes | *Existing* | `HANDOFF.md` (root) |
+| [Master Status / Sprint Registry](../MASTER_STATUS.md) | *Active* | `docs/MASTER_STATUS.md` |
 | Operational Procedures (formal) | *Not yet authored* | `docs/operations/` (proposed) |
 
 ---
