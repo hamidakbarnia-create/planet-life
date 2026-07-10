@@ -6,16 +6,16 @@ import { ChartSkeleton } from '@/components/ChartSkeleton';
 import { NatalChart, type NatalChartLabels } from '@/components/NatalChart';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useRequireAuth } from '@/hooks/use-require-auth';
+import type { FtueAskQuestion } from '@/lib/ask-question-repository';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
+import type { AppLang } from '@/lib/app-settings';
 import { fetchValidatedResultChart } from '@/lib/chart-api';
 import type { ChartData } from '@/lib/chart-types';
-import {
-  hasStoredAskQuestion,
-  resolveStoredAskQuestionText,
-} from '@/lib/resolve-ask-question';
+import { executePreparedDecision } from '@/lib/decision-engine-facade';
+import { prepareDecisionExecution } from '@/lib/decision-execution';
+import { resolveDecisionRequest } from '@/lib/decision-request';
 import { trackResultEvent } from '@/lib/ftue-analytics';
 import { buildResultShareText, getResultCopy } from '@/lib/ftue-i18n';
-import type { AppLang } from '@/lib/app-settings';
 import { ftueTodayPath, markFtueComplete } from '@/lib/ftue-storage';
 import {
   ASPECT_LABELS,
@@ -27,9 +27,30 @@ import {
   getProfileRepository,
   isProfileRecordComplete,
 } from '@/lib/profile';
+import {
+  hasStoredAskQuestion,
+  resolveAskQuestion,
+} from '@/lib/resolve-ask-question';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 
 type ResultChartPhase = 'loading' | 'empty' | 'ready';
+
+function resolveQuestionDisplayText(
+  question: FtueAskQuestion,
+  lang: AppLang
+): string {
+  const resolved = resolveAskQuestion(question, lang);
+  const request = resolveDecisionRequest(resolved);
+  const preparation = prepareDecisionExecution(request);
+  const decision = executePreparedDecision(preparation);
+  // Runtime integration only.
+  // The decision result is intentionally unused until the
+  // Decision Engine runtime replaces the placeholder implementation.
+  // Future runtime integration must preserve the existing user-visible
+  // behavior until the real decision experience is introduced.
+  void decision;
+  return request.displayText;
+}
 
 export function ResultScreen({ lang }: { lang: AppLang }) {
   const router = useRouter();
@@ -46,7 +67,7 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
   const storedQuestion = askRepo.loadQuestion();
   const hasQuestion = hasStoredAskQuestion(storedQuestion);
   const questionText = storedQuestion
-    ? resolveStoredAskQuestionText(storedQuestion, lang)
+    ? resolveQuestionDisplayText(storedQuestion, lang)
     : '';
 
   const chartLabels: NatalChartLabels = useMemo(() => {
