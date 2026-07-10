@@ -68,7 +68,7 @@ This index classifies every Markdown documentation file in the repository. It do
 | Document | Location | Purpose | Authority | Status | Superseded by | Notes |
 |----------|----------|---------|-----------|--------|---------------|-------|
 | ADR-0005 Decision Engine Facade | `docs/adr/ADR-0005-Decision-Engine-Facade-First-Runtime-Migration.md` | First facade runtime migration pattern (finance analyze) | **Accepted ADR** | **Canonical** | — | Lives in `docs/adr/` |
-| ADR-0006 Decision API Contract v1 | `docs/adr/ADR-0006-Decision-API-Contract-v1.md` | LOCKED HTTP contract for Phase 6A backend bridge | **LOCKED ADR** | **Canonical** | — | `POST /api/v1/decision/evaluate` |
+| ADR-0006 Decision API Contract v1 | `docs/adr/ADR-0006-Decision-API-Contract-v1.md` | LOCKED HTTP contract for Phase 6A backend bridge | **LOCKED ADR** | **Canonical** | — | `POST /api/v1/decision/execute` (corrected 2026-07-10) |
 
 ### `docs/brand/`
 

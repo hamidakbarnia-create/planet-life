@@ -31,7 +31,7 @@
 
 **ADR-0004 note:** Superseded by [TRUST_ARCHITECTURE.md](./TRUST_ARCHITECTURE.md) (Level 1 governance document). Trust Architecture is not an architecture decision record.
 
-**ADR-0006 note:** LOCKED HTTP contract for `POST /api/v1/decision/evaluate`. Full text: [ADR-0006-Decision-API-Contract-v1.md](../adr/ADR-0006-Decision-API-Contract-v1.md). Supersedes requires v2 ADR.
+**ADR-0006 note:** LOCKED HTTP contract for `POST /api/v1/decision/execute`. Full text: [ADR-0006-Decision-API-Contract-v1.md](../adr/ADR-0006-Decision-API-Contract-v1.md). Corrected 2026-07-10 after Sprint 6A Step 0 drift from commit `973ce88`. Supersedes requires v2 ADR.
 
 ---
 

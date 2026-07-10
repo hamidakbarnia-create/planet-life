@@ -28,7 +28,7 @@ resolveAskQuestion()
 
 Phase 6A will connect the **ready** execution boundary to FastAPI while keeping the **real decision response unused by UI** until Phase 6B.
 
-Without a locked contract, client and server could diverge on unresolved semantics, timeout handling, and field ownership. ADR-0005 established the facade migration **pattern** for legacy analyze routes; this ADR establishes the **new decision evaluate contract** for FTUE-ready requests.
+Without a locked contract, client and server could diverge on unresolved semantics, timeout handling, and field ownership. ADR-0005 established the facade migration **pattern** for legacy analyze routes; this ADR establishes the **new decision execute contract** for FTUE-ready requests.
 
 **Governing types (client, existing):**
 
@@ -51,10 +51,25 @@ Adopt **Decision API Contract v1** as defined below. Status **LOCKED** — the c
 | Property | Value |
 |----------|-------|
 | **Method** | `POST` |
-| **Path** | `/api/v1/decision/evaluate` |
+| **Path** | `/api/v1/decision/execute` |
 | **Content-Type** | `application/json` |
-| **Auth** | Required — same session identity model as other authenticated experience APIs (future JWT; current FTUE session gate) |
 | **Idempotency** | Recommended header `Idempotency-Key: {request_id}` for safe retries |
+
+> The `execute` verb mirrors `executePreparedDecision()` and preserves contract-code naming symmetry. `evaluate` is not a separate operation.
+
+Authentication and authorization for the Decision API are not decided by this ADR and are outside Sprint 6A. Any new authentication requirement requires a separately reviewed security decision.
+
+### Wire-schema naming
+
+The HTTP boundary may use explicitly named transport models, such as:
+
+- `DecisionExecuteRequest`
+- `DecisionExecuteResponse`
+- `DecisionApiErrorResponse`
+
+These transport models must map between the frozen frontend request contract and the existing backend engine model. Frontend, wire, and engine models are **not** literally the same Python or TypeScript type; boundary mappers translate between them.
+
+Boundary mappers must not invent domain-semantic defaults. In particular, values such as `target_date` may only be populated from an authoritative existing request field or an already locked rule. Defaulting to the current date is forbidden unless separately approved.
 
 ### Request body
 
@@ -92,20 +107,27 @@ The client sends a **ready executable decision** plus **profile context** requir
 | `profile` | Yes | Profile repository record | Birth and location context for engine |
 | `profile.action_type` | Yes | Profile record | Chart/scoring module default — **not** overridden by question `action_type` unless a future ADR explicitly changes this |
 
-**Unresolved requests must not be sent.** The client must stop at `prepareDecisionExecution()` and must not call this endpoint when status is `unresolved`.
+### Unresolved semantics
+
+> `unresolved` is frontend-only. It is produced before any network call. An unresolved decision request never reaches this endpoint. The backend does not return an unresolved response.
+
+The client must stop at `prepareDecisionExecution()` and must not call this endpoint when status is `unresolved`. Ordinary FastAPI/Pydantic request-shape rejection is not the domain state `unresolved`.
 
 ### Success response — `200 OK`
+
+Maps to the completed branch of `DecisionEngineResponse` / `DecisionExecuteResponse`:
 
 ```json
 {
   "status": "completed",
-  "request_id": "career-focus-week:career_focus",
   "result": {
-    "source": "decision_engine",
-    "recommendation_summary": "…",
-    "confidence_rating": "good",
-    "uncertainty_disclosed": true,
-    "correlation_id": "corr_01H…"
+    "requestId": "career-focus-week:career_focus",
+    "actionType": "career_focus",
+    "guidedQuestionId": "career-focus-week",
+    "categoryId": "career-work",
+    "needsTime": false,
+    "summary": "…",
+    "source": "decision_engine"
   }
 }
 ```
@@ -113,67 +135,55 @@ The client sends a **ready executable decision** plus **profile context** requir
 | Field | Required | Notes |
 |-------|----------|-------|
 | `status` | Yes | Always `"completed"` for success |
-| `request_id` | Yes | Echo request ID |
+| `result.requestId` | Yes | Echo request ID |
+| `result.actionType` | Yes | From request |
+| `result.guidedQuestionId` | Yes | From request |
+| `result.categoryId` | Yes | From request |
+| `result.needsTime` | Yes | From request |
+| `result.summary` | Yes | Human-readable summary; Phase 6A may be discarded by UI |
 | `result.source` | Yes | `"decision_engine"` for real engine; distinguishes from client placeholder |
-| `result.recommendation_summary` | Yes | Human-readable summary; Phase 6A may be discarded by UI |
-| `result.confidence_rating` | Yes | Engine rating band — opaque string at v1 |
-| `result.uncertainty_disclosed` | Yes | Must be `true` when confidence limits apply (Brand Constraint 4a readiness) |
-| `result.correlation_id` | Yes | Support and audit trace |
 
 Phase 6A **must not** require the UI to consume `result`. Phase 6B introduces first user-visible consumption under separate acceptance criteria.
-
-### Unresolved response — `422 Unprocessable Entity`
-
-When the server receives a structurally incomplete or policy-blocked request:
-
-```json
-{
-  "status": "unresolved",
-  "reason": "incomplete_execution_metadata",
-  "correlation_id": "corr_01H…"
-}
-```
-
-| `reason` value | Meaning |
-|----------------|---------|
-| `typed_question_unresolved` | Typed questions are not evaluable at v1 |
-| `legacy_suggestion_id` | Legacy suggestion IDs are not evaluable at v1 |
-| `unknown_suggestion_id` | Unknown suggestion IDs are not evaluable at v1 |
-| `missing_suggestion_id` | Missing suggestion ID |
-| `missing_question_text` | Missing display text |
-| `incomplete_execution_metadata` | Ready-contract validation failed server-side |
-
-Reason strings align with `DecisionExecutionUnresolvedReason` on the client. The server must not invent new public reason codes without a contract version bump.
 
 ### Error responses
 
 | HTTP | When | Body |
 |------|------|------|
-| `400` | Malformed JSON or missing required fields | `{ "detail": "…", "correlation_id": "…" }` |
-| `401` | Unauthenticated | `{ "detail": "Unauthorized", "correlation_id": "…" }` |
-| `403` | Authenticated but not entitled | `{ "detail": "Forbidden", "correlation_id": "…" }` |
-| `408` | Server timeout exceeded | `{ "detail": "Decision evaluation timed out", "correlation_id": "…" }` |
-| `500` | Unexpected server failure | `{ "detail": "Internal decision evaluation error", "correlation_id": "…" }` |
-| `503` | Engine unavailable | `{ "detail": "Decision engine unavailable", "correlation_id": "…" }` |
+| `400` | Request contract validation failure | See below |
+| `500` | Internal execution failure | See below |
 
-Every error response includes `correlation_id`.
+Body for both:
+
+```json
+{
+  "error": {
+    "code": "string",
+    "message": "string",
+    "requestId": "string"
+  }
+}
+```
+
+Do not use `{ "detail": ..., "correlation_id": ... }` as the v1 contract error shape.
 
 ### Timeout semantics
 
 | Layer | Limit | Behavior |
 |-------|-------|----------|
-| **Client** | 30 seconds | Abort fetch; treat as transport failure; **do not** synthesize completed results |
-| **Server** | 25 seconds | Cancel engine work; return `408` with `correlation_id` |
-| **Retry** | Max 1 automatic retry | Only on network failure or `503`; use same `Idempotency-Key` |
+| **Client** | 5 seconds | Abort fetch; treat as transport failure; **do not** synthesize completed results |
+| **Server** | 4 seconds | Cancel engine work; return `500` with contract error body |
+| **Retry** | Max 1 automatic retry | Only on network failure; use same `Idempotency-Key` |
+
+> These values are contract budgets, not measured engine-performance claims. Longer budgets require an ADR amendment backed by measured engine latency.
 
 ### Responsibilities
 
 | Actor | Responsibility |
 |-------|----------------|
-| **Client pipeline** | Produce `ExecutableDecisionRequest` only when `prepareDecisionExecution()` returns `ready`; never call evaluate for `unresolved` |
+| **Client pipeline** | Produce `ExecutableDecisionRequest` only when `prepareDecisionExecution()` returns `ready`; never call execute for `unresolved` |
 | **Client UI (Phase 6A)** | May ignore `result`; must preserve existing user-visible behavior |
 | **Client UI (Phase 6B+)** | Must consume real `result` with mandatory uncertainty disclosure |
-| **API route** | Validate ready contract; map to `DecisionRequest`; call `generate_decision_outcome()`; map to response contract |
+| **API route** | Validate ready contract; map to engine `DecisionRequest`; call `generate_decision_outcome()`; map to response contract |
 | **Decision Engine** | Produce advisory outcome; never claim decision authority |
 | **API route** | Must not convert unresolved client states into `completed` by inferring `action_type` |
 
@@ -181,9 +191,8 @@ Every error response includes `correlation_id`.
 
 1. **v1 is LOCKED** — field additions may be optional-only; no breaking renames or semantic inversions.
 2. **Breaking changes** require `Decision API Contract v2` as a new ADR and index entry.
-3. **Reason code additions** require minor contract revision or v2 ADR.
-4. **UI consumption of `result`** requires Phase 6B governance acceptance — not a silent v1 change.
-5. Implementation PRs must cite this ADR and demonstrate contract tests before merge.
+3. **UI consumption of `result`** requires Phase 6B governance acceptance — not a silent v1 change.
+4. Implementation PRs must cite this ADR and demonstrate contract tests before merge.
 
 ---
 
@@ -192,13 +201,13 @@ Every error response includes `correlation_id`.
 ### Positive
 
 - Phase 6A can proceed with a frozen boundary
-- Client and server unresolved semantics stay aligned
+- Client unresolved semantics remain client-only; server contract stays simple
 - Phase 6B has a stable contract to consume
 
 ### Negative
 
 - v1 locked before implementation — mismatches require v2 ADR
-- Server must reject unresolved cases explicitly rather than best-effort scoring
+- Server must reject malformed requests explicitly rather than best-effort scoring
 
 ---
 
@@ -207,8 +216,9 @@ Every error response includes `correlation_id`.
 | Alternative | Rejected because |
 |-------------|------------------|
 | Reuse `/api/business/analyze` shape | Couples FTUE decision pathway to legacy activity scoring response |
-| Unversioned `/api/decision/evaluate` | Violates API Strategy URL versioning policy |
+| Unversioned `/api/decision/execute` | Violates API Strategy URL versioning policy |
 | Allow typed questions with inferred `action_type` | Violates intent-classification boundary and Rule 0 product honesty |
+| Server-side `422 unresolved` | Unresolved is frontend-only; backend never returns unresolved |
 
 ---
 
@@ -229,3 +239,4 @@ Every error response includes `correlation_id`.
 | Date | Status | Notes |
 |------|--------|-------|
 | 2026-07-10 | LOCKED | Initial Decision API Contract v1 |
+| 2026-07-10 | LOCKED | Governance correction: restored approved draft after Sprint 6A Step 0 drift from commit `973ce88` (endpoint `evaluate`→`execute`, timeout budgets, frontend-only unresolved, error shape, auth deferred) |

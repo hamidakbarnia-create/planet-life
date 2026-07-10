@@ -68,6 +68,10 @@ Unanswered questions block sprint start.
 
 Stages may not be skipped. Inspection-only sprints stop after Stage 5 unless documentation updates are in scope.
 
+### Governance approval integrity
+
+> Any artifact subject to governance approval must be committed byte-identical to its approved draft. Any unreviewed delta discovered before or after commit invalidates the Lock and reverts the artifact to Proposed until re-reviewed.
+
 ### Relationship to Review Protocol
 
 | Review Protocol | Sprint Protocol |

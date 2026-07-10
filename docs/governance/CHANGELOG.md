@@ -2,13 +2,28 @@
 
 > Status: Review
 
-**Version:** 1.3.0
+**Version:** 1.3.1
 
 **Authority:** This document derives from [METIORO_CONSTITUTION.md](./METIORO_CONSTITUTION.md) (governance instrument).
 
 **Purpose:** Version history of the METIORO governance structure itself.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for governance releases.
+
+---
+
+## [1.3.1] — 2026-07-10
+
+### Changed
+
+- [ADR-0006](../adr/ADR-0006-Decision-API-Contract-v1.md) — governance correction restoring approved Decision API Contract v1 draft after Sprint 6A Step 0 discovered unreviewed drift in commit `973ce88` (endpoint, timeouts, unresolved semantics, error shape, auth scope)
+- [GOVERNANCE.md](./GOVERNANCE.md) — governance approval integrity rule (byte-identical commit requirement)
+- [ADR_INDEX.md](./ADR_INDEX.md) — ADR-0006 endpoint note corrected to `/api/v1/decision/execute`
+- [DOCUMENT_STATUS.md](../DOCUMENT_STATUS.md) — ADR-0006 endpoint note corrected
+
+### Documented
+
+- Invalid Lock on ADR-0006 from `973ce88` reverted to Proposed during inspection; re-LOCKED after correction review
 
 ---
 
