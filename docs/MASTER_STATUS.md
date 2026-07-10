@@ -1,7 +1,7 @@
 # METIORO Master Status
 
 > **Document type:** Navigation and status index only  
-> **Last updated:** 2026-07-07  
+> **Last updated:** 2026-07-10  
 > **Authority:** Summarizes existing repository artifacts — does not create governance
 
 **Quick links:** [Governance](./governance/README.md) · [Design Token Registry](./design/system/design-token-registry.md) · [Performance Baseline](./performance/BASELINE.md) · [UI Audit](./design/ui-audit/README.md)
@@ -228,6 +228,32 @@ Approved or documented engineering work only (no new feature proposals):
 - **Out of scope for DS-02 architecture:** resolver module location, CSS vs TS resolution path, feature flags (implementation choices only)
 
 **Success criteria (ADR-DS-002):** Engineering execution only — wire resolver, pick first map, screenshot + literal diff tests, register sub-tokens before binding, build + Lighthouse spot-check.
+
+---
+
+## Sprint Log
+
+### Phase 1 — FTUE Infrastructure (closed)
+
+**Tag:** `ftue-pipeline-complete` @ `d90f127`
+
+Phase 1 (FTUE Infrastructure) closed at tag ftue-pipeline-complete.
+
+Sprint 5B closed — runtime now traverses the complete decision pipeline. Decision output intentionally remains unused until the Decision Engine runtime integration sprint. No user-visible behavior changed.
+
+**UI Audit status:** CLOSED.  
+**Evidence:** commit 2384ecc; docs/design/ui-audit/README.md; docs/DOCUMENT_STATUS.md.  
+Open design-system ADRs and documented UI inconsistencies are separate workstreams and do not reopen the audit.
+
+### Phase 6 sequencing (locked)
+
+Phase 6 sequence:
+
+6A — Backend Bridge: connect the existing facade boundary to FastAPI while keeping the real decision response unused by UI.
+
+6B — Decision Signal Experience and Explainability: first user-visible consumption of the real decision response; Brand Constraint 4a uncertainty disclosure is a mandatory acceptance criterion.
+
+6C — Evidence Pipeline: operationalize evidence hierarchy, provenance, and explainability evidence requirements.
 
 ---
 
