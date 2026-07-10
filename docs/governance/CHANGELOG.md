@@ -2,13 +2,26 @@
 
 > Status: Review
 
-**Version:** 1.3.1
+**Version:** 1.3.2
 
 **Authority:** This document derives from [METIORO_CONSTITUTION.md](./METIORO_CONSTITUTION.md) (governance instrument).
 
 **Purpose:** Version history of the METIORO governance structure itself.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for governance releases.
+
+---
+
+## [1.3.2] — 2026-07-10
+
+### Changed
+
+- [ADR-0006](../adr/ADR-0006-Decision-API-Contract-v1.md) — Implementation Boundary Clarification (Sprint 6A HTTP boundary only; legacy engine mapping deferred; no semantic defaults)
+- [ADR_INDEX.md](./ADR_INDEX.md) — ADR-0006 note registers implementation boundary clarification
+
+### Documented
+
+- Sprint 6A Task 1 Step 0 finding: legacy `DecisionRequest` is not semantically isomorphic to Decision API Contract v1 without invented domain meaning
 
 ---
 

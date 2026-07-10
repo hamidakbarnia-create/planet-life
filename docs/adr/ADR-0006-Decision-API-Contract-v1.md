@@ -196,6 +196,103 @@ Do not use `{ "detail": ..., "correlation_id": ... }` as the v1 contract error s
 
 ---
 
+## Implementation Boundary Clarification
+
+**Date:** 2026-07-10
+**Scope:** Sprint 6A backend bridge — implementation interpretation only. Does not modify the v1 HTTP request, success response, error response, endpoint, timeout, unresolved, or authentication terms above.
+
+> A boundary mapper may translate representation, but it may not create domain meaning. Forcing the new Decision API contract through a legacy scoring model would conceal semantic invention behind an adapter.
+
+Sprint 6A establishes the versioned HTTP boundary only. The current legacy scoring model must not be forced behind the new Decision API contract until every required semantic input has an authoritative source.
+
+### Sprint 6A scope
+
+Sprint 6A establishes:
+
+- `POST /api/v1/decision/execute`
+- Explicit transport request and response models
+- Request validation
+- Response serialization
+- 5-second client timeout contract
+- 4-second server execution budget
+- `400`/`500` error envelope
+- Request ID propagation
+- Route-level HTTP tests
+- OpenAPI exposure of the versioned contract
+
+Sprint 6A does **not** establish semantic compatibility with the legacy scoring engine.
+
+### Legacy engine integration deferred
+
+`packages.decision_engine.DecisionRequest` is a legacy internal scoring model. It is **not** itself the Decision API v1 wire contract.
+
+Direct mapping to the current legacy scoring model is deferred because that model requires semantic fields not supplied or governed by ADR-0006, including:
+
+- `target_date`
+- `ScoringContext`
+- `module_origin`
+- a single collapsed `action_type`
+
+Legacy integration may begin only after each required field has an authoritative source defined by governance or by an approved domain contract.
+
+Sprint 6A is not required to delegate to the legacy engine facade when doing so would require invented semantic values. The backend may use a dedicated deterministic boundary implementation to return a contract-valid `DecisionExecuteResponse` while full engine integration remains deferred.
+
+### No semantic defaults
+
+The implementation must not invent or infer domain meaning merely to satisfy the legacy engine.
+
+Explicitly prohibited defaults or guesses include:
+
+- using today's date as `target_date`
+- constructing a default `ScoringContext`
+- assigning a default `module_origin`
+- collapsing distinct profile and question `action_type` values into one legacy field
+- inferring `target_time` from `needs_time` alone
+- deriving missing semantic fields from transport structure alone
+
+`needs_time` may be validated and preserved in the v1 transport response, but it must not be converted into an invented date or time.
+
+Question `action_type` and `profile.action_type` remain distinct at the HTTP boundary. They must not be collapsed into one legacy engine field without a separately reviewed mapping decision.
+
+The boundary implementation must not fabricate:
+
+- `target_date`
+- `target_time`
+- `ScoringContext`
+- `module_origin`
+- `include_location_context`
+- collapsed action-type semantics
+- any other domain-semantic input absent from the HTTP request
+
+### Boundary mapper rule
+
+Boundary mappers may:
+
+- rename fields
+- normalize transport representation
+- validate shape
+- convert equivalent data formats
+- serialize and deserialize contract-valid values
+
+Boundary mappers may not:
+
+- create missing domain facts
+- select business meaning without an authoritative source
+- silently substitute legacy requirements
+- weaken the public API contract to match internal legacy models
+
+### Sprint 6A response boundary
+
+Until legacy scoring integration is separately approved, the endpoint must return a contract-valid `DecisionExecuteResponse` produced within the Decision API boundary.
+
+The clarification does not prescribe fabricated scores, outcomes, recommendations, or astrological conclusions. Any temporary boundary response must be deterministic, explicitly governed, transport-valid, and semantically honest. Do not describe placeholder or boundary-only data as real legacy engine output.
+
+### Future integration gate
+
+Legacy engine integration requires a separate reviewed task or ADR clarification that identifies authoritative sources for every required semantic field and defines the mapping without invented defaults.
+
+---
+
 ## Consequences
 
 ### Positive
@@ -240,3 +337,4 @@ Do not use `{ "detail": ..., "correlation_id": ... }` as the v1 contract error s
 |------|--------|-------|
 | 2026-07-10 | LOCKED | Initial Decision API Contract v1 |
 | 2026-07-10 | LOCKED | Governance correction: restored approved draft after Sprint 6A Step 0 drift from commit `973ce88` (endpoint `evaluate`→`execute`, timeout budgets, frontend-only unresolved, error shape, auth deferred) |
+| 2026-07-10 | LOCKED | Implementation boundary clarification: Sprint 6A HTTP boundary only; legacy engine mapping deferred; no semantic defaults |
