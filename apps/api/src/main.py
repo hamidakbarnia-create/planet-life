@@ -15,6 +15,11 @@ from routes.real_estate import router as real_estate_router
 from routes.vault import router as vault_router
 from routes.pathfinder import router as pathfinder_router
 from routes.world import router as world_router
+from routes.decision import (
+    router as decision_router,
+    register_decision_exception_handlers,
+    register_decision_openapi_filter,
+)
 from packages.astro_engine.scoring_context import CONTEXT_CALENDAR_DAY, CONTEXT_CALENDAR_HOURLY
 from schemas.score_breakdown import build_scoring_response, validate_component_breakdown
 from services.scoring_pipeline import score_with_context
@@ -51,6 +56,10 @@ app.include_router(real_estate_router, prefix="/api/real-estate", tags=["real-es
 app.include_router(vault_router, prefix="/api/vault", tags=["vault"])
 app.include_router(pathfinder_router, prefix="/api/pathfinder", tags=["pathfinder"])
 app.include_router(world_router, prefix="/api/world", tags=["world"])
+app.include_router(decision_router, prefix="/api/v1/decision", tags=["decision"])
+
+register_decision_exception_handlers(app)
+register_decision_openapi_filter(app)
 
 
 @app.get("/")
