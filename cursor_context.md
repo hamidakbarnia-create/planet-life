@@ -50,3 +50,5 @@ NEXT TASKS:
 
 11\. Public figures database - compare with famous charts
 
+For canonical development workflow and environment requirements, see docs/governance/DEVELOPMENT.md.
+
