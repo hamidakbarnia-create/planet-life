@@ -107,17 +107,27 @@ def test_timeout_returns_500_envelope() -> None:
     payload = response.json()
     _assert_error_envelope(payload, request_id=VALID_REQUEST["request_id"])
     assert payload["error"]["code"] == "EXECUTION_TIMEOUT"
+    assert payload["error"]["message"] == "Decision execution timed out"
 
 
 def test_boundary_exception_returns_500_envelope() -> None:
+    secret = "sensitive-internal-detail-7f3c"
     with patch(
         "routes.decision.execute_decision_boundary",
-        side_effect=RuntimeError("boundary failure"),
+        side_effect=RuntimeError(secret),
     ):
         response = client.post("/api/v1/decision/execute", json=VALID_REQUEST)
     assert response.status_code == 500
-    _assert_error_envelope(response.json(), request_id=VALID_REQUEST["request_id"])
-    assert response.json()["error"]["code"] == "INTERNAL_ERROR"
+    payload = response.json()
+    body_text = response.text
+    _assert_error_envelope(payload, request_id=VALID_REQUEST["request_id"])
+    assert payload["error"]["code"] == "INTERNAL_ERROR"
+    assert payload["error"]["message"] == "Internal decision execution failure"
+    assert payload["error"]["requestId"] == VALID_REQUEST["request_id"]
+    assert secret not in body_text
+    assert "RuntimeError" not in body_text
+    assert "sensitive-internal" not in body_text
+    assert set(payload["error"].keys()) == {"code", "message", "requestId"}
 
 
 def test_request_id_propagation_in_success_and_error() -> None:
