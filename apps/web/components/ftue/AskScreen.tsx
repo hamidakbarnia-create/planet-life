@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
 import type { AppLang } from '@/lib/app-settings';
@@ -40,7 +40,7 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
   const inputId = `${formId}-question`;
   const counterId = `${formId}-counter`;
 
-  const [question, setQuestion] = useState('');
+  const [typedQuestion, setTypedQuestion] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] =
     useState<QuestionCategoryId>(DEFAULT_CATEGORY_ID);
   const [selectedSuggestionId, setSelectedSuggestionId] = useState<GuidedQuestionId | null>(null);
@@ -49,16 +49,14 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
 
   const categoryQuestions = questionsByCategory(selectedCategoryId);
   const profileComplete = isProfileRecordComplete(repo.loadProfile());
+  const selectedGuidedQuestion = selectedSuggestionId
+    ? findGuidedQuestion(selectedSuggestionId)
+    : undefined;
+  const question = selectedGuidedQuestion
+    ? resolveGuidedQuestionText(selectedGuidedQuestion, lang)
+    : typedQuestion;
   const trimmed = question.trim();
   const canSubmit = trimmed.length > 0 && trimmed.length <= MAX_CHARS;
-
-  useEffect(() => {
-    if (!selectedSuggestionId) return;
-    const guidedQuestion = findGuidedQuestion(selectedSuggestionId);
-    if (guidedQuestion) {
-      setQuestion(resolveGuidedQuestionText(guidedQuestion, lang));
-    }
-  }, [lang, selectedSuggestionId]);
 
   const markStarted = () => {
     if (startedRef.current) return;
@@ -85,7 +83,7 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     }
     markStarted();
     setSelectedSuggestionId(null);
-    setQuestion(value);
+    setTypedQuestion(value);
   };
 
   const handleCategory = (categoryId: QuestionCategoryId) => {
@@ -98,7 +96,6 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     markStarted();
     trackAskEvent('ftue.ask.question_selected', { suggestion_id: questionId });
     setSelectedSuggestionId(questionId);
-    setQuestion(resolveGuidedQuestionText(guidedQuestion, lang));
   };
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -113,16 +110,7 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
       return;
     }
 
-    const guidedQuestion = selectedSuggestionId
-      ? findGuidedQuestion(selectedSuggestionId)
-      : undefined;
-    const canonicalText = guidedQuestion
-      ? resolveGuidedQuestionText(guidedQuestion, lang)
-      : '';
-    const isUnmodifiedSuggestion =
-      guidedQuestion != null && canonicalText === text;
-
-    if (isUnmodifiedSuggestion && selectedSuggestionId) {
+    if (selectedSuggestionId && selectedGuidedQuestion) {
       askRepo.saveQuestion({
         submitted_at: askSubmittedAt(),
         source: 'suggestion',
