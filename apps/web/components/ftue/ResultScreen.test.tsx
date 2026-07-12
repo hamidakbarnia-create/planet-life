@@ -12,6 +12,8 @@ import { getProfileRepository, resetProfileRepositoryForTests } from '@/lib/prof
 import { buildResultShareText, getResultCopy } from '@/lib/ftue-i18n';
 import { fetchValidatedResultChart } from '@/lib/chart-api';
 import { RAFSANJAN_CHART } from '@/lib/chart-fixtures';
+import * as decisionApi from '@/lib/decision-api';
+import * as decisionFacade from '@/lib/decision-engine-facade';
 
 const replace = vi.fn();
 const push = vi.fn();
@@ -52,6 +54,18 @@ describe('ResultScreen', () => {
     text: 'What should I focus on in my career this week?',
     submitted_at: Date.now(),
     source: 'typed' as const,
+  };
+
+  const guidedReadyQuestion = {
+    submitted_at: Date.now(),
+    source: 'suggestion' as const,
+    suggestion_id: 'career-focus-week',
+  };
+
+  const unresolvedLegacyQuestion = {
+    submitted_at: Date.now(),
+    source: 'suggestion' as const,
+    suggestion_id: 'career',
   };
 
   beforeEach(() => {
@@ -293,5 +307,107 @@ describe('ResultScreen', () => {
     expect(payload.text).not.toMatch(/New York|40\.7128|1990-06-15|14:30|Alex|United States/i);
 
     vi.unstubAllGlobals();
+  });
+
+  it('makes zero Decision API calls during synchronous render', () => {
+    const postSpy = vi
+      .spyOn(decisionApi, 'postDecisionExecute')
+      .mockResolvedValue({
+        ok: true,
+        httpStatus: 200,
+        body: {
+          status: 'completed',
+          result: {
+            requestId: 'career-focus-week:career_focus',
+            actionType: 'career_focus',
+            guidedQuestionId: 'career-focus-week',
+            categoryId: 'career-work',
+            needsTime: false,
+            summary: 'What should I focus on in my career this week?',
+            source: 'decision_api_boundary',
+          },
+        },
+      });
+    const executeSpy = vi.spyOn(decisionFacade, 'executePreparedDecision');
+
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(guidedReadyQuestion);
+    renderResult('en');
+
+    // useQueuedEffect schedules after commit via microtask — render itself must not execute.
+    expect(executeSpy).not.toHaveBeenCalled();
+    expect(postSpy).not.toHaveBeenCalled();
+  });
+
+  it('executes Guided Ready from the effect with exactly one network request', async () => {
+    const postSpy = vi
+      .spyOn(decisionApi, 'postDecisionExecute')
+      .mockResolvedValue({
+        ok: true,
+        httpStatus: 200,
+        body: {
+          status: 'completed',
+          result: {
+            requestId: 'career-focus-week:career_focus',
+            actionType: 'career_focus',
+            guidedQuestionId: 'career-focus-week',
+            categoryId: 'career-work',
+            needsTime: false,
+            summary: 'What should I focus on in my career this week?',
+            source: 'decision_api_boundary',
+          },
+        },
+      });
+    const executeSpy = vi.spyOn(decisionFacade, 'executePreparedDecision');
+
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(guidedReadyQuestion);
+    renderResult('en');
+
+    expect(executeSpy).not.toHaveBeenCalled();
+    expect(postSpy).not.toHaveBeenCalled();
+
+    expect(
+      await screen.findByRole('heading', { name: /your journey begins/i })
+    ).toBeTruthy();
+
+    await waitFor(() => {
+      expect(executeSpy).toHaveBeenCalledTimes(1);
+      expect(postSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('does not call the Decision API for typed questions', async () => {
+    const postSpy = vi.spyOn(decisionApi, 'postDecisionExecute');
+    const executeSpy = vi.spyOn(decisionFacade, 'executePreparedDecision');
+
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(sampleQuestion);
+    renderResult('en');
+
+    await screen.findByRole('heading', { name: /your journey begins/i });
+    await waitFor(() => {
+      expect(mockFetchValidatedResultChart).toHaveBeenCalled();
+    });
+
+    expect(executeSpy).not.toHaveBeenCalled();
+    expect(postSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not call the Decision API for unresolved preparations', async () => {
+    const postSpy = vi.spyOn(decisionApi, 'postDecisionExecute');
+    const executeSpy = vi.spyOn(decisionFacade, 'executePreparedDecision');
+
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(unresolvedLegacyQuestion);
+    renderResult('en');
+
+    await screen.findByRole('heading', { name: /your journey begins/i });
+    await waitFor(() => {
+      expect(mockFetchValidatedResultChart).toHaveBeenCalled();
+    });
+
+    expect(executeSpy).not.toHaveBeenCalled();
+    expect(postSpy).not.toHaveBeenCalled();
   });
 });

@@ -41,14 +41,6 @@ function resolveQuestionDisplayText(
 ): string {
   const resolved = resolveAskQuestion(question, lang);
   const request = resolveDecisionRequest(resolved);
-  const preparation = prepareDecisionExecution(request);
-  const decision = executePreparedDecision(preparation);
-  // Runtime integration only.
-  // The decision result is intentionally unused until the
-  // Decision Engine runtime replaces the placeholder implementation.
-  // Future runtime integration must preserve the existing user-visible
-  // behavior until the real decision experience is introduced.
-  void decision;
   return request.displayText;
 }
 
@@ -121,6 +113,42 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
       cancelled = true;
     };
   }, [authed, profileComplete, hasQuestion, profileRepo]);
+
+  useQueuedEffect(() => {
+    if (!authed || !profileComplete || !hasQuestion) return;
+
+    const question = askRepo.loadQuestion();
+    if (!question) return;
+
+    const profile = profileRepo.loadProfile();
+    if (!profile || !isProfileRecordComplete(profile)) return;
+
+    const resolved = resolveAskQuestion(question, lang);
+    const request = resolveDecisionRequest(resolved);
+    const preparation = prepareDecisionExecution(request);
+
+    // Existing discriminator: only Guided Ready preparations execute over the network.
+    if (preparation.status !== 'ready') return;
+
+    const controller = new AbortController();
+
+    void (async () => {
+      try {
+        // Observe at the boundary only — intentionally unused by UI.
+        await executePreparedDecision(preparation, {
+          profile,
+          locale: lang,
+          signal: controller.signal,
+        });
+      } catch {
+        // Transport failures are typed on the facade result; never throw to UI.
+      }
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, [authed, profileComplete, hasQuestion, lang, askRepo, profileRepo]);
 
   useQueuedEffect(() => {
     if (!authed || initRef.current) return;
