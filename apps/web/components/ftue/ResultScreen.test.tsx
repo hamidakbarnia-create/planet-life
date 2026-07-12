@@ -14,6 +14,7 @@ import { fetchValidatedResultChart } from '@/lib/chart-api';
 import { RAFSANJAN_CHART } from '@/lib/chart-fixtures';
 import * as decisionApi from '@/lib/decision-api';
 import * as decisionFacade from '@/lib/decision-engine-facade';
+import type { DecisionEngineResponse } from '@/lib/decision-engine-facade';
 
 const replace = vi.fn();
 const push = vi.fn();
@@ -31,6 +32,31 @@ vi.mock('@/lib/chart-api', async (importOriginal) => {
 });
 
 const mockFetchValidatedResultChart = vi.mocked(fetchValidatedResultChart);
+
+const GUIDED_DISPLAY_TEXT =
+  'What should I focus on in my career this week?';
+
+const UNIQUE_API_SUMMARY =
+  'DECISION_API_BOUNDARY_SUMMARY_MUST_NOT_RENDER_7f3c';
+
+function successDecisionFetchResponse(summary = UNIQUE_API_SUMMARY) {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({
+      status: 'completed' as const,
+      result: {
+        requestId: 'career-focus-week:career_focus',
+        actionType: 'career_focus',
+        guidedQuestionId: 'career-focus-week',
+        categoryId: 'career-work',
+        needsTime: false,
+        summary,
+        source: 'decision_api_boundary',
+      },
+    }),
+  };
+}
 
 function renderResult(lang: AppLang = 'en') {
   return render(<ResultScreen lang={lang} />);
@@ -82,6 +108,7 @@ describe('ResultScreen', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     resetProfileRepositoryForTests();
     resetAskQuestionRepositoryForTests();
   });
@@ -310,24 +337,11 @@ describe('ResultScreen', () => {
   });
 
   it('makes zero Decision API calls during synchronous render', () => {
-    const postSpy = vi
-      .spyOn(decisionApi, 'postDecisionExecute')
-      .mockResolvedValue({
-        ok: true,
-        httpStatus: 200,
-        body: {
-          status: 'completed',
-          result: {
-            requestId: 'career-focus-week:career_focus',
-            actionType: 'career_focus',
-            guidedQuestionId: 'career-focus-week',
-            categoryId: 'career-work',
-            needsTime: false,
-            summary: 'What should I focus on in my career this week?',
-            source: 'decision_api_boundary',
-          },
-        },
-      });
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValue(successDecisionFetchResponse());
+    vi.stubGlobal('fetch', fetchSpy);
+    const postSpy = vi.spyOn(decisionApi, 'postDecisionExecute');
     const executeSpy = vi.spyOn(decisionFacade, 'executePreparedDecision');
 
     getProfileRepository().saveProfile(sampleProfile);
@@ -337,35 +351,24 @@ describe('ResultScreen', () => {
     // useQueuedEffect schedules after commit via microtask — render itself must not execute.
     expect(executeSpy).not.toHaveBeenCalled();
     expect(postSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it('executes Guided Ready from the effect with exactly one network request', async () => {
-    const postSpy = vi
-      .spyOn(decisionApi, 'postDecisionExecute')
-      .mockResolvedValue({
-        ok: true,
-        httpStatus: 200,
-        body: {
-          status: 'completed',
-          result: {
-            requestId: 'career-focus-week:career_focus',
-            actionType: 'career_focus',
-            guidedQuestionId: 'career-focus-week',
-            categoryId: 'career-work',
-            needsTime: false,
-            summary: 'What should I focus on in my career this week?',
-            source: 'decision_api_boundary',
-          },
-        },
-      });
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValue(successDecisionFetchResponse());
+    vi.stubGlobal('fetch', fetchSpy);
+    const postSpy = vi.spyOn(decisionApi, 'postDecisionExecute');
     const executeSpy = vi.spyOn(decisionFacade, 'executePreparedDecision');
 
     getProfileRepository().saveProfile(sampleProfile);
     getAskQuestionRepository().saveQuestion(guidedReadyQuestion);
-    renderResult('en');
+    const { rerender } = renderResult('en');
 
     expect(executeSpy).not.toHaveBeenCalled();
     expect(postSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).not.toHaveBeenCalled();
 
     expect(
       await screen.findByRole('heading', { name: /your journey begins/i })
@@ -374,10 +377,141 @@ describe('ResultScreen', () => {
     await waitFor(() => {
       expect(executeSpy).toHaveBeenCalledTimes(1);
       expect(postSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
+
+    // Rerender with unchanged execution inputs must not trigger another execution.
+    rerender(<ResultScreen lang="en" />);
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /your journey begins/i })).toBeTruthy();
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(executeSpy).toHaveBeenCalledTimes(1);
+    expect(postSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('propagates effect cleanup abort to the fetch AbortSignal', async () => {
+    let capturedSignal: AbortSignal | undefined;
+    const fetchSpy = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => {
+      capturedSignal = init?.signal;
+      return new Promise(() => {});
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(guidedReadyQuestion);
+    const { unmount } = renderResult('en');
+
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    expect(capturedSignal).toBeInstanceOf(AbortSignal);
+    expect(capturedSignal!.aborted).toBe(false);
+
+    unmount();
+
+    expect(capturedSignal!.aborted).toBe(true);
+  });
+
+  it('returns build_failed without HTTP when the request builder rejects', async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    const postSpy = vi.spyOn(decisionApi, 'postDecisionExecute');
+    const executeSpy = vi.spyOn(decisionFacade, 'executePreparedDecision');
+
+    // Complete for ResultScreen guards, rejected by buildDecisionExecuteRequest.
+    getProfileRepository().saveProfile({
+      ...sampleProfile,
+      action_type: '   ',
+    });
+    getAskQuestionRepository().saveQuestion(guidedReadyQuestion);
+    renderResult('en');
+
+    expect(
+      await screen.findByRole('heading', { name: /your journey begins/i })
+    ).toBeTruthy();
+
+    await waitFor(() => {
+      expect(executeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    const response = (await executeSpy.mock.results[0]
+      ?.value) as DecisionEngineResponse;
+
+    expect(response).toEqual({
+      status: 'completed',
+      result: expect.objectContaining({
+        source: 'placeholder',
+        guidedQuestionId: 'career-focus-week',
+      }),
+      execution: { executed: false, reason: 'build_failed' },
+    });
+    expect(response.status === 'completed' ? response.api : undefined).toBeUndefined();
+    expect(postSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('keeps Decision API success boundary-only: no UI, navigation, or repository writes', async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValue(successDecisionFetchResponse(UNIQUE_API_SUMMARY));
+    vi.stubGlobal('fetch', fetchSpy);
+
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(guidedReadyQuestion);
+
+    const profileSaveSpy = vi.spyOn(getProfileRepository(), 'saveProfile');
+    const questionSaveSpy = vi.spyOn(getAskQuestionRepository(), 'saveQuestion');
+
+    replace.mockClear();
+    push.mockClear();
+
+    renderResult('en');
+
+    expect(
+      await screen.findByRole('heading', { name: /your journey begins/i })
+    ).toBeTruthy();
+
+    await waitFor(() => {
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    // Allow the execute promise to settle after fetch resolves.
+    await waitFor(async () => {
+      const last = fetchSpy.mock.results[0];
+      expect(last?.type).toBe('return');
+      await last?.value;
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // A) Visible output unchanged — API summary never rendered.
+    expect(screen.getByText(GUIDED_DISPLAY_TEXT)).toBeTruthy();
+    expect(screen.getByText(/early preview/i)).toBeTruthy();
+    expect(
+      screen.getByText(
+        /today is best used for clarity, prioritization, and one deliberate action/i
+      )
+    ).toBeTruthy();
+    expect(document.querySelector('[data-result-chart="empty"]')).toBeTruthy();
+    expect(screen.queryByText(UNIQUE_API_SUMMARY)).toBeNull();
+
+    // B) Navigation untouched by Decision API success.
+    expect(replace).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+
+    // C) Repositories untouched after fixture setup.
+    expect(profileSaveSpy).not.toHaveBeenCalled();
+    expect(questionSaveSpy).not.toHaveBeenCalled();
   });
 
   it('does not call the Decision API for typed questions', async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
     const postSpy = vi.spyOn(decisionApi, 'postDecisionExecute');
     const executeSpy = vi.spyOn(decisionFacade, 'executePreparedDecision');
 
@@ -392,9 +526,12 @@ describe('ResultScreen', () => {
 
     expect(executeSpy).not.toHaveBeenCalled();
     expect(postSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it('does not call the Decision API for unresolved preparations', async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
     const postSpy = vi.spyOn(decisionApi, 'postDecisionExecute');
     const executeSpy = vi.spyOn(decisionFacade, 'executePreparedDecision');
 
@@ -409,5 +546,6 @@ describe('ResultScreen', () => {
 
     expect(executeSpy).not.toHaveBeenCalled();
     expect(postSpy).not.toHaveBeenCalled();
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
