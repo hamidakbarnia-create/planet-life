@@ -1,7 +1,7 @@
 # METIORO Master Status
 
 > **Document type:** Sprint & workstream status registry
-> **Last updated:** 2026-07-10
+> **Last updated:** 2026-07-12
 > **Authority:** Authoritative registry for sprint and workstream status per [GOVERNANCE.md](./governance/GOVERNANCE.md). Summarizes repository artifacts — does not override Constitution, Decision Log LOCKED entries, Token Registry, or LOCKED ADRs.
 
 **Quick links:** [Governance](./governance/GOVERNANCE.md) · [Governance hub](./governance/README.md) · [Design Token Registry](./design/system/design-token-registry.md) · [Performance Baseline](./performance/BASELINE.md) · [UI Audit](./design/ui-audit/README.md)
@@ -254,8 +254,8 @@ Approved or documented engineering work only (no new feature proposals):
 | **DS-02** | DS-02 runtime token migration (implementation) | **OPEN** | Blocked on ADR-DS-002 acceptance |
 | **ENG-HYGIENE** | Engineering hygiene (lint + CI gate) | **OPEN** | [ENGINEERING_READINESS.md](./ENGINEERING_READINESS.md) |
 | **ONE-SENTENCE** | One Sentence Position proposal | **PROPOSED** | [one-sentence-position.md](./brand/one-sentence-position.md) |
-| **PHASE-6A** | Backend Bridge | **PLANNED** | [ADR-0006](./adr/ADR-0006-Decision-API-Contract-v1.md) LOCKED |
-| **PHASE-6B** | Decision Signal Experience & Explainability | **PLANNED** | Phase 6 sequence below |
+| **PHASE-6A** | Backend Bridge | **CLOSED** | [ADR-0006](./adr/ADR-0006-Decision-API-Contract-v1.md) LOCKED; [2026-07-12 backend Sprint 6A deployment](./deployments/2026-07-12-backend-sprint-6a.md) (`9196e890`) |
+| **PHASE-6B** | Decision Signal Experience & Explainability | **CLOSED** | [2026-07-12 frontend Sprint 6B deployment](./deployments/2026-07-12-frontend-sprint-6b.md) (`c8bfa34c`) |
 | **PHASE-6C** | Evidence Pipeline | **PLANNED** | Phase 6 sequence below |
 
 **Allowed status values:** `CLOSED` · `OPEN` · `PROPOSED` · `PLANNED` — no other value is valid.
