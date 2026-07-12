@@ -19,7 +19,7 @@ import { HOME_LANGS } from '@/lib/home-i18n';
 import type { CitySelection } from '@/lib/chart-types';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 
-const API = 'http://localhost:8000';
+const API = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
 
 const LANGS = {
   en: {
