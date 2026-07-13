@@ -34,7 +34,7 @@
 
 **ADR-0006 note:** LOCKED HTTP contract for `POST /api/v1/decision/execute`. Full text: [ADR-0006-Decision-API-Contract-v1.md](../adr/ADR-0006-Decision-API-Contract-v1.md). Corrected 2026-07-10 after Sprint 6A Step 0 drift from commit `973ce88`. Implementation boundary clarification added 2026-07-10 (Sprint 6A Step 0 — legacy engine mapping deferred). Supersedes requires v2 ADR.
 
-**ADR-0007 note:** RATIFIED Conversation API contract for Sprint P1 Live Conversation MVP. Full text: [ADR-0007-Conversation-API-Contract-v1.md](../adr/ADR-0007-Conversation-API-Contract-v1.md). Stateless client-supplied history; provider-agnostic generation; derived astrological context (Option B); decision/conversational discriminator with Constraint 4a explainability. Hard ceilings: 20 messages, 32 KiB, 30s timeout. Prompt Governance Spec v1 required (Brand Voice Layer pending).
+**ADR-0007 note:** LOCKED Conversation API contract for Sprint P1 Live Conversation MVP. Full text: [ADR-0007-Conversation-API-Contract-v1.md](../adr/ADR-0007-Conversation-API-Contract-v1.md). Stateless client-supplied history; provider-agnostic generation; derived astrological context (Option B); decision/conversational discriminator with Constraint 4a explainability. Hard ceilings: 20 messages, 32 KiB, 30s timeout. Prompt Governance Spec v1 required (Brand Voice Layer pending).
 
 ---
 

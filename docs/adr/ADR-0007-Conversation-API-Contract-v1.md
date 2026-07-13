@@ -1,6 +1,6 @@
 # ADR-0007 — Conversation API Contract v1.0
 
-**Status:** RATIFIED — APPROVED TO COMMIT
+**Status:** LOCKED
 **Scope:** Sprint P1 — Live Conversation MVP
 **Normative language:** `MUST`, `MUST NOT`, `SHALL`, `SHALL NOT`, `MAY`
 
