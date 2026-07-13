@@ -20,7 +20,8 @@
 | ADR-0004 | Trust Architecture | Superseded | 2026-07-05 |
 | ADR-0005 | Decision Engine Facade — First Runtime Migration | Accepted | 2026-07-05 |
 | ADR-0006 | Decision API Contract v1 | LOCKED | 2026-07-10 |
-| ADR-0007 | Conversation API Contract v1 | RATIFIED | 2026-07-13 |
+| ADR-0007 | Conversation API Contract v1 | LOCKED | 2026-07-13 |
+| ADR-0007-A1 | Conversation API Public HTTP Route Clarification | APPROVED TO COMMIT | 2026-07-13 |
 | ADR-DS-001 | Design System Architecture v1 | Proposed | 2026-07-07 |
 | ADR-DS-002 | Runtime Semantic Token Consumption | Proposed | 2026-07-07 |
 
@@ -34,7 +35,7 @@
 
 **ADR-0006 note:** LOCKED HTTP contract for `POST /api/v1/decision/execute`. Full text: [ADR-0006-Decision-API-Contract-v1.md](../adr/ADR-0006-Decision-API-Contract-v1.md). Corrected 2026-07-10 after Sprint 6A Step 0 drift from commit `973ce88`. Implementation boundary clarification added 2026-07-10 (Sprint 6A Step 0 — legacy engine mapping deferred). Supersedes requires v2 ADR.
 
-**ADR-0007 note:** LOCKED Conversation API contract for Sprint P1 Live Conversation MVP. Full text: [ADR-0007-Conversation-API-Contract-v1.md](../adr/ADR-0007-Conversation-API-Contract-v1.md). Stateless client-supplied history; provider-agnostic generation; derived astrological context (Option B); decision/conversational discriminator with Constraint 4a explainability. Hard ceilings: 20 messages, 32 KiB, 30s timeout. Prompt Governance Spec v1 required (Brand Voice Layer pending).
+**ADR-0007 note:** ADR-0007 is LOCKED. Full text: [ADR-0007-Conversation-API-Contract-v1.md](../adr/ADR-0007-Conversation-API-Contract-v1.md). Conversation API contract for Sprint P1 Live Conversation MVP: stateless client-supplied history; provider-agnostic generation; derived astrological context (Option B); decision/conversational discriminator with Constraint 4a explainability. Hard ceilings: 20 messages, 32 KiB, 30s timeout. Prompt Governance Spec v1 required (Brand Voice Layer pending). Amendment A1 — method/path/versioning clarification. A1 current status = APPROVED TO COMMIT. A1 has its own lifecycle and MUST NOT be represented as RATIFIED or LOCKED before approval and commit. Decisions D1–D13 remain unchanged. A1: [ADR-0007-Amendment-A1-Public-HTTP-Route.md](../adr/ADR-0007-Amendment-A1-Public-HTTP-Route.md).
 
 ---
 

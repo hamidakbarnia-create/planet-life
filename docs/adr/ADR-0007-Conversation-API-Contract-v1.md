@@ -608,6 +608,17 @@ Any normative clause that cannot be mapped to an approved source MUST be rejecte
 4. EVIDENCE_REGISTRY
 5. P1 Architecture Decision Freeze
 6. Locked METIORO brand constraints
+7. ADR-0007 Amendment A1 — Public HTTP Route Clarification (APPROVED TO COMMIT): [ADR-0007-Amendment-A1-Public-HTTP-Route.md](./ADR-0007-Amendment-A1-Public-HTTP-Route.md)
+
+---
+
+## 10. Amendments registry
+
+| Amendment | Title | Status | Effect on D1–D13 |
+|-----------|-------|--------|------------------|
+| ADR-0007-A1 | Public HTTP Route Clarification (method/path/versioning) | APPROVED TO COMMIT | None — route binding clarification only; A1 has its own lifecycle |
+
+Amendments listed here refine contract publication details. ADR-0007 remains LOCKED. A1 MUST NOT be represented as RATIFIED or LOCKED before approval and commit. Amendments MUST NOT be read as silently modifying Decisions D1–D13 unless an amendment explicitly states such a modification.
 
 ---
 
