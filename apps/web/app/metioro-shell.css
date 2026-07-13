@@ -128,7 +128,8 @@
   width: 100%;
   max-width: 64rem;
   margin-inline: auto;
-  padding: var(--mio-space-3) var(--mio-space-3) var(--mio-space-4);
+  /* Match Calendar page gutter rhythm: px-4 py-6 */
+  padding: var(--mio-space-6) var(--mio-space-4);
   box-sizing: border-box;
 }
 
@@ -143,7 +144,7 @@
 @media (min-width: 768px) {
   .metioro-page--dashboard,
   .metioro-home {
-    padding: var(--mio-space-3) 16px var(--mio-space-4);
+    padding: var(--mio-space-6) var(--mio-space-4);
   }
 
   .metioro-page--observatory {
