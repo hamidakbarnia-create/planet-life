@@ -20,6 +20,7 @@
 | ADR-0004 | Trust Architecture | Superseded | 2026-07-05 |
 | ADR-0005 | Decision Engine Facade — First Runtime Migration | Accepted | 2026-07-05 |
 | ADR-0006 | Decision API Contract v1 | LOCKED | 2026-07-10 |
+| ADR-0007 | Conversation API Contract v1 | RATIFIED | 2026-07-13 |
 | ADR-DS-001 | Design System Architecture v1 | Proposed | 2026-07-07 |
 | ADR-DS-002 | Runtime Semantic Token Consumption | Proposed | 2026-07-07 |
 
@@ -32,6 +33,8 @@
 **ADR-0004 note:** Superseded by [TRUST_ARCHITECTURE.md](./TRUST_ARCHITECTURE.md) (Level 1 governance document). Trust Architecture is not an architecture decision record.
 
 **ADR-0006 note:** LOCKED HTTP contract for `POST /api/v1/decision/execute`. Full text: [ADR-0006-Decision-API-Contract-v1.md](../adr/ADR-0006-Decision-API-Contract-v1.md). Corrected 2026-07-10 after Sprint 6A Step 0 drift from commit `973ce88`. Implementation boundary clarification added 2026-07-10 (Sprint 6A Step 0 — legacy engine mapping deferred). Supersedes requires v2 ADR.
+
+**ADR-0007 note:** RATIFIED Conversation API contract for Sprint P1 Live Conversation MVP. Full text: [ADR-0007-Conversation-API-Contract-v1.md](../adr/ADR-0007-Conversation-API-Contract-v1.md). Stateless client-supplied history; provider-agnostic generation; derived astrological context (Option B); decision/conversational discriminator with Constraint 4a explainability. Hard ceilings: 20 messages, 32 KiB, 30s timeout. Prompt Governance Spec v1 required (Brand Voice Layer pending).
 
 ---
 
