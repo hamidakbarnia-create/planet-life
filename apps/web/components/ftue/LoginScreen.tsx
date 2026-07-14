@@ -476,8 +476,12 @@ export function LoginScreen() {
 
               <p className="fi text-[11px] text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
                 {ftue.termsPrefix}{' '}
-                <Link href="/disclaimer" className="underline hover:text-white/55">
+                <Link href="/terms" className="underline hover:text-white/55">
                   {ftue.termsLink}
+                </Link>{' '}
+                {ftue.privacyMid}{' '}
+                <Link href="/privacy" className="underline hover:text-white/55">
+                  {ftue.privacyLink}
                 </Link>
                 .
               </p>

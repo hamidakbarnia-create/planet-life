@@ -360,7 +360,9 @@ export const LOGIN_FTUE_COPY = {
   sub: 'Save your profile and decision guidance securely.',
   oauthSoon: 'Social sign-in is coming soon. Use email or phone for now.',
   backWelcome: 'Back to welcome',
-  termsPrefix: 'By continuing you agree to the',
-  termsLink: 'educational use disclaimer',
+  termsPrefix: 'By continuing, you agree to the',
+  termsLink: 'Terms of Service',
+  privacyMid: 'and acknowledge the',
+  privacyLink: 'Privacy Policy',
   rateLimited: 'Too many attempts. Try again in a few minutes.',
 } as const;

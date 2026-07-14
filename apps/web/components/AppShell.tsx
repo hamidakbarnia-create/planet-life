@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { DesktopSidebar, MobileTabBar, VaultPill } from './BottomNav';
 import { BrandLogo } from './BrandLogo';
+import { SiteFooter } from './SiteFooter';
 import { clearSession, loadSession, type AuthSession } from '@/lib/auth';
 import { type BrandLang } from '@/lib/brand';
 import {
@@ -169,6 +170,7 @@ export function AppShell({
 
       <main dir={dir} lang={lang} className="metioro-main">
         {children}
+        <SiteFooter />
       </main>
       <MobileTabBar labels={navLabels} />
     </div>

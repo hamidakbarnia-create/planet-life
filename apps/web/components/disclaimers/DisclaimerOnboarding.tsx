@@ -10,6 +10,8 @@ import {
 } from '@/lib/disclaimers';
 import { BrandLogo } from '@/components/BrandLogo';
 import type { BrandLang } from '@/lib/brand';
+import { LEGAL_NAV_LINKS } from '@/lib/legal-nav';
+import Link from 'next/link';
 
 export function DisclaimerOnboarding({
   onAccepted,
@@ -112,6 +114,22 @@ export function DisclaimerOnboarding({
             </button>
           ))}
         </div>
+
+        <nav
+          aria-label="Legal"
+          className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-6"
+        >
+          {LEGAL_NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="fi text-[11px] underline hover:opacity-100"
+              style={{ color: 'rgba(255,255,255,0.45)' }}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
 
         <button
           type="button"

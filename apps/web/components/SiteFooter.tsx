@@ -1,14 +1,8 @@
 import Link from 'next/link';
 import { BrandLogo } from '@/components/BrandLogo';
-import { BRAND } from '@/lib/brand';import { COLORS, COLORS_RGBA } from '@/lib/brand-theme';
-
-const LEGAL_LINKS = [
-  { href: '/privacy', label: 'Privacy Policy' },
-  { href: '/terms', label: 'Terms of Service' },
-  { href: '/cookies', label: 'Cookie Policy' },
-  { href: '/disclaimer', label: 'Disclaimer' },
-  { href: '/contact', label: 'Contact' },
-] as const;
+import { BRAND } from '@/lib/brand';
+import { LEGAL_NAV_LINKS } from '@/lib/legal-nav';
+import { COLORS, COLORS_RGBA } from '@/lib/brand-theme';
 
 export function SiteFooter() {
   return (
@@ -22,7 +16,7 @@ export function SiteFooter() {
           aria-label="Legal"
           className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
         >
-          {LEGAL_LINKS.map((link) => (
+          {LEGAL_NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}

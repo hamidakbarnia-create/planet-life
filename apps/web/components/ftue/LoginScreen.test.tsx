@@ -61,4 +61,15 @@ describe('LoginScreen', () => {
     const queue = localStorage.getItem('planet-life-ftue-events');
     expect(queue).toContain('ftue_auth_oauth_unavailable');
   });
+
+  it('shows clickable Terms of Service and Privacy Policy links', async () => {
+    render(<LoginScreen />);
+    await screen.findByRole('heading', { name: /sign in to continue/i });
+    const terms = screen.getByRole('link', { name: /terms of service/i });
+    const privacy = screen.getByRole('link', { name: /privacy policy/i });
+    expect(terms.getAttribute('href')).toBe('/terms');
+    expect(privacy.getAttribute('href')).toBe('/privacy');
+    expect(screen.getByText(/by continuing, you agree to the/i)).toBeTruthy();
+    expect(screen.getByText(/and acknowledge the/i)).toBeTruthy();
+  });
 });
