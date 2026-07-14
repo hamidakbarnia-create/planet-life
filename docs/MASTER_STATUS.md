@@ -1,7 +1,7 @@
 # METIORO Master Status
 
 > **Document type:** Sprint & workstream status registry
-> **Last updated:** 2026-07-12
+> **Last updated:** 2026-07-14
 > **Authority:** Authoritative registry for sprint and workstream status per [GOVERNANCE.md](./governance/GOVERNANCE.md). Summarizes repository artifacts — does not override Constitution, Decision Log LOCKED entries, Token Registry, or LOCKED ADRs.
 
 **Quick links:** [Governance](./governance/GOVERNANCE.md) · [Governance hub](./governance/README.md) · [Design Token Registry](./design/system/design-token-registry.md) · [Performance Baseline](./performance/BASELINE.md) · [UI Audit](./design/ui-audit/README.md)
@@ -257,8 +257,26 @@ Approved or documented engineering work only (no new feature proposals):
 | **PHASE-6A** | Backend Bridge | **CLOSED** | [ADR-0006](./adr/ADR-0006-Decision-API-Contract-v1.md) LOCKED; [2026-07-12 backend Sprint 6A deployment](./deployments/2026-07-12-backend-sprint-6a.md) (`9196e890`) |
 | **PHASE-6B** | Decision Signal Experience & Explainability | **CLOSED** | [2026-07-12 frontend Sprint 6B deployment](./deployments/2026-07-12-frontend-sprint-6b.md) (`c8bfa34c`) |
 | **PHASE-6C** | Evidence Pipeline | **PLANNED** | Phase 6 sequence below |
+| **P1-T04** | Provider-Agnostic Live Generation Boundary | **READY; EXECUTION PAUSED BY PRODUCT REMEDIATION GATE** | Sprint P1 task; paused for Product Remediation Gate **PRG-02**; see Product Remediation Gates below. Task definition remains in [SPRINT-P1-TASK-DECOMPOSITION.md](./governance/SPRINT-P1-TASK-DECOMPOSITION.md); execution state is registered here only. |
+| **PRG-02** | World News Freshness Enforcement | **IMPLEMENTATION QUEUED** | Authority: [ADR-0008](./adr/ADR-0008-News-Freshness-Policy.md) (Accepted). Separate from P1-T04. Gate: Product Remediation Gates below. |
 
-**Allowed status values:** `CLOSED` · `OPEN` · `PROPOSED` · `PLANNED` — no other value is valid.
+**Allowed status values:** `CLOSED` · `OPEN` · `PROPOSED` · `PLANNED` · `IMPLEMENTATION QUEUED` · `READY; EXECUTION PAUSED BY PRODUCT REMEDIATION GATE` — no other value is valid.
+
+---
+
+## Product Remediation Gates
+
+### PRG-02 — World News Freshness Enforcement
+
+| Field | Value |
+|-------|--------|
+| **ID** | PRG-02 |
+| **Title** | World News Freshness Enforcement |
+| **Status** | IMPLEMENTATION QUEUED |
+| **Authority** | [ADR-0008](./adr/ADR-0008-News-Freshness-Policy.md) (Accepted) |
+| **Gate opener** | Product Owner |
+| **Gate exit** | Implementation complete; automated tests pass; production verification evidence recorded |
+| **Relation to P1-T04** | **Separate.** PRG-02 is not a sub-task of P1-T04 and does not satisfy P1-T04. PRG-02 requires its own implementation, tests, commit, CI, deployment, and production evidence. P1-T04 remains READY and EXECUTION PAUSED BY PRODUCT REMEDIATION GATE until the Product Owner opens the gate after PRG-02 gate exit. |
 
 ---
 

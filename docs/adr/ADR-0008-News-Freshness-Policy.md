@@ -1,9 +1,9 @@
 # ADR-0008: News Freshness Policy
 
-**Status:** Proposed  
-**Date:** 2026-07-14  
-**Decision makers:** METIORO Platform Engineering  
-**Scope:** World live news surfaces (`/api/world/news` and all UI consumers)  
+**Status:** Accepted
+**Date:** 2026-07-14
+**Decision makers:** METIORO Platform Engineering
+**Scope:** World live news surfaces (`/api/world/news` and all UI consumers)
 **Normative language:** `MUST`, `MUST NOT`, `SHALL`, `SHALL NOT`, `MAY`, `SHOULD`
 
 ---
@@ -11,6 +11,8 @@
 ## Lifecycle
 
 ADR-0008 originated in an external product-review cycle during Sprint P1 and entered the repository as a Proposed ADR with its ADR_INDEX entry in the same change set.
+
+Status advanced from Proposed to Accepted on 2026-07-14 under the ADR_INDEX template lifecycle (`Proposed | Accepted | Deprecated | Superseded`). LOCKED is not required for this policy ADR; LOCKED remains reserved for contract ADRs that the repository explicitly locks (for example ADR-0006 and ADR-0007).
 
 ---
 
