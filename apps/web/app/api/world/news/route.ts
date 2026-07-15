@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { applyFreshnessPolicy } from '@/lib/world-news-freshness';
 
 // Free live headlines via Google News RSS (no API key). Returns the top items
 // for a topic. Language follows the app language so RU/FA/AR users get native
 // headlines. Upgrade path: swap to NewsAPI/GNews with a key later.
+// Freshness: ADR-0008 enforced via applyFreshnessPolicy (publication timestamp).
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -23,6 +25,8 @@ const LANG_LOCALE: Record<string, { hl: string; gl: string; ceid: string }> = {
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
+
+const RESPONSE_ITEM_CAP = 8;
 
 function decode(s: string): string {
   return s
@@ -56,7 +60,7 @@ export async function GET(req: NextRequest) {
     if (!res.ok) return NextResponse.json({ topic, items: [] });
     const xml = await res.text();
     const blocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
-    const items: Item[] = blocks.slice(0, 8).map((b) => {
+    const parsed: Item[] = blocks.map((b) => {
       let title = pick(b, 'title');
       let source = pick(b, 'source');
       // Google appends " - Source" to titles; split it out when source is empty.
@@ -72,6 +76,13 @@ export async function GET(req: NextRequest) {
         published: pick(b, 'pubDate'),
       };
     });
+
+    // Request time injected at the BFF boundary; policy module stays pure.
+    const now = new Date();
+    const items = applyFreshnessPolicy(parsed, now, {
+      minimumPrimaryItems: 2,
+    }).slice(0, RESPONSE_ITEM_CAP);
+
     return NextResponse.json(
       { topic, items },
       { headers: { 'Cache-Control': 's-maxage=600, stale-while-revalidate=1200' } }
