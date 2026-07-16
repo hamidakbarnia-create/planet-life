@@ -71,6 +71,14 @@ None of these options has been selected yet.
 
 These gates are binary. A provider that fails any hard gate cannot be the sole provider.
 
+Failure of any of the following also rejects sole-provider eligibility. If a gate value is `UNKNOWN`, the provider is not yet sole-provider eligible.
+
+```text
+FA support explicitly documented or subsequently verified through an approved evidence path
+Automated polling permitted
+Caching/storage requirements permitted
+```
+
 ### 4.1 Authentication
 
 ```text
@@ -85,9 +93,44 @@ Anonymous scraping dependency: rejected
 Commercial production use explicitly permitted
 Terms of Service available
 Automated API consumption permitted
+Automated polling at the required production cadence must be permitted.
+Caching or temporary storage required by the application must be permitted.
 Redistribution/display constraints documented
 No dependency on undocumented scraping behavior
 ```
+
+Automated polling and caching are independent hard gates. They must not be treated as implied by a general `commercial use` finding.
+
+### Automated Polling Gate
+
+This gate determines whether scheduled or repeated automated API requests are
+permitted under the provider's official Terms, acceptable-use policy, and plan.
+
+A provider fails this gate if:
+
+- automated polling is prohibited;
+- required polling frequency is prohibited;
+- the plan is restricted to interactive/manual use;
+- the documentation is materially ambiguous and support confirmation is unavailable.
+
+Unknown does not equal permitted.
+
+### Caching Gate
+
+This gate determines whether the application may cache provider responses or
+derived article metadata for the duration required by the product architecture.
+
+The review must distinguish among:
+
+- response caching;
+- article metadata storage;
+- headline and source display;
+- full-content storage;
+- redistribution;
+- retention duration.
+
+Permission for commercial API access does not automatically imply permission
+to cache, retain, or redistribute results.
 
 ### 4.3 Data Contract
 
@@ -220,14 +263,14 @@ until the corresponding Evidence Register entry contains:
 
 Every provider claim must reference a concrete evidence record.
 
-| Provider     | Evidence Type | Official URL | Access Date (UTC) | Scope              | Status  |
-| ------------ | ------------- | ------------ | ----------------- | ------------------ | ------- |
-| GNews        | UNKNOWN       |              |                   | Language support   | PENDING |
-| Mediastack   | UNKNOWN       |              |                   | Language support   | PENDING |
-| NewsAPI.org  | UNKNOWN       |              |                   | Language support   | PENDING |
-| NewsData.io  | UNKNOWN       |              |                   | Language support   | PENDING |
-| The News API | UNKNOWN       |              |                   | Language support   | PENDING |
-| Currents API | UNKNOWN       |              |                   | Language support   | PENDING |
+| Provider     | Evidence Type | Official URL | Access Date (UTC) | Scope            | FA Officially Documented | FA Evidence URL | Automated Polling Allowed | Caching Allowed | Reviewer | Status  |
+| ------------ | ------------- | ------------ | ----------------- | ---------------- | ------------------------ | --------------- | ------------------------- | --------------- | -------- | ------- |
+| GNews        | UNKNOWN       | UNKNOWN      | UNKNOWN           | Language support | UNKNOWN                  | UNKNOWN         | UNKNOWN                   | UNKNOWN         | UNKNOWN  | PENDING |
+| Mediastack   | UNKNOWN       | UNKNOWN      | UNKNOWN           | Language support | UNKNOWN                  | UNKNOWN         | UNKNOWN                   | UNKNOWN         | UNKNOWN  | PENDING |
+| NewsAPI.org  | UNKNOWN       | UNKNOWN      | UNKNOWN           | Language support | UNKNOWN                  | UNKNOWN         | UNKNOWN                   | UNKNOWN         | UNKNOWN  | PENDING |
+| NewsData.io  | UNKNOWN       | UNKNOWN      | UNKNOWN           | Language support | UNKNOWN                  | UNKNOWN         | UNKNOWN                   | UNKNOWN         | UNKNOWN  | PENDING |
+| The News API | UNKNOWN       | UNKNOWN      | UNKNOWN           | Language support | UNKNOWN                  | UNKNOWN         | UNKNOWN                   | UNKNOWN         | UNKNOWN  | PENDING |
+| Currents API | UNKNOWN       | UNKNOWN      | UNKNOWN           | Language support | UNKNOWN                  | UNKNOWN         | UNKNOWN                   | UNKNOWN         | UNKNOWN  | PENDING |
 
 Rules:
 
@@ -235,6 +278,24 @@ Rules:
 * URL must not contain `utm_*` or tracking parameters.
 * Access Date is mandatory.
 * Until evidence is recorded, Status remains `PENDING`.
+* No `Yes` or `No` value may be recorded without official evidence.
+* Unknown FA, polling, or caching values remain `UNKNOWN` and do not count as pass.
+
+### FA Official Documentation Gate
+
+`FA Officially Documented` answers only this question:
+
+> Does the provider's current official documentation explicitly list Persian,
+> Farsi, `fa`, or an equivalent supported language identifier?
+
+Rules:
+
+- General claims such as “supports 80+ languages” are insufficient.
+- A marketing page without an explicit language list is insufficient.
+- Acceptance of an undocumented `language=fa` parameter does not satisfy this gate.
+- Search results containing Iran-related articles do not satisfy this gate.
+- The supporting official URL must be recorded separately in `FA Evidence URL`.
+- If the evidence is ambiguous or unavailable, the value remains `UNKNOWN`.
 
 ---
 
@@ -257,39 +318,46 @@ Until the Evidence Register is complete, no provider may be treated as documenta
 
 ## 8. Comparison Matrix
 
-| Criterion                    | GNews   | Mediastack | NewsAPI.org | NewsData.io | The News API | Currents API |
-| ---------------------------- | ------- | ---------- | ----------- | ----------- | ------------ | ------------ |
-| Authenticated API            | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Production plan              | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Commercial use verified      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Official ToS reviewed        | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Documented quota             | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Documented rate limits       | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Structured errors            | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Publication timestamp        | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Timestamp semantics verified | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| EN documented                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| AR documented                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| RU documented                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| FA documented                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| `language=fa` accepted       | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| FA geopolitics fresh volume  | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| FA markets fresh volume      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| FA real estate fresh volume  | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| EN topic coverage            | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| AR topic coverage            | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| RU topic coverage            | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Search/query support         | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Source/domain filtering      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Monthly production cost      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Overage behavior             | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Integration complexity       | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Fallback suitability         | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Sole-provider eligible       | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Criterion                              | GNews   | Mediastack | NewsAPI.org | NewsData.io | The News API | Currents API |
+| -------------------------------------- | ------- | ---------- | ----------- | ----------- | ------------ | ------------ |
+| Authenticated API                      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Production plan                        | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Commercial use verified                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Official ToS reviewed                  | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Automated polling permitted            | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Required polling cadence permitted     | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Response caching permitted             | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Article metadata retention permitted   | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Redistribution/display restrictions verified | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Documented quota                       | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Documented rate limits                 | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Structured errors                      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Publication timestamp                  | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Timestamp semantics verified           | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| EN documented                          | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| AR documented                          | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| RU documented                          | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| FA documented                          | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| FA officially documented               | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| FA official evidence URL recorded      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| `language=fa` accepted                 | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| FA geopolitics fresh volume            | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| FA markets fresh volume                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| FA real estate fresh volume            | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| EN topic coverage                      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| AR topic coverage                      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| RU topic coverage                      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Search/query support                   | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Source/domain filtering                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Monthly production cost                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Overage behavior                       | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Integration complexity                 | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Fallback suitability                   | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Sole-provider eligible                 | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 
 Cells without evidence remain `UNKNOWN`, not `No`.
 
-FA-related cells remain `UNKNOWN` for all providers until corresponding Evidence Register entries are complete.
+FA-related, polling, and caching cells remain `UNKNOWN` for all providers until corresponding Evidence Register entries are complete.
 
 ---
 
@@ -437,12 +505,17 @@ Allowed only when one provider:
 
 ```text
 passes all hard gates
+FA documentation gate passes
+automated polling gate passes
+caching gate passes
 passes EN/FA/RU/AR coverage
 passes topic coverage
 passes freshness requirements
 passes production reliability benchmark
 has acceptable cost and ToS
 ```
+
+A provider is sole-provider eligible only when the FA documentation gate, automated polling gate, and caching gate all pass. `UNKNOWN` does not satisfy eligibility.
 
 ### Primary + Fallback
 
@@ -456,6 +529,13 @@ or primary reliability requires a second independent upstream
 
 Fallback must not merely consume the same upstream via another path or hostname, unless independence is proven.
 
+```text
+Each routed provider must independently pass the legal polling and caching gates
+for the traffic and data handling assigned to it.
+```
+
+Using a provider as fallback does not exempt it from legal hard gates.
+
 ### Language-Routed Architecture
 
 Consider when:
@@ -464,6 +544,13 @@ Consider when:
 FA coverage is structurally unavailable from the strongest primary providers
 but another provider can satisfy FA independently.
 ```
+
+```text
+Each routed provider must independently pass the legal polling and caching gates
+for the traffic and data handling assigned to it.
+```
+
+Using a provider as a language-routed component does not exempt it from legal hard gates.
 
 The external World DTO and state contract must remain unchanged.
 
@@ -586,3 +673,38 @@ Provider evaluation proceeds in four independent stages:
 4. Production benchmark
 
 Passing one stage does not imply passing any later stage.
+
+### Pre-Push Verification
+
+Before pushing a governance or provider-selection commit:
+
+```bash
+git branch --show-current
+git status -sb
+git log -1 --oneline
+git diff --cached --name-only
+```
+
+The push command must be derived from the actual current branch and upstream
+state. A hard-coded branch name must not be used without verification.
+
+---
+
+## Repository Hygiene Debt
+
+Eight unrelated web files were observed as modified only because of
+whitespace or line-ending differences.
+
+Evidence:
+
+- `git diff -w --stat` showed no semantic changes in those files.
+- The files were not included in the PRG-03 governance commit.
+
+Deferred follow-up:
+
+- determine whether the cause is editor formatting, Prettier, ESLint,
+  `core.autocrlf`, or missing `.gitattributes`;
+- restore unrelated files before their next semantic edit;
+- consider repository-wide LF normalization through a separate reviewed change.
+
+This debt is not part of PRG-03 and must not be mixed into provider-selection commits.
