@@ -14,11 +14,99 @@ export interface MarketsResponse {
   quotes: MarketQuote[];
 }
 
-export interface NewsItem {
+/** BFF-classified World news coverage state (ADR-0008 / PRG-02). */
+export type WorldNewsState = 'ok' | 'low_signal' | 'unavailable';
+
+export type WorldNewsItem = {
   title: string;
   source: string;
   link: string;
   published: string;
+};
+
+/** @deprecated Prefer WorldNewsItem — kept for existing call sites. */
+export type NewsItem = WorldNewsItem;
+
+export type WorldNewsResponse =
+  | {
+      topic: string;
+      state: 'ok';
+      items: WorldNewsItem[];
+    }
+  | {
+      topic: string;
+      state: 'low_signal';
+      items: WorldNewsItem[];
+    }
+  | {
+      topic: string;
+      state: 'unavailable';
+      items: [];
+    };
+
+export function assertNever(value: never): never {
+  throw new Error(`Unexpected value: ${String(value)}`);
+}
+
+const NEWS_DATE_LOCALE: Record<string, string> = {
+  en: 'en-GB',
+  ru: 'ru-RU',
+  fa: 'fa-IR',
+  ar: 'ar-EG',
+};
+
+/**
+ * Locale-aware absolute publication date for World news items.
+ * Returns null when the timestamp cannot be displayed (caller omits the label).
+ */
+export function formatNewsPublicationDate(published: string, lang: string): string | null {
+  if (typeof published !== 'string' || !published.trim()) return null;
+  const ms = Date.parse(published);
+  if (Number.isNaN(ms)) return null;
+  const date = new Date(ms);
+  if (Number.isNaN(date.getTime())) return null;
+  try {
+    return new Intl.DateTimeFormat(NEWS_DATE_LOCALE[lang] ?? NEWS_DATE_LOCALE.en, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(date);
+  } catch {
+    return null;
+  }
+}
+
+function isWorldNewsItem(value: unknown): value is WorldNewsItem {
+  if (!value || typeof value !== 'object') return false;
+  const item = value as Record<string, unknown>;
+  return (
+    typeof item.title === 'string' &&
+    typeof item.source === 'string' &&
+    typeof item.link === 'string' &&
+    typeof item.published === 'string'
+  );
+}
+
+function normalizeWorldNewsResponse(data: unknown, fallbackTopic: string): WorldNewsResponse {
+  if (!data || typeof data !== 'object') {
+    return { topic: fallbackTopic, state: 'unavailable', items: [] };
+  }
+  const raw = data as Record<string, unknown>;
+  const topic = typeof raw.topic === 'string' && raw.topic ? raw.topic : fallbackTopic;
+  const state = raw.state;
+  const items = Array.isArray(raw.items) ? raw.items.filter(isWorldNewsItem) : [];
+
+  if (state === 'unavailable') {
+    return { topic, state: 'unavailable', items: [] };
+  }
+  if (state === 'low_signal') {
+    return { topic, state: 'low_signal', items };
+  }
+  if (state === 'ok') {
+    return { topic, state: 'ok', items };
+  }
+  // Legacy/malformed BFF payload — do not invent ok/low_signal from an empty array.
+  return { topic, state: 'unavailable', items: [] };
 }
 
 export interface SkySignal {
@@ -85,22 +173,28 @@ export async function fetchMarkets(): Promise<MarketsResponse> {
   return (await res.json()) as MarketsResponse;
 }
 
-export async function fetchNews(topic: string, lang: string): Promise<NewsItem[]> {
-  const res = await fetch(`/api/world/news?topic=${encodeURIComponent(topic)}&lang=${lang}`, {
-    cache: 'no-store',
-  });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (data?.items ?? []) as NewsItem[];
+export async function fetchNews(topic: string, lang: string): Promise<WorldNewsResponse> {
+  try {
+    const res = await fetch(`/api/world/news?topic=${encodeURIComponent(topic)}&lang=${lang}`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) return { topic, state: 'unavailable', items: [] };
+    return normalizeWorldNewsResponse(await res.json(), topic);
+  } catch {
+    return { topic, state: 'unavailable', items: [] };
+  }
 }
 
-export async function fetchNewsQuery(q: string, lang: string): Promise<NewsItem[]> {
-  const res = await fetch(`/api/world/news?q=${encodeURIComponent(q)}&lang=${lang}`, {
-    cache: 'no-store',
-  });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (data?.items ?? []) as NewsItem[];
+export async function fetchNewsQuery(q: string, lang: string): Promise<WorldNewsResponse> {
+  try {
+    const res = await fetch(`/api/world/news?q=${encodeURIComponent(q)}&lang=${lang}`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) return { topic: q, state: 'unavailable', items: [] };
+    return normalizeWorldNewsResponse(await res.json(), q);
+  } catch {
+    return { topic: q, state: 'unavailable', items: [] };
+  }
 }
 
 export async function fetchSky(): Promise<SkyResponse> {

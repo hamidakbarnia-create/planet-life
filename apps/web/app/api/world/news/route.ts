@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { applyFreshnessPolicy } from '@/lib/world-news-freshness';
+import type { WorldNewsResponse, WorldNewsState } from '@/lib/world-api';
 
 // Free live headlines via Google News RSS (no API key). Returns the top items
 // for a topic. Language follows the app language so RU/FA/AR users get native
 // headlines. Upgrade path: swap to NewsAPI/GNews with a key later.
 // Freshness: ADR-0008 enforced via applyFreshnessPolicy (publication timestamp).
+// Coverage state: classified here in the BFF (ok | low_signal | unavailable).
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -28,6 +30,12 @@ const UA =
 
 const RESPONSE_ITEM_CAP = 8;
 
+/** Sufficient usable coverage after freshness/credibility; below this is low_signal. */
+const MINIMUM_SIGNAL_ITEMS = 2;
+
+/** Upstream RSS fetch budget (Node 20 AbortSignal.timeout). */
+const UPSTREAM_TIMEOUT_MS = 8_000;
+
 function decode(s: string): string {
   return s
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
@@ -48,6 +56,21 @@ function pick(block: string, tag: string): string {
 
 type Item = { title: string; source: string; link: string; published: string };
 
+/** True when the body is a processable RSS/Atom feed (may still contain zero items). */
+function isProcessableFeed(xml: string): boolean {
+  const trimmed = xml.trim();
+  if (!trimmed) return false;
+  return /<(?:rss|rdf:RDF|feed)\b/i.test(trimmed) || /<channel\b/i.test(trimmed);
+}
+
+function unavailable(topic: string): WorldNewsResponse {
+  return { topic, state: 'unavailable', items: [] };
+}
+
+function classifyCoverage(acceptedCount: number): Exclude<WorldNewsState, 'unavailable'> {
+  return acceptedCount >= MINIMUM_SIGNAL_ITEMS ? 'ok' : 'low_signal';
+}
+
 export async function GET(req: NextRequest) {
   const topic = req.nextUrl.searchParams.get('topic') || 'geopolitics';
   const lang = req.nextUrl.searchParams.get('lang') || 'en';
@@ -56,9 +79,19 @@ export async function GET(req: NextRequest) {
 
   try {
     const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=${loc.hl}&gl=${loc.gl}&ceid=${loc.ceid}`;
-    const res = await fetch(url, { headers: { 'User-Agent': UA }, cache: 'no-store' });
-    if (!res.ok) return NextResponse.json({ topic, items: [] });
+    const res = await fetch(url, {
+      headers: { 'User-Agent': UA },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+    });
+    if (!res.ok) {
+      return NextResponse.json(unavailable(topic));
+    }
     const xml = await res.text();
+    if (!isProcessableFeed(xml)) {
+      return NextResponse.json(unavailable(topic));
+    }
+
     const blocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
     const parsed: Item[] = blocks.map((b) => {
       let title = pick(b, 'title');
@@ -78,16 +111,20 @@ export async function GET(req: NextRequest) {
     });
 
     // Request time injected at the BFF boundary; policy module stays pure.
+    // minimumPrimaryItems shares MINIMUM_SIGNAL_ITEMS so ADR-0008 fallback
+    // gating and low_signal classification use one named threshold.
     const now = new Date();
     const items = applyFreshnessPolicy(parsed, now, {
-      minimumPrimaryItems: 2,
+      minimumPrimaryItems: MINIMUM_SIGNAL_ITEMS,
     }).slice(0, RESPONSE_ITEM_CAP);
 
-    return NextResponse.json(
-      { topic, items },
-      { headers: { 'Cache-Control': 's-maxage=600, stale-while-revalidate=1200' } }
-    );
+    const state = classifyCoverage(items.length);
+    const body: WorldNewsResponse = { topic, state, items };
+
+    return NextResponse.json(body, {
+      headers: { 'Cache-Control': 's-maxage=600, stale-while-revalidate=1200' },
+    });
   } catch {
-    return NextResponse.json({ topic, items: [] });
+    return NextResponse.json(unavailable(topic));
   }
 }
