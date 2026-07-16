@@ -71,24 +71,60 @@ function classifyCoverage(acceptedCount: number): Exclude<WorldNewsState, 'unava
   return acceptedCount >= MINIMUM_SIGNAL_ITEMS ? 'ok' : 'low_signal';
 }
 
+/** Hostname + pathname only — never the query string. */
+function safeUpstreamPath(requestUrl: string): string {
+  try {
+    const parsed = new URL(requestUrl);
+    return `${parsed.hostname}${parsed.pathname}`;
+  } catch {
+    return 'invalid-upstream-url';
+  }
+}
+
+function upstreamContentType(res: Response): string | null {
+  try {
+    return res.headers?.get?.('content-type') ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(req: NextRequest) {
   const topic = req.nextUrl.searchParams.get('topic') || 'geopolitics';
   const lang = req.nextUrl.searchParams.get('lang') || 'en';
   const query = req.nextUrl.searchParams.get('q') || TOPIC_QUERIES[topic] || TOPIC_QUERIES.geopolitics;
   const loc = LANG_LOCALE[lang] || LANG_LOCALE.en;
+  const requestUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=${loc.hl}&gl=${loc.gl}&ceid=${loc.ceid}`;
 
   try {
-    const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=${loc.hl}&gl=${loc.gl}&ceid=${loc.ceid}`;
-    const res = await fetch(url, {
+    const res = await fetch(requestUrl, {
       headers: { 'User-Agent': UA },
       cache: 'no-store',
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
     if (!res.ok) {
+      console.error('[world-news]', {
+        event: 'upstream_non_ok',
+        topic,
+        lang,
+        url: safeUpstreamPath(requestUrl),
+        status: res.status,
+        statusText: res.statusText,
+        contentType: upstreamContentType(res),
+      });
       return NextResponse.json(unavailable(topic));
     }
     const xml = await res.text();
     if (!isProcessableFeed(xml)) {
+      const prefix = xml.slice(0, 120).replace(/\s+/g, ' ').trim();
+      console.error('[world-news]', {
+        event: 'invalid_upstream_payload',
+        topic,
+        lang,
+        url: safeUpstreamPath(requestUrl),
+        contentType: upstreamContentType(res),
+        prefix,
+      });
       return NextResponse.json(unavailable(topic));
     }
 
@@ -124,7 +160,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(body, {
       headers: { 'Cache-Control': 's-maxage=600, stale-while-revalidate=1200' },
     });
-  } catch {
+  } catch (error) {
+    console.error('[world-news]', {
+      event: 'upstream_fetch_failed',
+      topic,
+      lang,
+      url: safeUpstreamPath(requestUrl),
+      name: error instanceof Error ? error.name : 'UnknownError',
+      message: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(unavailable(topic));
   }
 }
