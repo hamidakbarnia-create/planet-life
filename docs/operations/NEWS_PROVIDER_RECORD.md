@@ -208,6 +208,7 @@ PROBE_REQUIRED
 PROBE_PASSED
 PROBE_FAILED
 REJECTED_HARD_GATE
+NOT_EVALUATED
 SHORTLISTED
 SELECTED
 ```
@@ -221,6 +222,32 @@ Rules:
 * Unclear information:
   `PROBE_REQUIRED`
 * No provider may be shortlisted from a marketing page alone.
+
+`NOT_EVALUATED` definition:
+
+```text
+Evaluation intentionally stopped because an earlier
+hard gate already rejected the provider for the
+current architectural question.
+```
+
+### UNKNOWN vs NOT_EVALUATED
+
+```text
+UNKNOWN
+
+Evaluation was attempted,
+but official evidence was insufficient.
+
+NOT_EVALUATED
+
+Evaluation was intentionally skipped because
+an earlier hard gate already failed.
+
+UNKNOWN must not be interpreted as permitted.
+
+NOT_EVALUATED must not be interpreted as unknown.
+```
 
 ---
 
@@ -248,6 +275,17 @@ Rules:
 * Absence of evidence must never be interpreted as supported.
 
 ```text
+Official URLs shall be stored in canonical form.
+
+Tracking parameters
+(for example utm_*)
+must be removed before recording.
+
+The recorded URL should uniquely identify
+the official source.
+```
+
+```text
 No provider status may transition to DOCS_VERIFIED
 until the corresponding Evidence Register entry contains:
 
@@ -265,9 +303,9 @@ Every provider claim must reference a concrete evidence record.
 
 | Provider     | Evidence Type | Official Documentation URL | Pricing URL | Terms of Service URL | Access Date (UTC) | Scope            | FA Officially Documented | FA Evidence URL | Automated Polling Allowed | Caching Allowed | Reviewer | Status             |
 | ------------ | ------------- | -------------------------- | ----------- | -------------------- | ----------------- | ---------------- | ------------------------ | --------------- | ------------------------- | --------------- | -------- | ------------------ |
-| GNews        | OFFICIAL_DOC  | https://docs.gnews.io/endpoints/search-endpoint | https://gnews.io/pricing | https://gnews.io/legal/terms-of-service | 2026-07-16 | Language support | No | https://docs.gnews.io/endpoints/search-endpoint | UNKNOWN | UNKNOWN | Platform | REJECTED_HARD_GATE |
-| Mediastack   | UNKNOWN       | UNKNOWN                    | UNKNOWN     | UNKNOWN              | UNKNOWN           | Language support | UNKNOWN                  | UNKNOWN         | UNKNOWN                   | UNKNOWN         | UNKNOWN  | PENDING            |
-| NewsAPI.org  | OFFICIAL_DOC  | https://newsapi.org/docs/endpoints/everything | https://newsapi.org/pricing | https://newsapi.org/terms | 2026-07-16 | Language support | No | https://newsapi.org/docs/endpoints/everything | UNKNOWN | UNKNOWN | Platform | REJECTED_HARD_GATE |
+| GNews        | OFFICIAL_DOC  | https://docs.gnews.io/endpoints/search-endpoint | https://gnews.io/pricing | https://gnews.io/legal/terms-of-service | 2026-07-16 | Language support | No | https://docs.gnews.io/endpoints/search-endpoint | NOT_EVALUATED | NOT_EVALUATED | Platform | REJECTED_HARD_GATE |
+| Mediastack   | OFFICIAL_DOC  | https://docs.apilayer.com/mediastack/docs/options | https://mediastack.com/pricing | https://mediastack.com/terms | 2026-07-16 | Language support | No | https://docs.apilayer.com/mediastack/docs/options | NOT_EVALUATED | NOT_EVALUATED | Platform | REJECTED_HARD_GATE |
+| NewsAPI.org  | OFFICIAL_DOC  | https://newsapi.org/docs/endpoints/everything | https://newsapi.org/pricing | https://newsapi.org/terms | 2026-07-16 | Language support | No | https://newsapi.org/docs/endpoints/everything | NOT_EVALUATED | NOT_EVALUATED | Platform | REJECTED_HARD_GATE |
 | NewsData.io  | UNKNOWN       | UNKNOWN                    | UNKNOWN     | UNKNOWN              | UNKNOWN           | Language support | UNKNOWN                  | UNKNOWN         | UNKNOWN                   | UNKNOWN         | UNKNOWN  | PENDING            |
 | The News API | UNKNOWN       | UNKNOWN                    | UNKNOWN     | UNKNOWN              | UNKNOWN           | Language support | UNKNOWN                  | UNKNOWN         | UNKNOWN                   | UNKNOWN         | UNKNOWN  | PENDING            |
 | Currents API | UNKNOWN       | UNKNOWN                    | UNKNOWN     | UNKNOWN              | UNKNOWN           | Language support | UNKNOWN                  | UNKNOWN         | UNKNOWN                   | UNKNOWN         | UNKNOWN  | PENDING            |
@@ -276,8 +314,21 @@ Wave 1 note (GNews, NewsAPI.org):
 
 * Official supported-language lists were reviewed on 2026-07-16 UTC.
 * Neither list explicitly documents Persian, Farsi, or `fa`.
+* Rejection Gate: `LANGUAGE_COVERAGE`.
 * `REJECTED_HARD_GATE` applies to sole-provider eligibility only. These providers remain eligible for later evaluation as primary EN/AR/RU, fallback, or language-routed components, subject to remaining hard gates.
-* Polling cadence, response caching, and metadata retention remain `UNKNOWN` because official documentation does not state them explicitly for the required production use.
+* Open Gates for later architectural contexts are `NOT_EVALUATED`: automated_polling, polling_cadence, response_caching, metadata_retention, redistribution.
+
+Wave 2 note (Mediastack):
+
+* Official Available Languages list reviewed on 2026-07-16 UTC at https://docs.apilayer.com/mediastack/docs/options.
+* Documented codes: `ar`, `de`, `en`, `es`, `fr`, `he`, `it`, `nl`, `no`, `pt`, `ru`, `se`, `zh`.
+* Persian, Farsi, and `fa` are not listed.
+* Rejection Gate: `LANGUAGE_COVERAGE`.
+* Authentication: required query parameter `access_key` (OFFICIAL_DOC / OpenAPI).
+* Production/commercial plans exist on https://mediastack.com/pricing (`Commercial Use` listed on paid tiers).
+* Data contract fields documented in official OpenAPI Article schema: `title`, `url`, `source`, `published_at` (described as ISO 8601 publication timestamp).
+* Open Gates for later architectural contexts are `NOT_EVALUATED`: automated_polling, polling_cadence, response_caching, metadata_retention, redistribution.
+* `REJECTED_HARD_GATE` applies to sole-provider eligibility only.
 
 Rules:
 
@@ -308,20 +359,68 @@ Rules:
 
 ## 7. Candidate Inventory
 
-| Provider     | Current Status     | Sole-provider Eligibility | Reason                                                                     |
-| ------------ | ------------------ | ------------------------: | -------------------------------------------------------------------------- |
-| GNews        | REJECTED_HARD_GATE |                        No | Fails sole-provider language hard gate.                                    |
-| Mediastack   | EVIDENCE_PENDING   |                   Unknown | Official language support does not include Persian                         |
-| NewsAPI.org  | REJECTED_HARD_GATE |                        No | Fails sole-provider language hard gate.                                    |
-| NewsData.io  | PROBE_REQUIRED     |                   Unknown | Persian parameter and effective fresh coverage require direct verification |
-| The News API | PROBE_REQUIRED     |                   Unknown | Persian parameter and effective fresh coverage require direct verification |
-| Currents API | PENDING            |                   Unknown | Full official verification not yet completed                               |
+| Provider     | Current Status     | Rejection Gate     | Sole-provider Eligibility | Reason                                                                     |
+| ------------ | ------------------ | ------------------ | ------------------------: | -------------------------------------------------------------------------- |
+| GNews        | REJECTED_HARD_GATE | LANGUAGE_COVERAGE  |                        No | Official documentation does not document Persian (`fa`) support.           |
+| Mediastack   | REJECTED_HARD_GATE | LANGUAGE_COVERAGE  |                        No | Official documentation does not document Persian (`fa`) support.           |
+| NewsAPI.org  | REJECTED_HARD_GATE | LANGUAGE_COVERAGE  |                        No | Official documentation does not document Persian (`fa`) support.           |
+| NewsData.io  | PROBE_REQUIRED     | —                  |                   Unknown | Persian parameter and effective fresh coverage require direct verification |
+| The News API | PROBE_REQUIRED     | —                  |                   Unknown | Persian parameter and effective fresh coverage require direct verification |
+| Currents API | PENDING            | —                  |                   Unknown | Full official verification not yet completed                               |
 
 These statuses are not a final provider selection.
 
-`REJECTED_HARD_GATE` for GNews and NewsAPI.org means sole-provider rejection only. It does not mean the provider is rejected entirely for primary, fallback, or routed roles.
+### Rejected Providers — Scope Clarification
 
-Until the Evidence Register is complete for remaining providers, unverified FA, polling, and caching Comparison Matrix cells remain `UNKNOWN` and will be filled only after Evidence Register entries are recorded.
+```text
+REJECTED_HARD_GATE never means the provider is
+globally rejected.
+
+It only rejects the provider for the
+architectural question currently under evaluation.
+
+The same provider may later be evaluated
+for another architecture
+(primary, fallback or routed)
+under a separate decision context.
+```
+
+### Rejection Records (LANGUAGE_COVERAGE)
+
+For GNews, Mediastack, and NewsAPI.org:
+
+```text
+Status:
+REJECTED_HARD_GATE
+
+Rejection Gate:
+LANGUAGE_COVERAGE
+
+Reason:
+Official documentation does not document Persian (`fa`) support.
+
+Scope:
+Sole-provider eligibility only.
+```
+
+Open Gates:
+
+```text
+automated_polling
+polling_cadence
+response_caching
+metadata_retention
+redistribution
+```
+
+```text
+These gates remain unevaluated for any future
+primary/fallback or language-routed assessment.
+```
+
+Matrix and Evidence Register cells for those Open Gates are recorded as `NOT_EVALUATED`, not `UNKNOWN`.
+
+Until the Evidence Register is complete for remaining providers, unverified FA Comparison Matrix cells remain `UNKNOWN` and will be filled only after Evidence Register entries are recorded.
 
 ---
 
@@ -329,26 +428,26 @@ Until the Evidence Register is complete for remaining providers, unverified FA, 
 
 | Criterion                              | GNews   | Mediastack | NewsAPI.org | NewsData.io | The News API | Currents API |
 | -------------------------------------- | ------- | ---------- | ----------- | ----------- | ------------ | ------------ |
-| Authenticated API                      | Yes     | UNKNOWN    | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Production plan                        | Yes     | UNKNOWN    | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Authenticated API                      | Yes     | Yes        | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Production plan                        | Yes     | Yes        | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | Commercial use verified                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | Official ToS reviewed                  | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Automated polling permitted            | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Required polling cadence permitted     | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Response caching permitted             | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Article metadata retention permitted   | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Redistribution/display restrictions verified | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Documented quota                       | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Automated polling permitted            | NOT_EVALUATED | NOT_EVALUATED | NOT_EVALUATED | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Required polling cadence permitted     | NOT_EVALUATED | NOT_EVALUATED | NOT_EVALUATED | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Response caching permitted             | NOT_EVALUATED | NOT_EVALUATED | NOT_EVALUATED | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Article metadata retention permitted   | NOT_EVALUATED | NOT_EVALUATED | NOT_EVALUATED | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Redistribution/display restrictions verified | NOT_EVALUATED | NOT_EVALUATED | NOT_EVALUATED | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Documented quota                       | UNKNOWN | Yes        | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | Documented rate limits                 | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | Structured errors                      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Publication timestamp                  | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Timestamp semantics verified           | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| EN documented                          | Yes     | UNKNOWN    | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| AR documented                          | Yes     | UNKNOWN    | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| RU documented                          | Yes     | UNKNOWN    | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| FA documented                          | No      | UNKNOWN    | No          | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| FA officially documented               | No      | UNKNOWN    | No          | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| FA official evidence URL recorded      | Yes     | UNKNOWN    | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Publication timestamp                  | UNKNOWN | Yes        | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Timestamp semantics verified           | UNKNOWN | Yes        | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| EN documented                          | Yes     | Yes        | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| AR documented                          | Yes     | Yes        | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| RU documented                          | Yes     | Yes        | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| FA documented                          | No      | No         | No          | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| FA officially documented               | No      | No         | No          | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| FA official evidence URL recorded      | Yes     | Yes        | Yes         | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | `language=fa` accepted                 | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | FA geopolitics fresh volume            | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | FA markets fresh volume                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
@@ -356,17 +455,21 @@ Until the Evidence Register is complete for remaining providers, unverified FA, 
 | EN topic coverage                      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | AR topic coverage                      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | RU topic coverage                      | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Search/query support                   | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Source/domain filtering                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Search/query support                   | UNKNOWN | Yes        | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Source/domain filtering                | UNKNOWN | Yes        | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | Monthly production cost                | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | Overage behavior                       | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | Integration complexity                 | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 | Fallback suitability                   | UNKNOWN | UNKNOWN    | UNKNOWN     | UNKNOWN     | UNKNOWN      | UNKNOWN      |
-| Sole-provider eligible                 | No      | UNKNOWN    | No          | UNKNOWN     | UNKNOWN      | UNKNOWN      |
+| Sole-provider eligible                 | No      | No         | No          | UNKNOWN     | UNKNOWN      | UNKNOWN      |
 
 Cells without evidence remain `UNKNOWN`, not `No`.
 
-Wave 1 matrix updates for GNews and NewsAPI.org are limited to claims supported by official documentation accessed on 2026-07-16 UTC. Polling, caching, retention, and redistribution cells remain `UNKNOWN` where official documentation is not explicit.
+For providers rejected solely on `LANGUAGE_COVERAGE`, Open Gate legal cells are `NOT_EVALUATED`, not `UNKNOWN`.
+
+Wave 1 matrix updates for GNews and NewsAPI.org are limited to claims supported by official documentation accessed on 2026-07-16 UTC. Open Gate legal cells are `NOT_EVALUATED` after the sole-provider language hard-gate failure.
+
+Wave 2 matrix updates for Mediastack are limited to claims supported by official documentation accessed on 2026-07-16 UTC (`docs/options` language list, pricing page quotas/plans, and OpenAPI Article/`access_key` definitions). Open Gate legal cells are `NOT_EVALUATED` after the sole-provider language hard-gate failure.
 
 ---
 
@@ -634,8 +737,127 @@ rollback path
 | 2026-07-16 | Google News RSS rejected as sole primary provider                   | PRG-02 production benchmark                | Platform | Final  |
 | 2026-07-16 | Provider selection not yet made                                     | Persian and production evidence incomplete | Platform | Open   |
 | 2026-07-16 | FA parameter support and effective FA coverage evaluated separately | Governance requirement                     | Platform | Final  |
-| 2026-07-16 | GNews rejected as sole-provider candidate. Reason: official documentation does not document Persian language support. | OFFICIAL_DOC https://docs.gnews.io/endpoints/search-endpoint | Platform | Preliminary hard-gate decision |
-| 2026-07-16 | NewsAPI.org rejected as sole-provider candidate. Reason: official documentation does not document Persian language support. | OFFICIAL_DOC https://newsapi.org/docs/endpoints/everything | Platform | Preliminary hard-gate decision |
+
+### Hard-gate decisions (sole-provider)
+
+#### GNews
+
+```text
+Date:
+2026-07-16
+
+Status:
+REJECTED_HARD_GATE
+
+Rejection Gate:
+LANGUAGE_COVERAGE
+
+Reason:
+Official documentation does not document Persian (`fa`) support.
+
+Scope:
+Sole-provider eligibility only.
+
+Evidence:
+OFFICIAL_DOC https://docs.gnews.io/endpoints/search-endpoint
+
+Author:
+Platform
+
+Decision Status:
+Preliminary hard-gate decision
+```
+
+Open Gates:
+
+```text
+automated_polling
+polling_cadence
+response_caching
+metadata_retention
+redistribution
+```
+
+#### NewsAPI.org
+
+```text
+Date:
+2026-07-16
+
+Status:
+REJECTED_HARD_GATE
+
+Rejection Gate:
+LANGUAGE_COVERAGE
+
+Reason:
+Official documentation does not document Persian (`fa`) support.
+
+Scope:
+Sole-provider eligibility only.
+
+Evidence:
+OFFICIAL_DOC https://newsapi.org/docs/endpoints/everything
+
+Author:
+Platform
+
+Decision Status:
+Preliminary hard-gate decision
+```
+
+Open Gates:
+
+```text
+automated_polling
+polling_cadence
+response_caching
+metadata_retention
+redistribution
+```
+
+#### Mediastack
+
+```text
+Date:
+2026-07-16
+
+Status:
+REJECTED_HARD_GATE
+
+Rejection Gate:
+LANGUAGE_COVERAGE
+
+Reason:
+Official documentation does not document Persian (`fa`) support.
+
+Scope:
+Sole-provider eligibility only.
+
+Evidence:
+OFFICIAL_DOC https://docs.apilayer.com/mediastack/docs/options
+
+Author:
+Platform
+
+Decision Status:
+Preliminary hard-gate decision
+```
+
+Open Gates:
+
+```text
+automated_polling
+polling_cadence
+response_caching
+metadata_retention
+redistribution
+```
+
+```text
+These gates remain unevaluated for any future
+primary/fallback or language-routed assessment.
+```
 
 Sole-provider hard-gate rejection does not reject the provider entirely for primary EN/AR/RU, fallback, or language-routed architecture evaluation.
 
