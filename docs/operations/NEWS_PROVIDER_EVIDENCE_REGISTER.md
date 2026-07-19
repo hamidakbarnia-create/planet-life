@@ -450,7 +450,7 @@ BLOCKED_UNKNOWN
 
 ### Reason
 
-Language Gate contains UNKNOWN values for EN, RU, and FA. Official primary documentation portal pages returned “JavaScript is disabled” without an extractable exhaustive supported-language list. Partial mentions (e.g. Arabic in SDK README examples) are insufficient to close all Supported Language Snapshot locales. `UNKNOWN` blocks benchmark.
+Caching/storage permitted is UNKNOWN. Official Terms of Service do not state a clear permission for response caching/temporary storage required by METIORO World usage. `UNKNOWN` is not permission and blocks benchmark.
 
 ### Official Sources
 
@@ -461,6 +461,8 @@ Language Gate contains UNKNOWN values for EN, RU, and FA. Official primary docum
 | NewsAPI.ai plans/pricing | https://newsapi.ai/plans | 2026-07-19 |
 | Event Registry documentation portal | https://eventregistry.org/documentation | 2026-07-19 |
 | Official Python SDK README | https://github.com/EventRegistry/event-registry-python | 2026-07-19 |
+| Official Supported languages (SDK wiki) | https://github.com/EventRegistry/event-registry-python/wiki/Supported-languages | 2026-07-19 |
+| Terms of Service | https://newsapi.ai/terms | 2026-07-19 |
 
 ### Authentication
 
@@ -468,7 +470,7 @@ PASS — Official materials document API key authentication (`Get FREE API key`;
 
 ### Commercial Availability
 
-PASS — Official site positions the API for use in products/services; official plans page offers paid monthly plans.
+PASS — Official Terms grant paid-plan license to use data for commercial purposes; official plans page offers paid monthly plans.
 
 ### Pricing
 
@@ -478,34 +480,34 @@ PASS — Official plans page documents priced plans (example observed: 5K Plan $
 
 | Gate | Result |
 | ---- | ------ |
-| Automated polling permitted | NOT_EVALUATED |
-| Caching/storage permitted | NOT_EVALUATED |
+| Automated polling permitted | PASS — Official Terms contemplate rate-limited API use (prohibit bypassing rate limits / API restrictions). |
+| Caching/storage permitted | UNKNOWN — Official Terms do not clearly permit caching/temporary storage. |
 | Redistribution/display restrictions verified | NOT_EVALUATED |
 | Attribution requirements verified | NOT_EVALUATED |
 | License compatible with METIORO World usage | NOT_EVALUATED |
 
-Short-circuit after Language Gate UNKNOWN outcomes.
+Short-circuit after Caching/storage UNKNOWN.
 
 ### Language Gate
 
 | Locale | Result | Evidence |
 | ------ | ------ | -------- |
-| EN | UNKNOWN | No extractable exhaustive official supported-language list from primary documentation portal. |
-| AR | PASS | Official SDK README explicitly mentions Arabic among searchable languages. |
-| RU | UNKNOWN | No extractable exhaustive official supported-language list confirming Russian / `ru`. |
-| FA | UNKNOWN | No extractable official documentation explicitly listing Persian / Farsi / `fa`. |
+| EN | PASS | Official Supported languages list includes English (`eng`). |
+| AR | PASS | Official Supported languages list includes Arabic (`ara`). |
+| RU | PASS | Official Supported languages list includes Russian (`rus`). |
+| FA | PASS | Official Supported languages list includes Persian (`fas`). |
 
 ### Documentation vs Coverage Notes
 
-FA remains UNKNOWN at documentation gate. Effective FA Coverage not assessed.
+FA is officially documented as Persian (`fas`). Effective FA Coverage remains a benchmark metric and is not decided here.
 
 ### Evidence Notes
 
-Primary documentation portals were not readable without JavaScript execution. No third-party comparison pages used.
+Audit correction (2026-07-19): Language Gate outcomes updated from official Supported-languages wiki. Legal gates re-opened after Language Gate PASS; evaluation short-circuited at Caching/storage UNKNOWN. Redistribution restrictions exist in Terms §6 but were not scored due to short-circuit. No third-party comparison pages used.
 
 ### Decision
 
-BLOCKED_UNKNOWN — Language Gate UNKNOWN for one or more required locales.
+BLOCKED_UNKNOWN — Caching/storage UNKNOWN.
 
 ### Proceed to Benchmark
 
