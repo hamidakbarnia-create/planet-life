@@ -52,13 +52,29 @@ Rules applied:
 | ----- | ----- |
 | Evidence Collection | COMPLETE |
 | Unknown Resolution | OPEN |
-| Benchmark Authorization | BLOCKED — X and RLP pending ratification |
+
+### Benchmark Execution Authorization
+
+**BLOCKED**
+
+Reasons:
+
+1. Product Ratification
+   - Effective Coverage Threshold (X)
+
+2. Operations Ratification
+   - Reference Load Profile (RLP)
+
+3. Provider Clarifications
+   - Event Registry
+   - Associated Press
+   - Reuters
 
 ### Clarification Queue
 
 | Provider | Open clarification |
 | -------- | ------------------ |
-| Event Registry | Caching/storage permission |
+| Event Registry | Caching/storage permission; automated polling permission |
 | Associated Press | API authentication/access and commercial availability |
 | Reuters | API authentication/access and commercial availability |
 
