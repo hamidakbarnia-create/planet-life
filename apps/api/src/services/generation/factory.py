@@ -7,10 +7,12 @@ from __future__ import annotations
 
 from config.conversation_generation import CONVERSATION_GENERATION_PROVIDER
 from services.generation.errors import GenerationConfigurationError
+from services.generation.openai_provider import OpenAIConversationProvider
 from services.generation.ports import GenerationProvider
 from services.generation.static_provider import StaticConversationProvider
 
 _STATIC_PROVIDER_KEY = "static"
+_OPENAI_PROVIDER_KEY = "openai"
 
 
 def resolve_generation_provider(
@@ -21,6 +23,9 @@ def resolve_generation_provider(
 
     if key == _STATIC_PROVIDER_KEY:
         return StaticConversationProvider()
+
+    if key == _OPENAI_PROVIDER_KEY:
+        return OpenAIConversationProvider()
 
     raise GenerationConfigurationError(
         "Unsupported conversation generation provider configuration"
