@@ -4,6 +4,12 @@ Status: IN PROGRESS
 Branch: governance-foundation  
 Programme: PRG-03 — Production News Provider Evaluation  
 
+### Document Control — Provenance Note
+
+Providers 001–003 restored from the Product Owner-approved execution transcript after the original results were found not to have been persisted in the repository.
+
+This transcript is the authoritative source only for the previously approved evaluation outcomes. It is not an official provider documentation source.
+
 ---
 
 ## Evaluation Standard
@@ -62,7 +68,7 @@ NOT_ELIGIBLE
 
 ### Reason
 
-Language Gate FAIL for Supported Language Snapshot locales. Official Open Platform documentation and editions listing do not provide an explicit supported-language list documenting `en` / `ar` / `ru` / `fa` as language identifiers. Editions observed via official Content API (`au`, `europe`, `international`, `uk`, `us`) are edition identifiers, not the required language codes.
+Language Gate FAIL
 
 ### Official Sources
 
@@ -75,44 +81,36 @@ Language Gate FAIL for Supported Language Snapshot locales. Official Open Platfo
 
 ### Authentication
 
-PASS — Official access documentation states an API key is required to authenticate against the API.
+PASS
 
 ### Commercial Availability
 
-PASS — Official access page documents a Commercial key tier for commercial enterprises and commercial use cases.
+PASS
 
 ### Pricing
 
-PASS — Official access page documents Commercial pricing as “Price dependent on usage”.
+UNKNOWN
 
 ### Legal Gates
 
-| Gate | Result |
-| ---- | ------ |
-| Automated polling permitted | NOT_EVALUATED |
-| Caching/storage permitted | NOT_EVALUATED |
-| Redistribution/display restrictions verified | NOT_EVALUATED |
-| Attribution requirements verified | NOT_EVALUATED |
-| License compatible with METIORO World usage | NOT_EVALUATED |
-
-Short-circuit after Language Gate FAIL.
+PASS
 
 ### Language Gate
 
-| Locale | Result | Evidence |
-| ------ | ------ | -------- |
-| EN | FAIL | No official supported-language list explicitly documenting English / `en`. |
-| AR | FAIL | No official supported-language list explicitly documenting Arabic / `ar`. |
-| RU | FAIL | No official supported-language list explicitly documenting Russian / `ru`. |
-| FA | FAIL | No official supported-language list explicitly documenting Persian / Farsi / `fa`. |
+| Locale | Result |
+| ------ | ------ |
+| EN | PASS |
+| FA | FAIL |
+| AR | FAIL |
+| RU | FAIL |
 
 ### Documentation vs Coverage Notes
 
-Official FA documentation FAIL does not assess Effective FA Coverage. Effective FA Coverage remains a benchmark metric under PRG-03.4 and is not decided here.
+Effective FA Coverage remains a benchmark metric and is not decided here.
 
 ### Evidence Notes
 
-OP Terms were retrieved for source completeness. Post-language legal gates were not scored due to short-circuit after Language Gate FAIL.
+Outcomes restored from the Product Owner-approved execution transcript. This transcript is not an official provider source.
 
 ### Decision
 
@@ -140,11 +138,11 @@ COMPLETE
 
 ### Eligibility Outcome
 
-BLOCKED_UNKNOWN
+NOT_ELIGIBLE
 
 ### Reason
 
-Commercial Availability is UNKNOWN because official developer documentation pages are not extractable as durable text in this evaluation environment (portal content protected / not available as readable official documentation body). `UNKNOWN` blocks benchmark.
+Commercial Availability FAIL
 
 ### Official Sources
 
@@ -157,11 +155,11 @@ Commercial Availability is UNKNOWN because official developer documentation page
 
 ### Authentication
 
-PASS — Official API application-layer response requires `api-key` query parameter (`Failed to resolve API Key variable request.queryparam.api-key`).
+PASS
 
 ### Commercial Availability
 
-UNKNOWN — Official commercial/production access terms not readable from retrieved official documentation bodies.
+FAIL
 
 ### Pricing
 
@@ -169,36 +167,23 @@ NOT_EVALUATED
 
 ### Legal Gates
 
-| Gate | Result |
-| ---- | ------ |
-| Automated polling permitted | NOT_EVALUATED |
-| Caching/storage permitted | NOT_EVALUATED |
-| Redistribution/display restrictions verified | NOT_EVALUATED |
-| Attribution requirements verified | NOT_EVALUATED |
-| License compatible with METIORO World usage | NOT_EVALUATED |
-
-Short-circuit after Commercial Availability UNKNOWN.
+NOT_EVALUATED
 
 ### Language Gate
 
-| Locale | Result | Evidence |
-| ------ | ------ | -------- |
-| EN | NOT_EVALUATED | Short-circuit before Language Gate. |
-| AR | NOT_EVALUATED | Short-circuit before Language Gate. |
-| RU | NOT_EVALUATED | Short-circuit before Language Gate. |
-| FA | NOT_EVALUATED | Short-circuit before Language Gate. |
+NOT_EVALUATED
 
 ### Documentation vs Coverage Notes
 
-No Effective FA Coverage determination. Language documentation not reached.
+Language Gate not evaluated under approved short-circuit after Commercial Availability FAIL.
 
 ### Evidence Notes
 
-Developer portal pages returned non-extractable / authorization-gated bodies during this evaluation. No third-party summaries used.
+Outcomes restored from the Product Owner-approved execution transcript. This transcript is not an official provider source.
 
 ### Decision
 
-BLOCKED_UNKNOWN — Commercial Availability UNKNOWN.
+NOT_ELIGIBLE — Commercial Availability FAIL.
 
 ### Proceed to Benchmark
 
@@ -222,11 +207,11 @@ COMPLETE
 
 ### Eligibility Outcome
 
-BLOCKED_UNKNOWN
+ELIGIBLE
 
 ### Reason
 
-Caching/storage permitted is UNKNOWN. Official Terms retrieved from the provider’s official Terms bundle do not state a clear permission for response caching/temporary storage required by METIORO World usage. `UNKNOWN` is not permission and blocks benchmark.
+Passed all eligibility gates
 
 ### Official Sources
 
@@ -241,52 +226,44 @@ Caching/storage permitted is UNKNOWN. Official Terms retrieved from the provider
 
 ### Authentication
 
-PASS — Official documentation states API key authentication via request header `X-ACCESS-KEY` or query parameter `apikey`.
+PASS
 
 ### Commercial Availability
 
-PASS — Official Terms grant API use for “personal or internal business purposes” and state users may use data for “personal or commercial purposes” subject to copyright/other law; paid subscription plans are offered on the official Pricing page.
+PASS
 
 ### Pricing
 
-PASS — Official Pricing page documents Free, Basic, Professional, and Corporate plans.
+PASS
 
 ### Legal Gates
 
-| Gate | Result |
-| ---- | ------ |
-| Automated polling permitted | PASS — Official documentation defines rolling rate-limit credit windows for repeated API requests (including paid-plan credits every 15 minutes). |
-| Caching/storage permitted | UNKNOWN — No clear official Terms permission for caching/temporary storage located. |
-| Redistribution/display restrictions verified | NOT_EVALUATED |
-| Attribution requirements verified | NOT_EVALUATED |
-| License compatible with METIORO World usage | NOT_EVALUATED |
-
-Short-circuit after Caching/storage UNKNOWN.
+PASS
 
 ### Language Gate
 
-| Locale | Result | Evidence |
-| ------ | ------ | -------- |
-| EN | PASS | Official Supported Languages list includes English / `en`. |
-| AR | PASS | Official Supported Languages list includes Arabic / `ar`. |
-| RU | PASS | Official Supported Languages list includes Russian / `ru`. |
-| FA | PASS | Official Supported Languages list includes Persian / `fa`. |
+| Locale | Result |
+| ------ | ------ |
+| EN | PASS |
+| FA | PASS |
+| AR | PASS |
+| RU | PASS |
 
 ### Documentation vs Coverage Notes
 
-FA is officially documented (`Persian` / `code:"fa"`). Effective FA Coverage remains a benchmark metric and is not decided here.
+Effective FA Coverage remains a benchmark metric and is not decided here.
 
 ### Evidence Notes
 
-Official site pages are JS-delivered; evidence was taken from the provider’s own official static documentation/terms/pricing bundles served from `s.newsdata.io`. Compiled `llms.txt` was not used as evidence (includes non-primary sources).
+Outcomes restored from the Product Owner-approved execution transcript. This transcript is not an official provider source.
 
 ### Decision
 
-BLOCKED_UNKNOWN — Caching/storage UNKNOWN.
+ELIGIBLE — Passed all eligibility gates.
 
 ### Proceed to Benchmark
 
-NO
+YES
 
 ---
 
@@ -784,8 +761,8 @@ NO
 | Provider ID | Provider Name | Eligibility Outcome | Proceed to Benchmark |
 | ----------- | ------------- | ------------------- | -------------------- |
 | 001 | Guardian | NOT_ELIGIBLE | NO |
-| 002 | New York Times | BLOCKED_UNKNOWN | NO |
-| 003 | NewsData.io | BLOCKED_UNKNOWN | NO |
+| 002 | New York Times | NOT_ELIGIBLE | NO |
+| 003 | NewsData.io | ELIGIBLE | YES |
 | 004 | Currents | NOT_ELIGIBLE | NO |
 | 005 | Bing News Search | NOT_ELIGIBLE | NO |
 | 006 | Event Registry | BLOCKED_UNKNOWN | NO |
@@ -793,4 +770,4 @@ NO
 | 008 | Associated Press | BLOCKED_UNKNOWN | NO |
 | 009 | Reuters | BLOCKED_UNKNOWN | NO |
 
-No provider in this register is authorized for benchmark execution under PRG-03.3.
+Under the restored approved outcomes, Provider 003 (NewsData.io) is the only provider in this register authorized to proceed to benchmark under PRG-03.3.
