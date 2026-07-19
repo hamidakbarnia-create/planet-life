@@ -51,7 +51,7 @@ Rules applied:
 | Field | Value |
 | ----- | ----- |
 | Evidence Collection | COMPLETE |
-| Unknown Resolution | OPEN |
+| Unknown Resolution | OPEN — Event Registry automated polling remains UNKNOWN after official-doc re-review (2026-07-19). Associated Press and Reuters UNKNOWN blockers resolved (see provider sections). |
 
 ### Benchmark Execution Authorization
 
@@ -65,18 +65,18 @@ Reasons:
 2. Operations Ratification
    - Reference Load Profile (RLP)
 
-3. Provider Clarifications
-   - Event Registry
-   - Associated Press
-   - Reuters
+3. Provider Clarifications (register Unknown Resolution)
+   - Event Registry remains `BLOCKED_UNKNOWN` (automated polling UNKNOWN)
+
+Benchmark-authorization note (2026-07-19): Associated Press and Reuters clarifications are closed (`NOT_ELIGIBLE`). Provider 003 (NewsData.io) remains the only `ELIGIBLE` provider. Under PRG-03.3, NewsData.io benchmark execution still requires Eligibility = PASS for that provider (already recorded) plus ratified X/RLP (and PRG-03.4 preconditions). Event Registry UNKNOWN continues to block Event Registry only; it keeps programme-level Unknown Resolution OPEN but is not an Eligibility defect on NewsData.io.
 
 ### Clarification Queue
 
-| Provider | Open clarification |
-| -------- | ------------------ |
-| Event Registry | Caching/storage permission; automated polling permission |
-| Associated Press | API authentication/access and commercial availability |
-| Reuters | API authentication/access and commercial availability |
+| Provider | Open clarification | Status |
+| -------- | ------------------ | ------ |
+| Event Registry | Automated polling permission (explicit Terms/AUP permission required; rate-limit text alone insufficient). Caching/storage remains NOT_EVALUATED under short-circuit. | OPEN |
+| Associated Press | API authentication/access and commercial availability | CLOSED — Auth/Commercial resolved; provider NOT_ELIGIBLE (Redistribution/display FAIL) |
+| Reuters | API authentication/access and commercial availability | CLOSED — Auth/Commercial resolved; provider NOT_ELIGIBLE (Language Gate FAIL) |
 
 ---
 
@@ -496,6 +496,27 @@ Automated polling permitted is UNKNOWN. Official Terms of Service do not explici
 | Official Supported languages (SDK wiki) | https://github.com/EventRegistry/event-registry-python/wiki/Supported-languages | 2026-07-19 |
 | Terms of Service | https://newsapi.ai/terms | 2026-07-19 |
 
+### Gate-by-Gate Status (EG-01–EG-12)
+
+| Gate ID | Gate | Result | Notes |
+| ------- | ---- | ------ | ----- |
+| EG-01 | Authentication method documented | PASS | API key (`Get FREE API key`; SDK `EventRegistry(apiKey=...)`). |
+| EG-02 | Commercial production access documented | PASS | Paid-plan commercial license in Terms; paid plans on plans page. |
+| EG-03 | Pricing documented | PASS | Public priced plans (example: 5K Plan $90.00 per month). |
+| EG-04 | EN officially documented | PASS | Supported languages list includes English (`eng`). |
+| EG-05 | AR officially documented | PASS | Supported languages list includes Arabic (`ara`). |
+| EG-06 | RU officially documented | PASS | Supported languages list includes Russian (`rus`). |
+| EG-07 | FA officially documented | PASS | Supported languages list includes Persian (`fas`). |
+| EG-08 | Automated polling permitted | **UNKNOWN** | Terms lack explicit automated/programmatic polling permission. |
+| EG-09 | Caching/storage permitted | NOT_EVALUATED | Short-circuit after EG-08 UNKNOWN. |
+| EG-10 | Redistribution/display restrictions verified | NOT_EVALUATED | Short-circuit after EG-08 UNKNOWN. |
+| EG-11 | Attribution requirements verified | NOT_EVALUATED | Short-circuit after EG-08 UNKNOWN. |
+| EG-12 | License compatible with METIORO World usage | NOT_EVALUATED | Short-circuit after EG-08 UNKNOWN. |
+
+**UNKNOWN gates (exact):** EG-08 only (`Automated polling permitted`).
+
+**NOT_EVALUATED gates (exact):** EG-09, EG-10, EG-11, EG-12 (blocked from scoring by short-circuit after EG-08 UNKNOWN).
+
 ### Authentication
 
 PASS — Official materials document API key authentication (`Get FREE API key`; SDK `EventRegistry(apiKey=...)`).
@@ -512,13 +533,13 @@ PASS — Official plans page documents priced plans (example observed: 5K Plan $
 
 | Gate | Result |
 | ---- | ------ |
-| Automated polling permitted | UNKNOWN — Official Terms do not explicitly permit automated/programmatic polling; rate-limit text alone is insufficient. |
-| Caching/storage permitted | NOT_EVALUATED |
-| Redistribution/display restrictions verified | NOT_EVALUATED |
-| Attribution requirements verified | NOT_EVALUATED |
-| License compatible with METIORO World usage | NOT_EVALUATED |
+| Automated polling permitted (EG-08) | **UNKNOWN** — Official Terms do not explicitly permit automated/programmatic polling; rate-limit text alone is insufficient. |
+| Caching/storage permitted (EG-09) | NOT_EVALUATED |
+| Redistribution/display restrictions verified (EG-10) | NOT_EVALUATED |
+| Attribution requirements verified (EG-11) | NOT_EVALUATED |
+| License compatible with METIORO World usage (EG-12) | NOT_EVALUATED |
 
-Short-circuit after Automated polling UNKNOWN.
+Short-circuit after Automated polling UNKNOWN (EG-08).
 
 ### Language Gate
 
@@ -537,9 +558,11 @@ FA is officially documented as Persian (`fas`). Effective FA Coverage remains a 
 
 Closure review (2026-07-19): Automated polling reclassified from PASS to UNKNOWN because https://newsapi.ai/terms contains no explicit automated/programmatic polling permission (only a prohibition on bypassing rate limits). Per PRG-03.3 short-circuit, Caching/storage and later legal gates remain NOT_EVALUATED. Caching/storage permission remains queued for clarification. No third-party comparison pages used.
 
+Unknown-resolution re-review (2026-07-19): Re-fetched official Terms at https://newsapi.ai/terms and https://eventregistry.org/terms (same content). Paid-plan commercial license and rate-limit bypass prohibitions remain; no clause explicitly permits automated/programmatic polling. Official plans/SDK materials document API request usage and tokens but do not supply acceptable-use permission for scheduled polling. **Only EG-08 is UNKNOWN.** EG-09–EG-12 are NOT_EVALUATED (not UNKNOWN). `UNKNOWN` is not permission. No third-party sources used.
+
 ### Decision
 
-BLOCKED_UNKNOWN — Automated polling UNKNOWN.
+BLOCKED_UNKNOWN — EG-08 Automated polling UNKNOWN.
 
 ### Proceed to Benchmark
 
@@ -646,62 +669,70 @@ COMPLETE
 
 ### Eligibility Outcome
 
-BLOCKED_UNKNOWN
+NOT_ELIGIBLE
 
 ### Reason
 
-Authentication method for production Media API access is UNKNOWN from publicly retrieveable official developer homepage content (access path is contact/enterprise oriented without extractable auth-method documentation sufficient for EG-01 PASS). `UNKNOWN` blocks benchmark.
+Redistribution/display restrictions FAIL. Official FAQ states AP Media API does not support B2C syndication and that content and feeds must not be published directly to websites. METIORO World is a consumer-facing display surface. Language Gate FA also FAIL (no official supported-language list including Persian / `fa`).
 
 ### Official Sources
 
 | Source | URL | Access Date (UTC) |
 | ------ | --- | ----------------- |
 | AP Developer Home | https://developer.ap.org/ | 2026-07-19 |
+| AP Media API product page | https://developer.ap.org/ap-media-api/ | 2026-07-19 |
+| Getting started with Media API | https://api.ap.org/media/v/docs/Getting_Started_API.htm | 2026-07-19 |
+| Frequently Asked Questions | https://api.ap.org/media/v/docs/FrequentlyAskedQuestions.htm | 2026-07-19 |
+| Pricing | https://api.ap.org/media/v/docs/Pricing.htm | 2026-07-19 |
+| Quota limits / best practices | https://api.ap.org/media/v/docs/Quota_Limits.htm | 2026-07-19 |
+| Getting content updates | https://api.ap.org/media/v/docs/Getting_Content_Updates.htm | 2026-07-19 |
+| Official OpenAPI / Swagger | https://api.ap.org/media/v/swagger.json | 2026-07-19 |
+| Official APISamples README | https://github.com/TheAssociatedPress/APISamples | 2026-07-19 |
 
 ### Authentication
 
-UNKNOWN — Official homepage describes Media API/Agent and related APIs but does not document a concrete public authentication method sufficient to score PASS.
+PASS — Official Getting Started and Swagger document API key authentication via `x-api-key` HTTP header (also `x-apikey`). Official FAQ: API key required for Media API calls.
 
 ### Commercial Availability
 
-NOT_EVALUATED
+PASS — Official docs describe access to licensed multimedia content via API; API key issued through AP Customer Support / Sales or Licensing channels (official APISamples README and Getting Started).
 
 ### Pricing
 
-NOT_EVALUATED
+PASS — Official Pricing page documents plan types (Unlimited subscription, Metered, Metered credits, A la carte, Choice, Limited duration) and contract-based item pricing.
 
 ### Legal Gates
 
 | Gate | Result |
 | ---- | ------ |
-| Automated polling permitted | NOT_EVALUATED |
-| Caching/storage permitted | NOT_EVALUATED |
-| Redistribution/display restrictions verified | NOT_EVALUATED |
+| Automated polling permitted | PASS — Official docs describe programmatic feed ingestion, custom programs for feed processing, HTTP long polling, and periodic latest-content workflows (e.g. rebuilding a page/ticker). |
+| Caching/storage permitted | PASS — Official Quota best practices instruct storing `itemid` and `etag` (or version) in a database and serving repeats from that store instead of re-downloading. |
+| Redistribution/display restrictions verified | FAIL — Official FAQ: API is B2B only; content and feeds must not be published directly to websites; B2C syndication not supported. |
 | Attribution requirements verified | NOT_EVALUATED |
 | License compatible with METIORO World usage | NOT_EVALUATED |
 
-Short-circuit after Authentication UNKNOWN.
+Short-circuit after Redistribution/display FAIL.
 
 ### Language Gate
 
 | Locale | Result | Evidence |
 | ------ | ------ | -------- |
-| EN | NOT_EVALUATED | Short-circuit before Language Gate. |
-| AR | NOT_EVALUATED | Short-circuit before Language Gate. |
-| RU | NOT_EVALUATED | Short-circuit before Language Gate. |
-| FA | NOT_EVALUATED | Short-circuit before Language Gate. |
+| EN | PASS | Official Swagger language field description examples include `en`. |
+| AR | FAIL | No official supported-language list entry for Arabic / `ar`. |
+| RU | FAIL | No official supported-language list entry for Russian / `ru`. |
+| FA | FAIL | No official supported-language list entry for Persian / Farsi / `fa`. |
 
 ### Documentation vs Coverage Notes
 
-No language-list evidence retrieved from official public developer homepage.
+Swagger documents a two-letter language code field with examples `en` or `es` only. Effective FA Coverage not assessed.
 
 ### Evidence Notes
 
-Homepage directs to contact for API access. No third-party materials used.
+Unknown-resolution re-review (2026-07-19): Prior Authentication UNKNOWN cleared using official Media API docs/Swagger (not homepage alone). Evaluation continued under PRG-03.3. Blocking disposition is Redistribution/display FAIL for World consumer display. No third-party materials used.
 
 ### Decision
 
-BLOCKED_UNKNOWN — Authentication UNKNOWN.
+NOT_ELIGIBLE — Redistribution/display FAIL (B2C prohibition). Language Gate FA also FAIL.
 
 ### Proceed to Benchmark
 
@@ -717,7 +748,7 @@ NO
 
 ### Provider Name
 
-Reuters (Reuters News Agency / LSEG distribution)
+Reuters (Reuters News Agency / LSEG News API on Refinitiv Data Platform)
 
 ### Evaluation Status
 
@@ -725,31 +756,52 @@ COMPLETE
 
 ### Eligibility Outcome
 
-BLOCKED_UNKNOWN
+NOT_ELIGIBLE
 
 ### Reason
 
-Authentication method for a Reuters production news API suitable for METIORO World ingestion is UNKNOWN. Public official pages describe agency/licensing and LSEG developer offerings, but no extractable self-serve news-search API authentication method was found that satisfies EG-01.
+Language Gate FAIL (EG-04–EG-07). Official LSEG pages state Reuters language *counts* only and do not explicitly list English/`en`, Arabic/`ar`, Russian/`ru`, or Persian/`fa`. Under PRG-03.3, general language-count claims are insufficient for locale gates.
 
 ### Official Sources
 
 | Source | URL | Access Date (UTC) |
 | ------ | --- | ----------------- |
 | Reuters News Agency | https://www.reutersagency.com/en/ | 2026-07-19 |
-| LSEG Data & Analytics | https://www.lseg.com/en/data-analytics | 2026-07-19 |
 | LSEG Developer Community | https://developers.lseg.com/ | 2026-07-19 |
+| News API for Wealth (RDP) | https://developers.lseg.com/en/api-catalog/refinitiv-data-platform/news-API | 2026-07-19 |
+| News Service on Refinitiv Data Platform | https://developers.lseg.com/en/product/news/news_service_rdp | 2026-07-19 |
+| News product overview | https://developers.lseg.com/en/product/news/overview | 2026-07-19 |
+| OAuth grant types in Refinitiv Data Platform | https://developers.lseg.com/en/article-catalog/article/oauth-grant-types-in-refinitiv-data-platform | 2026-07-19 |
+| Limitations and Guidelines for the RDP Authentication Service | https://developers.lseg.com/en/article-catalog/article/limitations-and-guidelines-for-the-rdp-authentication-service | 2026-07-19 |
+| Methodology (gate rule) | `docs/governance/PRG-03.3-pre-benchmark-eligibility.md` — Gate interpretation: general language claims insufficient for EG-04–EG-07 | 2026-07-19 |
+
+### Official Controlling Quotations (Language Gate)
+
+Quoted from official LSEG developer pages accessed 2026-07-19 UTC:
+
+1. **News API for Wealth** — https://developers.lseg.com/en/api-catalog/refinitiv-data-platform/news-API
+
+   > “It delivers more than 2.2 million News Stories per year in 16 languages, actively covering 41,000 companies.”
+
+2. **News Service on Refinitiv Data Platform** — https://developers.lseg.com/en/product/news/news_service_rdp
+
+   > “Languages – Reuters: 15 languages”
+
+**Observation recorded from those same pages:** No supported-language inventory naming English/`en`, Arabic/`ar`, Russian/`ru`, or Persian/Farsi/`fa` (or equivalents) appears adjacent to these count statements, nor elsewhere on the reviewed official pages for this evaluation.
+
+**Gate-rule binding (PRG-03.3):** “General claims such as ‘supports many languages’ are insufficient for locale gates EG-04 through EG-07.” A numeric language count without an explicit locale list does not satisfy EG-04–EG-07; therefore each Supported Language Snapshot locale is scored FAIL (not UNKNOWN).
 
 ### Authentication
 
-UNKNOWN — No extractable official documentation of a concrete Reuters news API authentication method for the evaluated World ingestion use.
+PASS — Official LSEG developer materials document RDP OAuth 2.0 authentication (password / refresh / client-credentials style machine access) with access tokens for API calls. News API overview states standard authentication and entitlements and machine session establishment; API Playground access via username/password from account manager.
 
 ### Commercial Availability
 
-NOT_EVALUATED
+PASS — Official News API / News Service pages document Professional and non-professional subscription packaging, sales/free-trial channels, and account-manager access for Reuters/RDP news.
 
 ### Pricing
 
-NOT_EVALUATED
+PASS — Official materials identify subscription packaging (Professional / non-professional) and sales/trial procurement paths. Public numeric list prices are not published; pricing path is recorded from official pages.
 
 ### Legal Gates
 
@@ -761,28 +813,28 @@ NOT_EVALUATED
 | Attribution requirements verified | NOT_EVALUATED |
 | License compatible with METIORO World usage | NOT_EVALUATED |
 
-Short-circuit after Authentication UNKNOWN.
+Short-circuit after Language Gate FAIL.
 
 ### Language Gate
 
 | Locale | Result | Evidence |
 | ------ | ------ | -------- |
-| EN | NOT_EVALUATED | Short-circuit before Language Gate. |
-| AR | NOT_EVALUATED | Short-circuit before Language Gate. |
-| RU | NOT_EVALUATED | Short-circuit before Language Gate. |
-| FA | NOT_EVALUATED | Short-circuit before Language Gate. |
+| EN | FAIL | Official quote records “16 languages” / “Reuters: 15 languages” only; English / `en` not explicitly listed (PRG-03.3 general-claim rule). |
+| AR | FAIL | Same official sources; Arabic / `ar` not explicitly listed. |
+| RU | FAIL | Same official sources; Russian / `ru` not explicitly listed. |
+| FA | FAIL | Same official sources; Persian / Farsi / `fa` not explicitly listed. |
 
 ### Documentation vs Coverage Notes
 
-No Supported Language Snapshot language-list evidence retrieved for a Reuters news API in this evaluation.
+Official language evidence is limited to count claims quoted above. Effective FA Coverage not assessed.
 
 ### Evidence Notes
 
-Enterprise licensing surfaces were identified; they were not treated as PASS without concrete official API auth/language/legal documentation. No third-party comparisons used.
+Unknown-resolution re-review (2026-07-19): Prior Authentication UNKNOWN cleared using official LSEG News API + RDP OAuth documentation. Language Gate retained as FAIL with controlling official quotations above (not reverted to BLOCKED_UNKNOWN). Official News product overview also states Standard News Feeds licenses do not permit distribution/redistribution (including client-derived data); that Redistribution gate was not scored due to short-circuit after Language Gate FAIL. No third-party comparisons used.
 
 ### Decision
 
-BLOCKED_UNKNOWN — Authentication UNKNOWN.
+NOT_ELIGIBLE — Language Gate FAIL (EG-04–EG-07), supported by official quotations in this section.
 
 ### Proceed to Benchmark
 
@@ -801,7 +853,9 @@ NO
 | 005 | Bing News Search | NOT_ELIGIBLE | NO |
 | 006 | Event Registry | BLOCKED_UNKNOWN | NO |
 | 007 | World News API | NOT_ELIGIBLE | NO |
-| 008 | Associated Press | BLOCKED_UNKNOWN | NO |
-| 009 | Reuters | BLOCKED_UNKNOWN | NO |
+| 008 | Associated Press | NOT_ELIGIBLE | NO |
+| 009 | Reuters | NOT_ELIGIBLE | NO |
 
-Under the restored approved outcomes, Provider 003 (NewsData.io) is the only provider in this register authorized to proceed to benchmark under PRG-03.3.
+Provider 003 (NewsData.io) remains the only provider in this register with Eligibility = ELIGIBLE / Proceed to Benchmark = YES under PRG-03.3.
+
+Benchmark execution remains BLOCKED until Product Ratification of Effective Coverage Threshold (X), Operations Ratification of the Reference Load Profile (RLP), and closure of the remaining Event Registry clarification (required for register Unknown Resolution closure; NewsData.io eligibility itself is not waiting on Event Registry).

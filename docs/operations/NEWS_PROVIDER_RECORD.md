@@ -737,6 +737,23 @@ rollback path
 | 2026-07-16 | Google News RSS rejected as sole primary provider                   | PRG-02 production benchmark                | Platform | Final  |
 | 2026-07-16 | Provider selection not yet made                                     | Persian and production evidence incomplete | Platform | Open   |
 | 2026-07-16 | FA parameter support and effective FA coverage evaluated separately | Governance requirement                     | Platform | Final  |
+| 2026-07-19 | PRG-03.3 Evidence Register: NewsData.io ELIGIBLE; Event Registry BLOCKED_UNKNOWN; AP and Reuters NOT_ELIGIBLE after UNKNOWN resolution | `docs/operations/NEWS_PROVIDER_EVIDENCE_REGISTER.md` | Platform | Final  |
+| 2026-07-19 | Benchmark execution not authorized — X and RLP pending; Event Registry UNKNOWN remains open at programme level | Benchmark Authorization Package | Platform | Open   |
+
+### PRG-03.3 Unknown-resolution sync (2026-07-19)
+
+Authoritative eligibility cells for the PRG-03.3 candidate set live in `docs/operations/NEWS_PROVIDER_EVIDENCE_REGISTER.md`. This section records the UNKNOWN-resolution outcomes only; it does not change governance thresholds or architecture.
+
+| Provider | Prior blocker | Outcome after official-doc re-review | Proceed to Benchmark |
+| -------- | ------------- | ------------------------------------ | -------------------- |
+| Event Registry (006) | Automated polling UNKNOWN | Remains `BLOCKED_UNKNOWN` — **UNKNOWN gate = EG-08 only**; EG-01–EG-07 PASS; EG-09–EG-12 NOT_EVALUATED (short-circuit). Terms lack explicit automated/programmatic polling permission | NO |
+| Associated Press (008) | Authentication UNKNOWN | `NOT_ELIGIBLE` — Auth PASS (`x-api-key`); Redistribution/display FAIL (official FAQ: B2C syndication not supported; content/feeds must not be published directly to websites); FA Language Gate also FAIL | NO |
+| Reuters (009) | Authentication UNKNOWN | `NOT_ELIGIBLE` — Auth PASS (RDP OAuth 2.0); Language Gate FAIL supported by official quotes (“16 languages”; “Languages – Reuters: 15 languages”) with no explicit `en`/`ar`/`ru`/`fa` list (PRG-03.3 general-claim rule) | NO |
+| NewsData.io (003) | (already ELIGIBLE) | Unchanged `ELIGIBLE` | YES (subject to X/RLP/PRG-03.4 authorization) |
+
+Remaining UNKNOWN gates: Event Registry **EG-08 only**.
+
+Does Event Registry UNKNOWN still block benchmark execution? It blocks Event Registry eligibility and keeps Unknown Resolution OPEN. It does not create an Eligibility defect on NewsData.io. Programme Benchmark Execution Authorization remains BLOCKED primarily on Product Ratification (X), Operations Ratification (RLP), and PRG-03.4 ratification — see `docs/operations/PRG-03-BENCHMARK-AUTHORIZATION-PACKAGE.md` Decision Summary.
 
 ### Hard-gate decisions (sole-provider)
 
@@ -866,14 +883,21 @@ Sole-provider hard-gate rejection does not reject the provider entirely for prim
 ## 17. Open Questions
 
 ```text
-Does NewsData.io officially support `fa`?
-Does The News API officially support `fa`?
-Does Currents API officially support `fa`?
-What is the actual fresh Persian volume by topic?
-Are publication timestamps original publication times?
-What are the production and redistribution restrictions?
+Event Registry: does official Terms/AUP explicitly permit automated/programmatic polling?
+What is the actual fresh Persian volume by topic under ratified RLP (Effective FA Coverage / X)?
+Are publication timestamps original publication times under benchmark measurement?
 Are candidate fallback providers operationally independent?
 What is the minimum acceptable monthly cost?
+When will Effective Coverage Threshold (X) and Reference Load Profile (RLP) be ratified?
+```
+
+Closed by PRG-03.3 Evidence Register (see register for evidence URLs):
+
+```text
+NewsData.io official FA documentation — PASS (ELIGIBLE)
+Currents API official FA documentation — FAIL
+Associated Press authentication — PASS; B2C/website display — FAIL
+Reuters authentication — PASS; explicit en/ar/ru/fa language list — FAIL
 ```
 
 ---
