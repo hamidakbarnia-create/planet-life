@@ -1,5 +1,6 @@
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
 
 from repo_path import ensure_repo_on_path
 
@@ -34,10 +35,22 @@ from services.chart_data import build_chart_payload
 # so threads give us real parallelism on multi-core machines.
 _BATCH_EXECUTOR = ThreadPoolExecutor(max_workers=8, thread_name_prefix="batch")
 
+
+@asynccontextmanager
+async def _app_lifespan(app: FastAPI):
+    """Fail fast when conversation generation runtime configuration is invalid."""
+    from services.generation.factory import validate_generation_provider_configuration
+
+    _ = app
+    validate_generation_provider_configuration()
+    yield
+
+
 app = FastAPI(
     title="METIORO API",
     description="METIORO personal decision intelligence platform API",
     version="1.0.0",
+    lifespan=_app_lifespan,
 )
 
 app.add_middleware(

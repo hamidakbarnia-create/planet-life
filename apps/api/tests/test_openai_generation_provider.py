@@ -233,7 +233,7 @@ def test_sdk_exception_mapped_to_generation_provider_error() -> None:
 
 def test_factory_resolves_openai_provider() -> None:
     with patch(
-        "services.generation.factory.OpenAIConversationProvider"
+        "services.generation.openai_provider.OpenAIConversationProvider"
     ) as provider_cls:
         provider_cls.return_value = MagicMock()
         resolved = resolve_generation_provider("openai")
