@@ -46,6 +46,22 @@ Rules applied:
 | Reviewer | Platform |
 | Methodology Reference | `docs/governance/PRG-03.3-pre-benchmark-eligibility.md` |
 
+### Execution Status
+
+| Field | Value |
+| ----- | ----- |
+| Evidence Collection | COMPLETE |
+| Unknown Resolution | OPEN |
+| Benchmark Authorization | BLOCKED — X and RLP pending ratification |
+
+### Clarification Queue
+
+| Provider | Open clarification |
+| -------- | ------------------ |
+| Event Registry | Caching/storage permission |
+| Associated Press | API authentication/access and commercial availability |
+| Reuters | API authentication/access and commercial availability |
+
 ---
 
 ## Provider 001 — Guardian
@@ -450,7 +466,7 @@ BLOCKED_UNKNOWN
 
 ### Reason
 
-Caching/storage permitted is UNKNOWN. Official Terms of Service do not state a clear permission for response caching/temporary storage required by METIORO World usage. `UNKNOWN` is not permission and blocks benchmark.
+Automated polling permitted is UNKNOWN. Official Terms of Service do not explicitly permit automated/programmatic polling. A documented rate-limit bypass prohibition alone is not permission. `UNKNOWN` is not permission and blocks benchmark.
 
 ### Official Sources
 
@@ -480,13 +496,13 @@ PASS — Official plans page documents priced plans (example observed: 5K Plan $
 
 | Gate | Result |
 | ---- | ------ |
-| Automated polling permitted | PASS — Official Terms contemplate rate-limited API use (prohibit bypassing rate limits / API restrictions). |
-| Caching/storage permitted | UNKNOWN — Official Terms do not clearly permit caching/temporary storage. |
+| Automated polling permitted | UNKNOWN — Official Terms do not explicitly permit automated/programmatic polling; rate-limit text alone is insufficient. |
+| Caching/storage permitted | NOT_EVALUATED |
 | Redistribution/display restrictions verified | NOT_EVALUATED |
 | Attribution requirements verified | NOT_EVALUATED |
 | License compatible with METIORO World usage | NOT_EVALUATED |
 
-Short-circuit after Caching/storage UNKNOWN.
+Short-circuit after Automated polling UNKNOWN.
 
 ### Language Gate
 
@@ -503,11 +519,11 @@ FA is officially documented as Persian (`fas`). Effective FA Coverage remains a 
 
 ### Evidence Notes
 
-Audit correction (2026-07-19): Language Gate outcomes updated from official Supported-languages wiki. Legal gates re-opened after Language Gate PASS; evaluation short-circuited at Caching/storage UNKNOWN. Redistribution restrictions exist in Terms §6 but were not scored due to short-circuit. No third-party comparison pages used.
+Closure review (2026-07-19): Automated polling reclassified from PASS to UNKNOWN because https://newsapi.ai/terms contains no explicit automated/programmatic polling permission (only a prohibition on bypassing rate limits). Per PRG-03.3 short-circuit, Caching/storage and later legal gates remain NOT_EVALUATED. Caching/storage permission remains queued for clarification. No third-party comparison pages used.
 
 ### Decision
 
-BLOCKED_UNKNOWN — Caching/storage UNKNOWN.
+BLOCKED_UNKNOWN — Automated polling UNKNOWN.
 
 ### Proceed to Benchmark
 
