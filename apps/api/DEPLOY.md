@@ -58,12 +58,53 @@ This monorepo has a root `package.json` for local dev scripts only. Without
    disable auto-deploy; keep a single Python API service.
 3. Railway reads `railway.toml` and `nixpacks.toml` at the repo root.
 4. Python **3.11** is pinned via `.python-version` and `NIXPACKS_PYTHON_VERSION`.
-5. No extra environment variables are required for the API today.
+5. Environment variables for Conversation generation (optional; default is static):
+
+   | Variable | Required when | Example / notes |
+   | -------- | ------------- | --------------- |
+   | `CONVERSATION_GENERATION_PROVIDER` | Always (defaults if unset) | `static` (default) or `openai` |
+   | `OPENAI_API_KEY` | `CONVERSATION_GENERATION_PROVIDER=openai` | Set only in Railway Variables / local env. **Never commit.** |
+   | `OPENAI_MODEL` | Optional | Defaults to `gpt-4o-mini` if unset |
+   | `OPENAI_TIMEOUT_SECONDS` | Optional | Defaults to `25.0` if unset; must be a finite number `> 0` |
+
+   Startup validation fails fast if `openai` is selected without an API key, with an invalid timeout, or with an unknown provider name.
+
+   Secrets must not appear in repository files, CI logs, or application error responses.
+
 6. After deploy, copy the public URL and set it on the frontend:
 
    ```
    NEXT_PUBLIC_API_BASE=https://<your-railway-service>.up.railway.app
    ```
+
+### Conversation OpenAI activation (Railway)
+
+Operator procedure only. As of 2026-07-19, production remains on `CONVERSATION_GENERATION_PROVIDER=static`. Production OpenAI activation was **NOT PERFORMED** in repository verification (Railway CLI authentication unavailable). See `docs/operations/2026-07-19-conversation-openai-runtime-activation.md` for status **PARTIALLY COMPLETE** and the operator completion checklist.
+
+To enable the OpenAI conversation provider in the deployed API:
+
+1. In the Railway service Variables, set:
+
+   ```text
+   CONVERSATION_GENERATION_PROVIDER=openai
+   OPENAI_API_KEY=<secret from approved vault — never paste into git>
+   OPENAI_MODEL=gpt-4o-mini
+   OPENAI_TIMEOUT_SECONDS=25.0
+   ```
+
+2. Redeploy or restart the service so lifespan startup validation runs.
+3. Confirm health: `GET /` → `{"status":"healthy","platform":"METIORO"}`.
+4. Smoke: `POST /api/v1/conversation/execute` with a minimal valid body (see below).
+
+Minimal smoke payload:
+
+```bash
+curl -sS -X POST "$API_BASE/api/v1/conversation/execute" \
+  -H 'Content-Type: application/json' \
+  -d '{"messages":[{"role":"user","content":"Hello"}],"locale":"en"}'
+```
+
+Expect HTTP 200 with `type`, `message`, `sources`, and `request_id` populated. Provider identity and API keys must not appear in the response body.
 
 ### Install (handled by `nixpacks.toml` install phase)
 
