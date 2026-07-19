@@ -26,9 +26,10 @@ Eligibility outcomes used for provider disposition:
 
 Rules applied:
 
-- `FAIL` blocks benchmark.
-- `UNKNOWN` blocks benchmark until clarified. `UNKNOWN` is not permission.
-- `NOT_EVALUATED` means evidence work is incomplete and blocks benchmark.
+- `FAIL` blocks benchmark for the affected provider.
+- `UNKNOWN` blocks benchmark for the affected provider until clarified. `UNKNOWN` is not permission.
+- `NOT_EVALUATED` means evidence work is incomplete and blocks benchmark for the affected provider.
+- Provider independence (PRG-03.3 v0.1.1): unresolved gates on one provider MUST NOT programme-block a different provider that independently satisfies the Benchmark Authorization Rule.
 - Short-circuit evaluation applies after the first blocking non-language gate outcome.
 - Language Gate evaluates all Supported Language Snapshot locales even if the first language fails.
 - Official documentation only. No AI summaries. No third-party comparisons.
@@ -51,13 +52,13 @@ Rules applied:
 | Field | Value |
 | ----- | ----- |
 | Evidence Collection | COMPLETE |
-| Unknown Resolution | OPEN — Event Registry automated polling remains UNKNOWN after official-doc re-review (2026-07-19). Associated Press and Reuters UNKNOWN blockers resolved (see provider sections). |
+| Unknown Resolution | OPEN — Event Registry EG-08 remains UNKNOWN (provider-scoped). Associated Press and Reuters UNKNOWN blockers resolved (see provider sections). |
 
 ### Benchmark Execution Authorization
 
-**BLOCKED**
+**BLOCKED** (for any authorized run, including NewsData.io)
 
-Reasons:
+Programme-wide / shared ratification reasons (apply to every provider run):
 
 1. Product Ratification
    - Effective Coverage Threshold (X)
@@ -65,18 +66,22 @@ Reasons:
 2. Operations Ratification
    - Reference Load Profile (RLP)
 
-3. Provider Clarifications (register Unknown Resolution)
-   - Event Registry remains `BLOCKED_UNKNOWN` (automated polling UNKNOWN)
+3. Benchmark-definition ratification
+   - PRG-03.4 Production Benchmark Definition (Owner/Approver identity assignment remains PENDING RATIFICATION)
 
-Benchmark-authorization note (2026-07-19): Associated Press and Reuters clarifications are closed (`NOT_ELIGIBLE`). Provider 003 (NewsData.io) remains the only `ELIGIBLE` provider. Under PRG-03.3, NewsData.io benchmark execution still requires Eligibility = PASS for that provider (already recorded) plus ratified X/RLP (and PRG-03.4 preconditions). Event Registry UNKNOWN continues to block Event Registry only; it keeps programme-level Unknown Resolution OPEN but is not an Eligibility defect on NewsData.io.
+Provider-scoped reason (does **not** programme-block NewsData.io):
+
+4. Event Registry (006) EG-08 UNKNOWN → Provider 006 remains `BLOCKED_UNKNOWN`; Proceed to Benchmark = NO for Event Registry only (PRG-03.3 v0.1.1 provider independence).
+
+Packaging clarification (2026-07-19): Prior listing of Event Registry clarification as a programme-level Benchmark Execution Authorization reason is corrected to provider-scoped blocking only, consistent with PRG-03.3 v0.1.1. Provider 003 (NewsData.io) remains `ELIGIBLE` / Proceed = YES. Event Registry is not authorized for benchmarking while EG-08 is UNKNOWN. NewsData.io eligibility is unchanged.
 
 ### Clarification Queue
 
-| Provider | Open clarification | Status |
-| -------- | ------------------ | ------ |
-| Event Registry | Automated polling permission (explicit Terms/AUP permission required; rate-limit text alone insufficient). Caching/storage remains NOT_EVALUATED under short-circuit. | OPEN |
-| Associated Press | API authentication/access and commercial availability | CLOSED — Auth/Commercial resolved; provider NOT_ELIGIBLE (Redistribution/display FAIL) |
-| Reuters | API authentication/access and commercial availability | CLOSED — Auth/Commercial resolved; provider NOT_ELIGIBLE (Language Gate FAIL) |
+| Provider | Open clarification | Status | Blocks |
+| -------- | ------------------ | ------ | ------ |
+| Event Registry | Automated polling permission (explicit Terms/AUP permission required; rate-limit text alone insufficient). Caching/storage remains NOT_EVALUATED under short-circuit. | OPEN | Event Registry only |
+| Associated Press | API authentication/access and commercial availability | CLOSED — Auth/Commercial resolved; provider NOT_ELIGIBLE (Redistribution/display FAIL) | N/A |
+| Reuters | API authentication/access and commercial availability | CLOSED — Auth/Commercial resolved; provider NOT_ELIGIBLE (Language Gate FAIL) | N/A |
 
 ---
 
@@ -858,4 +863,4 @@ NO
 
 Provider 003 (NewsData.io) remains the only provider in this register with Eligibility = ELIGIBLE / Proceed to Benchmark = YES under PRG-03.3.
 
-Benchmark execution remains BLOCKED until Product Ratification of Effective Coverage Threshold (X), Operations Ratification of the Reference Load Profile (RLP), and closure of the remaining Event Registry clarification (required for register Unknown Resolution closure; NewsData.io eligibility itself is not waiting on Event Registry).
+Benchmark execution for NewsData.io remains BLOCKED on programme-wide ratification items only: Effective Coverage Threshold (X), Reference Load Profile (RLP), and PRG-03.4. Event Registry EG-08 UNKNOWN blocks Event Registry only (PRG-03.3 v0.1.1). Unknown Resolution may remain OPEN without programme-blocking NewsData.io.

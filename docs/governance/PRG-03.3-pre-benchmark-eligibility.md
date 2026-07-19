@@ -15,13 +15,13 @@
 | Field | Value |
 | ----- | ----- |
 | Document ID | PRG-03.3 |
-| Version | 0.1.0 |
+| Version | 0.1.1 |
 | Status | IN REVIEW |
 | Classification | Governance — Eligibility Gate |
 | Owner | PENDING RATIFICATION |
 | Approver | PENDING RATIFICATION |
 | Effective date (UTC) | PENDING RATIFICATION |
-| Supersedes | None |
+| Supersedes | 0.1.0 |
 | Branch | governance-foundation |
 
 This artifact SHALL progress only through `DRAFTED → IN REVIEW → RATIFIED → LOCKED`. It MUST NOT be represented as `RATIFIED` or `LOCKED` before the corresponding governance steps have been completed.
@@ -110,12 +110,13 @@ Each gate, and the provider-level eligibility outcome, SHALL use exactly one of 
 
 ### Binding rules
 
-1. `FAIL` blocks benchmark.
-2. `UNKNOWN` blocks benchmark until clarified.
-3. `NOT_EVALUATED` means evidence work is incomplete and blocks benchmark.
-4. Benchmark execution is prohibited before eligibility `PASS`.
+1. `FAIL` blocks benchmark for the affected provider.
+2. `UNKNOWN` blocks benchmark for the affected provider until clarified.
+3. `NOT_EVALUATED` means evidence work is incomplete and blocks benchmark for the affected provider.
+4. Benchmark execution is prohibited before eligibility `PASS` for the provider under authorization.
 5. `UNKNOWN` is not equivalent to permission.
 6. Provider-level eligibility is `PASS` only when every required eligibility gate for the intended evaluation context is `PASS`.
+7. Provider independence: Binding rules 1–3 apply per provider. A gate state of `FAIL`, `UNKNOWN`, or `NOT_EVALUATED` for one provider blocks benchmark authorization for that provider only. It MUST NOT block benchmark authorization for a different provider that independently satisfies the Benchmark Authorization Rule.
 
 ---
 
@@ -158,7 +159,9 @@ Benchmark execution against a provider is authorized only when all of the follow
 4. PRG-03.3A (Reference Load Profile) is ratified for the intended run, or the run is explicitly deferred until such ratification (see PRG-03.4 preconditions).
 5. PRG-03.4 (Production Benchmark Definition) is ratified for the intended run.
 
-Until Eligibility = `PASS`, benchmark execution MUST NOT proceed.
+Until Eligibility = `PASS` for that provider, benchmark execution against that provider MUST NOT proceed.
+
+Unresolved `FAIL`, `UNKNOWN`, or `NOT_EVALUATED` gates on any other provider MUST NOT be treated as programme-wide authorization blockers for a provider that independently satisfies conditions 1–5.
 
 `UNKNOWN` is not permission. Silence, incomplete review, or unverified assumptions MUST NOT be treated as authorization.
 
@@ -181,8 +184,10 @@ Before this document may move from `IN REVIEW` to `RATIFIED`, the following MUST
 - [ ] Document Control fields are complete except where explicitly marked PENDING RATIFICATION pending approver assignment.
 - [ ] All twelve eligibility gates are defined and mapped to the Eligibility Matrix columns.
 - [ ] Decision states `PASS`, `FAIL`, `UNKNOWN`, and `NOT_EVALUATED` are defined with binding block rules.
+- [ ] Rule recorded: binding block rules apply per provider (provider independence).
 - [ ] Relationship to the PRG-03.2 Evidence Register is explicit.
-- [ ] Benchmark Authorization Rule prohibits execution before Eligibility = `PASS`.
+- [ ] Benchmark Authorization Rule prohibits execution before Eligibility = `PASS` for the provider under authorization.
+- [ ] Rule recorded: unresolved gates on another provider MUST NOT programme-block an independently eligible provider.
 - [ ] Rule recorded: `UNKNOWN` is not equivalent to permission.
 - [ ] Rule recorded: Effective FA Coverage remains a benchmark metric even when FA is officially documented.
 - [ ] No invented numeric thresholds appear in this document.

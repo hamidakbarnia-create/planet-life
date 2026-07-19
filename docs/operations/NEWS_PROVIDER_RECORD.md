@@ -738,7 +738,10 @@ rollback path
 | 2026-07-16 | Provider selection not yet made                                     | Persian and production evidence incomplete | Platform | Open   |
 | 2026-07-16 | FA parameter support and effective FA coverage evaluated separately | Governance requirement                     | Platform | Final  |
 | 2026-07-19 | PRG-03.3 Evidence Register: NewsData.io ELIGIBLE; Event Registry BLOCKED_UNKNOWN; AP and Reuters NOT_ELIGIBLE after UNKNOWN resolution | `docs/operations/NEWS_PROVIDER_EVIDENCE_REGISTER.md` | Platform | Final  |
-| 2026-07-19 | Benchmark execution not authorized — X and RLP pending; Event Registry UNKNOWN remains open at programme level | Benchmark Authorization Package | Platform | Open   |
+| 2026-07-19 | Benchmark execution not authorized — X, RLP, and PRG-03.4 pending; Event Registry EG-08 UNKNOWN is provider-scoped only | Benchmark Authorization Package | Platform | Open   |
+| 2026-07-19 | Final Ratification Package prepared — D1 X / D2 RLP / D3 PRG-03.4 / D4 EG-08 packaging conflict reported; verdict NOT AUTHORIZED | `docs/operations/PRG-03-FINAL-RATIFICATION-PACKAGE.md` | Platform | Open   |
+| 2026-07-19 | PRG-03.3 v0.1.1 provider independence: unresolved gates block affected provider only; packaging conflict resolved — EG-08 does not programme-block NewsData.io; Event Registry remains unauthorized; EG-08 UNKNOWN and NewsData.io ELIGIBLE unchanged | PRG-03.3; Evidence Register; Auth Package v0.1.3; Final Ratification Package v0.1.2 | Platform | Final  |
+| 2026-07-19 | Pre-commit governance audit: RLP table corrected to exact PRG-03.3A extraction (no “(none recorded)” for PENDING RATIFICATION rows); PRG-03.4 Owner/Approver remain AUTHORITY UNDEFINED citing PRG-03.4 Document Control | `docs/operations/PRG-03-FINAL-RATIFICATION-PACKAGE.md` v0.1.2 | Platform | Final  |
 
 ### PRG-03.3 Unknown-resolution sync (2026-07-19)
 
@@ -753,7 +756,7 @@ Authoritative eligibility cells for the PRG-03.3 candidate set live in `docs/ope
 
 Remaining UNKNOWN gates: Event Registry **EG-08 only**.
 
-Does Event Registry UNKNOWN still block benchmark execution? It blocks Event Registry eligibility and keeps Unknown Resolution OPEN. It does not create an Eligibility defect on NewsData.io. Programme Benchmark Execution Authorization remains BLOCKED primarily on Product Ratification (X), Operations Ratification (RLP), and PRG-03.4 ratification — see `docs/operations/PRG-03-BENCHMARK-AUTHORIZATION-PACKAGE.md` Decision Summary.
+Does Event Registry UNKNOWN still block benchmark execution? Under PRG-03.3 v0.1.1 it blocks **Event Registry only** and keeps register Unknown Resolution OPEN as tracking. It does not create an Eligibility defect on NewsData.io and does not programme-block NewsData.io authorization. NewsData.io Benchmark Execution Authorization remains BLOCKED on Product Ratification (X), Operations Ratification (RLP), PRG-03.4 ratification (Document Control Owner/Approver identities AUTHORITY UNDEFINED until named), Environment Freeze, and AUTHORIZE signature — see `docs/operations/PRG-03-BENCHMARK-AUTHORIZATION-PACKAGE.md` and `docs/operations/PRG-03-FINAL-RATIFICATION-PACKAGE.md`.
 
 ### Hard-gate decisions (sole-provider)
 

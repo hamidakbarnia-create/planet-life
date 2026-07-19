@@ -7,8 +7,8 @@
 **Branch:** governance-foundation  
 
 This package is the final pre-execution authorization checklist for PRG-03 benchmark runs.  
-It does **not** amend PRG-03.3, PRG-03.3A, PRG-03.4, PRG-03.5, PRG-03.6, or ADR-0008.  
-It does **not** invent thresholds, approvals, or architecture decisions.  
+It aligns with PRG-03.3 v0.1.1 provider independence.
+It does **not** invent thresholds, approvals, or architecture decisions.
 It does **not** authorize or execute a benchmark run.
 
 ---
@@ -22,21 +22,20 @@ It does **not** authorize or execute a benchmark run.
 | Sole ELIGIBLE provider | Provider 003 — NewsData.io |
 | May execution start now? | **No** |
 
-### Why the benchmark is still not permitted
+### Why the benchmark is still not permitted (NewsData.io)
 
-Benchmark execution remains prohibited because the PRG-03.3 Benchmark Authorization Rule is not fully satisfied for any runnable context:
+Under PRG-03.3 v0.1.1, NewsData.io authorization requires provider-scoped eligibility (already recorded) plus shared ratification items. The following still block NewsData.io:
 
 1. **Effective Coverage Threshold (X) is not ratified**  
-   Product acceptance bar for Effective FA Coverage (PRG-03.4 HG-05) remains PENDING PRODUCT RATIFICATION. Without X, a run cannot be classified against a frozen Product threshold.
+   Product acceptance bar for Effective FA Coverage (PRG-03.4 HG-05) remains PENDING PRODUCT RATIFICATION.
 
 2. **Reference Load Profile (RLP) is not ratified**  
    PRG-03.3A remains unratified. No authorized workload version exists for a comparable run.
 
 3. **PRG-03.4 Production Benchmark Definition is not ratified**  
-   Method, Environment Freeze fields, and threshold register remain pending ratification. A PRG-03.5 report cannot cite a ratified benchmark-definition version.
+   Document Control Owner/Approver identities remain PENDING RATIFICATION (**AUTHORITY UNDEFINED** until named). Environment Freeze not recorded.
 
-4. **Programme Unknown Resolution remains OPEN**  
-   Event Registry EG-08 (Automated polling permitted) is still `UNKNOWN`. That blocks Event Registry eligibility and keeps register Unknown Resolution OPEN. It does **not** create an Eligibility defect on NewsData.io, but programme-level clarification closure is incomplete.
+**Not a NewsData.io authorization blocker:** Event Registry EG-08 UNKNOWN. Per PRG-03.3 v0.1.1, that gate blocks Event Registry only. Register Unknown Resolution may remain OPEN without programme-blocking NewsData.io.
 
 **Binding rule restated:** Eligibility = PASS for a provider is necessary but not sufficient. Until X, RLP, and PRG-03.4 are ratified (and authorization is recorded), benchmark execution MUST NOT proceed. `UNKNOWN` is not permission.
 
@@ -50,9 +49,9 @@ Benchmark execution remains prohibited because the PRG-03.3 Benchmark Authorizat
 | ----- | ----- |
 | Benchmark execution | **NOT AUTHORIZED** |
 | Eligible provider(s) recorded | Provider 003 — NewsData.io (`ELIGIBLE`, Proceed = YES) |
-| Providers resolved from prior UNKNOWN | Associated Press → `NOT_ELIGIBLE`; Reuters → `NOT_ELIGIBLE` (Language Gate FAIL with official quotations) |
-| Remaining UNKNOWN provider / gate | Event Registry — **EG-08 only** (`BLOCKED_UNKNOWN`) |
-| Unknown Resolution (register) | OPEN |
+| Providers resolved from prior UNKNOWN | Associated Press → `NOT_ELIGIBLE`; Reuters → `NOT_ELIGIBLE` |
+| Remaining UNKNOWN provider / gate | Event Registry — **EG-08 only** (`BLOCKED_UNKNOWN`) — provider-scoped |
+| Unknown Resolution (register) | OPEN (tracking only; not a NewsData.io authorization blocker under PRG-03.3 v0.1.1) |
 
 ---
 
@@ -62,9 +61,10 @@ Benchmark execution remains prohibited because the PRG-03.3 Benchmark Authorizat
 | -------- | --------------- | ---- |
 | Evidence Register | `docs/operations/NEWS_PROVIDER_EVIDENCE_REGISTER.md` | PRG-03.2 / eligibility evidence |
 | Provider Record | `docs/operations/NEWS_PROVIDER_RECORD.md` | Programme record + UNKNOWN-resolution sync |
-| Eligibility method | `docs/governance/PRG-03.3-pre-benchmark-eligibility.md` | Gate semantics (unchanged) |
+| Eligibility method | `docs/governance/PRG-03.3-pre-benchmark-eligibility.md` v0.1.1 | Gate semantics + provider independence |
 | Reference Load Profile | `docs/governance/PRG-03.3A-reference-load-profile.md` | Workload (pending ratification) |
 | Benchmark definition | `docs/governance/PRG-03.4-production-benchmark-definition.md` | Method/thresholds (pending ratification) |
+| Final Ratification Package | `docs/operations/PRG-03-FINAL-RATIFICATION-PACKAGE.md` | Exact X/RLP/authority tables |
 | Report template | `docs/governance/PRG-03.5-benchmark-report.md` | Fact record template (not instantiated) |
 
 ---
@@ -78,10 +78,10 @@ Benchmark execution remains prohibited because the PRG-03.3 Benchmark Authorizat
 | 003 | NewsData.io | ELIGIBLE | YES | Sole ELIGIBLE provider |
 | 004 | Currents | NOT_ELIGIBLE | NO | FA Language Gate FAIL |
 | 005 | Bing News Search | NOT_ELIGIBLE | NO | FA Language Gate FAIL |
-| 006 | Event Registry | BLOCKED_UNKNOWN | NO | **EG-08 UNKNOWN only**; EG-09–EG-12 NOT_EVALUATED |
+| 006 | Event Registry | BLOCKED_UNKNOWN | NO | EG-08 UNKNOWN — blocks 006 only |
 | 007 | World News API | NOT_ELIGIBLE | NO | Caching/storage FAIL |
 | 008 | Associated Press | NOT_ELIGIBLE | NO | Redistribution/display FAIL (B2C) |
-| 009 | Reuters | NOT_ELIGIBLE | NO | Language Gate FAIL (official count quotations; no locale list) |
+| 009 | Reuters | NOT_ELIGIBLE | NO | Language Gate FAIL |
 
 ---
 
@@ -107,26 +107,25 @@ Benchmark execution remains prohibited because the PRG-03.3 Benchmark Authorizat
 | Field | Value |
 | ----- | ----- |
 | UNKNOWN gates (exact) | **EG-08 only** |
-| Why EG-08 is UNKNOWN | Official Terms (`https://newsapi.ai/terms` / `https://eventregistry.org/terms`) grant paid-plan commercial use and prohibit bypassing rate limits; they do **not** explicitly permit automated/programmatic polling. Rate-limit text alone is not permission. |
-| Converted to FAIL? | No |
 | Blocks Event Registry benchmark? | Yes |
 | Blocks NewsData.io eligibility? | No |
+| Blocks NewsData.io authorization? | No (PRG-03.3 v0.1.1) |
 
 ### 4.2 Associated Press / Reuters
 
-Prior Authentication UNKNOWN items are **closed** (see Evidence Register). Reuters Language Gate FAIL is supported by official quotations in Provider 009 (not reverted to `BLOCKED_UNKNOWN`).
+Prior Authentication UNKNOWN items are **closed** (see Evidence Register).
 
 ---
 
 ## 5. Authorization Checklist
 
-Use this checklist for any proposed PRG-03 benchmark run. **All boxes required for the named provider must be checked before AUTHORIZE.**
+Use this checklist for any proposed PRG-03 benchmark run against a named provider. **AC-01–AC-09 must be checked before AUTHORIZE for that provider.**
 
 ### 5.1 Pre-conditions (mandatory for any run)
 
 - [ ] **AC-01** Product Owner has ratified Effective Coverage Threshold **(X)** with version, owner, and UTC approval date.
 - [ ] **AC-02** Operations has ratified a specific **PRG-03.3A RLP version**; the run will cite that exact version.
-- [ ] **AC-03** **PRG-03.4** is ratified; the run will cite that exact benchmark-definition version.
+- [ ] **AC-03** **PRG-03.4** is ratified by its Document Control Owner and Approver (identities currently PENDING RATIFICATION / **AUTHORITY UNDEFINED** until named); the run will cite that exact version.
 - [ ] **AC-04** Environment Freeze fields required by PRG-03.4 are completed and recorded (commit SHA, harness, region, runtime, network path, credential class, dataset version).
 - [ ] **AC-05** No threshold, gate, or workload parameter will be invented or changed after observation begins.
 
@@ -137,32 +136,33 @@ Use this checklist for any proposed PRG-03 benchmark run. **All boxes required f
 - [x] **AC-08** Provider 003 has no open `FAIL`, `UNKNOWN`, or `NOT_EVALUATED` eligibility gate in the register.
 - [ ] **AC-09** Authorization Decision Block below records AUTHORIZE for Provider 003 with named authorities and UTC date.
 
-### 5.3 Programme Unknown Resolution (tracking)
+### 5.3 Provider-scoped tracking (Event Registry — not required for NewsData.io AUTHORIZE)
 
-- [ ] **AC-10** Event Registry EG-08 clarified to PASS or FAIL from official evidence, **or** expressly scoped out of the authorized run set with recorded rationale.
-- [ ] **AC-11** Evidence Register Unknown Resolution marked COMPLETE (or scoped exception recorded).
+- [ ] **AC-10** Event Registry EG-08 clarified to PASS or FAIL from official evidence (required only to authorize Event Registry; does not gate NewsData.io).
+- [ ] **AC-11** Evidence Register Unknown Resolution marked COMPLETE when no provider-scoped UNKNOWN remains (tracking; not a NewsData.io authorization precondition under PRG-03.3 v0.1.1).
 
 ### 5.4 Checklist result (current)
 
 | Checklist group | Result |
 | --------------- | ------ |
-| AC-01 … AC-05 (pre-conditions) | **FAIL** — X, RLP, and PRG-03.4 not ratified |
+| AC-01 … AC-05 (pre-conditions) | **FAIL** — X, RLP, and PRG-03.4 not ratified; PRG-03.4 Owner/Approver **AUTHORITY UNDEFINED** |
 | AC-06 … AC-08 (NewsData.io eligibility) | PASS (recorded) |
 | AC-09 (signed authorization) | **FAIL** — no AUTHORIZE recorded |
-| AC-10 … AC-11 (Unknown Resolution) | **FAIL** — Event Registry EG-08 still UNKNOWN |
+| AC-10 … AC-11 (Event Registry / Unknown Resolution tracking) | OPEN — does **not** fail NewsData.io authorization under PRG-03.3 v0.1.1 |
 
-**Checklist verdict:** Benchmark remains **NOT AUTHORIZED**.
+**Checklist verdict (NewsData.io):** Benchmark remains **NOT AUTHORIZED** (AC-01–AC-05 and AC-09).
 
 ---
 
 ## 6. Blockers to Clear Before Authorization
 
-| # | Blocker | Authority | Current Status | Required to authorize NewsData.io run? |
-| - | ------- | --------- | -------------- | -------------------------------------- |
-| 1 | Effective Coverage Threshold (X) | Product Owner | PENDING PRODUCT RATIFICATION | **Yes** |
-| 2 | Reference Load Profile (RLP) | Operations | PRG-03.3A not ratified | **Yes** |
-| 3 | PRG-03.4 ratification + Environment Freeze | Platform / Ops governance | NOT RATIFIED | **Yes** |
-| 4 | Event Registry EG-08 clarification | Provider official docs / Platform recorder | OPEN — EG-08 UNKNOWN | Required for Unknown Resolution COMPLETE; not an Eligibility defect on 003 |
+| # | Blocker | Authority (exact named role in repo) | Current Status | Scope |
+| - | ------- | ------------------------------------ | -------------- | ----- |
+| 1 | Effective Coverage Threshold (X) | Product Owner | PENDING PRODUCT RATIFICATION | Programme-wide (shared) |
+| 2 | Reference Load Profile (RLP) | Operations | PRG-03.3A not ratified | Programme-wide (shared) |
+| 3 | PRG-03.4 ratification | PRG-03.4 Document Control **Owner** and **Approver** — identities PENDING RATIFICATION → **AUTHORITY UNDEFINED** | NOT RATIFIED | Programme-wide (shared) |
+| 4 | Environment Freeze recorded | Recorded at run time per PRG-03.4 (no separate named ratifying role beyond freeze completeness) | Not recorded | Programme-wide (shared) |
+| 5 | Event Registry EG-08 UNKNOWN | Provider official documentation; Platform recorder for register update | OPEN | **Event Registry only** |
 
 ---
 
@@ -174,6 +174,8 @@ Use this checklist for any proposed PRG-03 benchmark run. **All boxes required f
 | ---- | ---- | ------------------------------------- | ---------- | ------------ |
 | Product Owner (X) | PENDING | PENDING | PENDING | PENDING |
 | Operations (RLP) | PENDING | PENDING | PENDING | PENDING |
+| PRG-03.4 Owner | PENDING / AUTHORITY UNDEFINED | PENDING | PENDING | PENDING |
+| PRG-03.4 Approver | PENDING / AUTHORITY UNDEFINED | PENDING | PENDING | PENDING |
 | Platform recorder | PENDING | N/A — records only | PENDING | PENDING |
 
 No name, date, or authorization is invented.
@@ -182,17 +184,20 @@ No name, date, or authorization is invented.
 
 ## 8. Execution Boundary
 
-When (and only when) Decision Summary blockers 1–3 are cleared, Authorization Checklist AC-01–AC-09 are checked, and this Decision Block records AUTHORIZE for a named provider and cited versions:
+When (and only when) shared blockers 1–4 are cleared, Authorization Checklist AC-01–AC-09 are checked for the named provider, and this Decision Block records AUTHORIZE for that provider and cited versions:
 
 1. Instantiate a PRG-03.5 Benchmark Report shell citing exact PRG-03.3 / 03.3A / 03.4 versions.  
 2. Freeze environment per PRG-03.4.  
 3. Execute the ratified RLP only.  
+
+AC-10/AC-11 are not preconditions for NewsData.io AUTHORIZE under PRG-03.3 v0.1.1.
 
 Until then:
 
 - No benchmark run  
 - No threshold invention after observation  
 - No architecture selection under PRG-03.6  
+- Event Registry remains unauthorized while EG-08 is UNKNOWN
 
 ---
 
@@ -201,9 +206,11 @@ Until then:
 | Field | Value |
 | ----- | ----- |
 | Package ID | PRG-03-BENCHMARK-AUTH |
-| Package Version | 0.1.1 |
+| Package Version | 0.1.3 |
 | Status | PENDING AUTHORIZATION — BENCHMARK NOT AUTHORIZED |
-| Supersedes | 0.1.0 |
+| Supersedes | 0.1.2 |
+| Aligns to | PRG-03.3 v0.1.1 provider independence |
+| Consolidation pointer | `docs/operations/PRG-03-FINAL-RATIFICATION-PACKAGE.md` |
 
 ---
 
