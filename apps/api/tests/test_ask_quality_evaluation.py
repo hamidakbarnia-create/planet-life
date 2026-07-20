@@ -38,7 +38,12 @@ from evaluations.ask.reporting import (  # noqa: E402
     write_human_review_template,
     write_report,
 )
-from evaluations.ask.runner import run_evaluation, run_scenario  # noqa: E402
+from evaluations.ask.runner import (  # noqa: E402
+    build_arg_parser,
+    main,
+    run_evaluation,
+    run_scenario,
+)
 from evaluations.ask.structural_evaluator import StructuralEvaluator  # noqa: E402
 from services.generation.errors import GenerationProviderError  # noqa: E402
 from services.generation.ports import GenerationResult  # noqa: E402
@@ -489,3 +494,277 @@ def test_write_report_roundtrip(tmp_path: Path) -> None:
     loaded = json.loads(path.read_text(encoding="utf-8"))
     assert loaded["scenario_count"] == 0
     assert loaded["subjective_scores_included"] is False
+
+
+# --- Selected scenario IDs (P1-T05-03A) ---
+
+
+def _fake_provider() -> MagicMock:
+    provider = MagicMock()
+    provider.provider_name = "fake"
+    provider.model_name = "fake-model"
+    provider.generate.return_value = GenerationResult(
+        response_type="conversational",
+        message=(
+            "Here is a direct next step: list constraints, then choose one action."
+        ),
+        sources=(),
+        request_id="eval",
+    )
+    return provider
+
+
+def _multi_scenario_dataset(tmp_path: Path) -> Path:
+    return _write_dataset(
+        tmp_path,
+        [
+            _base_scenario_dict(id="ask-001"),
+            _base_scenario_dict(id="ask-002"),
+            _base_scenario_dict(id="ask-003"),
+            _base_scenario_dict(id="ask-025"),
+        ],
+    )
+
+
+def test_scenario_ids_preserves_caller_order(tmp_path: Path) -> None:
+    dataset_path = _multi_scenario_dataset(tmp_path)
+    output = tmp_path / "ordered.json"
+    provider = _fake_provider()
+    written = run_evaluation(
+        dataset_path=dataset_path,
+        rubric_path=RUBRIC_PATH,
+        provider_key="static",
+        output_path=output,
+        scenario_ids=["ask-003", "ask-001", "ask-025"],
+        provider=provider,
+        write_review_template=False,
+    )
+    report = json.loads(written.read_text(encoding="utf-8"))
+    assert [item["scenario_id"] for item in report["scenarios"]] == [
+        "ask-003",
+        "ask-001",
+        "ask-025",
+    ]
+    assert report["scenario_count"] == 3
+    assert provider.generate.call_count == 3
+
+
+def test_scenario_ids_rejects_duplicates_before_provider(tmp_path: Path) -> None:
+    dataset_path = _multi_scenario_dataset(tmp_path)
+    provider = _fake_provider()
+    with pytest.raises(
+        DatasetValidationError,
+        match="duplicate scenario id in --scenario-ids",
+    ):
+        run_evaluation(
+            dataset_path=dataset_path,
+            rubric_path=RUBRIC_PATH,
+            provider_key="static",
+            output_path=tmp_path / "dup.json",
+            scenario_ids=["ask-001", "ask-003", "ask-001"],
+            provider=provider,
+            write_review_template=False,
+        )
+    provider.generate.assert_not_called()
+
+
+def test_scenario_ids_rejects_unknown_before_provider(tmp_path: Path) -> None:
+    dataset_path = _multi_scenario_dataset(tmp_path)
+    provider = _fake_provider()
+    with pytest.raises(DatasetValidationError, match="scenario not found: ask-999"):
+        run_evaluation(
+            dataset_path=dataset_path,
+            rubric_path=RUBRIC_PATH,
+            provider_key="static",
+            output_path=tmp_path / "unknown.json",
+            scenario_ids=["ask-001", "ask-999"],
+            provider=provider,
+            write_review_template=False,
+        )
+    provider.generate.assert_not_called()
+
+
+def test_scenario_ids_rejects_empty_before_provider(tmp_path: Path) -> None:
+    dataset_path = _multi_scenario_dataset(tmp_path)
+    provider = _fake_provider()
+    with pytest.raises(DatasetValidationError, match="empty scenario id"):
+        run_evaluation(
+            dataset_path=dataset_path,
+            rubric_path=RUBRIC_PATH,
+            provider_key="static",
+            output_path=tmp_path / "empty-id.json",
+            scenario_ids=["ask-001", "", "ask-003"],
+            provider=provider,
+            write_review_template=False,
+        )
+    provider.generate.assert_not_called()
+
+    with pytest.raises(DatasetValidationError, match="must not be empty"):
+        run_evaluation(
+            dataset_path=dataset_path,
+            rubric_path=RUBRIC_PATH,
+            provider_key="static",
+            output_path=tmp_path / "empty-list.json",
+            scenario_ids=[],
+            provider=provider,
+            write_review_template=False,
+        )
+    provider.generate.assert_not_called()
+
+
+def test_scenario_id_and_scenario_ids_mutually_exclusive(tmp_path: Path) -> None:
+    dataset_path = _multi_scenario_dataset(tmp_path)
+    provider = _fake_provider()
+    with pytest.raises(
+        DatasetValidationError,
+        match="mutually exclusive",
+    ):
+        run_evaluation(
+            dataset_path=dataset_path,
+            rubric_path=RUBRIC_PATH,
+            provider_key="static",
+            output_path=tmp_path / "conflict.json",
+            scenario_id="ask-001",
+            scenario_ids=["ask-003"],
+            provider=provider,
+            write_review_template=False,
+        )
+    provider.generate.assert_not_called()
+
+
+def test_limit_cannot_combine_with_scenario_ids(tmp_path: Path) -> None:
+    dataset_path = _multi_scenario_dataset(tmp_path)
+    provider = _fake_provider()
+    with pytest.raises(
+        DatasetValidationError,
+        match="--limit cannot be combined with --scenario-ids",
+    ):
+        run_evaluation(
+            dataset_path=dataset_path,
+            rubric_path=RUBRIC_PATH,
+            provider_key="static",
+            output_path=tmp_path / "limit-conflict.json",
+            scenario_ids=["ask-001", "ask-003"],
+            limit=1,
+            provider=provider,
+            write_review_template=False,
+        )
+    provider.generate.assert_not_called()
+
+
+def test_cli_scenario_id_and_scenario_ids_conflict(tmp_path: Path) -> None:
+    parser = build_arg_parser()
+    with pytest.raises(SystemExit):
+        parser.parse_args(
+            [
+                "--output",
+                str(tmp_path / "out.json"),
+                "--scenario-id",
+                "ask-001",
+                "--scenario-ids",
+                "ask-003,ask-025",
+            ]
+        )
+
+
+def test_cli_scenario_ids_runs_selected_order(tmp_path: Path) -> None:
+    dataset_path = _multi_scenario_dataset(tmp_path)
+    output = tmp_path / "cli-pilot.json"
+    exit_code = main(
+        [
+            "--dataset",
+            str(dataset_path),
+            "--rubric",
+            str(RUBRIC_PATH),
+            "--provider",
+            "static",
+            "--scenario-ids",
+            "ask-025,ask-001,ask-003",
+            "--output",
+            str(output),
+            "--no-review-template",
+        ]
+    )
+    assert exit_code == 0
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert [item["scenario_id"] for item in report["scenarios"]] == [
+        "ask-025",
+        "ask-001",
+        "ask-003",
+    ]
+
+
+def test_cli_limit_with_scenario_ids_rejected(tmp_path: Path) -> None:
+    dataset_path = _multi_scenario_dataset(tmp_path)
+    exit_code = main(
+        [
+            "--dataset",
+            str(dataset_path),
+            "--rubric",
+            str(RUBRIC_PATH),
+            "--provider",
+            "static",
+            "--scenario-ids",
+            "ask-001,ask-003",
+            "--limit",
+            "1",
+            "--output",
+            str(tmp_path / "cli-limit.json"),
+            "--no-review-template",
+        ]
+    )
+    assert exit_code == 2
+
+
+def test_scenario_id_selection_unchanged(tmp_path: Path) -> None:
+    dataset_path = _multi_scenario_dataset(tmp_path)
+    output = tmp_path / "single.json"
+    written = run_evaluation(
+        dataset_path=dataset_path,
+        rubric_path=RUBRIC_PATH,
+        provider_key="static",
+        output_path=output,
+        scenario_id="ask-002",
+        write_review_template=False,
+    )
+    report = json.loads(written.read_text(encoding="utf-8"))
+    assert report["scenario_count"] == 1
+    assert report["scenarios"][0]["scenario_id"] == "ask-002"
+
+
+def test_limit_selection_unchanged(tmp_path: Path) -> None:
+    dataset_path = _multi_scenario_dataset(tmp_path)
+    output = tmp_path / "limited.json"
+    written = run_evaluation(
+        dataset_path=dataset_path,
+        rubric_path=RUBRIC_PATH,
+        provider_key="static",
+        output_path=output,
+        limit=2,
+        write_review_template=False,
+    )
+    report = json.loads(written.read_text(encoding="utf-8"))
+    assert [item["scenario_id"] for item in report["scenarios"]] == [
+        "ask-001",
+        "ask-002",
+    ]
+
+
+def test_full_dataset_selection_unchanged(tmp_path: Path) -> None:
+    dataset_path = _multi_scenario_dataset(tmp_path)
+    output = tmp_path / "full.json"
+    written = run_evaluation(
+        dataset_path=dataset_path,
+        rubric_path=RUBRIC_PATH,
+        provider_key="static",
+        output_path=output,
+        write_review_template=False,
+    )
+    report = json.loads(written.read_text(encoding="utf-8"))
+    assert [item["scenario_id"] for item in report["scenarios"]] == [
+        "ask-001",
+        "ask-002",
+        "ask-003",
+        "ask-025",
+    ]
+    assert report["scenario_count"] == 4

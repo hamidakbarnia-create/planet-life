@@ -177,6 +177,42 @@ def run_scenario(
         )
 
 
+def _select_scenarios_by_ids(
+    scenarios: list[EvalScenario],
+    scenario_ids: list[str],
+) -> list[EvalScenario]:
+    """Select scenarios by explicit IDs, preserving caller order.
+
+    Validates before any provider execution: rejects empty IDs, duplicates,
+    and unknown IDs.
+    """
+    if not scenario_ids:
+        raise DatasetValidationError("--scenario-ids must not be empty")
+
+    by_id = {item.id: item for item in scenarios}
+    seen: set[str] = set()
+    selected: list[EvalScenario] = []
+    for raw_id in scenario_ids:
+        scenario_id = raw_id.strip() if isinstance(raw_id, str) else ""
+        if not scenario_id:
+            raise DatasetValidationError("empty scenario id in --scenario-ids")
+        if scenario_id in seen:
+            raise DatasetValidationError(
+                f"duplicate scenario id in --scenario-ids: {scenario_id}"
+            )
+        seen.add(scenario_id)
+        match = by_id.get(scenario_id)
+        if match is None:
+            raise DatasetValidationError(f"scenario not found: {scenario_id}")
+        selected.append(match)
+    return selected
+
+
+def _parse_scenario_ids_arg(value: str) -> list[str]:
+    """Parse comma-separated --scenario-ids, preserving caller order."""
+    return [part.strip() for part in value.split(",")]
+
+
 def run_evaluation(
     *,
     dataset_path: str | Path,
@@ -185,18 +221,37 @@ def run_evaluation(
     output_path: str | Path,
     limit: int | None = None,
     scenario_id: str | None = None,
+    scenario_ids: list[str] | None = None,
     provider: GenerationProvider | None = None,
     write_review_template: bool = True,
 ) -> Path:
-    """Run the evaluation suite and write the baseline report."""
+    """Run the evaluation suite and write the baseline report.
+
+    Scenario selection priority:
+    1. scenario_id (single)
+    2. scenario_ids (explicit list, caller order preserved)
+    3. full dataset (+ optional limit)
+    """
     dataset = load_dataset(dataset_path)
     rubric = load_rubric(rubric_path)
+
+    if scenario_id is not None and scenario_ids is not None:
+        raise DatasetValidationError(
+            "--scenario-id and --scenario-ids are mutually exclusive"
+        )
+    if scenario_ids is not None and limit is not None:
+        raise DatasetValidationError(
+            "--limit cannot be combined with --scenario-ids"
+        )
 
     scenarios = list(dataset.scenarios)
     if scenario_id is not None:
         scenarios = [item for item in scenarios if item.id == scenario_id]
         if not scenarios:
             raise DatasetValidationError(f"scenario not found: {scenario_id}")
+    elif scenario_ids is not None:
+        scenarios = _select_scenarios_by_ids(scenarios, scenario_ids)
+
     if limit is not None:
         if limit < 0:
             raise DatasetValidationError("--limit must be >= 0")
@@ -283,10 +338,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional max number of scenarios to run",
     )
-    parser.add_argument(
+    scenario_select = parser.add_mutually_exclusive_group()
+    scenario_select.add_argument(
         "--scenario-id",
         default=None,
         help="Optional single scenario id to run",
+    )
+    scenario_select.add_argument(
+        "--scenario-ids",
+        default=None,
+        help="Optional comma-separated scenario ids to run (caller order preserved)",
     )
     parser.add_argument(
         "--no-review-template",
@@ -299,6 +360,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
+    scenario_ids = (
+        _parse_scenario_ids_arg(args.scenario_ids)
+        if args.scenario_ids is not None
+        else None
+    )
     try:
         output = run_evaluation(
             dataset_path=args.dataset,
@@ -307,6 +373,7 @@ def main(argv: list[str] | None = None) -> int:
             output_path=args.output,
             limit=args.limit,
             scenario_id=args.scenario_id,
+            scenario_ids=scenario_ids,
             write_review_template=not args.no_review_template,
         )
     except DatasetValidationError as exc:

@@ -53,8 +53,23 @@ Options:
 --output PATH
 --limit N
 --scenario-id ask-001
+--scenario-ids ask-001,ask-003,ask-025
 --no-review-template
 ```
+
+Selected-scenario pilot (explicit ID list, caller order preserved):
+
+```bash
+PYTHONPATH=apps/api/src python -m evaluations.ask.runner \
+  --dataset apps/api/evaluations/ask/dataset_v1.json \
+  --rubric apps/api/evaluations/ask/rubric_v1.json \
+  --provider openai \
+  --scenario-ids ask-001,ask-003,ask-025 \
+  --output apps/api/evaluations/ask/baseline/openai-pilot.json
+```
+
+`--scenario-id` and `--scenario-ids` are mutually exclusive.
+`--limit` cannot be combined with `--scenario-ids`.
 
 OpenAI runs use existing runtime configuration (`OPENAI_API_KEY`,
 `OPENAI_MODEL`, `OPENAI_TIMEOUT_SECONDS`). API keys are never written into
