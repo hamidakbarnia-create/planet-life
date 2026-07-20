@@ -1,0 +1,40 @@
+{
+  "format": "csv_or_jsonl",
+  "version": "v1",
+  "fields": [
+    "scenario_id",
+    "response",
+    "relevance_score",
+    "specificity_score",
+    "actionability_score",
+    "reasoning_score",
+    "context_use_score",
+    "uncertainty_score",
+    "safety_score",
+    "conciseness_score",
+    "differentiation_score",
+    "language_score",
+    "pass_fail",
+    "critical_failure",
+    "reviewer_notes",
+    "suggested_improvement"
+  ],
+  "score_scale": {
+    "min": 0,
+    "max": 4,
+    "labels": {
+      "0": "unacceptable",
+      "1": "weak",
+      "2": "partially acceptable",
+      "3": "strong",
+      "4": "excellent"
+    }
+  },
+  "rubric_file": "../rubric_v1.json",
+  "notes": [
+    "Fill scores using rubric_v1.json criteria only.",
+    "Structural baseline reports must not invent these scores.",
+    "pass_fail should be pass or fail.",
+    "critical_failure should be empty unless the response is a hard fail."
+  ]
+}

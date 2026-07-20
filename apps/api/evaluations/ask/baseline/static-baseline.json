@@ -1,0 +1,5114 @@
+{
+  "dataset_version": "v1",
+  "rubric_version": "v1",
+  "provider": "static",
+  "model": "static",
+  "prompt_version": "v2",
+  "execution_timestamp": "2026-07-20T01:03:03.413073+00:00",
+  "scenario_count": 60,
+  "success_count": 23,
+  "failure_count": 37,
+  "structural_pass_rate": 0.38333333333333336,
+  "category_breakdown": {
+    "ambiguous_questions": {
+      "total": 4,
+      "success": 1,
+      "failure": 3,
+      "structural_pass": 1,
+      "structural_fail": 3
+    },
+    "career_and_business": {
+      "total": 5,
+      "success": 2,
+      "failure": 3,
+      "structural_pass": 2,
+      "structural_fail": 3
+    },
+    "comparison": {
+      "total": 4,
+      "success": 1,
+      "failure": 3,
+      "structural_pass": 1,
+      "structural_fail": 3
+    },
+    "daily_planning": {
+      "total": 4,
+      "success": 2,
+      "failure": 2,
+      "structural_pass": 2,
+      "structural_fail": 2
+    },
+    "decision_support": {
+      "total": 6,
+      "success": 1,
+      "failure": 5,
+      "structural_pass": 1,
+      "structural_fail": 5
+    },
+    "financial_decision_framing": {
+      "total": 4,
+      "success": 1,
+      "failure": 3,
+      "structural_pass": 1,
+      "structural_fail": 3
+    },
+    "follow_up": {
+      "total": 4,
+      "success": 1,
+      "failure": 3,
+      "structural_pass": 1,
+      "structural_fail": 3
+    },
+    "general_conversation": {
+      "total": 3,
+      "success": 2,
+      "failure": 1,
+      "structural_pass": 2,
+      "structural_fail": 1
+    },
+    "personal_reflection": {
+      "total": 3,
+      "success": 1,
+      "failure": 2,
+      "structural_pass": 1,
+      "structural_fail": 2
+    },
+    "planning": {
+      "total": 5,
+      "success": 3,
+      "failure": 2,
+      "structural_pass": 3,
+      "structural_fail": 2
+    },
+    "prioritization": {
+      "total": 3,
+      "success": 2,
+      "failure": 1,
+      "structural_pass": 2,
+      "structural_fail": 1
+    },
+    "relationship_guidance": {
+      "total": 3,
+      "success": 1,
+      "failure": 2,
+      "structural_pass": 1,
+      "structural_fail": 2
+    },
+    "risk_assessment": {
+      "total": 4,
+      "success": 2,
+      "failure": 2,
+      "structural_pass": 2,
+      "structural_fail": 2
+    },
+    "travel_and_relocation": {
+      "total": 3,
+      "success": 1,
+      "failure": 2,
+      "structural_pass": 1,
+      "structural_fail": 2
+    },
+    "unsupported_or_insufficient_context": {
+      "total": 5,
+      "success": 2,
+      "failure": 3,
+      "structural_pass": 2,
+      "structural_fail": 3
+    }
+  },
+  "locale_breakdown": {
+    "ar": {
+      "total": 8,
+      "success": 0,
+      "failure": 8,
+      "structural_pass": 0,
+      "structural_fail": 8
+    },
+    "en": {
+      "total": 35,
+      "success": 23,
+      "failure": 12,
+      "structural_pass": 23,
+      "structural_fail": 12
+    },
+    "fa": {
+      "total": 10,
+      "success": 0,
+      "failure": 10,
+      "structural_pass": 0,
+      "structural_fail": 10
+    },
+    "ru": {
+      "total": 7,
+      "success": 0,
+      "failure": 7,
+      "structural_pass": 0,
+      "structural_fail": 7
+    }
+  },
+  "latency_statistics": {
+    "count": 60.0,
+    "min_ms": 0.02139000025636051,
+    "max_ms": 0.17470599959779065,
+    "mean_ms": 0.04768125005891003,
+    "median_ms": 0.04245400032232283
+  },
+  "validation_failures": 0,
+  "provider_failures": 0,
+  "structural_failures": 37,
+  "subjective_scores_included": false,
+  "scenarios": [
+    {
+      "scenario_id": "ask-001",
+      "category": "decision_support",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.061299000662984326,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I have two job offers: a stable corporate role with lower pay, and a startup with equity but less stability. How should I decide this week?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-002",
+      "category": "decision_support",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04085500040673651,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Should I move in with my partner after only four months of dating?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-003",
+      "category": "planning",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04049199924338609,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Help me plan a 6-week runway to launch a small consulting offer while working full time."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-004",
+      "category": "planning",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04073799937032163,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I need a study plan for a professional certification exam in 10 weeks with only 8 hours per week."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-005",
+      "category": "comparison",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.022159001673571765,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Compare renting a small apartment near work versus buying a cheaper place 70 minutes away."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-006",
+      "category": "comparison",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.023107000743038952,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Compare hiring a freelance designer versus using an AI design tool for my landing page."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-007",
+      "category": "prioritization",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.0360630001523532,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I can only do three things this weekend: deep work on a proposal, family visit, or catching up on sleep. How should I prioritize?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-008",
+      "category": "prioritization",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.08054299905779772,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "My backlog has: fix billing bug, rewrite onboarding copy, and research a new market. Rank them for a solo founder this month."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-009",
+      "category": "relationship_guidance",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.05964900083199609,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "My sibling keeps cancelling plans last minute. I want to stay close but I'm resentful. What is a constructive next step?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-010",
+      "category": "relationship_guidance",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04385600004752632,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "How do I raise a recurring fairness issue with a co-founder without escalating into a fight?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-011",
+      "category": "personal_reflection",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.05302599856804591,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I keep starting projects and abandoning them after two weeks. Help me reflect on what pattern to examine first."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-012",
+      "category": "personal_reflection",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.0333480002154829,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I feel successful on paper but restless. What questions should I ask myself before making a big life change?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-013",
+      "category": "career_and_business",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.03221800034225453,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I manage a team of five and one high performer is demotivating others. What should I do in the next two conversations?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-014",
+      "category": "career_and_business",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.03239199941162951,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Should I raise prices on my service business by 20% this quarter or wait until I have more demand proof?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-015",
+      "category": "financial_decision_framing",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.02893999953812454,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I have an emergency fund of 3 months and a chance to invest in a friend's early startup. How should I frame this decision?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-016",
+      "category": "financial_decision_framing",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.17470599959779065,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Frame the trade-offs between paying off a medium-interest loan early versus investing surplus cash."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-017",
+      "category": "travel_and_relocation",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.0632900009804871,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I'm considering relocating from a high-cost city to a mid-size city for remote work. What decision factors should I weigh first?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-018",
+      "category": "travel_and_relocation",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.0473890013381606,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Plan a 5-day work trip that balances two client meetings and recovery time. I hate packed itineraries."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-019",
+      "category": "daily_planning",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.05301500095811207,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I have a scattered day: two meetings, one deep task, and errands. Help me sequence the day."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-020",
+      "category": "daily_planning",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.0260519991570618,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I wake up drained. Suggest a morning sequence that protects one deep-work block before noon."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-021",
+      "category": "risk_assessment",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04635700133803766,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "What are the main risks of quitting my job before landing the next one if I have 4 months of savings?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-022",
+      "category": "risk_assessment",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04533299943432212,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Assess the risk of launching a public beta with known onboarding friction."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-023",
+      "category": "ambiguous_questions",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.026752000849228352,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Is this a good time?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-024",
+      "category": "ambiguous_questions",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.02139000025636051,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "What should I do with my life?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-025",
+      "category": "follow_up",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04763300057675224,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I am choosing between staying in my current role and switching industries."
+        },
+        {
+          "role": "assistant",
+          "content": "A useful first cut is to separate financial runway, skill transferability, and identity fit."
+        },
+        {
+          "role": "user",
+          "content": "What about timing — does waiting six months change the decision?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-026",
+      "category": "follow_up",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.02523600051063113,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Help me decide whether to confront a colleague about credit-stealing."
+        },
+        {
+          "role": "assistant",
+          "content": "Start by defining the outcome you want from the conversation and one observable example."
+        },
+        {
+          "role": "user",
+          "content": "Also, should I loop in my manager first?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-027",
+      "category": "general_conversation",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.03842899968731217,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Hello — can we talk through a decision later today?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-028",
+      "category": "general_conversation",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.029441000151564367,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Thanks, that framing helped."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-029",
+      "category": "unsupported_or_insufficient_context",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.0466799992864253,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Using my birth chart and today's transits, tell me exactly whether I should resign tomorrow."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-030",
+      "category": "unsupported_or_insufficient_context",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.030585999411414377,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Based on my vault notes and last month's calendar, what should I prioritize tomorrow?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-031",
+      "category": "decision_support",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.06454300091718324,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I can accept a promotion that increases scope but destroys my evenings, or stay put. How do I decide without optimizing only for status?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-032",
+      "category": "career_and_business",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.15416700080095325,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "I want to fire a vendor who is polite but consistently late. Draft the decision criteria before the conversation."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-033",
+      "category": "planning",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.0374630017176969,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Create a 30-day plan to validate whether my newsletter idea has demand before I build a product."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-034",
+      "category": "financial_decision_framing",
+      "locale": "en",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.069167999754427,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "How should I think about using a bonus: spend on rest, invest, or pay debt? I am not asking for a portfolio."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-035",
+      "category": "risk_assessment",
+      "locale": "en",
+      "success": true,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.05023099947720766,
+      "validation_ok": true,
+      "error_type": null,
+      "error_message": null,
+      "structural": {
+        "passed": true,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": true,
+            "detail": "Latin characters present for locale=en"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "What could go wrong if I publicly share an early roadmap with aggressive dates?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-036",
+      "category": "decision_support",
+      "locale": "fa",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.06316899998637382,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "بین دو پیشنهاد شغلی مانده‌ام: یکی پایدار با حقوق کمتر و یکی استارتاپ با ریسک بیشتر. چطور این هفته تصمیم بگیرم؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-037",
+      "category": "planning",
+      "locale": "fa",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.07236899909912609,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "برای آمادگی یک آزمون حرفه‌ای در ۸ هفته، هفته‌ای ۶ ساعت وقت دارم. یک برنامه واقع‌بینانه بده."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-038",
+      "category": "comparison",
+      "locale": "fa",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.03777999882004224,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "اجاره نزدیک محل کار را با خرید خانه دورتر مقایسه کن."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-039",
+      "category": "relationship_guidance",
+      "locale": "fa",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.06386800123436842,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "با یکی از دوستانم دربارهٔ مرزهای زمانی به مشکل خورده‌ام. قدم بعدی سازنده چیست؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-040",
+      "category": "career_and_business",
+      "locale": "fa",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.041569999666535296,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "آیا الان زمان مناسبی برای افزایش قیمت خدمات کسب‌وکار کوچک من است؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-041",
+      "category": "daily_planning",
+      "locale": "fa",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04138799886277411,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "امروز دو جلسه و یک کار عمیق دارم. چطور روز را اولویت‌بندی کنم؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-042",
+      "category": "ambiguous_questions",
+      "locale": "fa",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.03607200051192194,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "به نظرت الان وقتشه؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-043",
+      "category": "follow_up",
+      "locale": "fa",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04251199970894959,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "دارم بین ماندن در شغلم و تغییر مسیر مردد هستم."
+        },
+        {
+          "role": "assistant",
+          "content": "اول می‌توان مسیر را به سه محور تقسیم کرد: درآمد، یادگیری، و انرژی روزانه."
+        },
+        {
+          "role": "user",
+          "content": "اگر فقط سه ماه فرصت داشته باشم، اولویت کدام است؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-044",
+      "category": "unsupported_or_insufficient_context",
+      "locale": "fa",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.042177000068477355,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "با توجه به چارت تولد و ترانزیت امروز بگو دقیقاً فردا استعفا بدهم یا نه."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-045",
+      "category": "personal_reflection",
+      "locale": "fa",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.05072999920230359,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "مدام کار جدید شروع می‌کنم و نیمه‌کاره رها می‌کنم. از کجا خودم را بررسی کنم؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-046",
+      "category": "decision_support",
+      "locale": "ar",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04696200085163582,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "لدي عرضان للعمل: وظيفة مستقرة براتب أقل، وشركة ناشئة بمخاطر أعلى. كيف أقرر هذا الأسبوع؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-047",
+      "category": "planning",
+      "locale": "ar",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.03617899892560672,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "ساعدني في خطة لمدة شهر للتحقق من فكرة منتج قبل بنائه."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-048",
+      "category": "comparison",
+      "locale": "ar",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.054055999498814344,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "قارن بين العمل عن بُعد بالكامل والعمل الهجين ثلاثة أيام في المكتب."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-049",
+      "category": "financial_decision_framing",
+      "locale": "ar",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.042054000005009584,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "كيف أفكر في استخدام مكافأة نهاية السنة: سداد دين أو ادخار أو راحة؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-050",
+      "category": "travel_and_relocation",
+      "locale": "ar",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.044701999286189675,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "أفكر في الانتقال إلى مدينة أقل تكلفة للعمل عن بُعد. ما العوامل الأولى التي يجب وزنها؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-051",
+      "category": "risk_assessment",
+      "locale": "ar",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04255499879946001,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "ما المخاطر الرئيسية لترك عملي قبل إيجاد بديل إذا كان لدي مدخرات تكفي أربعة أشهر؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-052",
+      "category": "general_conversation",
+      "locale": "ar",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.029378999897744507,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "مرحباً، أريد مناقشة قرار لاحقاً اليوم."
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-053",
+      "category": "unsupported_or_insufficient_context",
+      "locale": "ar",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04045000059704762,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Arabic-script characters for locale",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Arabic-script characters for locale"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "اعتماداً على ملاحظاتي المحفوظة وتقويم الشهر الماضي، ماذا يجب أن أعطي أولوية غداً؟"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-054",
+      "category": "decision_support",
+      "locale": "ru",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04826199983654078,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Cyrillic characters for locale=ru; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Cyrillic characters for locale=ru"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "У меня два оффера: стабильная корпорация с меньшей зарплатой и стартап с риском. Как решить на этой неделе?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-055",
+      "category": "prioritization",
+      "locale": "ru",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.05296599920256995,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Cyrillic characters for locale=ru",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Cyrillic characters for locale=ru"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Могу сделать только три вещи в эти выходные: глубокую работу, визит к семье или сон. Как расставить приоритеты?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-056",
+      "category": "career_and_business",
+      "locale": "ru",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.04445500053407159,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Cyrillic characters for locale=ru; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Cyrillic characters for locale=ru"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Стоит ли повышать цены на услуги на 20% в этом квартале или ждать доказательств спроса?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-057",
+      "category": "daily_planning",
+      "locale": "ru",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.053146000936976634,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Cyrillic characters for locale=ru",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Cyrillic characters for locale=ru"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "У меня день из двух встреч и одной глубокой задачи. Как выстроить последовательность?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-058",
+      "category": "ambiguous_questions",
+      "locale": "ru",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.026046000130008906,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Cyrillic characters for locale=ru; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Cyrillic characters for locale=ru"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Это хорошее время?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-059",
+      "category": "follow_up",
+      "locale": "ru",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.0390860004699789,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Cyrillic characters for locale=ru; characteristic_uncertainty: expected uncertainty acknowledgment not detected",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Cyrillic characters for locale=ru"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          },
+          {
+            "check_id": "characteristic_uncertainty",
+            "passed": false,
+            "detail": "expected uncertainty acknowledgment not detected"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "Выбираю между текущей ролью и сменой отрасли."
+        },
+        {
+          "role": "assistant",
+          "content": "Сначала полезно разделить решение на финансовую подушку, переносимость навыков и соответствие ценностям."
+        },
+        {
+          "role": "user",
+          "content": "А если подождать шесть месяцев — это меняет решение?"
+        }
+      ]
+    },
+    {
+      "scenario_id": "ask-060",
+      "category": "unsupported_or_insufficient_context",
+      "locale": "ru",
+      "success": false,
+      "response": "Conversation request accepted under the P1 contract surface.",
+      "provider": "static",
+      "model": "static",
+      "prompt_version": "v2",
+      "latency_ms": 0.042396000935696065,
+      "validation_ok": true,
+      "error_type": "structural",
+      "error_message": "locale_match: expected Cyrillic characters for locale=ru",
+      "structural": {
+        "passed": false,
+        "checks": [
+          {
+            "check_id": "non_empty",
+            "passed": true,
+            "detail": "response has content"
+          },
+          {
+            "check_id": "max_length",
+            "passed": true,
+            "detail": "length=60 <= 16384"
+          },
+          {
+            "check_id": "locale_match",
+            "passed": false,
+            "detail": "expected Cyrillic characters for locale=ru"
+          },
+          {
+            "check_id": "no_prompt_leakage",
+            "passed": true,
+            "detail": "no prompt markers"
+          },
+          {
+            "check_id": "no_placeholder_leakage",
+            "passed": true,
+            "detail": "no placeholders"
+          },
+          {
+            "check_id": "no_instruction_leakage",
+            "passed": true,
+            "detail": "no instruction leakage"
+          },
+          {
+            "check_id": "no_duplicated_paragraphs",
+            "passed": true,
+            "detail": "no duplicated paragraphs"
+          },
+          {
+            "check_id": "no_static_fallback_for_openai",
+            "passed": true,
+            "detail": "check skipped (provider is not openai)"
+          },
+          {
+            "check_id": "no_unsupported_citations",
+            "passed": true,
+            "detail": "no unsupported citation phrasing"
+          },
+          {
+            "check_id": "not_malformed",
+            "passed": true,
+            "detail": "no structural malformation detected"
+          },
+          {
+            "check_id": "no_forbidden_phrases",
+            "passed": true,
+            "detail": "no forbidden phrases"
+          }
+        ]
+      },
+      "messages": [
+        {
+          "role": "user",
+          "content": "По моей натальной карте и транзитам скажи точно: увольняться завтра или нет?"
+        }
+      ]
+    }
+  ]
+}
