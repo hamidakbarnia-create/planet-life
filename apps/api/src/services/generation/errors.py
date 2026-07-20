@@ -17,3 +17,7 @@ class GenerationConfigurationError(GenerationError):
 
 class GenerationProviderError(GenerationError):
     """Raised when a generation provider fails during execution."""
+
+
+class GenerationValidationError(GenerationError):
+    """Raised when provider output fails internal response validation."""

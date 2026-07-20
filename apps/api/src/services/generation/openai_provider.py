@@ -81,6 +81,8 @@ def map_openai_completion_to_result(
 class OpenAIConversationProvider:
     """GenerationProvider backed by the official OpenAI Python SDK."""
 
+    provider_name = "openai"
+
     def __init__(
         self,
         *,
@@ -89,6 +91,7 @@ class OpenAIConversationProvider:
         model: str | None = None,
     ) -> None:
         self._model = OPENAI_MODEL if model is None else model
+        self.model_name = self._model
         if client is not None:
             self._client = client
             return
