@@ -196,6 +196,11 @@ const EN: CopyTable = {
     'Use a general decision framework: name the irreversible step, shrink to a reversible pilot, and gather the one fact that would change your mind.',
   'fallback.providerUnavailable':
     'Provider path unavailable ({reason}) — using structured local framework.',
+  'fallback.reason.network': 'network',
+  'fallback.reason.timeout': 'timeout',
+  'fallback.reason.parse': 'parse',
+  'fallback.reason.provider': 'provider',
+  'fallback.reason.unknown': 'unknown',
   'fallback.lowConfidence':
     'Low confidence because the conversational briefing could not be completed. Retry when connectivity returns.',
   'fallback.limit.structured':
@@ -431,6 +436,11 @@ const FA: CopyTable = {
     'از چارچوب تصمیم عمومی استفاده کنید: گام برگشت‌ناپذیر را نام ببرید، به یک آزمایش برگشت‌پذیر کوچک کنید، و همان حقیقتی را که نظر شما را عوض می‌کند جمع کنید.',
   'fallback.providerUnavailable':
     'مسیر ارائه‌دهنده در دسترس نیست ({reason}) — از چارچوب محلی ساخت‌یافته استفاده می‌شود.',
+  'fallback.reason.network': 'شبکه',
+  'fallback.reason.timeout': 'زمان‌تمام',
+  'fallback.reason.parse': 'تجزیه',
+  'fallback.reason.provider': 'ارائه‌دهنده',
+  'fallback.reason.unknown': 'نامشخص',
   'fallback.lowConfidence':
     'اطمینان پایین چون خلاصهٔ گفتگویی کامل نشد. با بازگشت اتصال دوباره تلاش کنید.',
   'fallback.limit.structured':
@@ -662,6 +672,11 @@ const AR: CopyTable = {
     'استخدم إطار قرار عام: سمِّ الخطوة غير القابلة للرجوع، واختصر إلى تجربة قابلة للرجوع، واجمع الحقيقة التي تغيّر رأيك.',
   'fallback.providerUnavailable':
     'مسار المزوّد غير متاح ({reason}) — يُستخدم إطار محلي منظم.',
+  'fallback.reason.network': 'شبكة',
+  'fallback.reason.timeout': 'انتهاء المهلة',
+  'fallback.reason.parse': 'تحليل',
+  'fallback.reason.provider': 'مزوّد',
+  'fallback.reason.unknown': 'غير معروف',
   'fallback.lowConfidence':
     'ثقة منخفضة لأن الملخص الحواري لم يكتمل. أعد المحاولة عند عودة الاتصال.',
   'fallback.limit.structured':
@@ -893,6 +908,11 @@ const RU: CopyTable = {
     'Используйте общий каркас решения: назовите необратимый шаг, сузьте до обратимого пилота и соберите один факт, который изменит ваше мнение.',
   'fallback.providerUnavailable':
     'Путь провайдера недоступен ({reason}) — используется структурированный локальный каркас.',
+  'fallback.reason.network': 'сеть',
+  'fallback.reason.timeout': 'таймаут',
+  'fallback.reason.parse': 'разбор',
+  'fallback.reason.provider': 'провайдер',
+  'fallback.reason.unknown': 'неизвестно',
   'fallback.lowConfidence':
     'Низкая уверенность, потому что разговорный брифинг не удалось завершить. Повторите при восстановлении связи.',
   'fallback.limit.structured':

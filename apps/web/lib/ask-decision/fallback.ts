@@ -81,7 +81,9 @@ export function buildStructuredFallback(input: {
     alternatives: [],
     assumptions: [
       ...input.frame.assumptions,
-      askCopy(locale, 'fallback.providerUnavailable', { reason: input.reason }),
+      askCopy(locale, 'fallback.providerUnavailable', {
+        reason: askCopy(locale, `fallback.reason.${input.reason}`),
+      }),
     ],
     confidence: {
       ...confidenceBase,

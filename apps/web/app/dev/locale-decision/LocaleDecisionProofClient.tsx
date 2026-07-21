@@ -48,7 +48,13 @@ export function LocaleDecisionProofClient({ lang }: { lang: AppLang }) {
   }, [locale]);
 
   const personalFitResult = useMemo(() => {
-    const question = 'Should I launch this product in Q3 with the current team?';
+    const questionByLang: Record<AppLang, string> = {
+      en: 'Should I launch this product in Q3 with the current team?',
+      fa: 'آیا باید این محصول را در سه‌ماهه سوم با تیم فعلی راه‌اندازی کنم؟',
+      ar: 'هل يجب أن أطلق هذا المنتج في الربع الثالث مع الفريق الحالي؟',
+      ru: 'Стоит ли запускать этот продукт в Q3 с текущей командой?',
+    };
+    const question = questionByLang[lang];
     const intent = detectIntent(question);
     const frame = frameDecision(question, intent);
     const timing = buildTimingIntelligence(null, intent.timingRelevant, false, locale);
@@ -65,7 +71,7 @@ export function LocaleDecisionProofClient({ lang }: { lang: AppLang }) {
       reason: 'unknown',
       locale,
     });
-  }, [locale]);
+  }, [lang, locale]);
 
   const forbidden = [...FORBIDDEN_CLARIFY, ...FORBIDDEN_STYLES];
 
