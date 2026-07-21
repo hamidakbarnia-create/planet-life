@@ -2,13 +2,17 @@
 
 import { useRouter } from 'next/navigation';
 import { useMemo, useRef, useState } from 'react';
+import { AskDecisionView } from '@/components/ask/AskDecisionView';
 import { ChartSkeleton } from '@/components/ChartSkeleton';
 import { NatalChart, type NatalChartLabels } from '@/components/NatalChart';
-import { GlassCard } from '@/components/ui/GlassCard';
 import { useRequireAuth } from '@/hooks/use-require-auth';
+import type { AskDecisionResult, ClarificationState } from '@/lib/ask-decision';
+import { runAskDecision } from '@/lib/ask-decision';
+import { getPersonalIntelligenceProfile } from '@/lib/intelligence';
 import type { FtueAskQuestion } from '@/lib/ask-question-repository';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
 import type { AppLang } from '@/lib/app-settings';
+import { loadBirthProfile } from '@/lib/birth-profile';
 import { fetchValidatedResultChart } from '@/lib/chart-api';
 import type { ChartData } from '@/lib/chart-types';
 import { executePreparedDecision } from '@/lib/decision-engine-facade';
@@ -54,6 +58,21 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
   const startedRef = useRef(false);
   const [chartPhase, setChartPhase] = useState<ResultChartPhase>('loading');
   const [chartData, setChartData] = useState<ChartData | null>(null);
+  const [decisionResult, setDecisionResult] = useState<AskDecisionResult | null>(
+    null
+  );
+  const [decisionLoading, setDecisionLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState('Framing your decision');
+  const [clarification, setClarification] = useState<ClarificationState | null>(
+    null
+  );
+  const [pendingClarification, setPendingClarification] = useState(false);
+  const [clarificationAnswer, setClarificationAnswer] = useState<string | null>(
+    null
+  );
+  const [continueWithAssumptions, setContinueWithAssumptions] = useState(false);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
+  const [retryTick, setRetryTick] = useState(0);
 
   const profileComplete = isProfileRecordComplete(profileRepo.loadProfile());
   const storedQuestion = askRepo.loadQuestion();
@@ -151,6 +170,59 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
   }, [authed, profileComplete, hasQuestion, lang, askRepo, profileRepo]);
 
   useQueuedEffect(() => {
+    if (!authed || !profileComplete || !hasQuestion || !questionText) return;
+
+    const controller = new AbortController();
+    let cancelled = false;
+
+    setDecisionLoading(true);
+    setDecisionError(null);
+    setLoadingStage('Framing your decision');
+
+    void (async () => {
+      try {
+        setLoadingStage('Applying your intelligence profile');
+        setLoadingStage('Checking timing context');
+        setLoadingStage('Building your recommendation');
+        const out = await runAskDecision({
+          question: questionText,
+          profile: loadBirthProfile(),
+          locale: lang === 'fa' || lang === 'ar' || lang === 'ru' ? lang : 'en',
+          signal: controller.signal,
+          clarificationAnswer,
+          continueWithAssumptions,
+        });
+        if (cancelled) return;
+        setClarification(out.clarification);
+        setPendingClarification(out.pendingClarification);
+        setDecisionResult(out.result);
+      } catch {
+        if (!cancelled) {
+          setDecisionError(
+            'The decision briefing could not be completed. Your question is preserved — retry when ready.'
+          );
+        }
+      } finally {
+        if (!cancelled) setDecisionLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [
+    authed,
+    profileComplete,
+    hasQuestion,
+    questionText,
+    lang,
+    clarificationAnswer,
+    continueWithAssumptions,
+    retryTick,
+  ]);
+
+  useQueuedEffect(() => {
     if (!authed || initRef.current) return;
 
     if (!profileComplete) {
@@ -207,7 +279,7 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6" data-ftue-screen="result" data-lang={lang}>
+    <div className="max-w-5xl mx-auto px-4 py-6" data-ftue-screen="result" data-lang={lang}>
       <header className="mb-6">
         <p className="fi text-xs uppercase tracking-widest text-amber-400/80 mb-2">{c.step}</p>
         <h1 className="fc text-2xl tracking-wide text-white mb-2">{c.title}</h1>
@@ -219,6 +291,37 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
         </h2>
         <p className="fi text-sm text-white/85 leading-relaxed">{questionText}</p>
       </section>
+
+      <AskDecisionView
+        result={decisionResult}
+        loading={decisionLoading}
+        loadingStage={loadingStage}
+        clarification={clarification}
+        pendingClarification={pendingClarification}
+        error={decisionError}
+        profileMissing={!getPersonalIntelligenceProfile()}
+        onClarify={(answer) => {
+          setClarificationAnswer(answer);
+          setContinueWithAssumptions(false);
+          setPendingClarification(false);
+        }}
+        onContinueWithAssumptions={() => {
+          setContinueWithAssumptions(true);
+          setPendingClarification(false);
+        }}
+        onRetry={() => setRetryTick((n) => n + 1)}
+        onFollowUp={(q) => {
+          askRepo.saveQuestion({
+            submitted_at: Date.now(),
+            source: 'typed',
+            text: q,
+          });
+          setClarificationAnswer(null);
+          setContinueWithAssumptions(false);
+          setRetryTick((n) => n + 1);
+          router.push('/result');
+        }}
+      />
 
       <section
         className="mb-5 flex flex-col items-center"
@@ -242,12 +345,17 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
         )}
       </section>
 
-      <GlassCard className="w-full p-5 mb-5" eyebrow={c.insightEyebrow}>
-        <p className="fi text-sm text-white/80 leading-relaxed">{c.insightBody}</p>
-      </GlassCard>
-
-      <p className="fi text-xs text-white/40 text-center leading-relaxed mb-4 px-2">
+      {/* FTUE preview note retained for onboarding continuity; DI is the primary answer. */}
+      <p
+        className="fi text-xs text-white/40 text-center leading-relaxed mb-4 px-2"
+        data-testid="result-preview-note"
+      >
+        <span className="block text-white/50 mb-1">{c.insightEyebrow}</span>
         {c.previewNote}
+      </p>
+      {/* Keep insight body for FTUE share/regression compatibility; DI is the primary answer. */}
+      <p className="sr-only" data-testid="result-insight-legacy">
+        {c.insightBody}
       </p>
 
       <button

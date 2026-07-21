@@ -11,6 +11,8 @@ import {
   getProfileRepository,
   isProfileRecordComplete,
 } from '@/lib/profile';
+import { detectIntent } from '@/lib/ask-decision';
+import { getAskProfileContext } from '@/lib/intelligence-profile';
 import {
   findGuidedQuestion,
   getAllQuestionCategories,
@@ -25,6 +27,15 @@ import { useQueuedEffect } from '@/lib/use-queued-effect';
 const MAX_CHARS = 500;
 const QUESTION_CATEGORIES = getAllQuestionCategories();
 const DEFAULT_CATEGORY_ID = QUESTION_CATEGORIES[0]?.id ?? 'career-work';
+
+const EXAMPLE_PROMPTS = [
+  'Should I accept this job offer?',
+  'Is this a good week to negotiate?',
+  'Should I wait before launching?',
+  'How should I handle this relationship conflict?',
+  'Is moving now better than waiting?',
+  'What should I prioritise this month?',
+];
 
 function askSubmittedAt(): number {
   return Date.now();
@@ -144,6 +155,8 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
   }
 
   const charCount = question.length;
+  const askIntel = getAskProfileContext();
+  const liveIntent = trimmed ? detectIntent(trimmed).primaryIntent : null;
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6" data-ftue-screen="ask" data-lang={lang}>
@@ -151,7 +164,43 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
         <p className="fi text-xs uppercase tracking-widest text-amber-400/80 mb-2">{c.step}</p>
         <h1 className="fc text-2xl tracking-wide text-white mb-2">{c.title}</h1>
         <p className="fi text-sm text-white/60 leading-relaxed">{c.sub}</p>
+        <p className="fi text-xs text-white/45 mt-2">
+          Ask turns your question into structured decision intelligence — recommendation, scores, timing, and next actions.
+        </p>
+        {askIntel ? (
+          <p
+            className="fi text-xs text-[#93B4FF] mt-3"
+            data-testid="ask-decision-style"
+          >
+            Decision style: {askIntel.decisionStyles.join(' · ')}
+          </p>
+        ) : null}
+        {liveIntent ? (
+          <p
+            className="fi text-xs text-white/55 mt-2"
+            data-testid="ask-live-intent"
+          >
+            Detected intent: <span className="text-[#93B4FF]">{liveIntent}</span>
+          </p>
+        ) : null}
       </header>
+
+      <div className="mb-4 flex flex-wrap gap-2" data-testid="ask-example-prompts">
+        {EXAMPLE_PROMPTS.map((example) => (
+          <button
+            key={example}
+            type="button"
+            onClick={() => {
+              markStarted();
+              setSelectedSuggestionId(null);
+              setTypedQuestion(example);
+            }}
+            className="ask-chip fi text-xs px-3 py-1.5 rounded-full border border-white/10 text-white/60 hover:text-white hover:border-amber-400/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+          >
+            {example}
+          </button>
+        ))}
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         <div>
@@ -224,7 +273,8 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
         <button
           type="submit"
           disabled={!canSubmit}
-          className="ask-submit w-full fc py-3.5 rounded-xl text-sm font-medium tracking-wide disabled:opacity-40 disabled:cursor-not-allowed"
+          aria-busy={false}
+          className="ask-submit w-full fc py-3.5 rounded-xl text-sm font-medium tracking-wide disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
           style={{
             background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
             color: '#0a0a0a',

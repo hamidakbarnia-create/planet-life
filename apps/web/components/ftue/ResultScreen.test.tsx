@@ -19,6 +19,171 @@ import type { DecisionEngineResponse } from '@/lib/decision-engine-facade';
 const replace = vi.fn();
 const push = vi.fn();
 
+const { runAskDecisionMock } = vi.hoisted(() => {
+  const mockAskDecisionResult = {
+    schemaVersion: '3.0.0',
+    intent: {
+      primaryIntent: 'career' as const,
+      secondaryIntent: null,
+      confidence: 70,
+      rationale: 'Career cues',
+      detectedEntities: [] as string[],
+      decisionPresent: true,
+      timingRelevant: true,
+      peopleRelevant: false,
+      financialImpactLikely: false,
+      highStakesFlag: false,
+    },
+    decisionFrame: {
+      originalQuestion: 'What should I focus on in my career this week?',
+      decisionStatement: 'What should I focus on in my career this week?',
+      decisionType: 'career' as const,
+      objective: 'Identify focus',
+      mainConcern: 'Unknown',
+      options: [] as string[],
+      urgency: 'high' as const,
+      timeHorizon: 'days' as const,
+      reversibility: 'Unknown',
+      affectedAreas: ['career'],
+      unknowns: [] as string[],
+      assumptions: [] as string[],
+      requiresClarification: false,
+    },
+    executiveSummary:
+      'Decision: career focus this week. Recommendation: proceed with caution. Caution: scatter. Next: write one priority.',
+    recommendation: 'Stage the career focus with one reversible priority.',
+    recommendationStatus: 'proceed-with-caution' as const,
+    scores: {
+      opportunity: { value: 64, rationale: 'Constructive' },
+      risk: { value: 42, rationale: 'Contained' },
+      timing: { value: 60, rationale: 'Supportive' },
+      readiness: { value: 61, rationale: 'Ready' },
+      confidence: { value: 58, rationale: 'Moderate' },
+    },
+    analysis: [
+      { id: 'situation' as const, title: 'Situation', body: 'Career focus.' },
+      { id: 'factors' as const, title: 'Main Factors', body: 'Priorities.' },
+      { id: 'opportunities' as const, title: 'Opportunities', body: 'Clarity.' },
+      { id: 'risks' as const, title: 'Risks', body: 'Scatter.' },
+      { id: 'tradeoffs' as const, title: 'Trade-offs', body: 'Breadth vs depth.' },
+      { id: 'personal-fit' as const, title: 'Personal Fit', body: 'Fits style.' },
+      { id: 'what-could-change' as const, title: 'What Could Change', body: 'New constraint.' },
+      { id: 'why' as const, title: 'Why', body: 'Pick one lever.' },
+    ],
+    timing: {
+      applicable: true,
+      available: true,
+      today: { label: 'Today', dateRange: '2026-07-20', score: 60, note: 'ok' },
+      next7Days: {
+        label: 'Week',
+        dateRange: '2026-07-20 → 2026-07-26',
+        score: 58,
+        note: 'ok',
+      },
+      next30Days: {
+        label: 'Month',
+        dateRange: '2026-07-20 → 2026-08-16',
+        score: 70,
+        note: 'ok',
+      },
+      bestWindow: {
+        label: 'Best',
+        dateRange: '2026-07-20 → 2026-07-26',
+        score: 58,
+        note: 'ok',
+      },
+      cautionWindow: { label: 'Avoid', dateRange: '2026-07-22', score: 30, note: 'low' },
+      timingRationale: 'Prefer supportive windows.',
+      timingConfidence: 'medium' as const,
+    },
+    scenarios: {
+      bestCase: {
+        outcome: 'Clear focus',
+        likelihoodBand: 'medium' as const,
+        keyConditions: ['One lever'],
+        earlySignals: ['Progress'],
+        mitigation: 'Protect time',
+      },
+      mostLikely: {
+        outcome: 'Partial progress',
+        likelihoodBand: 'high' as const,
+        keyConditions: ['Mixed'],
+        earlySignals: ['Drift'],
+        mitigation: 'Weekly review',
+      },
+      downsideCase: {
+        outcome: 'Scatter',
+        likelihoodBand: 'low' as const,
+        keyConditions: ['No owner'],
+        earlySignals: ['Context switch'],
+        mitigation: 'Batch',
+      },
+    },
+    actionPlan: {
+      now: [
+        {
+          action: 'Write one priority.',
+          purpose: 'Clarity',
+          priority: 'high' as const,
+          completionSignal: 'Written',
+        },
+      ],
+      next7Days: [
+        {
+          action: 'Schedule the decisive step.',
+          purpose: 'Execute',
+          priority: 'high' as const,
+          completionSignal: 'Scheduled',
+        },
+      ],
+      next30Days: [
+        {
+          action: 'Review progress.',
+          purpose: 'Validate',
+          priority: 'medium' as const,
+          completionSignal: 'Reviewed',
+        },
+      ],
+    },
+    alternatives: [],
+    assumptions: ['Week horizon as stated'],
+    confidence: {
+      level: 'medium' as const,
+      score: 58,
+      explanation: 'Proceed with staged moves.',
+      missingInputs: [] as string[],
+      limitingFactors: ['Not predictive'],
+    },
+    limitations: ['Comparative only'],
+    relatedModules: [
+      {
+        module: 'pathfinder' as const,
+        reason: 'Deeper workflow',
+        actionLabel: 'Open Pathfinder',
+        route: '/pathfinder',
+      },
+    ],
+    followUpQuestions: [
+      'What would make this a no?',
+      'Who must agree?',
+      'What proves progress?',
+    ],
+    safetyNotice: null,
+    generatedAt: '2026-07-20T12:00:00.000Z',
+  };
+  return {
+    runAskDecisionMock: vi.fn(async () => ({
+      result: mockAskDecisionResult,
+      clarification: {
+        required: false,
+        question: null,
+        canContinueWithAssumptions: true,
+      },
+      pendingClarification: false,
+    })),
+  };
+});
+
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace, push }),
 }));
@@ -28,6 +193,14 @@ vi.mock('@/lib/chart-api', async (importOriginal) => {
   return {
     ...actual,
     fetchValidatedResultChart: vi.fn(),
+  };
+});
+
+vi.mock('@/lib/ask-decision', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/ask-decision')>();
+  return {
+    ...actual,
+    runAskDecision: runAskDecisionMock,
   };
 });
 
@@ -150,16 +323,15 @@ describe('ResultScreen', () => {
     expect(queue).toContain('ftue.result.missing_question');
   });
 
-  it('displays the static insight text', async () => {
+  it('displays structured decision intelligence instead of a generic chat answer', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     getAskQuestionRepository().saveQuestion(sampleQuestion);
     renderResult('en');
 
-    expect(
-      await screen.findByText(
-        /today is best used for clarity, prioritization, and one deliberate action/i
-      )
-    ).toBeTruthy();
+    expect(await screen.findByTestId('ask-decision-engine')).toBeTruthy();
+    expect(screen.getByTestId('ask-recommendation-status')).toBeTruthy();
+    // Legacy insight retained for share/FTUE compatibility but not as the main answer surface.
+    expect(screen.getByTestId('result-insight-legacy')).toBeTruthy();
   });
 
   it('marks FTUE complete and navigates to /home on completion', async () => {
@@ -490,13 +662,9 @@ describe('ResultScreen', () => {
     await Promise.resolve();
 
     // A) Visible output unchanged — API summary never rendered.
-    expect(screen.getByText(GUIDED_DISPLAY_TEXT)).toBeTruthy();
+    expect(screen.getAllByText(GUIDED_DISPLAY_TEXT).length).toBeGreaterThan(0);
     expect(screen.getByText(/early preview/i)).toBeTruthy();
-    expect(
-      screen.getByText(
-        /today is best used for clarity, prioritization, and one deliberate action/i
-      )
-    ).toBeTruthy();
+    expect(screen.getByTestId('result-insight-legacy')).toBeTruthy();
     expect(document.querySelector('[data-result-chart="empty"]')).toBeTruthy();
     expect(screen.queryByText(UNIQUE_API_SUMMARY)).toBeNull();
 
@@ -507,6 +675,17 @@ describe('ResultScreen', () => {
     // C) Repositories untouched after fixture setup.
     expect(profileSaveSpy).not.toHaveBeenCalled();
     expect(questionSaveSpy).not.toHaveBeenCalled();
+  });
+
+  it('renders Ask Decision Intelligence cards for a stored question', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    getAskQuestionRepository().saveQuestion(sampleQuestion);
+    renderResult('en');
+
+    expect(await screen.findByTestId('ask-decision-engine')).toBeTruthy();
+    expect(screen.getByTestId('ask-detected-intent').textContent).toBe('career');
+    expect(screen.getByTestId('ask-score-opportunity')).toBeTruthy();
+    expect(screen.getByTestId('ask-confidence-level').textContent).toMatch(/medium/i);
   });
 
   it('does not call the Decision API for typed questions', async () => {
