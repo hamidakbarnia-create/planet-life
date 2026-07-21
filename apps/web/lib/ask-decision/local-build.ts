@@ -1,6 +1,7 @@
 /** Local structured builders used for repair + no-model fallback. */
 
 import type { AppLang } from '@/lib/app-settings';
+import { formatLocalizedStyleList } from '@/lib/intelligence/intelligence-copy';
 import { askCopy } from './ask-local-copy';
 import {
   localizeFrameHorizon,
@@ -146,7 +147,11 @@ export function buildLocalAnalysis(
       title: askCopy(locale, 'analysis.personalFit.title'),
       body: usedProfile
         ? askCopy(locale, 'analysis.personalFit.body.withProfile', {
-            styles: decisionStyles.slice(0, 3).join(', ') || 'available',
+            styles: formatLocalizedStyleList(
+              decisionStyles,
+              locale as AppLang,
+              (key) => askCopy(locale, key)
+            ),
           })
         : askCopy(locale, 'analysis.personalFit.body.withoutProfile'),
     },

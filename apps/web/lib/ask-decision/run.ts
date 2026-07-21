@@ -86,7 +86,7 @@ export async function runAskDecision(
 
   const intent = detectIntent(question);
   const frameBase = frameDecision(question, intent);
-  const clarification = evaluateClarification(frameBase, intent);
+  const clarification = evaluateClarification(frameBase, intent, locale);
 
   if (
     clarification.required &&
@@ -144,7 +144,10 @@ export async function runAskDecision(
 
   if (input.clarificationAnswer?.trim()) {
     frame.unknowns = frame.unknowns.filter((u) => !/subject|options|deadline/i.test(u));
-    frame.decisionStatement = `${frame.decisionStatement} — Clarification: ${input.clarificationAnswer.trim().slice(0, 120)}`;
+    frame.decisionStatement = askCopy(locale, 'run.clarification.frameSuffix', {
+      decision: frame.decisionStatement,
+      answer: input.clarificationAnswer.trim().slice(0, 120),
+    });
   }
 
   const context = collectAskContext(input.profile, { locale, intent });

@@ -246,6 +246,10 @@ const EN: CopyTable = {
     'One clarification will improve this briefing.',
   'run.clarification.executiveSummary':
     'This question needs one clarification before a responsible recommendation. Answer the prompt or continue with stated assumptions.',
+  'run.clarification.frameSuffix': '{decision} — Clarification: {answer}',
+  'analysis.personalFit.styles.available': 'available',
+  'analysis.personalFit.styles.listSep': ', ',
+  'analysis.personalFit.styles.listAnd': ' and ',
 
   // Safe language failure
   'safe.languageFailure':
@@ -309,7 +313,7 @@ const FA: CopyTable = {
     'اقدام اکنون سرعت را با اطلاعات ناقص ({horizon}) مبادله می‌کند. انتظار وضوح را با احتمال از دست دادن زمان مبادله می‌کند.',
   'analysis.personalFit.title': 'تناسب شخصی',
   'analysis.personalFit.body.withProfile':
-    'سیگنال‌های سبک تصمیم ({styles}) پیشنهاد می‌کند گام‌های برگشت‌ناپذیر را پس از آزمایش برگشت‌پذیر دنباله کنید.',
+    'سبک تصمیم‌گیری {styles} پیشنهاد می‌کند گام‌های برگشت‌ناپذیر را پس از یک آزمایش برگشت‌پذیر دنبال کنید.',
   'analysis.personalFit.body.withoutProfile':
     'پروفایل هوش شخصی در دسترس نیست — از بهداشت عمومی تصمیم استفاده می‌شود. تکمیل پروفایل تناسب شخصی را بهبود می‌دهد.',
   'analysis.whatCouldChange.title': 'چه چیزی می‌تواند توصیه را تغییر دهد',
@@ -473,6 +477,10 @@ const FA: CopyTable = {
     'یک توضیح تکمیلی کیفیت این خلاصه را بهتر می‌کند.',
   'run.clarification.executiveSummary':
     'این پرسش قبل از یک توصیه مسئولانه به یک توضیح نیاز دارد. به پرسش پاسخ دهید یا با فرضیات بیان‌شده ادامه دهید.',
+  'run.clarification.frameSuffix': '{decision} — توضیح: {answer}',
+  'analysis.personalFit.styles.available': 'در دسترس',
+  'analysis.personalFit.styles.listSep': '، ',
+  'analysis.personalFit.styles.listAnd': ' و ',
 
   'safe.languageFailure':
     'نتوانستیم این خلاصه را به زبان انتخابی شما ارائه دهیم. لطفاً دوباره تلاش کنید.',
@@ -536,7 +544,7 @@ const AR: CopyTable = {
     'التصرّف الآن يقايض السرعة بمعلومات ناقصة ({horizon}). الانتظار يقايض الوضوح باحتمال فقدان التوقيت.',
   'analysis.personalFit.title': 'الملاءمة الشخصية',
   'analysis.personalFit.body.withProfile':
-    'إشارات أسلوب القرار ({styles}) تقترح تسلسل الخطوات غير القابلة للرجوع بعد تجربة قابلة للرجوع.',
+    'أسلوب القرار {styles} يقترح ترتيب الخطوات غير القابلة للرجوع بعد تجربة قابلة للرجوع.',
   'analysis.personalFit.body.withoutProfile':
     'ملف الذكاء الشخصي غير متاح — نستخدم نظافة قرار عامة. إكمال ملفك يحسّن الملاءمة الشخصية.',
   'analysis.whatCouldChange.title': 'ما الذي قد يغيّر التوصية',
@@ -700,6 +708,10 @@ const AR: CopyTable = {
     'توضيح واحد سيحسّن هذا الملخص.',
   'run.clarification.executiveSummary':
     'يحتاج هذا السؤال إلى توضيح واحد قبل توصية مسؤولة. أجب عن الموجه أو تابع مع الافتراضات المذكورة.',
+  'run.clarification.frameSuffix': '{decision} — توضيح: {answer}',
+  'analysis.personalFit.styles.available': 'متاح',
+  'analysis.personalFit.styles.listSep': '، ',
+  'analysis.personalFit.styles.listAnd': ' و ',
 
   'safe.languageFailure':
     'تعذّر تقديم هذا الملخص بلغتك المحددة. يرجى إعادة المحاولة.',
@@ -763,7 +775,7 @@ const RU: CopyTable = {
     'Действие сейчас меняет скорость на неполную информацию ({horizon}). Ожидание меняет ясность на возможную потерю тайминга.',
   'analysis.personalFit.title': 'Личное соответствие',
   'analysis.personalFit.body.withProfile':
-    'Сигналы стиля решений ({styles}) предлагают ставить необратимые шаги после обратимого пилота.',
+    'Стиль решений ({styles}) предлагает ставить необратимые шаги после обратимого пилота.',
   'analysis.personalFit.body.withoutProfile':
     'Личный профиль интеллекта недоступен — используется общая гигиена решений. Заполнение профиля улучшает личное соответствие.',
   'analysis.whatCouldChange.title': 'Что может изменить рекомендацию',
@@ -928,6 +940,10 @@ const RU: CopyTable = {
     'Одно уточнение улучшит этот брифинг.',
   'run.clarification.executiveSummary':
     'Этому вопросу нужно одно уточнение перед ответственной рекомендацией. Ответьте на подсказку или продолжите с указанными допущениями.',
+  'run.clarification.frameSuffix': '{decision} — Уточнение: {answer}',
+  'analysis.personalFit.styles.available': 'доступно',
+  'analysis.personalFit.styles.listSep': ', ',
+  'analysis.personalFit.styles.listAnd': ' и ',
 
   'safe.languageFailure':
     'Не удалось предоставить этот брифинг на выбранном языке. Пожалуйста, повторите попытку.',

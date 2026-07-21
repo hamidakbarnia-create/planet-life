@@ -20,6 +20,7 @@ import {
   localizeTimeHorizon,
   localizeUrgency,
 } from '@/lib/decision-ui-i18n';
+import { localizeStyleTokensInText } from '@/lib/intelligence/intelligence-copy';
 
 function ScoreMeter({
   label,
@@ -254,7 +255,9 @@ export function AskDecisionView({
                     <h4 className="fc text-sm text-white">
                       {localizeAnalysisTitle(card.id, card.title, lang)}
                     </h4>
-                    <p className="fi text-sm text-white/75 leading-relaxed">{card.body}</p>
+                    <p className="fi text-sm text-white/75 leading-relaxed">
+                      {localizeStyleTokensInText(card.body, lang)}
+                    </p>
                   </GlassCard>
                 </div>
               ))}
