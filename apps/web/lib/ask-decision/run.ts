@@ -86,7 +86,7 @@ export async function runAskDecision(
 
   const intent = detectIntent(question);
   const frameBase = frameDecision(question, intent);
-  const clarification = evaluateClarification(frameBase, intent, locale);
+  const clarification = evaluateClarification(frameBase, intent);
 
   if (
     clarification.required &&
