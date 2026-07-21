@@ -114,7 +114,8 @@ describe('decision-style token localization', () => {
   );
 
   it('uses expected Persian / Arabic / Russian labels', () => {
-    expect(localizeStyleToken('analytical', 'fa')).toBe('تحلیلی');
+    expect(localizeStyleToken('analytical', 'fa')).toBe('تحلیل‌محور');
+    expect(localizeStyleToken('collaborative', 'fa')).toBe('مشارکت‌گرا');
     expect(localizeStyleToken('execution-focused', 'fa')).toBe('نتیجه‌محور');
     expect(localizeStyleToken('analytical', 'ar')).toBe('تحليلي');
     expect(localizeStyleToken('execution-focused', 'ar')).toMatch(/تنفيذ/);
@@ -150,7 +151,7 @@ describe('decision-style token localization', () => {
       'fa',
       (key) => askCopy('fa', key)
     );
-    expect(fa).toContain('تحلیلی');
+    expect(fa).toContain('تحلیل‌محور');
     expect(fa).toContain('نتیجه‌محور');
     expect(fa).toContain(' و ');
     expect(fa).not.toMatch(/analytical|execution-focused/i);
@@ -161,7 +162,7 @@ describe('decision-style token localization', () => {
       'signals (analytical, execution-focused) matter',
       'fa'
     );
-    expect(scrubbed).toContain('تحلیلی');
+    expect(scrubbed).toContain('تحلیل‌محور');
     expect(scrubbed).toContain('نتیجه‌محور');
     expect(scrubbed).not.toMatch(/analytical|execution-focused/i);
   });

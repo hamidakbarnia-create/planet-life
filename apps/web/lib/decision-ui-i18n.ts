@@ -225,7 +225,7 @@ export const DECISION_UI: Record<AppLang, DecisionUiCopy> = {
     outOf100: 'از ۱۰۰',
     recommendationStatusAria: 'وضعیت توصیه',
     askIntro:
-      'پرسش، سؤال شما را به هوش تصمیم‌گیری ساخت‌یافته تبدیل می‌کند — توصیه، امتیاز، زمان‌بندی و اقدامات بعدی.',
+      'Ask سؤال شما را به هوش تصمیم ساخت‌یافته تبدیل می‌کند — توصیه، امتیازها، زمان‌بندی و اقدامات بعدی.',
     decisionStyle: 'سبک تصمیم‌گیری',
     detectedIntent: 'قصد شناسایی‌شده',
     examplePrompts: [

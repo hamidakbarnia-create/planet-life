@@ -12,9 +12,11 @@ import {
   isProfileRecordComplete,
 } from '@/lib/profile';
 import { detectIntent } from '@/lib/ask-decision';
-import { getDecisionUi } from '@/lib/decision-ui-i18n';
+import {
+  getDecisionUi,
+  localizeIntent,
+} from '@/lib/decision-ui-i18n';
 import { getAskProfileContext } from '@/lib/intelligence-profile';
-import { localizeStyleToken } from '@/lib/intelligence/intelligence-copy';
 import {
   findGuidedQuestion,
   getAllQuestionCategories,
@@ -29,15 +31,6 @@ import { useQueuedEffect } from '@/lib/use-queued-effect';
 const MAX_CHARS = 500;
 const QUESTION_CATEGORIES = getAllQuestionCategories();
 const DEFAULT_CATEGORY_ID = QUESTION_CATEGORIES[0]?.id ?? 'career-work';
-
-const EXAMPLE_PROMPTS = [
-  'Should I accept this job offer?',
-  'Is this a good week to negotiate?',
-  'Should I wait before launching?',
-  'How should I handle this relationship conflict?',
-  'Is moving now better than waiting?',
-  'What should I prioritise this month?',
-];
 
 function askSubmittedAt(): number {
   return Date.now();
@@ -159,9 +152,9 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
   const charCount = question.length;
   const askIntel = getAskProfileContext();
   const decisionUi = getDecisionUi(lang);
-  const localizedDecisionStyles = askIntel
-    ? askIntel.decisionStyles.map((s) => localizeStyleToken(s, lang))
-    : [];
+  // Decision-style tags stay as standard English labels (Analytical · Cautious …);
+  // only the section title follows locale. getAskProfileContext already Title-Cases IDs.
+  const decisionStyleTags = askIntel?.decisionStyles ?? [];
   const liveIntent = trimmed ? detectIntent(trimmed).primaryIntent : null;
 
   return (
@@ -170,15 +163,13 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
         <p className="fi text-xs uppercase tracking-widest text-amber-400/80 mb-2">{c.step}</p>
         <h1 className="fc text-2xl tracking-wide text-white mb-2">{c.title}</h1>
         <p className="fi text-sm text-white/60 leading-relaxed">{c.sub}</p>
-        <p className="fi text-xs text-white/45 mt-2">
-          Ask turns your question into structured decision intelligence — recommendation, scores, timing, and next actions.
-        </p>
-        {localizedDecisionStyles.length > 0 ? (
+        <p className="fi text-xs text-white/45 mt-2">{decisionUi.askIntro}</p>
+        {decisionStyleTags.length > 0 ? (
           <p
             className="fi text-xs text-[#93B4FF] mt-3"
             data-testid="ask-decision-style"
           >
-            {decisionUi.decisionStyle}: {localizedDecisionStyles.join(' · ')}
+            {decisionUi.decisionStyle}: {decisionStyleTags.join(' · ')}
           </p>
         ) : null}
         {liveIntent ? (
@@ -186,13 +177,16 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
             className="fi text-xs text-white/55 mt-2"
             data-testid="ask-live-intent"
           >
-            Detected intent: <span className="text-[#93B4FF]">{liveIntent}</span>
+            {decisionUi.detectedIntent}:{' '}
+            <span className="text-[#93B4FF]">
+              {localizeIntent(liveIntent, lang)}
+            </span>
           </p>
         ) : null}
       </header>
 
       <div className="mb-4 flex flex-wrap gap-2" data-testid="ask-example-prompts">
-        {EXAMPLE_PROMPTS.map((example) => (
+        {decisionUi.examplePrompts.map((example) => (
           <button
             key={example}
             type="button"

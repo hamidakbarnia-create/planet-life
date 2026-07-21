@@ -233,6 +233,26 @@ describe('AskScreen', () => {
     expect(screen.getByRole('tab', { name: /عشق و افراد/i })).toBeTruthy();
   });
 
+  it('localizes Ask intro, example chips, and keeps English decision-style tags for fa', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('fa');
+
+    expect(
+      await screen.findByText(
+        /Ask سؤال شما را به هوش تصمیم ساخت‌یافته تبدیل می‌کند/
+      )
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: /آیا باید این پیشنهاد شغلی را بپذیرم؟/ })
+    ).toBeTruthy();
+    expect(
+      screen.queryByText(/Ask turns your question into structured decision intelligence/i)
+    ).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: /Should I accept this job offer/i })
+    ).toBeNull();
+  });
+
   it('updates question labels when parent passes a new locale', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     const { rerender } = renderAsk('en');
