@@ -577,7 +577,7 @@ const FA: CopyTable = {
 
 const AR: CopyTable = {
   'frame.unknown.timeHorizon': 'الأفق الزمني غير مذكور',
-  'frame.unknown.options': 'الخيارات الصريحة غير مذكورة',
+  'frame.unknown.options': 'الخيارات الواضحة ما زالت ناقصة',
   'frame.unknown.decisionVerb': 'فعل القرار غير واضح',
   'frame.unknown.mainConcern': 'ما زال القلق الأساسي غير واضح',
   'frame.assumption.timingFlexible': 'نتعامل مع التوقيت بمرونة ما لم يُوضَّح خلاف ذلك',
@@ -852,7 +852,7 @@ const AR: CopyTable = {
 
 const RU: CopyTable = {
   'frame.unknown.timeHorizon': 'Временной горизонт не указан',
-  'frame.unknown.options': 'Явные варианты не указаны',
+  'frame.unknown.options': 'явные варианты всё ещё не указаны',
   'frame.unknown.decisionVerb': 'Глагол решения неясен',
   'frame.unknown.mainConcern': 'главное опасение всё ещё неясно',
   'frame.assumption.timingFlexible': 'Считаем тайминг гибким, пока не уточнено иное',

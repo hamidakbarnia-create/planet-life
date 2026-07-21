@@ -150,6 +150,15 @@ const SCAFFOLD_ENTRIES: Array<{ match: RegExp; map: LocaleMap }> = [
       ru: 'Что ещё неясно: ',
     },
   },
+  {
+    match: /Financial or resource exposure \(inferred\)/gi,
+    map: {
+      en: 'financial or resource exposure (inferred)',
+      fa: 'ریسک پول یا منابع',
+      ar: 'تعرّض مالي أو للموارد (مستنتج)',
+      ru: 'Финансовое или ресурсное воздействие (выведено)',
+    },
+  },
 ];
 
 /**
