@@ -2,7 +2,7 @@ import type { AskDecisionResult } from '@/lib/ask-decision';
 import { ASK_DECISION_SCHEMA_VERSION } from '@/lib/ask-decision';
 
 /** English provider payload matching staging Decision Result defects. */
-export const englishProviderResult: AskDecisionResult = {
+export const englishProviderResult = {
   schemaVersion: ASK_DECISION_SCHEMA_VERSION,
   intent: {
     primaryIntent: 'business',
@@ -143,4 +143,4 @@ export const englishProviderResult: AskDecisionResult = {
     requestId: null,
     clarificationAnswer: null,
   },
-};
+} as AskDecisionResult;
