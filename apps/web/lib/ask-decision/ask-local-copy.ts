@@ -262,238 +262,239 @@ const EN: CopyTable = {
 };
 
 const FA: CopyTable = {
-  'frame.unknown.timeHorizon': 'افق زمانی بیان نشده است',
-  'frame.unknown.options': 'گزینه‌های صریح بیان نشده‌اند',
-  'frame.unknown.decisionVerb': 'فعل تصمیم مبهم است',
-  'frame.unknown.mainConcern': 'نگرانی اصلی به‌طور کامل بیان نشده است',
-  'frame.assumption.timingFlexible': 'زمان‌بندی انعطاف‌پذیر فرض می‌شود مگر خلاف آن روشن شود',
-  'frame.assumption.proceedWaitGather': 'به‌عنوان تصمیم پیش‌روی / صبر / جمع‌آوری اطلاعات چارچوب‌بندی می‌شود',
-  'frame.assumption.decisionSupport': 'پرسش به‌عنوان درخواست پشتیبانی تصمیم تفسیر می‌شود',
-  'frame.objective.default': 'شناسایی پراهرم‌ترین گام بعدی برای پرسش بیان‌شده',
-  'frame.objective.resolve': 'تصمیم‌گیری دربارهٔ پیش‌روی: {detail}',
-  'frame.concern.unstated': 'نگرانی اصلی به‌طور کامل بیان نشده است',
-  'frame.concern.downside': 'نگرانی بیان‌شده دربارهٔ ریسک یا پشیمانی',
-  'frame.concern.financial': 'در معرض منابع یا مال (استنباط‌شده)',
-  'frame.concern.people': 'تأثیر بر افراد (استنباط‌شده)',
-  'frame.reversibility.unknown': 'نامشخص — برگشت‌پذیری بیان نشده است',
-  'frame.reversibility.low': 'کم — زبان به نتایج سخت‌برگشت‌پذیر اشاره دارد',
-  'frame.reversibility.high': 'بالا — چارچوب آزمایشی یا برگشت‌پذیر حاضر است',
+  'frame.unknown.timeHorizon': 'هنوز زمان دقیق مشخص نیست',
+  'frame.unknown.options': 'گزینه‌های روشن هنوز معلوم نیست',
+  'frame.unknown.decisionVerb': 'هنوز معلوم نیست دقیقاً چه کاری می‌خواهید بکنید',
+  'frame.unknown.mainConcern': 'هنوز نگفته‌اید بزرگ‌ترین نگرانی‌تان چیست',
+  'frame.assumption.timingFlexible': 'فرض می‌کنیم زمان‌بندی‌تان انعطاف دارد، مگر خلافش را بگویید',
+  'frame.assumption.proceedWaitGather': 'این را به‌صورت «انجام بدم / صبر کنم / اول اطلاعات جمع کنم» می‌بینیم',
+  'frame.assumption.decisionSupport': 'پرسش را درخواست کمک برای تصمیم‌گیری می‌دانیم',
+  'frame.objective.default': 'پیدا کردن بهترین گام بعدی برای این سؤال',
+  'frame.objective.resolve': 'تصمیم دربارهٔ پیش رفتن با: {detail}',
+  'frame.concern.unstated': 'هنوز نگفته‌اید از چه می‌ترسید',
+  'frame.concern.downside': 'نگرانی از ضرر یا پشیمانی',
+  'frame.concern.financial': 'ریسک پول یا منابع',
+  'frame.concern.people': 'اثر روی افراد مهم',
+  'frame.reversibility.unknown': 'هنوز معلوم نیست چقدر قابل‌برگشت است',
+  'frame.reversibility.low': 'کم — برگشت از این تصمیم سخت به نظر می‌رسد',
+  'frame.reversibility.high': 'زیاد — می‌شود اول آزمایش کرد و بعد جدی شد',
   'frame.horizon.today': 'امروز',
-  'frame.horizon.days': 'روزها',
-  'frame.horizon.weeks': 'هفته‌ها',
-  'frame.horizon.months': 'ماه‌ها',
+  'frame.horizon.days': 'روزهای نزدیک',
+  'frame.horizon.weeks': 'هفته‌های آینده',
+  'frame.horizon.months': 'ماه‌های آینده',
   'frame.horizon.long-term': 'بلندمدت',
-  'frame.horizon.unknown': 'نامشخص',
+  'frame.horizon.unknown': 'هنوز مشخص نیست',
 
   'score.opportunity':
-    'فشار فرصت نسبی بر اساس چارچوب‌بندی و سیگنال‌های حوزه.',
-  'score.risk': 'ریسک بازتاب زبان ریسک، برگشت‌پذیری و حوزه است.',
-  'score.timing.available': 'امتیاز زمان‌بندی از پنجره‌های موتور زمان‌بندی موجود.',
+    'چقدر این موقعیت ارزش دنبال کردن دارد، نسبت به شرایط فعلی.',
+  'score.risk': 'چقدر احتمال ضرر، فشار یا پشیمانی در این انتخاب هست.',
+  'score.timing.available': 'امتیاز زمان‌بندی بر اساس پنجره‌های در دسترس.',
   'score.timing.provisional':
-    'زمان‌بندی موقت — زمان‌بندی زنده در دسترس نیست.',
+    'زمان‌بندی تقریبی است — دادهٔ زندهٔ زمان‌بندی نداریم.',
   'score.readiness.withProfile':
-    'آمادگی با در نظر گرفتن دسترس‌پذیری بافت تصمیم شخصی.',
+    'آمادگی شما با توجه به پروفایل تصمیم‌گیری‌تان.',
   'score.readiness.withoutProfile':
-    'آمادگی بدون پروفایل هوش شخصی محدود است.',
+    'بدون پروفایل کامل، آمادگی تقریبی برآورد شده.',
   'score.confidence':
-    'اطمینان وضوح، پروفایل، زمان‌بندی و بار فرضیات را دنبال می‌کند.',
+    'چقدر به این خلاصه مطمئنیم — بر اساس وضوح سؤال، پروفایل و زمان‌بندی.',
 
   'analysis.situation.title': 'وضعیت',
   'analysis.situation.body':
-    'شما تصمیم می‌گیرید: {decision}. نیت: {intent}. افق: {horizon}.',
+    'موضوع تصمیم‌تان این است: {decision}. تمرکز روی {intent} است و افق زمانی‌اش {horizon}.',
   'analysis.factors.title': 'عوامل اصلی',
   'analysis.factors.body':
-    'هدف: {objective}. نگرانی: {concern}. برگشت‌پذیری: {reversibility}.',
+    'هدفتان: {objective}. دغدغه‌تان: {concern}. میزان برگشت‌پذیری: {reversibility}.',
   'analysis.opportunities.title': 'فرصت‌ها',
   'analysis.opportunities.body.withOptions':
-    'گزینه‌های نام‌برده: {options}. گزینه‌ای را ترجیح دهید که هنگام یادگیری برگشت‌پذیر بماند.',
+    'گزینه‌هایی که مطرح شده: {options}. گزینه‌ای را انتخاب کنید که موقع یادگیری هنوز قابل‌برگشت بماند.',
   'analysis.opportunities.body.noOptions':
-    'فرصت در روشن کردن یک گام برگشت‌پذیر بعدی است که ناشناختهٔ اصلی را کاهش دهد.',
+    'بهترین فرصت همین حالا یک گام کوچک و قابل‌برگشت است که مهم‌ترین ابهام را کم کند.',
   'analysis.risks.title': 'ریسک‌ها',
   'analysis.risks.body':
-    'نگرانی اصلی: {concern}. ناشناخته‌ها: {unknowns}.',
-  'analysis.risks.noneListed': 'موردی فهرست نشده',
+    'اصلی‌ترین ریسک: {concern}. چیزهایی که هنوز روشن نیست: {unknowns}.',
+  'analysis.risks.noneListed': 'مورد خاصی ثبت نشده',
   'analysis.tradeoffs.title': 'بده‌بستان‌ها',
   'analysis.tradeoffs.body':
-    'اقدام اکنون سرعت را با اطلاعات ناقص ({horizon}) مبادله می‌کند. انتظار وضوح را با احتمال از دست دادن زمان مبادله می‌کند.',
+    'اگر الان اقدام کنید سریع‌تر جلو می‌روید، اما با اطلاعات ناقص ({horizon}). اگر صبر کنید دید بهتری می‌گیرید، ولی ممکن است زمان از دست برود.',
   'analysis.personalFit.title': 'تناسب شخصی',
   'analysis.personalFit.body.withProfile':
-    'سبک تصمیم‌گیری {styles} پیشنهاد می‌کند گام‌های برگشت‌ناپذیر را پس از یک آزمایش برگشت‌پذیر دنبال کنید.',
+    'با سبک {styles}، بهتر است اول یک آزمون کوچک و قابل‌برگشت انجام دهید؛ بعد سراغ تعهدهای جدی بروید.',
   'analysis.personalFit.body.withoutProfile':
-    'پروفایل هوش شخصی در دسترس نیست — از بهداشت عمومی تصمیم استفاده می‌شود. تکمیل پروفایل تناسب شخصی را بهبود می‌دهد.',
-  'analysis.whatCouldChange.title': 'چه چیزی می‌تواند توصیه را تغییر دهد',
+    'پروفایل شخصی هنوز کامل نیست — راهنمایی عمومی می‌دهیم. با تکمیل پروفایل، این بخش دقیق‌تر می‌شود.',
+  'analysis.whatCouldChange.title': 'چه چیزی توصیه را عوض می‌کند',
   'analysis.whatCouldChange.body.default':
-    'یک مهلت بیان‌شده، حد زیان، یا مجموعهٔ صریح گزینه‌ها این خلاصه را به‌طور معنادار تغییر می‌دهد.',
+    'اگر مهلت، سقف ضرر، یا گزینه‌های مشخص را بگویید، این راهنمایی خیلی دقیق‌تر می‌شود.',
   'analysis.why.title': 'چرا این توصیه',
 
   'action.now.writeDecision':
-    'تصمیم را در یک جمله بنویسید: «{decision}»',
-  'action.now.writeDecision.purpose': 'تصمیم را صریح کنید',
-  'action.now.writeDecision.signal': 'یک جملهٔ نوشته‌شدهٔ تصمیم وجود دارد',
+    'در یک جمله بنویسید دقیقاً چه تصمیمی می‌گیرید: «{decision}»',
+  'action.now.writeDecision.purpose': 'تصمیم را شفاف کنید',
+  'action.now.writeDecision.signal': 'یک جملهٔ روشن از تصمیم نوشته شده',
   'action.now.listFact':
-    'تنها حقیقتی را فهرست کنید که نظر شما را در هر دو جهت عوض می‌کند',
-  'action.now.listFact.purpose': 'ناشناختهٔ حیاتی را آشکار کنید',
-  'action.now.listFact.signal': 'حقیقت تغییردهندهٔ تصمیم نام برده شد',
+    'یک چیزی را بنویسید که اگر معلوم شود، نظرتان عوض می‌شود',
+  'action.now.listFact.purpose': 'مهم‌ترین ابهام را پیدا کنید',
+  'action.now.listFact.signal': 'همان حقیقتِ تغییردهندهٔ تصمیم مشخص شد',
   'action.now.identifyIrreversible':
-    'بخش برگشت‌ناپذیر این انتخاب را مشخص کنید',
-  'action.now.identifyIrreversible.purpose': 'از زیان محافظت کنید',
+    'مشخص کنید کدام بخش این کار دیگر قابل‌برگشت نیست',
+  'action.now.identifyIrreversible.purpose': 'از ضرر بزرگ محافظت کنید',
   'action.now.identifyIrreversible.signal':
-    'گام برگشت‌ناپذیر جدا از آزمایش‌ها نام برده شد',
+    'گام برگشت‌ناپذیر از آزمون‌های کوچک جدا نوشته شد',
 
   'action.week.scoreOptions':
-    'گزینه‌ها ({options}) را روی فرصت، ریسک و زمان‌بندی امتیاز دهید',
+    'گزینه‌ها ({options}) را از نظر فرصت، ریسک و زمان‌بندی با هم مقایسه کنید',
   'action.week.compareOptions':
-    'دو گزینهٔ مشخص را روی فرصت، ریسک و زمان‌بندی مقایسه کنید',
-  'action.week.scoreOptions.purpose': 'مجموعهٔ انتخاب قابل‌مقایسه بسازید',
-  'action.week.scoreOptions.signal': 'جدول امتیاز گزینه‌ها وجود دارد',
+    'دو گزینهٔ مشخص را از نظر فرصت، ریسک و زمان‌بندی کنار هم بگذارید',
+  'action.week.scoreOptions.purpose': 'انتخاب‌ها را قابل‌مقایسه کنید',
+  'action.week.scoreOptions.signal': 'جدول مقایسهٔ گزینه‌ها آماده است',
   'action.week.schedule':
-    'گفتگو یا بازبینی قطعی را در بهترین پنجرهٔ موجود زمان‌بندی کنید',
-  'action.week.schedule.purpose': 'اقدام را با زمان‌بندی هم‌راستا کنید',
-  'action.week.schedule.signal': 'رویداد تقویم ایجاد شد',
-  'action.week.addressConcern': 'نگرانی را رسیدگی کنید: {concern}',
-  'action.week.addressConcern.purpose': 'ریسک بیان‌شده را کاهش دهید',
-  'action.week.addressConcern.signal': 'یک گام کاهش ریسک انجام شد',
+    'گفتگو یا بازبینی مهم را در بهترین زمانی که دارید بگذارید',
+  'action.week.schedule.purpose': 'اقدام را با زمان مناسب هم‌راستا کنید',
+  'action.week.schedule.signal': 'زمان در تقویم ثبت شد',
+  'action.week.addressConcern': 'این نگرانی را جدی بگیرید: {concern}',
+  'action.week.addressConcern.purpose': 'ریسک اصلی را کم کنید',
+  'action.week.addressConcern.signal': 'یک قدم عملی برای کاهش ریسک برداشته شد',
 
   'action.month.checkpoint':
-    'یک نقطهٔ کنترل در برابر معیارهای موفقیت اجرا کنید',
-  'action.month.checkpoint.purpose': 'جهت را اعتبارسنجی کنید',
-  'action.month.checkpoint.signal': 'یادداشت بازبینی تاریخ‌دار وجود دارد',
+    'یک نقطهٔ کنترل بگذارید و ببینید به معیار موفقیت‌تان رسیده‌اید یا نه',
+  'action.month.checkpoint.purpose': 'مسیر را چک کنید',
+  'action.month.checkpoint.signal': 'یادداشت بازبینی با تاریخ دارید',
   'action.month.increaseCommitment':
-    'تعهد را فقط پس از موفقیت اولین نقطهٔ عطف برگشت‌پذیر افزایش دهید',
-  'action.month.increaseCommitment.purpose': 'برگشت‌ناپذیری را دنباله کنید',
+    'فقط بعد از موفقیت اولین آزمون کوچک، تعهد را بزرگ‌تر کنید',
+  'action.month.increaseCommitment.purpose': 'تعهد جدی را مرحله‌به‌مرحله جلو ببرید',
   'action.month.increaseCommitment.signal':
-    'نقطهٔ عطف قبل از تشدید کامل علامت‌گذاری شد',
+    'اولین نقطهٔ عطف قبل از تعهد کامل تیک خورده',
   'action.month.archive':
-    'آنچه نسبت به این توصیه تغییر کرد را بایگانی کنید',
-  'action.month.archive.purpose': 'تصمیم‌های آینده را بهبود دهید',
+    'بنویسید نسبت به این توصیه چه چیزی عوض شد',
+  'action.month.archive.purpose': 'تصمیم‌های بعدی‌تان را بهتر کنید',
   'action.month.archive.signal': 'گزارش تصمیم به‌روز شد',
 
   'scenario.best.outcome':
-    'با یک آزمایش برگشت‌پذیر پیش می‌روید و اختیار عمل را حفظ می‌کنید.',
-  'scenario.best.condition1': 'ناشناختهٔ حیاتی کاهش یافته',
-  'scenario.best.condition2': 'پنجرهٔ زمان‌بندی استفاده شده',
-  'scenario.best.signal1': 'مالک بعدی روشن',
-  'scenario.best.signal2': 'معیارهای موفقیت نوشته‌شده',
-  'scenario.best.mitigation': 'اولین گام را برگشت‌پذیر نگه دارید.',
+    'با یک آزمون کوچک جلو می‌روید و دستتان برای تغییر مسیر باز می‌ماند.',
+  'scenario.best.condition1': 'ابهام اصلی کمتر شده',
+  'scenario.best.condition2': 'از پنجرهٔ زمانی خوب استفاده شده',
+  'scenario.best.signal1': 'مسئول قدم بعدی مشخص است',
+  'scenario.best.signal2': 'معیار موفقیت نوشته شده',
+  'scenario.best.mitigation': 'اولین قدم را قابل‌برگشت نگه دارید.',
   'scenario.likely.outcome':
-    'پیشرفت جزئی با بده‌بستان‌هایی حول {concern}.',
-  'scenario.likely.condition1': 'کیفیت اطلاعات مختلط',
-  'scenario.likely.signal1': 'پاسخ‌های تأخیری',
-  'scenario.likely.signal2': 'خزش دامنه',
-  'scenario.likely.mitigation': 'جمع‌آوری اطلاعات را زمان‌محدود کنید.',
+    'کمی جلو می‌روید، ولی هنوز حول «{concern}» سبک‌سنگین می‌کنید.',
+  'scenario.likely.condition1': 'اطلاعات مخلوط و ناقص',
+  'scenario.likely.signal1': 'جواب‌ها دیر می‌رسد',
+  'scenario.likely.signal2': 'دامنهٔ کار بزرگ می‌شود',
+  'scenario.likely.mitigation': 'برای جمع‌آوری اطلاعات مهلت بگذارید.',
   'scenario.downside.outcome':
-    'یک حرکت برگشت‌ناپذیر قبل از دانستن حقایق کلیدی رخ می‌دهد.',
-  'scenario.downside.condition1': 'فوریت نقاط کنترل را دور می‌زند',
+    'قبل از دانستن نکات مهم، تعهد جدی می‌دهید و برگشت سخت می‌شود.',
+  'scenario.downside.condition1': 'عجله نقاط کنترل را رد می‌کند',
   'scenario.downside.signal1': 'فشار برای رد شدن از بازبینی',
   'scenario.downside.mitigation':
-    'آزمایش را از تعهد به‌صورت کتبی جدا کنید.',
+    'آزمون کوچک را از تعهد جدی جدا و مکتوب کنید.',
 
   'conf.aligned':
-    'سیگنال‌ها به‌اندازهٔ کافی هم‌راستا هستند تا با نقاط کنترل اقدام کنید.',
+    'سیگنال‌ها به‌اندازهٔ کافی هم‌راستا هستند؛ با نقطهٔ کنترل جلو بروید.',
   'conf.staged':
-    'با حرکت‌های مرحله‌ای پیش بروید؛ یک ورودی حیاتی دیگر اطمینان را بالا می‌برد.',
+    'قدم‌به‌قدم پیش بروید؛ یک اطلاعات مهم دیگر اطمینان را بالاتر می‌برد.',
   'conf.directional':
-    'این را جهت‌نما بدانید — قبل از گام‌های برگشت‌ناپذیر ورودی گمشده را جمع کنید.',
+    'این را جهت کلی بدانید — قبل از تعهد جدی، همان اطلاعات کم‌بوده را جمع کنید.',
   'conf.limit.comparative':
-    'فقط پشتیبانی نسبی تصمیم — نه پیش‌بینی.',
+    'این راهنمایی مقایسه‌ای است، نه پیش‌بینی قطعی.',
   'conf.limit.highStakes':
-    'حوزهٔ پرریسک — راهنمایی آموزشی محدود.',
+    'موضوع حساس است — راهنمایی محدود و آموزشی است.',
 
   'exec.decision': 'تصمیم: {decision}.',
   'exec.recommendation': 'توصیه: {status}.',
   'exec.caution': 'احتیاط: {concern}.',
-  'exec.next': 'بعدی: {next}.',
+  'exec.next': 'قدم بعدی: {next}.',
 
   'status.proceed': 'پیش بروید',
   'status.proceed-with-caution': 'با احتیاط پیش بروید',
-  'status.wait': 'منتظر بمانید',
-  'status.gather-more-information': 'اطلاعات بیشتری جمع کنید',
-  'status.avoid-for-now': 'فعلاً اجتناب کنید',
+  'status.wait': 'کمی صبر کنید',
+  'status.gather-more-information': 'اول اطلاعات بیشتری جمع کنید',
+  'status.avoid-for-now': 'فعلاً کنار بگذارید',
   'status.neutral': 'خنثی',
 
   'timing.notApplicable':
-    'مشاورهٔ زمان‌بندی برای این پرسش کاربرد ندارد.',
+    'برای این پرسش، زمان‌بندی خاصی لازم نیست.',
   'timing.unavailable':
-    'دادهٔ زمان‌بندی در دسترس نیست — پنجره‌ای ساخته نمی‌شود.',
+    'دادهٔ زمان‌بندی نداریم — پنجرهٔ زمانی ساخته نمی‌شود.',
   'timing.today': 'امروز',
   'timing.next7Days': '۷ روز آینده',
   'timing.next30Days': '۳۰ روز آینده',
   'timing.bestWindow': 'بهترین پنجره',
   'timing.cautionWindow': 'پنجرهٔ احتیاط',
   'timing.rationale':
-    'پنجره‌ها از امتیازهای روزانهٔ موتور زمان‌بندی موجود گرفته شده‌اند — نسبی، نه پیش‌بینانه.',
+    'این پنجره‌ها نسبی‌اند و از امتیازهای روزانه گرفته شده‌اند — پیش‌بینی قطعی نیستند.',
 
   'safety.health':
-    'فقط پشتیبانی آموزشی تصمیم — نه تشخیص یا برنامهٔ درمان. برای تصمیم‌های پزشکی با متخصص واجد شرایط مشورت کنید.',
+    'فقط راهنمایی تصمیم است — تشخیص یا درمان پزشکی نیست. برای موضوع پزشکی با متخصص مشورت کنید.',
   'safety.legal':
-    'فقط پشتیبانی آموزشی تصمیم — نه مشاورهٔ حقوقی. برای نتیجه‌گیری حقوقی با متخصص واجد شرایط مشورت کنید.',
+    'فقط راهنمایی تصمیم است — مشاورهٔ حقوقی نیست. برای نتیجهٔ حقوقی با متخصص مشورت کنید.',
   'safety.investment':
-    'فقط پشتیبانی آموزشی تصمیم — نه مشاورهٔ سرمایه‌گذاری. هیچ نتیجه‌ای تضمین نمی‌شود.',
+    'فقط راهنمایی تصمیم است — مشاورهٔ سرمایه‌گذاری نیست. هیچ نتیجه‌ای تضمین نمی‌شود.',
   'safety.highStakes':
-    'موضوع پرریسک — این را پشتیبانی محدود تصمیم بدانید، نه تضمین.',
+    'موضوع پرریسک است — این را کمک محدود برای فکر کردن بدانید، نه تضمین.',
 
   'fallback.recommendation':
-    'از چارچوب تصمیم عمومی استفاده کنید: گام برگشت‌ناپذیر را نام ببرید، به یک آزمایش برگشت‌پذیر کوچک کنید، و همان حقیقتی را که نظر شما را عوض می‌کند جمع کنید.',
+    'اول بنویسید چه چیزی برگشت‌ناپذیر است، بعد یک آزمون کوچک طراحی کنید، و همان یک حقیقتی را پیدا کنید که نظرتان را عوض می‌کند.',
   'fallback.providerUnavailable':
-    'مسیر ارائه‌دهنده در دسترس نیست ({reason}) — از چارچوب محلی ساخت‌یافته استفاده می‌شود.',
+    'پاسخ کامل مدل در دسترس نیست ({reason}) — از چارچوب محلی و شفاف استفاده می‌کنیم.',
   'fallback.reason.network': 'شبکه',
-  'fallback.reason.timeout': 'زمان‌تمام',
-  'fallback.reason.parse': 'تجزیه',
-  'fallback.reason.provider': 'ارائه‌دهنده',
+  'fallback.reason.timeout': 'اتمام زمان',
+  'fallback.reason.parse': 'خواندن پاسخ',
+  'fallback.reason.provider': 'سرویس',
   'fallback.reason.unknown': 'نامشخص',
   'fallback.lowConfidence':
-    'اطمینان پایین چون خلاصهٔ گفتگویی کامل نشد. با بازگشت اتصال دوباره تلاش کنید.',
+    'اطمینان پایین است چون خلاصهٔ گفتگو کامل نشد. وقتی اتصال برگشت، دوباره تلاش کنید.',
   'fallback.limit.structured':
-    'بازگشت ساخت‌یافته — نه بینش شخصی‌سازی‌شدهٔ مدل.',
-  'fallback.limit.retry': 'برای تولید مجدد خلاصهٔ کامل دوباره تلاش کنید.',
+    'این نسخهٔ ساخت‌یافته است — نه بینش کامل شخصی‌سازی‌شده.',
+  'fallback.limit.retry': 'برای گرفتن خلاصهٔ کامل‌تر دوباره تلاش کنید.',
   'fallback.followup.irreversible':
-    'کدام بخش این تصمیم برگشت‌ناپذیر است؟',
-  'fallback.followup.fact': 'کدام حقیقت واحد نظر شما را عوض می‌کند؟',
+    'کدام بخش این تصمیم دیگر قابل‌برگشت نیست؟',
+  'fallback.followup.fact': 'کدام یک حقیقت نظرتان را عوض می‌کند؟',
   'fallback.followup.reversible':
-    'کوچک‌ترین گام برگشت‌پذیر این هفته چیست؟',
+    'کوچک‌ترین گام قابل‌برگشت این هفته چیست؟',
 
   'parse.holdIrreversible':
-    'گام برگشت‌ناپذیر را تا کاهش ناشناختهٔ اصلی نگه دارید.',
-  'parse.gatherInput': 'قبل از تعهد، یک ورودی حیاتی جمع کنید.',
+    'تا وقتی ابهام اصلی کم نشده، سراغ تعهد جدی نروید.',
+  'parse.gatherInput':
+    'قبل از تصمیم نهایی، یک اطلاعات کلیدی کم دارید — همان را جمع کنید.',
   'parse.advancePilot':
-    'با یک آزمایش برگشت‌پذیر و نقاط کنترل روشن پیش بروید.',
-  'parse.nextStep': 'گام برگشت‌پذیر بعدی را تعریف کنید',
-  'parse.defineNextStep': 'گام بعدی را تعریف کنید',
-  'parse.advanceDecision': 'تصمیم را پیش ببرید',
-  'parse.stepCompleted': 'گام تکمیل شد',
-  'parse.relevantNext': 'گام بعدی مرتبط',
+    'با یک آزمون کوچک شروع کنید و از اول معیار موفقیت را روشن کنید.',
+  'parse.nextStep': 'قدم قابل‌برگشت بعدی را تعریف کنید',
+  'parse.defineNextStep': 'قدم بعدی را روشن کنید',
+  'parse.advanceDecision': 'تصمیم را جلو ببرید',
+  'parse.stepCompleted': 'قدم انجام شد',
+  'parse.relevantNext': 'قدم بعدی مرتبط',
   'parse.open': 'باز کردن',
   'parse.option': 'گزینه',
   'parse.limit.comparative': 'فقط پشتیبانی نسبی تصمیم.',
   'parse.limit.noProfile': 'پروفایل هوش شخصی در دسترس نیست.',
   'parse.limit.noTiming': 'زمان‌بندی زنده در دسترس نیست.',
-  'parse.alt.bestFor': 'وقتی این مسیر با خط قرمزهای شما هم‌خوان است',
-  'parse.alt.advantage': 'از یک گزینهٔ بیان‌شده استفاده می‌کند',
-  'parse.alt.disadvantage': 'هنوز نیاز به اعتبارسنجی دارد',
+  'parse.alt.bestFor': 'وقتی این مسیر با خط قرمزهای شما جور است',
+  'parse.alt.advantage': 'از یک گزینهٔ واقعی شما استفاده می‌کند',
+  'parse.alt.disadvantage': 'هنوز باید چک شود',
   'parse.alt.recommendationFit':
-    'قبل از قفل کردن در برابر نقاط کنترل مقایسه کنید',
+    'قبل از قفل کردن، با نقطهٔ کنترل مقایسه کنید',
   'parse.followup.no':
-    'چه چیزی «{decision}» را به‌روشنی رد می‌کند؟',
+    'چه چیزی «{decision}» را برایتان رد قطعی می‌کند؟',
   'parse.followup.downside':
-    'حداکثر زیانی که قبل از کناره‌گیری می‌پذیرید چیست؟',
+    'حداکثر ضرری که قبل از کنار کشیدن می‌پذیرید چیست؟',
   'parse.followup.stakeholder':
-    'کدام ذی‌نفع با مخالفت بیشترین تغییر را در نتیجه ایجاد می‌کند؟',
+    'مخالفت کدام نفر بیشترین اثر را روی نتیجه می‌گذارد؟',
   'parse.followup.checkpoint':
-    'اگر این هفته پیش بروید، کدام نقطهٔ کنترل برگشت‌پذیر نشان می‌دهد مسیر کار می‌کند؟',
+    'اگر این هفته جلو بروید، کدام علامت کوچک نشان می‌دهد مسیر درست است؟',
 
   'run.untitled': 'تصمیم بدون عنوان',
-  'run.continuedAssumptions': 'کاربر با فرضیات بیان‌شده ادامه داد',
+  'run.continuedAssumptions': 'کاربر با فرض‌های گفته‌شده ادامه داد',
   'run.clarification.recommendation':
-    'یک توضیح تکمیلی کیفیت این خلاصه را بهتر می‌کند.',
+    'یک توضیح کوتاه، کیفیت این راهنمایی را بهتر می‌کند.',
   'run.clarification.executiveSummary':
-    'این پرسش قبل از یک توصیه مسئولانه به یک توضیح نیاز دارد. به پرسش پاسخ دهید یا با فرضیات بیان‌شده ادامه دهید.',
+    'قبل از یک توصیهٔ جدی، یک نکته کم است. به پرسش پاسخ دهید یا با فرض‌های گفته‌شده ادامه دهید.',
   'run.clarification.frameSuffix': '{decision} — توضیح: {answer}',
   'analysis.personalFit.styles.available': 'در دسترس',
   'analysis.personalFit.styles.listSep': '، ',
   'analysis.personalFit.styles.listAnd': ' و ',
 
   'safe.languageFailure':
-    'نتوانستیم این خلاصه را به زبان انتخابی شما ارائه دهیم. لطفاً دوباره تلاش کنید.',
+    'نتوانستیم این خلاصه را به زبان انتخابی شما بدهیم. لطفاً دوباره تلاش کنید.',
 };
 
 const AR: CopyTable = {
@@ -536,30 +537,30 @@ const AR: CopyTable = {
 
   'analysis.situation.title': 'الوضع',
   'analysis.situation.body':
-    'أنت تقرر: {decision}. النية: {intent}. الأفق: {horizon}.',
+    'قرارك يدور حول: {decision}. التركيز على {intent} والأفق الزمني {horizon}.',
   'analysis.factors.title': 'العوامل الرئيسية',
   'analysis.factors.body':
-    'الهدف: {objective}. القلق: {concern}. قابلية الرجوع: {reversibility}.',
+    'هدفك: {objective}. قلقك: {concern}. قابلية الرجوع: {reversibility}.',
   'analysis.opportunities.title': 'الفرص',
   'analysis.opportunities.body.withOptions':
-    'خيارات مسمّاة: {options}. فضّل الخيار الذي يبقى قابلاً للرجوع أثناء التعلّم.',
+    'الخيارات المذكورة: {options}. اختر ما يبقى قابلاً للرجوع أثناء التعلّم.',
   'analysis.opportunities.body.noOptions':
-    'الفرصة في توضيح خطوة تالية قابلة للرجوع تقلّل المجهول الأهم.',
+    'أفضل فرصة الآن خطوة صغيرة قابلة للرجوع تقلّل أهم غموض.',
   'analysis.risks.title': 'المخاطر',
   'analysis.risks.body':
-    'القلق الأساسي: {concern}. المجهولات: {unknowns}.',
+    'أهم مخاطرة: {concern}. ما لم يتضح بعد: {unknowns}.',
   'analysis.risks.noneListed': 'لا شيء مدرج',
   'analysis.tradeoffs.title': 'المقايضات',
   'analysis.tradeoffs.body':
-    'التصرّف الآن يقايض السرعة بمعلومات ناقصة ({horizon}). الانتظار يقايض الوضوح باحتمال فقدان التوقيت.',
+    'التصرّف الآن يسرّع التقدم لكن بمعلومات ناقصة ({horizon}). الانتظار يعطي وضوحاً أكثر وقد يكلّفك التوقيت.',
   'analysis.personalFit.title': 'الملاءمة الشخصية',
   'analysis.personalFit.body.withProfile':
-    'أسلوب القرار {styles} يقترح ترتيب الخطوات غير القابلة للرجوع بعد تجربة قابلة للرجوع.',
+    'بأسلوب {styles}، الأفضل أن تبدأ بتجربة صغيرة قابلة للرجوع قبل أي التزام كبير.',
   'analysis.personalFit.body.withoutProfile':
-    'ملف الذكاء الشخصي غير متاح — نستخدم نظافة قرار عامة. إكمال ملفك يحسّن الملاءمة الشخصية.',
+    'الملف الشخصي غير مكتمل — نقدّم إرشاداً عاماً. إكمال الملف يجعل هذا أدق.',
   'analysis.whatCouldChange.title': 'ما الذي قد يغيّر التوصية',
   'analysis.whatCouldChange.body.default':
-    'موعد معلن أو حد خسارة أو مجموعة خيارات صريحة سيغيّر هذا الملخص جوهرياً.',
+    'إذا ذكرت موعداً نهائياً أو حدّ خسارة أو خيارات واضحة، تصبح هذه النصيحة أدق بكثير.',
   'analysis.why.title': 'لماذا هذه التوصية',
 
   'action.now.writeDecision':
@@ -669,9 +670,9 @@ const AR: CopyTable = {
     'موضوع عالي المخاطر — اعتبر هذا دعم قرار محدوداً وليس ضماناً.',
 
   'fallback.recommendation':
-    'استخدم إطار قرار عام: سمِّ الخطوة غير القابلة للرجوع، واختصر إلى تجربة قابلة للرجوع، واجمع الحقيقة التي تغيّر رأيك.',
+    'اكتب أولاً ما لا يمكن الرجوع عنه، ثم صمّم تجربة صغيرة، وابحث عن الحقيقة الواحدة التي تغيّر رأيك.',
   'fallback.providerUnavailable':
-    'مسار المزوّد غير متاح ({reason}) — يُستخدم إطار محلي منظم.',
+    'الملخص الكامل غير متاح ({reason}) — نستخدم إطاراً محلياً واضحاً.',
   'fallback.reason.network': 'شبكة',
   'fallback.reason.timeout': 'انتهاء المهلة',
   'fallback.reason.parse': 'تحليل',
@@ -690,9 +691,10 @@ const AR: CopyTable = {
 
   'parse.holdIrreversible':
     'أوقف الخطوة غير القابلة للرجوع حتى ينخفض المجهول الأهم.',
-  'parse.gatherInput': 'اجمع إدخالاً حرجاً واحداً قبل الالتزام.',
+  'parse.gatherInput':
+    'قبل القرار النهائي ينقصك معلومة أساسية واحدة — اجمعها أولاً.',
   'parse.advancePilot':
-    'تقدّم بتجربة قابلة للرجوع ونقاط تحقق واضحة.',
+    'ابدأ بتجربة صغيرة وحدد معيار النجاح من البداية.',
   'parse.nextStep': 'عرّف الخطوة التالية القابلة للرجوع',
   'parse.defineNextStep': 'عرّف الخطوة التالية',
   'parse.advanceDecision': 'قدّم القرار',
@@ -772,30 +774,30 @@ const RU: CopyTable = {
 
   'analysis.situation.title': 'Ситуация',
   'analysis.situation.body':
-    'Вы решаете: {decision}. Намерение: {intent}. Горизонт: {horizon}.',
+    'Вы решаете: {decision}. Фокус — {intent}, горизонт — {horizon}.',
   'analysis.factors.title': 'Главные факторы',
   'analysis.factors.body':
     'Цель: {objective}. Опасение: {concern}. Обратимость: {reversibility}.',
   'analysis.opportunities.title': 'Возможности',
   'analysis.opportunities.body.withOptions':
-    'Названные варианты: {options}. Предпочитайте вариант, который остаётся обратимым при обучении.',
+    'Варианты: {options}. Выбирайте тот, что остаётся обратимым, пока вы учитесь.',
   'analysis.opportunities.body.noOptions':
-    'Возможность — уточнить один обратимый следующий шаг, снижающий главную неизвестность.',
+    'Лучшая возможность сейчас — маленький обратимый шаг, который снижает главную неизвестность.',
   'analysis.risks.title': 'Риски',
   'analysis.risks.body':
-    'Главное опасение: {concern}. Неизвестности: {unknowns}.',
+    'Главный риск: {concern}. Что ещё неясно: {unknowns}.',
   'analysis.risks.noneListed': 'не указаны',
   'analysis.tradeoffs.title': 'Компромиссы',
   'analysis.tradeoffs.body':
-    'Действие сейчас меняет скорость на неполную информацию ({horizon}). Ожидание меняет ясность на возможную потерю тайминга.',
+    'Действовать сейчас — быстрее, но с неполной информацией ({horizon}). Ждать — яснее, но можно упустить момент.',
   'analysis.personalFit.title': 'Личное соответствие',
   'analysis.personalFit.body.withProfile':
-    'Стиль решений ({styles}) предлагает ставить необратимые шаги после обратимого пилота.',
+    'При стиле {styles} лучше сначала сделать маленький обратимый пилот, а уже потом брать жёсткие обязательства.',
   'analysis.personalFit.body.withoutProfile':
-    'Личный профиль интеллекта недоступен — используется общая гигиена решений. Заполнение профиля улучшает личное соответствие.',
+    'Личный профиль ещё неполный — даём общие ориентиры. Заполнение профиля сделает этот блок точнее.',
   'analysis.whatCouldChange.title': 'Что может изменить рекомендацию',
   'analysis.whatCouldChange.body.default':
-    'Указанный дедлайн, лимит убытка или явный набор вариантов существенно изменит этот брифинг.',
+    'Если назвать дедлайн, лимит потерь или явные варианты, эта рекомендация станет заметно точнее.',
   'analysis.why.title': 'Почему эта рекомендация',
 
   'action.now.writeDecision':
@@ -905,9 +907,9 @@ const RU: CopyTable = {
     'Высокорисковая тема — считайте это ограниченной поддержкой решений, а не гарантией.',
 
   'fallback.recommendation':
-    'Используйте общий каркас решения: назовите необратимый шаг, сузьте до обратимого пилота и соберите один факт, который изменит ваше мнение.',
+    'Сначала назовите необратимое, затем сделайте маленький пилот и найдите один факт, который изменит ваше мнение.',
   'fallback.providerUnavailable':
-    'Путь провайдера недоступен ({reason}) — используется структурированный локальный каркас.',
+    'Полный ответ модели недоступен ({reason}) — используем прозрачный локальный каркас.',
   'fallback.reason.network': 'сеть',
   'fallback.reason.timeout': 'таймаут',
   'fallback.reason.parse': 'разбор',
@@ -927,9 +929,9 @@ const RU: CopyTable = {
   'parse.holdIrreversible':
     'Удержите необратимый шаг, пока не снизится главная неизвестность.',
   'parse.gatherInput':
-    'Соберите один критический ввод перед обязательством.',
+    'Перед финальным решением не хватает одного ключевого факта — соберите его.',
   'parse.advancePilot':
-    'Продвигайтесь с обратимым пилотом и ясными контрольными точками.',
+    'Начните с маленького пилота и сразу зафиксируйте критерий успеха.',
   'parse.nextStep': 'Определите следующий обратимый шаг',
   'parse.defineNextStep': 'Определите следующий шаг',
   'parse.advanceDecision': 'Продвинуть решение',

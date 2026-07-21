@@ -254,11 +254,11 @@ export function AskDecisionView({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {analysis.map((card) => (
                 <div key={card.id} data-testid={`ask-reasoning-${card.id}`}>
-                  <GlassCard variant="secondary" className="p-4 space-y-2">
+                  <GlassCard variant="secondary" className="p-4 space-y-2 overflow-visible">
                     <h4 className="fc text-sm text-white">
                       {localizeAnalysisTitle(card.id, card.title, lang)}
                     </h4>
-                    <p className="fi text-sm text-white/75 leading-relaxed">
+                    <p className="fi text-sm text-white/75 leading-relaxed ps-1 pe-0.5 break-words">
                       {localizeStyleTokensInText(card.body, lang)}
                     </p>
                   </GlassCard>
