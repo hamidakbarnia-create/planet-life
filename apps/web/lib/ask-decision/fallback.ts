@@ -1,5 +1,6 @@
 /** Structured non-generic fallback when provider/parse fails. */
 
+import { askCopy } from './ask-local-copy';
 import type {
   AskDecisionResult,
   DecisionFrame,
@@ -30,17 +31,27 @@ export function buildStructuredFallback(input: {
   requestId: string | null;
   clarificationAnswer: string | null;
   reason: 'network' | 'timeout' | 'parse' | 'provider' | 'unknown';
+  locale?: 'en' | 'ru' | 'fa' | 'ar';
 }): AskDecisionResult {
+  const locale = input.locale ?? 'en';
   const scores = buildLocalScores(
     input.frame,
     input.intent,
     input.timing.bestWindow?.score ?? null,
-    input.usedProfile
+    input.usedProfile,
+    locale
   );
   const status = recommendStatus(scores, input.intent);
-  const recommendation =
-    'Use a general decision framework: name the irreversible step, shrink to a reversible pilot, and gather the one fact that would change your mind.';
-  const actions = buildLocalActionPlan(input.frame);
+  const recommendation = askCopy(locale, 'fallback.recommendation');
+  const actions = buildLocalActionPlan(input.frame, locale);
+  const confidenceBase = buildLocalConfidence(
+    scores,
+    input.frame,
+    input.usedProfile,
+    input.usedTiming,
+    input.intent.highStakesFlag,
+    locale
+  );
 
   return {
     schemaVersion: ASK_DECISION_SCHEMA_VERSION,
@@ -50,7 +61,8 @@ export function buildStructuredFallback(input: {
       input.frame,
       status,
       recommendation,
-      actions.now[0]!.action
+      actions.now[0]!.action,
+      locale
     ),
     recommendation,
     recommendationStatus: 'gather-more-information',
@@ -60,49 +72,34 @@ export function buildStructuredFallback(input: {
       input.intent,
       recommendation,
       input.usedProfile,
-      input.decisionStyles
+      input.decisionStyles,
+      locale
     ),
     timing: input.timing,
-    scenarios: buildLocalScenarios(input.frame),
+    scenarios: buildLocalScenarios(input.frame, locale),
     actionPlan: actions,
     alternatives: [],
     assumptions: [
       ...input.frame.assumptions,
-      `Provider path unavailable (${input.reason}) — using structured local framework.`,
+      askCopy(locale, 'fallback.providerUnavailable', { reason: input.reason }),
     ],
     confidence: {
-      ...buildLocalConfidence(
-        scores,
-        input.frame,
-        input.usedProfile,
-        input.usedTiming,
-        input.intent.highStakesFlag
-      ),
+      ...confidenceBase,
       level: 'low',
-      score: Math.min(
-        40,
-        buildLocalConfidence(
-          scores,
-          input.frame,
-          input.usedProfile,
-          input.usedTiming,
-          input.intent.highStakesFlag
-        ).score
-      ),
-      explanation:
-        'Low confidence because the conversational briefing could not be completed. Retry when connectivity returns.',
+      score: Math.min(40, confidenceBase.score),
+      explanation: askCopy(locale, 'fallback.lowConfidence'),
     },
     limitations: [
-      'Structured fallback — not personalised model insight.',
-      'Retry to regenerate a full briefing.',
+      askCopy(locale, 'fallback.limit.structured'),
+      askCopy(locale, 'fallback.limit.retry'),
     ],
-    relatedModules: buildLocalModules(input.intent, input.usedProfile),
+    relatedModules: buildLocalModules(input.intent, input.usedProfile, locale),
     followUpQuestions: [
-      'What is the irreversible part of this decision?',
-      'What single fact would change your mind?',
-      'What is the smallest reversible next step this week?',
+      askCopy(locale, 'fallback.followup.irreversible'),
+      askCopy(locale, 'fallback.followup.fact'),
+      askCopy(locale, 'fallback.followup.reversible'),
     ],
-    safetyNotice: safetyNoticeFor(input.intent),
+    safetyNotice: safetyNoticeFor(input.intent, locale),
     generatedAt: input.generatedAt,
     meta: {
       sources: ['ask-decision-fallback'],

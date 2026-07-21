@@ -1,0 +1,146 @@
+import type { AskDecisionResult } from '@/lib/ask-decision';
+import { ASK_DECISION_SCHEMA_VERSION } from '@/lib/ask-decision';
+
+/** English provider payload matching staging Decision Result defects. */
+export const englishProviderResult: AskDecisionResult = {
+  schemaVersion: ASK_DECISION_SCHEMA_VERSION,
+  intent: {
+    primaryIntent: 'business',
+    secondaryIntent: null,
+    confidence: 70,
+    rationale: 'Business cues',
+    detectedEntities: ['launch'],
+    decisionPresent: true,
+    timingRelevant: true,
+    peopleRelevant: false,
+    financialImpactLikely: true,
+    highStakesFlag: false,
+  },
+  decisionFrame: {
+    originalQuestion: 'Best time to launch?',
+    decisionStatement: 'Best time to launch?',
+    decisionType: 'business',
+    objective: 'Identify the highest-leverage next move for the stated question',
+    mainConcern: 'Primary concern not fully stated',
+    options: [],
+    urgency: 'moderate',
+    timeHorizon: 'months',
+    reversibility: 'Unknown — reversibility not stated',
+    affectedAreas: ['business'],
+    unknowns: ['Explicit options not stated'],
+    assumptions: ['Treating timing as flexible unless clarified'],
+    requiresClarification: false,
+  },
+  executiveSummary:
+    'Gather more information about market conditions and internal readiness.',
+  recommendation:
+    'Gather more information about market conditions and internal readiness to refine the launch timing.',
+  recommendationStatus: 'gather-more-information',
+  scores: {
+    opportunity: { value: 55, rationale: 'Constructive window' },
+    risk: { value: 48, rationale: 'Manageable' },
+    timing: { value: 50, rationale: 'Supportive' },
+    readiness: { value: 45, rationale: 'Ready enough' },
+    confidence: { value: 65, rationale: 'Moderate' },
+  },
+  analysis: [
+    {
+      id: 'custom-market',
+      title: 'Market Premise and Readiness',
+      body: 'Market trends and team readiness remain unclear.',
+    },
+    {
+      id: 'factors',
+      title: 'Main Factors',
+      body: 'Objective: Identify the highest-leverage next move. Concern: Primary concern not fully stated. Reversibility: Unknown — reversibility not stated.',
+    },
+    {
+      id: 'risks',
+      title: 'Risks',
+      body: 'Primary concern: Financial or resource exposure (inferred). Unknowns: Explicit options not stated.',
+    },
+    {
+      id: 'opportunities',
+      title: 'Opportunities',
+      body: 'Opportunity lies in clarifying one reversible next step.',
+    },
+    {
+      id: 'tradeoffs',
+      title: 'Trade-offs',
+      body: 'Acting now trades speed for incomplete information.',
+    },
+    {
+      id: 'personal-fit',
+      title: 'Personal Fit',
+      body: 'Decision style signals (analytical, cautious) support gathering more information.',
+    },
+  ],
+  timing: {
+    applicable: true,
+    available: false,
+    today: null,
+    next7Days: null,
+    next30Days: null,
+    bestWindow: null,
+    cautionWindow: null,
+    timingRationale: 'Timing provisional.',
+    timingConfidence: 'medium',
+  },
+  scenarios: {
+    bestCase: {
+      outcome: 'Clean launch',
+      likelihoodBand: 'medium',
+      keyConditions: [],
+      earlySignals: [],
+      mitigation: 'Pilot',
+    },
+    mostLikely: {
+      outcome: 'Partial clarity',
+      likelihoodBand: 'high',
+      keyConditions: [],
+      earlySignals: [],
+      mitigation: 'Checkpoint',
+    },
+    downsideCase: {
+      outcome: 'Rush',
+      likelihoodBand: 'low',
+      keyConditions: [],
+      earlySignals: [],
+      mitigation: 'Wait',
+    },
+  },
+  actionPlan: {
+    now: [
+      {
+        action: 'Write the decision in one sentence',
+        purpose: 'Clarity',
+        priority: 'high',
+        completionSignal: 'Written',
+      },
+    ],
+    next7Days: [],
+    next30Days: [],
+  },
+  alternatives: [],
+  assumptions: ['Treating timing as flexible unless clarified'],
+  confidence: {
+    level: 'medium',
+    score: 65,
+    explanation: 'Proceed with staged moves.',
+    missingInputs: [],
+    limitingFactors: [],
+  },
+  limitations: ['Comparative only'],
+  relatedModules: [],
+  followUpQuestions: ['What would make this a clear no?'],
+  safetyNotice: null,
+  generatedAt: '2026-07-21T12:00:00.000Z',
+  meta: {
+    fallback: false,
+    sources: ['conversation-api'],
+    usedProfile: false,
+    usedTiming: false,
+    requestId: null,
+    clarificationAnswer: null,
+  },
+};

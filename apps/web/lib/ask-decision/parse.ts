@@ -1,5 +1,6 @@
 /** Parse + repair Conversation API content into AskDecisionResult. */
 
+import { askCopy } from './ask-local-copy';
 import type {
   AnalysisSection,
   AskActionPlan,
@@ -62,7 +63,11 @@ function parseScores(raw: unknown, local: AskDecisionScores): AskDecisionScores 
   };
 }
 
-function parseActions(raw: unknown, local: AskActionPlan): AskActionPlan {
+function parseActions(
+  raw: unknown,
+  local: AskActionPlan,
+  locale: string
+): AskActionPlan {
   const parseBucket = (key: keyof AskActionPlan) => {
     const list = isRecord(raw) && Array.isArray(raw[key]) ? raw[key] : local[key];
     return (list as unknown[])
@@ -71,16 +76,21 @@ function parseActions(raw: unknown, local: AskActionPlan): AskActionPlan {
         if (!isRecord(item)) return local[key][i] ?? local[key][0]!;
         const priority = String(item.priority ?? 'medium').toLowerCase();
         return {
-          action: String(item.action ?? local[key][i]?.action ?? 'Define next step').slice(0, 200),
-          purpose: String(item.purpose ?? local[key][i]?.purpose ?? 'Advance the decision').slice(
-            0,
-            160
-          ),
+          action: String(
+            item.action ?? local[key][i]?.action ?? askCopy(locale, 'parse.defineNextStep')
+          ).slice(0, 200),
+          purpose: String(
+            item.purpose ??
+              local[key][i]?.purpose ??
+              askCopy(locale, 'parse.advanceDecision')
+          ).slice(0, 160),
           priority: (ACTION_PRIORITIES as readonly string[]).includes(priority)
             ? (priority as (typeof ACTION_PRIORITIES)[number])
             : 'medium',
           completionSignal: String(
-            item.completionSignal ?? local[key][i]?.completionSignal ?? 'Step completed'
+            item.completionSignal ??
+              local[key][i]?.completionSignal ??
+              askCopy(locale, 'parse.stepCompleted')
           ).slice(0, 120),
         };
       });
@@ -135,7 +145,11 @@ function parseScenarios(raw: unknown, local: AskScenarios): AskScenarios {
   };
 }
 
-function parseModules(raw: unknown, local: RelatedModule[]): RelatedModule[] {
+function parseModules(
+  raw: unknown,
+  local: RelatedModule[],
+  locale: string
+): RelatedModule[] {
   if (!Array.isArray(raw)) return local;
   const out: RelatedModule[] = [];
   for (const item of raw) {
@@ -144,8 +158,13 @@ function parseModules(raw: unknown, local: RelatedModule[]): RelatedModule[] {
     if (!(MODULE_IDS as readonly string[]).includes(modId)) continue;
     out.push({
       module: modId as RelatedModule['module'],
-      reason: String(item.reason ?? 'Relevant next step').slice(0, 160),
-      actionLabel: String(item.actionLabel ?? 'Open').slice(0, 40),
+      reason: String(
+        item.reason ?? askCopy(locale, 'parse.relevantNext')
+      ).slice(0, 160),
+      actionLabel: String(item.actionLabel ?? askCopy(locale, 'parse.open')).slice(
+        0,
+        40
+      ),
       route: MODULE_ROUTES[modId] ?? '/',
     });
     if (out.length >= 3) break;
@@ -180,6 +199,7 @@ export type ParseInput = {
   requestId: string | null;
   clarificationAnswer: string | null;
   sources: string[];
+  locale?: 'en' | 'ru' | 'fa' | 'ar';
 };
 
 /**
@@ -187,21 +207,24 @@ export type ParseInput = {
  * Never returns raw JSON to UI callers.
  */
 export function parseAskDecisionResponse(input: ParseInput): AskDecisionResult {
+  const locale = input.locale ?? 'en';
   const localScores = buildLocalScores(
     input.frame,
     input.intent,
     input.timing.bestWindow?.score ?? input.timing.today?.score ?? null,
-    input.usedProfile
+    input.usedProfile,
+    locale
   );
   let status = recommendStatus(localScores, input.intent);
   let recommendation =
     status === 'wait'
-      ? 'Hold the irreversible step until the top unknown is reduced.'
+      ? askCopy(locale, 'parse.holdIrreversible')
       : status === 'gather-more-information'
-        ? 'Gather one critical input before committing.'
-        : 'Advance with a reversible pilot and clear checkpoints.';
+        ? askCopy(locale, 'parse.gatherInput')
+        : askCopy(locale, 'parse.advancePilot');
 
-  const localActions = buildLocalActionPlan(input.frame);
+  const localActions = buildLocalActionPlan(input.frame, locale);
+  const nextActionFallback = askCopy(locale, 'parse.nextStep');
   const result: AskDecisionResult = {
     schemaVersion: ASK_DECISION_SCHEMA_VERSION,
     intent: input.intent,
@@ -210,7 +233,8 @@ export function parseAskDecisionResponse(input: ParseInput): AskDecisionResult {
       input.frame,
       status,
       recommendation,
-      localActions.now[0]?.action ?? 'Define the next reversible step'
+      localActions.now[0]?.action ?? nextActionFallback,
+      locale
     ),
     recommendation,
     recommendationStatus: status,
@@ -220,19 +244,20 @@ export function parseAskDecisionResponse(input: ParseInput): AskDecisionResult {
       input.intent,
       recommendation,
       input.usedProfile,
-      input.decisionStyles
+      input.decisionStyles,
+      locale
     ),
     timing: input.timing,
-    scenarios: buildLocalScenarios(input.frame),
+    scenarios: buildLocalScenarios(input.frame, locale),
     actionPlan: localActions,
     alternatives: input.frame.options.slice(0, 3).map((option) => ({
       option,
-      bestFor: 'When this path matches your non-negotiables',
-      advantages: ['Uses a stated option'],
-      disadvantages: ['Still requires validation'],
+      bestFor: askCopy(locale, 'parse.alt.bestFor'),
+      advantages: [askCopy(locale, 'parse.alt.advantage')],
+      disadvantages: [askCopy(locale, 'parse.alt.disadvantage')],
       risk: input.frame.mainConcern,
       timingFit: input.frame.timeHorizon,
-      recommendationFit: 'Compare against checkpoints before locking',
+      recommendationFit: askCopy(locale, 'parse.alt.recommendationFit'),
     })),
     assumptions: [...input.frame.assumptions],
     confidence: buildLocalConfidence(
@@ -240,22 +265,25 @@ export function parseAskDecisionResponse(input: ParseInput): AskDecisionResult {
       input.frame,
       input.usedProfile,
       input.usedTiming,
-      input.intent.highStakesFlag
+      input.intent.highStakesFlag,
+      locale
     ),
     limitations: [
-      'Comparative decision-support only.',
-      ...(input.usedProfile ? [] : ['Personal intelligence profile unavailable.']),
-      ...(input.usedTiming ? [] : ['Live timing unavailable.']),
+      askCopy(locale, 'parse.limit.comparative'),
+      ...(input.usedProfile ? [] : [askCopy(locale, 'parse.limit.noProfile')]),
+      ...(input.usedTiming ? [] : [askCopy(locale, 'parse.limit.noTiming')]),
     ],
-    relatedModules: buildLocalModules(input.intent, input.usedProfile),
+    relatedModules: buildLocalModules(input.intent, input.usedProfile, locale),
     followUpQuestions: [
-      `What would make “${input.frame.decisionStatement.slice(0, 60)}” clearly a no?`,
+      askCopy(locale, 'parse.followup.no', {
+        decision: input.frame.decisionStatement.slice(0, 60),
+      }),
       input.intent.financialImpactLikely
-        ? 'What is the maximum downside you will accept before walking away?'
-        : 'Which stakeholder most changes the outcome if they disagree?',
-      'If you advance this week, what reversible checkpoint proves the path is working?',
+        ? askCopy(locale, 'parse.followup.downside')
+        : askCopy(locale, 'parse.followup.stakeholder'),
+      askCopy(locale, 'parse.followup.checkpoint'),
     ],
-    safetyNotice: safetyNoticeFor(input.intent),
+    safetyNotice: safetyNoticeFor(input.intent, locale),
     generatedAt: input.generatedAt,
     meta: {
       sources: input.sources,
@@ -288,26 +316,51 @@ export function parseAskDecisionResponse(input: ParseInput): AskDecisionResult {
         input.frame,
         status,
         recommendation,
-        localActions.now[0]?.action ?? 'Define the next reversible step'
+        localActions.now[0]?.action ?? nextActionFallback,
+        locale
       );
     }
     result.scores = parseScores(parsed.scores, localScores);
     result.analysis = parseAnalysis(parsed.analysis, result.analysis);
     result.scenarios = parseScenarios(parsed.scenarios, result.scenarios);
-    result.actionPlan = parseActions(parsed.actionPlan, localActions);
-    result.relatedModules = parseModules(parsed.relatedModules, result.relatedModules);
+    result.actionPlan = parseActions(parsed.actionPlan, localActions, locale);
+    result.relatedModules = parseModules(
+      parsed.relatedModules,
+      result.relatedModules,
+      locale
+    );
     // Ensure people routing when people-relevant even if model omitted it.
     if (
       input.intent.peopleRelevant &&
       !result.relatedModules.some((m) => m.module === 'people') &&
       result.relatedModules.length < 3
     ) {
+      const peopleFallback =
+        locale === 'fa'
+          ? {
+              reason: 'بافت ارتباطی برای این تصمیم مهم است.',
+              actionLabel: 'مقایسه افراد',
+            }
+          : locale === 'ru'
+            ? {
+                reason: 'Контекст общения важен для этого решения.',
+                actionLabel: 'Сравнить людей',
+              }
+            : locale === 'ar'
+              ? {
+                  reason: 'سياق التواصل مهم لهذا القرار.',
+                  actionLabel: 'مقارنة الأشخاص',
+                }
+              : {
+                  reason: 'Communication context matters for this decision.',
+                  actionLabel: 'Compare People',
+                };
       result.relatedModules = [
         ...result.relatedModules,
         {
           module: 'people' as const,
-          reason: 'Communication context matters for this decision.',
-          actionLabel: 'Compare People',
+          reason: peopleFallback.reason,
+          actionLabel: peopleFallback.actionLabel,
           route: MODULE_ROUTES.people,
         },
       ].slice(0, 3);
@@ -332,7 +385,7 @@ export function parseAskDecisionResponse(input: ParseInput): AskDecisionResult {
         .filter(isRecord)
         .slice(0, 3)
         .map((a) => ({
-          option: String(a.option ?? 'Option').slice(0, 80),
+          option: String(a.option ?? askCopy(locale, 'parse.option')).slice(0, 80),
           bestFor: String(a.bestFor ?? '').slice(0, 120),
           advantages: Array.isArray(a.advantages) ? a.advantages.map(String).slice(0, 4) : [],
           disadvantages: Array.isArray(a.disadvantages)
@@ -360,14 +413,16 @@ export function parseAskDecisionResponse(input: ParseInput): AskDecisionResult {
       input.intent,
       result.recommendation,
       input.usedProfile,
-      input.decisionStyles
+      input.decisionStyles,
+      locale
     );
     result.confidence = buildLocalConfidence(
       localScores,
       input.frame,
       input.usedProfile,
       input.usedTiming,
-      input.intent.highStakesFlag
+      input.intent.highStakesFlag,
+      locale
     );
     result.meta = { ...result.meta!, fallback: true };
   }

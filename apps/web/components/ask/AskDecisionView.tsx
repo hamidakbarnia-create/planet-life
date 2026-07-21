@@ -6,16 +6,31 @@ import Link from 'next/link';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { BAND_STYLES, scoreToBand } from '@/lib/calendar-scores';
 import type { AskDecisionResult, ClarificationState } from '@/lib/ask-decision';
+import { localizeAskDecisionPresentation } from '@/lib/ask-decision/localize-presentation';
 import { trackAskDecisionEvent } from '@/lib/ask-decision';
+import type { AppLang } from '@/lib/app-settings';
+import {
+  getDecisionUi,
+  localizeActionPriority,
+  localizeAnalysisTitle,
+  localizeConfidenceLevel,
+  localizeIntent,
+  localizeLikelihoodBand,
+  localizeRecommendationStatus,
+  localizeTimeHorizon,
+  localizeUrgency,
+} from '@/lib/decision-ui-i18n';
 
 function ScoreMeter({
   label,
   value,
   rationale,
+  outOf100,
 }: {
   label: string;
   value: number;
   rationale: string;
+  outOf100: string;
 }) {
   const band = scoreToBand(value);
   const style = BAND_STYLES[band];
@@ -23,8 +38,8 @@ function ScoreMeter({
     <div
       className="rounded-xl border p-3"
       style={{ borderColor: style.border, background: style.bg }}
-      data-testid={`ask-score-${label.toLowerCase()}`}
-      aria-label={`${label}: ${value} out of 100. ${rationale}`}
+      data-testid={`ask-score-${label.toLowerCase().replace(/\s+/g, '-')}`}
+      aria-label={`${label}: ${value} ${outOf100}. ${rationale}`}
     >
       <div className="fi text-[10px] uppercase tracking-[0.16em]" style={{ color: style.text }}>
         {label}
@@ -45,13 +60,6 @@ function SectionTitle({ children }: { children: ReactNode }) {
   );
 }
 
-const LOADING_STAGES = [
-  'Framing your decision',
-  'Applying your intelligence profile',
-  'Checking timing context',
-  'Building your recommendation',
-] as const;
-
 export function AskDecisionView({
   result,
   loading,
@@ -64,6 +72,7 @@ export function AskDecisionView({
   onFollowUp,
   error,
   profileMissing,
+  lang = 'en',
 }: {
   result: AskDecisionResult | null;
   loading?: boolean;
@@ -76,28 +85,36 @@ export function AskDecisionView({
   onFollowUp?: (question: string) => void;
   error?: string | null;
   profileMissing?: boolean;
+  lang?: AppLang;
 }) {
+  const t = getDecisionUi(lang);
   const summaryRef = useRef<HTMLDivElement>(null);
   const clarifyRef = useRef<HTMLInputElement>(null);
+  const loadingStages = t.loadingStages;
+  const localizedResult =
+    result && lang !== 'en'
+      ? localizeAskDecisionPresentation(result, lang)
+      : result;
 
   useEffect(() => {
-    if (result && !loading && !pendingClarification) {
+    if (localizedResult && !loading && !pendingClarification) {
       summaryRef.current?.focus();
     }
-  }, [result, loading, pendingClarification]);
+  }, [localizedResult, loading, pendingClarification]);
 
-  if (loading && !result) {
-    const stage = loadingStage ?? LOADING_STAGES[0];
+  if (loading && !localizedResult) {
+    const stage = loadingStage ?? loadingStages[0];
     return (
       <div
         className="rounded-xl border border-white/10 bg-black/20 p-6 mb-6"
         data-testid="ask-decision-loading"
         aria-busy="true"
         aria-live="polite"
+        dir={t.dir}
       >
         <p className="fi text-sm text-white/70">{stage}</p>
         <ol className="mt-3 space-y-1">
-          {LOADING_STAGES.map((label) => (
+          {loadingStages.map((label) => (
             <li
               key={label}
               className={`fi text-xs ${label === stage ? 'text-[#93B4FF]' : 'text-white/35'}`}
@@ -116,9 +133,10 @@ export function AskDecisionView({
         className="mb-6 space-y-4"
         data-testid="ask-clarification"
         aria-live="polite"
+        dir={t.dir}
       >
         <GlassCard variant="signature" className="p-5 space-y-3">
-          <SectionTitle>One clarification</SectionTitle>
+          <SectionTitle>{t.clarificationTitle}</SectionTitle>
           <p className="fi text-sm text-white/85">{clarification.question}</p>
           <form
             onSubmit={(e) => {
@@ -129,7 +147,7 @@ export function AskDecisionView({
             className="space-y-3"
           >
             <label htmlFor="ask-clarify-input" className="fi text-xs text-white/50 block">
-              Your answer
+              {t.yourAnswer}
             </label>
             <input
               ref={clarifyRef}
@@ -145,7 +163,7 @@ export function AskDecisionView({
                 color: '#0a0a0a',
               }}
             >
-              Continue analysis
+              {t.continueAnalysis}
             </button>
           </form>
           {clarification.canContinueWithAssumptions ? (
@@ -154,7 +172,7 @@ export function AskDecisionView({
               onClick={() => onContinueWithAssumptions?.()}
               className="fi text-xs text-white/55 underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
             >
-              Continue with assumptions
+              {t.continueWithAssumptions}
             </button>
           ) : null}
         </GlassCard>
@@ -162,15 +180,16 @@ export function AskDecisionView({
     );
   }
 
-  if (error && !result) {
+  if (error && !localizedResult) {
     return (
       <div
         className="rounded-xl border border-amber-400/30 bg-black/20 p-6 mb-6 space-y-3"
         data-testid="ask-decision-error"
         role="alert"
         aria-live="assertive"
+        dir={t.dir}
       >
-        <h2 className="fc text-base text-white">Decision briefing unavailable</h2>
+        <h2 className="fc text-base text-white">{t.errorTitle}</h2>
         <p className="fi text-sm text-white/70">{error}</p>
         {onRetry ? (
           <button
@@ -178,14 +197,14 @@ export function AskDecisionView({
             onClick={onRetry}
             className="fi text-sm px-3.5 py-2 rounded-xl border border-white/20 text-white/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
           >
-            Retry
+            {t.retry}
           </button>
         ) : null}
       </div>
     );
   }
 
-  if (!result) return null;
+  if (!localizedResult) return null;
 
   const {
     executiveSummary,
@@ -205,30 +224,36 @@ export function AskDecisionView({
     safetyNotice,
     decisionFrame,
     intent,
-  } = result;
+  } = localizedResult;
+
+  const statusLabel = localizeRecommendationStatus(recommendationStatus, lang);
+  const intentLabel = localizeIntent(intent.primaryIntent, lang);
 
   return (
     <div
       className="mb-6"
       data-testid="ask-decision-engine"
       data-ask-layout="decision-intelligence-v3"
+      data-lang={lang}
+      dir={t.dir}
     >
       {profileMissing ? (
         <p className="fi text-xs text-[#93B4FF] mb-3" data-testid="ask-profile-hint">
-          Complete your profile to improve personalisation — Ask still works without it.
+          {t.profileHint}
         </p>
       ) : null}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-4 order-2 lg:order-1">
-          {/* Desktop: analysis after summary; Mobile: actions come first via order */}
           <div className="space-y-4 order-2 md:order-none" data-testid="ask-card-analysis">
-            <SectionTitle>Analysis</SectionTitle>
+            <SectionTitle>{t.analysis}</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {analysis.map((card) => (
                 <div key={card.id} data-testid={`ask-reasoning-${card.id}`}>
                   <GlassCard variant="secondary" className="p-4 space-y-2">
-                    <h4 className="fc text-sm text-white">{card.title}</h4>
+                    <h4 className="fc text-sm text-white">
+                      {localizeAnalysisTitle(card.id, card.title, lang)}
+                    </h4>
                     <p className="fi text-sm text-white/75 leading-relaxed">{card.body}</p>
                   </GlassCard>
                 </div>
@@ -237,22 +262,24 @@ export function AskDecisionView({
           </div>
 
           <div data-testid="ask-card-scenarios">
-            <SectionTitle>Scenarios</SectionTitle>
+            <SectionTitle>{t.scenarios}</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {(
                 [
-                  ['Best case', scenarios.bestCase],
-                  ['Most likely', scenarios.mostLikely],
-                  ['Downside', scenarios.downsideCase],
+                  [t.bestCase, scenarios.bestCase],
+                  [t.mostLikely, scenarios.mostLikely],
+                  [t.downside, scenarios.downsideCase],
                 ] as const
               ).map(([label, s]) => (
                 <GlassCard key={label} variant="technical" className="p-4 space-y-2">
                   <p className="fc text-sm text-white">{label}</p>
                   <p className="fi text-xs text-white/45 uppercase tracking-widest">
-                    {s.likelihoodBand}
+                    {localizeLikelihoodBand(s.likelihoodBand, lang)}
                   </p>
                   <p className="fi text-sm text-white/80">{s.outcome}</p>
-                  <p className="fi text-xs text-white/50">Mitigation: {s.mitigation}</p>
+                  <p className="fi text-xs text-white/50">
+                    {t.mitigation}: {s.mitigation}
+                  </p>
                 </GlassCard>
               ))}
             </div>
@@ -260,13 +287,17 @@ export function AskDecisionView({
 
           {alternatives.length > 0 ? (
             <div data-testid="ask-card-alternatives">
-              <SectionTitle>Alternatives</SectionTitle>
+              <SectionTitle>{t.alternatives}</SectionTitle>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {alternatives.map((alt) => (
                   <GlassCard key={alt.option} variant="technical" className="p-4 space-y-2">
                     <p className="fc text-sm text-white">{alt.option}</p>
-                    <p className="fi text-xs text-[#93B4FF]">Best for: {alt.bestFor}</p>
-                    <p className="fi text-xs text-white/60">Risk: {alt.risk}</p>
+                    <p className="fi text-xs text-[#93B4FF]">
+                      {t.bestFor}: {alt.bestFor}
+                    </p>
+                    <p className="fi text-xs text-white/60">
+                      {t.risk}: {alt.risk}
+                    </p>
                   </GlassCard>
                 ))}
               </div>
@@ -275,7 +306,7 @@ export function AskDecisionView({
 
           <div data-testid="ask-card-assumptions">
             <GlassCard variant="secondary" className="p-4 space-y-2">
-              <SectionTitle>Assumptions & gaps</SectionTitle>
+              <SectionTitle>{t.assumptionsGaps}</SectionTitle>
               <ul className="space-y-1">
                 {assumptions.map((a) => (
                   <li key={a} className="fi text-xs text-white/70">
@@ -304,24 +335,26 @@ export function AskDecisionView({
                 <span
                   className="fi text-[10px] uppercase tracking-widest px-2 py-1 rounded-md border border-amber-400/30 text-amber-200"
                   data-testid="ask-recommendation-status"
-                  aria-label={`Recommendation status: ${recommendationStatus}`}
+                  aria-label={`${t.recommendationStatusAria}: ${statusLabel}`}
                 >
-                  {recommendationStatus.replace(/-/g, ' ')}
+                  {statusLabel}
                 </span>
                 <span
                   className="fi text-[10px] uppercase tracking-widest text-white/45"
                   data-testid="ask-detected-intent"
                 >
-                  {intent.primaryIntent}
+                  {intentLabel}
                 </span>
               </div>
-              <SectionTitle>Recommendation</SectionTitle>
+              <SectionTitle>{t.recommendation}</SectionTitle>
               <p className="fi text-sm text-white/90 leading-relaxed">{recommendation}</p>
               <p className="fi text-sm text-white/70 leading-relaxed">{executiveSummary}</p>
               <div data-testid="ask-card-confidence" className="pt-2 border-t border-white/5">
-                <p className="fi text-[10px] uppercase tracking-widest text-white/40">Confidence</p>
+                <p className="fi text-[10px] uppercase tracking-widest text-white/40">
+                  {t.confidence}
+                </p>
                 <p className="fc text-xl text-white" data-testid="ask-confidence-level">
-                  {confidence.level} · {confidence.score}
+                  {localizeConfidenceLevel(confidence.level, lang)} · {confidence.score}
                 </p>
                 <p className="fi text-xs text-white/55 mt-1">{confidence.explanation}</p>
               </div>
@@ -335,12 +368,12 @@ export function AskDecisionView({
 
           <div data-testid="ask-card-actions" className="order-1">
             <GlassCard variant="action" className="p-5 space-y-3">
-              <SectionTitle>Action plan</SectionTitle>
+              <SectionTitle>{t.actionPlan}</SectionTitle>
               {(
                 [
-                  ['Now', actionPlan.now],
-                  ['Next 7 days', actionPlan.next7Days],
-                  ['Next 30 days', actionPlan.next30Days],
+                  [t.now, actionPlan.now],
+                  [t.next7Days, actionPlan.next7Days],
+                  [t.next30Days, actionPlan.next30Days],
                 ] as const
               ).map(([label, items]) => (
                 <div key={label}>
@@ -350,8 +383,8 @@ export function AskDecisionView({
                   <ul className="space-y-2">
                     {items.map((item) => (
                       <li key={item.action} className="fi text-sm text-white/85">
-                        <span className="text-white/40 text-[10px] uppercase mr-1">
-                          {item.priority}
+                        <span className="text-white/40 text-[10px] uppercase me-1">
+                          {localizeActionPriority(item.priority, lang)}
                         </span>
                         {item.action}
                       </li>
@@ -363,47 +396,56 @@ export function AskDecisionView({
           </div>
 
           <div data-testid="ask-card-scores">
-            <SectionTitle>Scores</SectionTitle>
+            <SectionTitle>{t.scores}</SectionTitle>
             <div className="grid grid-cols-2 gap-2">
               <ScoreMeter
-                label="Opportunity"
+                label={t.opportunity}
                 value={scores.opportunity.value}
                 rationale={scores.opportunity.rationale}
+                outOf100={t.outOf100}
               />
-              <ScoreMeter label="Risk" value={scores.risk.value} rationale={scores.risk.rationale} />
               <ScoreMeter
-                label="Timing"
+                label={t.risk}
+                value={scores.risk.value}
+                rationale={scores.risk.rationale}
+                outOf100={t.outOf100}
+              />
+              <ScoreMeter
+                label={t.timing}
                 value={scores.timing.value}
                 rationale={scores.timing.rationale}
+                outOf100={t.outOf100}
               />
               <ScoreMeter
-                label="Readiness"
+                label={t.readiness}
                 value={scores.readiness.value}
                 rationale={scores.readiness.rationale}
+                outOf100={t.outOf100}
               />
               <ScoreMeter
-                label="Confidence"
+                label={t.confidence}
                 value={scores.confidence.value}
                 rationale={scores.confidence.rationale}
+                outOf100={t.outOf100}
               />
             </div>
           </div>
 
           <div data-testid="ask-card-timing">
             <GlassCard variant="primary" className="p-4 space-y-2">
-              <SectionTitle>Timing</SectionTitle>
+              <SectionTitle>{t.timingSection}</SectionTitle>
               {!timing.applicable ? (
-                <p className="fi text-xs text-white/55">Not applicable for this question.</p>
+                <p className="fi text-xs text-white/55">{t.timingNotApplicable}</p>
               ) : !timing.available ? (
-                <p className="fi text-xs text-white/55">Timing data unavailable.</p>
+                <p className="fi text-xs text-white/55">{t.timingUnavailable}</p>
               ) : (
                 <>
                   {(
                     [
-                      ['Today', timing.today],
-                      ['Next 7 days', timing.next7Days],
-                      ['Best window', timing.bestWindow],
-                      ['Caution', timing.cautionWindow],
+                      [t.today, timing.today],
+                      [t.next7Days, timing.next7Days],
+                      [t.bestWindow, timing.bestWindow],
+                      [t.caution, timing.cautionWindow],
                     ] as const
                   ).map(([label, w]) =>
                     w ? (
@@ -421,7 +463,7 @@ export function AskDecisionView({
 
           {relatedModules.length > 0 ? (
             <div data-testid="ask-card-modules">
-              <SectionTitle>Related modules</SectionTitle>
+              <SectionTitle>{t.relatedModules}</SectionTitle>
               <div className="flex flex-wrap gap-2">
                 {relatedModules.map((mod) => (
                   <Link
@@ -441,7 +483,7 @@ export function AskDecisionView({
             </div>
           ) : null}
 
-          {result.meta?.fallback && onRetry ? (
+          {localizedResult.meta?.fallback && onRetry ? (
             <button
               type="button"
               onClick={() => {
@@ -451,7 +493,7 @@ export function AskDecisionView({
               className="w-full fi text-sm py-2.5 rounded-xl border border-white/15 text-white/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
               data-testid="ask-retry"
             >
-              Retry full briefing
+              {t.retryFull}
             </button>
           ) : null}
         </div>
@@ -459,13 +501,13 @@ export function AskDecisionView({
 
       <div className="mt-5" data-testid="ask-card-followups">
         <GlassCard variant="primary" className="p-5 space-y-2">
-          <SectionTitle>Follow-up questions</SectionTitle>
+          <SectionTitle>{t.followUpQuestions}</SectionTitle>
           <ul className="space-y-2">
             {followUpQuestions.map((q) => (
               <li key={q}>
                 <button
                   type="button"
-                  className="fi text-sm text-left text-[#93B4FF] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
+                  className="fi text-sm text-start text-[#93B4FF] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
                   onClick={() => {
                     trackAskDecisionEvent('ask_followup_selected', {
                       intent: intent.primaryIntent,
@@ -479,7 +521,8 @@ export function AskDecisionView({
             ))}
           </ul>
           <p className="fi text-[10px] text-white/35 pt-2">
-            Urgency: {decisionFrame.urgency} · Horizon: {decisionFrame.timeHorizon}
+            {t.urgency}: {localizeUrgency(decisionFrame.urgency, lang)} · {t.horizon}:{' '}
+            {localizeTimeHorizon(decisionFrame.timeHorizon, lang)}
           </p>
         </GlassCard>
       </div>

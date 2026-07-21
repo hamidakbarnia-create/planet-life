@@ -1,5 +1,13 @@
 /** Local structured builders used for repair + no-model fallback. */
 
+import type { AppLang } from '@/lib/app-settings';
+import { askCopy } from './ask-local-copy';
+import {
+  localizeFrameHorizon,
+  localizeFrameIntent,
+  localizeFrameList,
+  localizeFramePhrase,
+} from './frame-display';
 import type {
   AnalysisSection,
   AskActionPlan,
@@ -15,11 +23,14 @@ import type {
 import { clampScore, wordLimit } from './util';
 import { MODULE_ROUTES } from './util';
 
+type Locale = AppLang | string;
+
 export function buildLocalScores(
   frame: DecisionFrame,
   intent: IntentDetection,
   timingScore: number | null,
-  usedProfile: boolean
+  usedProfile: boolean,
+  locale: Locale = 'en'
 ): AskDecisionScores {
   const timing = clampScore(timingScore ?? 52);
   const riskBase =
@@ -36,28 +47,28 @@ export function buildLocalScores(
   return {
     opportunity: {
       value: clampScore(opportunityBase),
-      rationale: 'Comparative opportunity pressure from framing and domain signals.',
+      rationale: askCopy(locale, 'score.opportunity'),
     },
     risk: {
       value: clampScore(riskBase + (frame.reversibility.startsWith('Low') ? 10 : 0)),
-      rationale: 'Risk reflects stakes language, reversibility, and domain.',
+      rationale: askCopy(locale, 'score.risk'),
     },
     timing: {
       value: timing,
       rationale:
         timingScore != null
-          ? 'Timing score from existing timing engine windows.'
-          : 'Timing provisional — live timing unavailable.',
+          ? askCopy(locale, 'score.timing.available')
+          : askCopy(locale, 'score.timing.provisional'),
     },
     readiness: {
       value: clampScore(readinessBase),
       rationale: usedProfile
-        ? 'Readiness considers personal decision context availability.'
-        : 'Readiness limited without a personal intelligence profile.',
+        ? askCopy(locale, 'score.readiness.withProfile')
+        : askCopy(locale, 'score.readiness.withoutProfile'),
     },
     confidence: {
       value: clampScore(confidenceBase - frame.assumptions.length * 4),
-      rationale: 'Confidence tracks clarity, profile, timing, and assumption load.',
+      rationale: askCopy(locale, 'score.confidence'),
     },
   };
 }
@@ -81,78 +92,105 @@ export function buildLocalAnalysis(
   intent: IntentDetection,
   recommendation: string,
   usedProfile: boolean,
-  decisionStyles: string[]
+  decisionStyles: string[],
+  locale: Locale = 'en'
 ): AnalysisSection[] {
   return [
     {
       id: 'situation',
-      title: 'Situation',
-      body: `You are deciding: ${frame.decisionStatement}. Intent: ${intent.primaryIntent}. Horizon: ${frame.timeHorizon}.`,
+      title: askCopy(locale, 'analysis.situation.title'),
+      body: askCopy(locale, 'analysis.situation.body', {
+        decision: frame.decisionStatement,
+        intent: localizeFrameIntent(locale as AppLang, intent.primaryIntent),
+        horizon: localizeFrameHorizon(locale as AppLang, frame.timeHorizon),
+      }),
     },
     {
       id: 'factors',
-      title: 'Main Factors',
-      body: `Objective: ${frame.objective}. Concern: ${frame.mainConcern}. Reversibility: ${frame.reversibility}.`,
+      title: askCopy(locale, 'analysis.factors.title'),
+      body: askCopy(locale, 'analysis.factors.body', {
+        objective: localizeFramePhrase(locale as AppLang, frame.objective),
+        concern: localizeFramePhrase(locale as AppLang, frame.mainConcern),
+        reversibility: localizeFramePhrase(locale as AppLang, frame.reversibility),
+      }),
     },
     {
       id: 'opportunities',
-      title: 'Opportunities',
+      title: askCopy(locale, 'analysis.opportunities.title'),
       body:
         frame.options.length > 0
-          ? `Named options: ${frame.options.join('; ')}. Prefer the option that stays reversible while learning.`
-          : 'Opportunity lies in clarifying one reversible next step that reduces the top unknown.',
+          ? askCopy(locale, 'analysis.opportunities.body.withOptions', {
+              options: frame.options.join('; '),
+            })
+          : askCopy(locale, 'analysis.opportunities.body.noOptions'),
     },
     {
       id: 'risks',
-      title: 'Risks',
-      body: `Primary concern: ${frame.mainConcern}. Unknowns: ${frame.unknowns.join('; ') || 'none listed'}.`,
+      title: askCopy(locale, 'analysis.risks.title'),
+      body: askCopy(locale, 'analysis.risks.body', {
+        concern: localizeFramePhrase(locale as AppLang, frame.mainConcern),
+        unknowns:
+          localizeFrameList(locale as AppLang, frame.unknowns) ||
+          askCopy(locale, 'analysis.risks.noneListed'),
+      }),
     },
     {
       id: 'tradeoffs',
-      title: 'Trade-offs',
-      body: `Acting now trades speed for incomplete information (${frame.timeHorizon}). Waiting trades clarity for possible lost timing.`,
+      title: askCopy(locale, 'analysis.tradeoffs.title'),
+      body: askCopy(locale, 'analysis.tradeoffs.body', {
+        horizon: localizeFrameHorizon(locale as AppLang, frame.timeHorizon),
+      }),
     },
     {
       id: 'personal-fit',
-      title: 'Personal Fit',
+      title: askCopy(locale, 'analysis.personalFit.title'),
       body: usedProfile
-        ? `Decision style signals (${decisionStyles.slice(0, 3).join(', ') || 'available'}) suggest sequencing irreversible steps after a reversible pilot.`
-        : 'Personal intelligence profile unavailable — using general decision hygiene. Completing your profile improves personal fit.',
+        ? askCopy(locale, 'analysis.personalFit.body.withProfile', {
+            styles: decisionStyles.slice(0, 3).join(', ') || 'available',
+          })
+        : askCopy(locale, 'analysis.personalFit.body.withoutProfile'),
     },
     {
       id: 'what-could-change',
-      title: 'What Could Change the Recommendation',
+      title: askCopy(locale, 'analysis.whatCouldChange.title'),
       body:
-        frame.unknowns[0] ||
-        'A stated deadline, downside limit, or explicit option set would materially change this briefing.',
+        (frame.unknowns[0]
+          ? localizeFramePhrase(locale as AppLang, frame.unknowns[0])
+          : null) ||
+        askCopy(locale, 'analysis.whatCouldChange.body.default'),
     },
     {
       id: 'why',
-      title: 'Why This Recommendation',
+      title: askCopy(locale, 'analysis.why.title'),
       body: recommendation,
     },
   ];
 }
 
-export function buildLocalActionPlan(frame: DecisionFrame): AskActionPlan {
+export function buildLocalActionPlan(
+  frame: DecisionFrame,
+  locale: Locale = 'en'
+): AskActionPlan {
   const now: AskActionPlan['now'] = [
     {
-      action: `Write the decision in one sentence: “${frame.decisionStatement.slice(0, 100)}”`,
-      purpose: 'Make the decision explicit',
+      action: askCopy(locale, 'action.now.writeDecision', {
+        decision: frame.decisionStatement.slice(0, 100),
+      }),
+      purpose: askCopy(locale, 'action.now.writeDecision.purpose'),
       priority: 'high',
-      completionSignal: 'One written decision sentence exists',
+      completionSignal: askCopy(locale, 'action.now.writeDecision.signal'),
     },
     {
-      action: 'List the single fact that would change your mind in either direction',
-      purpose: 'Surface the critical unknown',
+      action: askCopy(locale, 'action.now.listFact'),
+      purpose: askCopy(locale, 'action.now.listFact.purpose'),
       priority: 'critical',
-      completionSignal: 'Decision-changing fact named',
+      completionSignal: askCopy(locale, 'action.now.listFact.signal'),
     },
     {
-      action: 'Identify the irreversible part of this choice',
-      purpose: 'Protect downside',
+      action: askCopy(locale, 'action.now.identifyIrreversible'),
+      purpose: askCopy(locale, 'action.now.identifyIrreversible.purpose'),
       priority: 'high',
-      completionSignal: 'Irreversible step named separately from pilots',
+      completionSignal: askCopy(locale, 'action.now.identifyIrreversible.signal'),
     },
   ];
 
@@ -160,44 +198,51 @@ export function buildLocalActionPlan(frame: DecisionFrame): AskActionPlan {
     {
       action:
         frame.options.length >= 2
-          ? `Score options (${frame.options.slice(0, 2).join(' vs ')}) on opportunity, risk, and timing`
-          : 'Compare two concrete options on opportunity, risk, and timing',
-      purpose: 'Create a comparable choice set',
+          ? askCopy(locale, 'action.week.scoreOptions', {
+              options: frame.options.slice(0, 2).join(' vs '),
+            })
+          : askCopy(locale, 'action.week.compareOptions'),
+      purpose: askCopy(locale, 'action.week.scoreOptions.purpose'),
       priority: 'high',
-      completionSignal: 'Option score table exists',
+      completionSignal: askCopy(locale, 'action.week.scoreOptions.signal'),
     },
     {
-      action: 'Schedule the decisive conversation or review inside your best available window',
-      purpose: 'Align action with timing',
+      action: askCopy(locale, 'action.week.schedule'),
+      purpose: askCopy(locale, 'action.week.schedule.purpose'),
       priority: 'medium',
-      completionSignal: 'Calendar event created',
+      completionSignal: askCopy(locale, 'action.week.schedule.signal'),
     },
     {
-      action: `Address concern: ${frame.mainConcern.slice(0, 80)}`,
-      purpose: 'Reduce the stated risk',
+      action: askCopy(locale, 'action.week.addressConcern', {
+        concern: localizeFramePhrase(locale as AppLang, frame.mainConcern).slice(
+          0,
+          80
+        ),
+      }),
+      purpose: askCopy(locale, 'action.week.addressConcern.purpose'),
       priority: 'high',
-      completionSignal: 'One mitigation step completed',
+      completionSignal: askCopy(locale, 'action.week.addressConcern.signal'),
     },
   ];
 
   const next30Days: AskActionPlan['next30Days'] = [
     {
-      action: 'Run a checkpoint against your success criteria',
-      purpose: 'Validate direction',
+      action: askCopy(locale, 'action.month.checkpoint'),
+      purpose: askCopy(locale, 'action.month.checkpoint.purpose'),
       priority: 'medium',
-      completionSignal: 'Dated review note exists',
+      completionSignal: askCopy(locale, 'action.month.checkpoint.signal'),
     },
     {
-      action: 'Increase commitment only after the first reversible milestone succeeds',
-      purpose: 'Sequence irreversibility',
+      action: askCopy(locale, 'action.month.increaseCommitment'),
+      purpose: askCopy(locale, 'action.month.increaseCommitment.purpose'),
       priority: 'high',
-      completionSignal: 'Milestone marked complete before escalation',
+      completionSignal: askCopy(locale, 'action.month.increaseCommitment.signal'),
     },
     {
-      action: 'Archive what changed vs. this recommendation',
-      purpose: 'Improve future decisions',
+      action: askCopy(locale, 'action.month.archive'),
+      purpose: askCopy(locale, 'action.month.archive.purpose'),
       priority: 'low',
-      completionSignal: 'Decision log updated',
+      completionSignal: askCopy(locale, 'action.month.archive.signal'),
     },
   ];
 
@@ -208,72 +253,188 @@ export function buildLocalActionPlan(frame: DecisionFrame): AskActionPlan {
   };
 }
 
-export function buildLocalScenarios(frame: DecisionFrame): AskScenarios {
+export function buildLocalScenarios(
+  frame: DecisionFrame,
+  locale: Locale = 'en'
+): AskScenarios {
   return {
     bestCase: {
-      outcome: 'You advance with a reversible pilot and retain optionality.',
+      outcome: askCopy(locale, 'scenario.best.outcome'),
       likelihoodBand: 'medium',
-      keyConditions: ['Critical unknown reduced', 'Timing window used'],
-      earlySignals: ['Clear next owner', 'Written success criteria'],
-      mitigation: 'Keep the first step reversible.',
+      keyConditions: [
+        askCopy(locale, 'scenario.best.condition1'),
+        askCopy(locale, 'scenario.best.condition2'),
+      ],
+      earlySignals: [
+        askCopy(locale, 'scenario.best.signal1'),
+        askCopy(locale, 'scenario.best.signal2'),
+      ],
+      mitigation: askCopy(locale, 'scenario.best.mitigation'),
     },
     mostLikely: {
-      outcome: `Partial progress with trade-offs around ${frame.mainConcern.toLowerCase()}.`,
+      outcome: askCopy(locale, 'scenario.likely.outcome', {
+        concern: localizeFramePhrase(
+          locale as AppLang,
+          frame.mainConcern
+        ).toLowerCase(),
+      }),
       likelihoodBand: 'high',
-      keyConditions: ['Mixed information quality'],
-      earlySignals: ['Delayed replies', 'Scope creep'],
-      mitigation: 'Time-box information gathering.',
+      keyConditions: [askCopy(locale, 'scenario.likely.condition1')],
+      earlySignals: [
+        askCopy(locale, 'scenario.likely.signal1'),
+        askCopy(locale, 'scenario.likely.signal2'),
+      ],
+      mitigation: askCopy(locale, 'scenario.likely.mitigation'),
     },
     downsideCase: {
-      outcome: 'An irreversible move lands before key facts are known.',
+      outcome: askCopy(locale, 'scenario.downside.outcome'),
       likelihoodBand: 'low',
-      keyConditions: ['Urgency overrides checkpoints'],
-      earlySignals: ['Pressure to skip review'],
-      mitigation: 'Separate pilot from commitment in writing.',
+      keyConditions: [askCopy(locale, 'scenario.downside.condition1')],
+      earlySignals: [askCopy(locale, 'scenario.downside.signal1')],
+      mitigation: askCopy(locale, 'scenario.downside.mitigation'),
     },
   };
 }
 
 export function buildLocalModules(
   intent: IntentDetection,
-  usedProfile: boolean
+  usedProfile: boolean,
+  locale: 'en' | 'ru' | 'fa' | 'ar' = 'en'
 ): RelatedModule[] {
+  const labels: Record<
+    'en' | 'ru' | 'fa' | 'ar',
+    Record<string, { reason: string; actionLabel: string }>
+  > = {
+    en: {
+      pathfinder: {
+        reason:
+          'Run a deeper multi-step workflow for irreversible or multi-option decisions.',
+        actionLabel: 'Open Pathfinder',
+      },
+      calendar: {
+        reason: 'Inspect day-level timing across the month.',
+        actionLabel: 'View Calendar',
+      },
+      today: {
+        reason: "Align the next action with today's energy windows.",
+        actionLabel: 'See Today',
+      },
+      people: {
+        reason: 'Communication context matters for this decision.',
+        actionLabel: 'Compare People',
+      },
+      profile: {
+        reason: 'Complete your profile to improve personalisation.',
+        actionLabel: 'Complete Profile',
+      },
+    },
+    fa: {
+      pathfinder: {
+        reason:
+          'برای تصمیم‌های برگشت‌ناپذیر یا چندگزینه‌ای، گردش‌کار عمیق‌تری اجرا کنید.',
+        actionLabel: 'باز کردن مسیریاب',
+      },
+      calendar: {
+        reason: 'زمان‌بندی روزبه‌روز ماه را بررسی کنید.',
+        actionLabel: 'مشاهده تقویم',
+      },
+      today: {
+        reason: 'اقدام بعدی را با پنجره‌های انرژی امروز هم‌راستا کنید.',
+        actionLabel: 'دیدن امروز',
+      },
+      people: {
+        reason: 'بافت ارتباطی برای این تصمیم مهم است.',
+        actionLabel: 'مقایسه افراد',
+      },
+      profile: {
+        reason: 'پروفایل را کامل کنید تا شخصی‌سازی بهتر شود.',
+        actionLabel: 'تکمیل پروفایل',
+      },
+    },
+    ru: {
+      pathfinder: {
+        reason:
+          'Запустите более глубокий многошаговый процесс для необратимых или многовариантных решений.',
+        actionLabel: 'Открыть Pathfinder',
+      },
+      calendar: {
+        reason: 'Проверьте дневной тайминг на протяжении месяца.',
+        actionLabel: 'Календарь',
+      },
+      today: {
+        reason: 'Согласуйте следующий шаг с энергетическими окнами сегодня.',
+        actionLabel: 'Сегодня',
+      },
+      people: {
+        reason: 'Контекст общения важен для этого решения.',
+        actionLabel: 'Сравнить людей',
+      },
+      profile: {
+        reason: 'Заполните профиль для лучшей персонализации.',
+        actionLabel: 'Заполнить профиль',
+      },
+    },
+    ar: {
+      pathfinder: {
+        reason:
+          'شغّل سير عمل أعمق متعدد الخطوات للقرارات غير القابلة للرجوع أو متعددة الخيارات.',
+        actionLabel: 'فتح المستكشف',
+      },
+      calendar: {
+        reason: 'افحص التوقيت اليومي عبر الشهر.',
+        actionLabel: 'عرض التقويم',
+      },
+      today: {
+        reason: 'واءم الخطوة التالية مع نوافذ طاقة اليوم.',
+        actionLabel: 'عرض اليوم',
+      },
+      people: {
+        reason: 'سياق التواصل مهم لهذا القرار.',
+        actionLabel: 'مقارنة الأشخاص',
+      },
+      profile: {
+        reason: 'أكمل ملفك لتحسين التخصيص.',
+        actionLabel: 'أكمل الملف',
+      },
+    },
+  };
+  const L = labels[locale] ?? labels.en;
   const modules: RelatedModule[] = [];
   if (intent.highStakesFlag || intent.decisionPresent) {
     modules.push({
       module: 'pathfinder',
-      reason: 'Run a deeper multi-step workflow for irreversible or multi-option decisions.',
-      actionLabel: 'Open Pathfinder',
+      reason: L.pathfinder.reason,
+      actionLabel: L.pathfinder.actionLabel,
       route: MODULE_ROUTES.pathfinder,
     });
   }
   if (intent.timingRelevant) {
     modules.push({
       module: 'calendar',
-      reason: 'Inspect day-level timing across the month.',
-      actionLabel: 'View Calendar',
+      reason: L.calendar.reason,
+      actionLabel: L.calendar.actionLabel,
       route: MODULE_ROUTES.calendar,
     });
   }
   modules.push({
     module: 'today',
-    reason: 'Align the next action with today’s energy windows.',
-    actionLabel: 'See Today',
+    reason: L.today.reason,
+    actionLabel: L.today.actionLabel,
     route: MODULE_ROUTES.today,
   });
   if (intent.peopleRelevant) {
     modules.push({
       module: 'people',
-      reason: 'Communication context matters for this decision.',
-      actionLabel: 'Compare People',
+      reason: L.people.reason,
+      actionLabel: L.people.actionLabel,
       route: MODULE_ROUTES.people,
     });
   }
   if (!usedProfile) {
     modules.push({
       module: 'profile',
-      reason: 'Complete your profile to improve personalisation.',
-      actionLabel: 'Complete Profile',
+      reason: L.profile.reason,
+      actionLabel: L.profile.actionLabel,
       route: MODULE_ROUTES.profile,
     });
   }
@@ -285,7 +446,8 @@ export function buildLocalConfidence(
   frame: DecisionFrame,
   usedProfile: boolean,
   usedTiming: boolean,
-  highStakes: boolean
+  highStakes: boolean,
+  locale: Locale = 'en'
 ): AskConfidence {
   let score = scores.confidence.value;
   if (highStakes) score = Math.min(score, 58);
@@ -300,14 +462,14 @@ export function buildLocalConfidence(
     score: clampScore(score),
     explanation:
       level === 'high'
-        ? 'Signals are aligned enough to act with checkpoints.'
+        ? askCopy(locale, 'conf.aligned')
         : level === 'medium'
-          ? 'Proceed with staged moves; one more critical input would raise confidence.'
-          : 'Treat this as directional — gather the missing input before irreversible steps.',
+          ? askCopy(locale, 'conf.staged')
+          : askCopy(locale, 'conf.directional'),
     missingInputs,
     limitingFactors: [
-      'Comparative decision-support only — not a prediction.',
-      ...(highStakes ? ['High-stakes domain — bounded educational guidance.'] : []),
+      askCopy(locale, 'conf.limit.comparative'),
+      ...(highStakes ? [askCopy(locale, 'conf.limit.highStakes')] : []),
       ...frame.assumptions.slice(0, 2),
     ],
   };
@@ -317,14 +479,23 @@ export function buildExecutiveSummary(
   frame: DecisionFrame,
   status: RecommendationStatus,
   recommendation: string,
-  nextAction: string
+  nextAction: string,
+  locale: Locale = 'en'
 ): string {
+  const statusLabel = askCopy(locale, `status.${status}`);
   const text = [
-    `Decision: ${frame.decisionStatement.slice(0, 80)}.`,
-    `Recommendation: ${status.replace(/-/g, ' ')}.`,
+    askCopy(locale, 'exec.decision', {
+      decision: frame.decisionStatement.slice(0, 80),
+    }),
+    askCopy(locale, 'exec.recommendation', { status: statusLabel }),
     recommendation.slice(0, 120),
-    `Caution: ${frame.mainConcern.slice(0, 60)}.`,
-    `Next: ${nextAction.slice(0, 80)}.`,
+    askCopy(locale, 'exec.caution', {
+      concern: localizeFramePhrase(locale as AppLang, frame.mainConcern).slice(
+        0,
+        60
+      ),
+    }),
+    askCopy(locale, 'exec.next', { next: nextAction.slice(0, 80) }),
   ].join(' ');
   return wordLimit(text, 90);
 }
@@ -337,7 +508,8 @@ export function buildTimingIntelligence(
     avoidWindow: { label: string; dateRange: string; score: number; note: string };
   } | null,
   applicable: boolean,
-  available: boolean
+  available: boolean,
+  locale: Locale = 'en'
 ): TimingIntelligence {
   if (!applicable) {
     return {
@@ -348,7 +520,7 @@ export function buildTimingIntelligence(
       next30Days: null,
       bestWindow: null,
       cautionWindow: null,
-      timingRationale: 'Timing advice not applicable for this question.',
+      timingRationale: askCopy(locale, 'timing.notApplicable'),
       timingConfidence: 'low',
     };
   }
@@ -361,7 +533,7 @@ export function buildTimingIntelligence(
       next30Days: null,
       bestWindow: null,
       cautionWindow: null,
-      timingRationale: 'Timing data unavailable — no fabricated windows.',
+      timingRationale: askCopy(locale, 'timing.unavailable'),
       timingConfidence: 'low',
     };
   }
@@ -369,55 +541,57 @@ export function buildTimingIntelligence(
     applicable: true,
     available: true,
     today: {
-      label: 'Today',
+      label: askCopy(locale, 'timing.today'),
       dateRange: timing.bestToday.dateRange,
       score: timing.bestToday.score,
       note: timing.bestToday.note,
     },
     next7Days: {
-      label: 'Next 7 days',
+      label: askCopy(locale, 'timing.next7Days'),
       dateRange: timing.bestThisWeek.dateRange,
       score: timing.bestThisWeek.score,
       note: timing.bestThisWeek.note,
     },
     next30Days: {
-      label: 'Next 30 days',
+      label: askCopy(locale, 'timing.next30Days'),
       dateRange: timing.bestThisMonth.dateRange,
       score: timing.bestThisMonth.score,
       note: timing.bestThisMonth.note,
     },
     bestWindow: {
-      label: 'Best window',
+      label: askCopy(locale, 'timing.bestWindow'),
       dateRange: timing.bestThisWeek.dateRange,
       score: timing.bestThisWeek.score,
       note: timing.bestThisWeek.note,
     },
     cautionWindow: {
-      label: 'Caution window',
+      label: askCopy(locale, 'timing.cautionWindow'),
       dateRange: timing.avoidWindow.dateRange,
       score: timing.avoidWindow.score,
       note: timing.avoidWindow.note,
     },
-    timingRationale:
-      'Windows derived from existing timing engine day scores — comparative, not predictive.',
+    timingRationale: askCopy(locale, 'timing.rationale'),
     timingConfidence: 'medium',
   };
 }
 
-export function safetyNoticeFor(intent: IntentDetection): string | null {
+export function safetyNoticeFor(
+  intent: IntentDetection,
+  locale: Locale = 'en'
+): string | null {
   if (!intent.highStakesFlag) return null;
   if (intent.primaryIntent === 'health' || intent.secondaryIntent === 'health') {
-    return 'Educational decision support only — not a diagnosis or treatment plan. Consult a qualified professional for medical decisions.';
+    return askCopy(locale, 'safety.health');
   }
   if (intent.primaryIntent === 'legal' || intent.secondaryIntent === 'legal') {
-    return 'Educational decision support only — not legal advice. Consult a qualified professional for legal conclusions.';
+    return askCopy(locale, 'safety.legal');
   }
   if (
     intent.primaryIntent === 'investment' ||
     intent.secondaryIntent === 'investment' ||
     intent.financialImpactLikely
   ) {
-    return 'Educational decision support only — not investment advice. No outcomes are guaranteed.';
+    return askCopy(locale, 'safety.investment');
   }
-  return 'High-stakes topic — treat this as bounded decision support, not a guarantee.';
+  return askCopy(locale, 'safety.highStakes');
 }

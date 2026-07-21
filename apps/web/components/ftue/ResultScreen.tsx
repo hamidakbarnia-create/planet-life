@@ -19,6 +19,7 @@ import { executePreparedDecision } from '@/lib/decision-engine-facade';
 import { prepareDecisionExecution } from '@/lib/decision-execution';
 import { resolveDecisionRequest } from '@/lib/decision-request';
 import { trackResultEvent } from '@/lib/ftue-analytics';
+import { getDecisionUi } from '@/lib/decision-ui-i18n';
 import { buildResultShareText, getResultCopy } from '@/lib/ftue-i18n';
 import { ftueTodayPath, markFtueComplete } from '@/lib/ftue-storage';
 import {
@@ -54,6 +55,7 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
   const profileRepo = getProfileRepository();
   const askRepo = getAskQuestionRepository();
   const c = getResultCopy(lang);
+  const decisionUi = getDecisionUi(lang);
   const initRef = useRef(false);
   const startedRef = useRef(false);
   const [chartPhase, setChartPhase] = useState<ResultChartPhase>('loading');
@@ -62,7 +64,7 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
     null
   );
   const [decisionLoading, setDecisionLoading] = useState(false);
-  const [loadingStage, setLoadingStage] = useState('Framing your decision');
+  const [loadingStage, setLoadingStage] = useState(decisionUi.loadingStages[0]);
   const [clarification, setClarification] = useState<ClarificationState | null>(
     null
   );
@@ -175,15 +177,16 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
     const controller = new AbortController();
     let cancelled = false;
 
+    const stages = getDecisionUi(lang).loadingStages;
     setDecisionLoading(true);
     setDecisionError(null);
-    setLoadingStage('Framing your decision');
+    setLoadingStage(stages[0]);
 
     void (async () => {
       try {
-        setLoadingStage('Applying your intelligence profile');
-        setLoadingStage('Checking timing context');
-        setLoadingStage('Building your recommendation');
+        setLoadingStage(stages[1]);
+        setLoadingStage(stages[2]);
+        setLoadingStage(stages[3]);
         const out = await runAskDecision({
           question: questionText,
           profile: loadBirthProfile(),
@@ -198,9 +201,7 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
         setDecisionResult(out.result);
       } catch {
         if (!cancelled) {
-          setDecisionError(
-            'The decision briefing could not be completed. Your question is preserved — retry when ready.'
-          );
+          setDecisionError(getDecisionUi(lang).briefingError);
         }
       } finally {
         if (!cancelled) setDecisionLoading(false);
@@ -300,6 +301,7 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
         pendingClarification={pendingClarification}
         error={decisionError}
         profileMissing={!getPersonalIntelligenceProfile()}
+        lang={lang}
         onClarify={(answer) => {
           setClarificationAnswer(answer);
           setContinueWithAssumptions(false);

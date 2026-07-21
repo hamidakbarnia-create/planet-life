@@ -4,18 +4,27 @@ import type { BirthProfile } from '@/lib/birth-profile';
 import {
   postConversationExecute,
   type ConversationLocale,
+  type ConversationMessage,
 } from '@/lib/conversation-client';
+import {
+  checkResponseLanguage,
+  extractUserFacingAskProse,
+  LANGUAGE_RETRY_INSTRUCTION,
+} from '@/lib/locale-language-guard';
 import { loadPathfinderTiming } from '@/lib/pathfinder-decision/timing';
+import { askCopy } from './ask-local-copy';
 import { trackAskDecisionEvent } from './analytics';
 import { evaluateClarification } from './clarification';
 import { collectAskContext } from './context';
 import { buildStructuredFallback } from './fallback';
 import { frameDecision } from './framing';
 import { detectIntent } from './intent';
+import { localizeAskDecisionPresentation } from './localize-presentation';
 import { buildTimingIntelligence } from './local-build';
 import { parseAskDecisionResponse } from './parse';
 import { buildAskDecisionPrompt } from './prompt-builder';
 import type { AskDecisionResult, ClarificationState } from './types';
+import type { AppLang } from '@/lib/app-settings';
 
 export type RunAskDecisionInput = {
   question: string;
@@ -34,6 +43,36 @@ export type RunAskDecisionOutput = {
   pendingClarification: boolean;
 };
 
+function parseInputBase(args: {
+  conversationMessage: string | null;
+  intent: ReturnType<typeof detectIntent>;
+  frame: ReturnType<typeof frameDecision>;
+  timing: ReturnType<typeof buildTimingIntelligence>;
+  usedProfile: boolean;
+  usedTiming: boolean;
+  decisionStyles: string[];
+  generatedAt: string;
+  requestId: string | null;
+  clarificationAnswer: string | null;
+  sources: string[];
+  locale: ConversationLocale;
+}) {
+  return {
+    conversationMessage: args.conversationMessage,
+    intent: args.intent,
+    frame: args.frame,
+    timing: args.timing,
+    usedProfile: args.usedProfile,
+    usedTiming: args.usedTiming,
+    decisionStyles: args.decisionStyles,
+    generatedAt: args.generatedAt,
+    requestId: args.requestId,
+    clarificationAnswer: args.clarificationAnswer,
+    sources: args.sources,
+    locale: args.locale,
+  };
+}
+
 /**
  * Full Ask V3 pipeline:
  * Intent → Frame → Optional clarification gate → Context → Conversation + Timing → Parse/Validate/Fallback
@@ -41,20 +80,25 @@ export type RunAskDecisionOutput = {
 export async function runAskDecision(
   input: RunAskDecisionInput
 ): Promise<RunAskDecisionOutput> {
-  const question = input.question.trim() || 'Untitled decision';
-  const generatedAt = new Date().toISOString();
   const locale = input.locale ?? 'en';
+  const question = input.question.trim() || askCopy(locale, 'run.untitled');
+  const generatedAt = new Date().toISOString();
 
   const intent = detectIntent(question);
   const frameBase = frameDecision(question, intent);
-  const clarification = evaluateClarification(frameBase, intent);
+  const clarification = evaluateClarification(frameBase, intent, locale);
 
   if (
     clarification.required &&
     !input.clarificationAnswer?.trim() &&
     !input.continueWithAssumptions
   ) {
-    const timingEmpty = buildTimingIntelligence(null, intent.timingRelevant, false);
+    const timingEmpty = buildTimingIntelligence(
+      null,
+      intent.timingRelevant,
+      false,
+      locale
+    );
     const pending = buildStructuredFallback({
       intent,
       frame: frameBase,
@@ -66,17 +110,20 @@ export async function runAskDecision(
       requestId: null,
       clarificationAnswer: null,
       reason: 'unknown',
+      locale,
     });
-    pending.recommendation = 'One clarification will improve this briefing.';
+    pending.recommendation = askCopy(locale, 'run.clarification.recommendation');
     pending.recommendationStatus = 'gather-more-information';
-    pending.executiveSummary =
-      'This question needs one clarification before a responsible recommendation. Answer the prompt or continue with stated assumptions.';
+    pending.executiveSummary = askCopy(
+      locale,
+      'run.clarification.executiveSummary'
+    );
     trackAskDecisionEvent('ask_clarification_shown', {
       intent: intent.primaryIntent,
       high_stakes: intent.highStakesFlag,
     });
     return {
-      result: pending,
+      result: localizeAskDecisionPresentation(pending, locale as AppLang),
       clarification,
       pendingClarification: true,
     };
@@ -90,7 +137,7 @@ export async function runAskDecision(
       : [
           ...frameBase.assumptions,
           ...(input.continueWithAssumptions
-            ? ['User continued with stated assumptions']
+            ? [askCopy(locale, 'run.continuedAssumptions')]
             : []),
         ],
   };
@@ -102,28 +149,31 @@ export async function runAskDecision(
 
   const context = collectAskContext(input.profile, { locale, intent });
 
-  let timingBlock = buildTimingIntelligence(null, intent.timingRelevant, false);
+  let timingBlock = buildTimingIntelligence(
+    null,
+    intent.timingRelevant,
+    false,
+    locale
+  );
   let conversationOk = false;
   let conversationMessage: string | null = null;
   let requestId: string | null = null;
   let failReason: 'network' | 'timeout' | 'parse' | 'provider' | 'unknown' = 'unknown';
+  let promptMessages: ConversationMessage[] = [];
 
   try {
+    promptMessages = buildAskDecisionPrompt({
+      question,
+      intent,
+      frame,
+      context,
+      clarificationAnswer: input.clarificationAnswer,
+    });
     const [timingResult, conversation] = await Promise.all([
       intent.timingRelevant || context.timingAvailable
         ? loadPathfinderTiming(input.profile).catch(() => null)
         : Promise.resolve(null),
-      postConversationExecute(
-        buildAskDecisionPrompt({
-          question,
-          intent,
-          frame,
-          context,
-          clarificationAnswer: input.clarificationAnswer,
-        }),
-        locale,
-        { signal: input.signal }
-      ),
+      postConversationExecute(promptMessages, locale, { signal: input.signal }),
     ]);
 
     if (timingResult) {
@@ -131,7 +181,8 @@ export async function runAskDecision(
         timingResult.timing,
         intent.timingRelevant,
         timingResult.signals.todayScore != null ||
-          timingResult.signals.weekScore != null
+          timingResult.signals.weekScore != null,
+        locale
       );
     }
 
@@ -153,6 +204,20 @@ export async function runAskDecision(
   if (timingBlock.available) sources.push('timing-engine');
   if (conversationOk) sources.push('conversation-api');
 
+  const sharedParse = {
+    intent,
+    frame,
+    timing: timingBlock,
+    usedProfile: context.usedProfile,
+    usedTiming: timingBlock.available,
+    decisionStyles: context.decisionStyles,
+    generatedAt,
+    requestId,
+    clarificationAnswer: input.clarificationAnswer ?? null,
+    sources,
+    locale,
+  };
+
   let result: AskDecisionResult;
   if (!conversationOk || !conversationMessage) {
     result = buildStructuredFallback({
@@ -166,6 +231,7 @@ export async function runAskDecision(
       requestId,
       clarificationAnswer: input.clarificationAnswer ?? null,
       reason: failReason,
+      locale,
     });
     trackAskDecisionEvent('ask_result_failed', {
       reason: failReason,
@@ -173,19 +239,104 @@ export async function runAskDecision(
       has_request_id: Boolean(requestId),
     });
   } else {
-    result = parseAskDecisionResponse({
-      conversationMessage,
-      intent,
-      frame,
-      timing: timingBlock,
-      usedProfile: context.usedProfile,
-      usedTiming: timingBlock.available,
-      decisionStyles: context.decisionStyles,
-      generatedAt,
-      requestId,
-      clarificationAnswer: input.clarificationAnswer ?? null,
-      sources,
-    });
+    result = parseAskDecisionResponse(
+      parseInputBase({
+        ...sharedParse,
+        conversationMessage,
+      })
+    );
+
+    // Language guard: one retry for fa/ar/ru when prose is English-dominant.
+    if (locale === 'fa' || locale === 'ar' || locale === 'ru') {
+      const prose = extractUserFacingAskProse(result);
+      const langCheck = checkResponseLanguage(prose, locale);
+      if (!langCheck.ok) {
+        console.info({
+          event: 'ask_language_mismatch',
+          locale,
+          dominant: langCheck.dominant,
+          requestId,
+          attempt: 1,
+        });
+
+        let didLanguageRetry = false;
+        if (!didLanguageRetry) {
+          didLanguageRetry = true;
+          try {
+            const retryMessages: ConversationMessage[] = [
+              ...promptMessages,
+              {
+                role: 'user',
+                content: LANGUAGE_RETRY_INSTRUCTION[locale],
+              },
+            ];
+            const retry = await postConversationExecute(retryMessages, locale, {
+              signal: input.signal,
+            });
+            if (retry.ok) {
+              requestId = retry.body.request_id;
+              result = parseAskDecisionResponse(
+                parseInputBase({
+                  ...sharedParse,
+                  conversationMessage: retry.body.message,
+                  requestId,
+                  sources: [...new Set([...sources, 'conversation-api'])],
+                })
+              );
+              const retryProse = extractUserFacingAskProse(result);
+              const retryCheck = checkResponseLanguage(retryProse, locale);
+              if (!retryCheck.ok) {
+                result = buildStructuredFallback({
+                  intent,
+                  frame,
+                  timing: timingBlock,
+                  usedProfile: context.usedProfile,
+                  usedTiming: timingBlock.available,
+                  decisionStyles: context.decisionStyles,
+                  generatedAt,
+                  requestId,
+                  clarificationAnswer: input.clarificationAnswer ?? null,
+                  reason: 'parse',
+                  locale,
+                });
+                result.recommendation = askCopy(locale, 'safe.languageFailure');
+                result.executiveSummary = askCopy(locale, 'safe.languageFailure');
+              }
+            } else {
+              result = buildStructuredFallback({
+                intent,
+                frame,
+                timing: timingBlock,
+                usedProfile: context.usedProfile,
+                usedTiming: timingBlock.available,
+                decisionStyles: context.decisionStyles,
+                generatedAt,
+                requestId,
+                clarificationAnswer: input.clarificationAnswer ?? null,
+                reason: 'provider',
+                locale,
+              });
+            }
+          } catch (err) {
+            const name = err instanceof Error ? err.name : '';
+            result = buildStructuredFallback({
+              intent,
+              frame,
+              timing: timingBlock,
+              usedProfile: context.usedProfile,
+              usedTiming: timingBlock.available,
+              decisionStyles: context.decisionStyles,
+              generatedAt,
+              requestId,
+              clarificationAnswer: input.clarificationAnswer ?? null,
+              reason: name === 'AbortError' ? 'timeout' : 'network',
+              locale,
+            });
+          }
+        }
+      }
+    }
+
     trackAskDecisionEvent('ask_result_rendered', {
       intent: intent.primaryIntent,
       status: result.recommendationStatus,
@@ -194,6 +345,9 @@ export async function runAskDecision(
       used_timing: timingBlock.available,
     });
   }
+
+  // Presentation gate: never ship English/wrong-script Decision UI for fa/ar/ru.
+  result = localizeAskDecisionPresentation(result, locale as AppLang);
 
   return { result, clarification, pendingClarification: false };
 }
