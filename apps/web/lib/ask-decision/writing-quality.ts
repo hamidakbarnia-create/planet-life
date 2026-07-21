@@ -30,6 +30,10 @@ import type {
   AskDecisionResult,
   RecommendationStatus,
 } from './types';
+import {
+  appendMissingTokens,
+  extractSemanticTokens,
+} from './semantic-tokens';
 
 const MECHANICAL_RE =
   /Decision:\s*|Recommendation:\s*|Primary concern not fully|Main concern not fully|Time horizon not stated|Explicit options not stated|Unknown — reversibility|شناسایی پراهرم‌ترین|نگرانی اصلی به‌طور کامل بیان نشده|فعل تصمیم مبهم|استفاده از چارچوب تصمیم عمومی|Provider path unavailable|مسیر ارائه‌دهنده|Structured fallback|بازگشت ساخت‌یافته|القلق الرئيسي غير مذكور|Основная озабоченность указана|Используйте общий каркас|Decision style signals \(/i;
@@ -405,11 +409,36 @@ export function applyWritingQualityLayer(
   const actions = buildActions(result, locale);
   const recommendation = polishRecommendation(result, locale);
 
-  const executiveSummary =
-    isMechanical(result.executiveSummary) ||
-    /Decision:|تصمیم:|القرار:|Решение:/i.test(result.executiveSummary)
+  // Label scaffolds at line start (EN or localized exec templates) — not
+  // mid-sentence uses like «موضوع تصمیم:».
+  const labelScaffold =
+    /(?:^|\n)\s*(?:Decision|Recommendation|تصمیم|توصیه|القرار|التوصية|Решение|Рекомендация):\s*/i.test(
+      result.executiveSummary
+    );
+
+  let executiveSummary =
+    isMechanical(result.executiveSummary) || labelScaffold
       ? summary
-      : result.executiveSummary.trim().slice(0, 400) || summary;
+      : result.executiveSummary.trim().slice(0, 600) || summary;
+
+  // Preserve scenario facts if summary rewrite dropped them
+  const sourceFacts = extractSemanticTokens(
+    [
+      result.executiveSummary,
+      result.recommendation,
+      result.decisionFrame.decisionStatement,
+      result.decisionFrame.mainConcern,
+      ...result.decisionFrame.options,
+      ...result.actionPlan.now.map((a) => a.action),
+      ...result.analysis.map((c) => c.body),
+    ].join('\n')
+  );
+  executiveSummary = appendMissingTokens(
+    executiveSummary,
+    sourceFacts,
+    askCopy(locale, 'semantic.factsJoin'),
+    'prepend'
+  );
 
   const safeSummary = ASTROLOGY_RE.test(executiveSummary)
     ? result.executiveSummary

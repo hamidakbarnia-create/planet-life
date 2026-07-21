@@ -10,6 +10,12 @@
  *   rebuilt from local templates ONLY when that field is English-dominant,
  *   wrong sibling script, or a known deterministic English scaffold.
  *
+ * Semantic preservation:
+ *   English fields that fail the language guard are NOT discarded wholesale.
+ *   Scenario-specific actions are preserved (wrapped), not replaced by generic
+ *   action.now.* unless empty/unusable. Score rationales are repaired per-field
+ *   while retaining semantic tokens. Known mechanical scaffolds are polished.
+ *
  * Valid localized, personalized provider prose is preserved.
  */
 
@@ -32,8 +38,19 @@ import {
   buildLocalScores,
   buildLocalScenarios,
 } from './local-build';
-import type { AnalysisSection, AskDecisionResult } from './types';
+import type {
+  ActionItem,
+  AnalysisSection,
+  AskActionPlan,
+  AskDecisionResult,
+  AskDecisionScores,
+} from './types';
 import { applyWritingQualityLayer } from './writing-quality';
+import { polishMechanicalScaffolds } from './scaffold-polish';
+import {
+  appendMissingTokens,
+  extractSemanticTokens,
+} from './semantic-tokens';
 
 type AnalysisId = AnalysisSection['id'];
 
@@ -79,6 +96,17 @@ function localizedRecommendationForStatus(
   );
 }
 
+function withPreservedFacts(
+  localized: string,
+  source: string,
+  locale: AppLang
+): string {
+  const polished = polishMechanicalScaffolds(localized, locale);
+  const tokens = extractSemanticTokens(source);
+  const join = askCopy(locale, 'semantic.factsJoin');
+  return appendMissingTokens(polished, tokens, join, 'prepend');
+}
+
 function repairAnalysisBodies(
   result: AskDecisionResult,
   locale: AppLang,
@@ -99,16 +127,152 @@ function repairAnalysisBodies(
     const title = uiTitles[id] ?? uiTitles.situation ?? card.title;
     const needsBody = fieldNeedsLanguageCorrection(card.body, locale);
     if (!needsBody) {
-      return { ...card, id, title, body: card.body };
+      return {
+        ...card,
+        id,
+        title,
+        body: polishMechanicalScaffolds(card.body, locale),
+      };
     }
     const localCard = localById.get(id);
+    const rebuilt = localCard?.body ?? card.body;
     return {
       ...card,
       id,
       title,
-      body: localCard?.body ?? card.body,
+      body: withPreservedFacts(rebuilt, card.body, locale),
     };
   });
+}
+
+function isUnusableAction(text: string): boolean {
+  return !text.trim() || text.trim().length < 3;
+}
+
+/**
+ * Per-item action repair: never wipe a whole plan for one English action.
+ * Specific actions are preserved (detail kept); generics only for empty slots.
+ */
+function repairActionPlan(
+  plan: AskActionPlan,
+  frame: AskDecisionResult['decisionFrame'],
+  locale: AppLang
+): AskActionPlan {
+  const safe = buildLocalActionPlan(frame, locale);
+
+  const repairBucket = (
+    items: ActionItem[],
+    safeItems: ActionItem[]
+  ): ActionItem[] => {
+    if (items.length === 0) return items;
+
+    return items.map((item, i) => {
+      if (isUnusableAction(item.action)) {
+        return safeItems[i] ?? item;
+      }
+
+      const actionBad = fieldNeedsLanguageCorrection(item.action, locale);
+      const purposeBad = fieldNeedsLanguageCorrection(item.purpose, locale);
+      const signalBad = fieldNeedsLanguageCorrection(
+        item.completionSignal,
+        locale
+      );
+
+      if (!actionBad && !purposeBad && !signalBad) {
+        return item;
+      }
+
+      // Keep scenario-specific action text; do not swap for generic action.now.*
+      return {
+        ...item,
+        action: actionBad
+          ? askCopy(locale, 'action.preserveSpecific', {
+              detail: item.action.trim(),
+            })
+          : item.action,
+        purpose: purposeBad
+          ? askCopy(locale, 'action.preserveSpecific.purpose')
+          : item.purpose,
+        completionSignal: signalBad
+          ? askCopy(locale, 'action.preserveSpecific.signal')
+          : item.completionSignal,
+      };
+    });
+  };
+
+  // If the entire now-plan is empty, use safe fallbacks once.
+  const now =
+    plan.now.filter((a) => a.action.trim()).length === 0
+      ? safe.now
+      : repairBucket(plan.now, safe.now);
+
+  return {
+    now,
+    next7Days: repairBucket(plan.next7Days, safe.next7Days),
+    next30Days: repairBucket(plan.next30Days, safe.next30Days),
+  };
+}
+
+function repairScoreRationales(
+  scores: AskDecisionScores,
+  frame: AskDecisionResult['decisionFrame'],
+  intent: AskDecisionResult['intent'],
+  timingScore: number | null,
+  usedProfile: boolean,
+  locale: AppLang
+): AskDecisionScores {
+  const localScores = buildLocalScores(
+    frame,
+    intent,
+    timingScore,
+    usedProfile,
+    locale
+  );
+
+  const repairOne = (
+    key: keyof AskDecisionScores
+  ): AskDecisionScores[typeof key] => {
+    const current = scores[key];
+    if (!fieldNeedsLanguageCorrection(current.rationale, locale)) {
+      return {
+        value: current.value,
+        rationale: polishMechanicalScaffolds(current.rationale, locale),
+      };
+    }
+    const local = localScores[key].rationale;
+    const facts = extractSemanticTokens(current.rationale);
+    let rationale = polishMechanicalScaffolds(local, locale);
+    if (facts.length > 0) {
+      rationale = askCopy(locale, 'rationale.preserve', {
+        local: rationale,
+        facts: facts.join(', '),
+      });
+    } else {
+      // Still embed original rationale snippet so markers/direction survive
+      rationale = askCopy(locale, 'rationale.preserve', {
+        local: rationale,
+        facts: current.rationale.trim().slice(0, 160),
+      });
+    }
+    return { value: current.value, rationale };
+  };
+
+  return {
+    opportunity: repairOne('opportunity'),
+    risk: repairOne('risk'),
+    timing: repairOne('timing'),
+    readiness: repairOne('readiness'),
+    confidence: repairOne('confidence'),
+  };
+}
+
+function polishAssumptions(
+  assumptions: string[],
+  locale: AppLang
+): string[] {
+  return assumptions.map((a) =>
+    polishMechanicalScaffolds(localizeFramePhrase(locale, a), locale)
+  );
 }
 
 /**
@@ -142,10 +306,9 @@ export function localizeAskDecisionPresentation(
     analysis: withResolvedIds.analysis.map((card) => ({
       ...card,
       title: uiTitles[card.id] ?? uiTitles.situation ?? card.title,
+      body: polishMechanicalScaffolds(card.body, locale),
     })),
-    assumptions: withResolvedIds.assumptions.map((a) =>
-      localizeFramePhrase(locale, a)
-    ),
+    assumptions: polishAssumptions(withResolvedIds.assumptions, locale),
   };
 
   const recommendationBad = fieldNeedsLanguageCorrection(
@@ -180,20 +343,47 @@ export function localizeAskDecisionPresentation(
     ['opportunity', 'risk', 'timing', 'readiness', 'confidence'] as const
   ).some((k) => fieldNeedsLanguageCorrection(next.scores[k].rationale, locale));
 
+  // Collect scenario tokens from the original result for summary/recommendation
+  const sourceTokens = extractSemanticTokens(
+    [
+      result.executiveSummary,
+      result.recommendation,
+      result.decisionFrame.decisionStatement,
+      result.decisionFrame.mainConcern,
+      ...result.decisionFrame.unknowns,
+      ...result.actionPlan.now.map((a) => a.action),
+      ...result.analysis.map((c) => c.body),
+    ].join('\n')
+  );
+
   // --- Category B: field-selective ---
   if (anyAnalysisBodyBad) {
     next = {
       ...next,
       analysis: repairAnalysisBodies(next, locale, uiTitles),
     };
+  } else {
+    // Still polish scaffolds on kept bodies
+    next = {
+      ...next,
+      analysis: next.analysis.map((card) => ({
+        ...card,
+        body: polishMechanicalScaffolds(card.body, locale),
+      })),
+    };
   }
 
   if (recommendationBad) {
+    const statusRec = localizedRecommendationForStatus(
+      locale,
+      next.recommendationStatus
+    );
     next = {
       ...next,
-      recommendation: localizedRecommendationForStatus(
-        locale,
-        next.recommendationStatus
+      recommendation: withPreservedFacts(
+        statusRec,
+        result.recommendation,
+        locale
       ),
     };
   }
@@ -201,7 +391,11 @@ export function localizeAskDecisionPresentation(
   if (actionBad) {
     next = {
       ...next,
-      actionPlan: buildLocalActionPlan(next.decisionFrame, locale),
+      actionPlan: repairActionPlan(
+        next.actionPlan,
+        next.decisionFrame,
+        locale
+      ),
     };
   }
 
@@ -215,37 +409,16 @@ export function localizeAskDecisionPresentation(
   if (scoreRationaleBad) {
     const timingScore =
       next.timing.bestWindow?.score ?? next.timing.today?.score ?? null;
-    const localScores = buildLocalScores(
-      next.decisionFrame,
-      next.intent,
-      timingScore,
-      usedProfile,
-      locale
-    );
     next = {
       ...next,
-      scores: {
-        opportunity: {
-          value: next.scores.opportunity.value,
-          rationale: localScores.opportunity.rationale,
-        },
-        risk: {
-          value: next.scores.risk.value,
-          rationale: localScores.risk.rationale,
-        },
-        timing: {
-          value: next.scores.timing.value,
-          rationale: localScores.timing.rationale,
-        },
-        readiness: {
-          value: next.scores.readiness.value,
-          rationale: localScores.readiness.rationale,
-        },
-        confidence: {
-          value: next.scores.confidence.value,
-          rationale: localScores.confidence.rationale,
-        },
-      },
+      scores: repairScoreRationales(
+        next.scores,
+        next.decisionFrame,
+        next.intent,
+        timingScore,
+        usedProfile,
+        locale
+      ),
     };
   }
 
@@ -262,7 +435,11 @@ export function localizeAskDecisionPresentation(
       ...next,
       confidence: {
         ...next.confidence,
-        explanation: rebuilt.explanation,
+        explanation: withPreservedFacts(
+          rebuilt.explanation,
+          result.confidence.explanation,
+          locale
+        ),
         missingInputs: next.confidence.missingInputs.some((m) =>
           fieldNeedsLanguageCorrection(m, locale)
         )
@@ -280,14 +457,50 @@ export function localizeAskDecisionPresentation(
   if (summaryBad || recommendationBad) {
     const nextAction =
       next.actionPlan.now[0]?.action ?? askCopy(locale, 'parse.nextStep');
+    const rebuilt = buildExecutiveSummary(
+      next.decisionFrame,
+      next.recommendationStatus,
+      next.recommendation,
+      nextAction,
+      locale
+    );
     next = {
       ...next,
-      executiveSummary: buildExecutiveSummary(
-        next.decisionFrame,
-        next.recommendationStatus,
-        next.recommendation,
-        nextAction,
+      executiveSummary: withPreservedFacts(
+        rebuilt,
+        result.executiveSummary,
         locale
+      ),
+    };
+  } else {
+    next = {
+      ...next,
+      executiveSummary: withPreservedFacts(
+        next.executiveSummary,
+        result.executiveSummary,
+        locale
+      ),
+    };
+  }
+
+  // Final pass: ensure global source tokens survive somewhere in user-facing prose
+  const proseBlob = [
+    next.executiveSummary,
+    next.recommendation,
+    ...next.actionPlan.now.map((a) => a.action),
+    ...next.analysis.map((c) => c.body),
+  ].join('\n');
+  const stillMissing = sourceTokens.filter(
+    (t) => !proseBlob.toLowerCase().includes(t.toLowerCase())
+  );
+  if (stillMissing.length > 0) {
+    next = {
+      ...next,
+      executiveSummary: appendMissingTokens(
+        next.executiveSummary,
+        stillMissing,
+        askCopy(locale, 'semantic.factsJoin'),
+        'prepend'
       ),
     };
   }

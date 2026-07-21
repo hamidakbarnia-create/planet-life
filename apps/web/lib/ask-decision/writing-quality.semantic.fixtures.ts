@@ -72,11 +72,26 @@ function baseResult(opts: {
     recommendation: opts.recommendation,
     recommendationStatus: opts.status,
     scores: {
-      opportunity: { value: 58, rationale: 'Mixed window' },
-      risk: { value: 52, rationale: 'Material downside' },
-      timing: { value: 49, rationale: 'Timing uncertain' },
-      readiness: { value: 55, rationale: 'Partial readiness' },
-      confidence: { value: 62, rationale: 'Moderate' },
+      opportunity: {
+        value: 58,
+        rationale: `Constructive upside around: ${opts.decision.slice(0, 60)}`,
+      },
+      risk: {
+        value: 52,
+        rationale: `Material downside risk tied to: ${opts.concern.slice(0, 60)}`,
+      },
+      timing: {
+        value: 49,
+        rationale: 'Timing uncertain until the review window is clearer',
+      },
+      readiness: {
+        value: 55,
+        rationale: 'Partial readiness — profile signals incomplete',
+      },
+      confidence: {
+        value: 62,
+        rationale: 'Moderate confidence with incomplete inputs',
+      },
     },
     analysis: [
       {
@@ -307,7 +322,7 @@ export const WRITING_SEMANTIC_FIXTURES: WritingSemanticFixture[] = [
       intent: 'relationship',
       status: 'proceed-with-caution',
       question: 'Should we move in together before the wedding?',
-      decision: 'Whether to move in together before the wedding',
+      decision: 'Whether moving in together before the wedding is wise',
       concern: 'lease co-sign without a shared exit plan',
       unknowns: ['conflict repair habits under stress', 'money split rules'],
       options: ['move in together now', 'wait until after wedding'],

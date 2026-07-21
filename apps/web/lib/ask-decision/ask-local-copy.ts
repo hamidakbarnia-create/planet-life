@@ -260,6 +260,12 @@ const EN: CopyTable = {
   'safe.languageFailure':
     'We could not deliver this briefing in your selected language. Please retry.',
 
+  'action.preserveSpecific': '{detail}',
+  'action.preserveSpecific.purpose': 'Keep this step concrete',
+  'action.preserveSpecific.signal': 'Step completed or deferred on purpose',
+  'semantic.factsJoin': 'Key facts to keep:',
+  'rationale.preserve': '{local} ({facts})',
+
   // Writing quality layer
   'wq.status.proceed': 'The current lean is to move forward.',
   'wq.status.caution':
@@ -531,6 +537,12 @@ const FA: CopyTable = {
   'safe.languageFailure':
     'نتوانستیم این خلاصه را به زبان انتخابی شما بدهیم. لطفاً دوباره تلاش کنید.',
 
+  'action.preserveSpecific': '{detail}',
+  'action.preserveSpecific.purpose': 'این گام را مشخص نگه دارید',
+  'action.preserveSpecific.signal': 'گام انجام شد یا عمداً به تعویق افتاد',
+  'semantic.factsJoin': 'حقایق مهم که باید بماند:',
+  'rationale.preserve': '{local} ({facts})',
+
   'wq.status.proceed': 'تمایل فعلی به جلو رفتن است.',
   'wq.status.caution':
     'تمایل فعلی به جلو رفتن با احتیاط است؛ بخش برگشت‌ناپذیر را جدا نگه دارید.',
@@ -567,13 +579,13 @@ const AR: CopyTable = {
   'frame.unknown.timeHorizon': 'الأفق الزمني غير مذكور',
   'frame.unknown.options': 'الخيارات الصريحة غير مذكورة',
   'frame.unknown.decisionVerb': 'فعل القرار غير واضح',
-  'frame.unknown.mainConcern': 'القلق الرئيسي غير مذكور بالكامل',
+  'frame.unknown.mainConcern': 'ما زال القلق الأساسي غير واضح',
   'frame.assumption.timingFlexible': 'نتعامل مع التوقيت بمرونة ما لم يُوضَّح خلاف ذلك',
   'frame.assumption.proceedWaitGather': 'نؤطّر القرار كالمضي / الانتظار / جمع المعلومات',
   'frame.assumption.decisionSupport': 'نفسّر السؤال كطلب دعم قرار',
   'frame.objective.default': 'تحديد الخطوة التالية الأكثر تأثيراً للسؤال المذكور',
   'frame.objective.resolve': 'حسم المضي قدماً: {detail}',
-  'frame.concern.unstated': 'القلق الرئيسي غير مذكور بالكامل',
+  'frame.concern.unstated': 'ما زال القلق الأساسي غير واضح',
   'frame.concern.downside': 'قلق مذكور حول الجانب السلبي أو الندم',
   'frame.concern.financial': 'تعرّض مالي أو للموارد (مستنتج)',
   'frame.concern.people': 'تأثير على الأشخاص (مستنتج)',
@@ -799,6 +811,12 @@ const AR: CopyTable = {
   'safe.languageFailure':
     'تعذّر تقديم هذا الملخص بلغتك المحددة. يرجى إعادة المحاولة.',
 
+  'action.preserveSpecific': '{detail}',
+  'action.preserveSpecific.purpose': 'أبقِ هذه الخطوة ملموسة',
+  'action.preserveSpecific.signal': 'أُنجزت الخطوة أو أُجّلت عمداً',
+  'semantic.factsJoin': 'حقائق أساسية يجب أن تبقى:',
+  'rationale.preserve': '{local} ({facts})',
+
   'wq.status.proceed': 'الميل الحالي هو المضي قدماً.',
   'wq.status.caution':
     'الميل الحالي هو المضي بحذر مع فصل الجزء غير القابل للرجوع.',
@@ -836,13 +854,13 @@ const RU: CopyTable = {
   'frame.unknown.timeHorizon': 'Временной горизонт не указан',
   'frame.unknown.options': 'Явные варианты не указаны',
   'frame.unknown.decisionVerb': 'Глагол решения неясен',
-  'frame.unknown.mainConcern': 'Основная озабоченность указана не полностью',
+  'frame.unknown.mainConcern': 'главное опасение всё ещё неясно',
   'frame.assumption.timingFlexible': 'Считаем тайминг гибким, пока не уточнено иное',
   'frame.assumption.proceedWaitGather': 'Формулируем как решение продолжить / ждать / собрать информацию',
   'frame.assumption.decisionSupport': 'Интерпретируем вопрос как запрос поддержки решения',
   'frame.objective.default': 'Определить наиболее эффективный следующий шаг по вопросу',
   'frame.objective.resolve': 'Решить, двигаться ли дальше: {detail}',
-  'frame.concern.unstated': 'Основная озабоченность указана не полностью',
+  'frame.concern.unstated': 'главное опасение всё ещё неясно',
   'frame.concern.downside': 'Заявленная озабоченность по поводу риска или сожаления',
   'frame.concern.financial': 'Финансовое или ресурсное воздействие (выведено)',
   'frame.concern.people': 'Влияние на людей (выведено)',
@@ -1067,6 +1085,12 @@ const RU: CopyTable = {
 
   'safe.languageFailure':
     'Не удалось предоставить этот брифинг на выбранном языке. Пожалуйста, повторите попытку.',
+
+  'action.preserveSpecific': '{detail}',
+  'action.preserveSpecific.purpose': 'Сохранить этот шаг конкретным',
+  'action.preserveSpecific.signal': 'Шаг выполнен или сознательно отложен',
+  'semantic.factsJoin': 'Ключевые факты, которые нужно сохранить:',
+  'rationale.preserve': '{local} ({facts})',
 
   'wq.status.proceed': 'Текущий уклон — двигаться вперёд.',
   'wq.status.caution':
