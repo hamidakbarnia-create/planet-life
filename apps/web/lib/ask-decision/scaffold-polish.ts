@@ -106,6 +106,15 @@ const SCAFFOLD_ENTRIES: Array<{ match: RegExp; map: LocaleMap }> = [
     },
   },
   {
+    match: /Primary concern:\s*/gi,
+    map: {
+      en: 'Main risk: ',
+      fa: 'اصلی‌ترین ریسک: ',
+      ar: 'أهم مخاطرة: ',
+      ru: 'Главный риск: ',
+    },
+  },
+  {
     match: /Objective:\s*/gi,
     map: {
       en: 'Goal: ',
@@ -130,15 +139,6 @@ const SCAFFOLD_ENTRIES: Array<{ match: RegExp; map: LocaleMap }> = [
       fa: 'میزان برگشت‌پذیری: ',
       ar: 'قابلية الرجوع: ',
       ru: 'Обратимость: ',
-    },
-  },
-  {
-    match: /Primary concern:\s*/gi,
-    map: {
-      en: 'Main risk: ',
-      fa: 'اصلی‌ترین ریسک: ',
-      ar: 'أهم مخاطرة: ',
-      ru: 'Главный риск: ',
     },
   },
   {
