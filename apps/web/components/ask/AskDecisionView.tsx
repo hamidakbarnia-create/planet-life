@@ -396,11 +396,16 @@ export function AskDecisionView({
                   </p>
                   <ul className="space-y-2">
                     {items.map((item) => (
-                      <li key={item.action} className="fi text-sm text-white/85">
-                        <span className="text-white/40 text-[10px] uppercase me-1">
+                      <li
+                        key={item.action}
+                        className="fi text-sm text-white/85 flex items-start gap-2"
+                      >
+                        <span className="shrink-0 text-white/40 text-[10px] tracking-wide pt-0.5">
                           {localizeActionPriority(item.priority, lang)}
                         </span>
-                        {localizeStyleTokensInText(item.action, lang)}
+                        <span className="min-w-0 flex-1 leading-relaxed [overflow-wrap:anywhere]">
+                          {localizeStyleTokensInText(item.action, lang)}
+                        </span>
                       </li>
                     ))}
                   </ul>
