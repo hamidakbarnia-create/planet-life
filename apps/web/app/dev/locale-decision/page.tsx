@@ -10,7 +10,8 @@ export default async function LocaleDecisionProofPage({
 }) {
   const allow =
     process.env.NODE_ENV === 'development' ||
-    process.env.NEXT_PUBLIC_CHART_TEST === '1';
+    process.env.NEXT_PUBLIC_CHART_TEST === '1' ||
+    process.env.NEXT_PUBLIC_APP_ENV === 'staging';
   if (!allow) notFound();
 
   const params = await searchParams;
