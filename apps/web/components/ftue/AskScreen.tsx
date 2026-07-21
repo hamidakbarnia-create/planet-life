@@ -12,7 +12,9 @@ import {
   isProfileRecordComplete,
 } from '@/lib/profile';
 import { detectIntent } from '@/lib/ask-decision';
+import { getDecisionUi } from '@/lib/decision-ui-i18n';
 import { getAskProfileContext } from '@/lib/intelligence-profile';
+import { localizeStyleToken } from '@/lib/intelligence/intelligence-copy';
 import {
   findGuidedQuestion,
   getAllQuestionCategories,
@@ -156,6 +158,10 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
 
   const charCount = question.length;
   const askIntel = getAskProfileContext();
+  const decisionUi = getDecisionUi(lang);
+  const localizedDecisionStyles = askIntel
+    ? askIntel.decisionStyles.map((s) => localizeStyleToken(s, lang))
+    : [];
   const liveIntent = trimmed ? detectIntent(trimmed).primaryIntent : null;
 
   return (
@@ -167,12 +173,12 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
         <p className="fi text-xs text-white/45 mt-2">
           Ask turns your question into structured decision intelligence — recommendation, scores, timing, and next actions.
         </p>
-        {askIntel ? (
+        {localizedDecisionStyles.length > 0 ? (
           <p
             className="fi text-xs text-[#93B4FF] mt-3"
             data-testid="ask-decision-style"
           >
-            Decision style: {askIntel.decisionStyles.join(' · ')}
+            {decisionUi.decisionStyle}: {localizedDecisionStyles.join(' · ')}
           </p>
         ) : null}
         {liveIntent ? (

@@ -27,20 +27,23 @@ function ScoreMeter({
   value,
   rationale,
   outOf100,
+  lang,
 }: {
   label: string;
   value: number;
   rationale: string;
   outOf100: string;
+  lang: AppLang;
 }) {
   const band = scoreToBand(value);
   const style = BAND_STYLES[band];
+  const localizedRationale = localizeStyleTokensInText(rationale, lang);
   return (
     <div
       className="rounded-xl border p-3"
       style={{ borderColor: style.border, background: style.bg }}
       data-testid={`ask-score-${label.toLowerCase().replace(/\s+/g, '-')}`}
-      aria-label={`${label}: ${value} ${outOf100}. ${rationale}`}
+      aria-label={`${label}: ${value} ${outOf100}. ${localizedRationale}`}
     >
       <div className="fi text-[10px] uppercase tracking-[0.16em]" style={{ color: style.text }}>
         {label}
@@ -48,7 +51,7 @@ function ScoreMeter({
       <div className="fc text-3xl font-semibold mt-1 tabular-nums" style={{ color: style.text }}>
         {value}
       </div>
-      <p className="fi text-[11px] mt-1 text-white/55 leading-snug">{rationale}</p>
+      <p className="fi text-[11px] mt-1 text-white/55 leading-snug">{localizedRationale}</p>
     </div>
   );
 }
@@ -279,9 +282,11 @@ export function AskDecisionView({
                   <p className="fi text-xs text-white/45 uppercase tracking-widest">
                     {localizeLikelihoodBand(s.likelihoodBand, lang)}
                   </p>
-                  <p className="fi text-sm text-white/80">{s.outcome}</p>
+                  <p className="fi text-sm text-white/80">
+                    {localizeStyleTokensInText(s.outcome, lang)}
+                  </p>
                   <p className="fi text-xs text-white/50">
-                    {t.mitigation}: {s.mitigation}
+                    {t.mitigation}: {localizeStyleTokensInText(s.mitigation, lang)}
                   </p>
                 </GlassCard>
               ))}
@@ -294,12 +299,12 @@ export function AskDecisionView({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {alternatives.map((alt) => (
                   <GlassCard key={alt.option} variant="technical" className="p-4 space-y-2">
-                    <p className="fc text-sm text-white">{alt.option}</p>
+                    <p className="fc text-sm text-white">{localizeStyleTokensInText(alt.option, lang)}</p>
                     <p className="fi text-xs text-[#93B4FF]">
-                      {t.bestFor}: {alt.bestFor}
+                      {t.bestFor}: {localizeStyleTokensInText(alt.bestFor, lang)}
                     </p>
                     <p className="fi text-xs text-white/60">
-                      {t.risk}: {alt.risk}
+                      {t.risk}: {localizeStyleTokensInText(alt.risk, lang)}
                     </p>
                   </GlassCard>
                 ))}
@@ -313,12 +318,12 @@ export function AskDecisionView({
               <ul className="space-y-1">
                 {assumptions.map((a) => (
                   <li key={a} className="fi text-xs text-white/70">
-                    · {a}
+                    · {localizeStyleTokensInText(a, lang)}
                   </li>
                 ))}
                 {limitations.slice(0, 3).map((l) => (
                   <li key={l} className="fi text-xs text-white/45">
-                    · {l}
+                    · {localizeStyleTokensInText(l, lang)}
                   </li>
                 ))}
               </ul>
@@ -350,8 +355,12 @@ export function AskDecisionView({
                 </span>
               </div>
               <SectionTitle>{t.recommendation}</SectionTitle>
-              <p className="fi text-sm text-white/90 leading-relaxed">{recommendation}</p>
-              <p className="fi text-sm text-white/70 leading-relaxed">{executiveSummary}</p>
+              <p className="fi text-sm text-white/90 leading-relaxed">
+                {localizeStyleTokensInText(recommendation, lang)}
+              </p>
+              <p className="fi text-sm text-white/70 leading-relaxed">
+                {localizeStyleTokensInText(executiveSummary, lang)}
+              </p>
               <div data-testid="ask-card-confidence" className="pt-2 border-t border-white/5">
                 <p className="fi text-[10px] uppercase tracking-widest text-white/40">
                   {t.confidence}
@@ -359,7 +368,9 @@ export function AskDecisionView({
                 <p className="fc text-xl text-white" data-testid="ask-confidence-level">
                   {localizeConfidenceLevel(confidence.level, lang)} · {confidence.score}
                 </p>
-                <p className="fi text-xs text-white/55 mt-1">{confidence.explanation}</p>
+                <p className="fi text-xs text-white/55 mt-1">
+                  {localizeStyleTokensInText(confidence.explanation, lang)}
+                </p>
               </div>
               {safetyNotice ? (
                 <p className="fi text-xs text-amber-200/80" data-testid="ask-safety-notice">
@@ -389,7 +400,7 @@ export function AskDecisionView({
                         <span className="text-white/40 text-[10px] uppercase me-1">
                           {localizeActionPriority(item.priority, lang)}
                         </span>
-                        {item.action}
+                        {localizeStyleTokensInText(item.action, lang)}
                       </li>
                     ))}
                   </ul>
@@ -406,30 +417,35 @@ export function AskDecisionView({
                 value={scores.opportunity.value}
                 rationale={scores.opportunity.rationale}
                 outOf100={t.outOf100}
+                lang={lang}
               />
               <ScoreMeter
                 label={t.risk}
                 value={scores.risk.value}
                 rationale={scores.risk.rationale}
                 outOf100={t.outOf100}
+                lang={lang}
               />
               <ScoreMeter
                 label={t.timing}
                 value={scores.timing.value}
                 rationale={scores.timing.rationale}
                 outOf100={t.outOf100}
+                lang={lang}
               />
               <ScoreMeter
                 label={t.readiness}
                 value={scores.readiness.value}
                 rationale={scores.readiness.rationale}
                 outOf100={t.outOf100}
+                lang={lang}
               />
               <ScoreMeter
                 label={t.confidence}
                 value={scores.confidence.value}
                 rationale={scores.confidence.rationale}
                 outOf100={t.outOf100}
+                lang={lang}
               />
             </div>
           </div>
@@ -458,7 +474,9 @@ export function AskDecisionView({
                       </div>
                     ) : null
                   )}
-                  <p className="fi text-xs text-white/45">{timing.timingRationale}</p>
+                  <p className="fi text-xs text-white/45">
+                    {localizeStyleTokensInText(timing.timingRationale, lang)}
+                  </p>
                 </>
               )}
             </GlassCard>

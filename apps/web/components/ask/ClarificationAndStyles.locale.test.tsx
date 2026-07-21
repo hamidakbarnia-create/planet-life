@@ -118,8 +118,8 @@ describe('decision-style token localization', () => {
     expect(localizeStyleToken('execution-focused', 'fa')).toBe('نتیجه‌محور');
     expect(localizeStyleToken('analytical', 'ar')).toBe('تحليلي');
     expect(localizeStyleToken('execution-focused', 'ar')).toMatch(/تنفيذ/);
-    expect(localizeStyleToken('analytical', 'ru').toLowerCase()).toContain(
-      'аналитическ'
+    expect(localizeStyleToken('execution-focused', 'ru').toLowerCase()).toContain(
+      'выполнение'
     );
   });
 

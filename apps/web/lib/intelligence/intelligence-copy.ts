@@ -1110,7 +1110,7 @@ const PROSE: Record<AppLang, Record<string, string>> = {
     'style.analytical': 'Аналитический',
     'style.cautious': 'Осторожный',
     'style.collaborative': 'Коллаборативный',
-    'style.execution-focused': 'Ориентированный на исполнение',
+    'style.execution-focused': 'ориентированный на выполнение',
     'style.exploratory': 'Исследовательский',
     'style.intuitive': 'Интуитивный',
     'style.strategic': 'Стратегический',
