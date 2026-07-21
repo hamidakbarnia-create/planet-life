@@ -683,7 +683,7 @@ describe('ResultScreen', () => {
     renderResult('en');
 
     expect(await screen.findByTestId('ask-decision-engine')).toBeTruthy();
-    expect(screen.getByTestId('ask-detected-intent').textContent).toBe('career');
+    expect(screen.getByTestId('ask-detected-intent').textContent).toBe('Career');
     expect(screen.getByTestId('ask-score-opportunity')).toBeTruthy();
     expect(screen.getByTestId('ask-confidence-level').textContent).toMatch(/medium/i);
   });
