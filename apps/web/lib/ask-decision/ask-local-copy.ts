@@ -259,6 +259,41 @@ const EN: CopyTable = {
   // Safe language failure
   'safe.languageFailure':
     'We could not deliver this briefing in your selected language. Please retry.',
+
+  // Writing quality layer
+  'wq.status.proceed': 'The current lean is to move forward.',
+  'wq.status.caution':
+    'The current lean is to move forward carefully and keep irreversible parts separate.',
+  'wq.status.wait':
+    'The current lean is to wait until one key unknown shrinks.',
+  'wq.status.gather':
+    'The current lean is to gather one critical input before committing.',
+  'wq.status.avoid': 'The current lean is to pause this commitment for now.',
+  'wq.status.neutral':
+    'The current lean is to stay flexible until the picture is clearer.',
+  'wq.summary.v0':
+    '{lean} You are weighing: {decision}. A key watchpoint is: {concern}. Prefer a reversible first step so new facts can still change the path.',
+  'wq.summary.v1':
+    'On “{decision}”, the practical reading is: {lean} Watchpoint: {concern}. Keep the first move small enough to reverse.',
+  'wq.summary.v2':
+    'Around {concern}, here is the lean: {lean} Decision in view: {decision}. Leave room to adjust once one listed gap closes.',
+  'wq.why.title': 'Why?',
+  'wq.why.v0':
+    'This lean rests on three signals already in the frame: concern ({concern}), open gaps ({unknowns}), and “{lean}”. Closing one listed gap usually sharpens the call more than rushing the whole decision.',
+  'wq.why.v1':
+    'The main pressure is {concern}. Open gaps still in play: {unknowns}. That is why the stance stays “{lean}”.',
+  'wq.why.v2':
+    'Given “{lean}”, the frame points back to {concern} plus these gaps: {unknowns}. Treat those as the levers, not a full rewrite of the choice.',
+  'wq.why.noUnknowns': 'no major gaps listed',
+  'wq.missing.title': 'What would make this more precise',
+  'wq.missing.v0':
+    'If you can add these listed gaps, the answer may get sharper: {items}.',
+  'wq.missing.v1':
+    'Precision improves most if these known gaps get filled: {items}.',
+  'wq.missing.v2':
+    'The recommendation stays provisional until more is known about: {items}.',
+  'wq.missing.default':
+    'A clearer deadline, downside limit, or two concrete options — if they apply — would make this recommendation more specific.',
 };
 
 const FA: CopyTable = {
@@ -495,6 +530,37 @@ const FA: CopyTable = {
 
   'safe.languageFailure':
     'نتوانستیم این خلاصه را به زبان انتخابی شما بدهیم. لطفاً دوباره تلاش کنید.',
+
+  'wq.status.proceed': 'تمایل فعلی به جلو رفتن است.',
+  'wq.status.caution':
+    'تمایل فعلی به جلو رفتن با احتیاط است؛ بخش برگشت‌ناپذیر را جدا نگه دارید.',
+  'wq.status.wait': 'تمایل فعلی به صبر است تا یک ابهام مهم کمتر شود.',
+  'wq.status.gather': 'تمایل فعلی این است که قبل از تعهد یک ورودی کلیدی جمع شود.',
+  'wq.status.avoid': 'تمایل فعلی به متوقف‌کردن این تعهد برای الان است.',
+  'wq.status.neutral': 'تمایل فعلی به انعطاف است تا تصویر روشن‌تر شود.',
+  'wq.summary.v0':
+    '{lean} دارید این را می‌سنجید: {decision}. نقطهٔ حساس: {concern}. ترجیح با قدم اول قابل‌برگشت است تا اطلاعات تازه هنوز بتواند مسیر را عوض کند.',
+  'wq.summary.v1':
+    'دربارهٔ «{decision}» خوانش عملی این است: {lean} نقطهٔ فشار: {concern}. اول قدمی بردارید که برگردد.',
+  'wq.summary.v2':
+    'با تمرکز روی {concern}، تمایل فعلی این است: {lean} موضوع تصمیم: {decision}. جا بگذارید تا با بستن یک شکافِ فهرست‌شده مسیر اصلاح شود.',
+  'wq.why.title': 'چرا؟',
+  'wq.why.v0':
+    'این تمایل بر سه سیگنالِ همین چارچوب استوار است: دغدغه ({concern})، جاهای باز ({unknowns})، و «{lean}». معمولاً بستن یک ابهامِ فهرست‌شده بهتر از عجله برای کل تصمیم است.',
+  'wq.why.v1':
+    'فشار اصلی {concern} است. شکاف‌های باز: {unknowns}. برای همین موضع «{lean}» می‌ماند.',
+  'wq.why.v2':
+    'با «{lean}»، چارچوب دوباره به {concern} و این شکاف‌ها برمی‌گردد: {unknowns}. این‌ها اهرم‌اند، نه بازنویسی کامل انتخاب.',
+  'wq.why.noUnknowns': 'ابهام بزرگی ثبت نشده',
+  'wq.missing.title': 'چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟',
+  'wq.missing.v0':
+    'اگر بتوانید این شکاف‌های فهرست‌شده را اضافه کنید، پاسخ ممکن است دقیق‌تر شود: {items}.',
+  'wq.missing.v1':
+    'دقت بیشتر وقتی می‌آید که این شکاف‌های معلوم پر شوند: {items}.',
+  'wq.missing.v2':
+    'تا وقتی دربارهٔ این‌ها بیشتر ندانید، توصیه موقتی می‌ماند: {items}.',
+  'wq.missing.default':
+    'اگر مرتبط باشد، مهلت روشن‌تر، سقف ضرر، یا دو گزینهٔ مشخص این توصیه را دقیق‌تر می‌کند.',
 };
 
 const AR: CopyTable = {
@@ -732,6 +798,38 @@ const AR: CopyTable = {
 
   'safe.languageFailure':
     'تعذّر تقديم هذا الملخص بلغتك المحددة. يرجى إعادة المحاولة.',
+
+  'wq.status.proceed': 'الميل الحالي هو المضي قدماً.',
+  'wq.status.caution':
+    'الميل الحالي هو المضي بحذر مع فصل الجزء غير القابل للرجوع.',
+  'wq.status.wait': 'الميل الحالي هو الانتظار حتى يقلّ غموض أساسي واحد.',
+  'wq.status.gather':
+    'الميل الحالي هو جمع مدخل أساسي واحد قبل الالتزام.',
+  'wq.status.avoid': 'الميل الحالي هو إيقاف هذا الالتزام الآن.',
+  'wq.status.neutral': 'الميل الحالي هو البقاء مرناً حتى تتضح الصورة.',
+  'wq.summary.v0':
+    '{lean} أنت تزن: {decision}. نقطة مراقبة أساسية: {concern}. يُفضَّل خطوة أولى قابلة للرجوع حتى تظل الحقائق الجديدة قادرة على تغيير المسار.',
+  'wq.summary.v1':
+    'حول «{decision}»، القراءة العملية: {lean} نقطة الضغط: {concern}. اجعل الخطوة الأولى صغيرة وقابلة للرجوع.',
+  'wq.summary.v2':
+    'مع التركيز على {concern}، الميل هو: {lean} القرار المعني: {decision}. اترك مساحة للتعديل بعد إغلاق فجوة مسجّلة.',
+  'wq.why.title': 'لماذا؟',
+  'wq.why.v0':
+    'هذا الميل يستند إلى ثلاث إشارات في الإطار: القلق ({concern})، والفجوات ({unknowns})، و«{lean}». إغلاق فجوة مسجّلة واحدة غالباً أوضح من الاستعجال في القرار كله.',
+  'wq.why.v1':
+    'الضغط الرئيسي هو {concern}. الفجوات المفتوحة: {unknowns}. لذلك يبقى الموقف «{lean}».',
+  'wq.why.v2':
+    'مع «{lean}»، يعود الإطار إلى {concern} وهذه الفجوات: {unknowns}. اعتبرها روافع، لا إعادة كتابة كاملة للاختيار.',
+  'wq.why.noUnknowns': 'لا فجوات كبيرة مسجّلة',
+  'wq.missing.title': 'ما المعلومات التي تجعل الإجابة أدق؟',
+  'wq.missing.v0':
+    'إذا أمكنك إضافة هذه الفجوات المسجّلة، قد تصير الإجابة أدق: {items}.',
+  'wq.missing.v1':
+    'تزداد الدقة أكثر إذا امتلأت هذه الفجوات المعروفة: {items}.',
+  'wq.missing.v2':
+    'تبقى التوصية مؤقتة حتى يُعرف المزيد عن: {items}.',
+  'wq.missing.default':
+    'إن كانت ذات صلة، فموعد أوضح أو حدّ خسارة أو خياران محددان يجعلان هذه التوصية أدق.',
 };
 
 const RU: CopyTable = {
@@ -969,6 +1067,40 @@ const RU: CopyTable = {
 
   'safe.languageFailure':
     'Не удалось предоставить этот брифинг на выбранном языке. Пожалуйста, повторите попытку.',
+
+  'wq.status.proceed': 'Текущий уклон — двигаться вперёд.',
+  'wq.status.caution':
+    'Текущий уклон — двигаться осторожно и отделять необратимую часть.',
+  'wq.status.wait':
+    'Текущий уклон — подождать, пока не сузится одна ключевая неизвестность.',
+  'wq.status.gather':
+    'Текущий уклон — собрать один критический ввод до обязательства.',
+  'wq.status.avoid': 'Текущий уклон — пока приостановить это обязательство.',
+  'wq.status.neutral':
+    'Текущий уклон — оставаться гибкими, пока картина не прояснится.',
+  'wq.summary.v0':
+    '{lean} Вы взвешиваете: {decision}. Ключевая точка внимания: {concern}. Лучше обратимый первый шаг, чтобы новые факты ещё могли изменить путь.',
+  'wq.summary.v1':
+    'По поводу «{decision}» практический вывод такой: {lean} Точка давления: {concern}. Сделайте первый шаг достаточно маленьким, чтобы его можно было откатить.',
+  'wq.summary.v2':
+    'Вокруг {concern} уклон такой: {lean} Решение в фокусе: {decision}. Оставьте место для корректировки, когда закроется один перечисленный пробел.',
+  'wq.why.title': 'Почему?',
+  'wq.why.v0':
+    'Этот уклон опирается на три сигнала уже в рамке: опасение ({concern}), пробелы ({unknowns}) и «{lean}». Обычно закрытие одного перечисленного пробела яснее, чем спешка со всем решением.',
+  'wq.why.v1':
+    'Главное давление — {concern}. Открытые пробелы: {unknowns}. Поэтому позиция остаётся «{lean}».',
+  'wq.why.v2':
+    'При «{lean}» рамка снова указывает на {concern} и эти пробелы: {unknowns}. Это рычаги, а не полная перепись выбора.',
+  'wq.why.noUnknowns': 'крупных пробелов не указано',
+  'wq.missing.title': 'Какая информация сделает ответ точнее?',
+  'wq.missing.v0':
+    'Если добавить эти перечисленные пробелы, ответ может стать точнее: {items}.',
+  'wq.missing.v1':
+    'Точность растёт сильнее всего, когда заполняются эти известные пробелы: {items}.',
+  'wq.missing.v2':
+    'Рекомендация остаётся предварительной, пока неизвестно больше о: {items}.',
+  'wq.missing.default':
+    'Если уместно, более ясный дедлайн, лимит потерь или два конкретных варианта сделают эту рекомендацию точнее.',
 };
 
 const TABLES: Record<AppLang, CopyTable> = {

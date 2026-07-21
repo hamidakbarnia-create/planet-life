@@ -33,6 +33,7 @@ import {
   buildLocalScenarios,
 } from './local-build';
 import type { AnalysisSection, AskDecisionResult } from './types';
+import { applyWritingQualityLayer } from './writing-quality';
 
 type AnalysisId = AnalysisSection['id'];
 
@@ -127,7 +128,7 @@ export function localizeAskDecisionPresentation(
   };
 
   if (!isNonEn(locale)) {
-    return withResolvedIds;
+    return applyWritingQualityLayer(withResolvedIds, locale);
   }
 
   const uiTitles = getDecisionUi(locale).sectionTitles;
@@ -315,5 +316,6 @@ export function localizeAskDecisionPresentation(
     };
   }
 
-  return next;
+  // Writing quality: restructure prose only — never change scores or status enums.
+  return applyWritingQualityLayer(next, locale);
 }

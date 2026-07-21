@@ -1,0 +1,306 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`writing quality layer > snapshot: invariants unchanged while wording outline is stable (en) > en-decision-invariants 1`] = `
+{
+  "actionPlanNext30Days": [],
+  "actionPlanNext7Days": [],
+  "alternatives": [],
+  "assumptions": [
+    "Treating timing as flexible unless clarified",
+  ],
+  "confidence": {
+    "level": "medium",
+    "limitingFactors": [],
+    "missingInputs": [],
+    "score": 65,
+  },
+  "coreAnalysisIds": [
+    "factors",
+    "risks",
+    "opportunities",
+    "tradeoffs",
+    "personal-fit",
+  ],
+  "decisionFrame": {
+    "affectedAreas": [
+      "business",
+    ],
+    "assumptions": [
+      "Treating timing as flexible unless clarified",
+    ],
+    "decisionStatement": "Best time to launch?",
+    "decisionType": "business",
+    "mainConcern": "Primary concern not fully stated",
+    "objective": "Identify the highest-leverage next move for the stated question",
+    "options": [],
+    "requiresClarification": false,
+    "reversibility": "Unknown — reversibility not stated",
+    "timeHorizon": "months",
+    "unknowns": [
+      "Explicit options not stated",
+    ],
+    "urgency": "moderate",
+  },
+  "followUpQuestions": [
+    "What would make this a clear no?",
+  ],
+  "intent": {
+    "confidence": 70,
+    "decisionPresent": true,
+    "financialImpactLikely": true,
+    "highStakesFlag": false,
+    "peopleRelevant": false,
+    "primaryIntent": "business",
+    "secondaryIntent": null,
+    "timingRelevant": true,
+  },
+  "limitations": [
+    "Comparative only",
+  ],
+  "metaFlags": {
+    "clarificationAnswer": null,
+    "fallback": false,
+    "requestId": null,
+    "usedProfile": false,
+    "usedTiming": false,
+  },
+  "opportunitiesBody": "Opportunity lies in clarifying one reversible next step.",
+  "recommendationStatus": "gather-more-information",
+  "risksBody": "Primary concern: Financial or resource exposure (inferred). Unknowns: Explicit options not stated.",
+  "safetyNotice": null,
+  "scenarios": {
+    "bestConditions": [],
+    "bestLikelihood": "medium",
+    "downsideConditions": [],
+    "downsideLikelihood": "low",
+    "mostLikelyConditions": [],
+    "mostLikelyLikelihood": "high",
+  },
+  "schemaVersion": "3.0.0",
+  "scores": {
+    "confidence": 65,
+    "confidenceRationale": "Moderate",
+    "opportunity": 55,
+    "opportunityRationale": "Constructive window",
+    "readiness": 45,
+    "readinessRationale": "Ready enough",
+    "risk": 48,
+    "riskRationale": "Manageable",
+    "timing": 50,
+    "timingRationale": "Supportive",
+  },
+  "timing": {
+    "applicable": true,
+    "available": false,
+    "bestRange": null,
+    "bestScore": null,
+    "cautionRange": null,
+    "cautionScore": null,
+    "next30Range": null,
+    "next30Score": null,
+    "next7Range": null,
+    "next7Score": null,
+    "timingConfidence": "medium",
+    "todayRange": null,
+    "todayScore": null,
+  },
+}
+`;
+
+exports[`writing quality layer > snapshot: invariants unchanged while wording outline is stable (en) > en-writing-outline 1`] = `
+{
+  "خلاصه تصمیم": "Gather more information about market conditions and internal readiness.",
+  "قبل از اقدام چه کار کنید؟": [
+    "1. Write the decision in one sentence",
+  ],
+  "چرا؟": "This lean rests on three signals already in the frame: concern (Primary concern not fully stated), open gaps (Explicit options not stated), and “The current lean is to gather one critical input before committing.”. Closing one listed gap usually sharpens the call more than rushing the whole decision.",
+  "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "If you can add these listed gaps, the answer may get sharper: Explicit options not stated.",
+}
+`;
+
+exports[`writing quality layer > snapshot: invariants unchanged while wording outline is stable (fa) > fa-decision-invariants 1`] = `
+{
+  "actionPlanNext30Days": [
+    {
+      "action": "یک نقطهٔ کنترل بگذارید و ببینید به معیار موفقیت‌تان رسیده‌اید یا نه",
+      "completionSignal": "یادداشت بازبینی با تاریخ دارید",
+      "priority": "medium",
+      "purpose": "مسیر را چک کنید",
+    },
+    {
+      "action": "فقط بعد از موفقیت اولین آزمون کوچک، تعهد را بزرگ‌تر کنید",
+      "completionSignal": "اولین نقطهٔ عطف قبل از تعهد کامل تیک خورده",
+      "priority": "high",
+      "purpose": "تعهد جدی را مرحله‌به‌مرحله جلو ببرید",
+    },
+    {
+      "action": "بنویسید نسبت به این توصیه چه چیزی عوض شد",
+      "completionSignal": "گزارش تصمیم به‌روز شد",
+      "priority": "low",
+      "purpose": "تصمیم‌های بعدی‌تان را بهتر کنید",
+    },
+  ],
+  "actionPlanNext7Days": [
+    {
+      "action": "دو گزینهٔ مشخص را از نظر فرصت، ریسک و زمان‌بندی کنار هم بگذارید",
+      "completionSignal": "جدول مقایسهٔ گزینه‌ها آماده است",
+      "priority": "high",
+      "purpose": "انتخاب‌ها را قابل‌مقایسه کنید",
+    },
+    {
+      "action": "گفتگو یا بازبینی مهم را در بهترین زمانی که دارید بگذارید",
+      "completionSignal": "زمان در تقویم ثبت شد",
+      "priority": "medium",
+      "purpose": "اقدام را با زمان مناسب هم‌راستا کنید",
+    },
+    {
+      "action": "این نگرانی را جدی بگیرید: هنوز نگفته‌اید از چه می‌ترسید",
+      "completionSignal": "یک قدم عملی برای کاهش ریسک برداشته شد",
+      "priority": "high",
+      "purpose": "ریسک اصلی را کم کنید",
+    },
+  ],
+  "alternatives": [],
+  "assumptions": [
+    "Treating timing as flexible unless clarified",
+    "Framing as a proceed / wait / gather-information decision",
+    "Interpreting the question as a decision-support request",
+    "پاسخ کامل مدل در دسترس نیست (نامشخص) — از چارچوب محلی و شفاف استفاده می‌کنیم.",
+  ],
+  "confidence": {
+    "level": "low",
+    "limitingFactors": [
+      "این راهنمایی مقایسه‌ای است، نه پیش‌بینی قطعی.",
+      "Treating timing as flexible unless clarified",
+      "Framing as a proceed / wait / gather-information decision",
+    ],
+    "missingInputs": [
+      "Time horizon not stated",
+      "Explicit options not stated",
+      "Decision verb unclear",
+      "Main concern not fully stated",
+      "timing_engine",
+    ],
+    "score": 40,
+  },
+  "coreAnalysisIds": [
+    "situation",
+    "factors",
+    "opportunities",
+    "risks",
+    "tradeoffs",
+    "personal-fit",
+  ],
+  "decisionFrame": {
+    "affectedAreas": [
+      "unknown",
+    ],
+    "assumptions": [
+      "Treating timing as flexible unless clarified",
+      "Framing as a proceed / wait / gather-information decision",
+      "Interpreting the question as a decision-support request",
+    ],
+    "decisionStatement": "چه زمانی برای درخواست افزایش حقوق مناسب است؟",
+    "decisionType": "unknown",
+    "mainConcern": "Primary concern not fully stated",
+    "objective": "Identify the highest-leverage next move for the stated question",
+    "options": [],
+    "requiresClarification": false,
+    "reversibility": "Unknown — reversibility not stated",
+    "timeHorizon": "unknown",
+    "unknowns": [
+      "Time horizon not stated",
+      "Explicit options not stated",
+      "Decision verb unclear",
+      "Main concern not fully stated",
+    ],
+    "urgency": "moderate",
+  },
+  "followUpQuestions": [
+    "کدام بخش این تصمیم دیگر قابل‌برگشت نیست؟",
+    "کدام یک حقیقت نظرتان را عوض می‌کند؟",
+    "کوچک‌ترین گام قابل‌برگشت این هفته چیست؟",
+  ],
+  "intent": {
+    "confidence": 20,
+    "decisionPresent": false,
+    "financialImpactLikely": false,
+    "highStakesFlag": false,
+    "peopleRelevant": false,
+    "primaryIntent": "unknown",
+    "secondaryIntent": null,
+    "timingRelevant": false,
+  },
+  "limitations": [
+    "این نسخهٔ ساخت‌یافته است — نه بینش کامل شخصی‌سازی‌شده.",
+    "برای گرفتن خلاصهٔ کامل‌تر دوباره تلاش کنید.",
+  ],
+  "metaFlags": {
+    "clarificationAnswer": null,
+    "fallback": true,
+    "requestId": "wq-snap-fa",
+    "usedProfile": true,
+    "usedTiming": false,
+  },
+  "opportunitiesBody": "بهترین فرصت همین حالا یک گام کوچک و قابل‌برگشت است که مهم‌ترین ابهام را کم کند.",
+  "recommendationStatus": "gather-more-information",
+  "risksBody": "اصلی‌ترین ریسک: هنوز نگفته‌اید از چه می‌ترسید. چیزهایی که هنوز روشن نیست: هنوز زمان دقیق مشخص نیست; گزینه‌های روشن هنوز معلوم نیست; هنوز معلوم نیست دقیقاً چه کاری می‌خواهید بکنید; هنوز نگفته‌اید بزرگ‌ترین نگرانی‌تان چیست.",
+  "safetyNotice": null,
+  "scenarios": {
+    "bestConditions": [
+      "ابهام اصلی کمتر شده",
+      "از پنجرهٔ زمانی خوب استفاده شده",
+    ],
+    "bestLikelihood": "medium",
+    "downsideConditions": [
+      "عجله نقاط کنترل را رد می‌کند",
+    ],
+    "downsideLikelihood": "low",
+    "mostLikelyConditions": [
+      "اطلاعات مخلوط و ناقص",
+    ],
+    "mostLikelyLikelihood": "high",
+  },
+  "schemaVersion": "3.0.0",
+  "scores": {
+    "confidence": 40,
+    "confidenceRationale": "چقدر به این خلاصه مطمئنیم — بر اساس وضوح سؤال، پروفایل و زمان‌بندی.",
+    "opportunity": 48,
+    "opportunityRationale": "چقدر این موقعیت ارزش دنبال کردن دارد، نسبت به شرایط فعلی.",
+    "readiness": 58,
+    "readinessRationale": "آمادگی شما با توجه به پروفایل تصمیم‌گیری‌تان.",
+    "risk": 42,
+    "riskRationale": "چقدر احتمال ضرر، فشار یا پشیمانی در این انتخاب هست.",
+    "timing": 52,
+    "timingRationale": "زمان‌بندی تقریبی است — دادهٔ زندهٔ زمان‌بندی نداریم.",
+  },
+  "timing": {
+    "applicable": false,
+    "available": false,
+    "bestRange": null,
+    "bestScore": null,
+    "cautionRange": null,
+    "cautionScore": null,
+    "next30Range": null,
+    "next30Score": null,
+    "next7Range": null,
+    "next7Score": null,
+    "timingConfidence": "low",
+    "todayRange": null,
+    "todayScore": null,
+  },
+}
+`;
+
+exports[`writing quality layer > snapshot: invariants unchanged while wording outline is stable (fa) > fa-writing-outline 1`] = `
+{
+  "خلاصه تصمیم": "با تمرکز روی هنوز نگفته‌اید از چه می‌ترسید، تمایل فعلی این است: تمایل فعلی این است که قبل از تعهد یک ورودی کلیدی جمع شود. موضوع تصمیم: چه زمانی برای درخواست افزایش حقوق مناسب است؟. جا بگذارید تا با بستن یک شکافِ فهرست‌شده مسیر اصلاح شود.",
+  "قبل از اقدام چه کار کنید؟": [
+    "1. در یک جمله بنویسید دقیقاً چه تصمیمی می‌گیرید: «چه زمانی برای درخواست افزایش حقوق مناسب است؟»",
+    "2. یک چیزی را بنویسید که اگر معلوم شود، نظرتان عوض می‌شود",
+    "3. مشخص کنید کدام بخش این کار دیگر قابل‌برگشت نیست",
+  ],
+  "چرا؟": "اول بنویسید چه چیزی برگشت‌ناپذیر است، بعد یک آزمون کوچک طراحی کنید، و همان یک حقیقتی را پیدا کنید که نظرتان را عوض می‌کند.",
+  "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "هنوز زمان دقیق مشخص نیست",
+}
+`;

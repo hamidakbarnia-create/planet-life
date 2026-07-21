@@ -72,8 +72,8 @@ const SECTION_TITLES_EN: Record<string, string> = {
   risks: 'Risks',
   tradeoffs: 'Trade-offs',
   'personal-fit': 'Personal Fit',
-  'what-could-change': 'What Could Change the Recommendation',
-  why: 'Why This Recommendation',
+    'what-could-change': 'What would make this more precise',
+    why: 'Why?',
 };
 
 const SECTION_TITLES_FA: Record<string, string> = {
@@ -83,8 +83,8 @@ const SECTION_TITLES_FA: Record<string, string> = {
   risks: 'ریسک‌ها',
   tradeoffs: 'بده‌بستان‌ها',
   'personal-fit': 'تناسب شخصی',
-  'what-could-change': 'چه چیزی توصیه را تغییر می‌دهد',
-  why: 'چرا این توصیه',
+    'what-could-change': 'چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟',
+    why: 'چرا؟',
 };
 
 const SECTION_TITLES_RU: Record<string, string> = {
@@ -94,8 +94,8 @@ const SECTION_TITLES_RU: Record<string, string> = {
   risks: 'Риски',
   tradeoffs: 'Компромиссы',
   'personal-fit': 'Личное соответствие',
-  'what-could-change': 'Что может изменить рекомендацию',
-  why: 'Почему эта рекомендация',
+    'what-could-change': 'Какая информация сделает ответ точнее?',
+    why: 'Почему?',
 };
 
 const SECTION_TITLES_AR: Record<string, string> = {
@@ -105,8 +105,8 @@ const SECTION_TITLES_AR: Record<string, string> = {
   risks: 'المخاطر',
   tradeoffs: 'المقايضات',
   'personal-fit': 'الملاءمة الشخصية',
-  'what-could-change': 'ما الذي قد يغيّر التوصية',
-  why: 'لماذا هذه التوصية',
+    'what-could-change': 'ما المعلومات التي تجعل الإجابة أدق؟',
+    why: 'لماذا؟',
 };
 
 export const DECISION_UI: Record<AppLang, DecisionUiCopy> = {
@@ -140,7 +140,7 @@ export const DECISION_UI: Record<AppLang, DecisionUiCopy> = {
     recommendation: 'Recommendation',
     confidence: 'Confidence',
     actionPlan: 'Action plan',
-    now: 'Now',
+    now: 'Before you act',
     next7Days: 'Next 7 days',
     next30Days: 'Next 30 days',
     scores: 'Scores',
@@ -205,7 +205,7 @@ export const DECISION_UI: Record<AppLang, DecisionUiCopy> = {
     recommendation: 'توصیه',
     confidence: 'اطمینان',
     actionPlan: 'برنامه اقدام',
-    now: 'اکنون',
+    now: 'قبل از اقدام چه کار کنید؟',
     next7Days: '۷ روز آینده',
     next30Days: '۳۰ روز آینده',
     scores: 'امتیازها',
@@ -270,7 +270,7 @@ export const DECISION_UI: Record<AppLang, DecisionUiCopy> = {
     recommendation: 'Рекомендация',
     confidence: 'Уверенность',
     actionPlan: 'План действий',
-    now: 'Сейчас',
+    now: 'Что сделать до действия?',
     next7Days: 'Следующие 7 дней',
     next30Days: 'Следующие 30 дней',
     scores: 'Оценки',
@@ -335,7 +335,7 @@ export const DECISION_UI: Record<AppLang, DecisionUiCopy> = {
     recommendation: 'التوصية',
     confidence: 'الثقة',
     actionPlan: 'خطة العمل',
-    now: 'الآن',
+    now: 'ماذا تفعل قبل أن تتصرف؟',
     next7Days: 'الـ٧ أيام القادمة',
     next30Days: 'الـ٣٠ يوماً القادمة',
     scores: 'الدرجات',
