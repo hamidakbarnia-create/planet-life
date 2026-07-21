@@ -10,6 +10,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional
+from cors_origins import (
+    resolve_cors_allowed_origins,
+    validate_staging_cors_configuration,
+)
 from routes.business import router as business_router
 from routes.finance import router as finance_router
 from routes.real_estate import router as real_estate_router
@@ -42,6 +46,7 @@ async def _app_lifespan(app: FastAPI):
     from services.generation.factory import validate_generation_provider_configuration
 
     _ = app
+    validate_staging_cors_configuration()
     validate_generation_provider_configuration()
     yield
 
@@ -55,13 +60,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "https://metioro.com",
-        "https://www.metioro.com",
-        "https://planet-life-web.planet-life.workers.dev",
-    ],
+    allow_origins=resolve_cors_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
