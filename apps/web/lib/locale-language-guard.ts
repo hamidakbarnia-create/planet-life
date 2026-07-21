@@ -154,6 +154,28 @@ export function checkResponseLanguage(
     };
   }
 
+  // Cross-family mismatch: Arabic/Persian script vs Cyrillic (e.g. AR→RU switch)
+  const arabicRatio = counts.arabicPersian / counts.letters;
+  const cyrillicRatio = counts.cyrillic / counts.letters;
+  if (expected === 'ru' && arabicRatio > 0.35 && cyrillicRatio < 0.2) {
+    return {
+      ok: false,
+      dominant: dominant === 'unknown' ? 'ar' : dominant,
+      reason: 'arabic_script_when_russian_expected',
+    };
+  }
+  if (
+    (expected === 'fa' || expected === 'ar') &&
+    cyrillicRatio > 0.35 &&
+    arabicRatio < 0.2
+  ) {
+    return {
+      ok: false,
+      dominant: 'ru',
+      reason: 'cyrillic_when_arabic_script_expected',
+    };
+  }
+
   // fa ≠ ar: shared script family must not pass sibling-language prose
   if (expected === 'fa' || expected === 'ar') {
     const faMarks = countMatches(stripped, PERSIAN_MARKERS);

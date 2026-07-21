@@ -106,7 +106,7 @@ export function AskDecisionView({
     }
   }, [localizedResult, loading, pendingClarification]);
 
-  if (loading && !localizedResult) {
+  if (loading) {
     const stage = loadingStage ?? loadingStages[0];
     return (
       <div

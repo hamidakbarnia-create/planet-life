@@ -180,6 +180,9 @@ export function ResultScreen({ lang }: { lang: AppLang }) {
     const stages = getDecisionUi(lang).loadingStages;
     setDecisionLoading(true);
     setDecisionError(null);
+    // Drop previous-locale prose immediately so chrome/lang switch cannot show mixed AR+RU UI.
+    setDecisionResult(null);
+    setPendingClarification(false);
     setLoadingStage(stages[0]);
 
     void (async () => {
