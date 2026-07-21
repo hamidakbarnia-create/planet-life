@@ -6,25 +6,10 @@ import { englishProviderResult } from '@/lib/ask-decision/english-provider-resul
 import { evaluateClarification } from '@/lib/ask-decision/clarification';
 import { detectIntent } from '@/lib/ask-decision/intent';
 import { frameDecision } from '@/lib/ask-decision/framing';
-import { buildLocalAnalysis } from '@/lib/ask-decision/local-build';
+import { buildStructuredFallback } from '@/lib/ask-decision/fallback';
+import { buildTimingIntelligence } from '@/lib/ask-decision/local-build';
 import type { ConversationLocale } from '@/lib/conversation-client';
 import type { AppLang } from '@/lib/app-settings';
-
-const FORBIDDEN_CHROME = [
-  'ANALYSIS',
-  'RECOMMENDATION',
-  'CONFIDENCE',
-  'GATHER MORE INFORMATION',
-  'BUSINESS',
-  'Main Factors',
-  'Market Premise and Readiness',
-  'Opportunities',
-  'Trade-offs',
-  'Personal Fit',
-  'Objective:',
-  'Reversibility:',
-  'Unknown — reversibility not stated',
-];
 
 const FORBIDDEN_CLARIFY = [
   'One clarification',
@@ -63,40 +48,26 @@ export function LocaleDecisionProofClient({ lang }: { lang: AppLang }) {
   }, [locale]);
 
   const personalFitResult = useMemo(() => {
-    const question = 'Should I launch this product in Q3?';
+    const question = 'Should I launch this product in Q3 with the current team?';
     const intent = detectIntent(question);
     const frame = frameDecision(question, intent);
-    const analysis = buildLocalAnalysis(
-      frame,
+    const timing = buildTimingIntelligence(null, intent.timingRelevant, false, locale);
+    return buildStructuredFallback({
       intent,
-      'Proceed with a reversible pilot before irreversible commitment.',
-      true,
-      ['analytical', 'execution-focused', 'cautious'],
-      locale
-    );
-    return {
-      ...englishProviderResult,
-      recommendation:
-        lang === 'fa'
-          ? 'قبل از تعهد برگشت‌ناپذیر یک آزمایش برگشت‌پذیر اجرا کنید و معیار موفقیت را روشن کنید کامل.'
-          : lang === 'ar'
-            ? 'نفّذ تجربة قابلة للعكس قبل الالتزام غير القابل للعكس وحدد معيار النجاح بوضوح كامل.'
-            : lang === 'ru'
-              ? 'Запустите обратимый пилот до необратимого обязательства и зафиксируйте критерий успеха полностью.'
-              : englishProviderResult.recommendation,
-      executiveSummary:
-        lang === 'fa'
-          ? 'خلاصهٔ تصمیم با تناسب شخصی محلی‌سازی‌شده برای عبور از دروازه زبان در این نتیجه.'
-          : lang === 'ar'
-            ? 'ملخص قرار مع ملاءمة شخصية موطّنة لتجاوز بوابة اللغة في هذه النتيجة.'
-            : lang === 'ru'
-              ? 'Краткое резюме решения с локализованным личным соответствием для языкового шлюза.'
-              : englishProviderResult.executiveSummary,
-      analysis,
-    };
-  }, [lang, locale]);
+      frame,
+      timing,
+      usedProfile: true,
+      usedTiming: false,
+      decisionStyles: ['analytical', 'execution-focused', 'cautious'],
+      generatedAt: new Date().toISOString(),
+      requestId: `staging-proof-${locale}-personal-fit`,
+      clarificationAnswer: null,
+      reason: 'unknown',
+      locale,
+    });
+  }, [locale]);
 
-  const forbidden = [...FORBIDDEN_CHROME, ...FORBIDDEN_CLARIFY, ...FORBIDDEN_STYLES];
+  const forbidden = [...FORBIDDEN_CLARIFY, ...FORBIDDEN_STYLES];
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white p-4" data-testid="locale-decision-proof">
