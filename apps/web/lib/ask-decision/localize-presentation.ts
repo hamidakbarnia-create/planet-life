@@ -34,6 +34,8 @@ import {
 } from './local-build';
 import type { AnalysisSection, AskDecisionResult } from './types';
 
+type AnalysisId = AnalysisSection['id'];
+
 function isNonEn(locale: AppLang): locale is 'fa' | 'ar' | 'ru' {
   return locale === 'fa' || locale === 'ar' || locale === 'ru';
 }
@@ -56,6 +58,10 @@ export function fieldNeedsLanguageCorrection(
   if (isEnglishDominantProse(text)) return true;
   const check = checkResponseLanguage(text, locale);
   return !check.ok;
+}
+
+function asAnalysisId(id: string): AnalysisId {
+  return id as AnalysisId;
 }
 
 function localizedRecommendationForStatus(
@@ -88,7 +94,7 @@ function repairAnalysisBodies(
   const localById = new Map(local.map((c) => [c.id, c]));
 
   return result.analysis.map((card) => {
-    const id = resolveAnalysisSectionId(card.id, card.title);
+    const id = asAnalysisId(resolveAnalysisSectionId(card.id, card.title));
     const title = uiTitles[id] ?? uiTitles.situation ?? card.title;
     const needsBody = fieldNeedsLanguageCorrection(card.body, locale);
     if (!needsBody) {
@@ -116,7 +122,7 @@ export function localizeAskDecisionPresentation(
     ...result,
     analysis: result.analysis.map((card) => ({
       ...card,
-      id: resolveAnalysisSectionId(card.id, card.title),
+      id: asAnalysisId(resolveAnalysisSectionId(card.id, card.title)),
     })),
   };
 
