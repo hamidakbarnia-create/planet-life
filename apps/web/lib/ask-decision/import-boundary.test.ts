@@ -53,6 +53,12 @@ describe('Ask import boundary', () => {
   it('imports Conversation client from the neutral shared module', () => {
     const run = readFileSync(join(process.cwd(), 'lib/ask-decision/run.ts'), 'utf8');
     expect(run).toMatch(/from\s+['"]@\/lib\/conversation-client['"]/);
-    expect(run).toMatch(/from\s+['"]@\/lib\/pathfinder-decision\/timing['"]/);
+    // Timing loader may live in run or prompt-context collect seam.
+    const timingImport = /from\s+['"]@\/lib\/pathfinder-decision\/timing['"]/;
+    const collect = readFileSync(
+      join(process.cwd(), 'lib/ask-decision/prompt-context/collect.ts'),
+      'utf8'
+    );
+    expect(timingImport.test(run) || timingImport.test(collect)).toBe(true);
   });
 });

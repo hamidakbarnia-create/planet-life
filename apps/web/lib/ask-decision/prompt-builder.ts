@@ -7,17 +7,27 @@ import type {
   IntentDetection,
 } from './types';
 import { ASK_DECISION_SCHEMA_VERSION } from './types';
+import { buildDecisionInstructions } from './prompt-context/decision-instructions';
+import type { RiskDomain } from './intent-templates';
 
-export function buildAskDecisionPrompt(input: {
+export type BuildAskDecisionPromptInput = {
   question: string;
   intent: IntentDetection;
   frame: DecisionFrame;
   context: AskContextSnapshot;
   clarificationAnswer?: string | null;
-}): ConversationMessage[] {
-  const { question, intent, frame, context, clarificationAnswer } = input;
+  /**
+   * Optional compact SerializedDecisionPromptContext JSON (already validated).
+   * When present, appends DECISION_CONTEXT_JSON + DECISION_INSTRUCTIONS
+   * and omits the legacy USER QUESTION block (question lives in JSON only).
+   */
+  structuredPromptContextJson?: string | null;
+  /** Risk domains from ReasoningPlan — only relevant domain rules are added. */
+  structuredRiskDomains?: readonly RiskDomain[];
+};
 
-  const schema = [
+function buildResponseSchemaBlock(): string {
+  return [
     '{',
     `  "schemaVersion": "${ASK_DECISION_SCHEMA_VERSION}",`,
     '  "executiveSummary": "string (~90 words max)",',
@@ -50,6 +60,75 @@ export function buildAskDecisionPrompt(input: {
     '  "safetyNotice": "string|null"',
     '}',
   ].join('\n');
+}
+
+const QUESTION_REF = '(see DECISION_CONTEXT_JSON.question)';
+
+/** Remove exact question string copies from frame fields in structured mode. */
+function scrubExactQuestion(value: string, question: string): string {
+  const q = question.trim();
+  if (!q) return value;
+  if (value.trim() === q) return QUESTION_REF;
+  if (!value.includes(q)) return value;
+  return value.split(q).join(QUESTION_REF);
+}
+
+/**
+ * In structured mode the authoritative question is DECISION_CONTEXT_JSON.question.
+ * Avoid repeating the exact question string in DECISION FRAME.
+ */
+function framePayloadForPrompt(
+  frame: DecisionFrame,
+  question: string,
+  structured: boolean
+): Record<string, unknown> {
+  const scrub = (value: string) =>
+    structured ? scrubExactQuestion(value, question) : value;
+
+  return {
+    decisionStatement: scrub(frame.decisionStatement),
+    objective: scrub(frame.objective),
+    mainConcern: scrub(frame.mainConcern),
+    options: frame.options.map((o) => scrub(o)),
+    urgency: frame.urgency,
+    timeHorizon: frame.timeHorizon,
+    reversibility: scrub(frame.reversibility),
+    unknowns: frame.unknowns.map((u) => scrub(u)),
+    assumptions: frame.assumptions.map((a) => scrub(a)),
+  };
+}
+
+export function buildAskDecisionPrompt(
+  input: BuildAskDecisionPromptInput
+): ConversationMessage[] {
+  const {
+    question,
+    intent,
+    frame,
+    context,
+    clarificationAnswer,
+    structuredPromptContextJson,
+    structuredRiskDomains,
+  } = input;
+
+  const schema = buildResponseSchemaBlock();
+  const structuredJson = structuredPromptContextJson?.trim() || null;
+  const structured = Boolean(structuredJson);
+
+  const questionBlock = structured
+    ? // Structured mode: question authority is DECISION_CONTEXT_JSON.question only.
+      clarificationAnswer
+      ? [`CLARIFICATION ANSWER: ${clarificationAnswer}`, '']
+      : []
+    : // Legacy mode: preserve USER QUESTION block exactly.
+      [
+        'USER QUESTION:',
+        question,
+        clarificationAnswer
+          ? `CLARIFICATION ANSWER: ${clarificationAnswer}`
+          : null,
+        '',
+      ];
 
   const content = [
     'You are METIORO Decision Intelligence for Ask.',
@@ -58,10 +137,7 @@ export function buildAskDecisionPrompt(input: {
     'No medical diagnosis. No legal conclusions. No investment instructions. No guaranteed outcomes.',
     'Be concise, practical, and decision-focused.',
     '',
-    'USER QUESTION:',
-    question,
-    clarificationAnswer ? `CLARIFICATION ANSWER: ${clarificationAnswer}` : null,
-    '',
+    ...questionBlock,
     'INTENT:',
     JSON.stringify({
       primary: intent.primaryIntent,
@@ -73,17 +149,7 @@ export function buildAskDecisionPrompt(input: {
     }),
     '',
     'DECISION FRAME:',
-    JSON.stringify({
-      decisionStatement: frame.decisionStatement,
-      objective: frame.objective,
-      mainConcern: frame.mainConcern,
-      options: frame.options,
-      urgency: frame.urgency,
-      timeHorizon: frame.timeHorizon,
-      reversibility: frame.reversibility,
-      unknowns: frame.unknowns,
-      assumptions: frame.assumptions,
-    }),
+    JSON.stringify(framePayloadForPrompt(frame, question, structured)),
     '',
     'PERSONAL INTELLIGENCE CONTEXT (token-efficient, no raw birth data):',
     context.intelligenceLine || 'unavailable — proceed with general decision intelligence',
@@ -94,6 +160,17 @@ export function buildAskDecisionPrompt(input: {
       ? `Missing inputs: ${context.missingInputs.join(', ')}`
       : null,
     '',
+    structuredJson
+      ? [
+          'DECISION_CONTEXT_JSON:',
+          structuredJson,
+          '',
+          buildDecisionInstructions({
+            riskDomains: structuredRiskDomains ?? [],
+          }),
+          '',
+        ].join('\n')
+      : null,
     'RESPONSE SCHEMA:',
     schema,
     '',
@@ -106,7 +183,7 @@ export function buildAskDecisionPrompt(input: {
     '- Personal Fit must use intelligence context without exposing raw profile fields.',
     '- Do not invent options the user did not imply; alternatives may be empty.',
   ]
-    .filter(Boolean)
+    .filter((line) => line != null)
     .join('\n');
 
   return [{ role: 'user', content }];

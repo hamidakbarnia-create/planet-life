@@ -238,6 +238,26 @@ export type AskDecisionResult = {
     usedTiming: boolean;
     fallback: boolean;
     loadingStage?: string;
+    /** P2.1a InputAnalysis foundation — presentation must ignore. */
+    inputAnalysis?: import('./input-analysis').InputAnalysis;
+    /** P2.1a-02 UnifiedDecisionContext — presentation must ignore. */
+    decisionContext?: import('./context-builder').UnifiedDecisionContext;
+    /** P2.1b-01 ReasoningPlan — presentation must ignore. */
+    reasoningPlan?: import('./reasoning-planner').ReasoningPlan;
+    /** P2.1b-02 structured prompt-context status — presentation must ignore. */
+    promptContext?: import('./prompt-context').PromptContextMeta;
+    /**
+     * P2.1b-03 grounding provenance — presentation must ignore.
+     * Observes final localized/WQ AskDecisionResult only (not raw provider).
+     * Claim-level grounding needs stage-aware / pre-transform capture later.
+     */
+    grounding?: import('./grounding').GroundingProvenance;
+    /**
+     * P2.1b-04 claim-level validation report — presentation must ignore.
+     * Consumes meta.grounding only; does not mutate user-facing fields.
+     * Observation-only until Safe Regeneration (P2.1b-05) consumes it.
+     */
+    validation?: import('./claim-validation').ValidationReport;
   };
 };
 

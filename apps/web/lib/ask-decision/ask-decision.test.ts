@@ -258,6 +258,34 @@ describe('privacy + no-profile', () => {
     expect(out.pendingClarification).toBe(false);
     expect(out.result.scores.opportunity.value).toBeGreaterThanOrEqual(0);
     expect(out.result.confidence.missingInputs.length).toBeGreaterThanOrEqual(0);
+    // P2.1a/b — analysis, context, plan on meta only
+    expect(out.result.meta?.inputAnalysis?.intent).toBe('career');
+    expect(out.result.meta?.decisionContext?.analysis.intent).toBe('career');
+    expect(out.result.meta?.reasoningPlan?.primaryIntent).toBe('career');
+    expect(out.result.meta?.reasoningPlan?.templateId).toBe('intent.career.v1');
+    expect(out.result.meta?.sources).toContain('input-analysis-v1');
+    expect(out.result.meta?.sources).toContain('context-builder-v1');
+    expect(out.result.meta?.sources).toContain('reasoning-planner-v1');
+    expect(out.result.meta?.promptContext?.version).toBe('1.0.0');
+    expect(['used', 'degraded', 'unavailable']).toContain(
+      out.result.meta?.promptContext?.status
+    );
+    expect(out.result.meta?.grounding?.version).toBe('1.0.0');
+    expect(['used', 'degraded', 'unavailable']).toContain(
+      out.result.meta?.grounding?.status
+    );
+    expect(out.result.meta?.sources).toContain('grounding-v1');
+    expect(out.result.meta?.validation?.version).toBe('1.0.0');
+    expect(['used', 'degraded', 'unavailable']).toContain(
+      out.result.meta?.validation?.status
+    );
+    expect(out.result.meta?.sources).toContain('claim-validation-v1');
+    expect('inputAnalysis' in out).toBe(false);
+    expect('decisionContext' in out).toBe(false);
+    expect('reasoningPlan' in out).toBe(false);
+    expect('promptContext' in out).toBe(false);
+    expect('grounding' in out).toBe(false);
+    expect('validation' in out).toBe(false);
   });
 });
 
