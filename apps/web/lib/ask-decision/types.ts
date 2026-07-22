@@ -258,6 +258,12 @@ export type AskDecisionResult = {
      * Observation-only until Safe Regeneration (P2.1b-05) consumes it.
      */
     validation?: import('./claim-validation').ValidationReport;
+    /**
+     * P2.1b-05 Safe Regeneration decision — presentation must ignore.
+     * Consumes meta.validation only. NEVER executes regeneration.
+     * Recommendation only (`shouldRegenerate`); execution is a later phase.
+     */
+    safeRegeneration?: import('./safe-regeneration').SafeRegenerationDecision;
   };
 };
 

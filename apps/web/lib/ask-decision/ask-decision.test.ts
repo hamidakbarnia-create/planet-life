@@ -280,12 +280,23 @@ describe('privacy + no-profile', () => {
       out.result.meta?.validation?.status
     );
     expect(out.result.meta?.sources).toContain('claim-validation-v1');
+    expect(out.result.meta?.safeRegeneration?.version).toBe('1.0.0');
+    expect(out.result.meta?.safeRegeneration?.source).toBe(
+      'safe-regeneration-v1'
+    );
+    expect(['used', 'unavailable']).toContain(
+      out.result.meta?.safeRegeneration?.status
+    );
+    expect(typeof out.result.meta?.safeRegeneration?.shouldRegenerate).toBe(
+      'boolean'
+    );
     expect('inputAnalysis' in out).toBe(false);
     expect('decisionContext' in out).toBe(false);
     expect('reasoningPlan' in out).toBe(false);
     expect('promptContext' in out).toBe(false);
     expect('grounding' in out).toBe(false);
     expect('validation' in out).toBe(false);
+    expect('safeRegeneration' in out).toBe(false);
   });
 });
 

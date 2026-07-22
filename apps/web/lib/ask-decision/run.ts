@@ -40,6 +40,10 @@ import {
   buildValidationReport,
   type ValidationReport,
 } from './claim-validation';
+import {
+  buildSafeRegenerationDecision,
+  type SafeRegenerationDecision,
+} from './safe-regeneration';
 import { localizeAskDecisionPresentation } from './localize-presentation';
 import { buildTimingIntelligence } from './local-build';
 import { parseAskDecisionResponse } from './parse';
@@ -78,6 +82,7 @@ function attachInternalDecisionMeta(
     promptContext: PromptContextMeta;
     grounding: GroundingProvenance;
     validation: ValidationReport;
+    safeRegeneration: SafeRegenerationDecision;
   }
 ): AskDecisionResult {
   const meta = result.meta;
@@ -95,6 +100,9 @@ function attachInternalDecisionMeta(
         : []),
       ...(args.validation.status === 'used'
         ? (['claim-validation-v1'] as const)
+        : []),
+      ...(args.safeRegeneration.status === 'used'
+        ? ([args.safeRegeneration.source] as const)
         : []),
     ]),
   ];
@@ -114,6 +122,7 @@ function attachInternalDecisionMeta(
       promptContext: args.promptContext,
       grounding: args.grounding,
       validation: args.validation,
+      safeRegeneration: args.safeRegeneration,
     },
   };
 }
@@ -175,12 +184,13 @@ function parseInputBase(args: {
  * Full Ask V3 pipeline:
  * Intent → Frame → Optional clarification → Context → Plan → Prompt →
  * Provider → Parse/Validate → Localization/WQ → Grounding (meta) →
- * Claim Validation (meta) → Presentation
+ * Claim Validation (meta) → Safe Regeneration Decision (meta) → Presentation
  *
  * Note: Grounding (P2.1b-03) observes the final localized / WQ result only —
  * final-output provenance preparation, not raw-provider claim provenance.
  * See ask-decision/grounding/types.ts. Do not relocate in this phase.
  * Claim validation (P2.1b-04) consumes grounding only; never mutates output.
+ * Safe Regeneration (P2.1b-05) consumes validation only; NEVER regenerates text.
  */
 export async function runAskDecision(
   input: RunAskDecisionInput
@@ -254,6 +264,8 @@ export async function runAskDecision(
       builtAt: generatedAt,
     });
     const validation = buildValidationReport(grounding);
+    // P2.1b-05: decision only — never regenerates.
+    const safeRegeneration = buildSafeRegenerationDecision(validation);
     return {
       result: attachInternalDecisionMeta(pendingLocalized, {
         inputAnalysis,
@@ -262,6 +274,7 @@ export async function runAskDecision(
         promptContext: buildPromptContextMeta('unavailable'),
         grounding,
         validation,
+        safeRegeneration,
       }),
       clarification,
       pendingClarification: true,
@@ -577,6 +590,8 @@ export async function runAskDecision(
   });
   // P2.1b-04: claim-level validation over grounding only — meta.validation.
   const validation = buildValidationReport(grounding);
+  // P2.1b-05: Safe Regeneration decision from validation only — no provider retry.
+  const safeRegeneration = buildSafeRegenerationDecision(validation);
   result = attachInternalDecisionMeta(result, {
     inputAnalysis,
     decisionContext,
@@ -584,6 +599,7 @@ export async function runAskDecision(
     promptContext: promptContextMeta,
     grounding,
     validation,
+    safeRegeneration,
   });
 
   return {

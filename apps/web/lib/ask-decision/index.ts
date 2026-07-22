@@ -142,6 +142,17 @@ export type {
   ClaimValidationStatus,
   GroundingBundle,
 } from './claim-validation';
+export {
+  SAFE_REGENERATION_VERSION,
+  SAFE_REGENERATION_SOURCE,
+  buildSafeRegenerationDecision,
+  buildUnavailableSafeRegenerationDecision,
+} from './safe-regeneration';
+export type {
+  SafeRegenerationDecision,
+  SafeRegenerationSummary,
+  SafeRegenerationStatus,
+} from './safe-regeneration';
 export { parseAskDecisionResponse } from './parse';
 export { validateAskDecisionResult } from './validate';
 export { buildStructuredFallback } from './fallback';
