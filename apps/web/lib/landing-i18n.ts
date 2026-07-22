@@ -68,12 +68,12 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
     dir: 'ltr',
     nav: { features: 'Features', how: 'How it works', profile: 'Profile', cta: 'Get Started' },
     hero: {
-      eyebrow: 'Personal Decision Intelligence',
-      headline: 'Every decision has a better time.',
+      eyebrow: 'PERSONAL DECISION INTELLIGENCE',
+      headline: 'Know your next move — and when to make it.',
       supporting:
-        'Some decisions deserve more than instinct and less than a guarantee. METIORO connects precise signals to clear explanations—so you understand the moment before you act.',
+        'METIORO helps you understand your most important timing periods, spot opportunities and risks, and decide your next step with confidence.',
       primaryCta: 'Start Free',
-      secondaryCta: 'See How It Works',
+      secondaryCta: 'How It Works',
     },
     trust: {
       title: 'Built for trust',
@@ -87,12 +87,14 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
           description: 'METIORO recommends. You decide. Nothing compels your choice.',
         },
         {
-          title: 'Multiple evidence frameworks',
-          description: 'Structured signals, documented methods, traceable inputs.',
+          title: 'Multiple sources of evidence',
+          description:
+            'Every insight is supported by structured analysis, documented methods, and traceable data.',
         },
         {
-          title: 'Transparent reasoning',
-          description: 'Assumptions and uncertainty are stated—not hidden.',
+          title: 'Transparent analysis',
+          description:
+            'We explain the reasoning behind every recommendation in clear, easy-to-understand language.',
         },
       ],
     },
@@ -146,10 +148,10 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
     dir: 'ltr',
     nav: { features: 'Возможности', how: 'Как это работает', profile: 'Профиль', cta: 'Начать' },
     hero: {
-      eyebrow: 'Персональный интеллект решений',
-      headline: 'У каждого решения есть лучшее время.',
+      eyebrow: 'ПЕРСОНАЛЬНАЯ АНАЛИТИКА РЕШЕНИЙ',
+      headline: 'Знайте, какой шаг сделать дальше — и когда.',
       supporting:
-        'Важные решения редко терпят неудачу из‑за нехватки информации. Они застревают без перспективы. METIORO соединяет точные сигналы с ясными объяснениями — чтобы вы понимали момент, прежде чем действовать.',
+        'METIORO анализирует важные для вас периоды, помогает увидеть возможности и риски и подсказывает, каким может быть следующий шаг.',
       primaryCta: 'Начать бесплатно',
       secondaryCta: 'Как это работает',
     },
@@ -165,12 +167,14 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
           description: 'METIORO рекомендует. Вы решаете. Ничто не принуждает к выбору.',
         },
         {
-          title: 'Несколько основ доказательств',
-          description: 'Структурированные сигналы, документированные методы, прослеживаемые входные данные.',
+          title: 'Несколько источников анализа',
+          description:
+            'Каждый вывод основан на структурированном анализе, документированных методах и проверяемых данных.',
         },
         {
-          title: 'Прозрачное рассуждение',
-          description: 'Допущения и неопределённость указаны явно — не скрыты.',
+          title: 'Прозрачный анализ',
+          description:
+            'Мы объясняем логику каждой рекомендации простым и понятным языком.',
         },
       ],
     },
@@ -224,12 +228,12 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
     dir: 'rtl',
     nav: { features: 'ویژگی‌ها', how: 'چگونه کار می‌کند', profile: 'پروفایل', cta: 'شروع' },
     hero: {
-      eyebrow: 'هوش تصمیم‌گیری شخصی',
-      headline: 'هر تصمیمی زمان بهتری دارد.',
+      eyebrow: 'هوش شخصی برای تصمیم‌گیری',
+      headline: 'بدانید قدم بعدی چیست و چه زمانی باید آن را بردارید.',
       supporting:
-        'برخی تصمیم‌ها به چیزی بیش از حس درونی و کمتر از تضمین نیاز دارند. METIORO سیگنال‌های دقیق را به توضیحات روشن وصل می‌کند — تا قبل از اقدام، لحظه را درک کنید.',
+        'METIORO به شما کمک می‌کند زمان‌های مهم زندگی‌تان را بهتر بشناسید، فرصت‌ها و ریسک‌ها را ببینید و برای قدم بعدی با اطمینان بیشتری تصمیم بگیرید.',
       primaryCta: 'شروع رایگان',
-      secondaryCta: 'چگونه کار می‌کند',
+      secondaryCta: 'نحوه کار',
     },
     trust: {
       title: 'ساخته‌شده برای اعتماد',
@@ -243,12 +247,14 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
           description: 'METIORO توصیه می‌کند. شما تصمیم می‌گیرید. هیچ‌چیز شما را مجبور نمی‌کند.',
         },
         {
-          title: 'چارچوب‌های متعدد شواهد',
-          description: 'سیگنال‌های ساختاریافته، روش‌های مستند، ورودی‌های قابل‌ردیابی.',
+          title: 'چندین منبع برای تحلیل',
+          description:
+            'هر تحلیل بر پایه داده‌های ساختاریافته، روش‌های مستند و اطلاعات قابل بررسی ارائه می‌شود.',
         },
         {
-          title: 'استدلال شفاف',
-          description: 'فرضیات و عدم‌قطعیت بیان می‌شوند — پنهان نمی‌شوند.',
+          title: 'تحلیل شفاف',
+          description:
+            'دلیل هر پیشنهاد را با زبانی ساده و قابل‌فهم توضیح می‌دهیم.',
         },
       ],
     },
@@ -302,11 +308,11 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
     dir: 'rtl',
     nav: { features: 'الميزات', how: 'كيف يعمل', profile: 'الملف', cta: 'ابدأ الآن' },
     hero: {
-      eyebrow: 'ذكاء القرار الشخصي',
-      headline: 'لكل قرار وقتٌ أفضل.',
+      eyebrow: 'ذكاء شخصي لاتخاذ القرار',
+      headline: 'اعرف خطوتك التالية ومتى تتخذها.',
       supporting:
-        'بعض القرارات تحتاج إلى أكثر من الحدس وأقل من الضمان. يربط METIORO الإشارات الدقيقة بتفسيرات واضحة — لتفهمي اللحظة قبل أن تتصرفي.',
-      primaryCta: 'ابدئي مجانًا',
+        'يساعدك METIORO على فهم الفترات المهمة في حياتك، واكتشاف الفرص والمخاطر، واتخاذ خطوتك التالية بثقة أكبر.',
+      primaryCta: 'ابدأ مجانًا',
       secondaryCta: 'كيف يعمل',
     },
     trust: {
@@ -321,12 +327,14 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
           description: 'METIORO يوصي. أنتِ تقررين. لا شيء يُجبرك على الاختيار.',
         },
         {
-          title: 'أطر أدلة متعددة',
-          description: 'إشارات منظمة، منهجيات موثقة، مدخلات قابلة للتتبع.',
+          title: 'مصادر متعددة للتحليل',
+          description:
+            'كل نتيجة تستند إلى تحليل منظم، وأساليب موثقة، وبيانات يمكن التحقق منها.',
         },
         {
-          title: 'تعليل شفاف',
-          description: 'الافتراضات وعدم اليقين مذكورة — لا مخفية.',
+          title: 'تحليل واضح',
+          description:
+            'نشرح المنطق وراء كل توصية بلغة واضحة وسهلة الفهم.',
         },
       ],
     },
