@@ -5,41 +5,41 @@ describe('landing hero approved copy', () => {
   it('matches approved EN/FA/AR/RU hero strings exactly', () => {
     expect(LANDING_I18N.en.hero).toEqual({
       eyebrow: 'PERSONAL DECISION INTELLIGENCE',
-      headline: 'Know your next move — and when to make it.',
+      headline: 'Every decision has a better time.',
       supporting:
         'METIORO helps you understand your most important timing periods, spot opportunities and risks, and decide your next step with confidence.',
       primaryCta: 'Start Free',
-      secondaryCta: 'How It Works',
+      secondaryCta: 'See How It Works',
     });
     expect(LANDING_I18N.fa.hero).toEqual({
       eyebrow: 'هوش شخصی برای تصمیم‌گیری',
-      headline: 'بدانید قدم بعدی چیست و چه زمانی باید آن را بردارید.',
+      headline: 'هر تصمیمی زمان بهتری دارد.',
       supporting:
         'METIORO به شما کمک می‌کند زمان‌های مهم زندگی‌تان را بهتر بشناسید، فرصت‌ها و ریسک‌ها را ببینید و برای قدم بعدی با اطمینان بیشتری تصمیم بگیرید.',
       primaryCta: 'شروع رایگان',
-      secondaryCta: 'نحوه کار',
+      secondaryCta: 'نحوه کار را ببینید',
     });
     expect(LANDING_I18N.fa.dir).toBe('rtl');
     expect(LANDING_I18N.ar.hero).toEqual({
       eyebrow: 'ذكاء شخصي لاتخاذ القرار',
-      headline: 'اعرف خطوتك التالية ومتى تتخذها.',
+      headline: 'لكل قرار وقت أفضل.',
       supporting:
         'يساعدك METIORO على فهم الفترات المهمة في حياتك، واكتشاف الفرص والمخاطر، واتخاذ خطوتك التالية بثقة أكبر.',
       primaryCta: 'ابدأ مجانًا',
-      secondaryCta: 'كيف يعمل',
+      secondaryCta: 'شاهد كيف يعمل',
     });
     expect(LANDING_I18N.ar.dir).toBe('rtl');
     expect(LANDING_I18N.ru.hero).toEqual({
       eyebrow: 'ПЕРСОНАЛЬНАЯ АНАЛИТИКА РЕШЕНИЙ',
-      headline: 'Знайте, какой шаг сделать дальше — и когда.',
+      headline: 'У каждого решения есть лучшее время.',
       supporting:
-        'METIORO анализирует важные для вас периоды, помогает увидеть возможности и риски и подсказывает, каким может быть следующий шаг.',
+        'METIORO анализирует важные для вас периоды, показывает возможности и риски и помогает определить следующие шаги.',
       primaryCta: 'Начать бесплатно',
-      secondaryCta: 'Как это работает',
+      secondaryCta: 'Посмотреть как это работает',
     });
   });
 
-  it('keeps all locales free of forbidden timing-signal phrasing in hero', () => {
+  it('keeps all locales free of forbidden timing-signal and unapproved hero phrasing', () => {
     const banned = [
       'timing signals',
       'personal timing signals',
@@ -47,8 +47,11 @@ describe('landing hero approved copy', () => {
       'إشارات التوقيت',
       'سیگنال‌های زمانی',
       'сигналы времени',
-      'See How It Works',
-      'Every decision has a better time',
+      'Know your next move — and when to make it.',
+      'بدانید قدم بعدی چیست و چه زمانی باید آن را بردارید.',
+      'اعرف خطوتك التالية ومتى تتخذها.',
+      'Знайте, какой шаг сделать дальше — и когда.',
+      'подсказывает',
     ];
     for (const lang of LANDING_LANG_OPTIONS) {
       const blob = Object.values(LANDING_I18N[lang].hero).join('\n');

@@ -69,11 +69,11 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
     nav: { features: 'Features', how: 'How it works', profile: 'Profile', cta: 'Get Started' },
     hero: {
       eyebrow: 'PERSONAL DECISION INTELLIGENCE',
-      headline: 'Know your next move — and when to make it.',
+      headline: 'Every decision has a better time.',
       supporting:
         'METIORO helps you understand your most important timing periods, spot opportunities and risks, and decide your next step with confidence.',
       primaryCta: 'Start Free',
-      secondaryCta: 'How It Works',
+      secondaryCta: 'See How It Works',
     },
     trust: {
       title: 'Built for trust',
@@ -149,11 +149,11 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
     nav: { features: 'Возможности', how: 'Как это работает', profile: 'Профиль', cta: 'Начать' },
     hero: {
       eyebrow: 'ПЕРСОНАЛЬНАЯ АНАЛИТИКА РЕШЕНИЙ',
-      headline: 'Знайте, какой шаг сделать дальше — и когда.',
+      headline: 'У каждого решения есть лучшее время.',
       supporting:
-        'METIORO анализирует важные для вас периоды, помогает увидеть возможности и риски и подсказывает, каким может быть следующий шаг.',
+        'METIORO анализирует важные для вас периоды, показывает возможности и риски и помогает определить следующие шаги.',
       primaryCta: 'Начать бесплатно',
-      secondaryCta: 'Как это работает',
+      secondaryCta: 'Посмотреть как это работает',
     },
     trust: {
       title: 'Создан для доверия',
@@ -229,11 +229,11 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
     nav: { features: 'ویژگی‌ها', how: 'چگونه کار می‌کند', profile: 'پروفایل', cta: 'شروع' },
     hero: {
       eyebrow: 'هوش شخصی برای تصمیم‌گیری',
-      headline: 'بدانید قدم بعدی چیست و چه زمانی باید آن را بردارید.',
+      headline: 'هر تصمیمی زمان بهتری دارد.',
       supporting:
         'METIORO به شما کمک می‌کند زمان‌های مهم زندگی‌تان را بهتر بشناسید، فرصت‌ها و ریسک‌ها را ببینید و برای قدم بعدی با اطمینان بیشتری تصمیم بگیرید.',
       primaryCta: 'شروع رایگان',
-      secondaryCta: 'نحوه کار',
+      secondaryCta: 'نحوه کار را ببینید',
     },
     trust: {
       title: 'ساخته‌شده برای اعتماد',
@@ -309,11 +309,11 @@ export const LANDING_I18N: Record<LandingLang, LandingCopy> = {
     nav: { features: 'الميزات', how: 'كيف يعمل', profile: 'الملف', cta: 'ابدأ الآن' },
     hero: {
       eyebrow: 'ذكاء شخصي لاتخاذ القرار',
-      headline: 'اعرف خطوتك التالية ومتى تتخذها.',
+      headline: 'لكل قرار وقت أفضل.',
       supporting:
         'يساعدك METIORO على فهم الفترات المهمة في حياتك، واكتشاف الفرص والمخاطر، واتخاذ خطوتك التالية بثقة أكبر.',
       primaryCta: 'ابدأ مجانًا',
-      secondaryCta: 'كيف يعمل',
+      secondaryCta: 'شاهد كيف يعمل',
     },
     trust: {
       title: 'مبني على الثقة',
