@@ -1,14 +1,13 @@
 /**
- * Safe Regeneration Decision v1 — first consumer of ValidationReport.
+ * Safe Regeneration Decision + bounded execution (P2.1b-05 decision / P2.2-02 execution).
  *
- * CRITICAL CONTRACT:
- * This phase NEVER performs regeneration.
- * It ONLY decides whether regeneration is recommended (`shouldRegenerate`).
- * Future roadmap phases may execute regeneration; P2.1b-05 does not.
+ * Decision contract (unchanged authority):
+ * - Consumes ValidationReport only for `shouldRegenerate`.
+ * - Never inspects provider output, localization, or Writing Quality for the decision.
  *
- * Input: ValidationReport only (meta.validation).
- * Never inspects provider output, localization, or Writing Quality directly.
- * No provider retry, prompt rebuild, or response mutation.
+ * Execution contract (P2.2-02):
+ * - At most one regeneration provider call when `shouldRegenerate` and budget allows.
+ * - Same provider; no recursive regeneration; ties / failures keep original.
  */
 
 import type { ClaimValidationReasonCode } from '../claim-validation';
@@ -51,16 +50,44 @@ export type SafeRegenerationSummary = {
   unknownReferenceCount: number;
 };
 
+/** Compact validation snapshot for execution metadata (no claim text). */
+export type SafeRegenerationValidationSnapshot = {
+  unsupported: number;
+  brokenReference: number;
+  structuralMismatch: number;
+  partial: number;
+  unknown: number;
+  total: number;
+};
+
+export const SAFE_REGENERATION_SELECTED = [
+  'original',
+  'regenerated',
+  'not_applicable',
+] as const;
+export type SafeRegenerationSelected =
+  (typeof SAFE_REGENERATION_SELECTED)[number];
+
+export const SAFE_REGENERATION_OUTCOMES = [
+  'not_requested',
+  'regenerated_selected',
+  'original_retained',
+  'regeneration_failed',
+  'comparison_unavailable',
+] as const;
+export type SafeRegenerationOutcome =
+  (typeof SAFE_REGENERATION_OUTCOMES)[number];
+
 /**
- * Decision whether regeneration SHOULD happen later.
- * Does not execute regeneration.
+ * Decision whether regeneration SHOULD happen, plus optional execution fields.
+ * Decision fields remain the authority; execution never loops.
  */
 export type SafeRegenerationDecision = {
   version: typeof SAFE_REGENERATION_VERSION;
   /** Stable source tag — also used in meta.sources when status is used. */
   source: typeof SAFE_REGENERATION_SOURCE;
   status: SafeRegenerationStatus;
-  /** Recommendation only — never triggers a provider call in P2.1b-05. */
+  /** Decision authority — whether regeneration was recommended. */
   shouldRegenerate: boolean;
   /**
    * Evidence-quality score in [0, 1].
@@ -74,6 +101,18 @@ export type SafeRegenerationDecision = {
   /** Claim ids with status supported (sorted). */
   supportedClaims: string[];
   summary: SafeRegenerationSummary;
+  /** P2.2-02: whether a regeneration provider call was attempted. */
+  attempted?: boolean;
+  /** P2.2-02: which semantic candidate was selected. */
+  selected?: SafeRegenerationSelected;
+  /** P2.2-02: execution outcome code. */
+  outcome?: SafeRegenerationOutcome;
+  /** P2.2-02: short machine reason (never user prose / prompts). */
+  reason?: string | null;
+  /** P2.2-02: original validation snapshot used for decision/compare. */
+  originalValidationSummary?: SafeRegenerationValidationSnapshot | null;
+  /** P2.2-02: regenerated validation snapshot when attempted. */
+  regeneratedValidationSummary?: SafeRegenerationValidationSnapshot | null;
 };
 
 export const SAFE_REGENERATION_DECISION_KEYS = [
@@ -86,4 +125,10 @@ export const SAFE_REGENERATION_DECISION_KEYS = [
   'blockingClaims',
   'supportedClaims',
   'summary',
+  'attempted',
+  'selected',
+  'outcome',
+  'reason',
+  'originalValidationSummary',
+  'regeneratedValidationSummary',
 ] as const satisfies ReadonlyArray<keyof SafeRegenerationDecision>;

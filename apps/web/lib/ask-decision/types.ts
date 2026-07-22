@@ -259,9 +259,10 @@ export type AskDecisionResult = {
      */
     validation?: import('./claim-validation').ValidationReport;
     /**
-     * P2.1b-05 Safe Regeneration decision — presentation must ignore.
-     * Consumes meta.validation only. NEVER executes regeneration.
-     * Recommendation only (`shouldRegenerate`); execution is a later phase.
+     * Safe Regeneration decision + bounded execution metadata.
+     * Decision (`shouldRegenerate`) remains validation-only authority.
+     * Execution (P2.2-02) may attempt at most one regeneration under the
+     * provider-call budget; presentation must ignore this block.
      */
     safeRegeneration?: import('./safe-regeneration').SafeRegenerationDecision;
   };

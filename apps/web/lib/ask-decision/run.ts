@@ -42,6 +42,9 @@ import {
 } from './claim-validation';
 import {
   buildSafeRegenerationDecision,
+  createProviderCallBudget,
+  executeSafeRegeneration,
+  notRequestedExecution,
   type SafeRegenerationDecision,
 } from './safe-regeneration';
 import { localizeAskDecisionPresentation } from './localize-presentation';
@@ -183,14 +186,19 @@ function parseInputBase(args: {
 /**
  * Full Ask V3 pipeline:
  * Intent → Frame → Optional clarification → Context → Plan → Prompt →
- * Provider → Parse/Validate → Localization/WQ → Grounding (meta) →
- * Claim Validation (meta) → Safe Regeneration Decision (meta) → Presentation
+ * Provider (budgeted) → Parse → optional language retry (budgeted) →
+ * Grounding + Claim Validation (semantic) → Safe Regeneration Decision →
+ * optional one-shot regeneration (budgeted) → deterministic selection →
+ * Writing Quality / Localization (selected only) → final Grounding/Validation meta.
  *
- * Note: Grounding (P2.1b-03) observes the final localized / WQ result only —
- * final-output provenance preparation, not raw-provider claim provenance.
- * See ask-decision/grounding/types.ts. Do not relocate in this phase.
- * Claim validation (P2.1b-04) consumes grounding only; never mutates output.
- * Safe Regeneration (P2.1b-05) consumes validation only; NEVER regenerates text.
+ * Provider-call budget: ASK_MAX_PROVIDER_CALLS = 2 (initial + at most one of
+ * language-retry OR safe-regeneration). Regenerated responses never language-retry
+ * and never regenerate again.
+ *
+ * Grounding (P2.1b-03) still attaches final-output provenance after presentation.
+ * Claim validation (P2.1b-04) consumes grounding only.
+ * Safe Regeneration decision (P2.1b-05) remains the authority for shouldRegenerate;
+ * P2.2-02 executes at most one bounded regeneration when recommended.
  */
 export async function runAskDecision(
   input: RunAskDecisionInput
@@ -264,8 +272,11 @@ export async function runAskDecision(
       builtAt: generatedAt,
     });
     const validation = buildValidationReport(grounding);
-    // P2.1b-05: decision only — never regenerates.
-    const safeRegeneration = buildSafeRegenerationDecision(validation);
+    // P2.1b-05 decision + P2.2-02 execution meta (no provider on clarification path).
+    const safeRegeneration = notRequestedExecution(
+      buildSafeRegenerationDecision(validation),
+      validation
+    );
     return {
       result: attachInternalDecisionMeta(pendingLocalized, {
         inputAnalysis,
@@ -319,6 +330,20 @@ export async function runAskDecision(
     buildPromptContextMeta('unavailable');
   let earlyDecisionContext: UnifiedDecisionContext | null = null;
   let earlyReasoningPlan: ReasoningPlan | null = null;
+  /** Hard budget: initial + at most one of (language retry | safe regeneration). */
+  const providerBudget = createProviderCallBudget();
+
+  async function callProviderBudgeted(
+    messages: ConversationMessage[]
+  ): Promise<
+    | Awaited<ReturnType<typeof postConversationExecute>>
+    | { ok: false; kind: 'network_error' }
+  > {
+    if (!providerBudget.consume()) {
+      return { ok: false, kind: 'network_error' };
+    }
+    return postConversationExecute(messages, locale, { signal: input.signal });
+  }
 
   try {
     const structuredEnabled = isStructuredPromptContextEnabled();
@@ -359,9 +384,7 @@ export async function runAskDecision(
       promptContextMeta = bundle.promptContext;
       promptMessages = bundle.promptMessages;
 
-      const conversation = await postConversationExecute(promptMessages, locale, {
-        signal: input.signal,
-      });
+      const conversation = await callProviderBudgeted(promptMessages);
       if (conversation.ok) {
         conversationOk = true;
         conversationMessage = conversation.body.message;
@@ -380,33 +403,40 @@ export async function runAskDecision(
         context,
         clarificationAnswer: input.clarificationAnswer,
       });
-      const [timingSettled, conversation] = await Promise.all([
-        needsTiming
-          ? collectAskTiming({
-              profile: input.profile,
-              timingRelevant: intent.timingRelevant,
-              timingAvailable: context.timingAvailable,
-              locale,
-            })
-          : Promise.resolve(
-              buildTimingIntelligence(
-                null,
-                intent.timingRelevant,
-                false,
-                locale
-              )
-            ),
-        postConversationExecute(promptMessages, locale, { signal: input.signal }),
-      ]);
-      timingBlock = timingSettled;
-
-      if (conversation.ok) {
-        conversationOk = true;
-        conversationMessage = conversation.body.message;
-        requestId = conversation.body.request_id;
+      // Timing may run in parallel, but provider still consumes budget once.
+      if (!providerBudget.consume()) {
+        failReason = 'provider';
       } else {
-        failReason =
-          conversation.kind === 'network_error' ? 'network' : 'provider';
+        const [timingSettled, conversation] = await Promise.all([
+          needsTiming
+            ? collectAskTiming({
+                profile: input.profile,
+                timingRelevant: intent.timingRelevant,
+                timingAvailable: context.timingAvailable,
+                locale,
+              })
+            : Promise.resolve(
+                buildTimingIntelligence(
+                  null,
+                  intent.timingRelevant,
+                  false,
+                  locale
+                )
+              ),
+          postConversationExecute(promptMessages, locale, {
+            signal: input.signal,
+          }),
+        ]);
+        timingBlock = timingSettled;
+
+        if (conversation.ok) {
+          conversationOk = true;
+          conversationMessage = conversation.body.message;
+          requestId = conversation.body.request_id;
+        } else {
+          failReason =
+            conversation.kind === 'network_error' ? 'network' : 'provider';
+        }
       }
     }
   } catch (err) {
@@ -462,6 +492,7 @@ export async function runAskDecision(
     );
 
     // Language guard: one retry for fa/ar/ru when prose is English-dominant.
+    // Consumes the second budget slot when used — blocks safe regeneration.
     if (locale === 'fa' || locale === 'ar' || locale === 'ru') {
       const prose = extractUserFacingAskProse(result);
       const langCheck = checkResponseLanguage(prose, locale);
@@ -472,11 +503,10 @@ export async function runAskDecision(
           dominant: langCheck.dominant,
           requestId,
           attempt: 1,
+          budgetRemaining: providerBudget.remaining,
         });
 
-        let didLanguageRetry = false;
-        if (!didLanguageRetry) {
-          didLanguageRetry = true;
+        if (providerBudget.canCall) {
           try {
             const retryMessages: ConversationMessage[] = [
               ...promptMessages,
@@ -485,9 +515,7 @@ export async function runAskDecision(
                 content: LANGUAGE_RETRY_INSTRUCTION[locale],
               },
             ];
-            const retry = await postConversationExecute(retryMessages, locale, {
-              signal: input.signal,
-            });
+            const retry = await callProviderBudgeted(retryMessages);
             if (retry.ok) {
               requestId = retry.body.request_id;
               result = parseAskDecisionResponse(
@@ -515,7 +543,10 @@ export async function runAskDecision(
                   locale,
                 });
                 result.recommendation = askCopy(locale, 'safe.languageFailure');
-                result.executiveSummary = askCopy(locale, 'safe.languageFailure');
+                result.executiveSummary = askCopy(
+                  locale,
+                  'safe.languageFailure'
+                );
               }
             } else {
               result = buildStructuredFallback({
@@ -561,8 +592,6 @@ export async function runAskDecision(
     });
   }
 
-  // Presentation gate: never ship English/wrong-script Decision UI for fa/ar/ru.
-  result = localizeAskDecisionPresentation(result, locale as AppLang);
   const decisionContext =
     earlyDecisionContext ??
     buildRunDecisionContext({
@@ -580,26 +609,59 @@ export async function runAskDecision(
       analysis: inputAnalysis,
       context: decisionContext,
     });
-  // P2.1b-03: final-output provenance only (post Localization/WQ).
-  // Not raw-provider claim provenance — see grounding/types.ts.
-  const grounding = buildGroundingProvenance({
-    context: decisionContext,
-    plan: reasoningPlan,
-    result,
-    builtAt: generatedAt,
+
+  const groundAndValidate = (candidate: AskDecisionResult) => {
+    const grounding = buildGroundingProvenance({
+      context: decisionContext,
+      plan: reasoningPlan,
+      result: candidate,
+      builtAt: generatedAt,
+    });
+    const validation = buildValidationReport(grounding);
+    return { grounding, validation };
+  };
+
+  // Semantic validation (pre-presentation) drives Safe Regeneration decision.
+  const semanticGv = groundAndValidate(result);
+  const decision = buildSafeRegenerationDecision(semanticGv.validation);
+
+  const executed = await executeSafeRegeneration({
+    decision,
+    originalResult: result,
+    originalGrounding: semanticGv.grounding,
+    originalValidation: semanticGv.validation,
+    promptMessages,
+    budget: providerBudget,
+    callProvider: (messages) =>
+      postConversationExecute(messages, locale, { signal: input.signal }),
+    parseResult: (message) =>
+      parseAskDecisionResponse(
+        parseInputBase({
+          ...sharedParse,
+          conversationMessage: message,
+          requestId,
+          sources: [...new Set([...sources, 'conversation-api'])],
+        })
+      ),
+    groundAndValidate,
   });
-  // P2.1b-04: claim-level validation over grounding only — meta.validation.
-  const validation = buildValidationReport(grounding);
-  // P2.1b-05: Safe Regeneration decision from validation only — no provider retry.
-  const safeRegeneration = buildSafeRegenerationDecision(validation);
+
+  // Presentation once on the selected semantic result only.
+  result = localizeAskDecisionPresentation(
+    executed.result,
+    locale as AppLang
+  );
+
+  // Final-output provenance (post Localization/WQ) — observation stage.
+  const finalGv = groundAndValidate(result);
   result = attachInternalDecisionMeta(result, {
     inputAnalysis,
     decisionContext,
     reasoningPlan,
     promptContext: promptContextMeta,
-    grounding,
-    validation,
-    safeRegeneration,
+    grounding: finalGv.grounding,
+    validation: finalGv.validation,
+    safeRegeneration: executed.safeRegeneration,
   });
 
   return {

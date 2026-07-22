@@ -144,8 +144,10 @@ describe('runAskDecision safeRegeneration meta', () => {
     expect(out.result.meta?.validation).toBeDefined();
     expect('safeRegeneration' in out).toBe(false);
 
-    // Decision only — single provider call, no retry for regeneration
+    // No regeneration when not recommended — single provider call
     expect(postConversationExecute).toHaveBeenCalledTimes(1);
+    expect(out.result.meta?.safeRegeneration?.outcome).toBe('not_requested');
+    expect(out.result.meta?.safeRegeneration?.attempted).toBe(false);
 
     // Public fields unchanged
     expect(out.result.schemaVersion).toBe(ASK_DECISION_SCHEMA_VERSION);

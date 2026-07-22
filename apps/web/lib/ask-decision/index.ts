@@ -145,13 +145,21 @@ export type {
 export {
   SAFE_REGENERATION_VERSION,
   SAFE_REGENERATION_SOURCE,
+  ASK_MAX_PROVIDER_CALLS,
   buildSafeRegenerationDecision,
   buildUnavailableSafeRegenerationDecision,
+  compareValidationReports,
+  createProviderCallBudget,
+  executeSafeRegeneration,
+  buildSafeRegenerationInstruction,
 } from './safe-regeneration';
 export type {
   SafeRegenerationDecision,
   SafeRegenerationSummary,
   SafeRegenerationStatus,
+  SafeRegenerationSelected,
+  SafeRegenerationOutcome,
+  ProviderCallBudget,
 } from './safe-regeneration';
 export { parseAskDecisionResponse } from './parse';
 export { validateAskDecisionResult } from './validate';
