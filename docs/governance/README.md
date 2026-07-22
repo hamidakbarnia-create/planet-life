@@ -58,6 +58,7 @@ Cursor and other AI agents may maintain structure, links, references, and consis
 | [DECISION_LOG.md](./DECISION_LOG.md) | Register of permanent project decisions |
 | [ADR_INDEX.md](./ADR_INDEX.md) | Index of Architecture Decision Records |
 | [CHANGELOG.md](./CHANGELOG.md) | Version history of the governance structure itself |
+| [P2.2-04-PRODUCTION-OBSERVABILITY.md](./P2.2-04-PRODUCTION-OBSERVABILITY.md) | Ratified P2.2-04 Production Observability acceptance package (implementation not started) |
 
 ## Relationship to Existing Documentation
 

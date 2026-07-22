@@ -2,13 +2,27 @@
 
 > Status: Review
 
-**Version:** 1.3.2
+**Version:** 1.3.3
 
 **Authority:** This document derives from [METIORO_CONSTITUTION.md](./METIORO_CONSTITUTION.md) (governance instrument).
 
 **Purpose:** Version history of the METIORO governance structure itself.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for governance releases.
+
+---
+
+## [1.3.3] — 2026-07-22
+
+### Added
+
+- [P2.2-04-PRODUCTION-OBSERVABILITY.md](./P2.2-04-PRODUCTION-OBSERVABILITY.md) — ratified operational acceptance package for Production Observability (specification only; implementation not started)
+- [MASTER_STATUS.md](../MASTER_STATUS.md) — registry rows for P2.2-01…P2.2-04; status value `SPECIFICATION RATIFIED — IMPLEMENTATION NOT STARTED`
+
+### Documented
+
+- P2.2-05 remains blocked until P2.2-04 implementation, verification, deployment evidence, and closure are complete
+- No observability vendor is ratified in this change
 
 ---
 

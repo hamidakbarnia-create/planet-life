@@ -1,7 +1,7 @@
 # METIORO Master Status
 
 > **Document type:** Sprint & workstream status registry
-> **Last updated:** 2026-07-14
+> **Last updated:** 2026-07-22
 > **Authority:** Authoritative registry for sprint and workstream status per [GOVERNANCE.md](./governance/GOVERNANCE.md). Summarizes repository artifacts — does not override Constitution, Decision Log LOCKED entries, Token Registry, or LOCKED ADRs.
 
 **Quick links:** [Governance](./governance/GOVERNANCE.md) · [Governance hub](./governance/README.md) · [Design Token Registry](./design/system/design-token-registry.md) · [Performance Baseline](./performance/BASELINE.md) · [UI Audit](./design/ui-audit/README.md)
@@ -259,8 +259,12 @@ Approved or documented engineering work only (no new feature proposals):
 | **PHASE-6C** | Evidence Pipeline | **PLANNED** | Phase 6 sequence below |
 | **P1-T04** | Provider-Agnostic Live Generation Boundary | **READY; EXECUTION PAUSED BY PRODUCT REMEDIATION GATE** | Sprint P1 task; paused for Product Remediation Gate **PRG-02**; see Product Remediation Gates below. Task definition remains in [SPRINT-P1-TASK-DECOMPOSITION.md](./governance/SPRINT-P1-TASK-DECOMPOSITION.md); execution state is registered here only. |
 | **PRG-02** | World News Freshness Enforcement | **IMPLEMENTATION QUEUED** | Authority: [ADR-0008](./adr/ADR-0008-News-Freshness-Policy.md) (Accepted). Separate from P1-T04. Gate: Product Remediation Gates below. |
+| **P2.2-01** | Staging Deployment & E2E Verification | **CLOSED** | [2026-07-22-p2.2-01-staging-readiness.md](./deployments/2026-07-22-p2.2-01-staging-readiness.md) |
+| **P2.2-02** | Safe Regeneration Execution | **CLOSED** | [2026-07-22-p2.2-02-safe-regeneration-execution.md](./deployments/2026-07-22-p2.2-02-safe-regeneration-execution.md) |
+| **P2.2-03** | Provider Hardening | **CLOSED** | [2026-07-22-p2.2-03-provider-hardening.md](./deployments/2026-07-22-p2.2-03-provider-hardening.md) |
+| **P2.2-04** | Production Observability | **SPECIFICATION RATIFIED — IMPLEMENTATION NOT STARTED** | Canonical spec: [P2.2-04-PRODUCTION-OBSERVABILITY.md](./governance/P2.2-04-PRODUCTION-OBSERVABILITY.md). Prerequisite: P2.2-03 CLOSED. **P2.2-05 remains blocked** until P2.2-04 implementation, verification, deployment evidence, and closure are complete. |
 
-**Allowed status values:** `CLOSED` · `OPEN` · `PROPOSED` · `PLANNED` · `IMPLEMENTATION QUEUED` · `READY; EXECUTION PAUSED BY PRODUCT REMEDIATION GATE` — no other value is valid.
+**Allowed status values:** `CLOSED` · `OPEN` · `PROPOSED` · `PLANNED` · `IMPLEMENTATION QUEUED` · `READY; EXECUTION PAUSED BY PRODUCT REMEDIATION GATE` · `SPECIFICATION RATIFIED — IMPLEMENTATION NOT STARTED` — no other value is valid.
 
 ---
 
