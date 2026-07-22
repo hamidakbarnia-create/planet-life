@@ -18,7 +18,16 @@ export type ConversationSuccess = {
 
 export type ConversationClientResult =
   | { ok: true; body: ConversationSuccess }
-  | { ok: false; kind: 'network_error' | 'contract_error' | 'malformed_response' };
+  | {
+      ok: false;
+      kind:
+        | 'network_error'
+        | 'contract_error'
+        | 'malformed_response'
+        | 'aborted';
+      /** Present for non-OK HTTP responses when known. */
+      httpStatus?: number;
+    };
 
 export type ConversationExecuteOptions = {
   signal?: AbortSignal;

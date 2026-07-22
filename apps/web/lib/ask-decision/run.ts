@@ -2,7 +2,6 @@
 
 import type { BirthProfile } from '@/lib/birth-profile';
 import {
-  postConversationExecute,
   type ConversationLocale,
   type ConversationMessage,
 } from '@/lib/conversation-client';
@@ -34,9 +33,11 @@ import {
 } from './prompt-context';
 import {
   buildGroundingProvenance,
+  buildUnavailableGrounding,
   type GroundingProvenance,
 } from './grounding';
 import {
+  buildUnavailableValidationReport,
   buildValidationReport,
   type ValidationReport,
 } from './claim-validation';
@@ -47,6 +48,12 @@ import {
   notRequestedExecution,
   type SafeRegenerationDecision,
 } from './safe-regeneration';
+import {
+  buildProviderExecutionMeta,
+  executeAskProviderCall,
+  toFallbackReason,
+  type ProviderExecutionAttempt,
+} from './provider-execution';
 import { localizeAskDecisionPresentation } from './localize-presentation';
 import { buildTimingIntelligence } from './local-build';
 import { parseAskDecisionResponse } from './parse';
@@ -86,6 +93,7 @@ function attachInternalDecisionMeta(
     grounding: GroundingProvenance;
     validation: ValidationReport;
     safeRegeneration: SafeRegenerationDecision;
+    providerExecution?: import('./provider-execution').ProviderExecutionMeta;
   }
 ): AskDecisionResult {
   const meta = result.meta;
@@ -126,6 +134,9 @@ function attachInternalDecisionMeta(
       grounding: args.grounding,
       validation: args.validation,
       safeRegeneration: args.safeRegeneration,
+      ...(args.providerExecution
+        ? { providerExecution: args.providerExecution }
+        : {}),
     },
   };
 }
@@ -332,18 +343,9 @@ export async function runAskDecision(
   let earlyReasoningPlan: ReasoningPlan | null = null;
   /** Hard budget: initial + at most one of (language retry | safe regeneration). */
   const providerBudget = createProviderCallBudget();
-
-  async function callProviderBudgeted(
-    messages: ConversationMessage[]
-  ): Promise<
-    | Awaited<ReturnType<typeof postConversationExecute>>
-    | { ok: false; kind: 'network_error' }
-  > {
-    if (!providerBudget.consume()) {
-      return { ok: false, kind: 'network_error' };
-    }
-    return postConversationExecute(messages, locale, { signal: input.signal });
-  }
+  const providerAttempts: ProviderExecutionAttempt[] = [];
+  let initialProviderFailed = false;
+  let providerFallbackUsed = false;
 
   try {
     const structuredEnabled = isStructuredPromptContextEnabled();
@@ -384,17 +386,26 @@ export async function runAskDecision(
       promptContextMeta = bundle.promptContext;
       promptMessages = bundle.promptMessages;
 
-      const conversation = await callProviderBudgeted(promptMessages);
-      if (conversation.ok) {
+      const conversation = await executeAskProviderCall({
+        messages: promptMessages,
+        locale,
+        purpose: 'initial',
+        budget: providerBudget,
+        signal: input.signal,
+        requireStructuredJson: true,
+      });
+      providerAttempts.push(conversation.attempt);
+      if (conversation.ok && conversation.message) {
         conversationOk = true;
-        conversationMessage = conversation.body.message;
-        requestId = conversation.body.request_id;
+        conversationMessage = conversation.message;
+        requestId = conversation.requestId;
       } else {
-        failReason =
-          conversation.kind === 'network_error' ? 'network' : 'provider';
+        initialProviderFailed = true;
+        providerFallbackUsed = true;
+        failReason = toFallbackReason(conversation.failureReason);
       }
     } else {
-      // Legacy: timing ∥ provider (prompt does not depend on timing payload).
+      // Legacy: timing ∥ hardened provider (prompt does not depend on timing).
       promptContextMeta = buildPromptContextMeta('unavailable');
       promptMessages = buildAskDecisionPrompt({
         question,
@@ -403,45 +414,50 @@ export async function runAskDecision(
         context,
         clarificationAnswer: input.clarificationAnswer,
       });
-      // Timing may run in parallel, but provider still consumes budget once.
-      if (!providerBudget.consume()) {
-        failReason = 'provider';
-      } else {
-        const [timingSettled, conversation] = await Promise.all([
-          needsTiming
-            ? collectAskTiming({
-                profile: input.profile,
-                timingRelevant: intent.timingRelevant,
-                timingAvailable: context.timingAvailable,
-                locale,
-              })
-            : Promise.resolve(
-                buildTimingIntelligence(
-                  null,
-                  intent.timingRelevant,
-                  false,
-                  locale
-                )
-              ),
-          postConversationExecute(promptMessages, locale, {
-            signal: input.signal,
-          }),
-        ]);
-        timingBlock = timingSettled;
+      const timingPromise = needsTiming
+        ? collectAskTiming({
+            profile: input.profile,
+            timingRelevant: intent.timingRelevant,
+            timingAvailable: context.timingAvailable,
+            locale,
+          })
+        : Promise.resolve(
+            buildTimingIntelligence(null, intent.timingRelevant, false, locale)
+          );
+      const [timingSettled, conversation] = await Promise.all([
+        timingPromise,
+        executeAskProviderCall({
+          messages: promptMessages,
+          locale,
+          purpose: 'initial',
+          budget: providerBudget,
+          signal: input.signal,
+          requireStructuredJson: true,
+        }),
+      ]);
+      timingBlock = timingSettled;
+      providerAttempts.push(conversation.attempt);
 
-        if (conversation.ok) {
-          conversationOk = true;
-          conversationMessage = conversation.body.message;
-          requestId = conversation.body.request_id;
-        } else {
-          failReason =
-            conversation.kind === 'network_error' ? 'network' : 'provider';
-        }
+      if (conversation.ok && conversation.message) {
+        conversationOk = true;
+        conversationMessage = conversation.message;
+        requestId = conversation.requestId;
+      } else {
+        initialProviderFailed = true;
+        providerFallbackUsed = true;
+        failReason = toFallbackReason(conversation.failureReason);
       }
     }
-  } catch (err) {
-    const name = err instanceof Error ? err.name : '';
-    failReason = name === 'AbortError' ? 'timeout' : 'network';
+  } catch {
+    initialProviderFailed = true;
+    providerFallbackUsed = true;
+    failReason = 'unknown';
+    providerAttempts.push({
+      purpose: 'initial',
+      status: 'unknown_failure',
+      latencyMs: 0,
+      failureReason: 'unknown_failure',
+    });
   }
 
   const sources: string[] = ['ask-decision-engine-v3'];
@@ -507,48 +523,37 @@ export async function runAskDecision(
         });
 
         if (providerBudget.canCall) {
-          try {
-            const retryMessages: ConversationMessage[] = [
-              ...promptMessages,
-              {
-                role: 'user',
-                content: LANGUAGE_RETRY_INSTRUCTION[locale],
-              },
-            ];
-            const retry = await callProviderBudgeted(retryMessages);
-            if (retry.ok) {
-              requestId = retry.body.request_id;
-              result = parseAskDecisionResponse(
-                parseInputBase({
-                  ...sharedParse,
-                  conversationMessage: retry.body.message,
-                  requestId,
-                  sources: [...new Set([...sources, 'conversation-api'])],
-                })
-              );
-              const retryProse = extractUserFacingAskProse(result);
-              const retryCheck = checkResponseLanguage(retryProse, locale);
-              if (!retryCheck.ok) {
-                result = buildStructuredFallback({
-                  intent,
-                  frame,
-                  timing: timingBlock,
-                  usedProfile: context.usedProfile,
-                  usedTiming: timingBlock.available,
-                  decisionStyles: context.decisionStyles,
-                  generatedAt,
-                  requestId,
-                  clarificationAnswer: input.clarificationAnswer ?? null,
-                  reason: 'parse',
-                  locale,
-                });
-                result.recommendation = askCopy(locale, 'safe.languageFailure');
-                result.executiveSummary = askCopy(
-                  locale,
-                  'safe.languageFailure'
-                );
-              }
-            } else {
+          const originalLanguageResult = result;
+          const retryMessages: ConversationMessage[] = [
+            ...promptMessages,
+            {
+              role: 'user',
+              content: LANGUAGE_RETRY_INSTRUCTION[locale],
+            },
+          ];
+          const retry = await executeAskProviderCall({
+            messages: retryMessages,
+            locale,
+            purpose: 'language_retry',
+            budget: providerBudget,
+            signal: input.signal,
+            requireStructuredJson: true,
+          });
+          providerAttempts.push(retry.attempt);
+
+          if (retry.ok && retry.message) {
+            requestId = retry.requestId;
+            result = parseAskDecisionResponse(
+              parseInputBase({
+                ...sharedParse,
+                conversationMessage: retry.message,
+                requestId,
+                sources: [...new Set([...sources, 'conversation-api'])],
+              })
+            );
+            const retryProse = extractUserFacingAskProse(result);
+            const retryCheck = checkResponseLanguage(retryProse, locale);
+            if (!retryCheck.ok) {
               result = buildStructuredFallback({
                 intent,
                 frame,
@@ -559,25 +564,16 @@ export async function runAskDecision(
                 generatedAt,
                 requestId,
                 clarificationAnswer: input.clarificationAnswer ?? null,
-                reason: 'provider',
+                reason: 'parse',
                 locale,
               });
+              result.recommendation = askCopy(locale, 'safe.languageFailure');
+              result.executiveSummary = askCopy(locale, 'safe.languageFailure');
+              providerFallbackUsed = true;
             }
-          } catch (err) {
-            const name = err instanceof Error ? err.name : '';
-            result = buildStructuredFallback({
-              intent,
-              frame,
-              timing: timingBlock,
-              usedProfile: context.usedProfile,
-              usedTiming: timingBlock.available,
-              decisionStyles: context.decisionStyles,
-              generatedAt,
-              requestId,
-              clarificationAnswer: input.clarificationAnswer ?? null,
-              reason: name === 'AbortError' ? 'timeout' : 'network',
-              locale,
-            });
+          } else {
+            // P2.2-03: language-retry transport failure retains valid original.
+            result = originalLanguageResult;
           }
         }
       }
@@ -621,6 +617,36 @@ export async function runAskDecision(
     return { grounding, validation };
   };
 
+  const providerExecution = () =>
+    buildProviderExecutionMeta({
+      attempts: providerAttempts,
+      fallbackUsed: providerFallbackUsed || Boolean(result.meta?.fallback),
+    });
+
+  // Initial provider failure: do not ground/validate/regenerate invalid output.
+  if (initialProviderFailed || !conversationOk) {
+    result = localizeAskDecisionPresentation(result, locale as AppLang);
+    const unavailableSafe = notRequestedExecution(
+      buildSafeRegenerationDecision(buildUnavailableValidationReport()),
+      buildUnavailableValidationReport()
+    );
+    result = attachInternalDecisionMeta(result, {
+      inputAnalysis,
+      decisionContext,
+      reasoningPlan,
+      promptContext: promptContextMeta,
+      grounding: buildUnavailableGrounding(generatedAt),
+      validation: buildUnavailableValidationReport(),
+      safeRegeneration: unavailableSafe,
+      providerExecution: providerExecution(),
+    });
+    return {
+      result,
+      clarification,
+      pendingClarification: false,
+    };
+  }
+
   // Semantic validation (pre-presentation) drives Safe Regeneration decision.
   const semanticGv = groundAndValidate(result);
   const decision = buildSafeRegenerationDecision(semanticGv.validation);
@@ -632,8 +658,42 @@ export async function runAskDecision(
     originalValidation: semanticGv.validation,
     promptMessages,
     budget: providerBudget,
-    callProvider: (messages) =>
-      postConversationExecute(messages, locale, { signal: input.signal }),
+    callProvider: async (messages) => {
+      const call = await executeAskProviderCall({
+        messages,
+        locale,
+        purpose: 'safe_regeneration',
+        budget: providerBudget,
+        consumeBudget: false,
+        skipBudgetGate: true,
+        signal: input.signal,
+        requireStructuredJson: true,
+      });
+      providerAttempts.push(call.attempt);
+      if (call.ok && call.message) {
+        return {
+          ok: true as const,
+          body: {
+            type: 'decision' as const,
+            message: call.message,
+            sources: [],
+            request_id: call.requestId ?? requestId ?? 'regen',
+            reasoning: null,
+            uncertainty: null,
+          },
+        };
+      }
+      return {
+        ok: false as const,
+        kind:
+          call.failureReason === 'network_error'
+            ? ('network_error' as const)
+            : call.failureReason === 'invalid_output' ||
+                call.failureReason === 'empty_response'
+              ? ('malformed_response' as const)
+              : ('contract_error' as const),
+      };
+    },
     parseResult: (message) =>
       parseAskDecisionResponse(
         parseInputBase({
@@ -662,6 +722,7 @@ export async function runAskDecision(
     grounding: finalGv.grounding,
     validation: finalGv.validation,
     safeRegeneration: executed.safeRegeneration,
+    providerExecution: providerExecution(),
   });
 
   return {

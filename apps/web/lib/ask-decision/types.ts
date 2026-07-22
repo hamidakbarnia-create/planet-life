@@ -259,6 +259,11 @@ export type AskDecisionResult = {
      */
     validation?: import('./claim-validation').ValidationReport;
     /**
+     * P2.2-03 provider execution facts — presentation must ignore.
+     * Transport/usability only; no prompts or response bodies.
+     */
+    providerExecution?: import('./provider-execution').ProviderExecutionMeta;
+    /**
      * Safe Regeneration decision + bounded execution metadata.
      * Decision (`shouldRegenerate`) remains validation-only authority.
      * Execution (P2.2-02) may attempt at most one regeneration under the

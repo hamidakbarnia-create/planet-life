@@ -143,6 +143,18 @@ export type {
   GroundingBundle,
 } from './claim-validation';
 export {
+  ASK_PROVIDER_TIMEOUT_MS_DEFAULT,
+  resolveAskProviderTimeoutMs,
+  executeAskProviderCall,
+  buildProviderExecutionMeta,
+} from './provider-execution';
+export type {
+  ProviderExecutionMeta,
+  ProviderFailureReason,
+  ProviderAttemptPurpose,
+  AskProviderCallResult,
+} from './provider-execution';
+export {
   SAFE_REGENERATION_VERSION,
   SAFE_REGENERATION_SOURCE,
   ASK_MAX_PROVIDER_CALLS,

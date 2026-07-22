@@ -230,7 +230,7 @@ describe('ask language retry orchestration', () => {
     expect(out.result.recommendation).not.toMatch(/Proceed with/i);
   });
 
-  it('falls back with localized provider failure when retry provider fails', async () => {
+  it('retains original when language retry provider fails (no extra call)', async () => {
     vi.mocked(postConversationExecute)
       .mockResolvedValueOnce(okBody(askPayload(ENGLISH), 'ask-en-1'))
       .mockResolvedValueOnce({
@@ -246,17 +246,25 @@ describe('ask language retry orchestration', () => {
     });
 
     expect(postConversationExecute).toHaveBeenCalledTimes(2);
-    expect(out.result.recommendation).toMatch(/[\u0600-\u06FF]/);
-    expect(out.result.recommendation).not.toMatch(/\bRecommendation\b|\bProceed with\b/i);
-    expect(Boolean(out.result.meta?.fallback)).toBe(true);
+    expect(out.result.meta?.fallback).toBe(false);
+    expect(out.result.meta?.providerExecution?.callCount).toBe(2);
+    expect(out.result.meta?.providerExecution?.maxCalls).toBe(2);
+    expect(
+      out.result.meta?.providerExecution?.attempts.some(
+        (a) => a.purpose === 'language_retry' && a.failureReason === 'network_error'
+      )
+    ).toBe(true);
+    // Localized presentation of retained original — not English scaffolds
+    expect(out.result.recommendation).not.toMatch(/\bProceed with\b/i);
   });
 
-  it('falls back with localized timeout when retry aborts', async () => {
+  it('retains original when language retry aborts (no third call)', async () => {
     vi.mocked(postConversationExecute)
       .mockResolvedValueOnce(okBody(askPayload(ENGLISH), 'ask-en-1'))
-      .mockRejectedValueOnce(
-        Object.assign(new Error('Aborted'), { name: 'AbortError' })
-      );
+      .mockResolvedValueOnce({
+        ok: false as const,
+        kind: 'aborted' as const,
+      });
 
     const out = await runAskDecision({
       question: 'Should I accept this job offer this month?',
@@ -266,8 +274,12 @@ describe('ask language retry orchestration', () => {
     });
 
     expect(postConversationExecute).toHaveBeenCalledTimes(2);
-    expect(out.result.recommendation).toMatch(/[\u0600-\u06FF]/);
-    expect(out.result.recommendation).not.toMatch(/\bProceed with\b/i);
-    expect(Boolean(out.result.meta?.fallback)).toBe(true);
+    expect(out.result.meta?.fallback).toBe(false);
+    expect(out.result.meta?.providerExecution?.callCount).toBeLessThanOrEqual(2);
+    expect(
+      out.result.meta?.providerExecution?.attempts.some(
+        (a) => a.purpose === 'language_retry'
+      )
+    ).toBe(true);
   });
 });

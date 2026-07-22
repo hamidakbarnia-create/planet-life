@@ -47,7 +47,13 @@ export async function postConversationExecute(
       }),
       signal: options?.signal,
     });
-  } catch {
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      (err.name === 'AbortError' || err.name === 'TimeoutError')
+    ) {
+      return { ok: false, kind: 'aborted' };
+    }
     return { ok: false, kind: 'network_error' };
   }
 
@@ -55,11 +61,19 @@ export async function postConversationExecute(
   try {
     parsed = await response.json();
   } catch {
-    return { ok: false, kind: 'malformed_response' };
+    return {
+      ok: false,
+      kind: 'malformed_response',
+      httpStatus: response.status,
+    };
   }
 
   if (response.status === 200 && isSuccess(parsed)) {
     return { ok: true, body: parsed };
   }
-  return { ok: false, kind: 'contract_error' };
+  return {
+    ok: false,
+    kind: 'contract_error',
+    httpStatus: response.status,
+  };
 }

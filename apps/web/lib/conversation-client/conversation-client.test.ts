@@ -42,7 +42,11 @@ describe('conversation-client (ADR-0007)', () => {
       expect(result.body.sources).toEqual([]);
     }
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, init] = fetchMock.mock.calls[0]!;
+    const call = fetchMock.mock.calls[0] as unknown as
+      | [unknown, RequestInit | undefined]
+      | undefined;
+    expect(call).toBeDefined();
+    const [url, init] = call!;
     expect(String(url)).toContain(CONVERSATION_EXECUTE_PATH);
     expect(init?.method).toBe('POST');
     const body = JSON.parse(String(init?.body));
@@ -72,12 +76,16 @@ describe('conversation-client (ADR-0007)', () => {
       conversationId: 'c-1',
     });
 
-    const [, init] = fetchMock.mock.calls[0]!;
+    const call = fetchMock.mock.calls[0] as unknown as
+      | [unknown, RequestInit | undefined]
+      | undefined;
+    expect(call).toBeDefined();
+    const [, init] = call!;
     expect(init?.signal).toBe(controller.signal);
     expect(JSON.parse(String(init?.body)).conversation_id).toBe('c-1');
   });
 
-  it('maps network and contract failures without inventing envelopes', async () => {
+  it('maps network, abort, and contract failures without inventing envelopes', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => {
@@ -91,6 +99,19 @@ describe('conversation-client (ADR-0007)', () => {
 
     vi.stubGlobal(
       'fetch',
+      vi.fn(async () => {
+        const err = new Error('aborted');
+        err.name = 'AbortError';
+        throw err;
+      })
+    );
+    expect(await postConversationExecute([{ role: 'user', content: 'x' }], 'en')).toEqual({
+      ok: false,
+      kind: 'aborted',
+    });
+
+    vi.stubGlobal(
+      'fetch',
       vi.fn(async () => ({
         status: 500,
         json: async () => ({ error: { code: 'X', message: 'y', requestId: 'z' } }),
@@ -99,6 +120,7 @@ describe('conversation-client (ADR-0007)', () => {
     expect(await postConversationExecute([{ role: 'user', content: 'x' }], 'en')).toEqual({
       ok: false,
       kind: 'contract_error',
+      httpStatus: 500,
     });
   });
 });
