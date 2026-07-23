@@ -124,10 +124,10 @@ export function CosmosCard({ lang, className = '' }: { lang: AppLang; className?
       try {
         const transit = await fetchTransitSnapshot(profile, today);
         if (cancelled) return;
-        if (transit.length > 0) {
+        if (transit.planets.length > 0) {
           setPlanets(
             Object.fromEntries(
-              transit.map((planet) => [
+              transit.planets.map((planet) => [
                 planet.name,
                 {
                   sign: planet.sign,

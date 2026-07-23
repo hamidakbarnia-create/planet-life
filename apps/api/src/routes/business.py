@@ -54,6 +54,7 @@ class BusinessAnalysisRequest(BaseModel):
     evaluation_location: str | None = None
     evaluation_latitude: float | None = None
     evaluation_longitude: float | None = None
+    evaluation_timezone: str | None = None
     country: str | None = None
     node_type: str = "mean"  # mean | true — Astro-Seek default reference uses Mean Node
 
@@ -74,6 +75,7 @@ async def analyze_business(request: BusinessAnalysisRequest):
             evaluation_location=request.evaluation_location,
             evaluation_latitude=request.evaluation_latitude,
             evaluation_longitude=request.evaluation_longitude,
+            evaluation_timezone=request.evaluation_timezone,
             house_system=request.house_system,
             zodiac=request.zodiac,
         )

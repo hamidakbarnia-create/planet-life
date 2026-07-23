@@ -74,6 +74,7 @@ export interface ScoringLocationPayload {
   evaluation_location: string;
   evaluation_latitude?: number;
   evaluation_longitude?: number;
+  evaluation_timezone?: string;
 }
 
 export function buildScoringLocationPayload(
@@ -90,6 +91,9 @@ export function buildScoringLocationPayload(
   if (evalLoc.latitude != null && evalLoc.longitude != null) {
     payload.evaluation_latitude = evalLoc.latitude;
     payload.evaluation_longitude = evalLoc.longitude;
+  }
+  if (evalLoc.timezone?.trim()) {
+    payload.evaluation_timezone = evalLoc.timezone.trim();
   }
   return payload;
 }

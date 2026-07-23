@@ -101,6 +101,7 @@ class BatchDayRequest(BaseModel):
     evaluation_location: str | None = None
     evaluation_latitude: float | None = None
     evaluation_longitude: float | None = None
+    evaluation_timezone: str | None = None
 
 
 def _score_one(
@@ -115,6 +116,7 @@ def _score_one(
     evaluation_location=None,
     evaluation_latitude=None,
     evaluation_longitude=None,
+    evaluation_timezone=None,
 ):
     """Synchronous worker run inside a thread."""
     try:
@@ -129,6 +131,7 @@ def _score_one(
             evaluation_location=evaluation_location,
             evaluation_latitude=evaluation_latitude,
             evaluation_longitude=evaluation_longitude,
+            evaluation_timezone=evaluation_timezone,
             house_system=house_system,
             zodiac=zodiac,
         )
@@ -182,6 +185,7 @@ async def batch_score(request: BatchDayRequest):
             request.evaluation_location,
             request.evaluation_latitude,
             request.evaluation_longitude,
+            request.evaluation_timezone,
         )
         for target_date in request.dates
     ]
@@ -209,6 +213,7 @@ class HourlyBatchRequest(BaseModel):
     evaluation_location: str | None = None
     evaluation_latitude: float | None = None
     evaluation_longitude: float | None = None
+    evaluation_timezone: str | None = None
 
 
 @app.post("/api/batch-hourly")
@@ -243,6 +248,7 @@ async def batch_hourly(request: HourlyBatchRequest):
             request.evaluation_location,
             request.evaluation_latitude,
             request.evaluation_longitude,
+            request.evaluation_timezone,
         )
         for h in hours
     ]
@@ -274,6 +280,8 @@ class TransitSnapshotRequest(BaseModel):
     evaluation_location: str | None = None
     evaluation_latitude: float | None = None
     evaluation_longitude: float | None = None
+    evaluation_timezone: str | None = None
+    calculation_instant: str | None = None
 
 
 @app.post("/api/transit")
@@ -293,6 +301,8 @@ async def transit_snapshot(request: TransitSnapshotRequest):
             evaluation_location=request.evaluation_location,
             evaluation_latitude=request.evaluation_latitude,
             evaluation_longitude=request.evaluation_longitude,
+            evaluation_timezone=request.evaluation_timezone,
+            calculation_instant=request.calculation_instant,
         )
         return {
             "natal": natal.get("planets", {}),

@@ -31,6 +31,7 @@ import {
   scoreToBand,
   type HourScore,
   type PlanetTransit,
+  type TransitSnapshotMeta,
   type ScoreBand,
 } from '@/lib/calendar-scores';
 import { HOME_LANGS } from '@/lib/home-i18n';
@@ -86,6 +87,11 @@ type LangPack = {
     in: string;
     house: string;
     empty: string;
+    detailsSummary: string;
+    detailsPlace: string;
+    detailsLocalTime: string;
+    detailsUtc: string;
+    detailsTimezone: string;
   };
   signs: string[];
   planets: Record<string, string>;
@@ -150,11 +156,16 @@ const LANGS: Record<LangKey, LangPack> = {
     },
     transit: {
       title: 'Sky on this day',
-      hint: 'Live planetary positions transiting on the selected date.',
+      hint: 'Planetary positions for the selected day at local noon where you live.',
       retrograde: 'Retrograde',
       in: 'in',
       house: 'House',
       empty: 'No transit data yet.',
+      detailsSummary: 'Calculation details',
+      detailsPlace: 'Living location',
+      detailsLocalTime: 'Local time used',
+      detailsUtc: 'UTC instant',
+      detailsTimezone: 'Timezone',
     },
     signs: [
       'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
@@ -224,11 +235,16 @@ const LANGS: Record<LangKey, LangPack> = {
     },
     transit: {
       title: 'Небо в этот день',
-      hint: 'Положения планет на выбранную дату.',
+      hint: 'Положения планет на выбранный день в полдень по месту проживания.',
       retrograde: 'Ретроград',
       in: 'в',
       house: 'Дом',
       empty: 'Данных о транзитах пока нет.',
+      detailsSummary: 'Детали расчёта',
+      detailsPlace: 'Место проживания',
+      detailsLocalTime: 'Местное время',
+      detailsUtc: 'Момент UTC',
+      detailsTimezone: 'Часовой пояс',
     },
     signs: [
       'Овен', 'Телец', 'Близнецы', 'Рак', 'Лев', 'Дева',
@@ -298,11 +314,16 @@ const LANGS: Record<LangKey, LangPack> = {
     },
     transit: {
       title: 'آسمان این روز',
-      hint: 'موقعیت سیارات در روز انتخاب‌شده.',
+      hint: 'موقعیت سیارات برای روز انتخاب‌شده در ظهر محلی محل زندگی شما.',
       retrograde: 'برگشتی',
       in: 'در',
       house: 'خانه',
       empty: 'هنوز داده‌ای از ترانزیت‌ها نیست.',
+      detailsSummary: 'جزئیات محاسبه',
+      detailsPlace: 'محل زندگی',
+      detailsLocalTime: 'زمان محلی استفاده‌شده',
+      detailsUtc: 'لحظهٔ UTC',
+      detailsTimezone: 'منطقهٔ زمانی',
     },
     signs: [
       'حمل', 'ثور', 'جوزا', 'سرطان', 'اسد', 'سنبله',
@@ -372,11 +393,16 @@ const LANGS: Record<LangKey, LangPack> = {
     },
     transit: {
       title: 'سماء هذا اليوم',
-      hint: 'مواقع الكواكب في التاريخ المحدد.',
+      hint: 'مواقع الكواكب لليوم المحدد عند الظهيرة المحلية في مكان إقامتك.',
       retrograde: 'تراجعي',
       in: 'في',
       house: 'البيت',
       empty: 'لا توجد بيانات عبور بعد.',
+      detailsSummary: 'تفاصيل الحساب',
+      detailsPlace: 'مكان الإقامة',
+      detailsLocalTime: 'الوقت المحلي المستخدم',
+      detailsUtc: 'لحظة UTC',
+      detailsTimezone: 'المنطقة الزمنية',
     },
     signs: [
       'الحمل', 'الثور', 'الجوزاء', 'السرطان', 'الأسد', 'العذراء',
@@ -438,6 +464,7 @@ export default function CalendarPage() {
   const [hourly, setHourly] = useState<HourScore[]>([]);
   const [loadingHourly, setLoadingHourly] = useState(false);
   const [transit, setTransit] = useState<PlanetTransit[]>([]);
+  const [transitMeta, setTransitMeta] = useState<TransitSnapshotMeta>({});
   const [loadingTransit, setLoadingTransit] = useState(false);
   const [exportMode, setExportMode] = useState<CalendarExportMode>('important');
   const [hasProfile, setHasProfile] = useState(false);
@@ -521,7 +548,8 @@ export default function CalendarPage() {
     });
     fetchTransitSnapshot(profile, selectedDate).then((data) => {
       if (!cancelled) {
-        setTransit(data);
+        setTransit(data.planets);
+        setTransitMeta(data.meta);
         setLoadingTransit(false);
       }
     });
@@ -926,6 +954,49 @@ export default function CalendarPage() {
             <p className="fi text-[11px] mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
               {t.transit.hint}
             </p>
+            {(transitMeta.localIso || transitMeta.utcIso || transitMeta.calculatedFor) && (
+              <details
+                className="mb-3 rounded-lg px-3 py-2"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+                dir={t.dir}
+              >
+                <summary
+                  className="fi text-[11px] cursor-pointer select-none"
+                  style={{ color: 'rgba(212,175,55,0.85)' }}
+                >
+                  {t.transit.detailsSummary}
+                </summary>
+                <dl className="fi mt-2 flex flex-col gap-1.5 text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                  {transitMeta.calculatedFor ? (
+                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                      <dt style={{ color: 'rgba(255,255,255,0.35)' }}>{t.transit.detailsPlace}</dt>
+                      <dd className="m-0">{transitMeta.calculatedFor}</dd>
+                    </div>
+                  ) : null}
+                  {transitMeta.localIso ? (
+                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                      <dt style={{ color: 'rgba(255,255,255,0.35)' }}>{t.transit.detailsLocalTime}</dt>
+                      <dd className="m-0">{transitMeta.localIso}</dd>
+                    </div>
+                  ) : null}
+                  {transitMeta.utcIso ? (
+                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                      <dt style={{ color: 'rgba(255,255,255,0.35)' }}>{t.transit.detailsUtc}</dt>
+                      <dd className="m-0">{transitMeta.utcIso}</dd>
+                    </div>
+                  ) : null}
+                  {transitMeta.timezone ? (
+                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                      <dt style={{ color: 'rgba(255,255,255,0.35)' }}>{t.transit.detailsTimezone}</dt>
+                      <dd className="m-0">{transitMeta.timezone}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+              </details>
+            )}
             {loadingTransit ? (
               <div className="py-4 text-center fi text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
                 {t.loading}

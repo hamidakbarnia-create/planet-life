@@ -109,6 +109,9 @@ export function scoringLocationFields(
   if (payload.evaluation_longitude != null) {
     out.evaluation_longitude = payload.evaluation_longitude;
   }
+  if (payload.evaluation_timezone) {
+    out.evaluation_timezone = payload.evaluation_timezone;
+  }
   return out;
 }
 
@@ -371,6 +374,18 @@ export interface PlanetTransit {
   retrograde?: boolean;
 }
 
+export interface TransitSnapshotMeta {
+  calculatedFor?: string;
+  timezone?: string;
+  localIso?: string;
+  utcIso?: string;
+}
+
+export interface TransitSnapshotResult {
+  planets: PlanetTransit[];
+  meta: TransitSnapshotMeta;
+}
+
 const ZODIAC_SIGNS = [
   'Aries',
   'Taurus',
@@ -401,12 +416,12 @@ export async function fetchTransitSnapshot(
   targetDate: string,
   targetTime?: string,
   evaluation?: UserLocation | null
-): Promise<PlanetTransit[]> {
+): Promise<TransitSnapshotResult> {
   const locFields = scoringLocationFields(
     profile,
     evaluation ?? resolveCalendarEvaluationLocation(profile)
   );
-  if (!locFields) return [];
+  if (!locFields) return { planets: [], meta: {} };
   const prefs = chartPreferenceFields();
   try {
     const res = await fetch(`${API_BASE}/api/transit`, {
@@ -422,9 +437,10 @@ export async function fetchTransitSnapshot(
         ...locFields,
       }),
     });
-    if (!res.ok) return [];
+    if (!res.ok) return { planets: [], meta: {} };
     const data = await res.json();
     const planets = data?.transit ?? {};
+    const ctx = (data?.location_context ?? {}) as Record<string, unknown>;
     const out: PlanetTransit[] = [];
     for (const [name, raw] of Object.entries(planets)) {
       const body = raw as {
@@ -444,9 +460,30 @@ export async function fetchTransitSnapshot(
         retrograde: body.retrograde === true,
       });
     }
-    return out;
+    return {
+      planets: out,
+      meta: {
+        calculatedFor:
+          typeof ctx.calculated_for === 'string'
+            ? ctx.calculated_for
+            : typeof ctx.location === 'string'
+              ? ctx.location
+              : undefined,
+        timezone: typeof ctx.timezone === 'string' ? ctx.timezone : undefined,
+        localIso:
+          typeof ctx.resolved_local_datetime === 'string'
+            ? ctx.resolved_local_datetime
+            : undefined,
+        utcIso:
+          typeof ctx.resolved_utc_datetime === 'string'
+            ? ctx.resolved_utc_datetime
+            : typeof ctx.calculation_instant === 'string'
+              ? ctx.calculation_instant
+              : undefined,
+      },
+    };
   } catch {
-    return [];
+    return { planets: [], meta: {} };
   }
 }
 
