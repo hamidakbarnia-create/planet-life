@@ -23,6 +23,8 @@ from functools import lru_cache
 from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+import pytz
+
 
 DEFAULT_TRANSIT_LOCAL_TIME = "12:00"
 
@@ -67,11 +69,12 @@ def assert_coords_match_timezone(
         return
     hour, minute = parse_hhmm(target_time)
     y, m, d = (int(p) for p in target_date.split("-"))
-    explicit_utc = datetime(
-        y, m, d, hour, minute, 0, tzinfo=ZoneInfo(timezone_name)
+    naive_local = datetime(y, m, d, hour, minute, 0)
+    explicit_utc = pytz.timezone(timezone_name).localize(
+        naive_local, is_dst=None
     ).astimezone(timezone.utc)
-    derived_utc = datetime(
-        y, m, d, hour, minute, 0, tzinfo=ZoneInfo(derived)
+    derived_utc = pytz.timezone(derived).localize(
+        naive_local, is_dst=None
     ).astimezone(timezone.utc)
     if explicit_utc != derived_utc:
         raise ValueError(
@@ -152,7 +155,8 @@ def resolve_transit_instant(
         )
     else:
         iana = timezone_at(latitude, longitude)
-    local_dt = datetime(y, m, d, hour, minute, 0, tzinfo=ZoneInfo(iana))
+    naive_local = datetime(y, m, d, hour, minute, 0)
+    local_dt = pytz.timezone(iana).localize(naive_local, is_dst=None)
     utc_dt = local_dt.astimezone(timezone.utc)
     return {
         "local_datetime": local_dt,
