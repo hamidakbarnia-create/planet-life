@@ -24,6 +24,7 @@
 | ADR-0007-A1 | Conversation API Public HTTP Route Clarification | APPROVED TO COMMIT | 2026-07-13 |
 | ADR-0008 | News Freshness Policy | Accepted | 2026-07-14 |
 | ADR-0009 | Shared Frontend Conversation and Decision Context Boundaries | Accepted | 2026-07-21 |
+| ADR-0010 | Canonical Memory Graph and Personal Intelligence Memory Boundaries | Accepted | 2026-07-23 |
 | ADR-DS-001 | Design System Architecture v1 | Proposed | 2026-07-07 |
 | ADR-DS-002 | Runtime Semantic Token Consumption | Proposed | 2026-07-07 |
 
@@ -42,6 +43,8 @@
 **ADR-0008 note:** Accepted. Full text: [ADR-0008-News-Freshness-Policy.md](../adr/ADR-0008-News-Freshness-Policy.md). Primary ≤7-day freshness window, conditional fallback to the 8–30-day window when recent qualifying coverage is insufficient, hard 30-day cutoff, publication-timestamp authority, mandatory publication-date display, explicit low-signal behaviour, BFF-owned policy enforcement, and implementation-owned relevance ranking. Authorises workstream **PRG-02** in [MASTER_STATUS.md](../MASTER_STATUS.md).
 
 **ADR-0009 note:** Accepted (Product Owner ratification 2026-07-21). Full text: [ADR-0009-Shared-Frontend-Conversation-and-Decision-Context-Boundaries.md](../adr/ADR-0009-Shared-Frontend-Conversation-and-Decision-Context-Boundaries.md). Frontend ownership boundaries: optional injected `DecisionHistorySummary` for Personal Intelligence Core (no Pathfinder imports); canonical ADR-0007 client at `apps/web/lib/conversation-client/`; Ask direct timing imports without Pathfinder workflow barrel. Does not amend ADR-0007 HTTP envelopes. Authorises independent P1-T14 / P1-T15 scoped commits; P1-T13 remains blocked until those dependencies are in HEAD.
+
+**ADR-0010 note:** Accepted (Product Owner ratification 2026-07-23). Full text: [ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md](../adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md). Companion: [CMG-FINAL-LOCK-REPORT.md](../architecture/CMG-FINAL-LOCK-REPORT.md). Locks the accepted L0 canonical memory ownership, admission, provenance, lifecycle, search, and intelligence-boundary model. Unique ownership (relationship entities vs memory events as separate rows; Search/Timeline/Knowledge = None; AI summaries = no canonical persistence by default). Canonical MemoryRecord Contract `schemaVersion: "1.0.0"` with `MemoryTypeId`/`MemoryDomainId` (taxonomy not frozen). L1 is client runtime role only; L2 does not exist and remains unapproved. Julia is not a producer under P1. Architectural ratification only — does not authorize implementation. Does not supersede ADR-0007.
 
 ---
 
