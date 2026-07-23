@@ -16,9 +16,9 @@ export const DISCLAIMER_LANGS: Record<
 > = {
   en: {
     dir: 'ltr',
-    onboardingTitle: 'Before you continue',
+    onboardingTitle: 'The Final Decision Is Always Yours',
     onboardingBody:
-      'METIORO is a personal decision intelligence tool based on analytical models and astronomical calculations. All content is for informational purposes only and does not replace financial, legal, or medical advice. All decisions are your sole responsibility.',
+      'METIORO helps you evaluate your options with data and analysis. It never decides for you. Every decision remains yours.',
     onboardingCheckbox: 'I understand and agree',
     onboardingContinue: 'Continue',
     moduleWarning:
@@ -28,9 +28,9 @@ export const DISCLAIMER_LANGS: Record<
   },
   ru: {
     dir: 'ltr',
-    onboardingTitle: 'Прежде чем продолжить',
+    onboardingTitle: 'Окончательное решение всегда за вами',
     onboardingBody:
-      'METIORO — инструмент персонального интеллекта решений на основе аналитических моделей и астрономических расчётов. Весь контент носит информационный характер и не заменяет финансовые, юридические или медицинские консультации. Все решения — ваша личная ответственность.',
+      'METIORO помогает оценить возможные варианты с помощью анализа и данных, но никогда не принимает решение вместо вас. Окончательный выбор всегда остаётся за вами.',
     onboardingCheckbox: 'Я понимаю и соглашаюсь',
     onboardingContinue: 'Продолжить',
     moduleWarning:
@@ -40,9 +40,9 @@ export const DISCLAIMER_LANGS: Record<
   },
   fa: {
     dir: 'rtl',
-    onboardingTitle: 'قبل از ادامه',
+    onboardingTitle: 'تصمیم نهایی همیشه با شماست',
     onboardingBody:
-      'METIORO ابزاری برای هوش تصمیم‌گیری شخصی بر پایه مدل‌های تحلیلی و محاسبات نجومی است. تمام محتوا صرفاً جهت اطلاع‌رسانی است و جایگزین مشاوره مالی، حقوقی یا پزشکی نیست. تمام تصمیم‌ها بر عهده خود شماست.',
+      'METIORO با تحلیل و اطلاعات به شما کمک می‌کند تصمیم آگاهانه‌تری بگیرید، اما هرگز به جای شما تصمیم نمی‌گیرد. انتخاب نهایی همیشه با شماست.',
     onboardingCheckbox: 'می‌فهمم و موافقم',
     onboardingContinue: 'ادامه',
     moduleWarning:
@@ -52,9 +52,9 @@ export const DISCLAIMER_LANGS: Record<
   },
   ar: {
     dir: 'rtl',
-    onboardingTitle: 'قبل المتابعة',
+    onboardingTitle: 'القرار النهائي لك دائماً',
     onboardingBody:
-      'METIORO أداة ذكاء قرار شخصي تعتمد على نماذج تحليلية وحسابات فلكية. كل المحتوى لأغراض معلوماتية فقط ولا يحل محل المشورة المالية أو القانونية أو الطبية. جميع القرارات مسؤوليتك وحدك.',
+      'يساعدك METIORO على تقييم خياراتك من خلال التحليل والبيانات، لكنه لا يقرر بدلاً منك. القرار النهائي يبقى لك دائماً.',
     onboardingCheckbox: 'أفهم وأوافق',
     onboardingContinue: 'متابعة',
     moduleWarning:
