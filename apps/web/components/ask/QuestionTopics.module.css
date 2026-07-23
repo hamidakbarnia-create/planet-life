@@ -1,0 +1,90 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  margin-inline: -0.25rem;
+  padding-inline: 0.25rem;
+  /* Keep chips clear of the track below */
+  padding-bottom: 0;
+}
+
+.scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+}
+
+.tab {
+  flex-shrink: 0;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: rgba(255, 255, 255, 0.75);
+  background: transparent;
+  transition: color 160ms ease, border-color 160ms ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: #ffffff;
+  border-color: rgba(245, 180, 0, 0.4);
+}
+
+.tab:focus-visible {
+  outline: 2px solid rgba(251, 191, 36, 0.7);
+  outline-offset: 2px;
+}
+
+.tabActive {
+  border-color: rgba(245, 180, 0, 0.4);
+  color: #f5b400;
+}
+
+/*
+ * Dedicated indicator track — independent from chips.
+ * Fixed height; active bar is vertically centered inside.
+ */
+.track {
+  position: relative;
+  height: 8px;
+  margin-top: 10px; /* 8–12px gap under chips */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.indicator {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1px; /* base width; visual width via scaleX */
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 999px;
+  background: #ffffff;
+  transform: translateX(0) scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+  transition: none;
+}
+
+.indicatorReady {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.indicatorScrolling {
+  transition: none;
+}

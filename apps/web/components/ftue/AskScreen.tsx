@@ -21,12 +21,12 @@ import {
   findGuidedQuestion,
   getAllQuestionCategories,
   questionsByCategory,
-  resolveCategoryLabel,
   resolveGuidedQuestionText,
   type GuidedQuestionId,
   type QuestionCategoryId,
 } from '@/lib/question-library';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
+import { QuestionTopics } from '@/components/ask/QuestionTopics';
 
 const MAX_CHARS = 500;
 const QUESTION_CATEGORIES = getAllQuestionCategories();
@@ -231,31 +231,13 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
           <legend className="fi text-xs uppercase tracking-widest text-white/45 mb-3">
             {c.suggestionsLabel}
           </legend>
-          <div
-            className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1"
-            role="tablist"
-            aria-label={c.suggestionsLabel}
-          >
-            {QUESTION_CATEGORIES.map((category) => {
-              const selected = category.id === selectedCategoryId;
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  onClick={() => handleCategory(category.id)}
-                  className={`ask-chip fi text-sm px-3.5 py-2 rounded-full border shrink-0 transition-colors ${
-                    selected
-                      ? 'border-amber-400/40 text-white'
-                      : 'border-white/15 text-white/75 hover:text-white hover:border-amber-400/40'
-                  }`}
-                >
-                  {resolveCategoryLabel(category, lang)}
-                </button>
-              );
-            })}
-          </div>
+          <QuestionTopics
+            categories={QUESTION_CATEGORIES}
+            selectedCategoryId={selectedCategoryId}
+            onSelect={handleCategory}
+            lang={lang}
+            label={c.suggestionsLabel}
+          />
           <div className="flex flex-wrap gap-2 mt-3" role="tabpanel">
             {categoryQuestions.map((guidedQuestion) => (
               <button
