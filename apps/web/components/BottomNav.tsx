@@ -222,16 +222,22 @@ export function MobileTabBar({
 }) {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [pathnameAtRender, setPathnameAtRender] = useState(pathname);
   const morePanelId = useId();
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const morePanelRef = useRef<HTMLDivElement>(null);
   const moreActive = isMoreRouteActive(pathname);
 
-  const closeMore = useCallback(() => setMoreOpen(false), []);
+  // Reset open state when the route changes (back/forward, tab links, etc.)
+  // without a pathname→setState effect (react-hooks/set-state-in-effect).
+  if (pathname !== pathnameAtRender) {
+    setPathnameAtRender(pathname);
+    if (moreOpen) {
+      setMoreOpen(false);
+    }
+  }
 
-  useEffect(() => {
-    closeMore();
-  }, [pathname, closeMore]);
+  const closeMore = useCallback(() => setMoreOpen(false), []);
 
   useEffect(() => {
     if (!moreOpen) return;
@@ -288,6 +294,7 @@ export function MobileTabBar({
                       href={item.href}
                       className={`metioro-more-sheet__link ${active ? 'metioro-more-sheet__link--active' : ''}`}
                       aria-current={active ? 'page' : undefined}
+                      onClick={closeMore}
                     >
                       <span className="metioro-more-sheet__icon" aria-hidden>
                         <NavIcon name={item.key} active={active} size={22} />
@@ -312,6 +319,7 @@ export function MobileTabBar({
               href={tab.href}
               className={`metioro-mobile-nav__link ${active ? 'metioro-mobile-nav__link--active' : 'metioro-mobile-nav__link--idle'}`}
               aria-current={active ? 'page' : undefined}
+              onClick={closeMore}
             >
               <span className="metioro-sidebar__icon" aria-hidden>
                 <NavIcon name={tab.key} active={active} size={26} />

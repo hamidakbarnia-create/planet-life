@@ -96,6 +96,62 @@ describe('MobileTabBar', () => {
       expect(screen.getByRole('button', { name: expected })).toBeTruthy();
     }
   });
+  it('closes More sheet when a destination is selected and keeps the href', () => {
+    render(<MobileTabBar labels={HOME_LANGS.en.nav} dir="ltr" />);
+    fireEvent.click(screen.getByRole('button', { name: /more/i }));
+    expect(screen.getByRole('dialog', { name: /more/i })).toBeTruthy();
+
+    const world = screen.getByRole('link', { name: /world/i });
+    expect(world.getAttribute('href')).toBe('/world');
+    fireEvent.click(world);
+
+    expect(screen.queryByRole('dialog', { name: /more/i })).toBeNull();
+    expect(screen.getByRole('button', { name: /more/i }).getAttribute('aria-expanded')).toBe(
+      'false'
+    );
+  });
+
+  it('can reopen More after closing via a destination', () => {
+    render(<MobileTabBar labels={HOME_LANGS.en.nav} dir="ltr" />);
+    const more = screen.getByRole('button', { name: /more/i });
+    fireEvent.click(more);
+    fireEvent.click(screen.getByRole('link', { name: /settings/i }));
+    expect(screen.queryByRole('dialog', { name: /more/i })).toBeNull();
+
+    fireEvent.click(more);
+    expect(screen.getByRole('dialog', { name: /more/i })).toBeTruthy();
+    expect(
+      within(screen.getByRole('dialog', { name: /more/i }))
+        .getAllByRole('link')
+        .map((el) => el.getAttribute('href'))
+    ).toEqual(['/pathfinder', '/world', '/vault', '/profile', '/settings', '/upgrade']);
+  });
+
+  it('closes More when a primary tab is clicked and keeps Calendar/Today/Ask/People', () => {
+    render(<MobileTabBar labels={HOME_LANGS.en.nav} dir="ltr" />);
+    fireEvent.click(screen.getByRole('button', { name: /more/i }));
+    expect(screen.getByRole('dialog', { name: /more/i })).toBeTruthy();
+
+    const calendar = screen.getByRole('link', { name: /^calendar$/i });
+    expect(calendar.getAttribute('href')).toBe('/calendar');
+    fireEvent.click(calendar);
+    expect(screen.queryByRole('dialog', { name: /more/i })).toBeNull();
+
+    const nav = screen.getByRole('navigation', { name: /mobile navigation/i });
+    expect(within(nav).getByRole('link', { name: /^today$/i })).toBeTruthy();
+    expect(within(nav).getByRole('link', { name: /^ask$/i })).toBeTruthy();
+    expect(within(nav).getByRole('link', { name: /^people$/i })).toBeTruthy();
+  });
+
+  it('closes More when the route changes without a destination click', () => {
+    const { rerender } = render(<MobileTabBar labels={HOME_LANGS.en.nav} dir="ltr" />);
+    fireEvent.click(screen.getByRole('button', { name: /more/i }));
+    expect(screen.getByRole('dialog', { name: /more/i })).toBeTruthy();
+
+    pathnameRef.current = '/ask';
+    rerender(<MobileTabBar labels={HOME_LANGS.en.nav} dir="ltr" />);
+    expect(screen.queryByRole('dialog', { name: /more/i })).toBeNull();
+  });
 });
 
 describe('DesktopSidebar', () => {
