@@ -172,7 +172,7 @@ export function AppShell({
         {children}
         <SiteFooter />
       </main>
-      <MobileTabBar labels={navLabels} />
+      <MobileTabBar labels={navLabels} dir={dir} />
     </div>
   );
 }
