@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
+import { localeFontFamily } from '@/lib/brand-theme';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
 import type { AppLang } from '@/lib/app-settings';
@@ -317,7 +318,7 @@ export default function VaultPage() {
 
   const t = VAULT_LANGS[lang];
   const dir = HOME_LANGS[lang].dir;
-  const fontFamily = lang === 'fa' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif';
+  const fontFamily = localeFontFamily(lang);
 
   return (
     <AppShell

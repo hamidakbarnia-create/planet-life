@@ -1300,3 +1300,93 @@ html[lang='fa'] [dir='ltr'],
   unicode-bidi: isolate;
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Arabic (ar) typography — readability only (no density / padding redesign)
+   Activators: .metioro-main[lang='ar'] / main[lang='ar'] (AppShell), not html[lang]. */
+
+.metioro-main[lang='ar'],
+main[lang='ar'] {
+  --mio-label: 12px;
+  --mio-caption: 13px;
+  --mio-body: 16px;
+  --mio-body-sm: 14px;
+  --mio-value: 16px;
+  --mio-heading-sm: 0.8125rem;
+  --mio-heading-md: 1.25rem;
+  --mio-heading-lg: 1.5rem;
+  font-feature-settings: 'kern';
+}
+
+.metioro-main[lang='ar'] .mio-eyebrow,
+.metioro-main[lang='ar'] .mio-insight-card__title,
+.metioro-main[lang='ar'] .mio-label,
+.metioro-main[lang='ar'] .mio-obs-metric__label,
+main[lang='ar'] .mio-eyebrow,
+main[lang='ar'] .mio-insight-card__title,
+main[lang='ar'] .mio-label,
+main[lang='ar'] .mio-obs-metric__label {
+  letter-spacing: 0;
+  word-spacing: 0;
+  text-transform: none;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.metioro-main[lang='ar'] .mio-page-header__title,
+.metioro-main[lang='ar'] .mio-obs-hero__title,
+main[lang='ar'] .mio-page-header__title,
+main[lang='ar'] .mio-obs-hero__title {
+  line-height: 1.55;
+  font-weight: 600;
+  letter-spacing: 0;
+  word-spacing: 0;
+}
+
+.metioro-main[lang='ar'] .mio-page-header__subtitle,
+.metioro-main[lang='ar'] .mio-obs-hero__tagline,
+.metioro-main[lang='ar'] .mio-alert,
+.metioro-main[lang='ar'] .mio-caption,
+main[lang='ar'] .mio-page-header__subtitle,
+main[lang='ar'] .mio-obs-hero__tagline,
+main[lang='ar'] .mio-alert,
+main[lang='ar'] .mio-caption {
+  line-height: 1.8;
+  letter-spacing: 0;
+  word-spacing: 0.01em;
+}
+
+.metioro-main[lang='ar'] .mio-segment__option,
+main[lang='ar'] .mio-segment__option {
+  font-weight: 500;
+  letter-spacing: 0;
+  word-spacing: 0;
+  line-height: 1.5;
+}
+
+.metioro-main[lang='ar'] .mio-value,
+.metioro-main[lang='ar'] .mio-obs-metric__value,
+main[lang='ar'] .mio-value,
+main[lang='ar'] .mio-obs-metric__value {
+  font-weight: 500;
+  line-height: 1.45;
+  word-spacing: 0;
+}
+
+.metioro-main[lang='ar'] .mio-strengths-list__text,
+main[lang='ar'] .mio-strengths-list__text {
+  font-size: var(--mio-body-sm);
+  line-height: 1.75;
+  word-spacing: 0.01em;
+}
+
+.metioro-main[lang='ar'] .mio-ltr-num,
+.metioro-main[lang='ar'] .mio-element-row__pct,
+.metioro-main[lang='ar'] [dir='ltr'],
+main[lang='ar'] .mio-ltr-num,
+main[lang='ar'] .mio-element-row__pct,
+main[lang='ar'] [dir='ltr'] {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+  word-spacing: 0;
+}

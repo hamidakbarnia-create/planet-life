@@ -1,5 +1,6 @@
 'use client';
 
+import { localeFontFamily } from '@/lib/brand-theme';
 import { AppShell } from '@/components/AppShell';
 import { AskScreen } from '@/components/ftue/AskScreen';
 import { getAskCopy } from '@/lib/ftue-i18n';
@@ -28,7 +29,7 @@ export default function AskPage() {
       setLang={setLang}
       dir={t.dir}
       navLabels={t.nav}
-      fontFamily={lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'}
+      fontFamily={localeFontFamily(lang)}
     >
       <AskScreen copy={copy} lang={lang} />
     </AppShell>

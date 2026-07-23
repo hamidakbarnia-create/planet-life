@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { localeFontFamily } from '@/lib/brand-theme';
 import { AppShell } from '@/components/AppShell';
 import { loadBirthProfile, type BirthProfile } from '@/lib/birth-profile';
 import { isPaid } from '@/lib/membership';
@@ -399,7 +400,7 @@ export default function PathfinderPage() {
       setLang={setLang}
       dir={shellLabels.dir}
       navLabels={shellLabels.nav}
-      fontFamily={lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'}
+      fontFamily={localeFontFamily(lang)}
     >
       <div className="mx-auto max-w-6xl px-5 py-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.05fr_0.95fr]">

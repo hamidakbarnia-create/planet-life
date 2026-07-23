@@ -5,6 +5,7 @@ import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { AppShell } from '@/components/AppShell';
+import { localeFontFamily } from '@/lib/brand-theme';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
 import type { AppLang } from '@/lib/app-settings';
@@ -898,7 +899,7 @@ export default function VaultSectionPage() {
   const t = SECTION_LANGS[lang];
   const rui = READING_UI[lang];
   const dir = HOME_LANGS[lang].dir;
-  const fontFamily = lang === 'fa' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif';
+  const fontFamily = localeFontFamily(lang);
 
   if (!isValidSection(raw)) {
     return (

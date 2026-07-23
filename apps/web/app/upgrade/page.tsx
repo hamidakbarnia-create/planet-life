@@ -15,6 +15,7 @@ import {
   GRADIENTS,
   TIER_THEME,
   type TierKey,
+  localeFontFamily,
 } from '@/lib/brand-theme';
 
 // /upgrade — pricing & tier comparison page.
@@ -906,7 +907,7 @@ export default function UpgradePage() {
 
   const t = LANGS[lang];
   const dir = HOME_LANGS[lang].dir;
-  const fontFamily = lang === 'fa' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif';
+  const fontFamily = localeFontFamily(lang);
 
   const openReserve = (key: TierKey) => {
     if (key === 'free') return;

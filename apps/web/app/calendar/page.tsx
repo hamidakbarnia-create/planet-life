@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
+import { localeFontFamily } from '@/lib/brand-theme';
 import { AppShell } from '@/components/AppShell';
 import { ActionDisclaimer } from '@/components/disclaimers/ActionDisclaimer';
 import type { DisclaimerLang } from '@/lib/disclaimers';
@@ -609,9 +610,7 @@ export default function CalendarPage() {
       setLang={setLang}
       dir={t.dir}
       navLabels={HOME_LANGS[lang].nav}
-      fontFamily={
-        lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'
-      }
+      fontFamily={localeFontFamily(lang)}
     >
       <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="mb-6">

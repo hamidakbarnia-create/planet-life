@@ -15,6 +15,7 @@ import { loadBirthProfile } from '@/lib/birth-profile';
 import type { DisclaimerLang } from '@/lib/disclaimers';
 import { BRAND_I18N } from '@/lib/brand';
 import type { BrandLang } from '@/lib/brand';
+import { localeFontFamily } from '@/lib/brand-theme';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import type { CitySelection } from '@/lib/chart-types';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
@@ -228,7 +229,7 @@ export default function Dashboard() {
   const getMsgKey = (s: number) => s >= 65 ? 'high' : s >= 45 ? 'mid' : 'low';
 
   return (
-    <div style={{ direction: t.dir as 'ltr' | 'rtl', fontFamily: (lang==='fa'||lang==='ar') ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif', fontFeatureSettings: '"kern"' }}
+    <div style={{ direction: t.dir as 'ltr' | 'rtl', fontFamily: localeFontFamily(lang), fontFeatureSettings: '"kern"' }}
         className="min-h-screen bg-[#070B14] text-white pl-20">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');

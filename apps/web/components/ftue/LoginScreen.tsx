@@ -7,6 +7,7 @@ import { BrandLogo } from '@/components/BrandLogo';
 import { isAuthed, saveSession, type AuthMethod } from '@/lib/auth';
 import { BRAND_I18N } from '@/lib/brand';
 import type { BrandLang } from '@/lib/brand';
+import { localeFcFiCss, localeFontFamily } from '@/lib/brand-theme';
 import { trackFtueEvent } from '@/lib/ftue-analytics';
 import { LOGIN_FTUE_COPY } from '@/lib/ftue-i18n';
 import { resolvePostAuthPath } from '@/lib/ftue-routing';
@@ -282,17 +283,15 @@ export function LoginScreen() {
       style={{
         direction: t.dir as 'ltr' | 'rtl',
         background: 'radial-gradient(circle at top, #1a1240 0%, #070B14 55%)',
-        fontFamily: lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif',
+        fontFamily: localeFontFamily(lang),
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
-        @import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
-        .fc{font-family:'Cinzel',serif}.fi{font-family:'Inter',sans-serif}
+        ${localeFcFiCss(lang)}
         .login-input{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;border-radius:12px}
         .login-input:focus{border-color:rgba(251,191,36,0.45);outline:none}
         .login-input:focus-visible,.login-btn:focus-visible,.login-tab:focus-visible{outline:2px solid #fbbf24;outline-offset:2px}
-        .otp-input{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;border-radius:10px;text-align:center;font-family:'Cinzel',serif;font-size:18px}
+        .otp-input{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;border-radius:10px;text-align:center;font-family:inherit;font-size:18px;font-weight:500}
       `}</style>
 
       <header className="flex items-center justify-between px-6 py-5">

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
+import { localeFontFamily } from '@/lib/brand-theme';
 import { AppShell } from '@/components/AppShell';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { CityAutocomplete } from '@/components/CityAutocomplete';
@@ -169,9 +170,7 @@ export default function PeoplePage() {
       setLang={setLang}
       dir={t.dir}
       navLabels={HOME_LANGS[lang].nav}
-      fontFamily={
-        lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'
-      }
+      fontFamily={localeFontFamily(lang)}
     >
       <div className="max-w-lg mx-auto px-4 py-6">
         <div className="mb-6">

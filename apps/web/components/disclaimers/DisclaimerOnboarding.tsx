@@ -10,6 +10,7 @@ import {
 } from '@/lib/disclaimers';
 import { BrandLogo } from '@/components/BrandLogo';
 import type { BrandLang } from '@/lib/brand';
+import { localeFcFiCss, localeFontFamily } from '@/lib/brand-theme';
 import { LEGAL_NAV_LINKS } from '@/lib/legal-nav';
 import Link from 'next/link';
 
@@ -29,8 +30,7 @@ export function DisclaimerOnboarding({
   if (!visible) return null;
 
   const t = DISCLAIMER_LANGS[lang];
-  const fontFamily =
-    lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif';
+  const fontFamily = localeFontFamily(lang);
 
   const handleContinue = () => {
     if (!checked) return;
@@ -49,10 +49,7 @@ export function DisclaimerOnboarding({
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
-        @import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
-        .fc{font-family:'Cinzel',serif}
-        .fi{font-family:'Inter',sans-serif}
+        ${localeFcFiCss(lang)}
       `}</style>
 
       <div

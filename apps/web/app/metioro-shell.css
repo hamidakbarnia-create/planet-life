@@ -231,6 +231,39 @@
   hyphens: auto;
 }
 
+/* Arabic nav labels — readable without changing sidebar geometry */
+.metioro-shell[lang='ar'] .metioro-sidebar__label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  word-spacing: 0;
+  text-transform: none;
+  line-height: 1.35;
+  font-family: var(--font-ibm-plex-sans-arabic), 'IBM Plex Sans Arabic',
+    'Noto Sans Arabic', Tahoma, sans-serif;
+}
+
+.metioro-shell[lang='ar'] .metioro-mobile-nav__label,
+.metioro-shell[lang='ar'] .metioro-more-sheet__label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  word-spacing: 0;
+  text-transform: none;
+  line-height: 1.35;
+  font-family: var(--font-ibm-plex-sans-arabic), 'IBM Plex Sans Arabic',
+    'Noto Sans Arabic', Tahoma, sans-serif;
+}
+
+.metioro-shell[lang='ar'] .metioro-header-chip {
+  font-family: var(--font-ibm-plex-sans-arabic), 'IBM Plex Sans Arabic',
+    'Noto Sans Arabic', Tahoma, sans-serif;
+  letter-spacing: 0;
+  word-spacing: 0;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
 .metioro-sidebar__link--active {
   color: #f2cf75;
   background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1));

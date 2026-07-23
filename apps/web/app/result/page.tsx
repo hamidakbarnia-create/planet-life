@@ -1,5 +1,6 @@
 'use client';
 
+import { localeFontFamily } from '@/lib/brand-theme';
 import { AppShell } from '@/components/AppShell';
 import { ResultScreen } from '@/components/ftue/ResultScreen';
 import { getResultCopy } from '@/lib/ftue-i18n';
@@ -31,7 +32,7 @@ export default function ResultPage() {
       setLang={setLang}
       dir={t.dir}
       navLabels={t.nav}
-      fontFamily={lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'}
+      fontFamily={localeFontFamily(lang)}
     >
       <ResultScreen lang={lang} />
     </AppShell>

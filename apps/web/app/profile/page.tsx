@@ -14,6 +14,7 @@ import { GeocodeConfirmDialog } from '@/components/GeocodeConfirmDialog';
 import { AppShell } from '@/components/AppShell';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { MetricCard } from '@/components/ui/MetricCard';
+import { localeFontFamily } from '@/lib/brand-theme';
 import {
   type ChartData,
   type CitySelection,
@@ -483,12 +484,7 @@ function ProfileEditor() {
     setLoading(false);
   };
 
-  const fontFamily =
-    lang === 'ar'
-      ? "'Cairo','Vazirmatn',sans-serif"
-      : lang === 'fa'
-        ? "'Vazirmatn',sans-serif"
-        : undefined;
+  const fontFamily = localeFontFamily(lang);
 
   return (
     <AppShell

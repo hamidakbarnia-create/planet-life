@@ -65,14 +65,81 @@ export const GRADIENTS = {
   vaultAmbient: `radial-gradient(ellipse 60% 40% at 50% 0%, ${COLORS_RGBA.goldMain18}, transparent 60%), radial-gradient(ellipse 50% 50% at 50% 100%, ${COLORS_RGBA.goldShadow10}, transparent 60%)`,
 } as const;
 
-/** Typography — Sora for brand LTR; RTL keeps existing Arabic/Persian stacks */
+/**
+ * Typography — brand LTR + locale stacks.
+ * Arabic: IBM Plex Sans Arabic (premium UAE-grade), Noto Sans Arabic fallback.
+ * Persian: Vazirmatn. English/Russian: Sora (headings) / Geist (body) via next/font.
+ */
 export const TYPOGRAPHY = {
   brand: "var(--font-sora), var(--font-geist-sans), sans-serif",
   body: "var(--font-geist-sans), sans-serif",
-  bodyRtl: "var(--font-vazirmatn), var(--font-cairo), var(--font-geist-sans), sans-serif",
-  bodyAr: "var(--font-cairo), var(--font-vazirmatn), sans-serif",
+  bodyRtl:
+    "var(--font-vazirmatn), 'Vazirmatn', var(--font-geist-sans), sans-serif",
+  bodyAr:
+    "var(--font-ibm-plex-sans-arabic), 'IBM Plex Sans Arabic', 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif",
   mono: "var(--font-geist-mono), monospace",
+  /** LTR chrome/body — Geist is loaded via next/font (do not reference bare Inter). */
+  chromeLtr: "var(--font-geist-sans), sans-serif",
 } as const;
+
+/** Consistent type scale (px). Prefer tokens over ad-hoc sizes for new work. */
+export const TYPE_SCALE = {
+  display: 48,
+  hero: 40,
+  h1: 32,
+  h2: 28,
+  h3: 24,
+  title: 20,
+  subtitle: 18,
+  body: 16,
+  small: 14,
+  caption: 12,
+} as const;
+
+/** Weights used across the product — avoid loading unused faces. */
+export const TYPE_WEIGHT = {
+  regular: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700,
+} as const;
+
+/** Arabic readability targets (typography only — no layout redesign). */
+export const ARABIC_TYPE = {
+  lineHeightBody: 1.8,
+  lineHeightHeading: 1.55,
+  /** Body-only; headings/nav/buttons keep word-spacing: 0. */
+  wordSpacingBody: '0.01em',
+  minBodyPx: TYPE_SCALE.body,
+} as const;
+
+/** Locale-aware UI font stack for AppShell / full-page chrome. */
+export function localeFontFamily(lang: BrandLang): string {
+  if (lang === 'ar') return TYPOGRAPHY.bodyAr;
+  if (lang === 'fa') return TYPOGRAPHY.bodyRtl;
+  return TYPOGRAPHY.chromeLtr;
+}
+
+/**
+ * `.fc` / `.fi` CSS for screens that inject a local style block
+ * (FTUE, disclaimer). Uses next/font CSS variables only.
+ */
+export function localeFcFiCss(lang: BrandLang): string {
+  if (lang === 'ar') {
+    return [
+      `.fc,.fi{font-family:${TYPOGRAPHY.bodyAr};letter-spacing:0;word-spacing:0}`,
+      `.fi{font-weight:${TYPE_WEIGHT.regular};line-height:${ARABIC_TYPE.lineHeightBody};word-spacing:${ARABIC_TYPE.wordSpacingBody}}`,
+      `.fc{font-weight:${TYPE_WEIGHT.semibold};line-height:${ARABIC_TYPE.lineHeightHeading};word-spacing:0}`,
+    ].join('');
+  }
+  if (lang === 'fa') {
+    return `.fc,.fi{font-family:${TYPOGRAPHY.bodyRtl};letter-spacing:0;word-spacing:0}`;
+  }
+  return (
+    `.fc{font-family:${TYPOGRAPHY.brand};letter-spacing:0}` +
+    `.fi{font-family:${TYPOGRAPHY.body};letter-spacing:0}`
+  );
+}
 
 export function brandHeadingFont(lang: BrandLang): string {
   if (lang === 'ar') return TYPOGRAPHY.bodyAr;
@@ -81,9 +148,10 @@ export function brandHeadingFont(lang: BrandLang): string {
 }
 
 export function brandBodyFont(lang: BrandLang, override?: string): string {
-  if (override) return override;
+  // Locale stacks win over page overrides so Arabic/Persian never fall back to Geist/Inter.
   if (lang === 'ar') return TYPOGRAPHY.bodyAr;
   if (lang === 'fa') return TYPOGRAPHY.bodyRtl;
+  if (override) return override;
   return TYPOGRAPHY.body;
 }
 

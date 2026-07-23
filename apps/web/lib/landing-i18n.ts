@@ -403,7 +403,11 @@ export function getLandingCopy(lang: LandingLang): LandingCopy {
 }
 
 export function getLandingFontFamily(lang: LandingLang): string {
-  if (lang === 'fa') return "'Vazirmatn', sans-serif";
-  if (lang === 'ar') return "'Cairo', 'Vazirmatn', sans-serif";
-  return 'Inter, sans-serif';
+  if (lang === 'fa') {
+    return "var(--font-vazirmatn), 'Vazirmatn', sans-serif";
+  }
+  if (lang === 'ar') {
+    return "var(--font-ibm-plex-sans-arabic), 'IBM Plex Sans Arabic', 'Noto Sans Arabic', 'Segoe UI', Tahoma, sans-serif";
+  }
+  return "var(--font-geist-sans), sans-serif";
 }
