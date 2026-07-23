@@ -12,20 +12,21 @@
 
 ADR-0010 entered the repository as a Proposed architecture decision documenting Canonical Memory Graph (CMG) L0 ownership, admission, MemoryRecord contract, projection boundaries, and intelligence-memory boundaries.
 
-Status advanced from Proposed to **Accepted** on **2026-07-23** by Product Owner ratification under the ADR_INDEX template lifecycle (`Proposed | Accepted | Deprecated | Superseded`). LOCKED is not required for this ownership ADR; LOCKED remains reserved for contract ADRs that the repository explicitly locks (for example ADR-0006 and ADR-0007).
+Status moved **Proposed → Accepted** on **2026-07-23** following explicit Product Owner ratification, under the ADR_INDEX template lifecycle (`Proposed | Accepted | Deprecated | Superseded`). LOCKED is not required for this ownership ADR; LOCKED remains reserved for contract ADRs that the repository explicitly locks (for example ADR-0006 and ADR-0007).
 
-This ADR ratifies **L0** domain boundaries only. Ratification is architectural. It does **not** authorise backend services, new public HTTP APIs, semantic search as a shipped capability, Vault IA/UI work, route changes, branding changes, CMG L1/L2 implementation, search engines, migration, or other implementation commits by itself.
+This ADR accepts **L0** domain boundaries only. Ratification is architectural. It does **not** authorise backend services, new public HTTP APIs, semantic search as a shipped capability, Vault IA/UI work, route changes, branding changes, CMG L1/L2 implementation, search engines, migration, or other implementation commits by itself.
 
-**Owner ratification record**
+**Ratification record**
 
 | Field | Value |
 |-------|-------|
-| Ratifying authority | Product Owner |
+| Ratified by | Product Owner |
 | Ratification date | 2026-07-23 |
-| Decisions accepted | L0 CMG naming, ownership, admission, Canonical MemoryRecord Contract (`schemaVersion: "1.0.0"`), projection/search boundaries, L1 role, L2 non-existence |
+| Decision | Accepted |
+| Scope | L0 canonical memory boundaries only |
+| Implementation authorization | Not granted by this ADR |
 | Public API impact | None |
 | L2 backend | Not approved; does not exist |
-| Implementation | Not authorized by ratification alone |
 
 ---
 
@@ -48,7 +49,7 @@ Clear boundaries are required among:
 
 ## Decision
 
-On acceptance (2026-07-23), the following are locked:
+On acceptance (2026-07-23), the following L0 boundaries are locked:
 
 1. The official name is **Canonical Memory Graph (CMG)**.
 2. **L0** is the canonical domain model (ownership, admission, MemoryRecord, invariants).

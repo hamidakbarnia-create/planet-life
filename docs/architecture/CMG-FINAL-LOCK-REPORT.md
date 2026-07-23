@@ -8,10 +8,9 @@
 
 ### Ratification notice
 
-- **ADR-0010 is Accepted** (Product Owner ratification, 2026-07-23).
-- **L0 canonical memory boundaries are ratified.**
-- This ratification is **architectural only**.
-- **No implementation is authorized by ratification alone** (no CMG runtime, Search engine, admission pipeline, IA/UI, migration, or provider integration claimed or authorized here).
+- ADR-0010 was explicitly ratified by the Product Owner on 2026-07-23.
+- The L0 canonical memory boundaries defined by the ADR are accepted and locked.
+- This ratification does not authorize implementation, L2, semantic search, implicit memory, Julia memory production, auto-save, migration, IA, or UI work.
 - **L2 does not exist and remains unapproved.**
 - **Search remains lexical/filter-based v1 only** (admitted MemoryRecords; title, summary, tags, type, domain, subjectRefs, approved structured references).
 - **Semantic/vector search remains out of scope.**
