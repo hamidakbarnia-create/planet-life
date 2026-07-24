@@ -80,6 +80,12 @@ Documents at this level define how METIORO is built — architecture patterns, A
 | [Evidence Pipeline Specification](../architecture/EVIDENCE_PIPELINE_SPECIFICATION.md) | Draft | `docs/architecture/EVIDENCE_PIPELINE_SPECIFICATION.md` |
 | [Explainability Engine Specification](../architecture/EXPLAINABILITY_ENGINE_SPECIFICATION.md) | Draft | `docs/architecture/EXPLAINABILITY_ENGINE_SPECIFICATION.md` |
 | Phase 3 Architecture Blueprint | Draft | `docs/architecture/PHASE3_ARCHITECTURE_BLUEPRINT.md` |
+| [ADR-0010 — Canonical Memory Graph L0 Boundaries](../adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md) | Accepted (2026-07-23) | `docs/adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md` — L0 ownership/admission only; **does not authorize implementation** |
+| [CMG Final Lock Report](../architecture/CMG-FINAL-LOCK-REPORT.md) | Companion (Accepted L0) | `docs/architecture/CMG-FINAL-LOCK-REPORT.md` |
+| [ADR-0011 — CMG L1 Client Runtime Authorization](../adr/ADR-0011-CMG-L1-Client-Runtime-Authorization.md) | Accepted (2026-07-24) | `docs/adr/ADR-0011-CMG-L1-Client-Runtime-Authorization.md` — L1 architectural boundary; coding blocked pending approved repository + admission specs |
+| [CMG Memory Type/Domain Registry Specification](../architecture/CMG-MEMORY-TYPE-DOMAIN-REGISTRY.md) | Proposed | `docs/architecture/CMG-MEMORY-TYPE-DOMAIN-REGISTRY.md` |
+| [CMG Relationship Edge Taxonomy Specification](../architecture/CMG-RELATIONSHIP-EDGE-TAXONOMY.md) | Proposed | `docs/architecture/CMG-RELATIONSHIP-EDGE-TAXONOMY.md` |
+| [CMG Specification Dependency Map](../architecture/CMG-SPECIFICATION-DEPENDENCY-MAP.md) | Planning (descriptive; not an authorization instrument) | `docs/architecture/CMG-SPECIFICATION-DEPENDENCY-MAP.md` |
 | Phase 2 Architecture Baseline | *Existing* | `PHASE2_ARCHITECTURE_BASELINE.md` (root) |
 | Pathfinder Scoring Methodology | *Existing* | `PATHFINDER_SCORING.md` (root) |
 | API Deployment Guide | *Existing* | `apps/api/DEPLOY.md` |
