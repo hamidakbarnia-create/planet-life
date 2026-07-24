@@ -10,7 +10,7 @@
 | **Phase** | P3 — Executable Specifications |
 | **Authority** | Derives from ADR-0010 (Accepted) and ADR-0011 (Accepted) |
 | **Coding authorization** | **Not granted.** Acceptance of this document does **not** authorize implementation or coding. |
-| **Companion gate** | CMG Admission Pipeline Specification — **Missing** (required coding gate; not yet authored) |
+| **Companion gate** | CMG Admission Pipeline Specification — **Accepted** v0.1.3 (`docs/architecture/CMG-ADMISSION-PIPELINE-SPECIFICATION.md`). Admission Pipeline acceptance does **not** grant coding or implementation authorization. Repository implementation remains blocked on required operational authorities and explicit implementation approval. |
 | **Planning map** | [CMG-SPECIFICATION-DEPENDENCY-MAP.md](./CMG-SPECIFICATION-DEPENDENCY-MAP.md) |
 
 ---
@@ -25,14 +25,14 @@ This document is the **CMG Repository Contract Specification**. It defines the d
 
 **Accepted** (2026-07-24) at version **0.3.1**.
 
-Acceptance of this Repository Contract Specification satisfies one ADR-0011 executable-spec gate (repository behavioural contract). Coding remains **blocked**. Remaining gates are listed in §37.3 (Admission Pipeline Specification must be accepted; required registries/lifecycle authorities must be accepted where applicable; explicit implementation approval must be issued).
+Acceptance of this Repository Contract Specification satisfies one ADR-0011 executable-spec gate (repository behavioural contract). Coding remains **blocked**. The Admission Pipeline Specification is **Accepted** v0.1.3; that acceptance does **not** grant coding or implementation authorization. Remaining gates are listed in §37.3 (required registries/lifecycle/operational authorities must be accepted where applicable; explicit implementation approval must be issued).
 
 | Classification | Content in this document |
 |----------------|--------------------------|
 | **Accepted (binding inputs)** | ADR-0010, ADR-0011, ADR-0007, ADR-0009 |
 | **Accepted (this document)** | Repository behavioural contract v0.3.1 |
 | **Proposed (non-authority)** | Memory type/domain registry; relationship edge taxonomy |
-| **Missing (coding gate)** | Admission Pipeline Specification |
+| **Accepted (companion coding gate)** | Admission Pipeline Specification v0.1.3 — acceptance does **not** grant coding or implementation authorization |
 | **Open Question** | §39 |
 | **Future Work** | Non-goals; gated lifecycle/erasure; concurrency |
 
@@ -103,7 +103,7 @@ The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** ar
 | [CMG-SPECIFICATION-DEPENDENCY-MAP.md](./CMG-SPECIFICATION-DEPENDENCY-MAP.md) | Planning | Sequencing; not an authorization instrument |
 | [CMG-FINAL-LOCK-REPORT.md](./CMG-FINAL-LOCK-REPORT.md) | Companion | L0 lock companion |
 
-**Missing companion (required coding gate):** CMG Admission Pipeline Specification — not yet authored.
+**Accepted companion (coding gate not cleared):** CMG Admission Pipeline Specification — **Accepted** v0.1.3 (`docs/architecture/CMG-ADMISSION-PIPELINE-SPECIFICATION.md`). Companion acceptance does **not** grant coding or implementation authorization. Repository implementation remains blocked on required operational authorities and explicit implementation approval.
 
 ---
 
@@ -114,8 +114,8 @@ The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** ar
 | **MemoryRecord** | Canonical admitted memory document per ADR-0010 Canonical MemoryRecord Contract with `schemaVersion: "1.0.0"`. |
 | **Canonical store** | Authoritative persistence of admitted MemoryRecords for a single `accountUserId` in L1 client context. |
 | **Derived index** | Disposable, rebuildable lexical/filter structure over admitted records; not a system of record. |
-| **Admission** | Governed process that decides whether a candidate may become a MemoryRecord. Defined by the future Admission Pipeline Specification. |
-| **Admission proof** | Evidence that a write was produced by an authorized successful Admission decision for that candidate. **Presence** is required by this contract; **schema and verification algorithm** are undefined until the Admission Pipeline Specification is accepted. |
+| **Admission** | Governed process that decides whether a candidate may become a MemoryRecord. Defined by the Accepted Admission Pipeline Specification v0.1.3. |
+| **Admission proof** | Evidence that a write was produced by an authorized successful Admission decision for that candidate. **Presence** is required by this contract; **schema and verification algorithm** are defined by the Accepted Admission Pipeline Specification v0.1.3. Operational proof issuance remains blocked while required Admission authorities are Missing and coding is Not granted. |
 | **Logical equivalence** | Field-wise equality of committed ADR-0010 canonical values (§25); not serialization-, encoding-, or property-order-based. |
 | **Repository** | Component that implements this contract: canonical store operations and optional derived-index maintenance. |
 | **Caller** | Admission process or other authorized internal surface that invokes repository operations. UI/read paths are not writers. |
@@ -424,7 +424,7 @@ After a registry is accepted and operationally authorized, write-time rejection 
 
 1. MemoryRecords **MUST NOT** embed People/Profile entity bodies.
 2. `subjectRefs` and edge `toRef` values are references only.
-3. The Repository **MUST NOT** treat `source.module = "julia"` (or conversation-derived candidates) as authorizing Julia or conversation memory production. Under ADR-0010 and ADR-0007, such production remains unauthorized. The future Admission Pipeline Specification will need to reject those admits; until it exists, Repository write paths that would persist them without authorized Admission **MUST** fail closed (§24).
+3. The Repository **MUST NOT** treat `source.module = "julia"` (or conversation-derived candidates) as authorizing Julia or conversation memory production. Under ADR-0010 and ADR-0007, such production remains unauthorized. The Accepted Admission Pipeline Specification v0.1.3 rejects those admits; Repository write paths that would persist them without authorized Admission **MUST** fail closed (§24). Coding and implementation remain Not granted.
 
 ---
 
@@ -449,7 +449,7 @@ After a registry is accepted and operationally authorized, write-time rejection 
 
 1. `id` **MUST** be a non-empty string.
 2. `id` uniqueness **MUST** hold within `accountUserId`.
-3. Who mints `id` (Admission vs Repository) and id format are **Open Question OQ-R2**, to be resolved by the Admission Pipeline Specification before create implementation.
+3. Who mints `id` (Admission vs Repository) and id format are **Open Question OQ-R2**, to be resolved under the Accepted Admission Pipeline Specification v0.1.3 and remaining operational authorities before create implementation.
 4. Offline / anonymous `accountUserId` mapping remains an ADR-0010 Open Question; this contract **MUST NOT** invent a conflicting model (OQ-R6).
 
 ---
@@ -694,7 +694,7 @@ This section is the **canonical** normative location for Admission proof rules. 
 1. `PersistAdmitted` and `Supersede` **MUST** require that `admissionProof` is **present** and was supplied by an **authorized Admission process**.
 2. If proof is missing, the Repository **MUST** reject with `AdmissionRequired` and **MUST NOT** persist.
 3. The Repository **MUST NOT** invent Admission proofs.
-4. Proof schema, issuer identity, integrity mechanism, producer identity representation, provenance representation, decision status, replay semantics, verification algorithm, and any fingerprint/canonical-hash definition are **undefined** until the CMG Admission Pipeline Specification is **accepted**.
+4. Proof schema, issuer identity, integrity mechanism, producer identity representation, provenance representation, decision status, replay semantics, verification algorithm, and any fingerprint/canonical-hash definition are defined by the Accepted CMG Admission Pipeline Specification v0.1.3; operational enablement remains blocked while required Admission authorities are Missing and coding is Not granted.
 5. Therefore `PersistAdmitted` and `Supersede` are **specified but not implementation-ready** until that proof contract exists.
 6. Reads, searches, projections, and index rebuilds **MUST NOT** constitute Admission and **MUST NOT** call `PersistAdmitted`.
 7. The Repository **MUST NOT** provide a write path for Ask auto-save, conversation persistence, Julia production, or read-triggered creation (ADR-0010, ADR-0007, ADR-0011).
@@ -883,7 +883,7 @@ When—and only when—all gates in §37.3 are cleared, an initial implementatio
 This subsection is the **canonical** coding/planning gate list. Other sections point here.
 
 1. This Repository Contract Specification is **accepted** — **satisfied** (Accepted 2026-07-24, v0.3.1);
-2. The Admission Pipeline Specification is **accepted** — **not satisfied** (Missing);
+2. The Admission Pipeline Specification is **accepted** — **satisfied** (Accepted v0.1.3); companion acceptance does **not** grant coding or implementation authorization;
 3. Required dependent registries or lifecycle authorities are **accepted** where the chosen slice needs them — **not satisfied** while those documents remain Proposed/Missing;
 4. **Explicit implementation approval** is issued — **not satisfied**.
 
@@ -944,11 +944,11 @@ This specification is **Accepted** (2026-07-24) at version **0.3.1**.
 
 ### 41.2 Acceptance does not mean
 
-- A coding license; a storage-technology decision; a change to ADR-0010 L0 semantics; acceptance of the Admission Pipeline Specification; acceptance of Proposed registries; or activation of ADR-0011 implementation authorization.
+- A coding license; a storage-technology decision; a change to ADR-0010 L0 semantics; acceptance of Proposed registries; or activation of ADR-0011 implementation authorization. (The Admission Pipeline Specification is separately Accepted v0.1.3; that companion acceptance also does **not** grant coding.)
 
 ### 41.3 Coding gate reminder
 
-Per ADR-0011 and §37.3: **Implementation authorization remains inactive** until the Admission Pipeline Specification is accepted, required registries/lifecycle authorities are accepted where applicable, and explicit implementation approval is issued.
+Per ADR-0011 and §37.3: **Implementation authorization remains inactive.** The Admission Pipeline Specification is Accepted v0.1.3; that acceptance does **not** grant coding or implementation authorization. Repository implementation remains blocked until required registries/lifecycle/operational authorities are accepted where applicable, and explicit implementation approval is issued.
 
 ---
 
