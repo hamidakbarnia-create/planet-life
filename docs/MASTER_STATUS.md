@@ -129,7 +129,7 @@ Implementation (apps/web, apps/api, packages)
 |-------|---------------|
 | Governance | [METIORO_CONSTITUTION.md](./governance/METIORO_CONSTITUTION.md) |
 | Product architecture | [DECISION_INTELLIGENCE_ENGINE.md](./architecture/DECISION_INTELLIGENCE_ENGINE.md), [PHASE3_ARCHITECTURE_BLUEPRINT.md](./architecture/PHASE3_ARCHITECTURE_BLUEPRINT.md) |
-| Canonical memory (L0) | [ADR-0010](./adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md) (**Accepted**, 2026-07-23) — L0 ownership/admission boundaries only; **does not authorize implementation**. Companion: [CMG-FINAL-LOCK-REPORT.md](./architecture/CMG-FINAL-LOCK-REPORT.md). L1 boundary: [ADR-0011](./adr/ADR-0011-CMG-L1-Client-Runtime-Authorization.md) (**Accepted**, 2026-07-24) — architectural only; coding blocked pending executable specs. L2 does not exist and remains unapproved. Does not supersede ADR-0007 or ADR-0009. |
+| Canonical memory (L0/L1 specs) | [ADR-0010](./adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md) (**Accepted**, 2026-07-23) — L0 only; **does not authorize implementation**. Companion: [CMG-FINAL-LOCK-REPORT.md](./architecture/CMG-FINAL-LOCK-REPORT.md). L1 boundary: [ADR-0011](./adr/ADR-0011-CMG-L1-Client-Runtime-Authorization.md) (**Accepted**, 2026-07-24). Repository contract: [CMG-REPOSITORY-CONTRACT-SPECIFICATION.md](./architecture/CMG-REPOSITORY-CONTRACT-SPECIFICATION.md) (**Accepted** v0.3.1, 2026-07-24) — **does not authorize coding**. Admission Pipeline Specification remains **Missing**. Coding blocked pending Admission Pipeline acceptance, applicable registry/lifecycle authorities, and explicit implementation approval. L2 unapproved. Does not supersede ADR-0007 or ADR-0009. |
 | Runtime migration (accepted pattern) | [ADR-0005](./adr/ADR-0005-Decision-Engine-Facade-First-Runtime-Migration.md) (finance analyze facade) |
 
 ---
@@ -210,7 +210,7 @@ Approved or documented engineering work only (no new feature proposals):
 | **Domain map → semantic token binding** | Registry Tier 3 violations |
 | **Legacy `/dashboard` style isolation** | [known-inconsistencies.md](./design/ui-audit/known-inconsistencies.md) |
 | **ADR-DS-001 / ADR-DS-002 acceptance + index registration** | [ADR_INDEX.md](./governance/ADR_INDEX.md) |
-| **CMG L1 runtime** | **BLOCKED** — [ADR-0011](./adr/ADR-0011-CMG-L1-Client-Runtime-Authorization.md) Accepted (L1 architectural boundary ratified); implementation remains blocked pending approval of executable repository and admission specifications. Not started / not in progress / not unblocked. |
+| **CMG L1 runtime** | **BLOCKED** — [ADR-0011](./adr/ADR-0011-CMG-L1-Client-Runtime-Authorization.md) Accepted; [Repository Contract](./architecture/CMG-REPOSITORY-CONTRACT-SPECIFICATION.md) Accepted v0.3.1 (does **not** authorize coding). Implementation remains blocked pending Admission Pipeline Specification acceptance, required registries/lifecycle authorities where applicable, and explicit implementation approval. Not started / not in progress / not unblocked. |
 
 ---
 
@@ -266,7 +266,8 @@ Approved or documented engineering work only (no new feature proposals):
 | **P2.2-03** | Provider Hardening | **CLOSED** | [2026-07-22-p2.2-03-provider-hardening.md](./deployments/2026-07-22-p2.2-03-provider-hardening.md) |
 | **P2.2-04** | Production Observability | **SPECIFICATION RATIFIED — IMPLEMENTATION NOT STARTED** | Canonical spec: [P2.2-04-PRODUCTION-OBSERVABILITY.md](./governance/P2.2-04-PRODUCTION-OBSERVABILITY.md). Prerequisite: P2.2-03 CLOSED. **P2.2-05 remains blocked** until P2.2-04 implementation, verification, deployment evidence, and closure are complete. |
 | **ADR-0010** | Canonical Memory Graph L0 boundaries | **SPECIFICATION RATIFIED — IMPLEMENTATION NOT STARTED** | [ADR-0010](./adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md) Accepted 2026-07-23 (Product Owner); [CMG-FINAL-LOCK-REPORT.md](./architecture/CMG-FINAL-LOCK-REPORT.md). L0 only; implementation not authorized; L2 unapproved; does not supersede ADR-0007 / ADR-0009. |
-| **ADR-0011** | CMG L1 client runtime authorization | **SPECIFICATION RATIFIED — IMPLEMENTATION NOT STARTED** | [ADR-0011](./adr/ADR-0011-CMG-L1-Client-Runtime-Authorization.md) Accepted 2026-07-24 — L1 architectural boundary ratified; implementation remains blocked pending approval of executable repository and admission specifications. L2 not granted. |
+| **ADR-0011** | CMG L1 client runtime authorization | **SPECIFICATION RATIFIED — IMPLEMENTATION NOT STARTED** | [ADR-0011](./adr/ADR-0011-CMG-L1-Client-Runtime-Authorization.md) Accepted 2026-07-24 — L1 architectural boundary ratified; coding not active. L2 not granted. |
+| **CMG-REPO-CONTRACT** | CMG L1 Repository Contract Specification | **SPECIFICATION RATIFIED — IMPLEMENTATION NOT STARTED** | [CMG-REPOSITORY-CONTRACT-SPECIFICATION.md](./architecture/CMG-REPOSITORY-CONTRACT-SPECIFICATION.md) Accepted v0.3.1 on 2026-07-24 (Product Owner). Satisfies repository behavioural gate only; **does not authorize coding**. Admission Pipeline Specification remains Missing. |
 
 **Allowed status values:** `CLOSED` · `OPEN` · `PROPOSED` · `PLANNED` · `IMPLEMENTATION QUEUED` · `READY; EXECUTION PAUSED BY PRODUCT REMEDIATION GATE` · `SPECIFICATION RATIFIED — IMPLEMENTATION NOT STARTED` — no other value is valid.
 
@@ -339,7 +340,7 @@ Traceability chain: Constitution → Decision Log / ADR → Registry / Spec → 
 | Design system | [design/system/design-token-registry.md](./design/system/design-token-registry.md) |
 | UI audit | [design/ui-audit/README.md](./design/ui-audit/README.md) |
 | Performance | [performance/BASELINE.md](./performance/BASELINE.md) |
-| Architecture | [architecture/PHASE3_ARCHITECTURE_BLUEPRINT.md](./architecture/PHASE3_ARCHITECTURE_BLUEPRINT.md) · [ADR-0010](./adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md) (CMG L0) · [CMG dependency map](./architecture/CMG-SPECIFICATION-DEPENDENCY-MAP.md) |
+| Architecture | [architecture/PHASE3_ARCHITECTURE_BLUEPRINT.md](./architecture/PHASE3_ARCHITECTURE_BLUEPRINT.md) · [ADR-0010](./adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md) (CMG L0) · [ADR-0011](./adr/ADR-0011-CMG-L1-Client-Runtime-Authorization.md) (CMG L1 boundary) · [CMG Repository Contract](./architecture/CMG-REPOSITORY-CONTRACT-SPECIFICATION.md) (Accepted v0.3.1) · [CMG dependency map](./architecture/CMG-SPECIFICATION-DEPENDENCY-MAP.md) |
 | Brand (proposal) | [brand/one-sentence-position.md](./brand/one-sentence-position.md) |
 | Handoff / dev | [HANDOFF.md](../HANDOFF.md) |
 | Roadmap (legacy) | [ROADMAP.md](../ROADMAP.md) |

@@ -136,3 +136,18 @@
 | **ACT** | Accept ADR-0011 for the **CMG L1 client-runtime implementation boundary** only. Coding authorization is **conditional and not yet active**. Implementation remains **blocked** until, at minimum, the CMG L1 repository/persistence contract and CMG admission pipeline specification are separately completed and approved. Producer integrations remain blocked until applicable producer contracts are approved. L2 remains nonexistent and unapproved. |
 | **OUTCOME** | L1 architectural boundary ratified. No CMG L1 runtime, API, UI, migration, Search engine, or producer integration is started, implemented, or unblocked by this decision alone. |
 | **LEARN** | Architectural Acceptance of an L1 boundary must keep an explicit executable-spec coding gate; do not place coding immediately after ADR acceptance. |
+
+## DEC-0007 — CMG L1 Repository Contract Specification Acceptance
+
+| Field | Value |
+|-------|-------|
+| **Status** | ACCEPTED |
+| **Authority** | Executable Specification (P3) |
+| **Owner** | METIORO Product Owner |
+| **Date** | 2026-07-24 |
+| **WHERE** | Explicit Product Owner ratification — [CMG-REPOSITORY-CONTRACT-SPECIFICATION.md](../architecture/CMG-REPOSITORY-CONTRACT-SPECIFICATION.md) v0.3.1 |
+| **References** | [ADR-0010](../adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md) (Accepted); [ADR-0011](../adr/ADR-0011-CMG-L1-Client-Runtime-Authorization.md) (Accepted); [ADR_INDEX.md](./ADR_INDEX.md); [CMG-SPECIFICATION-DEPENDENCY-MAP.md](../architecture/CMG-SPECIFICATION-DEPENDENCY-MAP.md); [MASTER_STATUS.md](../MASTER_STATUS.md). ADR-0007 remains LOCKED/stateless; ADR-0009 remains Accepted. |
+| **WHY** | ADR-0011 requires an approved deterministic CMG L1 repository/persistence contract before L1 coding. The Repository Contract was drafted, corrected, and reviewed to governance acceptance readiness. |
+| **ACT** | Accept [CMG-REPOSITORY-CONTRACT-SPECIFICATION.md](../architecture/CMG-REPOSITORY-CONTRACT-SPECIFICATION.md) **v0.3.1** as the binding L1 repository behavioural contract. **Acceptance does not authorize coding.** Implementation remains blocked until: (1) the CMG Admission Pipeline Specification is accepted; (2) required registries/lifecycle authorities are accepted where the chosen slice needs them; (3) explicit implementation approval is issued. Admission Pipeline Specification remains Missing. Proposed registries remain non-authority. L2 remains unapproved. |
+| **OUTCOME** | One ADR-0011 executable-spec gate (repository behavioural contract) is satisfied. No CMG L1 runtime, storage technology choice, API, UI, migration, Search engine, producer wiring, or soft-delete implementation is started, implemented, or unblocked by this decision alone. |
+| **LEARN** | Accepting an executable repository contract must keep Admission Pipeline, registry/lifecycle, and explicit implementation-approval gates visible; do not treat specification acceptance as a coding license. |
