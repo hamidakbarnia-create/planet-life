@@ -271,10 +271,6 @@ def _aspect_snippet(aspects: list[dict], lang: str) -> list[str]:
 
 
 def render_mars_reading(verdict: dict[str, Any], lang: str = "en") -> dict[str, Any]:
-    """
-    Build a three-layer reading from a MarsVerdict dict (from verdict_to_dict).
-    Returns executive (one line), strategic (paragraph), technical (facts).
-    """
     lang = _pick_lang(lang)
     keys = verdict.get("archetype_keys", [])
     sign_key = _archetype_from_keys(keys, "sign") or "warrior"
@@ -292,28 +288,63 @@ def render_mars_reading(verdict: dict[str, Any], lang: str = "en") -> dict[str, 
     aspect_lines = _aspect_snippet(verdict.get("aspects", []), lang)
 
     headline = INTENSITY_HEADLINE.get(intensity, INTENSITY_HEADLINE["moderate"])[lang]
+    conf_map = {
+        "extreme": "high",
+        "strong": "high",
+        "moderate": "medium",
+        "subtle": "low",
+    }
+    confidence = conf_map.get(str(intensity), "medium")
+    conf = _confidence_clause(confidence, lang)
 
-    executive = {
-        "en": f"{headline}: Mars in {sign_name}, house {house}.",
-        "fa": f"{headline}: مریخ در {sign_name}، خانه {house}.",
-        "ru": f"{headline}: Марс в {sign_name}, дом {house}.",
-        "ar": f"{headline}: المريخ في {sign_name}، البيت {house}.",
+    action = {
+        "en": "Choose one pursuit today and drop the rest",
+        "fa": "امروز یک پیگیری را انتخاب کن و بقیه را رها کن",
+        "ru": "Выберите одно стремление сегодня и отпустите остальное",
+        "ar": "اختاري مطاردة واحدة اليوم واتركي الباقي",
+    }[lang]
+    impact = {
+        "en": "What this changes today: your desire pattern is a filter — use it before you invest.",
+        "fa": "تأثیر امروز: الگوی میلت فیلتر است — قبل از سرمایه‌گذاری از آن استفاده کن.",
+        "ru": "Что меняется сегодня: паттерн желания — фильтр; используйте его до вложений.",
+        "ar": "ما يتغيّر اليوم: نمط رغبتك فلتر — استخدميه قبل أن تستثمري.",
+    }[lang]
+    signal = {
+        "en": f"Your desire signature sits in {sign_name}, house {house}.",
+        "fa": f"امضای میلت در {sign_name}، خانه {house} است.",
+        "ru": f"Ваш код желания — {sign_name}, дом {house}.",
+        "ar": f"بصمة رغبتك في {sign_name}، البيت {house}.",
     }[lang]
 
-    strategic_parts = [sign_line, house_line]
-    if dignity_line:
-        strategic_parts.append(dignity_line)
-    strategic_parts.extend(aspect_lines)
-    if retro:
-        retro_copy = {
-            "en": "Mars retrograde in your natal chart: desire revisits old patterns. You may return to the same type of man until you break the script.",
-            "fa": "مریخ رتروگراد در چارت تولد: میل الگوهای قدیمی رو تکرار می‌کنه. ممکنه تا وقتی سناریو رو نشکنی همون نوع مرد برگرده.",
-            "ru": "Марс ретрограден: желание возвращается к старым сценариям.",
-            "ar": "المريخ رجعي: الرغبة تعيد أنماطاً قديمة.",
-        }
-        strategic_parts.append(retro_copy[lang])
+    executive = {
+        "en": f"{headline}. {signal} Action: {action}. {conf}",
+        "fa": f"{headline}. {signal} اقدام: {action}. {conf}",
+        "ru": f"{headline}. {signal} Действие: {action}. {conf}",
+        "ar": f"{headline}. {signal} الإجراء: {action}. {conf}",
+    }[lang]
 
-    strategic = " ".join(strategic_parts)
+    body_parts = [sign_line, house_line]
+    if dignity_line:
+        body_parts.append(dignity_line)
+    body_parts.extend(aspect_lines)
+    if retro:
+        body_parts.append(
+            {
+                "en": "Retrograde tone: desire can revisit old scripts until you choose a cleaner pattern.",
+                "fa": "لحن برگشتی: میل ممکن است سناریوهای قدیمی را تکرار کند تا الگوی تمیزتری انتخاب کنی.",
+                "ru": "Ретроградный тон: желание может возвращать старые сценарии, пока не выберете чище.",
+                "ar": "نبرة رجعية: قد تعيد الرغبة سيناريوهات قديمة حتى تختاري نمطاً أنظف.",
+            }[lang]
+        )
+    strategic = (
+        f"{signal} {' '.join(body_parts)} {conf} {impact} "
+        + {
+            "en": f"Action: {action}.",
+            "fa": f"اقدام: {action}.",
+            "ru": f"Действие: {action}.",
+            "ar": f"الإجراء: {action}.",
+        }[lang]
+    )
 
     technical = (
         f"Mars {degree}° {sign_name} · house {house}"
@@ -331,6 +362,8 @@ def render_mars_reading(verdict: dict[str, Any], lang: str = "en") -> dict[str, 
         "intensity": intensity,
         "sign": sign_name,
         "house": house,
+        "confidence": confidence,
+        "action": action,
     }
 
 
@@ -359,24 +392,20 @@ GHOST_HEADLINE: dict[str, dict[str, str]] = {
 
 GHOST_STRATEGY: dict[str, str] = {
     "en": (
-        "Ghost Days favour strategic distance, not drama. "
-        "Less texting, fewer explanations, more space — so pull returns on its own. "
-        "Moon, Saturn, and Neptune support withdrawal without collapse."
+        "Distance works better than explanation here. "
+        "Fewer messages, fewer justifications, more room for pull to rebuild on its own."
     ),
     "fa": (
-        "روزهای غیبت فاصلهٔ استراتژیک است، نه درام. "
-        "پیام کمتر، توضیح کمتر، فضای بیشتر — تا کشش خودش برگردد. "
-        "ماه، زحل و نپتون از عقب‌نشینی بدون فروپاشی حمایت می‌کنند."
+        "اینجا فاصله بهتر از توضیح کار می‌کند. "
+        "پیام کمتر، توجیه کمتر، فضای بیشتر تا کشش خودش برگردد."
     ),
     "ru": (
-        "Дни тишины — стратегическая дистанция, не драма. "
-        "Меньше сообщений и объяснений, больше пространства — притяжение вернётся само. "
-        "Луна, Сатурн и Нептун поддерживают отход без обвала."
+        "Здесь дистанция работает лучше объяснений. "
+        "Меньше сообщений и оправданий — больше пространства, чтобы притяжение вернулось само."
     ),
     "ar": (
-        "أيام الغياب مسافة استراتيجية لا دراما. "
-        "رسائل أقل وتفسير أقل ومساحة أكثر — ليعود الجذب وحده. "
-        "القمر وزحل ونبتون يدعمان الانسحاب دون انهيار."
+        "المسافة هنا أنجع من الشرح. "
+        "رسائل أقل وتبريرات أقل ومساحة أكبر ليعود الجذب وحده."
     ),
 }
 
@@ -387,6 +416,87 @@ def _window_confidence(score: int) -> str:
     if score >= 60:
         return "medium"
     return "low"
+
+
+def _confidence_clause(confidence: str, lang: str) -> str:
+    lang = _pick_lang(lang)
+    band = confidence if confidence in {"high", "medium", "low"} else "medium"
+    return {
+        "high": {
+            "en": "Confidence: high — clear enough to act on, still not a guarantee.",
+            "fa": "اطمینان: high — برای عمل کافی است، هنوز قطعی نیست.",
+            "ru": "Уверенность: high — достаточно для действия, не гарантия.",
+            "ar": "الثقة: high — كافية للتصرف، وليست ضماناً.",
+        },
+        "medium": {
+            "en": "Confidence: medium — usable signal; leave room to adjust.",
+            "fa": "اطمینان: medium — سیگنال قابل استفاده؛ جا برای تنظیم بگذار.",
+            "ru": "Уверенность: medium — рабочий сигнал; оставьте запас.",
+            "ar": "الثقة: medium — إشارة قابلة للاستخدام؛ اتركي هامش تعديل.",
+        },
+        "low": {
+            "en": "Confidence: low — a soft lean, not a green light.",
+            "fa": "اطمینان: low — تمایل ملایم، نه چراغ سبز.",
+            "ru": "Уверенность: low — мягкий наклон, не зелёный свет.",
+            "ar": "الثقة: low — ميل خفيف، لا ضوء أخضر.",
+        },
+    }[band][lang]
+
+
+def _window_bundle(
+    *,
+    lang: str,
+    headline: str,
+    signal: str,
+    interpretation: str,
+    impact: str,
+    action: str,
+    avoid: str,
+    confidence: str,
+    score_note: str = "",
+    windows_note: str = "",
+) -> tuple[str, str]:
+    lang = _pick_lang(lang)
+    conf = _confidence_clause(confidence, lang)
+    score_bit = f" {score_note}" if score_note else ""
+    windows_bit = f" {windows_note}" if windows_note else ""
+    executive = {
+        "en": (
+            f"{headline}. {signal}{score_bit} "
+            f"Action: {action}. Avoid: {avoid}. {conf}"
+        ),
+        "fa": (
+            f"{headline}. {signal}{score_bit} "
+            f"اقدام: {action}. پرهیز: {avoid}. {conf}"
+        ),
+        "ru": (
+            f"{headline}. {signal}{score_bit} "
+            f"Действие: {action}. Избегать: {avoid}. {conf}"
+        ),
+        "ar": (
+            f"{headline}. {signal}{score_bit} "
+            f"الإجراء: {action}. تجنبي: {avoid}. {conf}"
+        ),
+    }[lang]
+    strategic = {
+        "en": (
+            f"{interpretation}{windows_bit} {conf} "
+            f"{impact} Action: {action}. Avoid: {avoid}."
+        ),
+        "fa": (
+            f"{interpretation}{windows_bit} {conf} "
+            f"{impact} اقدام: {action}. پرهیز: {avoid}."
+        ),
+        "ru": (
+            f"{interpretation}{windows_bit} {conf} "
+            f"{impact} Действие: {action}. Избегать: {avoid}."
+        ),
+        "ar": (
+            f"{interpretation}{windows_bit} {conf} "
+            f"{impact} الإجراء: {action}. تجنبي: {avoid}."
+        ),
+    }[lang]
+    return executive, strategic
 
 
 _GHOST_AVOID: dict[str, str] = {
@@ -417,27 +527,31 @@ def render_ghost_days_reading(
             "ru": "Оставайтесь тёплой и краткой до более ясного окна дистанции",
             "ar": "ابقي دافئة ومختصرة حتى نافذة انسحاب أوضح",
         }[lang]
-        empty = {
-            "en": (
-                f"No strong ghost windows in the next horizon. "
-                f"Action: {action}. Avoid: {avoid}. Confidence: {confidence}."
-            ),
-            "fa": (
-                f"در افق پیشِ رو پنجرهٔ غیبت قوی نیست. "
-                f"اقدام: {action}. پرهیز: {avoid}. اطمینان: {confidence}."
-            ),
-            "ru": (
-                f"Сильных окон дистанции в горизонте нет. "
-                f"Действие: {action}. Избегать: {avoid}. Уверенность: {confidence}."
-            ),
-            "ar": (
-                f"لا نوافذ غياب قوية في الأفق. "
-                f"الإجراء: {action}. تجنبي: {avoid}. الثقة: {confidence}."
-            ),
-        }
+        signal = {
+            "en": "No strong pull-back window shows in the next horizon.",
+            "fa": "در افق پیشِ رو پنجرهٔ عقب‌نشینی قوی دیده نمی‌شود.",
+            "ru": "В горизонте нет сильного окна дистанции.",
+            "ar": "لا تظهر نافذة انسحاب قوية في الأفق.",
+        }[lang]
+        impact = {
+            "en": "What this changes today: keep contact light; do not manufacture distance.",
+            "fa": "تأثیر امروز: تماس را سبک نگه دار؛ فاصلهٔ ساختگی نساز.",
+            "ru": "Что меняется сегодня: держите контакт лёгким; не создавайте дистанцию искусственно.",
+            "ar": "ما يتغيّر اليوم: أبقي التواصل خفيفاً؛ لا تختلقي مسافة.",
+        }[lang]
+        executive, strategic = _window_bundle(
+            lang=lang,
+            headline=GHOST_HEADLINE["subtle"][lang],
+            signal=signal,
+            interpretation=GHOST_STRATEGY[lang],
+            impact=impact,
+            action=action,
+            avoid=avoid,
+            confidence=confidence,
+        )
         return {
-            "executive": empty[lang],
-            "strategic": GHOST_STRATEGY[lang],
+            "executive": executive,
+            "strategic": strategic,
             "technical": f"action=rest_recovery · horizon={horizon_days}d · windows=0",
             "headline": GHOST_HEADLINE["subtle"][lang],
             "intensity": "subtle",
@@ -466,31 +580,54 @@ def render_ghost_days_reading(
         "ru": f"Максимальная дистанция {top['date']}",
         "ar": f"انسحبي بقوة في {top['date']}",
     }[lang]
-    executive = {
+    signal = {
+        "en": f"Strongest distance window: {top['date']} ({top_score}/100).",
+        "fa": f"قوی‌ترین پنجرهٔ فاصله: {top['date']} ({top_score}/100).",
+        "ru": f"Сильнейшее окно дистанции: {top['date']} ({top_score}/100).",
+        "ar": f"أقوى نافذة مسافة: {top['date']} ({top_score}/100).",
+    }[lang]
+    interpretation = {
         "en": (
-            f"{headline}. Action: {action} ({top_score}/100). "
-            f"Avoid: {avoid}. Confidence: {confidence}."
+            f"{GHOST_STRATEGY[lang]} The clearest window lands on {top['date']} "
+            f"({top_score}/100)."
         ),
         "fa": (
-            f"{headline}. اقدام: {action} ({top_score}/100). "
-            f"پرهیز: {avoid}. اطمینان: {confidence}."
+            f"{GHOST_STRATEGY[lang]} واضح‌ترین پنجره در {top['date']} "
+            f"({top_score}/100) است."
         ),
         "ru": (
-            f"{headline}. Действие: {action} ({top_score}/100). "
-            f"Избегать: {avoid}. Уверенность: {confidence}."
+            f"{GHOST_STRATEGY[lang]} Самое ясное окно — {top['date']} "
+            f"({top_score}/100)."
         ),
         "ar": (
-            f"{headline}. الإجراء: {action} ({top_score}/100). "
-            f"تجنبي: {avoid}. الثقة: {confidence}."
+            f"{GHOST_STRATEGY[lang]} أوضح نافذة في {top['date']} "
+            f"({top_score}/100)."
         ),
     }[lang]
-
-    strategic = GHOST_STRATEGY[lang] + " " + {
-        "en": f"Priority windows: {date_list}.",
-        "fa": f"پنجره‌های اولویت: {date_list}.",
-        "ru": f"Приоритетные окна: {date_list}.",
-        "ar": f"النوافذ ذات الأولوية: {date_list}.",
+    impact = {
+        "en": "What this changes today: silence can work harder than another reply.",
+        "fa": "تأثیر امروز: سکوت می‌تواند بهتر از یک پاسخ دیگر کار کند.",
+        "ru": "Что меняется сегодня: тишина может работать сильнее ещё одного ответа.",
+        "ar": "ما يتغيّر اليوم: الصمت قد يعمل أقوى من ردّ إضافي.",
     }[lang]
+    windows_note = {
+        "en": f"Also watch: {date_list}.",
+        "fa": f"همچنین ببین: {date_list}.",
+        "ru": f"Также смотрите: {date_list}.",
+        "ar": f"راقبي أيضاً: {date_list}.",
+    }[lang]
+    executive, strategic = _window_bundle(
+        lang=lang,
+        headline=headline,
+        signal=signal,
+        interpretation=interpretation,
+        impact=impact,
+        action=action,
+        avoid=avoid,
+        confidence=confidence,
+        score_note=f"({top_score}/100)",
+        windows_note=windows_note,
+    )
 
     technical = (
         f"action=rest_recovery · horizon={horizon_days}d · top={top['date']} "
@@ -535,24 +672,20 @@ MONEY_ASK_HEADLINE: dict[str, dict[str, str]] = {
 
 MONEY_ASK_STRATEGY: dict[str, str] = {
     "en": (
-        "Money-Ask Days favour clear asks with warm timing — not pressure. "
-        "Name the amount, keep the ask short, and let Venus/Jupiter do the softening. "
-        "Ask once; do not stack follow-ups the same day."
+        "Clear asks land better than pressure. "
+        "Name the amount, keep it short, and ask once — no stacked follow-ups the same day."
     ),
     "fa": (
-        "روزهای درخواست پول درخواست شفاف با زمان‌بندی گرم است — نه فشار. "
-        "مبلغ را بگو، کوتاه بخواه، و بگذار زهره/مشتری نرمش بسازند. "
-        "یک‌بار بخواه؛ همان روز پیگیری انباشته نکن."
+        "درخواست شفاف بهتر از فشار می‌نشیند. "
+        "مبلغ را بگو، کوتاه بخواه، یک‌بار — همان روز پیگیری انباشته نکن."
     ),
     "ru": (
-        "Дни денежной просьбы — ясный запрос в тёплый тайминг, без давления. "
-        "Назовите сумму, держите просьбу короткой — Венера/Юпитер смягчают. "
-        "Просите один раз; не копите follow-up в тот же день."
+        "Ясная просьба работает лучше давления. "
+        "Назовите сумму, держите коротко, просите один раз — без серии follow-up в тот же день."
     ),
     "ar": (
-        "أيام طلب المال طلب واضح بتوقيت دافئ — لا ضغط. "
-        "اذكري المبلغ واختصري الطلب واتركي الزهرة/المشتري يليّنان. "
-        "اطلبي مرة؛ لا تكدسي المتابعات في اليوم نفسه."
+        "الطلب الواضح أنجع من الضغط. "
+        "اذكري المبلغ واختصري واطلبي مرة — بلا متابعات متكدسة في اليوم نفسه."
     ),
 }
 
@@ -579,32 +712,36 @@ def render_money_ask_days_reading(
     if not windows:
         confidence = _window_confidence(0)
         action = {
-            "en": "Hold the ask until a clearer Venus money window",
-            "fa": "تا پنجرهٔ پول زهره واضح، درخواست را نگه دار",
-            "ru": "Отложите просьбу до более ясного денежного окна Венеры",
-            "ar": "أجّلي الطلب حتى نافذة مال زهرية أوضح",
+            "en": "Hold the ask until a clearer money window",
+            "fa": "تا پنجرهٔ پول واضح، درخواست را نگه دار",
+            "ru": "Отложите просьбу до более ясного денежного окна",
+            "ar": "أجّلي الطلب حتى نافذة مال أوضح",
         }[lang]
-        empty = {
-            "en": (
-                f"No strong money-ask windows in the next horizon. "
-                f"Action: {action}. Avoid: {avoid}. Confidence: {confidence}."
-            ),
-            "fa": (
-                f"در افق پیشِ رو پنجرهٔ درخواست پول قوی نیست. "
-                f"اقدام: {action}. پرهیز: {avoid}. اطمینان: {confidence}."
-            ),
-            "ru": (
-                f"Сильных окон денежной просьбы в горизонте нет. "
-                f"Действие: {action}. Избегать: {avoid}. Уверенность: {confidence}."
-            ),
-            "ar": (
-                f"لا نوافذ طلب مال قوية في الأفق. "
-                f"الإجراء: {action}. تجنبي: {avoid}. الثقة: {confidence}."
-            ),
-        }
+        signal = {
+            "en": "No strong money window shows in the next horizon.",
+            "fa": "در افق پیشِ رو پنجرهٔ پول قوی دیده نمی‌شود.",
+            "ru": "В горизонте нет сильного денежного окна.",
+            "ar": "لا تظهر نافذة مال قوية في الأفق.",
+        }[lang]
+        impact = {
+            "en": "What this changes today: prepare the number; do not force the ask.",
+            "fa": "تأثیر امروز: مبلغ را آماده کن؛ درخواست را زور نزن.",
+            "ru": "Что меняется сегодня: подготовьте сумму; не форсируйте просьбу.",
+            "ar": "ما يتغيّر اليوم: جهّزي الرقم؛ لا تفرضي الطلب.",
+        }[lang]
+        executive, strategic = _window_bundle(
+            lang=lang,
+            headline=MONEY_ASK_HEADLINE["subtle"][lang],
+            signal=signal,
+            interpretation=MONEY_ASK_STRATEGY[lang],
+            impact=impact,
+            action=action,
+            avoid=avoid,
+            confidence=confidence,
+        )
         return {
-            "executive": empty[lang],
-            "strategic": MONEY_ASK_STRATEGY[lang],
+            "executive": executive,
+            "strategic": strategic,
             "technical": (
                 f"action=finance_transaction · horizon={horizon_days}d · windows=0"
             ),
@@ -635,31 +772,54 @@ def render_money_ask_days_reading(
         "ru": f"Сделайте денежную просьбу {top['date']}",
         "ar": f"اطلبي المال في {top['date']}",
     }[lang]
-    executive = {
+    signal = {
+        "en": f"Strongest ask window: {top['date']} ({top_score}/100).",
+        "fa": f"قوی‌ترین پنجرهٔ درخواست: {top['date']} ({top_score}/100).",
+        "ru": f"Сильнейшее окно просьбы: {top['date']} ({top_score}/100).",
+        "ar": f"أقوى نافذة طلب: {top['date']} ({top_score}/100).",
+    }[lang]
+    interpretation = {
         "en": (
-            f"{headline}. Action: {action} ({top_score}/100). "
-            f"Avoid: {avoid}. Confidence: {confidence}."
+            f"{MONEY_ASK_STRATEGY[lang]} The clearest window lands on {top['date']} "
+            f"({top_score}/100)."
         ),
         "fa": (
-            f"{headline}. اقدام: {action} ({top_score}/100). "
-            f"پرهیز: {avoid}. اطمینان: {confidence}."
+            f"{MONEY_ASK_STRATEGY[lang]} واضح‌ترین پنجره در {top['date']} "
+            f"({top_score}/100) است."
         ),
         "ru": (
-            f"{headline}. Действие: {action} ({top_score}/100). "
-            f"Избегать: {avoid}. Уверенность: {confidence}."
+            f"{MONEY_ASK_STRATEGY[lang]} Самое ясное окно — {top['date']} "
+            f"({top_score}/100)."
         ),
         "ar": (
-            f"{headline}. الإجراء: {action} ({top_score}/100). "
-            f"تجنبي: {avoid}. الثقة: {confidence}."
+            f"{MONEY_ASK_STRATEGY[lang]} أوضح نافذة في {top['date']} "
+            f"({top_score}/100)."
         ),
     }[lang]
-
-    strategic = MONEY_ASK_STRATEGY[lang] + " " + {
-        "en": f"Priority windows: {date_list}.",
-        "fa": f"پنجره‌های اولویت: {date_list}.",
-        "ru": f"Приоритетные окна: {date_list}.",
-        "ar": f"النوافذ ذات الأولوية: {date_list}.",
+    impact = {
+        "en": "What this changes today: a short, numbered ask beats a long pitch.",
+        "fa": "تأثیر امروز: درخواست کوتاه با عدد بهتر از توضیح طولانی است.",
+        "ru": "Что меняется сегодня: короткая просьба с цифрой сильнее длинной речи.",
+        "ar": "ما يتغيّر اليوم: طلب قصير برقم أقوى من شرح طويل.",
     }[lang]
+    windows_note = {
+        "en": f"Also watch: {date_list}.",
+        "fa": f"همچنین ببین: {date_list}.",
+        "ru": f"Также смотрите: {date_list}.",
+        "ar": f"راقبي أيضاً: {date_list}.",
+    }[lang]
+    executive, strategic = _window_bundle(
+        lang=lang,
+        headline=headline,
+        signal=signal,
+        interpretation=interpretation,
+        impact=impact,
+        action=action,
+        avoid=avoid,
+        confidence=confidence,
+        score_note=f"({top_score}/100)",
+        windows_note=windows_note,
+    )
 
     technical = (
         f"action=finance_transaction · horizon={horizon_days}d · top={top['date']} "
@@ -723,57 +883,66 @@ def render_yes_day_reading(
         "ar": f"اطلبي في {ask_d}",
     }[lang]
 
+    conf = _confidence_clause(confidence, lang)
+    action = {
+        "en": f"Open the ask on {ask_d}, then hold terms until {commit_d}",
+        "fa": f"درخواست را در {ask_d} باز کن، بعد شروط را تا {commit_d} نگه دار",
+        "ru": f"Откройте просьбу {ask_d}, затем держите условия до {commit_d}",
+        "ar": f"افتحي الطلب في {ask_d} ثم أمسكي الشروط حتى {commit_d}",
+    }[lang]
     reason = {
         "en": (
-            f"Ask peaks on negotiation sky ({ask_d}); commit aligns when "
-            f"approval and terms both rise ({commit_d}); sign follows "
-            f"contract-clarity timing ({sign_d})."
+            f"Ask timing peaks {ask_d}; commitment aligns when approval and terms "
+            f"both rise ({commit_d}); signing follows clarity timing ({sign_d})."
         ),
         "fa": (
-            f"اوج درخواست روی آسمان مذاکره ({ask_d})؛ تعهد وقتی تأیید و شروط "
-            f"هم‌زمان بالا می‌روند ({commit_d})؛ امضا با زمان‌بندی وضوح قرارداد "
-            f"({sign_d})."
+            f"اوج درخواست {ask_d} است؛ تعهد وقتی تأیید و شروط هم‌زمان بالا می‌روند "
+            f"({commit_d})؛ امضا با زمان وضوح ({sign_d})."
         ),
         "ru": (
-            f"Просьба пик на переговорах ({ask_d}); обязательство — когда "
-            f"одобрение и условия совпадают ({commit_d}); подпись — ясность "
-            f"контракта ({sign_d})."
+            f"Пик просьбы {ask_d}; обязательство — когда одобрение и условия "
+            f"совпадают ({commit_d}); подпись — ясность ({sign_d})."
         ),
         "ar": (
-            f"ذروة الطلب على سماء التفاوض ({ask_d})؛ الالتزام حين يرتفع "
-            f"الموافقة والشروط معاً ({commit_d})؛ التوقيع بتوقيت وضوح العقد "
-            f"({sign_d})."
+            f"ذروة الطلب {ask_d}؛ الالتزام حين يرتفع الموافقة والشروط معاً "
+            f"({commit_d})؛ التوقيع بتوقيت الوضوح ({sign_d})."
         ),
+    }[lang]
+    impact = {
+        "en": "What this changes today: sequence the ask — do not compress ask, commit, and sign into one push.",
+        "fa": "تأثیر امروز: درخواست را مرحله‌بندی کن — درخواست، تعهد و امضا را در یک فشار جمع نکن.",
+        "ru": "Что меняется сегодня: разведите шаги — не сжимайте просьбу, обязательство и подпись в один рывок.",
+        "ar": "ما يتغيّر اليوم: رتّبي الطلب — لا تضغطي الطلب والالتزام والتوقيع في دفعة واحدة.",
     }[lang]
 
     executive = {
         "en": (
             f"Best time to ask: {ask_d}. Best time to commit: {commit_d}. "
             f"Best time to sign: {sign_d}. Avoid: {avoid}. "
-            f"Confidence: {confidence}."
+            f"{conf} Action: {action}."
         ),
         "fa": (
             f"بهترین زمان درخواست: {ask_d}. بهترین زمان تعهد: {commit_d}. "
             f"بهترین زمان امضا: {sign_d}. پرهیز: {avoid}. "
-            f"اطمینان: {confidence}."
+            f"{conf} اقدام: {action}."
         ),
         "ru": (
             f"Лучшее время просить: {ask_d}. Лучшее время обязаться: {commit_d}. "
             f"Лучшее время подписать: {sign_d}. Избегать: {avoid}. "
-            f"Уверенность: {confidence}."
+            f"{conf} Действие: {action}."
         ),
         "ar": (
             f"أفضل وقت للطلب: {ask_d}. أفضل وقت للالتزام: {commit_d}. "
             f"أفضل وقت للتوقيع: {sign_d}. تجنبي: {avoid}. "
-            f"الثقة: {confidence}."
+            f"{conf} الإجراء: {action}."
         ),
     }[lang]
 
     strategic = {
-        "en": f"{reason} Horizon {horizon_days}d.",
-        "fa": f"{reason} افق {horizon_days} روز.",
-        "ru": f"{reason} Горизонт {horizon_days}д.",
-        "ar": f"{reason} الأفق {horizon_days} يوماً.",
+        "en": f"{reason} {conf} {impact} Action: {action}. Avoid: {avoid}.",
+        "fa": f"{reason} {conf} {impact} اقدام: {action}. پرهیز: {avoid}.",
+        "ru": f"{reason} {conf} {impact} Действие: {action}. Избегать: {avoid}.",
+        "ar": f"{reason} {conf} {impact} الإجراء: {action}. تجنبي: {avoid}.",
     }[lang]
 
     technical = (
@@ -798,6 +967,7 @@ def render_yes_day_reading(
         "ask": ask_d,
         "commit": commit_d,
         "sign": sign_d,
+        "action": action,
     }
 
 
@@ -826,24 +996,20 @@ HOT_HEADLINE: dict[str, dict[str, str]] = {
 
 HOT_STRATEGY: dict[str, str] = {
     "en": (
-        "Hot Attraction Days favour presence, body, and bold timing — not over-explaining. "
-        "Lean into chemistry, touch, and magnetic silence. "
-        "Venus, Mars, and Moon in romance/partnership houses fuel the heat."
+        "Presence beats over-explaining. "
+        "Lean into chemistry, touch, and selective silence — show up where you can be felt."
     ),
     "fa": (
-        "روزهای جذابیت داغ حضور، بدن و زمان‌بندی جسورانه است — نه توضیح زیاد. "
-        "روی شیمی، لمس و سکوت مگنتیک تکیه کن. "
-        "زهره، مریخ و ماه در خانه‌های عشق/شراکت حرارت را می‌سازند."
+        "حضور بهتر از توضیح زیاد است. "
+        "روی شیمی، لمس و سکوت انتخابی تکیه کن — جایی حاضر شو که حس شوی."
     ),
     "ru": (
-        "Дни жаркого притяжения — присутствие, тело и смелый тайминг, не лишние слова. "
-        "Химия, касание, магнитная тишина. "
-        "Венера, Марс и Луна в домах романтики/партнёрства дают жар."
+        "Присутствие сильнее лишних слов. "
+        "Химия, касание, избирательная тишина — будьте там, где вас чувствуют."
     ),
     "ar": (
-        "أيام الجذب الحار حضور وجسد وتوقيت جريء — لا إفراط في الشرح. "
-        "اعتمدي على الكيمياء واللمس والصمت الجاذب. "
-        "الزهرة والمريخ والقمر في بيوت الحب/الشراكة يغذّون الحرارة."
+        "الحضور أقوى من الإفراط في الشرح. "
+        "اعتمدي على الكيمياء واللمس والصمت الانتقائي — احضري حيث تُحسّين."
     ),
 }
 
@@ -876,27 +1042,31 @@ def render_hot_attraction_days_reading(
             "ru": "Оставайтесь магнитной и избирательной до более ясного окна жара",
             "ar": "ابقي جذابة وانتقائية حتى نافذة حرارة أوضح",
         }[lang]
-        empty = {
-            "en": (
-                f"No strong heat windows in the next horizon. "
-                f"Action: {action}. Avoid: {avoid}. Confidence: {confidence}."
-            ),
-            "fa": (
-                f"در افق پیشِ رو پنجرهٔ حرارت قوی نیست. "
-                f"اقدام: {action}. پرهیز: {avoid}. اطمینان: {confidence}."
-            ),
-            "ru": (
-                f"Сильных окон жара в горизонте нет. "
-                f"Действие: {action}. Избегать: {avoid}. Уверенность: {confidence}."
-            ),
-            "ar": (
-                f"لا نوافذ حرارة قوية في الأفق. "
-                f"الإجراء: {action}. تجنبي: {avoid}. الثقة: {confidence}."
-            ),
-        }
+        signal = {
+            "en": "No strong heat window shows in the next horizon.",
+            "fa": "در افق پیشِ رو پنجرهٔ حرارت قوی دیده نمی‌شود.",
+            "ru": "В горизонте нет сильного окна жара.",
+            "ar": "لا تظهر نافذة حرارة قوية في الأفق.",
+        }[lang]
+        impact = {
+            "en": "What this changes today: protect allure; do not force chemistry.",
+            "fa": "تأثیر امروز: جذابیت را حفظ کن؛ شیمی را زور نزن.",
+            "ru": "Что меняется сегодня: берегите притяжение; не форсируйте химию.",
+            "ar": "ما يتغيّر اليوم: احمي الجاذبية؛ لا تفرضي الكيمياء.",
+        }[lang]
+        executive, strategic = _window_bundle(
+            lang=lang,
+            headline=HOT_HEADLINE["subtle"][lang],
+            signal=signal,
+            interpretation=HOT_STRATEGY[lang],
+            impact=impact,
+            action=action,
+            avoid=avoid,
+            confidence=confidence,
+        )
         return {
-            "executive": empty[lang],
-            "strategic": HOT_STRATEGY[lang],
+            "executive": executive,
+            "strategic": strategic,
             "technical": f"action=hot_attraction · horizon={horizon_days}d · windows=0",
             "headline": HOT_HEADLINE["subtle"][lang],
             "intensity": "subtle",
@@ -925,31 +1095,54 @@ def render_hot_attraction_days_reading(
         "ru": f"Выходите на жар {top['date']}",
         "ar": f"احضري للحرارة في {top['date']}",
     }[lang]
-    executive = {
+    signal = {
+        "en": f"Strongest heat window: {top['date']} ({top_score}/100).",
+        "fa": f"قوی‌ترین پنجرهٔ حرارت: {top['date']} ({top_score}/100).",
+        "ru": f"Сильнейшее окно жара: {top['date']} ({top_score}/100).",
+        "ar": f"أقوى نافذة حرارة: {top['date']} ({top_score}/100).",
+    }[lang]
+    interpretation = {
         "en": (
-            f"{headline}. Action: {action} ({top_score}/100). "
-            f"Avoid: {avoid}. Confidence: {confidence}."
+            f"{HOT_STRATEGY[lang]} The clearest window lands on {top['date']} "
+            f"({top_score}/100)."
         ),
         "fa": (
-            f"{headline}. اقدام: {action} ({top_score}/100). "
-            f"پرهیز: {avoid}. اطمینان: {confidence}."
+            f"{HOT_STRATEGY[lang]} واضح‌ترین پنجره در {top['date']} "
+            f"({top_score}/100) است."
         ),
         "ru": (
-            f"{headline}. Действие: {action} ({top_score}/100). "
-            f"Избегать: {avoid}. Уверенность: {confidence}."
+            f"{HOT_STRATEGY[lang]} Самое ясное окно — {top['date']} "
+            f"({top_score}/100)."
         ),
         "ar": (
-            f"{headline}. الإجراء: {action} ({top_score}/100). "
-            f"تجنبي: {avoid}. الثقة: {confidence}."
+            f"{HOT_STRATEGY[lang]} أوضح نافذة في {top['date']} "
+            f"({top_score}/100)."
         ),
     }[lang]
-
-    strategic = HOT_STRATEGY[lang] + " " + {
-        "en": f"Priority windows: {date_list}.",
-        "fa": f"پنجره‌های اولویت: {date_list}.",
-        "ru": f"Приоритетные окна: {date_list}.",
-        "ar": f"النوافذ ذات الأولوية: {date_list}.",
+    impact = {
+        "en": "What this changes today: choose one real encounter over scattered attention.",
+        "fa": "تأثیر امروز: یک برخورد واقعی را به توجه پراکنده ترجیح بده.",
+        "ru": "Что меняется сегодня: выберите одну живую встречу вместо рассеянного внимания.",
+        "ar": "ما يتغيّر اليوم: اختاري لقاءً حقيقياً واحداً بدل الانتباه المبعثر.",
     }[lang]
+    windows_note = {
+        "en": f"Also watch: {date_list}.",
+        "fa": f"همچنین ببین: {date_list}.",
+        "ru": f"Также смотрите: {date_list}.",
+        "ar": f"راقبي أيضاً: {date_list}.",
+    }[lang]
+    executive, strategic = _window_bundle(
+        lang=lang,
+        headline=headline,
+        signal=signal,
+        interpretation=interpretation,
+        impact=impact,
+        action=action,
+        avoid=avoid,
+        confidence=confidence,
+        score_note=f"({top_score}/100)",
+        windows_note=windows_note,
+    )
 
     technical = (
         f"action=hot_attraction · horizon={horizon_days}d · top={top['date']} "
@@ -1110,45 +1303,52 @@ def render_todays_color_reading(
         "ar": f"ارتدي {primary}",
     }[lang]
 
+    conf = _confidence_clause(confidence, lang)
+    impact = {
+        "en": "What this changes today: one clean color story reads intentional; clutter reads unsure.",
+        "fa": "تأثیر امروز: یک داستان رنگی تمیز هدفمند دیده می‌شود؛ شلوغی نامطمئن.",
+        "ru": "Что меняется сегодня: один чистый цвет читается как намерение; пестрота — как неуверенность.",
+        "ar": "ما يتغيّر اليوم: قصة لون نظيفة تُقرأ كقصد؛ الفوضى كتردد.",
+    }[lang]
     executive = {
         "en": (
             f"Action: {action}. Avoid: {avoid}. "
-            f"Moon in {sign_name}. Confidence: {confidence}."
+            f"Moon in {sign_name}. {conf}"
         ),
         "fa": (
             f"اقدام: {action}. پرهیز: {avoid}. "
-            f"ماه در {sign_name}. اطمینان: {confidence}."
+            f"ماه در {sign_name}. {conf}"
         ),
         "ru": (
             f"Действие: {action}. Избегать: {avoid}. "
-            f"Луна в {sign_name}. Уверенность: {confidence}."
+            f"Луна в {sign_name}. {conf}"
         ),
         "ar": (
             f"الإجراء: {action}. تجنبي: {avoid}. "
-            f"القمر في {sign_name}. الثقة: {confidence}."
+            f"القمر في {sign_name}. {conf}"
         ),
     }[lang]
 
     strategic = {
         "en": (
-            f"Dress from the Moon in {sign_name}: lead with {primary}, "
-            f"finish with {accent} in shoes, lips, or a single accessory. "
-            "One clear color story reads as intentional attraction — not costume."
+            f"Today’s color signal follows Moon in {sign_name}: lead with {primary}, "
+            f"finish with {accent} in shoes, lips, or one accessory. "
+            f"{conf} {impact} Action: {action}. Avoid: {avoid}."
         ),
         "fa": (
-            f"از ماه در {sign_name} لباس بپوش: با {primary} شروع کن، "
+            f"سیگنال رنگ امروز از ماه در {sign_name}: با {primary} شروع کن، "
             f"با {accent} در کفش، لب یا یک اکسسوری تمام کن. "
-            "یک داستان رنگی واضح جذابیت هدفمند است — نه لباس نمایشی."
+            f"{conf} {impact} اقدام: {action}. پرهیز: {avoid}."
         ),
         "ru": (
-            f"Одевайтесь от Луны в {sign_name}: основа {primary}, "
+            f"Цветовой сигнал дня — Луна в {sign_name}: основа {primary}, "
             f"акцент {accent} в обуви, губах или одном аксессуаре. "
-            "Один ясный цветовой сюжет — намеренное притяжение, не костюм."
+            f"{conf} {impact} Действие: {action}. Избегать: {avoid}."
         ),
         "ar": (
-            f"البسي من القمر في {sign_name}: ابدئي بـ {primary}، "
+            f"إشارة لون اليوم من القمر في {sign_name}: ابدئي بـ {primary}، "
             f"وأكملي بـ {accent} في الحذاء أو الشفاه أو إكسسوار واحد. "
-            "قصة لون واضحة جذب مقصود — لا تنكر."
+            f"{conf} {impact} الإجراء: {action}. تجنبي: {avoid}."
         ),
     }[lang]
 
@@ -1376,24 +1576,24 @@ def render_todays_perfume_reading(
 
     reason = {
         "en": (
-            f"Natal Venus {v_name} + Moon {m_name} set the blend; "
-            f"Asc {a_name} sets the occasion; Transit Moon {tm_name} "
-            f"tints the day ({dominant_element})."
+            f"Natal Venus {v_name} and Moon {m_name} set the blend; "
+            f"Asc {a_name} sets the room; Transit Moon {tm_name} "
+            f"tints the finish."
         ),
         "fa": (
-            f"زهرهٔ تولد {v_name} + ماه {m_name} ترکیب را می‌سازند؛ "
-            f"طالع {a_name} موقعیت را؛ ماه ترانزیت {tm_name} "
-            f"روز را رنگ می‌زند ({dominant_element})."
+            f"زهرهٔ تولد {v_name} و ماه {m_name} ترکیب را می‌سازند؛ "
+            f"طلوع {a_name} فضا را؛ ماه ترانزیت {tm_name} "
+            f"پایان را رنگ می‌زند."
         ),
         "ru": (
-            f"Натальная Венера {v_name} + Луна {m_name} задают смесь; "
-            f"Асц {a_name} — повод; транзитная Луна {tm_name} "
-            f"окрашивает день ({dominant_element})."
+            f"Натальная Венера {v_name} и Луна {m_name} задают смесь; "
+            f"Асц {a_name} — пространство; транзитная Луна {tm_name} "
+            f"завершает тон."
         ),
         "ar": (
-            f"الزهرة الولادية {v_name} + القمر {m_name} يحددان المزيج؛ "
-            f"الصاعد {a_name} المناسبة؛ قمر العبور {tm_name} "
-            f"يلوّن اليوم ({dominant_element})."
+            f"الزهرة الولادية {v_name} والقمر {m_name} يحددان المزيج؛ "
+            f"الصاعد {a_name} يحدد المكان؛ قمر العبور {tm_name} "
+            f"يلوّن اللمسة الأخيرة."
         ),
     }[lang]
 
@@ -1411,41 +1611,59 @@ def render_todays_perfume_reading(
         "ar": f" لمسة: {accent_note}." if accent_note else "",
     }[lang]
 
+    conf = _confidence_clause(confidence, lang)
+    action = {
+        "en": f"Wear {fragrance_family} for a {occasion}",
+        "fa": f"برای {occasion} عطر {fragrance_family} بزن",
+        "ru": f"Нанесите {fragrance_family} для: {occasion}",
+        "ar": f"ارتدي {fragrance_family} لمناسبة {occasion}",
+    }[lang]
+    impact = {
+        "en": "What this changes today: scent should match the room you enter, not every mood you feel.",
+        "fa": "تأثیر امروز: عطر باید با فضایی که وارد می‌شوی هم‌خوان باشد، نه با هر حال.",
+        "ru": "Что меняется сегодня: аромат под пространство, не под каждое настроение.",
+        "ar": "ما يتغيّر اليوم: العطر للمكان الذي تدخلينه لا لكل مزاج.",
+    }[lang]
+
     executive = {
         "en": (
             f"Family: {fragrance_family}. Primary notes: {primary_notes}."
             f"{accent_bit} Occasion: {occasion}. Avoid: {avoid}. "
-            f"Confidence: {confidence}."
+            f"{conf} Action: {action}."
         ),
         "fa": (
             f"خانواده: {fragrance_family}. نت‌های اصلی: {primary_notes}."
             f"{accent_bit} موقعیت: {occasion}. پرهیز: {avoid}. "
-            f"اطمینان: {confidence}."
+            f"{conf} اقدام: {action}."
         ),
         "ru": (
             f"Семейство: {fragrance_family}. Основные ноты: {primary_notes}."
             f"{accent_bit} Повод: {occasion}. Избегать: {avoid}. "
-            f"Уверенность: {confidence}."
+            f"{conf} Действие: {action}."
         ),
         "ar": (
             f"العائلة: {fragrance_family}. النوتات الأساسية: {primary_notes}."
             f"{accent_bit} المناسبة: {occasion}. تجنبي: {avoid}. "
-            f"الثقة: {confidence}."
+            f"{conf} الإجراء: {action}."
         ),
     }[lang]
 
     strategic = {
         "en": (
-            f"{reason} Aura projection: Asc {a_name} ({aura['note']})."
+            f"{reason} Finish note from rising {a_name}: {aura['note']}. "
+            f"{conf} {impact} Action: {action}. Avoid: {avoid}."
         ),
         "fa": (
-            f"{reason} پرتو طالع {a_name} ({aura['note']})."
+            f"{reason} نت پایانی از طلوع {a_name}: {aura['note']}. "
+            f"{conf} {impact} اقدام: {action}. پرهیز: {avoid}."
         ),
         "ru": (
-            f"{reason} Проекция Асц {a_name} ({aura['note']})."
+            f"{reason} Финиш от восхода {a_name}: {aura['note']}. "
+            f"{conf} {impact} Действие: {action}. Избегать: {avoid}."
         ),
         "ar": (
-            f"{reason} إسقاط الصاعد {a_name} ({aura['note']})."
+            f"{reason} لمسة ختامية من الصاعد {a_name}: {aura['note']}. "
+            f"{conf} {impact} الإجراء: {action}. تجنبي: {avoid}."
         ),
     }[lang]
 
@@ -1471,6 +1689,7 @@ def render_todays_perfume_reading(
         "avoid": avoid,
         "reason": reason,
         "confidence": confidence,
+        "action": action,
     }
 
 
@@ -1568,30 +1787,47 @@ def render_live_reel_time_reading(
         "ar": f"انشر {_safe_window(posting)}",
     }[lang]
 
+    conf = _confidence_clause(confidence, lang)
+    post_w = posting.get("window", "—")
+    film_w = filming.get("window", "—")
+    live_w = live_stream.get("window", "—")
+    action = {
+        "en": f"Post in {post_w}; film in {film_w}",
+        "fa": f"در {post_w} پست کن؛ در {film_w} فیلم بگیر",
+        "ru": f"Публикуйте в {post_w}; снимайте в {film_w}",
+        "ar": f"انشري في {post_w}؛ صوّري في {film_w}",
+    }[lang]
+    impact = {
+        "en": "What this changes today: separate capture from publish — do not force both into the weakest hour.",
+        "fa": "تأثیر امروز: فیلم‌برداری را از انتشار جدا کن — هر دو را در ضعیف‌ترین ساعت فشار نده.",
+        "ru": "Что меняется сегодня: отделите съёмку от публикации — не сжимайте оба в слабый час.",
+        "ar": "ما يتغيّر اليوم: افصلي التصوير عن النشر — لا تضغطي كلاهما في أضعف ساعة.",
+    }[lang]
+
     executive = {
         "en": (
-            f"Best posting: {posting.get('window', '—')}. "
-            f"Best filming: {filming.get('window', '—')}. "
-            f"Best live stream: {live_stream.get('window', '—')}. "
-            f"Confidence: {confidence}."
+            f"Best posting: {post_w}. "
+            f"Best filming: {film_w}. "
+            f"Best live stream: {live_w}. "
+            f"{conf} Action: {action}."
         ),
         "fa": (
-            f"بهترین پست: {posting.get('window', '—')}. "
-            f"بهترین فیلم‌برداری: {filming.get('window', '—')}. "
-            f"بهترین لایو: {live_stream.get('window', '—')}. "
-            f"اطمینان: {confidence}."
+            f"بهترین پست: {post_w}. "
+            f"بهترین فیلم‌برداری: {film_w}. "
+            f"بهترین لایو: {live_w}. "
+            f"{conf} اقدام: {action}."
         ),
         "ru": (
-            f"Лучший пост: {posting.get('window', '—')}. "
-            f"Лучшая съёмка: {filming.get('window', '—')}. "
-            f"Лучший эфир: {live_stream.get('window', '—')}. "
-            f"Уверенность: {confidence}."
+            f"Лучший пост: {post_w}. "
+            f"Лучшая съёмка: {film_w}. "
+            f"Лучший эфир: {live_w}. "
+            f"{conf} Действие: {action}."
         ),
         "ar": (
-            f"أفضل نشر: {posting.get('window', '—')}. "
-            f"أفضل تصوير: {filming.get('window', '—')}. "
-            f"أفضل بث: {live_stream.get('window', '—')}. "
-            f"الثقة: {confidence}."
+            f"أفضل نشر: {post_w}. "
+            f"أفضل تصوير: {film_w}. "
+            f"أفضل بث: {live_w}. "
+            f"{conf} الإجراء: {action}."
         ),
     }[lang]
 
@@ -1609,20 +1845,28 @@ def render_live_reel_time_reading(
 
     strategic = {
         "en": (
+            f"Posting peaks {_safe_window(posting)} for reach; filming peaks "
+            f"{_safe_window(filming)}; live peaks {_safe_window(live_stream)}. "
             f"{_line('posting')}. {_line('filming')}. {_line('live_stream')}. "
-            f"Reason: {reason}"
+            f"Reason: {reason} {conf} {impact} Action: {action}."
         ),
         "fa": (
+            f"اوج پست {_safe_window(posting)}؛ فیلم {_safe_window(filming)}؛ "
+            f"لایو {_safe_window(live_stream)}. "
             f"{_line('posting')}. {_line('filming')}. {_line('live_stream')}. "
-            f"دلیل: {reason}"
+            f"دلیل: {reason} {conf} {impact} اقدام: {action}."
         ),
         "ru": (
+            f"Пик поста {_safe_window(posting)}; съёмки {_safe_window(filming)}; "
+            f"эфира {_safe_window(live_stream)}. "
             f"{_line('posting')}. {_line('filming')}. {_line('live_stream')}. "
-            f"Причина: {reason}"
+            f"Причина: {reason} {conf} {impact} Действие: {action}."
         ),
         "ar": (
+            f"ذروة النشر {_safe_window(posting)}؛ التصوير {_safe_window(filming)}؛ "
+            f"البث {_safe_window(live_stream)}. "
             f"{_line('posting')}. {_line('filming')}. {_line('live_stream')}. "
-            f"السبب: {reason}"
+            f"السبب: {reason} {conf} {impact} الإجراء: {action}."
         ),
     }[lang]
 
@@ -1644,6 +1888,7 @@ def render_live_reel_time_reading(
         "intensity": intensity,
         "confidence": confidence,
         "reason": reason,
+        "action": action,
     }
 
 
@@ -1983,58 +2228,71 @@ def render_date_outfit_reading(
         "ar": f"ارتدي {style}",
     }[lang]
 
+    conf = _confidence_clause(confidence, lang)
+    action = {
+        "en": f"Wear {style} in {primary} and meet in {window}",
+        "fa": f"{style} با {primary} بپوش و در {window} ملاقات کن",
+        "ru": f"Наденьте {style} в {primary} и встретьтесь в {window}",
+        "ar": f"ارتدي {style} بـ {primary} والتقي في {window}",
+    }[lang]
+    impact = {
+        "en": "What this changes today: one coherent look beats three mixed signals.",
+        "fa": "تأثیر امروز: یک ظاهر منسجم بهتر از سه سیگنال درهم است.",
+        "ru": "Что меняется сегодня: один цельный образ сильнее трёх смешанных сигналов.",
+        "ar": "ما يتغيّر اليوم: إطلالة متماسكة أقوى من ثلاث إشارات مختلطة.",
+    }[lang]
     executive = {
         "en": (
             f"Outfit: {style}. Primary {primary}, accent {accent}. "
             f"Accessories: {accessories}. Fragrance: {fragrance}. "
-            f"Best meeting: {window}. Avoid: {avoid}. Confidence: {confidence}."
+            f"Best meeting: {window}. Avoid: {avoid}. {conf} Action: {action}."
         ),
         "fa": (
             f"استایل: {style}. اصلی {primary}، اکسنت {accent}. "
             f"اکسسوری: {accessories}. عطر: {fragrance}. "
-            f"بهترین ملاقات: {window}. پرهیز: {avoid}. اطمینان: {confidence}."
+            f"بهترین ملاقات: {window}. پرهیز: {avoid}. {conf} اقدام: {action}."
         ),
         "ru": (
             f"Образ: {style}. Основной {primary}, акцент {accent}. "
             f"Аксессуары: {accessories}. Аромат: {fragrance}. "
             f"Лучшая встреча: {window}. Избегать: {avoid}. "
-            f"Уверенность: {confidence}."
+            f"{conf} Действие: {action}."
         ),
         "ar": (
             f"الإطلالة: {style}. أساسي {primary}، لمسة {accent}. "
             f"إكسسوارات: {accessories}. عطر: {fragrance}. "
-            f"أفضل لقاء: {window}. تجنبي: {avoid}. الثقة: {confidence}."
+            f"أفضل لقاء: {window}. تجنبي: {avoid}. {conf} الإجراء: {action}."
         ),
     }[lang]
 
     strategic = {
         "en": (
-            f"Lead with Natal Venus in {SIGN_LABEL[venus][lang]} ({style}), "
-            f"color from Transit Moon in {SIGN_LABEL[t_moon][lang]} "
-            f"({primary} / {accent}), finish with Ascendant "
-            f"{SIGN_LABEL[asc][lang]} ({accessories}), and scent family "
-            f"{fragrance}. Meet in {window}; skip {avoid}."
+            f"Style from Venus in {SIGN_LABEL[venus][lang]} ({style}); "
+            f"today’s color from Moon in {SIGN_LABEL[t_moon][lang]} "
+            f"({primary} / {accent}); finish with rising "
+            f"{SIGN_LABEL[asc][lang]} ({accessories}) and {fragrance} scent. "
+            f"{conf} {impact} Action: {action}. Avoid: {avoid}."
         ),
         "fa": (
-            f"با زهرهٔ تولد در {SIGN_LABEL[venus][lang]} ({style}) شروع کن، "
-            f"رنگ از ماه ترانزیت در {SIGN_LABEL[t_moon][lang]} "
-            f"({primary} / {accent})، تمام با طالع "
-            f"{SIGN_LABEL[asc][lang]} ({accessories})، و خانوادهٔ عطر "
-            f"{fragrance}. ملاقات در {window}؛ از {avoid} پرهیز کن."
+            f"استایل از زهره در {SIGN_LABEL[venus][lang]} ({style})؛ "
+            f"رنگ امروز از ماه در {SIGN_LABEL[t_moon][lang]} "
+            f"({primary} / {accent})؛ تمام با طلوع "
+            f"{SIGN_LABEL[asc][lang]} ({accessories}) و عطر {fragrance}. "
+            f"{conf} {impact} اقدام: {action}. پرهیز: {avoid}."
         ),
         "ru": (
-            f"Ведите натальной Венерой в {SIGN_LABEL[venus][lang]} ({style}), "
-            f"цвет — от транзитной Луны в {SIGN_LABEL[t_moon][lang]} "
-            f"({primary} / {accent}), аксессуар — Асцендент "
-            f"{SIGN_LABEL[asc][lang]} ({accessories}), аромат — "
-            f"{fragrance}. Встреча в {window}; избегайте {avoid}."
+            f"Стиль от Венеры в {SIGN_LABEL[venus][lang]} ({style}); "
+            f"цвет дня от Луны в {SIGN_LABEL[t_moon][lang]} "
+            f"({primary} / {accent}); финиш — восход "
+            f"{SIGN_LABEL[asc][lang]} ({accessories}) и аромат {fragrance}. "
+            f"{conf} {impact} Действие: {action}. Избегать: {avoid}."
         ),
         "ar": (
-            f"ابدئي بالزهرة الولادية في {SIGN_LABEL[venus][lang]} ({style})، "
-            f"اللون من قمر العبور في {SIGN_LABEL[t_moon][lang]} "
-            f"({primary} / {accent})، وأكملي بالصاعد "
-            f"{SIGN_LABEL[asc][lang]} ({accessories})، وعائلة العطر "
-            f"{fragrance}. اللقاء في {window}؛ تجنبي {avoid}."
+            f"الأسلوب من الزهرة في {SIGN_LABEL[venus][lang]} ({style})؛ "
+            f"لون اليوم من القمر في {SIGN_LABEL[t_moon][lang]} "
+            f"({primary} / {accent})؛ اللمسة من الصاعد "
+            f"{SIGN_LABEL[asc][lang]} ({accessories}) وعطر {fragrance}. "
+            f"{conf} {impact} الإجراء: {action}. تجنبي: {avoid}."
         ),
     }[lang]
 
@@ -2060,6 +2318,7 @@ def render_date_outfit_reading(
         "fragrance_family": fragrance,
         "best_meeting_time": window,
         "avoid": avoid,
+        "action": action,
     }
 
 
@@ -2197,34 +2456,57 @@ def render_best_countries_reading(
         "ar": f"الأفضل لـ {goal_l}: {label}",
     }[lang]
 
+    conf = _confidence_clause(confidence, lang)
+    impact = {
+        "en": f"What this changes today: treat {label} as a test market for {goal_l}, not a forever vow.",
+        "fa": f"تأثیر امروز: {label} را بازار آزمایشی برای {goal_l} ببین، نه عهد ابدی.",
+        "ru": f"Что меняется сегодня: считайте {label} тестовым рынком для {goal_l}, не вечным обетом.",
+        "ar": f"ما يتغيّر اليوم: اعتبري {label} سوق اختبار لـ {goal_l} لا عهداً أبدياً.",
+    }[lang]
     executive = {
         "en": (
             f"{headline} ({top_score}/100). Strongest use: {use_l}. "
             f"Opportunity: {opportunity}. Risk: {risk}. "
-            f"Next: {action}. Confidence: {confidence}."
+            f"Next: {action}. {conf} Action: {action}."
         ),
         "fa": (
             f"{headline} ({top_score}/100). قوی‌ترین کاربرد: {use_l}. "
             f"فرصت: {opportunity}. ریسک: {risk}. "
-            f"قدم بعد: {action}. اطمینان: {confidence}."
+            f"قدم بعد: {action}. {conf} اقدام: {action}."
         ),
         "ru": (
             f"{headline} ({top_score}/100). Сильнее всего: {use_l}. "
             f"Возможность: {opportunity}. Риск: {risk}. "
-            f"Далее: {action}. Уверенность: {confidence}."
+            f"Далее: {action}. {conf} Действие: {action}."
         ),
         "ar": (
             f"{headline} ({top_score}/100). أقوى استخدام: {use_l}. "
             f"الفرصة: {opportunity}. المخاطر: {risk}. "
-            f"التالي: {action}. الثقة: {confidence}."
+            f"التالي: {action}. {conf} الإجراء: {action}."
         ),
     }[lang]
 
     strategic = {
-        "en": f"Ranked by Pathfinder relocation for {goal_l}:\n{rank_block}",
-        "fa": f"رتبه‌بندی جابه‌جایی Pathfinder برای {goal_l}:\n{rank_block}",
-        "ru": f"Рейтинг релокации Pathfinder для {goal_l}:\n{rank_block}",
-        "ar": f"ترتيب انتقال Pathfinder لـ {goal_l}:\n{rank_block}",
+        "en": (
+            f"{label} leads for {goal_l} ({top_score}/100), strongest for {use_l}. "
+            f"Opportunity: {opportunity}. Watch the risk: {risk}.\n{rank_block}\n"
+            f"{conf} {impact} Action: {action}."
+        ),
+        "fa": (
+            f"{label} برای {goal_l} جلوست ({top_score}/100)، قوی‌ترین کاربرد {use_l}. "
+            f"فرصت: {opportunity}. ریسک: {risk}.\n{rank_block}\n"
+            f"{conf} {impact} اقدام: {action}."
+        ),
+        "ru": (
+            f"{label} лидирует для {goal_l} ({top_score}/100), сильнее всего для {use_l}. "
+            f"Возможность: {opportunity}. Риск: {risk}.\n{rank_block}\n"
+            f"{conf} {impact} Действие: {action}."
+        ),
+        "ar": (
+            f"{label} يتقدّم لـ {goal_l} ({top_score}/100)، الأقوى لـ {use_l}. "
+            f"الفرصة: {opportunity}. المخاطر: {risk}.\n{rank_block}\n"
+            f"{conf} {impact} الإجراء: {action}."
+        ),
     }[lang]
 
     if missing:
@@ -2426,45 +2708,56 @@ def render_business_geography_reading(
         "ar": f"أفضل سوق لـ {goal_l}: {label}",
     }[lang]
 
+    conf = _confidence_clause(confidence, lang)
+    impact = {
+        "en": f"What this changes today: treat {label} as a market test for {goal_l}, not a permanent move.",
+        "fa": f"تأثیر امروز: {label} را تست بازار برای {goal_l} ببین، نه جابه‌جایی دائمی.",
+        "ru": f"Что меняется сегодня: считайте {label} рыночным тестом для {goal_l}, не постоянным переездом.",
+        "ar": f"ما يتغيّر اليوم: اعتبري {label} اختبار سوق لـ {goal_l} لا انتقالاً دائماً.",
+    }[lang]
     executive = {
         "en": (
             f"{headline} ({top_score}/100). Strongest business use: {use_l}. "
             f"Opportunity: {opportunity}. Commercial risk: {risk}. "
-            f"Next: {action}. Confidence: {confidence}."
+            f"Next: {action}. {conf} Action: {action}."
         ),
         "fa": (
             f"{headline} ({top_score}/100). قوی‌ترین کاربرد تجاری: {use_l}. "
             f"فرصت: {opportunity}. ریسک تجاری: {risk}. "
-            f"قدم بعد: {action}. اطمینان: {confidence}."
+            f"قدم بعد: {action}. {conf} اقدام: {action}."
         ),
         "ru": (
             f"{headline} ({top_score}/100). Сильнейшее деловое применение: {use_l}. "
             f"Возможность: {opportunity}. Коммерческий риск: {risk}. "
-            f"Далее: {action}. Уверенность: {confidence}."
+            f"Далее: {action}. {conf} Действие: {action}."
         ),
         "ar": (
             f"{headline} ({top_score}/100). أقوى استخدام تجاري: {use_l}. "
             f"الفرصة: {opportunity}. المخاطر التجارية: {risk}. "
-            f"التالي: {action}. الثقة: {confidence}."
+            f"التالي: {action}. {conf} الإجراء: {action}."
         ),
     }[lang]
 
     strategic = {
         "en": (
-            f"Ranked by Pathfinder relocation (Jupiter/Mercury/Sun/Saturn · "
-            f"houses 2/6/10/11 via wealth·career·community) for {goal_l}:\n{rank_block}"
+            f"{label} leads as a business market for {goal_l} ({top_score}/100), "
+            f"strongest for {use_l}. Opportunity: {opportunity}. Commercial risk: {risk}.\n"
+            f"{rank_block}\n{conf} {impact} Action: {action}."
         ),
         "fa": (
-            f"رتبه‌بندی جابه‌جایی Pathfinder (مشتری/عطارد/خورشید/زحل · "
-            f"خانه‌های ۲/۶/۱۰/۱۱ از ثروت·شغل·جامعه) برای {goal_l}:\n{rank_block}"
+            f"{label} بازار تجاری پیشرو برای {goal_l} است ({top_score}/100)، "
+            f"قوی‌ترین کاربرد {use_l}. فرصت: {opportunity}. ریسک تجاری: {risk}.\n"
+            f"{rank_block}\n{conf} {impact} اقدام: {action}."
         ),
         "ru": (
-            f"Рейтинг релокации Pathfinder (Юпитер/Меркурий/Солнце/Сатурн · "
-            f"дома 2/6/10/11 через wealth·career·community) для {goal_l}:\n{rank_block}"
+            f"{label} лидирует как деловой рынок для {goal_l} ({top_score}/100), "
+            f"сильнее всего для {use_l}. Возможность: {opportunity}. Риск: {risk}.\n"
+            f"{rank_block}\n{conf} {impact} Действие: {action}."
         ),
         "ar": (
-            f"ترتيب انتقال Pathfinder (المشتري/عطارد/الشمس/زحل · "
-            f"بيوت 2/6/10/11 عبر ثروة·مهنة·مجتمع) لـ {goal_l}:\n{rank_block}"
+            f"{label} يتقدّم كسوق أعمال لـ {goal_l} ({top_score}/100)، "
+            f"الأقوى لـ {use_l}. الفرصة: {opportunity}. المخاطر: {risk}.\n"
+            f"{rank_block}\n{conf} {impact} الإجراء: {action}."
         ),
     }[lang]
 
@@ -2666,53 +2959,64 @@ def render_partner_profile_reading(
         else ""
     )
 
+    conf = _confidence_clause(confidence, lang)
+    impact = {
+        "en": "What this changes today: use the sketch as a filter for dates — verify before you attach.",
+        "fa": "تأثیر امروز: این طرح را فیلتر قرار ببین — قبل از وابستگی راستی‌آزمایی کن.",
+        "ru": "Что меняется сегодня: используйте эскиз как фильтр — проверяйте до привязки.",
+        "ar": "ما يتغيّر اليوم: استخدمي المخطط كفلتر — تحققي قبل التعلق.",
+    }[lang]
     executive = {
         "en": (
             f"{headline}.{score_bit} Ideal traits: {traits_txt}. "
             f"Patterns: {patterns_txt}. Friction: {friction_txt}. "
             f"Dynamics — financial: {fin}; emotional: {emo}; practical: {pra}. "
-            f"Verify: {q_txt}. Next: {action}. Confidence: {confidence}. {disclaimer}"
+            f"Verify: {q_txt}. Next: {action}. {conf} Action: {action}. {disclaimer}"
         ),
         "fa": (
             f"{headline}.{score_bit} ویژگی‌های ایده‌آل: {traits_txt}. "
             f"الگوها: {patterns_txt}. اصطکاک: {friction_txt}. "
             f"پویایی — مالی: {fin}; عاطفی: {emo}; عملی: {pra}. "
-            f"راستی‌آزمایی: {q_txt}. قدم بعد: {action}. اطمینان: {confidence}. {disclaimer}"
+            f"راستی‌آزمایی: {q_txt}. قدم بعد: {action}. {conf} اقدام: {action}. {disclaimer}"
         ),
         "ru": (
             f"{headline}.{score_bit} Идеальные черты: {traits_txt}. "
             f"Паттерны: {patterns_txt}. Трение: {friction_txt}. "
             f"Динамика — финансы: {fin}; эмоции: {emo}; практика: {pra}. "
-            f"Проверить: {q_txt}. Далее: {action}. Уверенность: {confidence}. {disclaimer}"
+            f"Проверить: {q_txt}. Далее: {action}. {conf} Действие: {action}. {disclaimer}"
         ),
         "ar": (
             f"{headline}.{score_bit} السمات المثالية: {traits_txt}. "
             f"الأنماط: {patterns_txt}. الاحتكاك: {friction_txt}. "
             f"الديناميكيات — مالية: {fin}; عاطفية: {emo}; عملية: {pra}. "
-            f"تحققي: {q_txt}. التالي: {action}. الثقة: {confidence}. {disclaimer}"
+            f"تحققي: {q_txt}. التالي: {action}. {conf} الإجراء: {action}. {disclaimer}"
         ),
     }[lang]
 
     strategic = {
         "en": (
-            f"Goal={goal_l}. Mode={'synastry' if is_synastry else 'ideal_only'}. "
-            f"Separate chart tendencies from real-life proof. "
-            f"Questions: {q_txt}."
+            f"For {goal_l}, the chart leans toward: {traits_txt}. "
+            f"Likely patterns: {patterns_txt}. Friction to watch: {friction_txt}. "
+            f"Money / emotion / logistics: {fin} · {emo} · {pra}. "
+            f"{conf} {impact} Action: {action}. Verify with: {q_txt}. {disclaimer}"
         ),
         "fa": (
-            f"هدف={goal_l}. حالت={'هم‌خوانی' if is_synastry else 'فقط ایده‌آل'}. "
-            f"تمایل چارت را از اثبات واقعی جدا کن. "
-            f"سوالات: {q_txt}."
+            f"برای {goal_l} چارت به این سمت تمایل دارد: {traits_txt}. "
+            f"الگوهای محتمل: {patterns_txt}. اصطکاک: {friction_txt}. "
+            f"پول / عاطفه / عمل: {fin} · {emo} · {pra}. "
+            f"{conf} {impact} اقدام: {action}. راستی‌آزمایی: {q_txt}. {disclaimer}"
         ),
         "ru": (
-            f"Цель={goal_l}. Режим={'синастрия' if is_synastry else 'только идеал'}. "
-            f"Отделяйте тенденции карты от проверки в жизни. "
-            f"Вопросы: {q_txt}."
+            f"Для {goal_l} карта склоняется к: {traits_txt}. "
+            f"Паттерны: {patterns_txt}. Трение: {friction_txt}. "
+            f"Деньги / эмоции / практика: {fin} · {emo} · {pra}. "
+            f"{conf} {impact} Действие: {action}. Проверьте: {q_txt}. {disclaimer}"
         ),
         "ar": (
-            f"الهدف={goal_l}. الوضع={'توافق' if is_synastry else 'مثالي فقط'}. "
-            f"افصلي ميول الخريطة عن الإثبات الواقعي. "
-            f"الأسئلة: {q_txt}."
+            f"لـ {goal_l} تميل الخريطة إلى: {traits_txt}. "
+            f"أنماط محتملة: {patterns_txt}. احتكاك: {friction_txt}. "
+            f"مال / عاطفة / عملي: {fin} · {emo} · {pra}. "
+            f"{conf} {impact} الإجراء: {action}. تحققي بـ: {q_txt}. {disclaimer}"
         ),
     }[lang]
     if missing:
@@ -2981,45 +3285,56 @@ def render_compatibility_reading(
         "ar": f"التوافق · {rel_l}",
     }[lang]
 
+    conf = _confidence_clause(confidence, lang)
+    impact = {
+        "en": "What this changes today: invest where strength shows; test friction in one real talk.",
+        "fa": "تأثیر امروز: جایی سرمایه‌گذاری کن که قوت دیده می‌شود؛ اصطکاک را در یک گفتگوی واقعی تست کن.",
+        "ru": "Что меняется сегодня: вкладывайтесь в силу; трение проверьте в одном реальном разговоре.",
+        "ar": "ما يتغيّر اليوم: استثمري حيث تظهر القوة؛ اختبري الاحتكاك في حديث حقيقي واحد.",
+    }[lang]
     executive = {
         "en": (
             f"{headline} — {overall_score}/100.{concern_bit}{time_bit} "
             f"{dim_block}. Strengths: {strengths_txt}. Friction: {friction_txt}. "
-            f"Verify: {q_txt}. Next: {action}. Confidence: {confidence}. {disclaimer}"
+            f"Verify: {q_txt}. Next: {action}. {conf} Action: {action}. {disclaimer}"
         ),
         "fa": (
             f"{headline} — {overall_score}/100.{concern_bit}{time_bit} "
             f"{dim_block}. قوت: {strengths_txt}. اصطکاک: {friction_txt}. "
-            f"راستی‌آزمایی: {q_txt}. قدم بعد: {action}. اطمینان: {confidence}. {disclaimer}"
+            f"راستی‌آزمایی: {q_txt}. قدم بعد: {action}. {conf} اقدام: {action}. {disclaimer}"
         ),
         "ru": (
             f"{headline} — {overall_score}/100.{concern_bit}{time_bit} "
             f"{dim_block}. Сильные стороны: {strengths_txt}. Трение: {friction_txt}. "
-            f"Проверить: {q_txt}. Далее: {action}. Уверенность: {confidence}. {disclaimer}"
+            f"Проверить: {q_txt}. Далее: {action}. {conf} Действие: {action}. {disclaimer}"
         ),
         "ar": (
             f"{headline} — {overall_score}/100.{concern_bit}{time_bit} "
             f"{dim_block}. نقاط القوة: {strengths_txt}. الاحتكاك: {friction_txt}. "
-            f"تحققي: {q_txt}. التالي: {action}. الثقة: {confidence}. {disclaimer}"
+            f"تحققي: {q_txt}. التالي: {action}. {conf} الإجراء: {action}. {disclaimer}"
         ),
     }[lang]
 
     strategic = {
         "en": (
-            f"Weighted for {rel_l} via relationship_profile aspect tables. "
-            f"Harmony, tension, and unknown bands are separate. Questions: {q_txt}."
+            f"For {rel_l}, overall sits at {overall_score}/100. "
+            f"{dim_block}. Strengths: {strengths_txt}. Friction: {friction_txt}. "
+            f"{conf} {impact} Action: {action}. Verify with: {q_txt}. {disclaimer}"
         ),
         "fa": (
-            f"وزن‌دهی برای {rel_l} با جدول جنبه‌های relationship_profile. "
-            f"هماهنگی، تنش و نامشخص جدا هستند. سوالات: {q_txt}."
+            f"برای {rel_l} امتیاز کلی {overall_score}/100 است. "
+            f"{dim_block}. قوت: {strengths_txt}. اصطکاک: {friction_txt}. "
+            f"{conf} {impact} اقدام: {action}. راستی‌آزمایی: {q_txt}. {disclaimer}"
         ),
         "ru": (
-            f"Взвешено для «{rel_l}» таблицами аспектов relationship_profile. "
-            f"Гармония, напряжение и unknown разделены. Вопросы: {q_txt}."
+            f"Для «{rel_l}» общий балл {overall_score}/100. "
+            f"{dim_block}. Сильные стороны: {strengths_txt}. Трение: {friction_txt}. "
+            f"{conf} {impact} Действие: {action}. Проверьте: {q_txt}. {disclaimer}"
         ),
         "ar": (
-            f"موزون لـ {rel_l} عبر جداول جوانب relationship_profile. "
-            f"الانسجام والتوتر وغير المعروف منفصلان. الأسئلة: {q_txt}."
+            f"لـ {rel_l} المجموع {overall_score}/100. "
+            f"{dim_block}. نقاط القوة: {strengths_txt}. الاحتكاك: {friction_txt}. "
+            f"{conf} {impact} الإجراء: {action}. تحققي بـ: {q_txt}. {disclaimer}"
         ),
     }[lang]
     if missing:
@@ -3209,49 +3524,60 @@ def render_cheating_radar_reading(
     else:
         intensity = "subtle"
 
+    conf = _confidence_clause(confidence, lang)
+    impact = {
+        "en": "What this changes today: gather observable proof before you escalate meaning.",
+        "fa": "تأثیر امروز: قبل از بزرگ‌کردن معنا، شاهد قابل مشاهده جمع کن.",
+        "ru": "Что меняется сегодня: соберите наблюдаемые факты до эскалации смысла.",
+        "ar": "ما يتغيّر اليوم: اجمعي دليلاً ملحوظاً قبل تضخيم المعنى.",
+    }[lang]
     executive = {
         "en": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"Observed: {obs_txt}. Inferred: {inf_txt}. Unknown: {unk_txt}. "
             f"Verify behaviours: {beh_txt}. Questions: {q_txt}. "
-            f"Next: {action}. Confidence: {confidence}. {disclaimer}"
+            f"Next: {action}. {conf} Action: {action}. {disclaimer}"
         ),
         "fa": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"مشاهده: {obs_txt}. استنباط: {inf_txt}. نامشخص: {unk_txt}. "
             f"رفتار برای راستی‌آزمایی: {beh_txt}. سوالات: {q_txt}. "
-            f"قدم بعد: {action}. اطمینان: {confidence}. {disclaimer}"
+            f"قدم بعد: {action}. {conf} اقدام: {action}. {disclaimer}"
         ),
         "ru": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"Наблюдаемо: {obs_txt}. Вывод: {inf_txt}. Неизвестно: {unk_txt}. "
             f"Проверить поведение: {beh_txt}. Вопросы: {q_txt}. "
-            f"Далее: {action}. Уверенность: {confidence}. {disclaimer}"
+            f"Далее: {action}. {conf} Действие: {action}. {disclaimer}"
         ),
         "ar": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"ملاحظ: {obs_txt}. مستنتج: {inf_txt}. غير معروف: {unk_txt}. "
             f"سلوك للتحقق: {beh_txt}. أسئلة: {q_txt}. "
-            f"التالي: {action}. الثقة: {confidence}. {disclaimer}"
+            f"التالي: {action}. {conf} الإجراء: {action}. {disclaimer}"
         ),
     }[lang]
 
     strategic = {
         "en": (
-            f"Separate observed input, inferred pattern, and unknown. "
-            f"Mode={mode}. Use verification — never accusation. Questions: {q_txt}."
+            f"Signal map: {sig_block}. Keep observed ({obs_txt}) separate from "
+            f"inferred ({inf_txt}) and unknown ({unk_txt}). "
+            f"{conf} {impact} Action: {action}. Ask calmly: {q_txt}. {disclaimer}"
         ),
         "fa": (
-            f"ورودی مشاهده، الگوی استنباطی و نامشخص را جدا کن. "
-            f"حالت={mode}. راستی‌آزمایی — نه اتهام. سوالات: {q_txt}."
+            f"نقشه سیگنال: {sig_block}. مشاهده ({obs_txt}) را از استنباط "
+            f"({inf_txt}) و نامشخص ({unk_txt}) جدا نگه دار. "
+            f"{conf} {impact} اقدام: {action}. آرام بپرس: {q_txt}. {disclaimer}"
         ),
         "ru": (
-            f"Отделяйте наблюдаемый ввод, вывод и неизвестное. "
-            f"Режим={mode}. Проверка — не обвинение. Вопросы: {q_txt}."
+            f"Карта сигналов: {sig_block}. Отделяйте наблюдаемое ({obs_txt}) от "
+            f"вывода ({inf_txt}) и неизвестного ({unk_txt}). "
+            f"{conf} {impact} Действие: {action}. Спокойно спросите: {q_txt}. {disclaimer}"
         ),
         "ar": (
-            f"افصلي المدخل الملاحظ والنمط المستنتج وغير المعروف. "
-            f"الوضع={mode}. تحقق — لا اتهام. الأسئلة: {q_txt}."
+            f"خريطة الإشارات: {sig_block}. افصلي الملاحظ ({obs_txt}) عن "
+            f"المستنتج ({inf_txt}) وغير المعروف ({unk_txt}). "
+            f"{conf} {impact} الإجراء: {action}. اسألي بهدوء: {q_txt}. {disclaimer}"
         ),
     }[lang]
     if missing:
@@ -3451,30 +3777,37 @@ def render_trust_patterns_reading(
     else:
         intensity = "subtle"
 
+    conf = _confidence_clause(confidence, lang)
+    impact = {
+        "en": "What this changes today: gather observable proof before you escalate meaning.",
+        "fa": "تأثیر امروز: قبل از بزرگ‌کردن معنا، شاهد قابل مشاهده جمع کن.",
+        "ru": "Что меняется сегодня: соберите наблюдаемые факты до эскалации смысла.",
+        "ar": "ما يتغيّر اليوم: اجمعي دليلاً ملحوظاً قبل تضخيم المعنى.",
+    }[lang]
     executive = {
         "en": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"Observed: {obs_txt}. Inferred: {inf_txt}. Unknown: {unk_txt}. "
             f"Verify behaviours: {beh_txt}. Questions: {q_txt}. "
-            f"Next: {action}. Confidence: {confidence}. {disclaimer}"
+            f"Next: {action}. {conf} Action: {action}. {disclaimer}"
         ),
         "fa": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"مشاهده: {obs_txt}. استنباط: {inf_txt}. نامشخص: {unk_txt}. "
             f"رفتار برای راستی‌آزمایی: {beh_txt}. سوالات: {q_txt}. "
-            f"قدم بعد: {action}. اطمینان: {confidence}. {disclaimer}"
+            f"قدم بعد: {action}. {conf} اقدام: {action}. {disclaimer}"
         ),
         "ru": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"Наблюдаемо: {obs_txt}. Вывод: {inf_txt}. Неизвестно: {unk_txt}. "
             f"Проверить поведение: {beh_txt}. Вопросы: {q_txt}. "
-            f"Далее: {action}. Уверенность: {confidence}. {disclaimer}"
+            f"Далее: {action}. {conf} Действие: {action}. {disclaimer}"
         ),
         "ar": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"ملاحظ: {obs_txt}. مستنتج: {inf_txt}. غير معروف: {unk_txt}. "
             f"سلوك للتحقق: {beh_txt}. أسئلة: {q_txt}. "
-            f"التالي: {action}. الثقة: {confidence}. {disclaimer}"
+            f"التالي: {action}. {conf} الإجراء: {action}. {disclaimer}"
         ),
     }[lang]
 
@@ -3488,20 +3821,24 @@ def render_trust_patterns_reading(
 
     strategic = {
         "en": (
-            f"Moon/Mercury/Venus/Jupiter/Saturn roles for {rel_l}: {roles_txt}. "
-            f"Separate observed, inferred, and unknown. Questions: {q_txt}."
+            f"Trust signal map: {sig_block}. Roles: {roles_txt}. "
+            f"Keep observed ({obs_txt}) separate from inferred ({inf_txt}) and unknown ({unk_txt}). "
+            f"{conf} {impact} Action: {action}. Ask calmly: {q_txt}. {disclaimer}"
         ),
         "fa": (
-            f"نقش ماه/عطارد/زهره/مشتری/زحل برای {rel_l}: {roles_txt}. "
-            f"مشاهده، استنباط و نامشخص را جدا کن. سوالات: {q_txt}."
+            f"نقشه اعتماد: {sig_block}. نقش‌ها: {roles_txt}. "
+            f"مشاهده ({obs_txt}) را از استنباط ({inf_txt}) و نامشخص ({unk_txt}) جدا نگه دار. "
+            f"{conf} {impact} اقدام: {action}. آرام بپرس: {q_txt}. {disclaimer}"
         ),
         "ru": (
-            f"Роли Луна/Меркурий/Венера/Юпитер/Сатурн для «{rel_l}»: {roles_txt}. "
-            f"Отделяйте наблюдаемое, вывод и неизвестное. Вопросы: {q_txt}."
+            f"Карта доверия: {sig_block}. Роли: {roles_txt}. "
+            f"Отделяйте наблюдаемое ({obs_txt}) от вывода ({inf_txt}) и неизвестного ({unk_txt}). "
+            f"{conf} {impact} Действие: {action}. Спокойно спросите: {q_txt}. {disclaimer}"
         ),
         "ar": (
-            f"أدوار القمر/عطارد/الزهرة/المشتري/زحل لـ {rel_l}: {roles_txt}. "
-            f"افصلي الملاحظ والمستنتج وغير المعروف. الأسئلة: {q_txt}."
+            f"خريطة الثقة: {sig_block}. الأدوار: {roles_txt}. "
+            f"افصلي الملاحظ ({obs_txt}) عن المستنتج ({inf_txt}) وغير المعروف ({unk_txt}). "
+            f"{conf} {impact} الإجراء: {action}. اسألي بهدوء: {q_txt}. {disclaimer}"
         ),
     }[lang]
     if missing:
@@ -3740,49 +4077,60 @@ def render_communication_risk_reading(
         )
     roles_txt = " · ".join(role_bits) if role_bits else "—"
 
+    conf = _confidence_clause(confidence, lang)
+    impact = {
+        "en": "What this changes today: gather observable proof before you escalate meaning.",
+        "fa": "تأثیر امروز: قبل از بزرگ‌کردن معنا، شاهد قابل مشاهده جمع کن.",
+        "ru": "Что меняется сегодня: соберите наблюдаемые факты до эскалации смысла.",
+        "ar": "ما يتغيّر اليوم: اجمعي دليلاً ملحوظاً قبل تضخيم المعنى.",
+    }[lang]
     executive = {
         "en": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"Observed: {obs_txt}. Inferred: {inf_txt}. Unknown: {unk_txt}. "
             f"Verify behaviours: {beh_txt}. Questions: {q_txt}. "
-            f"Next: {action}. Confidence: {confidence}. {disclaimer}"
+            f"Next: {action}. {conf} Action: {action}. {disclaimer}"
         ),
         "fa": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"مشاهده: {obs_txt}. استنباط: {inf_txt}. نامشخص: {unk_txt}. "
             f"رفتار برای راستی‌آزمایی: {beh_txt}. سوالات: {q_txt}. "
-            f"قدم بعد: {action}. اطمینان: {confidence}. {disclaimer}"
+            f"قدم بعد: {action}. {conf} اقدام: {action}. {disclaimer}"
         ),
         "ru": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"Наблюдаемо: {obs_txt}. Вывод: {inf_txt}. Неизвестно: {unk_txt}. "
             f"Проверить поведение: {beh_txt}. Вопросы: {q_txt}. "
-            f"Далее: {action}. Уверенность: {confidence}. {disclaimer}"
+            f"Далее: {action}. {conf} Действие: {action}. {disclaimer}"
         ),
         "ar": (
             f"{headline}.{concern_bit}{time_bit} {sig_block}. "
             f"ملاحظ: {obs_txt}. مستنتج: {inf_txt}. غير معروف: {unk_txt}. "
             f"سلوك للتحقق: {beh_txt}. أسئلة: {q_txt}. "
-            f"التالي: {action}. الثقة: {confidence}. {disclaimer}"
+            f"التالي: {action}. {conf} الإجراء: {action}. {disclaimer}"
         ),
     }[lang]
 
     strategic = {
         "en": (
-            f"Mercury/Moon/Mars/Saturn/Jupiter/Venus roles for {rel_l}: {roles_txt}. "
-            f"Separate observed, inferred, and unknown. Questions: {q_txt}."
+            f"Communication risk map: {sig_block}. Roles: {roles_txt}. "
+            f"Keep observed ({obs_txt}) separate from inferred ({inf_txt}) and unknown ({unk_txt}). "
+            f"{conf} {impact} Action: {action}. Ask calmly: {q_txt}. {disclaimer}"
         ),
         "fa": (
-            f"نقش عطارد/ماه/مریخ/زحل/مشتری/زهره برای {rel_l}: {roles_txt}. "
-            f"مشاهده، استنباط و نامشخص را جدا کن. سوالات: {q_txt}."
+            f"نقشه ریسک ارتباط: {sig_block}. نقش‌ها: {roles_txt}. "
+            f"مشاهده ({obs_txt}) را از استنباط ({inf_txt}) و نامشخص ({unk_txt}) جدا نگه دار. "
+            f"{conf} {impact} اقدام: {action}. آرام بپرس: {q_txt}. {disclaimer}"
         ),
         "ru": (
-            f"Роли Меркурий/Луна/Марс/Сатурн/Юпитер/Венера для «{rel_l}»: {roles_txt}. "
-            f"Отделяйте наблюдаемое, вывод и неизвестное. Вопросы: {q_txt}."
+            f"Карта риска общения: {sig_block}. Роли: {roles_txt}. "
+            f"Отделяйте наблюдаемое ({obs_txt}) от вывода ({inf_txt}) и неизвестного ({unk_txt}). "
+            f"{conf} {impact} Действие: {action}. Спокойно спросите: {q_txt}. {disclaimer}"
         ),
         "ar": (
-            f"أدوار عطارد/القمر/المريخ/زحل/المشتري/الزهرة لـ {rel_l}: {roles_txt}. "
-            f"افصلي الملاحظ والمستنتج وغير المعروف. الأسئلة: {q_txt}."
+            f"خريطة مخاطر التواصل: {sig_block}. الأدوار: {roles_txt}. "
+            f"افصلي الملاحظ ({obs_txt}) عن المستنتج ({inf_txt}) وغير المعروف ({unk_txt}). "
+            f"{conf} {impact} الإجراء: {action}. اسألي بهدوء: {q_txt}. {disclaimer}"
         ),
     }[lang]
     if missing:

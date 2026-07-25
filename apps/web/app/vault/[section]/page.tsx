@@ -36,58 +36,48 @@ const READING_UI: Record<
   AppLang,
   {
     liveLabel: string;
-    executive: string;
-    strategic: string;
-    technical: string;
     loading: string;
     needProfile: string;
     goProfile: string;
     apiError: string;
+    tryThis: string;
   }
 > = {
   en: {
     liveLabel: 'Your reading',
-    executive: 'In one line',
-    strategic: 'Strategy',
-    technical: 'Chart facts',
     loading: 'Reading your chart…',
     needProfile:
       'Save your birth date, time and city in Profile — then this reading is built from your chart.',
     goProfile: 'Go to Profile',
     apiError: 'Could not reach METIORO. Is the API running on port 8000?',
+    tryThis: 'Try this',
   },
   fa: {
     liveLabel: 'خوانش تو',
-    executive: 'یک خط',
-    strategic: 'استراتژی',
-    technical: 'حقایق چارت',
     loading: 'در حال خواندن چارت…',
     needProfile:
       'تاریخ، ساعت و شهر تولد رو در پروفایل ذخیره کن — بعد این خوانش از چارتت ساخته می‌شه.',
     goProfile: 'رفتن به پروفایل',
     apiError: 'به سرور وصل نشد. API روی پورت ۸۰۰۰ روشن هست؟',
+    tryThis: 'این را امتحان کن',
   },
   ru: {
     liveLabel: 'Ваш разбор',
-    executive: 'Одной строкой',
-    strategic: 'Стратегия',
-    technical: 'Факты карты',
     loading: 'Читаем карту…',
     needProfile:
       'Сохраните дату, время и город в Профиле — тогда разбор строится по вашей карте.',
     goProfile: 'В профиль',
     apiError: 'Нет связи с API. Запущен ли сервер на порту 8000?',
+    tryThis: 'Попробуйте',
   },
   ar: {
     liveLabel: 'قراءتكِ',
-    executive: 'سطر واحد',
-    strategic: 'استراتيجية',
-    technical: 'حقائق الخريطة',
     loading: 'نقرأ خريطتكِ…',
     needProfile:
       'احفظي تاريخ الميلاد والوقت والمدينة في الملف — ثم يُبنى هذا التحليل من خريطتكِ.',
     goProfile: 'إلى الملف',
     apiError: 'تعذّر الاتصال. هل يعمل الخادم على المنفذ 8000؟',
+    tryThis: 'جرّبي هذا',
   },
 };
 
@@ -1216,7 +1206,13 @@ export default function VaultSectionPage() {
                             </p>
                           )}
                           {!liveLoading && liveReading && (
-                            <div className="space-y-3">
+                            <div
+                              className="rounded-lg p-3 space-y-3"
+                              style={{
+                                background: 'rgba(0,0,0,0.22)',
+                                border: '1px solid rgba(212,175,55,0.12)',
+                              }}
+                            >
                               {liveReading.headline && (
                                 <p
                                   className="fc text-sm leading-snug"
@@ -1225,46 +1221,29 @@ export default function VaultSectionPage() {
                                   {liveReading.headline}
                                 </p>
                               )}
-                              {liveReading.intensity && (
-                                <span
-                                  className="fi text-[10px] px-2 py-0.5 rounded-full inline-block"
-                                  style={{
-                                    background: 'rgba(212,175,55,0.12)',
-                                    border: '1px solid rgba(212,175,55,0.25)',
-                                    color: 'rgba(212,175,55,0.85)',
-                                  }}
+                              {liveReading.strategic && (
+                                <p
+                                  className="fi text-xs leading-relaxed whitespace-pre-line"
+                                  style={{ color: 'rgba(255,255,255,0.82)' }}
                                 >
-                                  {liveReading.intensity}
-                                </span>
+                                  {liveReading.strategic}
+                                </p>
                               )}
-                              {[
-                                { key: 'executive' as const, label: rui.executive },
-                                { key: 'strategic' as const, label: rui.strategic },
-                                { key: 'technical' as const, label: rui.technical },
-                              ].map(({ key, label }) =>
-                                liveReading[key] ? (
-                                  <div
-                                    key={key}
-                                    className="rounded-lg p-3"
-                                    style={{
-                                      background: 'rgba(0,0,0,0.22)',
-                                      border: '1px solid rgba(212,175,55,0.12)',
-                                    }}
-                                  >
-                                    <div
-                                      className="fi text-[10px] tracking-[0.15em] uppercase mb-1.5"
-                                      style={{ color: 'rgba(212,175,55,0.55)' }}
-                                    >
-                                      {label}
-                                    </div>
-                                    <p
-                                      className="fi text-xs leading-relaxed whitespace-pre-line"
-                                      style={{ color: 'rgba(255,255,255,0.82)' }}
-                                    >
-                                      {liveReading[key]}
-                                    </p>
-                                  </div>
-                                ) : null,
+                              {!liveReading.strategic && liveReading.executive && (
+                                <p
+                                  className="fi text-xs leading-relaxed whitespace-pre-line"
+                                  style={{ color: 'rgba(255,255,255,0.82)' }}
+                                >
+                                  {liveReading.executive}
+                                </p>
+                              )}
+                              {liveReading.action && (
+                                <p
+                                  className="fi text-xs leading-relaxed"
+                                  style={{ color: 'rgba(242,207,117,0.9)' }}
+                                >
+                                  {rui.tryThis}: {liveReading.action}
+                                </p>
                               )}
                             </div>
                           )}

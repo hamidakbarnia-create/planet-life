@@ -11,6 +11,9 @@ export type VaultReadingLayer = {
   intensity?: string;
   sign?: string;
   house?: number;
+  confidence?: string;
+  action?: string;
+  avoid?: string;
 };
 
 export type VaultMarsResponse = {
