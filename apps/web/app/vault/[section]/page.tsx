@@ -13,7 +13,22 @@ import { loadBirthProfile } from '@/lib/birth-profile';
 import { fetchNatalChart, type ChartPlanetBody } from '@/lib/chart-api';
 import { loadTier, type MembershipTier } from '@/lib/membership';
 import {
+  fetchVaultBestCountriesReading,
+  fetchVaultBusinessGeographyReading,
+  fetchVaultDateOutfitReading,
+  fetchVaultCheatingRadarReading,
+  fetchVaultCompatibilityReading,
+  fetchVaultPartnerProfileReading,
+  fetchVaultCommunicationRiskReading,
+  fetchVaultTrustPatternsReading,
+  fetchVaultGhostDaysReading,
+  fetchVaultHotAttractionDaysReading,
+  fetchVaultLiveReelTimeReading,
   fetchVaultMarsReading,
+  fetchVaultMoneyAskDaysReading,
+  fetchVaultTodaysColorReading,
+  fetchVaultTodaysPerfumeReading,
+  fetchVaultYesDayReading,
   type VaultReadingLayer,
 } from '@/lib/vault-reading';
 
@@ -37,7 +52,7 @@ const READING_UI: Record<
     technical: 'Chart facts',
     loading: 'Reading your chart…',
     needProfile:
-      'Save your birth date, time and city in Profile — then this reading is built from your real Mars.',
+      'Save your birth date, time and city in Profile — then this reading is built from your chart.',
     goProfile: 'Go to Profile',
     apiError: 'Could not reach METIORO. Is the API running on port 8000?',
   },
@@ -48,7 +63,7 @@ const READING_UI: Record<
     technical: 'حقایق چارت',
     loading: 'در حال خواندن چارت…',
     needProfile:
-      'تاریخ، ساعت و شهر تولد رو در پروفایل ذخیره کن — بعد این خوانش از مریخ واقعی چارتت ساخته می‌شه.',
+      'تاریخ، ساعت و شهر تولد رو در پروفایل ذخیره کن — بعد این خوانش از چارتت ساخته می‌شه.',
     goProfile: 'رفتن به پروفایل',
     apiError: 'به سرور وصل نشد. API روی پورت ۸۰۰۰ روشن هست؟',
   },
@@ -59,7 +74,7 @@ const READING_UI: Record<
     technical: 'Факты карты',
     loading: 'Читаем карту…',
     needProfile:
-      'Сохраните дату, время и город в Профиле — тогда разбор строится по вашему Марсу.',
+      'Сохраните дату, время и город в Профиле — тогда разбор строится по вашей карте.',
     goProfile: 'В профиль',
     apiError: 'Нет связи с API. Запущен ли сервер на порту 8000?',
   },
@@ -70,7 +85,7 @@ const READING_UI: Record<
     technical: 'حقائق الخريطة',
     loading: 'نقرأ خريطتكِ…',
     needProfile:
-      'احفظي تاريخ الميلاد والوقت والمدينة في الملف — ثم يُبنى هذا التحليل من مرّيخكِ الحقيقي.',
+      'احفظي تاريخ الميلاد والوقت والمدينة في الملف — ثم يُبنى هذا التحليل من خريطتكِ.',
     goProfile: 'إلى الملف',
     apiError: 'تعذّر الاتصال. هل يعمل الخادم على المنفذ 8000؟',
   },
@@ -147,7 +162,34 @@ type VaultSectionKey =
 /** Vault item index → live API key (same order as section.items). */
 const LIVE_ITEM_API: Partial<Record<VaultSectionKey, string[]>> = {
   sensuality: ['mars'],
+  // Power Calendar: Hot Attraction · Money-Ask · Ghost Days · Yes Day
+  power: ['hot', 'money', 'ghost', 'yes'],
+  // Style Timing: Today's Color · Perfume · Live/Reel · Date Outfit
+  look: ['color', 'perfume', 'reel', 'outfit'],
+  // The Provider: Business Geography · Best Countries · Partner Profile · Compatibility
+  provider: ['jupiter', 'countries', 'partner', 'compatibility'],
+  // Shadow Room: Cheating Radar · Trust Patterns · Communication Risk · …
+  shadow: ['radar', 'trust', 'communication', ''],
 };
+
+const LIVE_READING_KEYS = new Set([
+  'mars',
+  'ghost',
+  'hot',
+  'money',
+  'yes',
+  'color',
+  'perfume',
+  'reel',
+  'outfit',
+  'countries',
+  'jupiter',
+  'partner',
+  'compatibility',
+  'radar',
+  'trust',
+  'communication',
+]);
 
 const VALID: VaultSectionKey[] = [
   'sensuality',
@@ -214,8 +256,8 @@ const SECTION_LANGS: Record<
       items: [
         { label: 'My Jupiter', hint: 'Future partner profile and money' },
         { label: 'Love Lines Map', hint: 'Best countries and nationalities' },
-        { label: 'Crush Hack', hint: 'Decode one man’s Venus' },
-        { label: 'Open His Wallet', hint: 'Daily money-flow remedies' },
+        { label: 'Partner Profile', hint: 'Ideal traits and compatibility patterns' },
+        { label: 'Compatibility', hint: 'Emotional, chemistry, and stability scores' },
       ],
       coming: 'Relocation lines + partner timing in Sprint R8.',
     },
@@ -225,9 +267,9 @@ const SECTION_LANGS: Record<
       intro:
         'Patterns of secrecy and trust in any chart. We show signals — never verdicts.',
       items: [
-        { label: 'Cheating Radar', hint: 'Risk windows this month' },
-        { label: 'Best Day to Talk', hint: 'When truth surfaces easier' },
-        { label: 'Hidden 8th & 12th', hint: 'Secrecy houses on his chart' },
+        { label: 'Cheating Radar', hint: 'Signals to verify — never verdicts' },
+        { label: 'Trust Patterns', hint: 'Building, pressure, repair — not verdicts' },
+        { label: 'Communication Risk', hint: 'Clarity, reactivity, escalation — not verdicts' },
         { label: 'Safe Secret Timing', hint: 'Low-exposure days' },
       ],
       coming: 'Horary-style timing in Sprint R8. Educational only.',
@@ -307,8 +349,8 @@ const SECTION_LANGS: Record<
       items: [
         { label: 'Мой Юпитер', hint: 'Партнёр и деньги' },
         { label: 'Карта любви', hint: 'Страны и национальности' },
-        { label: 'Хак объекта', hint: 'Венера мужчины' },
-        { label: 'Открыть кошелёк', hint: 'Ремеди на день' },
+        { label: 'Профиль партнёра', hint: 'Черты и паттерны совместимости' },
+        { label: 'Совместимость', hint: 'Эмоции, химия и стабильность' },
       ],
       coming: 'Линии и тайминг в R8.',
     },
@@ -318,8 +360,8 @@ const SECTION_LANGS: Record<
       intro: 'Сигналы скрытности и доверия — не приговоры.',
       items: [
         { label: 'Радар верности', hint: 'Риски месяца' },
-        { label: 'День разговора', hint: 'Когда правда всплывает' },
-        { label: 'Дома 8 и 12', hint: 'Секреты в карте' },
+        { label: 'Паттерны доверия', hint: 'Строительство, давление, ремонт — не приговоры' },
+        { label: 'Риск общения', hint: 'Ясность, реактивность, эскалация — не приговоры' },
         { label: 'Безопасные дни', hint: 'Низкая видимость' },
       ],
       coming: 'Тайминг в R8. Только обучение.',
@@ -396,8 +438,8 @@ const SECTION_LANGS: Record<
       items: [
         { label: 'ژوپیتر من', hint: 'شریک و پول' },
         { label: 'نقشه عشق', hint: 'کشور و ملیت' },
-        { label: 'هک کیس', hint: 'ونوس مرد' },
-        { label: 'باز کردن کیف پول', hint: 'ریمدی روزانه' },
+        { label: 'پروفایل شریک', hint: 'ویژگی ایده‌آل و الگوهای هم‌خوانی' },
+        { label: 'هم‌خوانی', hint: 'عاطفی، شیمی و ثبات' },
       ],
       coming: 'خطوط و تایمینگ در R8.',
     },
@@ -407,8 +449,8 @@ const SECTION_LANGS: Record<
       intro: 'نشانه‌های پنهان‌کاری و اعتماد — نه حکم.',
       items: [
         { label: 'رادار خیانت', hint: 'پنجره ریسک' },
-        { label: 'روز حرف زدن', hint: 'وقتی حقیقت راحت‌تره' },
-        { label: 'خانه ۸ و ۱۲', hint: 'پنهان‌کاری' },
+        { label: 'الگوهای اعتماد', hint: 'ساخت، فشار، ترمیم — نه حکم' },
+        { label: 'ریسک ارتباط', hint: 'وضوح، واکنش، تشدید — نه حکم' },
         { label: 'روزهای امن', hint: 'لو نرفتن' },
       ],
       coming: 'تایمینگ در R8. فقط آموزشی.',
@@ -485,8 +527,8 @@ const SECTION_LANGS: Record<
       items: [
         { label: 'مشتريي', hint: 'الشريك والمال' },
         { label: 'خريطة الحب', hint: 'البلدان' },
-        { label: 'اختراق الإعجاب', hint: 'زهرة الرجل' },
-        { label: 'فتح المحفظة', hint: 'علاج يومي' },
+        { label: 'ملف الشريك', hint: 'سمات مثالية وأنماط توافق' },
+        { label: 'التوافق', hint: 'عاطفي وكيمياء واستقرار' },
       ],
       coming: 'الخطوط في R8.',
     },
@@ -496,8 +538,8 @@ const SECTION_LANGS: Record<
       intro: 'إشارات الكتمان والثقة — لا أحكاماً.',
       items: [
         { label: 'رادار الخيانة', hint: 'نوافذ الخطر' },
-        { label: 'يوم الحديث', hint: 'عندما تظهر الحقيقة' },
-        { label: 'البيت 8 و12', hint: 'الأسرار' },
+        { label: 'أنماط الثقة', hint: 'بناء وضغط وإصلاح — لا أحكام' },
+        { label: 'مخاطر التواصل', hint: 'وضوح وردة فعل وتصعيد — لا أحكام' },
         { label: 'أيام آمنة', hint: 'انكشاف منخفض' },
       ],
       coming: 'توقيت في R8. تعليمي فقط.',
@@ -834,7 +876,24 @@ export default function VaultSectionPage() {
     setPersonalizedError(null);
     setPersonalizedLoading(false);
 
-    if (apiKey === 'mars') {
+    if (
+      apiKey === 'mars' ||
+      apiKey === 'ghost' ||
+      apiKey === 'hot' ||
+      apiKey === 'money' ||
+      apiKey === 'yes' ||
+      apiKey === 'color' ||
+      apiKey === 'perfume' ||
+      apiKey === 'reel' ||
+      apiKey === 'outfit' ||
+      apiKey === 'countries' ||
+      apiKey === 'jupiter' ||
+      apiKey === 'partner' ||
+      apiKey === 'compatibility' ||
+      apiKey === 'radar' ||
+      apiKey === 'trust' ||
+      apiKey === 'communication'
+    ) {
       setHasLiveApi(true);
       const profile = loadBirthProfile();
       if (!profile) {
@@ -846,12 +905,48 @@ export default function VaultSectionPage() {
       let cancelled = false;
       setLiveLoading(true);
       setLiveError(null);
-      fetchVaultMarsReading(profile, lang)
+      setLiveReading(null);
+      const fetchReading =
+        apiKey === 'ghost'
+          ? fetchVaultGhostDaysReading(profile, lang)
+          : apiKey === 'hot'
+            ? fetchVaultHotAttractionDaysReading(profile, lang)
+            : apiKey === 'money'
+              ? fetchVaultMoneyAskDaysReading(profile, lang)
+              : apiKey === 'yes'
+                ? fetchVaultYesDayReading(profile, lang)
+                : apiKey === 'color'
+                  ? fetchVaultTodaysColorReading(profile, lang)
+                  : apiKey === 'perfume'
+                    ? fetchVaultTodaysPerfumeReading(profile, lang)
+                    : apiKey === 'reel'
+                      ? fetchVaultLiveReelTimeReading(profile, lang)
+                      : apiKey === 'outfit'
+                        ? fetchVaultDateOutfitReading(profile, lang)
+                        : apiKey === 'countries'
+                          ? fetchVaultBestCountriesReading(profile, lang)
+                          : apiKey === 'jupiter'
+                            ? fetchVaultBusinessGeographyReading(profile, lang)
+                            : apiKey === 'partner'
+                              ? fetchVaultPartnerProfileReading(profile, lang)
+                              : apiKey === 'compatibility'
+                                ? fetchVaultCompatibilityReading(profile, lang)
+                                : apiKey === 'radar'
+                                  ? fetchVaultCheatingRadarReading(profile, lang)
+                                  : apiKey === 'trust'
+                                    ? fetchVaultTrustPatternsReading(profile, lang)
+                                    : apiKey === 'communication'
+                                      ? fetchVaultCommunicationRiskReading(profile, lang)
+                                      : fetchVaultMarsReading(profile, lang);
+      fetchReading
         .then((res) => {
           if (!cancelled) setLiveReading(res.reading);
         })
         .catch(() => {
-          if (!cancelled) setLiveError('api');
+          if (!cancelled) {
+            setLiveError('api');
+            setLiveReading(null);
+          }
         })
         .finally(() => {
           if (!cancelled) setLiveLoading(false);
@@ -976,8 +1071,14 @@ export default function VaultSectionPage() {
               const lock = PREVIEW_LOCK_LANGS[lang];
               const itemApiKey = (LIVE_ITEM_API[raw] ?? [])[itemIdx];
               const showLive =
-                isOpen && hasLiveApi && itemApiKey === 'mars' && openItem === item.label;
-              const itemLive = !!itemApiKey || (unlocked && raw === 'lounge');
+                isOpen &&
+                hasLiveApi &&
+                !!itemApiKey &&
+                LIVE_READING_KEYS.has(itemApiKey) &&
+                openItem === item.label;
+              const itemLive =
+                (!!itemApiKey && LIVE_READING_KEYS.has(itemApiKey)) ||
+                (unlocked && raw === 'lounge');
               const showPersonalized =
                 isOpen && unlocked && raw === 'lounge' && !showLive;
               return (
