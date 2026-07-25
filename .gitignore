@@ -31,3 +31,6 @@ apps/web/test-results/
 # Logs
 *.log
 
+
+# Local test-output artifacts
+/test-output-pytest.txt
