@@ -102,51 +102,56 @@ const PREVIEW_LOCK_LANGS: Record<
     collapse: string;
     unlockedBadge: string;
     unlockedNote: string;
+    comingSoon: string;
   }
 > = {
   en: {
     sampleLabel: 'Sample reading',
     teaser:
-      'A live, personal reading flows here once Premium is on — pulled from your natal chart, today’s transits, and the lunar phase.',
+      'A live, personal reading flows here once Premium is on — pulled from your birth chart, today’s sky, and your cycle rhythm.',
     unlock: 'Unlock full reading',
-    premium: 'Premium · R8',
+    premium: 'Coming Soon',
     expand: 'Open',
     collapse: 'Close',
     unlockedBadge: 'Unlocked',
     unlockedNote: 'Unlocked with your membership — your live personal reading activates as each tool ships.',
+    comingSoon: 'Coming Soon',
   },
   ru: {
     sampleLabel: 'Пример разбора',
     teaser:
-      'Здесь появится живой персональный разбор после активации Премиум — из натальной карты, транзитов дня и фазы Луны.',
+      'Здесь появится живой персональный разбор после активации Премиум — из карты рождения, неба дня и ритма цикла.',
     unlock: 'Открыть полный разбор',
-    premium: 'Премиум · R8',
+    premium: 'Скоро',
     expand: 'Открыть',
     collapse: 'Закрыть',
     unlockedBadge: 'Открыто',
     unlockedNote: 'Открыто по подписке — живой персональный разбор появится по мере выхода инструментов.',
+    comingSoon: 'Скоро',
   },
   fa: {
     sampleLabel: 'نمونه خوانش',
     teaser:
-      'با فعال شدن پریمیوم اینجا یه خوانش زنده و شخصی می‌بینی — از چارت تولدت، ترانزیت‌های امروز و فاز ماه.',
+      'با فعال شدن پریمیوم اینجا یه خوانش زنده و شخصی می‌بینی — از چارت تولدت، آسمان امروز و ریتم چرخه‌ات.',
     unlock: 'باز کردن خوانش کامل',
-    premium: 'پریمیوم · R8',
+    premium: 'به‌زودی',
     expand: 'باز کن',
     collapse: 'ببند',
     unlockedBadge: 'باز شد',
     unlockedNote: 'با اشتراکت باز شد — خوانش زنده‌ی شخصی با آماده‌شدن هر ابزار فعال می‌شه.',
+    comingSoon: 'به‌زودی',
   },
   ar: {
     sampleLabel: 'قراءة تجريبية',
     teaser:
-      'ستظهر قراءة شخصية حيّة هنا عند تفعيل البريميوم — من خريطتك الفلكية وعبور اليوم وطور القمر.',
+      'ستظهر قراءة شخصية حيّة هنا عند تفعيل البريميوم — من خريطة ميلادك وسماء اليوم وإيقاع دورتك.',
     unlock: 'افتحي القراءة الكاملة',
-    premium: 'بريميوم · R8',
+    premium: 'قريباً',
     expand: 'افتح',
     collapse: 'إغلاق',
     unlockedBadge: 'مفتوح',
     unlockedNote: 'مفتوح باشتراكك — تُفعّل قراءتك الشخصية الحيّة مع إطلاق كل أداة.',
+    comingSoon: 'قريباً',
   },
 };
 
@@ -162,9 +167,9 @@ type VaultSectionKey =
 /** Vault item index → live API key (same order as section.items). */
 const LIVE_ITEM_API: Partial<Record<VaultSectionKey, string[]>> = {
   sensuality: ['mars'],
-  // Power Calendar: Hot Attraction · Money-Ask · Ghost Days · Yes Day
+  // Power Calendar: Heat · Money · Ghost · Yes
   power: ['hot', 'money', 'ghost', 'yes'],
-  // Style Timing: Today's Color · Perfume · Live/Reel · Date Outfit
+  // Style Timing: Color · Perfume · Post Time · Date Outfit
   look: ['color', 'perfume', 'reel', 'outfit'],
   // The Provider: Business Geography · Best Countries · Partner Profile · Compatibility
   provider: ['jupiter', 'countries', 'partner', 'compatibility'],
@@ -221,45 +226,45 @@ const SECTION_LANGS: Record<
   en: {
     back: '← Back to Vault',
     vaultHome: 'The Vault',
-    previewNote: 'Preview mode — full tools ship in Sprint R8 with Premium.',
+    previewNote: 'Preview mode — full tools unlock with Premium.',
     sensuality: {
       title: 'Sensuality',
-      sub: 'Mars · Pluto · Lilith',
+      sub: 'Desire · Fantasy · Magnetism',
       intro:
         'Read the geometry of your desire, fantasy, and magnetism — and when your appeal peaks today.',
       items: [
-        { label: 'My Mars', hint: 'What kind of men you are drawn to' },
-        { label: 'My Pluto', hint: 'Deep fantasies and shadow desire' },
-        { label: 'My Lilith', hint: 'Hidden magnetism and seduction' },
+        { label: 'My Desire', hint: 'What kind of men you are drawn to' },
+        { label: 'Deep Fantasies', hint: 'Hidden hunger and shadow desire' },
+        { label: 'Hidden Magnetism', hint: 'Seduction you don’t announce' },
         { label: 'Sex Appeal Today', hint: 'Peak hours for attraction' },
       ],
-      coming: 'Charts connect to your natal profile in Sprint R8.',
+      coming: 'Coming soon — connects to your birth profile.',
     },
     cycle: {
       title: 'Body & Cycle',
       sub: 'Period · Ovulation · Hormones',
       intro:
-        'Sync your cycle to the Moon. Know your peak, dip, and fertile window — day by day.',
+        'Sync your cycle to the sky. Know your peak, dip, and fertile window — day by day.',
       items: [
-        { label: 'Period Sync', hint: 'Moon phases vs your cycle' },
+        { label: 'Period Sync', hint: 'Sky rhythm vs your cycle' },
         { label: 'Ovulation Peak', hint: 'Peak desire and fertility window' },
         { label: 'Hormone Calendar', hint: 'Weekly energy rhythm' },
         { label: 'PMS Warning', hint: 'Days to protect your energy' },
       ],
-      coming: 'Cycle tracking + lunar overlay in Sprint R8.',
+      coming: 'Coming soon — cycle tracking with sky rhythm.',
     },
     provider: {
       title: 'The Provider',
-      sub: 'Jupiter · Astrocartography',
+      sub: 'Wealth · Love Map',
       intro:
-        'Where on Earth your wealth-line falls. What partner your chart calls. Your luckiest geography.',
+        'Where on Earth your fortune rises. What partner your chart calls. Your luckiest places.',
       items: [
-        { label: 'My Jupiter', hint: 'Future partner profile and money' },
+        { label: 'Wealth Partner', hint: 'Future partner profile and money' },
         { label: 'Love Lines Map', hint: 'Best countries and nationalities' },
         { label: 'Partner Profile', hint: 'Ideal traits and compatibility patterns' },
         { label: 'Compatibility', hint: 'Emotional, chemistry, and stability scores' },
       ],
-      coming: 'Relocation lines + partner timing in Sprint R8.',
+      coming: 'Coming soon — place maps and partner timing.',
     },
     shadow: {
       title: 'Shadow Room',
@@ -272,7 +277,7 @@ const SECTION_LANGS: Record<
         { label: 'Communication Risk', hint: 'Clarity, reactivity, escalation — not verdicts' },
         { label: 'Safe Secret Timing', hint: 'Low-exposure days' },
       ],
-      coming: 'Horary-style timing in Sprint R8. Educational only.',
+      coming: 'Coming soon — timing tools. Educational only.',
     },
     look: {
       title: 'Style Timing',
@@ -280,25 +285,25 @@ const SECTION_LANGS: Record<
       intro:
         'What to wear, smell, and post today so you hit maximum attraction in real life and on camera.',
       items: [
-        { label: "Today's Color", hint: 'Dress code from the Moon' },
-        { label: "Today's Perfume", hint: 'Venus vs Pluto notes' },
-        { label: 'Live / Reel Time', hint: 'Best hour to post' },
+        { label: "Today's Color", hint: 'Dress code for today' },
+        { label: "Today's Perfume", hint: 'Soft vs deep scent notes' },
+        { label: 'Best Post Time', hint: 'Best hour to post' },
         { label: 'Date Outfit', hint: 'What pulls him tonight' },
       ],
-      coming: 'Daily dress code engine in Sprint R8.',
+      coming: 'Coming soon — daily dress code.',
     },
     power: {
       title: 'Power Calendar',
       sub: 'Sex · Money · Distance · Yes-days',
       intro:
-        'Hot days, money-ask days, ghost days, and yes-days — the rhythm of attraction mapped.',
+        'Heat days, money days, distance days, and yes-days — the rhythm of attraction mapped.',
       items: [
-        { label: 'Hot Sex Days', hint: 'Mars-ruled windows' },
-        { label: 'Money-Ask Days', hint: 'Venus-ruled windows' },
+        { label: 'Heat Days', hint: 'Peak chemistry windows' },
+        { label: 'Money Days', hint: 'Best days to ask' },
         { label: 'Ghost Days', hint: 'Strategic distance' },
         { label: 'Yes Day', hint: 'Big asks and proposals' },
       ],
-      coming: 'Personal power calendar in Sprint R8.',
+      coming: 'Coming soon — personal power calendar.',
     },
     lounge: {
       title: 'Pink Lounge',
@@ -311,48 +316,48 @@ const SECTION_LANGS: Record<
         { label: 'Verified Queens', hint: 'Badge after light check' },
         { label: 'Leave No Trace', hint: 'One-tap wipe' },
       ],
-      coming: 'Chat + verification in Sprint R10.',
+      coming: 'Coming soon — chat and verification.',
     },
   },
   ru: {
     back: '← Назад в Хранилище',
     vaultHome: 'Хранилище',
-    previewNote: 'Режим превью — полные инструменты в спринте R8 с Премиум.',
+    previewNote: 'Режим превью — полные инструменты с Премиум.',
     sensuality: {
       title: 'Чувственность',
-      sub: 'Марс · Плутон · Лилит',
+      sub: 'Желание · Фантазия · Магнетизм',
       intro: 'Геометрия желания, фантазии и магнетизма — и часы пика притяжения.',
       items: [
-        { label: 'Мой Марс', hint: 'К каким мужчинам тянет' },
-        { label: 'Мой Плутон', hint: 'Глубокие фантазии' },
-        { label: 'Моя Лилит', hint: 'Скрытый магнетизм' },
+        { label: 'Моё желание', hint: 'К каким мужчинам тянет' },
+        { label: 'Глубокие фантазии', hint: 'Скрытый голод и тень желания' },
+        { label: 'Скрытый магнетизм', hint: 'Соблазн без объявления' },
         { label: 'Притяжение сегодня', hint: 'Пиковые часы' },
       ],
-      coming: 'Связь с натальной картой в R8.',
+      coming: 'Скоро — связь с картой рождения.',
     },
     cycle: {
       title: 'Тело и цикл',
       sub: 'Цикл · Овуляция · Гормоны',
-      intro: 'Синхронизация цикла с Луной — день за днём.',
+      intro: 'Синхронизация цикла с небом — день за днём.',
       items: [
-        { label: 'Синхрон с циклом', hint: 'Фазы Луны' },
+        { label: 'Синхрон с циклом', hint: 'Ритм неба и цикл' },
         { label: 'Пик овуляции', hint: 'Окно желания' },
         { label: 'Календарь гормонов', hint: 'Ритм недели' },
         { label: 'Предупреждение ПМС', hint: 'Дни беречь силы' },
       ],
-      coming: 'Трекер + Луна в R8.',
+      coming: 'Скоро — трекер и ритм неба.',
     },
     provider: {
       title: 'Покровитель',
-      sub: 'Юпитер · Астрокартография',
-      intro: 'Линия богатства на карте мира и профиль партнёра по карте.',
+      sub: 'Богатство · Карта любви',
+      intro: 'Где растёт богатство и какой партнёр зовёт карта.',
       items: [
-        { label: 'Мой Юпитер', hint: 'Партнёр и деньги' },
+        { label: 'Партнёр и богатство', hint: 'Партнёр и деньги' },
         { label: 'Карта любви', hint: 'Страны и национальности' },
         { label: 'Профиль партнёра', hint: 'Черты и паттерны совместимости' },
         { label: 'Совместимость', hint: 'Эмоции, химия и стабильность' },
       ],
-      coming: 'Линии и тайминг в R8.',
+      coming: 'Скоро — карты мест и тайминг партнёра.',
     },
     shadow: {
       title: 'Теневая комната',
@@ -364,31 +369,31 @@ const SECTION_LANGS: Record<
         { label: 'Риск общения', hint: 'Ясность, реактивность, эскалация — не приговоры' },
         { label: 'Безопасные дни', hint: 'Низкая видимость' },
       ],
-      coming: 'Тайминг в R8. Только обучение.',
+      coming: 'Скоро — тайминг. Только обучение.',
     },
     look: {
       title: 'Стиль и тайминг',
       sub: 'Цвет · Аромат · Стиль',
       intro: 'Что надеть и когда постить для максимального эффекта.',
       items: [
-        { label: 'Цвет дня', hint: 'От Луны' },
-        { label: 'Аромат дня', hint: 'Венера / Плутон' },
+        { label: 'Цвет дня', hint: 'Код стиля на сегодня' },
+        { label: 'Аромат дня', hint: 'Мягкие и глубокие ноты' },
         { label: 'Время лайва', hint: 'Лучший час' },
         { label: 'Образ на свидание', hint: 'Вечером' },
       ],
-      coming: 'Движок стиля в R8.',
+      coming: 'Скоро — ежедневный код стиля.',
     },
     power: {
       title: 'Календарь силы',
       sub: 'Секс · Деньги · Дистанция',
       intro: 'Горячие дни, дни денег, дни тишины и дни «да».',
       items: [
-        { label: 'Горячие дни', hint: 'Марс' },
-        { label: 'Дни денег', hint: 'Венера' },
+        { label: 'Горячие дни', hint: 'Окна жара' },
+        { label: 'Дни денег', hint: 'Лучшие дни спросить' },
         { label: 'Дни тишины', hint: 'Дистанция' },
         { label: 'День «да»', hint: 'Большие просьбы' },
       ],
-      coming: 'Персональный календарь в R8.',
+      coming: 'Скоро — персональный календарь силы.',
     },
     lounge: {
       title: 'Pink Lounge',
@@ -400,48 +405,48 @@ const SECTION_LANGS: Record<
         { label: 'Verified Queens', hint: 'После проверки' },
         { label: 'Без следа', hint: 'Стереть одним касанием' },
       ],
-      coming: 'Чат в R10.',
+      coming: 'Скоро — чат и проверка.',
     },
   },
   fa: {
     back: '→ بازگشت به محرمانه',
     vaultHome: 'محرمانه',
-    previewNote: 'حالت پیش‌نمایش — ابزار کامل در اسپرینت R8 با پریمیوم.',
+    previewNote: 'حالت پیش‌نمایش — ابزار کامل با پریمیوم.',
     sensuality: {
       title: 'شهوت و جذابیت',
-      sub: 'مریخ · پلوتو · لیلیت',
+      sub: 'میل · فانتزی · مگنتیسم',
       intro: 'هندسه میل، فانتزی و مگنتیسم — و ساعت‌های اوج جذابیت امروز.',
       items: [
-        { label: 'مریخ من', hint: 'کشش به چه نوع مردانی' },
-        { label: 'پلوتو من', hint: 'فانتزی‌های عمیق' },
-        { label: 'لیلیت من', hint: 'مگنتیسم پنهان' },
+        { label: 'میل من', hint: 'کشش به چه نوع مردانی' },
+        { label: 'فانتزی‌های عمیق', hint: 'گرسنگی پنهان و سایه میل' },
+        { label: 'مگنتیسم پنهان', hint: 'جذبی که اعلام نمی‌کنی' },
         { label: 'جذابیت امروز', hint: 'ساعات اوج' },
       ],
-      coming: 'اتصال به چارت تولد در R8.',
+      coming: 'به‌زودی — اتصال به پروفایل تولد.',
     },
     cycle: {
       title: 'بدن و چرخه',
       sub: 'پریود · تخمک‌گذاری · هورمون',
-      intro: 'هم‌گام‌سازی چرخه با ماه — روز به روز.',
+      intro: 'هم‌گام‌سازی چرخه با آسمان — روز به روز.',
       items: [
-        { label: 'هم‌گام پریود', hint: 'فازهای ماه' },
+        { label: 'هم‌گام پریود', hint: 'ریتم آسمان و چرخه' },
         { label: 'اوج تخمک‌گذاری', hint: 'پنجره شهوت' },
         { label: 'تقویم هورمون', hint: 'ریتم هفتگی' },
         { label: 'هشدار PMS', hint: 'روزهای محافظت انرژی' },
       ],
-      coming: 'ترکر + ماه در R8.',
+      coming: 'به‌زودی — ترکر با ریتم آسمان.',
     },
     provider: {
       title: 'حامی (همسر آینده)',
-      sub: 'ژوپیتر · آستروکارتوگرافی',
-      intro: 'خط ثروت روی نقشه و نوع شوهر در چارت.',
+      sub: 'ثروت · نقشه عشق',
+      intro: 'جایی که ثروت اوج می‌گیرد و نوع شریک در چارت.',
       items: [
-        { label: 'ژوپیتر من', hint: 'شریک و پول' },
+        { label: 'شریک و ثروت', hint: 'شریک و پول' },
         { label: 'نقشه عشق', hint: 'کشور و ملیت' },
         { label: 'پروفایل شریک', hint: 'ویژگی ایده‌آل و الگوهای هم‌خوانی' },
         { label: 'هم‌خوانی', hint: 'عاطفی، شیمی و ثبات' },
       ],
-      coming: 'خطوط و تایمینگ در R8.',
+      coming: 'به‌زودی — نقشه مکان و تایمینگ شریک.',
     },
     shadow: {
       title: 'اتاق سایه',
@@ -453,31 +458,31 @@ const SECTION_LANGS: Record<
         { label: 'ریسک ارتباط', hint: 'وضوح، واکنش، تشدید — نه حکم' },
         { label: 'روزهای امن', hint: 'لو نرفتن' },
       ],
-      coming: 'تایمینگ در R8. فقط آموزشی.',
+      coming: 'به‌زودی — تایمینگ. فقط آموزشی.',
     },
     look: {
       title: 'زمان‌بندی استایل',
       sub: 'رنگ · عطر · استایل',
       intro: 'امروز چه بپوشی و کی پست بذاری برای بیشترین جذابیت.',
       items: [
-        { label: 'رنگ امروز', hint: 'از ماه' },
-        { label: 'عطر امروز', hint: 'ونوس / پلوتو' },
+        { label: 'رنگ امروز', hint: 'کد لباس امروز' },
+        { label: 'عطر امروز', hint: 'نت‌های نرم در برابر عمیق' },
         { label: 'ساعت لایو', hint: 'بهترین پست' },
         { label: 'استایل قرار', hint: 'امشب' },
       ],
-      coming: 'موتور استایل در R8.',
+      coming: 'به‌زودی — کد لباس روزانه.',
     },
     power: {
       title: 'تقویم قدرت',
       sub: 'سکس · پول · دوری · بله',
       intro: 'روزهای داغ، روز پول، روز سکوت و روز «بله».',
       items: [
-        { label: 'روزهای داغ', hint: 'مریخ' },
-        { label: 'روز پول', hint: 'ونوس' },
+        { label: 'روزهای داغ', hint: 'پنجره‌های حرارت' },
+        { label: 'روز پول', hint: 'بهترین روز درخواست' },
         { label: 'روز غیبت', hint: 'دوری استراتژیک' },
         { label: 'روز بله', hint: 'درخواست بزرگ' },
       ],
-      coming: 'تقویم شخصی در R8.',
+      coming: 'به‌زودی — تقویم قدرت شخصی.',
     },
     lounge: {
       title: 'لانژ صورتی',
@@ -489,48 +494,48 @@ const SECTION_LANGS: Record<
         { label: 'ملکه تأییدشده', hint: 'بعد از چک سبک' },
         { label: 'بدون ردپا', hint: 'پاک‌سازی یک کلیک' },
       ],
-      coming: 'چت در R10.',
+      coming: 'به‌زودی — چت و تأیید.',
     },
   },
   ar: {
     back: '← العودة إلى الخزانة',
     vaultHome: 'الخزانة',
-    previewNote: 'وضع المعاينة — الأدوات الكاملة في R8 مع البريميوم.',
+    previewNote: 'وضع المعاينة — الأدوات الكاملة مع البريميوم.',
     sensuality: {
       title: 'الحسّية',
-      sub: 'مرّيخ · بلوتو · ليليت',
+      sub: 'رغبة · خيال · جاذبية',
       intro: 'هندسة الرغبة والخيال والجاذبية — وساعات الذروة اليوم.',
       items: [
-        { label: 'مرّيخي', hint: 'نوع الرجال الذين تجذبينهم' },
-        { label: 'بلوتوي', hint: 'خيالات عميقة' },
-        { label: 'ليليتي', hint: 'مغناطيسية خفية' },
+        { label: 'رغبتي', hint: 'نوع الرجال الذين تجذبينهم' },
+        { label: 'خيالات عميقة', hint: 'جوع خفي ورغبة ظلّية' },
+        { label: 'جاذبية خفية', hint: 'إغراء بلا إعلان' },
         { label: 'جاذبية اليوم', hint: 'ساعات الذروة' },
       ],
-      coming: 'ربط بالخريطة في R8.',
+      coming: 'قريباً — ربط بملف الميلاد.',
     },
     cycle: {
       title: 'الجسد والدورة',
       sub: 'الدورة · الإباضة',
-      intro: 'مزامنة الدورة مع القمر — يوماً بيوم.',
+      intro: 'مزامنة الدورة مع السماء — يوماً بيوم.',
       items: [
-        { label: 'مزامنة الدورة', hint: 'أطوار القمر' },
+        { label: 'مزامنة الدورة', hint: 'إيقاع السماء والدورة' },
         { label: 'ذروة الإباضة', hint: 'نافذة الرغبة' },
         { label: 'تقويم الهرمون', hint: 'إيقاع الأسبوع' },
         { label: 'تحذير PMS', hint: 'أيام حماية الطاقة' },
       ],
-      coming: 'تتبّع + قمر في R8.',
+      coming: 'قريباً — تتبّع مع إيقاع السماء.',
     },
     provider: {
       title: 'العائل',
-      sub: 'مشتري · الجغرافيا الفلكية',
-      intro: 'خط الثروة على الأرض ونوع الشريك في خريطتك.',
+      sub: 'ثروة · خريطة الحب',
+      intro: 'أين يرتفع حظّك ونوع الشريك في خريطتك.',
       items: [
-        { label: 'مشتريي', hint: 'الشريك والمال' },
+        { label: 'الشريك والثروة', hint: 'الشريك والمال' },
         { label: 'خريطة الحب', hint: 'البلدان' },
         { label: 'ملف الشريك', hint: 'سمات مثالية وأنماط توافق' },
         { label: 'التوافق', hint: 'عاطفي وكيمياء واستقرار' },
       ],
-      coming: 'الخطوط في R8.',
+      coming: 'قريباً — خرائط الأماكن وتوقيت الشريك.',
     },
     shadow: {
       title: 'غرفة الظل',
@@ -542,31 +547,31 @@ const SECTION_LANGS: Record<
         { label: 'مخاطر التواصل', hint: 'وضوح وردة فعل وتصعيد — لا أحكام' },
         { label: 'أيام آمنة', hint: 'انكشاف منخفض' },
       ],
-      coming: 'توقيت في R8. تعليمي فقط.',
+      coming: 'قريباً — توقيت. تعليمي فقط.',
     },
     look: {
       title: 'توقيت الأسلوب',
       sub: 'لون · عطر · أسلوب',
       intro: 'ماذا ترتدين ومتى تنشرين لأقصى جاذبية.',
       items: [
-        { label: 'لون اليوم', hint: 'من القمر' },
-        { label: 'عطر اليوم', hint: 'الزهرة / بلوتو' },
+        { label: 'لون اليوم', hint: 'كود الإطلالة اليوم' },
+        { label: 'عطر اليوم', hint: 'نغمات ناعمة مقابل عميقة' },
         { label: 'وقت البث', hint: 'أفضل ساعة' },
         { label: 'إطلالة الموعد', hint: 'الليلة' },
       ],
-      coming: 'محرك الإطلالة في R8.',
+      coming: 'قريباً — كود إطلالة يومي.',
     },
     power: {
       title: 'تقويم القوة',
       sub: 'الجنس · المال · المسافة',
       intro: 'أيام حارّة، أيام مال، أيام صمت، وأيام «نعم».',
       items: [
-        { label: 'أيام حارّة', hint: 'المريخ' },
-        { label: 'أيام المال', hint: 'الزهرة' },
+        { label: 'أيام حارّة', hint: 'نوافذ الذروة' },
+        { label: 'أيام المال', hint: 'أفضل أيام الطلب' },
         { label: 'أيام الغياب', hint: 'مسافة استراتيجية' },
         { label: 'يوم نعم', hint: 'طلبات كبيرة' },
       ],
-      coming: 'تقويم شخصي في R8.',
+      coming: 'قريباً — تقويم قوة شخصي.',
     },
     lounge: {
       title: 'صالون الوردي',
@@ -578,7 +583,7 @@ const SECTION_LANGS: Record<
         { label: 'ملكات موثّقات', hint: 'بعد تحقّق خفيف' },
         { label: 'بلا أثر', hint: 'مسح بضغطة' },
       ],
-      coming: 'دردشة في R10.',
+      coming: 'قريباً — دردشة وتحقّق.',
     },
   },
 };
@@ -764,7 +769,7 @@ function buildLoungeReading(
               ? `Pluto in ${signLabel(lang, pluto.sign)} (H${pluto.house ?? '?'}) — deep privacy instinct; session data stays on this device until you wipe.`
               : 'Session stays on this device until you clear it below.',
         },
-        { label: 'What we store', text: 'Lounge aliases and readings are not uploaded until R10 chat ships.' },
+        { label: 'What we store', text: 'Lounge aliases and readings stay on this device until chat ships.' },
         { label: 'Wipe this session', text: 'Tap below to clear vault session keys from this browser.' },
       ],
     },
@@ -779,7 +784,7 @@ function buildLoungeReading(
               ? `Плутон в ${signLabel(lang, pluto.sign)} — инстинкт приватности.`
               : 'Сессия только на этом устройстве.',
         },
-        { label: 'Хранение', text: 'Чат загрузится в R10 — пока данные не уходят на сервер.' },
+        { label: 'Хранение', text: 'Пока данные не уходят на сервер — чат скоро.' },
         { label: 'Стереть сессию', text: 'Кнопка ниже очищает ключи vault в браузере.' },
       ],
     },
@@ -794,7 +799,7 @@ function buildLoungeReading(
               ? `پلوتو در ${signLabel(lang, pluto.sign)} — غریزه حریم خصوصی.`
               : 'نشست فقط روی این دستگاه.',
         },
-        { label: 'ذخیره‌سازی', text: 'چت در R10 — فعلاً داده به سرور نمی‌رود.' },
+        { label: 'ذخیره‌سازی', text: 'فعلاً داده به سرور نمی‌رود — چت به‌زودی.' },
         { label: 'پاک‌سازی', text: 'دکمه پایین کلیدهای vault این مرورگر را پاک می‌کند.' },
       ],
     },
@@ -809,7 +814,7 @@ function buildLoungeReading(
               ? `بلوتو في ${signLabel(lang, pluto.sign)} — غريزة الخصوصية.`
               : 'الجلسة على هذا الجهاز فقط.',
         },
-        { label: 'التخزين', text: 'الدردشة في R10 — لا رفع للخادم حالياً.' },
+        { label: 'التخزين', text: 'لا رفع للخادم حالياً — الدردشة قريباً.' },
         { label: 'مسح الجلسة', text: 'الزر أدناه يمسح مفاتيح vault من المتصفح.' },
       ],
     },
@@ -1137,7 +1142,7 @@ export default function VaultSectionPage() {
                             : 'rgba(212,175,55,0.7)',
                         }}
                       >
-                        {itemLive ? 'LIVE' : 'R8'}
+                        {itemLive ? 'LIVE' : lock.comingSoon}
                       </span>
                       <svg
                         width="16"

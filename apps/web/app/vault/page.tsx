@@ -53,13 +53,13 @@ const VAULT_LANGS: Record<
       'Your charts and chats are encrypted. No real names. No screenshots. A door you can close in one tap.',
     cta: 'Step inside',
     ctaInside: 'Welcome — preview unlocked',
-    ctaHint: 'Full features arrive in Sprint R8 with Premium.',
+    ctaHint: 'Full features unlock with Premium.',
     backToToday: '← Back to Today',
     inside: 'Inside, you will find',
     sections: {
       sensuality: {
         title: 'Sensuality',
-        sub: 'Your Mars · Pluto · Lilith',
+        sub: 'Desire · Fantasy · Magnetism',
         preview:
           'The geometry of your desire, your fantasy, your magnetism — and the hours your appeal peaks.',
       },
@@ -67,13 +67,13 @@ const VAULT_LANGS: Record<
         title: 'Body & Cycle',
         sub: 'Period · Ovulation · Hormones',
         preview:
-          'Sync your cycle to the Moon. Know your peak, your dip, your fertile window — to the day.',
+          'Sync your cycle to the sky. Know your peak, your dip, your fertile window — to the day.',
       },
       provider: {
         title: 'The Provider',
-        sub: 'Your Jupiter · Astrocartography',
+        sub: 'Wealth · Love Map',
         preview:
-          'Where on Earth your wealth-line falls. What kind of partner your chart calls. Map your luckiest geography.',
+          'Where on Earth your fortune rises. What kind of partner your chart calls. Map your luckiest places.',
       },
       shadow: {
         title: 'Shadow Room',
@@ -85,13 +85,13 @@ const VAULT_LANGS: Record<
         title: 'Style Timing',
         sub: 'Color · Scent · Style of the day',
         preview:
-          'Today the Moon is in Scorpio — wear black velvet. Today Venus is loud — wear honey. Daily.',
+          'Today calls for black velvet. Tomorrow leans honey. Your daily dress code, timed.',
       },
       power: {
         title: 'Power Calendar',
         sub: 'Sex · Money · Distance · Yes-days',
         preview:
-          'Hot days. Money-ask days. Quiet days that pull people back. The rhythm of attraction, mapped.',
+          'Heat days. Money days. Quiet days that pull people back. The rhythm of attraction, mapped.',
       },
       lounge: {
         title: 'Pink Lounge',
@@ -110,13 +110,13 @@ const VAULT_LANGS: Record<
       'Карты и беседы зашифрованы. Только псевдонимы. Без скриншотов. Дверь закрывается одним касанием.',
     cta: 'Войти',
     ctaInside: 'Добро пожаловать — превью открыто',
-    ctaHint: 'Полный доступ откроется в спринте R8 с Премиум.',
+    ctaHint: 'Полный доступ откроется с Премиум.',
     backToToday: '← Назад к Сегодня',
     inside: 'Внутри вас ждёт',
     sections: {
       sensuality: {
         title: 'Чувственность',
-        sub: 'Марс · Плутон · Лилит',
+        sub: 'Желание · Фантазия · Магнетизм',
         preview:
           'Геометрия вашего желания, фантазии и магнетизма — и часы, когда ваша притягательность на пике.',
       },
@@ -124,13 +124,13 @@ const VAULT_LANGS: Record<
         title: 'Тело и цикл',
         sub: 'Цикл · Овуляция · Гормоны',
         preview:
-          'Синхронизируйте цикл с Луной. Зная пик, спад и фертильное окно — день в день.',
+          'Синхронизируйте цикл с небом. Зная пик, спад и фертильное окно — день в день.',
       },
       provider: {
         title: 'Покровитель',
-        sub: 'Юпитер · Астрокартография',
+        sub: 'Богатство · Карта любви',
         preview:
-          'Где на карте мира проходит ваша линия богатства. Какого партнёра зовёт ваша карта.',
+          'Где на карте мира растёт ваше богатство. Какого партнёра зовёт ваша карта.',
       },
       shadow: {
         title: 'Теневая комната',
@@ -142,7 +142,7 @@ const VAULT_LANGS: Record<
         title: 'Стиль и тайминг',
         sub: 'Цвет · Аромат · Стиль дня',
         preview:
-          'Сегодня Луна в Скорпионе — чёрный бархат. Сегодня Венера громкая — медовые тона. Ежедневно.',
+          'Сегодня — чёрный бархат. Завтра — медовые тона. Ежедневный код стиля.',
       },
       power: {
         title: 'Календарь силы',
@@ -167,13 +167,13 @@ const VAULT_LANGS: Record<
       'چارت‌ها و چت‌ها رمزنگاری شده‌اند. فقط نام مستعار. بدون اسکرین‌شات. دری که با یک کلیک می‌بندی.',
     cta: 'برو داخل',
     ctaInside: 'خوش اومدی — پیش‌نمایش باز شد',
-    ctaHint: 'دسترسی کامل با اشتراک پریمیوم در اسپرینت R8.',
+    ctaHint: 'دسترسی کامل با اشتراک پریمیوم.',
     backToToday: '→ بازگشت به امروز',
     inside: 'داخلش پیدا می‌کنی',
     sections: {
       sensuality: {
         title: 'شهوت و جذابیت',
-        sub: 'مریخ · پلوتو · لیلیت تو',
+        sub: 'میل · فانتزی · مگنتیسم',
         preview:
           'هندسه میل، فانتزی و مگنتیسم تو — و ساعت‌هایی که جذابیتت در اوج است.',
       },
@@ -181,13 +181,13 @@ const VAULT_LANGS: Record<
         title: 'بدن و چرخه',
         sub: 'پریود · تخمک‌گذاری · هورمون',
         preview:
-          'چرخه‌ات را با ماه هم‌گام کن. اوج، فرود و پنجره باروری — روز به روز.',
+          'چرخه‌ات را با آسمان هم‌گام کن. اوج، فرود و پنجره باروری — روز به روز.',
       },
       provider: {
         title: 'حامی (همسر آینده)',
-        sub: 'ژوپیتر · آستروکارتوگرافی',
+        sub: 'ثروت · نقشه عشق',
         preview:
-          'خط ثروتت روی نقشه دنیا. شوهر چارتت چه نوع آدمی‌ست. خوش‌شانس‌ترین جغرافیا.',
+          'جایی که ثروتت روی نقشه دنیا اوج می‌گیرد. شوهر چارتت چه نوع آدمی‌ست. خوش‌شانس‌ترین جاها.',
       },
       shadow: {
         title: 'اتاق سایه',
@@ -199,7 +199,7 @@ const VAULT_LANGS: Record<
         title: 'زمان‌بندی استایل',
         sub: 'رنگ · عطر · استایل روز',
         preview:
-          'امروز ماه در عقرب است — مخمل مشکی. امروز ونوس بلند است — عسلی. هر روز.',
+          'امروز مخمل مشکی. فردا عسلی. کد لباس روزانه‌ات، زمان‌بندی‌شده.',
       },
       power: {
         title: 'تقویم قدرت',
@@ -224,13 +224,13 @@ const VAULT_LANGS: Record<
       'خرائطك ومحادثاتك مشفّرة. أسماء مستعارة فقط. بلا لقطات شاشة. باب يُغلق بضغطة.',
     cta: 'ادخلي',
     ctaInside: 'أهلاً بكِ — المعاينة مفتوحة',
-    ctaHint: 'الميزات الكاملة تأتي في R8 مع البريميوم.',
+    ctaHint: 'الميزات الكاملة تُفتح مع البريميوم.',
     backToToday: '← العودة إلى اليوم',
     inside: 'في الداخل تجدين',
     sections: {
       sensuality: {
         title: 'الحسّية',
-        sub: 'مرّيخك · بلوتوك · ليليت',
+        sub: 'رغبة · خيال · جاذبية',
         preview:
           'هندسة رغبتك وخيالك وجاذبيتك — والساعات التي تبلغ فيها ذروتها.',
       },
@@ -238,13 +238,13 @@ const VAULT_LANGS: Record<
         title: 'الجسد والدورة',
         sub: 'الدورة · الإباضة · الهرمونات',
         preview:
-          'زامني دورتك مع القمر. اعرفي الذروة والهبوط ونافذة الخصوبة — يوماً بيوم.',
+          'زامني دورتك مع السماء. اعرفي الذروة والهبوط ونافذة الخصوبة — يوماً بيوم.',
       },
       provider: {
         title: 'العائل',
-        sub: 'مشتريك · الجغرافيا الفلكية',
+        sub: 'ثروة · خريطة الحب',
         preview:
-          'أين يقع خط ثروتك على الكوكب. أيّ شريك تستدعيه خريطتك. أحظى الجغرافيا.',
+          'أين يرتفع حظّك على الكوكب. أيّ شريك تستدعيه خريطتك. أحظى الأماكن.',
       },
       shadow: {
         title: 'غرفة الظل',
@@ -256,7 +256,7 @@ const VAULT_LANGS: Record<
         title: 'توقيت الأسلوب',
         sub: 'لون · عطر · أسلوب اليوم',
         preview:
-          'اليوم القمر في العقرب — مخمل أسود. اليوم الزهرة عالية — لون العسل. يومياً.',
+          'اليوم مخمل أسود. غداً لون العسل. كود إطلالتك اليومي، موقّتاً.',
       },
       power: {
         title: 'تقويم القوة',
