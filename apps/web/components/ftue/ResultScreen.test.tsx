@@ -568,7 +568,7 @@ describe('ResultScreen', () => {
   it('propagates effect cleanup abort to the fetch AbortSignal', async () => {
     let capturedSignal: AbortSignal | undefined;
     const fetchSpy = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => {
-      capturedSignal = init?.signal;
+      capturedSignal = init?.signal ?? undefined;
       return new Promise(() => {});
     });
     vi.stubGlobal('fetch', fetchSpy);

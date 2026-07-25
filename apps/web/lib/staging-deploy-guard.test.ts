@@ -50,6 +50,7 @@ describe('staging deploy guard', () => {
   it('runStagingDeployGuard passes with staging env', () => {
     const result = runStagingDeployGuard({
       env: {
+        NODE_ENV: 'test',
         NEXT_PUBLIC_APP_ENV: 'staging',
         NEXT_PUBLIC_API_BASE: 'https://api-staging.metioro.com',
       },

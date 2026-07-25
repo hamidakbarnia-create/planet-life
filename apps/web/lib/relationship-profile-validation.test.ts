@@ -70,14 +70,35 @@ describe('relationship profile strict resolution', () => {
   });
 
   it('maps extended relationship types to scoring profiles', () => {
-    expect(resolveRelationshipProfileStrict('mother').ok).toBe(true);
-    if (resolveRelationshipProfileStrict('mother').ok) {
-      expect(resolveRelationshipProfileStrict('mother').profile.key).toBe('parent_child');
+    const mother = resolveRelationshipProfileStrict('mother');
+    expect(mother.ok).toBe(true);
+    if (mother.ok) {
+      expect(mother.profile.key).toBe('parent_child');
     }
-    expect(resolveRelationshipProfileStrict('colleague').profile?.key).toBe('employee');
-    expect(resolveRelationshipProfileStrict('professional').profile?.key).toBe('employer');
-    expect(resolveRelationshipProfileStrict('competitor').profile?.key).toBe('business_partner');
-    expect(resolveRelationshipProfileStrict('sister').profile?.key).toBe('family');
+
+    const colleague = resolveRelationshipProfileStrict('colleague');
+    expect(colleague.ok).toBe(true);
+    if (colleague.ok) {
+      expect(colleague.profile.key).toBe('employee');
+    }
+
+    const professional = resolveRelationshipProfileStrict('professional');
+    expect(professional.ok).toBe(true);
+    if (professional.ok) {
+      expect(professional.profile.key).toBe('employer');
+    }
+
+    const competitor = resolveRelationshipProfileStrict('competitor');
+    expect(competitor.ok).toBe(true);
+    if (competitor.ok) {
+      expect(competitor.profile.key).toBe('business_partner');
+    }
+
+    const sister = resolveRelationshipProfileStrict('sister');
+    expect(sister.ok).toBe(true);
+    if (sister.ok) {
+      expect(sister.profile.key).toBe('family');
+    }
   });
 
   it('rejects unknown profiles instead of falling back to friend or romantic', () => {
