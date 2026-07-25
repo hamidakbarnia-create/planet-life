@@ -36,6 +36,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r apps/api/requirements-dev.txt
 
+      - name: Web type-check
+        working-directory: apps/web
+        run: npx tsc --noEmit
+
       - name: Web build
         working-directory: apps/web
         run: npm run build
