@@ -1,18 +1,30 @@
 # Trust Patterns — Product Decision
 
-**Status:** Accepted
+**Status:** Accepted — Corrected
 **Date:** 2026-07-26
 **Decision owner:** Product Owner
-**Previous name:** Cheating Radar
 **Canonical name:** Trust Patterns
+**Relationship to Cheating Radar:** Separate feature; not a rename
+
+---
+
+## Correction Notice
+
+The initial version of this decision incorrectly stated that `Cheating Radar` was renamed to `Trust Patterns`.
+
+Repository evidence confirms that these are two distinct, concurrently implemented Shadow Room features with separate routes, services, renderers, client helpers, UI entries, and tests.
+
+This correction supersedes the rename statement in the initial version of this document.
 
 ---
 
 ## Decision
 
-The product feature previously named `Cheating Radar` is renamed to `Trust Patterns`.
+`Trust Patterns` is the canonical name of a distinct Shadow Room feature.
 
-The previous name is retired because it implies detection or prediction of third-party cheating, while the authorized feature scope does not support that claim.
+It does not replace, rename, or alias `Cheating Radar`.
+
+Any future decision to retire, rename, merge, or remove `Cheating Radar` requires separate authorization and a compatibility assessment.
 
 ---
 
@@ -56,14 +68,39 @@ Trust Patterns MUST NOT:
 
 ---
 
+## Repository Evidence
+
+The repository contains distinct implementations for both features.
+
+### Trust Patterns
+
+- API route: `/trust-patterns`
+- Service: `trust_patterns_reading`
+- Renderer: `render_trust_patterns_reading`
+- Web client endpoint: `trust-patterns`
+- Test suite: `test_vault_trust_patterns.py`
+- UI entry: `Trust Patterns`
+
+### Cheating Radar
+
+- API route: `/cheating-radar`
+- Service: `cheating_radar_reading`
+- Renderer: `render_cheating_radar_reading`
+- Web client endpoint: `cheating-radar`
+- Test suite: `test_vault_cheating_radar.py`
+- UI entry: `Cheating Radar`
+
+The Trust Patterns test suite also contains an explicit regression guard confirming that Trust Patterns is not a renamed Cheating Radar implementation.
+
+---
+
 ## Repository Impact
 
-This decision establishes the canonical product name and authorized scope.
+This decision documents and constrains the existing Trust Patterns feature.
 
-Existing repository references to `Cheating Radar` remain implementation debt until a separately authorized rename task is completed.
+It does not authorize:
 
-This decision does not authorize:
-
+- removal or rename of Cheating Radar
 - scoring redesign
 - engine behaviour changes
 - API contract changes
@@ -73,26 +110,25 @@ This decision does not authorize:
 - template changes
 - test changes
 
-A separate gap audit MUST identify all affected surfaces before implementation.
+A separate product and governance decision is required before changing the existence, name, route, or behaviour of Cheating Radar.
 
 ---
 
 ## Implementation Constraint
 
-Any future implementation MUST preserve the authorized scope in this decision.
+Any future Trust Patterns implementation MUST preserve the authorized scope in this decision.
 
-Backward compatibility for API identifiers, routes, stored keys, or external consumers must be assessed before technical identifiers are renamed.
+Trust Patterns and Cheating Radar MUST remain technically and semantically distinct unless a later accepted decision explicitly authorizes consolidation or retirement.
 
 ---
 
 ## Decision State
 
 ```text
-Product decision: ACCEPTED
-Repository implementation: NOT STARTED
-Gap audit: REQUIRED
+Product decision: ACCEPTED — CORRECTED
+Trust Patterns implementation: EXISTS
+Cheating Radar implementation: EXISTS
+Relationship: DISTINCT FEATURES
+Gap audit: COMPLETED
 Runtime behaviour redesign: NOT AUTHORIZED
-
-
-
-```
+Cheating Radar retirement or rename: NOT AUTHORIZED
