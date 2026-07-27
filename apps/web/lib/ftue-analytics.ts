@@ -5,6 +5,7 @@ export type FtueEventName =
   | 'ftue_goal_select'
   | 'ftue_goal_skip'
   | 'ftue_intent_view'
+  | 'ftue_birthdate_set'
   | 'ftue_login_view'
   | 'ftue_auth_send_code'
   | 'ftue_auth_verify_attempt'

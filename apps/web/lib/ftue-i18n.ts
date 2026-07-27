@@ -183,6 +183,86 @@ export function getDecisionProfileCopy(lang: AppLang): DecisionProfileCopy {
   return DECISION_PROFILE_LANGS[lang] ?? DECISION_PROFILE_LANGS.en;
 }
 
+/** Canonical English Birth Date copy — PRD-001 §5.4 */
+export type BirthDateCopy = {
+  title: string;
+  description: string;
+  dateLabel: string;
+  continue: string;
+  back: string;
+  errors: {
+    required: string;
+    invalid: string;
+    future: string;
+    tooOld: string;
+  };
+};
+
+export const BIRTH_DATE_COPY: BirthDateCopy = {
+  title: 'When were you born?',
+  description:
+    'Your birth date provides one source of evidence used to personalize your recommendations.',
+  dateLabel: 'Birth date',
+  continue: 'Continue',
+  back: 'Back',
+  errors: {
+    required: 'Enter your birth date.',
+    invalid: 'Enter a valid calendar date.',
+    future: 'Birth date cannot be in the future.',
+    tooOld: 'Enter a birth date within a reasonable age range.',
+  },
+};
+
+export const BIRTH_DATE_LANGS: Record<AppLang, BirthDateCopy> = {
+  en: BIRTH_DATE_COPY,
+  ru: {
+    title: 'Когда вы родились?',
+    description:
+      'Дата рождения — один источник данных, который помогает персонализировать рекомендации.',
+    dateLabel: 'Дата рождения',
+    continue: 'Продолжить',
+    back: 'Назад',
+    errors: {
+      required: 'Укажите дату рождения.',
+      invalid: 'Введите корректную календарную дату.',
+      future: 'Дата рождения не может быть в будущем.',
+      tooOld: 'Укажите дату рождения в разумном возрастном диапазоне.',
+    },
+  },
+  fa: {
+    title: 'تاریخ تولد شما چیست؟',
+    description:
+      'تاریخ تولد یک منبع شواهد برای شخصی‌سازی پیشنهادهای شماست.',
+    dateLabel: 'تاریخ تولد',
+    continue: 'ادامه',
+    back: 'بازگشت',
+    errors: {
+      required: 'تاریخ تولد را وارد کنید.',
+      invalid: 'یک تاریخ تقویمی معتبر وارد کنید.',
+      future: 'تاریخ تولد نمی‌تواند در آینده باشد.',
+      tooOld: 'تاریخی در بازه سنی معقول وارد کنید.',
+    },
+  },
+  ar: {
+    title: 'متى وُلدت؟',
+    description:
+      'تاريخ ميلادك مصدر أدلة واحد يُستخدم لتخصيص توصياتك.',
+    dateLabel: 'تاريخ الميلاد',
+    continue: 'متابعة',
+    back: 'رجوع',
+    errors: {
+      required: 'أدخل تاريخ ميلادك.',
+      invalid: 'أدخل تاريخاً تقويمياً صالحاً.',
+      future: 'لا يمكن أن يكون تاريخ الميلاد في المستقبل.',
+      tooOld: 'أدخل تاريخ ميلاد ضمن نطاق عمري معقول.',
+    },
+  },
+};
+
+export function getBirthDateCopy(lang: AppLang): BirthDateCopy {
+  return BIRTH_DATE_LANGS[lang] ?? BIRTH_DATE_LANGS.en;
+}
+
 export const PROFILE_ONBOARDING_COPY = {
   step: 'Step 3 of 3',
   title: 'Your birth context',
