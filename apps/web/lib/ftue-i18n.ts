@@ -539,6 +539,92 @@ export function getLivingLocationCopy(lang: AppLang): LivingLocationCopy {
   return LIVING_LOCATION_LANGS[lang] ?? LIVING_LOCATION_LANGS.en;
 }
 
+/** Stable notification preference keys — PRD-001 §5.8 / §10. */
+export const FTUE_NOTIFICATION_IDS = [
+  'decision_windows',
+  'calendar_reminders',
+  'relationship_insights',
+  'important_changes',
+  'weekly_summary',
+] as const;
+
+export type FtueNotificationId = (typeof FTUE_NOTIFICATION_IDS)[number];
+
+/** Canonical English Notification Preferences copy — PRD-001 §5.8 */
+export type NotificationsCopy = {
+  prompt: string;
+  preferencesAria: string;
+  continue: string;
+  skip: string;
+  back: string;
+  options: Record<FtueNotificationId, string>;
+};
+
+export const NOTIFICATIONS_COPY: NotificationsCopy = {
+  prompt: 'What would you like to receive?',
+  preferencesAria: 'Notification preferences',
+  continue: 'Continue',
+  skip: 'Skip',
+  back: 'Back',
+  options: {
+    decision_windows: 'Best decision windows',
+    calendar_reminders: 'Calendar reminders',
+    relationship_insights: 'Relationship insights',
+    important_changes: 'Important changes',
+    weekly_summary: 'Weekly summary',
+  },
+};
+
+export const NOTIFICATIONS_LANGS: Record<AppLang, NotificationsCopy> = {
+  en: NOTIFICATIONS_COPY,
+  ru: {
+    prompt: 'Что вы хотите получать?',
+    preferencesAria: 'Настройки уведомлений',
+    continue: 'Продолжить',
+    skip: 'Пропустить',
+    back: 'Назад',
+    options: {
+      decision_windows: 'Лучшие окна для решений',
+      calendar_reminders: 'Напоминания календаря',
+      relationship_insights: 'Инсайты об отношениях',
+      important_changes: 'Важные изменения',
+      weekly_summary: 'Еженедельная сводка',
+    },
+  },
+  fa: {
+    prompt: 'مایلید چه چیزهایی دریافت کنید؟',
+    preferencesAria: 'ترجیحات اعلان',
+    continue: 'ادامه',
+    skip: 'رد کردن',
+    back: 'بازگشت',
+    options: {
+      decision_windows: 'بهترین پنجره‌های تصمیم',
+      calendar_reminders: 'یادآورهای تقویم',
+      relationship_insights: 'بینش‌های رابطه‌ای',
+      important_changes: 'تغییرات مهم',
+      weekly_summary: 'خلاصه هفتگی',
+    },
+  },
+  ar: {
+    prompt: 'ماذا تود أن تتلقى؟',
+    preferencesAria: 'تفضيلات الإشعارات',
+    continue: 'متابعة',
+    skip: 'تخطٍ',
+    back: 'رجوع',
+    options: {
+      decision_windows: 'أفضل نوافذ القرار',
+      calendar_reminders: 'تذكيرات التقويم',
+      relationship_insights: 'رؤى العلاقات',
+      important_changes: 'تغييرات مهمة',
+      weekly_summary: 'ملخص أسبوعي',
+    },
+  },
+};
+
+export function getNotificationsCopy(lang: AppLang): NotificationsCopy {
+  return NOTIFICATIONS_LANGS[lang] ?? NOTIFICATIONS_LANGS.en;
+}
+
 export const PROFILE_ONBOARDING_COPY = {
   step: 'Step 3 of 3',
   title: 'Your birth context',

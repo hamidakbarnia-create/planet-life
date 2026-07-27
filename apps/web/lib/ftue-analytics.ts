@@ -10,6 +10,8 @@ export type FtueEventName =
   | 'ftue_birthtime_unknown'
   | 'ftue_birthplace_set'
   | 'ftue_livinglocation_set'
+  | 'ftue_notifications_select'
+  | 'ftue_notifications_skip'
   | 'ftue_login_view'
   | 'ftue_auth_send_code'
   | 'ftue_auth_verify_attempt'
