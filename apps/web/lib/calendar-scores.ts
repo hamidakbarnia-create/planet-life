@@ -23,7 +23,12 @@ import {
   saveMonthCache,
 } from './calendar-cache';
 
-import { API_BASE } from './api-config';
+import {
+  postCalendarAnalyze,
+  postCalendarBatch,
+  postCalendarBatchHourly,
+  postCalendarTransit,
+} from './calendar-client';
 
 export { API_BASE } from './api-config';
 
@@ -101,18 +106,14 @@ export async function fetchDayScoreDetail(
   const locFields = scoringLocationFields(profile, evaluation);
   if (!locFields) return { score: null, breakdown: null };
   try {
-    const res = await fetch(`${API_BASE}/api/business/analyze`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        birth_date: profile.birth_date,
-        birth_time: profile.birth_time,
-        action_type: profile.action_type,
-        target_date: targetDate,
-        ...(targetTime ? { target_time: targetTime } : {}),
-        ...locFields,
-        ...chartPreferenceFields(),
-      }),
+    const res = await postCalendarAnalyze({
+      birth_date: profile.birth_date,
+      birth_time: profile.birth_time,
+      action_type: profile.action_type,
+      target_date: targetDate,
+      ...(targetTime ? { target_time: targetTime } : {}),
+      ...locFields,
+      ...chartPreferenceFields(),
     });
     const data = await res.json();
     return parseAnalyzeResponse(data);
@@ -176,18 +177,14 @@ export async function fetchMonthScores(
   const reasoning: Record<string, ScoreReasoning | null> = {};
 
   try {
-    const res = await fetch(`${API_BASE}/api/batch`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        birth_date: profile.birth_date,
-        birth_time: profile.birth_time,
-        action_type: profile.action_type,
-        dates,
-        house_system: prefs.house_system,
-        zodiac: prefs.zodiac,
-        ...locFields,
-      }),
+    const res = await postCalendarBatch({
+      birth_date: profile.birth_date,
+      birth_time: profile.birth_time,
+      action_type: profile.action_type,
+      dates,
+      house_system: prefs.house_system,
+      zodiac: prefs.zodiac,
+      ...locFields,
     });
     const data = await res.json();
     if (data.scores && typeof data.scores === 'object') {
@@ -227,18 +224,14 @@ export async function fetchHourlyScores(
 
   // Prefer the new single-request hourly batch (parallelised on the backend).
   try {
-    const res = await fetch(`${API_BASE}/api/batch-hourly`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        birth_date: profile.birth_date,
-        birth_time: profile.birth_time,
-        action_type: profile.action_type,
-        target_date: targetDate,
-        house_system: prefs.house_system,
-        zodiac: prefs.zodiac,
-        ...locFields,
-      }),
+    const res = await postCalendarBatchHourly({
+      birth_date: profile.birth_date,
+      birth_time: profile.birth_time,
+      action_type: profile.action_type,
+      target_date: targetDate,
+      house_system: prefs.house_system,
+      zodiac: prefs.zodiac,
+      ...locFields,
     });
     if (res.ok) {
       const data = await res.json();
@@ -343,18 +336,14 @@ export async function fetchTransitSnapshot(
   if (!locFields) return { planets: [], meta: {} };
   const prefs = chartPreferenceFields();
   try {
-    const res = await fetch(`${API_BASE}/api/transit`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        birth_date: profile.birth_date,
-        birth_time: profile.birth_time,
-        target_date: targetDate,
-        ...(targetTime ? { target_time: targetTime } : {}),
-        house_system: prefs.house_system,
-        zodiac: prefs.zodiac,
-        ...locFields,
-      }),
+    const res = await postCalendarTransit({
+      birth_date: profile.birth_date,
+      birth_time: profile.birth_time,
+      target_date: targetDate,
+      ...(targetTime ? { target_time: targetTime } : {}),
+      house_system: prefs.house_system,
+      zodiac: prefs.zodiac,
+      ...locFields,
     });
     if (!res.ok) return { planets: [], meta: {} };
     const data = await res.json();
