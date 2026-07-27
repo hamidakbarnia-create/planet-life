@@ -1,6 +1,9 @@
 export type FtueEventName =
   | 'ftue_welcome_view'
   | 'ftue_welcome_start'
+  | 'ftue_goal_view'
+  | 'ftue_goal_select'
+  | 'ftue_goal_skip'
   | 'ftue_login_view'
   | 'ftue_auth_send_code'
   | 'ftue_auth_verify_attempt'

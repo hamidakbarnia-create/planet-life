@@ -47,6 +47,108 @@ export function getWelcomeCopy(lang: AppLang): WelcomeCopy {
   return WELCOME_LANGS[lang] ?? WELCOME_LANGS.en;
 }
 
+/** Stable goal ids — PRD-001 §5.2 (no Decision Domain mapping yet; §17 open). */
+export const FTUE_GOAL_IDS = [
+  'specific_decision',
+  'relationship',
+  'someone_affects_choices',
+  'career',
+  'business',
+  'timing',
+  'decision_patterns',
+  'something_else',
+] as const;
+
+export type FtueGoalId = (typeof FTUE_GOAL_IDS)[number];
+
+export type GoalSelectionCopy = {
+  prompt: string;
+  continue: string;
+  skip: string;
+  back: string;
+  goalsAria: string;
+  goals: Record<FtueGoalId, string>;
+};
+
+export const GOAL_SELECTION_COPY: GoalSelectionCopy = {
+  prompt: 'What do you want to decide better?',
+  continue: 'Continue',
+  skip: 'Skip',
+  back: 'Back',
+  goalsAria: 'Goals',
+  goals: {
+    specific_decision: 'Make a specific decision',
+    relationship: 'Navigate a relationship',
+    someone_affects_choices: 'Understand how someone affects my choices',
+    career: 'Move my career forward',
+    business: 'Grow or start a business',
+    timing: 'Get the timing of a decision right',
+    decision_patterns: 'Understand my own decision patterns',
+    something_else: 'Something else',
+  },
+};
+
+export const GOAL_SELECTION_LANGS: Record<AppLang, GoalSelectionCopy> = {
+  en: GOAL_SELECTION_COPY,
+  ru: {
+    prompt: 'Что вы хотите решать лучше?',
+    continue: 'Продолжить',
+    skip: 'Пропустить',
+    back: 'Назад',
+    goalsAria: 'Цели',
+    goals: {
+      specific_decision: 'Принять конкретное решение',
+      relationship: 'Разобраться в отношениях',
+      someone_affects_choices: 'Понять, как кто-то влияет на мои решения',
+      career: 'Продвинуть карьеру',
+      business: 'Развить или начать бизнес',
+      timing: 'Выбрать правильный момент для решения',
+      decision_patterns: 'Понять свои паттерны принятия решений',
+      something_else: 'Что-то другое',
+    },
+  },
+  fa: {
+    prompt: 'می‌خواهید در چه چیزی بهتر تصمیم بگیرید؟',
+    continue: 'ادامه',
+    skip: 'رد کردن',
+    back: 'بازگشت',
+    goalsAria: 'اهداف',
+    goals: {
+      specific_decision: 'گرفتن یک تصمیم مشخص',
+      relationship: 'پیش بردن یک رابطه',
+      someone_affects_choices: 'فهمیدن اینکه کسی چگونه بر انتخاب‌هایم اثر می‌گذارد',
+      career: 'پیش بردن مسیر شغلی',
+      business: 'رشد یا راه‌اندازی کسب‌وکار',
+      timing: 'انتخاب زمان درست برای یک تصمیم',
+      decision_patterns: 'فهمیدن الگوهای تصمیم‌گیری خودم',
+      something_else: 'چیز دیگر',
+    },
+  },
+  ar: {
+    prompt: 'ماذا تريد أن تقرر بشكل أفضل؟',
+    continue: 'متابعة',
+    skip: 'تخطٍ',
+    back: 'رجوع',
+    goalsAria: 'الأهداف',
+    goals: {
+      specific_decision: 'اتخاذ قرار محدد',
+      relationship: 'إدارة علاقة',
+      someone_affects_choices: 'فهم كيف يؤثر شخص ما على خياراتي',
+      career: 'المضي قدماً في مساري المهني',
+      business: 'تنمية مشروع أو بدؤه',
+      timing: 'اختيار التوقيت المناسب لقرار',
+      decision_patterns: 'فهم أنماط قراراتي',
+      something_else: 'شيء آخر',
+    },
+  },
+};
+
+export function getGoalSelectionCopy(lang: AppLang): GoalSelectionCopy {
+  return GOAL_SELECTION_LANGS[lang] ?? GOAL_SELECTION_LANGS.en;
+}
+
+/** Canonical English Decision Profile copy — PRD-001 §5.3 */
+
 export const PROFILE_ONBOARDING_COPY = {
   step: 'Step 3 of 3',
   title: 'Your birth context',
