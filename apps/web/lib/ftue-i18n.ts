@@ -625,6 +625,68 @@ export function getNotificationsCopy(lang: AppLang): NotificationsCopy {
   return NOTIFICATIONS_LANGS[lang] ?? NOTIFICATIONS_LANGS.en;
 }
 
+/** Canonical English Snapshot copy — PRD-001 §5.9 progress acknowledgement only. */
+export type SnapshotCopy = {
+  title: string;
+  checklist: readonly [string, string, string];
+  done: string;
+  back: string;
+  continueToToday: string;
+};
+
+export const SNAPSHOT_COPY: SnapshotCopy = {
+  title: 'Preparing your Personal Intelligence…',
+  checklist: [
+    'Building your profile',
+    'Personalizing your timeline',
+    "Preparing today's intelligence",
+  ],
+  done: 'Done.',
+  back: 'Back',
+  continueToToday: 'Continue to Today',
+};
+
+export const SNAPSHOT_LANGS: Record<AppLang, SnapshotCopy> = {
+  en: SNAPSHOT_COPY,
+  ru: {
+    title: 'Готовим ваш Personal Intelligence…',
+    checklist: [
+      'Создаём ваш профиль',
+      'Персонализируем таймлайн',
+      'Готовим интеллект на сегодня',
+    ],
+    done: 'Готово.',
+    back: 'Назад',
+    continueToToday: 'Перейти к Today',
+  },
+  fa: {
+    title: 'در حال آماده‌سازی Personal Intelligence شما…',
+    checklist: [
+      'ساخت پروفایل شما',
+      'شخصی‌سازی جدول زمانی',
+      'آماده‌سازی هوش امروز',
+    ],
+    done: 'انجام شد.',
+    back: 'بازگشت',
+    continueToToday: 'ادامه به Today',
+  },
+  ar: {
+    title: 'جارٍ إعداد Personal Intelligence الخاص بك…',
+    checklist: [
+      'بناء ملفك',
+      'تخصيص خطك الزمني',
+      'إعداد ذكاء اليوم',
+    ],
+    done: 'تم.',
+    back: 'رجوع',
+    continueToToday: 'المتابعة إلى Today',
+  },
+};
+
+export function getSnapshotCopy(lang: AppLang): SnapshotCopy {
+  return SNAPSHOT_LANGS[lang] ?? SNAPSHOT_LANGS.en;
+}
+
 export const PROFILE_ONBOARDING_COPY = {
   step: 'Step 3 of 3',
   title: 'Your birth context',
