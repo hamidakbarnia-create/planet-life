@@ -12,6 +12,12 @@ import {
   getGoalSelectionCopy,
   type FtueGoalId,
 } from '@/lib/ftue-i18n';
+import {
+  ftueTodayPath,
+  isFtueComplete,
+  loadFtueDraft,
+  updateFtueDraft,
+} from '@/lib/ftue-storage';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 
@@ -33,14 +39,24 @@ export function GoalSelectionScreen() {
   const router = useRouter();
   const [lang] = useAppLang();
   const clientReady = useClientReady();
-  const [selected, setSelected] = useState<ReadonlySet<FtueGoalId>>(() => new Set());
+  const [selected, setSelected] = useState<ReadonlySet<FtueGoalId>>(
+    () => new Set(loadFtueDraft().goals)
+  );
   const [viewed, setViewed] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useQueuedEffect(() => {
-    if (viewed) return;
-    setViewed(true);
-    trackFtueEvent('ftue_goal_view');
-  }, [viewed]);
+    if (isFtueComplete()) {
+      router.replace(ftueTodayPath());
+      return;
+    }
+    setSelected(new Set(loadFtueDraft().goals));
+    setReady(true);
+    if (!viewed) {
+      setViewed(true);
+      trackFtueEvent('ftue_goal_view');
+    }
+  }, [router, viewed]);
 
   const handleToggle = useCallback((id: FtueGoalId) => {
     setSelected((prev) => toggleGoal(prev, id));
@@ -50,8 +66,10 @@ export function GoalSelectionScreen() {
     (mode: 'continue' | 'skip') => {
       const goals = Array.from(selected);
       if (mode === 'skip') {
-        trackFtueEvent('ftue_goal_skip', { goals });
+        updateFtueDraft({ goals: [] });
+        trackFtueEvent('ftue_goal_skip');
       } else {
+        updateFtueDraft({ goals });
         trackFtueEvent('ftue_goal_select', { goals });
       }
       router.push(FTUE_DECISION_PROFILE_PATH);
@@ -59,7 +77,7 @@ export function GoalSelectionScreen() {
     [router, selected]
   );
 
-  if (!clientReady) {
+  if (!clientReady || !ready) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"

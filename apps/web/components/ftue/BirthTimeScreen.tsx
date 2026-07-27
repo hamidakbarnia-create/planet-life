@@ -12,7 +12,14 @@ import {
   type BirthTimeAccuracy,
   type BirthTimeCopy,
 } from '@/lib/ftue-i18n';
+import {
+  ftueTodayPath,
+  isFtueComplete,
+  loadFtueDraft,
+  updateFtueDraft,
+} from '@/lib/ftue-storage';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 
 /** Next FTUE step — Birth Place (PRD-001 §5.6). */
 export const FTUE_BIRTH_PLACE_PATH = '/onboarding/birth-place';
@@ -62,10 +69,25 @@ export function BirthTimeScreen() {
   const noteId = `${formId}-note`;
   const errId = `${formId}-err`;
 
-  const [accuracy, setAccuracy] = useState<BirthTimeAccuracy | null>(null);
-  const [birthTime, setBirthTime] = useState('');
+  const initial = loadFtueDraft();
+  const [accuracy, setAccuracy] = useState<BirthTimeAccuracy | null>(
+    () => initial.birthTimeAccuracy
+  );
+  const [birthTime, setBirthTime] = useState(() => initial.birthTime ?? '');
   const [error, setError] = useState<BirthTimeValidationError | null>(null);
   const [touched, setTouched] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useQueuedEffect(() => {
+    if (isFtueComplete()) {
+      router.replace(ftueTodayPath());
+      return;
+    }
+    const draft = loadFtueDraft();
+    setAccuracy(draft.birthTimeAccuracy);
+    setBirthTime(draft.birthTime ?? '');
+    setReady(true);
+  }, [router]);
 
   const handleBack = useCallback(() => {
     router.push(FTUE_BIRTH_DATE_PATH);
@@ -101,14 +123,19 @@ export function BirthTimeScreen() {
     if (nextError || !accuracy) return;
 
     if (accuracy === 'unknown') {
+      updateFtueDraft({ birthTimeAccuracy: 'unknown', birthTime: null });
       trackFtueEvent('ftue_birthtime_unknown');
     } else {
+      updateFtueDraft({
+        birthTimeAccuracy: accuracy,
+        birthTime: birthTime.trim(),
+      });
       trackFtueEvent('ftue_birthtime_set', { accuracy });
     }
     router.push(FTUE_BIRTH_PLACE_PATH);
   }, [accuracy, birthTime, router]);
 
-  if (!clientReady) {
+  if (!clientReady || !ready) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"

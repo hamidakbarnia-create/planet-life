@@ -8,6 +8,11 @@ import type { BrandLang } from '@/lib/brand';
 import { localeFcFiCss, localeFontFamily } from '@/lib/brand-theme';
 import { trackFtueEvent } from '@/lib/ftue-analytics';
 import { getDecisionProfileCopy } from '@/lib/ftue-i18n';
+import {
+  ftueTodayPath,
+  isFtueComplete,
+  updateFtueDraft,
+} from '@/lib/ftue-storage';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 
@@ -26,14 +31,22 @@ export function DecisionProfileScreen() {
   const [lang] = useAppLang();
   const clientReady = useClientReady();
   const [viewed, setViewed] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useQueuedEffect(() => {
-    if (viewed) return;
-    setViewed(true);
-    trackFtueEvent('ftue_intent_view');
-  }, [viewed]);
+    if (isFtueComplete()) {
+      router.replace(ftueTodayPath());
+      return;
+    }
+    setReady(true);
+    if (!viewed) {
+      setViewed(true);
+      trackFtueEvent('ftue_intent_view');
+    }
+  }, [router, viewed]);
 
   const handleContinue = useCallback(() => {
+    updateFtueDraft({ decisionProfileAcknowledged: true });
     router.push(FTUE_BIRTH_DATE_PATH);
   }, [router]);
 
@@ -41,7 +54,7 @@ export function DecisionProfileScreen() {
     router.push(FTUE_GOAL_SELECTION_PATH);
   }, [router]);
 
-  if (!clientReady) {
+  if (!clientReady || !ready) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"

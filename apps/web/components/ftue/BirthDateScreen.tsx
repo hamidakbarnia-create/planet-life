@@ -8,7 +8,14 @@ import type { BrandLang } from '@/lib/brand';
 import { localeFcFiCss, localeFontFamily } from '@/lib/brand-theme';
 import { trackFtueEvent } from '@/lib/ftue-analytics';
 import { getBirthDateCopy, type BirthDateCopy } from '@/lib/ftue-i18n';
+import {
+  ftueTodayPath,
+  isFtueComplete,
+  loadFtueDraft,
+  updateFtueDraft,
+} from '@/lib/ftue-storage';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 
 /** Next FTUE step — Birth Time (PRD-001 §5.5). */
 export const FTUE_BIRTH_TIME_PATH = '/onboarding/birth-time';
@@ -81,11 +88,21 @@ export function BirthDateScreen() {
   const descId = `${formId}-desc`;
   const errId = `${formId}-err`;
 
-  const [birthDate, setBirthDate] = useState('');
+  const [birthDate, setBirthDate] = useState(() => loadFtueDraft().birthDate ?? '');
   const [error, setError] = useState<BirthDateValidationError | null>(null);
   const [touched, setTouched] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const bounds = useMemo(() => getBirthDateInputBounds(), []);
+
+  useQueuedEffect(() => {
+    if (isFtueComplete()) {
+      router.replace(ftueTodayPath());
+      return;
+    }
+    setBirthDate(loadFtueDraft().birthDate ?? '');
+    setReady(true);
+  }, [router]);
 
   const handleBack = useCallback(() => {
     router.push(FTUE_DECISION_PROFILE_PATH);
@@ -97,6 +114,7 @@ export function BirthDateScreen() {
     setError(nextError);
     if (nextError) return;
 
+    updateFtueDraft({ birthDate: birthDate.trim() });
     trackFtueEvent('ftue_birthdate_set');
     router.push(FTUE_BIRTH_TIME_PATH);
   }, [birthDate, router]);
@@ -108,7 +126,7 @@ export function BirthDateScreen() {
     }
   }, [touched]);
 
-  if (!clientReady) {
+  if (!clientReady || !ready) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"

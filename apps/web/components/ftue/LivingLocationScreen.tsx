@@ -11,7 +11,15 @@ import {
   getLivingLocationCopy,
   type LivingLocationCopy,
 } from '@/lib/ftue-i18n';
+import {
+  ftueTodayPath,
+  isFtueComplete,
+  loadFtueDraft,
+  updateFtueDraft,
+  type FtuePlaceValue,
+} from '@/lib/ftue-storage';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 
 /** Next FTUE step — Notifications (PRD-001 §5.8). */
 export const FTUE_NOTIFICATIONS_PATH = '/onboarding/notifications';
@@ -21,7 +29,7 @@ const FTUE_BIRTH_PLACE_PATH = '/onboarding/birth-place';
 /**
  * Independent living-location mocks (FTUE-07).
  * Separate from Birth Place state/values even if city strings match.
- * Coordinates stay in memory only — never shown or persisted.
+ * Coordinates may be kept in the local FTUE draft; never shown or sent to analytics.
  */
 export type MockLivingPlace = {
   id: string;
@@ -138,8 +146,31 @@ export function LivingLocationScreen() {
   const [selected, setSelected] = useState<MockLivingPlace | null>(null);
   const [error, setError] = useState<LivingLocationValidationError | null>(null);
   const [listOpen, setListOpen] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const results = useMemo(() => filterMockLivingPlaces(query), [query]);
+
+  useQueuedEffect(() => {
+    if (isFtueComplete()) {
+      router.replace(ftueTodayPath());
+      return;
+    }
+    const place = loadFtueDraft().livingLocation;
+    if (place) {
+      const match =
+        FTUE_MOCK_LIVING_PLACES.find((p) => p.id === place.id) ??
+        ({
+          id: place.id,
+          city: place.city,
+          country: place.country,
+          latitude: place.latitude,
+          longitude: place.longitude,
+        } satisfies MockLivingPlace);
+      setSelected(match);
+      setQuery(formatMockLivingPlace(match));
+    }
+    setReady(true);
+  }, [router]);
 
   const handleBack = useCallback(() => {
     router.push(FTUE_BIRTH_PLACE_PATH);
@@ -164,11 +195,19 @@ export function LivingLocationScreen() {
     setError(nextError);
     if (nextError || !selected) return;
 
+    const place: FtuePlaceValue = {
+      id: selected.id,
+      city: selected.city,
+      country: selected.country,
+      latitude: selected.latitude,
+      longitude: selected.longitude,
+    };
+    updateFtueDraft({ livingLocation: place });
     trackFtueEvent('ftue_livinglocation_set');
     router.push(FTUE_NOTIFICATIONS_PATH);
   }, [router, selected]);
 
-  if (!clientReady) {
+  if (!clientReady || !ready) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"

@@ -1,14 +1,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { BrandLogo } from '@/components/BrandLogo';
 import type { AppLang } from '@/lib/app-settings';
 import type { BrandLang } from '@/lib/brand';
 import { localeFcFiCss, localeFontFamily } from '@/lib/brand-theme';
 import { trackFtueEvent } from '@/lib/ftue-analytics';
 import { getSnapshotCopy } from '@/lib/ftue-i18n';
-import { ftueTodayPath, markFtueComplete } from '@/lib/ftue-storage';
+import {
+  ftueTodayPath,
+  isFtueComplete,
+  markFtueComplete,
+} from '@/lib/ftue-storage';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 
@@ -21,31 +25,43 @@ function isRtl(lang: AppLang): boolean {
 /**
  * Personal Intelligence Snapshot — PRD-001 §5.9.
  * Progress / acknowledgement only. No readings, scores, or collected-data review.
+ * Rendering does not complete FTUE; Continue to Today does (idempotent).
  */
 export function SnapshotScreen() {
   const router = useRouter();
   const [lang] = useAppLang();
   const clientReady = useClientReady();
   const [viewed, setViewed] = useState(false);
+  const [ready, setReady] = useState(false);
+  const completingRef = useRef(false);
 
   useQueuedEffect(() => {
+    if (isFtueComplete()) {
+      router.replace(ftueTodayPath());
+      return;
+    }
+    setReady(true);
     if (viewed) return;
     setViewed(true);
     trackFtueEvent('ftue_snapshot_view');
-  }, [viewed]);
+  }, [router, viewed]);
 
   const handleBack = useCallback(() => {
     router.push(FTUE_NOTIFICATIONS_PATH);
   }, [router]);
 
   const handleContinueToToday = useCallback(() => {
-    trackFtueEvent('ftue_complete');
-    trackFtueEvent('ftue_to_today');
+    const alreadyComplete = isFtueComplete();
     markFtueComplete();
+    if (!alreadyComplete && !completingRef.current) {
+      completingRef.current = true;
+      trackFtueEvent('ftue_complete');
+      trackFtueEvent('ftue_to_today');
+    }
     router.push(ftueTodayPath());
   }, [router]);
 
-  if (!clientReady) {
+  if (!clientReady || !ready) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"

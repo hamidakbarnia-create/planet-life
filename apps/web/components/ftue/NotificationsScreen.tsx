@@ -12,7 +12,14 @@ import {
   getNotificationsCopy,
   type FtueNotificationId,
 } from '@/lib/ftue-i18n';
+import {
+  ftueTodayPath,
+  isFtueComplete,
+  loadFtueDraft,
+  updateFtueDraft,
+} from '@/lib/ftue-storage';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 
 /** Next FTUE step — Personal Intelligence Snapshot (PRD-001 §5.9). */
 export const FTUE_SNAPSHOT_PATH = '/onboarding/snapshot';
@@ -44,6 +51,19 @@ export function NotificationsScreen() {
   const [selected, setSelected] = useState<ReadonlySet<FtueNotificationId>>(
     () => new Set()
   );
+  const [ready, setReady] = useState(false);
+
+  useQueuedEffect(() => {
+    if (isFtueComplete()) {
+      router.replace(ftueTodayPath());
+      return;
+    }
+    const draft = loadFtueDraft();
+    if (!draft.notificationsSkipped && draft.notifications.length > 0) {
+      setSelected(new Set(draft.notifications));
+    }
+    setReady(true);
+  }, [router]);
 
   const handleToggle = useCallback((id: FtueNotificationId) => {
     setSelected((prev) => togglePreference(prev, id));
@@ -57,8 +77,13 @@ export function NotificationsScreen() {
     (mode: 'continue' | 'skip') => {
       const choices = Array.from(selected);
       if (mode === 'skip') {
+        updateFtueDraft({ notifications: [], notificationsSkipped: true });
         trackFtueEvent('ftue_notifications_skip');
       } else {
+        updateFtueDraft({
+          notifications: choices,
+          notificationsSkipped: false,
+        });
         trackFtueEvent('ftue_notifications_select', { choices });
       }
       router.push(FTUE_SNAPSHOT_PATH);
@@ -66,7 +91,7 @@ export function NotificationsScreen() {
     [router, selected]
   );
 
-  if (!clientReady) {
+  if (!clientReady || !ready) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"

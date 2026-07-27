@@ -8,7 +8,15 @@ import type { BrandLang } from '@/lib/brand';
 import { localeFcFiCss, localeFontFamily } from '@/lib/brand-theme';
 import { trackFtueEvent } from '@/lib/ftue-analytics';
 import { getBirthPlaceCopy, type BirthPlaceCopy } from '@/lib/ftue-i18n';
+import {
+  ftueTodayPath,
+  isFtueComplete,
+  loadFtueDraft,
+  updateFtueDraft,
+  type FtuePlaceValue,
+} from '@/lib/ftue-storage';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 
 /** Next FTUE step — Living Location (PRD-001 §5.7). */
 export const FTUE_LIVING_LOCATION_PATH = '/onboarding/living-location';
@@ -17,7 +25,7 @@ const FTUE_BIRTH_TIME_PATH = '/onboarding/birth-time';
 
 /**
  * Local mock places only — no geocoding API or timezone (FTUE-06 scope).
- * Coordinates stay in memory for local completeness; they are never shown or persisted.
+ * Coordinates may be kept in the local FTUE draft; never shown or sent to analytics.
  */
 export type MockBirthPlace = {
   id: string;
@@ -134,8 +142,31 @@ export function BirthPlaceScreen() {
   const [selected, setSelected] = useState<MockBirthPlace | null>(null);
   const [error, setError] = useState<BirthPlaceValidationError | null>(null);
   const [listOpen, setListOpen] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const results = useMemo(() => filterMockBirthPlaces(query), [query]);
+
+  useQueuedEffect(() => {
+    if (isFtueComplete()) {
+      router.replace(ftueTodayPath());
+      return;
+    }
+    const place = loadFtueDraft().birthPlace;
+    if (place) {
+      const match =
+        FTUE_MOCK_BIRTH_PLACES.find((p) => p.id === place.id) ??
+        ({
+          id: place.id,
+          city: place.city,
+          country: place.country,
+          latitude: place.latitude,
+          longitude: place.longitude,
+        } satisfies MockBirthPlace);
+      setSelected(match);
+      setQuery(formatMockBirthPlace(match));
+    }
+    setReady(true);
+  }, [router]);
 
   const handleBack = useCallback(() => {
     router.push(FTUE_BIRTH_TIME_PATH);
@@ -160,11 +191,19 @@ export function BirthPlaceScreen() {
     setError(nextError);
     if (nextError || !selected) return;
 
+    const place: FtuePlaceValue = {
+      id: selected.id,
+      city: selected.city,
+      country: selected.country,
+      latitude: selected.latitude,
+      longitude: selected.longitude,
+    };
+    updateFtueDraft({ birthPlace: place });
     trackFtueEvent('ftue_birthplace_set');
     router.push(FTUE_LIVING_LOCATION_PATH);
   }, [router, selected]);
 
-  if (!clientReady) {
+  if (!clientReady || !ready) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"

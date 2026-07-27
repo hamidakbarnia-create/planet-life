@@ -6,7 +6,6 @@ import { useCallback, useState } from 'react';
 import { BrandLogo } from '@/components/BrandLogo';
 import type { BrandLang } from '@/lib/brand';
 import { localeFcFiCss, localeFontFamily } from '@/lib/brand-theme';
-import { isAuthed } from '@/lib/auth';
 import { trackFtueEvent } from '@/lib/ftue-analytics';
 import { getWelcomeCopy } from '@/lib/ftue-i18n';
 import { ftueTodayPath, isFtueComplete } from '@/lib/ftue-storage';
@@ -36,7 +35,7 @@ export function WelcomeScreen() {
   const [ready, setReady] = useState(false);
 
   useQueuedEffect(() => {
-    if (isAuthed() && isFtueComplete()) {
+    if (isFtueComplete()) {
       router.replace(ftueTodayPath());
       return;
     }
