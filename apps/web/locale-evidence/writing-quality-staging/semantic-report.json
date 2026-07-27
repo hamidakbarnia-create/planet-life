@@ -1,0 +1,1253 @@
+{
+  "generatedAt": "2026-07-27T21:23:09.200Z",
+  "stagingWorker": "https://planet-life-web-staging.planet-life.workers.dev",
+  "versionId": "6b20dd21-791c-4404-a545-133b47163ef2",
+  "commit": "03fa533e",
+  "scenarios": [
+    {
+      "id": "raise-request",
+      "locale": "fa",
+      "request_id": "raise-request",
+      "recommendationStatus": {
+        "before": "proceed-with-caution",
+        "after": "proceed-with-caution",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "ask for a 12% raise",
+          "retained": true,
+          "where": "خلاصه تصمیم, situation, score.opportunity"
+        },
+        {
+          "token": "manager budget freeze",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, situation, risks, why, score.risk"
+        },
+        {
+          "token": "comp band evidence",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, why, action.now"
+        },
+        {
+          "token": "peer salary data",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, risks, why, what-could-change, action.now"
+        }
+      ],
+      "renderedActions": [
+        "Gather peer salary data for the same level",
+        "Draft the 12% raise ask with comp band evidence",
+        "Separate reversible talking points from any hard ultimatum"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "حقایق مهم که باید بماند: comp band evidence, peer salary data. با تمرکز روی manager budget freeze after Q2 cuts، تمایل فعلی این است: تمایل فعلی به جلو رفتن با احتیاط است؛ بخش برگشت‌ناپذیر را جدا نگه دارید. موضوع تصمیم: Whether to ask for a 12% raise this month. جا بگذارید تا با بستن یک شکافِ فهرست‌شده مسیر اصلاح شود.",
+        "چرا؟": "حقایق مهم که باید بماند: manager budget freeze, peer salary data. Proceed with caution: prepare comp band evidence before asking for a 12% raise.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Gather peer salary data for the same level",
+          "2. Draft the 12% raise ask with comp band evidence",
+          "3. Separate reversible talking points from any hard ultimatum"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "peer salary data for the same level"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "raise-request",
+      "locale": "ar",
+      "request_id": "raise-request",
+      "recommendationStatus": {
+        "before": "proceed-with-caution",
+        "after": "proceed-with-caution",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "ask for a 12% raise",
+          "retained": true,
+          "where": "خلاصه تصمیم, situation, score.opportunity"
+        },
+        {
+          "token": "manager budget freeze",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, situation, risks, why, score.risk"
+        },
+        {
+          "token": "comp band evidence",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, why, action.now"
+        },
+        {
+          "token": "peer salary data",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, risks, why, what-could-change, action.now"
+        }
+      ],
+      "renderedActions": [
+        "Gather peer salary data for the same level",
+        "Draft the 12% raise ask with comp band evidence",
+        "Separate reversible talking points from any hard ultimatum"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "حقائق أساسية يجب أن تبقى: comp band evidence, peer salary data. مع التركيز على manager budget freeze after Q2 cuts، الميل هو: الميل الحالي هو المضي بحذر مع فصل الجزء غير القابل للرجوع. القرار المعني: Whether to ask for a 12% raise this month. اترك مساحة للتعديل بعد إغلاق فجوة مسجّلة.",
+        "چرا؟": "حقائق أساسية يجب أن تبقى: manager budget freeze, peer salary data. Proceed with caution: prepare comp band evidence before asking for a 12% raise.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Gather peer salary data for the same level",
+          "2. Draft the 12% raise ask with comp band evidence",
+          "3. Separate reversible talking points from any hard ultimatum"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "peer salary data for the same level"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "raise-request",
+      "locale": "ru",
+      "request_id": "raise-request",
+      "recommendationStatus": {
+        "before": "proceed-with-caution",
+        "after": "proceed-with-caution",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "ask for a 12% raise",
+          "retained": true,
+          "where": "خلاصه تصمیم, situation, score.opportunity"
+        },
+        {
+          "token": "manager budget freeze",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, situation, risks, why, score.risk"
+        },
+        {
+          "token": "comp band evidence",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, why, action.now"
+        },
+        {
+          "token": "peer salary data",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, risks, why, what-could-change, action.now"
+        }
+      ],
+      "renderedActions": [
+        "Gather peer salary data for the same level",
+        "Draft the 12% raise ask with comp band evidence",
+        "Separate reversible talking points from any hard ultimatum"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "Ключевые факты, которые нужно сохранить: comp band evidence, peer salary data. Вокруг manager budget freeze after Q2 cuts уклон такой: Текущий уклон — двигаться осторожно и отделять необратимую часть. Решение в фокусе: Whether to ask for a 12% raise this month. Оставьте место для корректировки, когда закроется один перечисленный пробел.",
+        "چرا؟": "Ключевые факты, которые нужно сохранить: manager budget freeze, peer salary data. Proceed with caution: prepare comp band evidence before asking for a 12% raise.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Gather peer salary data for the same level",
+          "2. Draft the 12% raise ask with comp band evidence",
+          "3. Separate reversible talking points from any hard ultimatum"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "peer salary data for the same level"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "job-change",
+      "locale": "fa",
+      "request_id": "job-change",
+      "recommendationStatus": {
+        "before": "gather-more-information",
+        "after": "gather-more-information",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "Series B offer",
+          "retained": true,
+          "where": "خلاصه تصمیم, situation, opportunities, score.opportunity"
+        },
+        {
+          "token": "runway of 14 months",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "vesting cliff",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "notice period",
+          "retained": true,
+          "where": "خلاصه تصمیم, قبل از اقدام, action.now"
+        }
+      ],
+      "renderedActions": [
+        "Confirm runway of 14 months in writing",
+        "Map vesting cliff dates against notice period",
+        "Write the stay-vs-leave decision in one sentence"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "حقایق مهم که باید بماند: notice period, 90 days. تمایل فعلی این است که قبل از تعهد یک ورودی کلیدی جمع شود. دارید این را می‌سنجید: Whether to accept the Series B offer and leave current role. نقطهٔ حساس: vesting cliff and runway of 14 months. ترجیح با قدم اول قابل‌برگشت است تا اطلاعات تازه هنوز بتواند مسیر را عوض کند.",
+        "چرا؟": "حقایق مهم که باید بماند: 90 days. Gather more information on vesting cliff and runway of 14 months before leaving.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Confirm runway of 14 months in writing",
+          "2. Map vesting cliff dates against notice period",
+          "3. Write the stay-vs-leave decision in one sentence"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "role scope after 90 days"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "job-change",
+      "locale": "ar",
+      "request_id": "job-change",
+      "recommendationStatus": {
+        "before": "gather-more-information",
+        "after": "gather-more-information",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "Series B offer",
+          "retained": true,
+          "where": "خلاصه تصمیم, situation, opportunities, score.opportunity"
+        },
+        {
+          "token": "runway of 14 months",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "vesting cliff",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "notice period",
+          "retained": true,
+          "where": "خلاصه تصمیم, قبل از اقدام, action.now"
+        }
+      ],
+      "renderedActions": [
+        "Confirm runway of 14 months in writing",
+        "Map vesting cliff dates against notice period",
+        "Write the stay-vs-leave decision in one sentence"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "حقائق أساسية يجب أن تبقى: notice period, 90 days. الميل الحالي هو جمع مدخل أساسي واحد قبل الالتزام. أنت تزن: Whether to accept the Series B offer and leave current role. نقطة مراقبة أساسية: vesting cliff and runway of 14 months. يُفضَّل خطوة أولى قابلة للرجوع حتى تظل الحقائق الجديدة قادرة على تغيير المسار.",
+        "چرا؟": "حقائق أساسية يجب أن تبقى: 90 days. Gather more information on vesting cliff and runway of 14 months before leaving.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Confirm runway of 14 months in writing",
+          "2. Map vesting cliff dates against notice period",
+          "3. Write the stay-vs-leave decision in one sentence"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "role scope after 90 days"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "job-change",
+      "locale": "ru",
+      "request_id": "job-change",
+      "recommendationStatus": {
+        "before": "gather-more-information",
+        "after": "gather-more-information",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "Series B offer",
+          "retained": true,
+          "where": "خلاصه تصمیم, situation, opportunities, score.opportunity"
+        },
+        {
+          "token": "runway of 14 months",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "vesting cliff",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "notice period",
+          "retained": true,
+          "where": "خلاصه تصمیم, قبل از اقدام, action.now"
+        }
+      ],
+      "renderedActions": [
+        "Confirm runway of 14 months in writing",
+        "Map vesting cliff dates against notice period",
+        "Write the stay-vs-leave decision in one sentence"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "Ключевые факты, которые нужно сохранить: notice period, 90 days. Текущий уклон — собрать один критический ввод до обязательства. Вы взвешиваете: Whether to accept the Series B offer and leave current role. Ключевая точка внимания: vesting cliff and runway of 14 months. Лучше обратимый первый шаг, чтобы новые факты ещё могли изменить путь.",
+        "چرا؟": "Ключевые факты, которые нужно сохранить: 90 days. Gather more information on vesting cliff and runway of 14 months before leaving.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Confirm runway of 14 months in writing",
+          "2. Map vesting cliff dates against notice period",
+          "3. Write the stay-vs-leave decision in one sentence"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "role scope after 90 days"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "relocation",
+      "locale": "fa",
+      "request_id": "relocation",
+      "recommendationStatus": {
+        "before": "wait",
+        "after": "wait",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "Berlin",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, situation, opportunities, why, score.opportunity"
+        },
+        {
+          "token": "visa timeline",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "housing deposit",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "remote-work approval",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, recommendation, situation, opportunities, risks, why, what-could-change, action.now"
+        }
+      ],
+      "renderedActions": [
+        "List visa timeline milestones before any housing deposit",
+        "Request remote-work approval in writing",
+        "Compare move-now vs wait-12-months on one page"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "حقایق مهم که باید بماند: remote-work approval, 12 months. دربارهٔ «Whether to relocate to Berlin this year or wait» خوانش عملی این است: تمایل فعلی به صبر است تا یک ابهام مهم کمتر شود. نقطهٔ فشار: visa timeline slipping past housing deposit deadlines. اول قدمی بردارید که برگردد.",
+        "چرا؟": "حقایق مهم که باید بماند: Berlin. Wait until visa timeline and remote-work approval line up with the housing deposit.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. List visa timeline milestones before any housing deposit",
+          "2. Request remote-work approval in writing",
+          "3. Compare move-now vs wait-12-months on one page"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "remote-work approval from current employer"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "relocation",
+      "locale": "ar",
+      "request_id": "relocation",
+      "recommendationStatus": {
+        "before": "wait",
+        "after": "wait",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "Berlin",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, situation, opportunities, why, score.opportunity"
+        },
+        {
+          "token": "visa timeline",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "housing deposit",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "remote-work approval",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, recommendation, situation, opportunities, risks, why, what-could-change, action.now"
+        }
+      ],
+      "renderedActions": [
+        "List visa timeline milestones before any housing deposit",
+        "Request remote-work approval in writing",
+        "Compare move-now vs wait-12-months on one page"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "حقائق أساسية يجب أن تبقى: remote-work approval, 12 months. حول «Whether to relocate to Berlin this year or wait»، القراءة العملية: الميل الحالي هو الانتظار حتى يقلّ غموض أساسي واحد. نقطة الضغط: visa timeline slipping past housing deposit deadlines. اجعل الخطوة الأولى صغيرة وقابلة للرجوع.",
+        "چرا؟": "حقائق أساسية يجب أن تبقى: Berlin. Wait until visa timeline and remote-work approval line up with the housing deposit.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. List visa timeline milestones before any housing deposit",
+          "2. Request remote-work approval in writing",
+          "3. Compare move-now vs wait-12-months on one page"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "remote-work approval from current employer"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "relocation",
+      "locale": "ru",
+      "request_id": "relocation",
+      "recommendationStatus": {
+        "before": "wait",
+        "after": "wait",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "Berlin",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, situation, opportunities, why, score.opportunity"
+        },
+        {
+          "token": "visa timeline",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "housing deposit",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "remote-work approval",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, recommendation, situation, opportunities, risks, why, what-could-change, action.now"
+        }
+      ],
+      "renderedActions": [
+        "List visa timeline milestones before any housing deposit",
+        "Request remote-work approval in writing",
+        "Compare move-now vs wait-12-months on one page"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "Ключевые факты, которые нужно сохранить: remote-work approval, 12 months. По поводу «Whether to relocate to Berlin this year or wait» практический вывод такой: Текущий уклон — подождать, пока не сузится одна ключевая неизвестность. Точка давления: visa timeline slipping past housing deposit deadlines. Сделайте первый шаг достаточно маленьким, чтобы его можно было откатить.",
+        "چرا؟": "Ключевые факты, которые нужно сохранить: Berlin. Wait until visa timeline and remote-work approval line up with the housing deposit.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. List visa timeline milestones before any housing deposit",
+          "2. Request remote-work approval in writing",
+          "3. Compare move-now vs wait-12-months on one page"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "remote-work approval from current employer"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "relationship",
+      "locale": "fa",
+      "request_id": "relationship",
+      "recommendationStatus": {
+        "before": "proceed-with-caution",
+        "after": "proceed-with-caution",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "moving in together",
+          "retained": true,
+          "where": "خلاصه تصمیم, situation, score.opportunity"
+        },
+        {
+          "token": "lease co-sign",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "conflict repair",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, recommendation, situation, opportunities, risks, why, what-could-change, action.now"
+        },
+        {
+          "token": "exit plan",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        }
+      ],
+      "renderedActions": [
+        "Draft a shared exit plan before lease co-sign",
+        "Agree one conflict repair ritual for hard weeks",
+        "Separate a reversible trial month from any lease co-sign"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "حقایق مهم که باید بماند: move in together, conflict repair. دربارهٔ «Whether moving in together before the wedding is wise» خوانش عملی این است: تمایل فعلی به جلو رفتن با احتیاط است؛ بخش برگشت‌ناپذیر را جدا نگه دارید. نقطهٔ فشار: lease co-sign without a shared exit plan. اول قدمی بردارید که برگردد.",
+        "چرا؟": "Proceed with caution: agree conflict repair and an exit plan before any lease co-sign.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Draft a shared exit plan before lease co-sign",
+          "2. Agree one conflict repair ritual for hard weeks",
+          "3. Separate a reversible trial month from any lease co-sign"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "conflict repair habits under stress"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "relationship",
+      "locale": "ar",
+      "request_id": "relationship",
+      "recommendationStatus": {
+        "before": "proceed-with-caution",
+        "after": "proceed-with-caution",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "moving in together",
+          "retained": true,
+          "where": "خلاصه تصمیم, situation, score.opportunity"
+        },
+        {
+          "token": "lease co-sign",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "conflict repair",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, recommendation, situation, opportunities, risks, why, what-could-change, action.now"
+        },
+        {
+          "token": "exit plan",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        }
+      ],
+      "renderedActions": [
+        "Draft a shared exit plan before lease co-sign",
+        "Agree one conflict repair ritual for hard weeks",
+        "Separate a reversible trial month from any lease co-sign"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "حقائق أساسية يجب أن تبقى: move in together, conflict repair. حول «Whether moving in together before the wedding is wise»، القراءة العملية: الميل الحالي هو المضي بحذر مع فصل الجزء غير القابل للرجوع. نقطة الضغط: lease co-sign without a shared exit plan. اجعل الخطوة الأولى صغيرة وقابلة للرجوع.",
+        "چرا؟": "Proceed with caution: agree conflict repair and an exit plan before any lease co-sign.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Draft a shared exit plan before lease co-sign",
+          "2. Agree one conflict repair ritual for hard weeks",
+          "3. Separate a reversible trial month from any lease co-sign"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "conflict repair habits under stress"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "relationship",
+      "locale": "ru",
+      "request_id": "relationship",
+      "recommendationStatus": {
+        "before": "proceed-with-caution",
+        "after": "proceed-with-caution",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "moving in together",
+          "retained": true,
+          "where": "خلاصه تصمیم, situation, score.opportunity"
+        },
+        {
+          "token": "lease co-sign",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "conflict repair",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, recommendation, situation, opportunities, risks, why, what-could-change, action.now"
+        },
+        {
+          "token": "exit plan",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        }
+      ],
+      "renderedActions": [
+        "Draft a shared exit plan before lease co-sign",
+        "Agree one conflict repair ritual for hard weeks",
+        "Separate a reversible trial month from any lease co-sign"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "Ключевые факты, которые нужно сохранить: move in together, conflict repair. По поводу «Whether moving in together before the wedding is wise» практический вывод такой: Текущий уклон — двигаться осторожно и отделять необратимую часть. Точка давления: lease co-sign without a shared exit plan. Сделайте первый шаг достаточно маленьким, чтобы его можно было откатить.",
+        "چرا؟": "Proceed with caution: agree conflict repair and an exit plan before any lease co-sign.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Draft a shared exit plan before lease co-sign",
+          "2. Agree one conflict repair ritual for hard weeks",
+          "3. Separate a reversible trial month from any lease co-sign"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "conflict repair habits under stress"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "financial-risk",
+      "locale": "fa",
+      "request_id": "financial-risk",
+      "recommendationStatus": {
+        "before": "avoid-for-now",
+        "after": "avoid-for-now",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "40% of savings",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, risks, why, action.now, score.opportunity"
+        },
+        {
+          "token": "private deal",
+          "retained": true,
+          "where": "خلاصه تصمیم, قبل از اقدام, situation, risks, action.now, score.opportunity"
+        },
+        {
+          "token": "liquidity lock",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "downside cap",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, recommendation, situation, opportunities, risks, why, what-could-change, action.now"
+        }
+      ],
+      "renderedActions": [
+        "Extract downside cap language from the private deal term sheet",
+        "Measure liquidity lock months against emergency reserves",
+        "Write a hard no-go if 40% of savings remains the ask"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "حقایق مهم که باید بماند: downside cap, 10%, term sheet, second-lien. تمایل فعلی به متوقف‌کردن این تعهد برای الان است. دارید این را می‌سنجید: Whether to allocate 40% of savings into the private deal. نقطهٔ حساس: liquidity lock longer than 36 months. ترجیح با قدم اول قابل‌برگشت است تا اطلاعات تازه هنوز بتواند مسیر را عوض کند.",
+        "چرا؟": "Avoid for now: do not commit 40% of savings until downside cap and liquidity lock are explicit.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Extract downside cap language from the private deal term sheet",
+          "2. Measure liquidity lock months against emergency reserves",
+          "3. Write a hard no-go if 40% of savings remains the ask"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "حقایق مهم که باید بماند: second-lien. downside cap in the term sheet"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "financial-risk",
+      "locale": "ar",
+      "request_id": "financial-risk",
+      "recommendationStatus": {
+        "before": "avoid-for-now",
+        "after": "avoid-for-now",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "40% of savings",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, risks, why, action.now, score.opportunity"
+        },
+        {
+          "token": "private deal",
+          "retained": true,
+          "where": "خلاصه تصمیم, قبل از اقدام, situation, risks, action.now, score.opportunity"
+        },
+        {
+          "token": "liquidity lock",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "downside cap",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, recommendation, situation, opportunities, risks, why, what-could-change, action.now"
+        }
+      ],
+      "renderedActions": [
+        "Extract downside cap language from the private deal term sheet",
+        "Measure liquidity lock months against emergency reserves",
+        "Write a hard no-go if 40% of savings remains the ask"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "حقائق أساسية يجب أن تبقى: downside cap, 10%, term sheet, second-lien. الميل الحالي هو إيقاف هذا الالتزام الآن. أنت تزن: Whether to allocate 40% of savings into the private deal. نقطة مراقبة أساسية: liquidity lock longer than 36 months. يُفضَّل خطوة أولى قابلة للرجوع حتى تظل الحقائق الجديدة قادرة على تغيير المسار.",
+        "چرا؟": "Avoid for now: do not commit 40% of savings until downside cap and liquidity lock are explicit.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Extract downside cap language from the private deal term sheet",
+          "2. Measure liquidity lock months against emergency reserves",
+          "3. Write a hard no-go if 40% of savings remains the ask"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "حقائق أساسية يجب أن تبقى: second-lien. downside cap in the term sheet"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    },
+    {
+      "id": "financial-risk",
+      "locale": "ru",
+      "request_id": "financial-risk",
+      "recommendationStatus": {
+        "before": "avoid-for-now",
+        "after": "avoid-for-now",
+        "unchanged": true
+      },
+      "confidence": {
+        "before": {
+          "level": "medium",
+          "score": 62
+        },
+        "after": {
+          "level": "medium",
+          "score": 62
+        },
+        "unchanged": true
+      },
+      "scores": {
+        "before": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "after": {
+          "opportunity": 58,
+          "risk": 52,
+          "timing": 49,
+          "readiness": 55,
+          "confidence": 62
+        },
+        "unchanged": false
+      },
+      "mustRetain": [
+        {
+          "token": "40% of savings",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, opportunities, risks, why, action.now, score.opportunity"
+        },
+        {
+          "token": "private deal",
+          "retained": true,
+          "where": "خلاصه تصمیم, قبل از اقدام, situation, risks, action.now, score.opportunity"
+        },
+        {
+          "token": "liquidity lock",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, recommendation, situation, risks, why, action.now, score.risk"
+        },
+        {
+          "token": "downside cap",
+          "retained": true,
+          "where": "خلاصه تصمیم, چرا؟, قبل از اقدام, چه اطلاعاتی, recommendation, situation, opportunities, risks, why, what-could-change, action.now"
+        }
+      ],
+      "renderedActions": [
+        "Extract downside cap language from the private deal term sheet",
+        "Measure liquidity lock months against emergency reserves",
+        "Write a hard no-go if 40% of savings remains the ask"
+      ],
+      "inventedActions": [],
+      "lostActions": [],
+      "outline": {
+        "خلاصه تصمیم": "Ключевые факты, которые нужно сохранить: downside cap, 10%, term sheet, second-lien. Текущий уклон — пока приостановить это обязательство. Вы взвешиваете: Whether to allocate 40% of savings into the private deal. Ключевая точка внимания: liquidity lock longer than 36 months. Лучше обратимый первый шаг, чтобы новые факты ещё могли изменить путь.",
+        "چرا؟": "Avoid for now: do not commit 40% of savings until downside cap and liquidity lock are explicit.",
+        "قبل از اقدام چه کار کنید؟": [
+          "1. Extract downside cap language from the private deal term sheet",
+          "2. Measure liquidity lock months against emergency reserves",
+          "3. Write a hard no-go if 40% of savings remains the ask"
+        ],
+        "چه اطلاعاتی پاسخ را دقیق‌تر می‌کند؟": "Ключевые факты, которые нужно сохранить: second-lien. downside cap in the term sheet"
+      },
+      "invariantsEqual": false,
+      "sources": [
+        "semantic-fixture",
+        "locale-presentation",
+        "writing-quality"
+      ]
+    }
+  ]
+}
