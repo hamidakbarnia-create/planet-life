@@ -369,6 +369,91 @@ export function getBirthTimeCopy(lang: AppLang): BirthTimeCopy {
   return BIRTH_TIME_LANGS[lang] ?? BIRTH_TIME_LANGS.en;
 }
 
+/** Canonical English Birth Place copy — PRD-001 §5.6 (title/description not specified in PRD). */
+export type BirthPlaceCopy = {
+  title: string;
+  description: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  resultsAria: string;
+  noResults: string;
+  selectedLabel: string;
+  continue: string;
+  back: string;
+  errors: {
+    required: string;
+  };
+};
+
+export const BIRTH_PLACE_COPY: BirthPlaceCopy = {
+  title: 'Where were you born?',
+  description:
+    'Your birth place is one source of evidence used to personalize your recommendations.',
+  searchLabel: 'Birth city',
+  searchPlaceholder: 'Start typing a city…',
+  resultsAria: 'City suggestions',
+  noResults: 'No cities found',
+  selectedLabel: 'Selected',
+  continue: 'Continue',
+  back: 'Back',
+  errors: {
+    required: 'Select a city from the list.',
+  },
+};
+
+export const BIRTH_PLACE_LANGS: Record<AppLang, BirthPlaceCopy> = {
+  en: BIRTH_PLACE_COPY,
+  ru: {
+    title: 'Где вы родились?',
+    description:
+      'Место рождения — один источник данных, который помогает персонализировать рекомендации.',
+    searchLabel: 'Город рождения',
+    searchPlaceholder: 'Начните вводить город…',
+    resultsAria: 'Подсказки городов',
+    noResults: 'Города не найдены',
+    selectedLabel: 'Выбрано',
+    continue: 'Продолжить',
+    back: 'Назад',
+    errors: {
+      required: 'Выберите город из списка.',
+    },
+  },
+  fa: {
+    title: 'کجا متولد شده‌اید؟',
+    description:
+      'محل تولد یک منبع شواهد برای شخصی‌سازی پیشنهادهای شماست.',
+    searchLabel: 'شهر تولد',
+    searchPlaceholder: 'نام شهر را تایپ کنید…',
+    resultsAria: 'پیشنهاد شهرها',
+    noResults: 'شهری یافت نشد',
+    selectedLabel: 'انتخاب‌شده',
+    continue: 'ادامه',
+    back: 'بازگشت',
+    errors: {
+      required: 'یک شهر را از فهرست انتخاب کنید.',
+    },
+  },
+  ar: {
+    title: 'أين وُلدت؟',
+    description:
+      'مكان الميلاد مصدر أدلة واحد يُستخدم لتخصيص توصياتك.',
+    searchLabel: 'مدينة الميلاد',
+    searchPlaceholder: 'ابدأ بكتابة اسم مدينة…',
+    resultsAria: 'اقتراحات المدن',
+    noResults: 'لم يتم العثور على مدن',
+    selectedLabel: 'تم الاختيار',
+    continue: 'متابعة',
+    back: 'رجوع',
+    errors: {
+      required: 'اختر مدينة من القائمة.',
+    },
+  },
+};
+
+export function getBirthPlaceCopy(lang: AppLang): BirthPlaceCopy {
+  return BIRTH_PLACE_LANGS[lang] ?? BIRTH_PLACE_LANGS.en;
+}
+
 export const PROFILE_ONBOARDING_COPY = {
   step: 'Step 3 of 3',
   title: 'Your birth context',

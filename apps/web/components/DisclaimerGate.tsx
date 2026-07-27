@@ -23,6 +23,7 @@ const FTUE_PUBLIC_PATHS = new Set([
   '/onboarding/birth-date',
   '/onboarding/birth-time',
   '/onboarding/birth-place',
+  '/onboarding/living-location',
 ]);
 
 export function DisclaimerGate({ children }: { children: React.ReactNode }) {
