@@ -18,6 +18,10 @@ import {
   scoreToBand,
   type ScoreBand,
 } from './timing-presentation';
+import {
+  loadMonthCache,
+  saveMonthCache,
+} from './calendar-cache';
 
 // Backend base URL. Override at build/dev time with NEXT_PUBLIC_API_BASE
 // (e.g. when sharing the app over a Cloudflare/ngrok tunnel).
@@ -49,11 +53,10 @@ export {
   scoreToBand,
   type ScoreBand,
 } from './timing-presentation';
-
-function cacheKey(year: number, month: number, action: string, evalCity?: string) {
-  const loc = evalCity ? evalCity.replace(/\s+/g, '_') : 'default';
-  return `planet-life-cal-${year}-${String(month).padStart(2, '0')}-${action}-${loc}`;
-}
+export {
+  loadMonthCache,
+  saveMonthCache,
+} from './calendar-cache';
 
 export function scoringLocationFields(
   profile: BirthProfile,
@@ -78,41 +81,6 @@ export function scoringLocationFields(
     out.evaluation_timezone = payload.evaluation_timezone;
   }
   return out;
-}
-
-export function loadMonthCache(
-  year: number,
-  month: number,
-  action: string,
-  evalCity?: string
-): Record<string, number> | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(cacheKey(year, month, action, evalCity));
-    if (!raw) return null;
-    const { scores, savedAt } = JSON.parse(raw) as {
-      scores: Record<string, number>;
-      savedAt: number;
-    };
-    if (Date.now() - savedAt > 1000 * 60 * 60 * 12) return null;
-    return scores;
-  } catch {
-    return null;
-  }
-}
-
-export function saveMonthCache(
-  year: number,
-  month: number,
-  action: string,
-  scores: Record<string, number>,
-  evalCity?: string
-) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(
-    cacheKey(year, month, action, evalCity),
-    JSON.stringify({ scores, savedAt: Date.now() })
-  );
 }
 
 export async function fetchDayScore(
