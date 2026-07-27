@@ -263,6 +263,112 @@ export function getBirthDateCopy(lang: AppLang): BirthDateCopy {
   return BIRTH_DATE_LANGS[lang] ?? BIRTH_DATE_LANGS.en;
 }
 
+/** Canonical English Birth Time copy — PRD-001 §5.5 */
+export type BirthTimeAccuracy = 'exact' | 'approximate' | 'unknown';
+
+export type BirthTimeCopy = {
+  title: string;
+  accuracyAria: string;
+  exact: string;
+  approximate: string;
+  unknown: string;
+  unknownReassurance: string;
+  approximateNote: string;
+  timeLabel: string;
+  continue: string;
+  back: string;
+  errors: {
+    accuracyRequired: string;
+    timeRequired: string;
+    timeInvalid: string;
+  };
+};
+
+export const BIRTH_TIME_COPY: BirthTimeCopy = {
+  title: 'Do you know your birth time?',
+  accuracyAria: 'Birth time accuracy',
+  exact: 'Exact',
+  approximate: 'Approximate',
+  unknown: "I don't know",
+  unknownReassurance:
+    "That's okay. We can still provide useful recommendations. You can improve accuracy later.",
+  approximateNote:
+    'Approximate times are fine — we treat this as a window, not a precise moment.',
+  timeLabel: 'Birth time',
+  continue: 'Continue',
+  back: 'Back',
+  errors: {
+    accuracyRequired: 'Choose how well you know your birth time.',
+    timeRequired: 'Enter your birth time.',
+    timeInvalid: 'Enter a valid time.',
+  },
+};
+
+export const BIRTH_TIME_LANGS: Record<AppLang, BirthTimeCopy> = {
+  en: BIRTH_TIME_COPY,
+  ru: {
+    title: 'Вы знаете время рождения?',
+    accuracyAria: 'Точность времени рождения',
+    exact: 'Точное',
+    approximate: 'Приблизительное',
+    unknown: 'Не знаю',
+    unknownReassurance:
+      'Ничего страшного. Мы всё равно сможем дать полезные рекомендации. Точность можно улучшить позже.',
+    approximateNote:
+      'Приблизительное время подходит — мы воспринимаем его как окно, а не точный момент.',
+    timeLabel: 'Время рождения',
+    continue: 'Продолжить',
+    back: 'Назад',
+    errors: {
+      accuracyRequired: 'Укажите, насколько точно вы знаете время рождения.',
+      timeRequired: 'Укажите время рождения.',
+      timeInvalid: 'Введите корректное время.',
+    },
+  },
+  fa: {
+    title: 'زمان تولدتان را می‌دانید؟',
+    accuracyAria: 'دقت زمان تولد',
+    exact: 'دقیق',
+    approximate: 'تقریبی',
+    unknown: 'نمی‌دانم',
+    unknownReassurance:
+      'اشکالی ندارد. همچنان می‌توانیم پیشنهادهای مفید ارائه دهیم. بعداً می‌توانید دقت را بهتر کنید.',
+    approximateNote:
+      'زمان تقریبی کافی است — آن را به‌عنوان یک بازه در نظر می‌گیریم، نه یک لحظه دقیق.',
+    timeLabel: 'زمان تولد',
+    continue: 'ادامه',
+    back: 'بازگشت',
+    errors: {
+      accuracyRequired: 'مشخص کنید زمان تولد را چقدر دقیق می‌دانید.',
+      timeRequired: 'زمان تولد را وارد کنید.',
+      timeInvalid: 'یک زمان معتبر وارد کنید.',
+    },
+  },
+  ar: {
+    title: 'هل تعرف وقت ميلادك؟',
+    accuracyAria: 'دقة وقت الميلاد',
+    exact: 'دقيق',
+    approximate: 'تقريبي',
+    unknown: 'لا أعرف',
+    unknownReassurance:
+      'لا بأس. ما زلنا نستطيع تقديم توصيات مفيدة. يمكنك تحسين الدقة لاحقاً.',
+    approximateNote:
+      'الأوقات التقريبية مناسبة — نتعامل معها كنافذة زمنية وليس لحظة دقيقة.',
+    timeLabel: 'وقت الميلاد',
+    continue: 'متابعة',
+    back: 'رجوع',
+    errors: {
+      accuracyRequired: 'اختر مدى معرفتك بوقت ميلادك.',
+      timeRequired: 'أدخل وقت ميلادك.',
+      timeInvalid: 'أدخل وقتاً صالحاً.',
+    },
+  },
+};
+
+export function getBirthTimeCopy(lang: AppLang): BirthTimeCopy {
+  return BIRTH_TIME_LANGS[lang] ?? BIRTH_TIME_LANGS.en;
+}
+
 export const PROFILE_ONBOARDING_COPY = {
   step: 'Step 3 of 3',
   title: 'Your birth context',
