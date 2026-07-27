@@ -1,4 +1,4 @@
-import { API_BASE } from './calendar-scores';
+import { API_BASE } from './api-config';
 import { chartPreferenceFields } from './app-settings';
 import type { BirthProfile } from './birth-profile';
 import { loadPeople } from './people-storage';

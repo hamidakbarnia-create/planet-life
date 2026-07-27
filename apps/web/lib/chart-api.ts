@@ -1,4 +1,4 @@
-import { API_BASE } from './calendar-scores';
+import { API_BASE } from './api-config';
 import { validateChartResponse, type ChartData } from './chart-types';
 import type { ProfileRecord } from './profile/profile-types';
 

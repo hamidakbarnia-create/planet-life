@@ -11,7 +11,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import type { BirthProfile } from '@/lib/birth-profile';
-import { API_BASE } from '@/lib/calendar-scores';
+import { API_BASE } from '@/lib/api-config';
 import {
   ASK_DECISION_SCHEMA_VERSION,
   runAskDecision,

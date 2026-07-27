@@ -7,7 +7,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import type { BirthProfile } from '@/lib/birth-profile';
-import { API_BASE } from '@/lib/calendar-scores';
+import { API_BASE } from '@/lib/api-config';
 import { ASK_DECISION_SCHEMA_VERSION, runAskDecision } from '@/lib/ask-decision';
 import {
   ASK_MAX_PROVIDER_CALLS,

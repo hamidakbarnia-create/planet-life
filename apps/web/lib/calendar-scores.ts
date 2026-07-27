@@ -23,10 +23,9 @@ import {
   saveMonthCache,
 } from './calendar-cache';
 
-// Backend base URL. Override at build/dev time with NEXT_PUBLIC_API_BASE
-// (e.g. when sharing the app over a Cloudflare/ngrok tunnel).
-export const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
+import { API_BASE } from './api-config';
+
+export { API_BASE } from './api-config';
 
 export interface DayScore {
   date: string;

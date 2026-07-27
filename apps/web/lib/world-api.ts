@@ -1,4 +1,4 @@
-import { API_BASE } from './calendar-scores';
+import { API_BASE } from './api-config';
 
 export interface MarketQuote {
   symbol: string;

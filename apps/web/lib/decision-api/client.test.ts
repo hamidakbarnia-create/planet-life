@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { API_BASE } from '../calendar-scores';
+import { API_BASE } from '../api-config';
 import { DECISION_EXECUTE_PATH, postDecisionExecute } from './client';
 import type { DecisionExecuteTransportRequest } from './types';
 

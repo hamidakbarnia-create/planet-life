@@ -3,7 +3,7 @@
  * Shared by Ask and Pathfinder. No Ask/Pathfinder business logic.
  */
 
-import { API_BASE } from '@/lib/calendar-scores';
+import { API_BASE } from '@/lib/api-config';
 import type {
   ConversationClientResult,
   ConversationExecuteOptions,
