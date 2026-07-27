@@ -454,6 +454,91 @@ export function getBirthPlaceCopy(lang: AppLang): BirthPlaceCopy {
   return BIRTH_PLACE_LANGS[lang] ?? BIRTH_PLACE_LANGS.en;
 }
 
+/** Canonical English Living Location copy — PRD-001 §5.7 */
+export type LivingLocationCopy = {
+  title: string;
+  description: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  resultsAria: string;
+  noResults: string;
+  selectedLabel: string;
+  continue: string;
+  back: string;
+  errors: {
+    required: string;
+  };
+};
+
+export const LIVING_LOCATION_COPY: LivingLocationCopy = {
+  title: 'Where do you live now?',
+  description:
+    'Your current location helps us calculate local timing and recommendations.',
+  searchLabel: 'Current city',
+  searchPlaceholder: 'Start typing a city…',
+  resultsAria: 'City suggestions',
+  noResults: 'No cities found',
+  selectedLabel: 'Selected',
+  continue: 'Continue',
+  back: 'Back',
+  errors: {
+    required: 'Select a city from the list.',
+  },
+};
+
+export const LIVING_LOCATION_LANGS: Record<AppLang, LivingLocationCopy> = {
+  en: LIVING_LOCATION_COPY,
+  ru: {
+    title: 'Где вы живёте сейчас?',
+    description:
+      'Текущее местоположение помогает рассчитывать локальный тайминг и рекомендации.',
+    searchLabel: 'Текущий город',
+    searchPlaceholder: 'Начните вводить город…',
+    resultsAria: 'Подсказки городов',
+    noResults: 'Города не найдены',
+    selectedLabel: 'Выбрано',
+    continue: 'Продолжить',
+    back: 'Назад',
+    errors: {
+      required: 'Выберите город из списка.',
+    },
+  },
+  fa: {
+    title: 'الان کجا زندگی می‌کنید؟',
+    description:
+      'موقعیت فعلی شما به محاسبه زمان‌بندی محلی و پیشنهادها کمک می‌کند.',
+    searchLabel: 'شهر فعلی',
+    searchPlaceholder: 'نام شهر را تایپ کنید…',
+    resultsAria: 'پیشنهاد شهرها',
+    noResults: 'شهری یافت نشد',
+    selectedLabel: 'انتخاب‌شده',
+    continue: 'ادامه',
+    back: 'بازگشت',
+    errors: {
+      required: 'یک شهر را از فهرست انتخاب کنید.',
+    },
+  },
+  ar: {
+    title: 'أين تعيش الآن؟',
+    description:
+      'موقعك الحالي يساعدنا على حساب التوقيت المحلي والتوصيات.',
+    searchLabel: 'المدينة الحالية',
+    searchPlaceholder: 'ابدأ بكتابة اسم مدينة…',
+    resultsAria: 'اقتراحات المدن',
+    noResults: 'لم يتم العثور على مدن',
+    selectedLabel: 'تم الاختيار',
+    continue: 'متابعة',
+    back: 'رجوع',
+    errors: {
+      required: 'اختر مدينة من القائمة.',
+    },
+  },
+};
+
+export function getLivingLocationCopy(lang: AppLang): LivingLocationCopy {
+  return LIVING_LOCATION_LANGS[lang] ?? LIVING_LOCATION_LANGS.en;
+}
+
 export const PROFILE_ONBOARDING_COPY = {
   step: 'Step 3 of 3',
   title: 'Your birth context',
