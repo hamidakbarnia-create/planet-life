@@ -14,13 +14,15 @@ import {
   resolveCalendarEvaluationLocation,
   type UserLocation,
 } from './user-locations';
+import {
+  scoreToBand,
+  type ScoreBand,
+} from './timing-presentation';
 
 // Backend base URL. Override at build/dev time with NEXT_PUBLIC_API_BASE
 // (e.g. when sharing the app over a Cloudflare/ngrok tunnel).
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
-
-export type ScoreBand = 'green' | 'yellow' | 'orange' | 'red' | 'empty';
 
 export interface DayScore {
   date: string;
@@ -39,51 +41,14 @@ export interface HourScore {
 
 export type { MonthScoresResult, ScoreBreakdown };
 export type { ScoreReasoning } from './score-reasoning';
-
-export function scoreToBand(score: number | null | undefined): ScoreBand {
-  if (score == null || Number.isNaN(score)) return 'empty';
-  if (score >= 85) return 'green';
-  if (score >= 60) return 'yellow';
-  if (score >= 40) return 'orange';
-  return 'red';
-}
-
-/**
- * Tier 3 domain presentation map (DS-01 registry).
- * ADR-DS-001 Principle 3: currently defines raw palette literals — does not consume
- * semantic tokens yet. Refactor deferred to a future design-system ADR.
- * @see docs/design/system/design-token-registry.md
- */
-export const BAND_STYLES: Record<
-  ScoreBand,
-  { bg: string; border: string; text: string }
-> = {
-  green: {
-    bg: 'rgba(74,222,128,0.32)',
-    border: '#4ade80',
-    text: '#4ade80',
-  },
-  yellow: {
-    bg: 'rgba(251,191,36,0.28)',
-    border: '#fbbf24',
-    text: '#fbbf24',
-  },
-  orange: {
-    bg: 'rgba(251,146,60,0.28)',
-    border: '#fb923c',
-    text: '#fb923c',
-  },
-  red: {
-    bg: 'rgba(248,113,113,0.28)',
-    border: '#f87171',
-    text: '#f87171',
-  },
-  empty: {
-    bg: 'rgba(255,255,255,0.04)',
-    border: 'rgba(255,255,255,0.1)',
-    text: 'rgba(255,255,255,0.25)',
-  },
-};
+export {
+  BAND_STYLES,
+  formatHourLabel,
+  isDangerHour,
+  isGoldenHour,
+  scoreToBand,
+  type ScoreBand,
+} from './timing-presentation';
 
 function cacheKey(year: number, month: number, action: string, evalCity?: string) {
   const loc = evalCity ? evalCity.replace(/\s+/g, '_') : 'default';
@@ -195,19 +160,6 @@ export function daysInMonth(year: number, month: number): number {
 
 export function formatDateYMD(year: number, month: number, day: number): string {
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-}
-
-// Format an hour (0-23) for display. English uses 12-hour with AM/PM
-// (e.g. 18 -> "6:00 PM"), other locales keep 24-hour (e.g. "18:00") which
-// is the native convention there.
-export function formatHourLabel(hour: number, lang: string = 'en'): string {
-  const safe = ((hour % 24) + 24) % 24;
-  if (lang === 'en') {
-    const period = safe >= 12 ? 'PM' : 'AM';
-    const h12 = safe % 12 === 0 ? 12 : safe % 12;
-    return `${h12}:00 ${period}`;
-  }
-  return `${String(safe).padStart(2, '0')}:00`;
 }
 
 async function mapPool<T, R>(
@@ -485,12 +437,4 @@ export async function fetchTransitSnapshot(
   } catch {
     return { planets: [], meta: {} };
   }
-}
-
-export function isGoldenHour(score: number) {
-  return score >= 85;
-}
-
-export function isDangerHour(score: number) {
-  return score <= 39;
 }
