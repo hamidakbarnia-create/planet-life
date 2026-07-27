@@ -92,3 +92,10 @@ Links to related decisions, documents, PRs, or issues.
 3. Superseded ADRs must reference the document that replaces them.
 4. New ADRs must be added to the index table above.
 5. ADR identifiers use four-digit zero-padded numbering (e.g. `ADR-0001`, not `ADR-001`).
+
+## ADR-0012 — Today and Shared Timing Architecture
+
+- Status: Proposed
+- Date: 2026-07-28
+- Document: `docs/adr/ADR-0012-Today-and-Shared-Timing-Architecture.md`
+- Scope: Today, Calendar, shared timing clients, decision signals, compatibility migration

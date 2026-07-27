@@ -1,7 +1,7 @@
-# ADR-0009 — Today and Shared Timing Architecture
+# ADR-0012 — Today and Shared Timing Architecture
 
 - Status: Proposed
-- Date: 2026-07-27
+- Date: 2026-07-28
 - Decision owners: Product and Engineering
 - Scope: Web client architecture for Today, Calendar, timing scores, and transit access
 

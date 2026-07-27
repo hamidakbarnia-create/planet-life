@@ -166,3 +166,18 @@
 | **ACT** | Accept [CMG-ADMISSION-PIPELINE-SPECIFICATION.md](../architecture/CMG-ADMISSION-PIPELINE-SPECIFICATION.md) **v0.1.3** as the binding L1 Admission Pipeline behavioural contract. **Acceptance does not authorize coding.** Acceptance establishes the normative Admission S0–S12 pipeline, deterministic first-failure semantics, S5-A/B/C precedence, intent-to-`repositoryOperation` binding, `authoritySnapshot` requirements, canonicalization and AdmissionProof gates, fail-closed dependency handling, Repository handoff and verification boundary, operation contracts, concurrency and replay rules, and implementation/coding gates. **Explicit non-authorizations:** no coding authorization; no implementation authorization; no runtime activation; no deployment authorization; no migration or backfill authorization; no registry or operational authority is accepted by this decision; no proof issuance is operationally enabled; no canonical memory producer is newly authorized; no Repository Contract behaviour is changed. **Remaining gates:** Admission Authority Selection Authority; canonicalization/hash authority; AdmissionProof issuer/integrity authority; applicable type/schema/identity/lifecycle/policy authorities; process-entry resource-limit authority for untrusted input; privacy/audit authority where required; and explicit implementation approval. **Runtime effect:** non-prohibited candidates remain fail-closed with `MissingAuthority` while required authorities are absent; direct Accepted-ADR prohibitions still return `PolicyViolation`; intent/`repositoryOperation` mismatch returns `ValidationFailed`; successful proof-backed Admission remains impossible while OQ-A2 and OQ-A4 are unresolved. |
 | **OUTCOME** | Specification governance gate: closed. Coding gate: open / **Not granted**. Implementation gate: blocked. Runtime success gate: blocked. The Admission Pipeline is **not** implemented by this decision. No CMG L1 runtime, producer wiring, storage technology choice, API, UI, migration, registry acceptance, proof issuance enablement, or Repository Contract behaviour change is started, implemented, or unblocked by this decision alone. |
 | **LEARN** | Accepting an executable Admission Pipeline specification must keep operational-authority and explicit implementation-approval gates visible; do not treat specification acceptance as a coding license or as acceptance of Missing authorities. |
+
+## 2026-07-28 — ADR-0012 Proposed
+
+**Decision:** Proposed the Today and Shared Timing Architecture.
+
+**Scope:**
+- Defines ownership boundaries for Today and Calendar.
+- Separates decision signals from transport, caching, mapping, and presentation.
+- Requires `calendar-scores.ts` to remain a compatibility facade during migration.
+- Authorizes no refactor, endpoint change, scoring change, or UI rewrite.
+
+**Document:**
+`docs/adr/ADR-0012-Today-and-Shared-Timing-Architecture.md`
+
+**Status:** PROPOSED
