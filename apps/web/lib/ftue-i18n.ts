@@ -1,19 +1,51 @@
 import type { AppLang } from './app-settings';
 
+/** Canonical English Welcome copy — PRD-001 §5.1 */
 export const WELCOME_COPY = {
   headline: 'Know your best next move.',
-  subline: 'Structured timing guidance with visible reasoning.',
-  steps: [
-    'Set your birth context once',
-    "See today's decision window",
-    'Ask one real question and see why',
-  ],
-  getStarted: 'Get started',
-  howItWorks: 'See how it works',
-  howItWorksHide: 'Hide',
-  offlineCta: 'Connect to continue',
-  disclaimerLink: 'Educational use disclaimer',
+  subline: 'Personalized Decision Intelligence to help you make better life decisions.',
+  start: 'Start',
+  alreadyHaveAccount: 'Already have an account',
+  languageAria: 'Language',
 } as const;
+
+export type WelcomeCopy = {
+  headline: string;
+  subline: string;
+  start: string;
+  alreadyHaveAccount: string;
+  languageAria: string;
+};
+
+export const WELCOME_LANGS: Record<AppLang, WelcomeCopy> = {
+  en: WELCOME_COPY,
+  ru: {
+    headline: 'Знай свой лучший следующий шаг.',
+    subline:
+      'Персонализированный Decision Intelligence, чтобы принимать более взвешенные жизненные решения.',
+    start: 'Начать',
+    alreadyHaveAccount: 'Уже есть аккаунт',
+    languageAria: 'Язык',
+  },
+  fa: {
+    headline: 'بهترین قدم بعدی خود را بشناسید.',
+    subline: 'هوش تصمیم شخصی‌سازی‌شده برای کمک به تصمیم‌های بهتر در زندگی.',
+    start: 'شروع',
+    alreadyHaveAccount: 'قبلاً حساب دارید',
+    languageAria: 'زبان',
+  },
+  ar: {
+    headline: 'اعرف أفضل خطوتك التالية.',
+    subline: 'ذكاء قرارات شخصي يساعدك على اتخاذ قرارات حياتية أفضل.',
+    start: 'ابدأ',
+    alreadyHaveAccount: 'لديك حساب بالفعل',
+    languageAria: 'اللغة',
+  },
+};
+
+export function getWelcomeCopy(lang: AppLang): WelcomeCopy {
+  return WELCOME_LANGS[lang] ?? WELCOME_LANGS.en;
+}
 
 export const PROFILE_ONBOARDING_COPY = {
   step: 'Step 3 of 3',
