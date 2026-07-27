@@ -15,7 +15,7 @@ const PUBLIC_LEGAL_PATHS = new Set([
 ]);
 
 /** FTUE entry routes run before disclaimer (accepted after auth per ONBOARDING_FLOW). */
-const FTUE_PUBLIC_PATHS = new Set(['/welcome', '/login', '/onboarding/goal', '/onboarding/intent']);
+const FTUE_PUBLIC_PATHS = new Set(['/welcome', '/login', '/onboarding/goal', '/onboarding/intent', '/onboarding/birth-date']);
 
 export function DisclaimerGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

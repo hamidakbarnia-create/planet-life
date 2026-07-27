@@ -148,6 +148,40 @@ export function getGoalSelectionCopy(lang: AppLang): GoalSelectionCopy {
 }
 
 /** Canonical English Decision Profile copy — PRD-001 §5.3 */
+export type DecisionProfileCopy = {
+  body: string;
+  continue: string;
+  back: string;
+};
+
+export const DECISION_PROFILE_COPY: DecisionProfileCopy = {
+  body: 'We use your information to personalize your Decision Intelligence. Your data helps us understand timing, personalize recommendations, and improve explainability. You always remain in control.',
+  continue: 'Continue',
+  back: 'Back',
+};
+
+export const DECISION_PROFILE_LANGS: Record<AppLang, DecisionProfileCopy> = {
+  en: DECISION_PROFILE_COPY,
+  ru: {
+    body: 'Мы используем ваши данные, чтобы персонализировать Decision Intelligence. Они помогают понимать тайминг, персонализировать рекомендации и повышать объяснимость. Контроль всегда остаётся у вас.',
+    continue: 'Продолжить',
+    back: 'Назад',
+  },
+  fa: {
+    body: 'از اطلاعات شما برای شخصی‌سازی Decision Intelligence استفاده می‌کنیم. این داده‌ها به درک زمان‌بندی، شخصی‌سازی پیشنهادها و بهبود توضیح‌پذیری کمک می‌کند. کنترل همیشه با شماست.',
+    continue: 'ادامه',
+    back: 'بازگشت',
+  },
+  ar: {
+    body: 'نستخدم معلوماتك لتخصيص Decision Intelligence. تساعدنا بياناتك على فهم التوقيت وتخصيص التوصيات وتحسين قابلية الشرح. تبقى السيطرة دائماً بيدك.',
+    continue: 'متابعة',
+    back: 'رجوع',
+  },
+};
+
+export function getDecisionProfileCopy(lang: AppLang): DecisionProfileCopy {
+  return DECISION_PROFILE_LANGS[lang] ?? DECISION_PROFILE_LANGS.en;
+}
 
 export const PROFILE_ONBOARDING_COPY = {
   step: 'Step 3 of 3',
