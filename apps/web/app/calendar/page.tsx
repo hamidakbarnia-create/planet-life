@@ -37,7 +37,7 @@ import {
 } from '@/lib/calendar-scores';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { loadCalendarSystem, type AppLang, type CalendarSystem } from '@/lib/app-settings';
-import { formatDisplayDate } from '@/lib/date-format';
+import { formatDisplayDate, formatDisplayMonthYear } from '@/lib/date-format';
 import {
   hasConfirmedCurrentLocation,
   formatCalculatedFor,
@@ -811,7 +811,9 @@ export default function CalendarPage() {
               {t.prev}
             </button>
             <div className="fc text-sm" style={{ color: '#fbbf24' }}>
-              {t.months[month - 1]} {year}
+              {calendar === 'gregorian'
+                ? `${t.months[month - 1]} ${year}`
+                : formatDisplayMonthYear(lang, year, month, calendar)}
             </div>
             <button
               type="button"

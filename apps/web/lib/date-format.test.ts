@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { formatDisplayDate, formatDisplayDateRange } from './date-format';
+import {
+  formatDisplayDate,
+  formatDisplayDateRange,
+  formatDisplayMonthYear,
+} from './date-format';
 
 describe('formatDisplayDate', () => {
   it('formats gregorian ISO dates for English', () => {
@@ -34,3 +38,16 @@ describe('formatDisplayDateRange', () => {
     expect(range.endsWith(formatDisplayDate('en', '2026-07-28', 'gregorian'))).toBe(true);
   });
 });
+
+describe('formatDisplayMonthYear', () => {
+  it('formats gregorian month/year for English without a day', () => {
+    expect(formatDisplayMonthYear('en', 2026, 7, 'gregorian')).toMatch(/July.*2026/);
+  });
+
+  it('formats the same Gregorian month in shamsi', () => {
+    const shamsi = formatDisplayMonthYear('fa', 2026, 7, 'shamsi');
+    expect(shamsi).not.toEqual(formatDisplayMonthYear('fa', 2026, 7, 'gregorian'));
+    expect(shamsi).toMatch(/1405|۱۴۰۵/);
+  });
+});
+

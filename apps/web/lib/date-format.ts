@@ -43,3 +43,23 @@ export function formatDisplayDateRange(
 ): string {
   return `${formatDisplayDate(lang, start, calendar)} - ${formatDisplayDate(lang, end, calendar)}`;
 }
+
+/** Format a Gregorian year/month (1–12) as a month+year label in the chosen calendar. */
+export function formatDisplayMonthYear(
+  lang: AppLang,
+  year: number,
+  month: number,
+  calendar: CalendarSystem = 'gregorian'
+): string {
+  if (!year || month < 1 || month > 12) {
+    return `${month}/${year}`;
+  }
+  const date = new Date(Date.UTC(year, month - 1, 1));
+  const baseLocale = DATE_LOCALES[lang] ?? DATE_LOCALES.en;
+  const locale = `${baseLocale}-u-ca-${CALENDAR_EXT[calendar] ?? CALENDAR_EXT.gregorian}`;
+  return new Intl.DateTimeFormat(locale, {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date);
+}
