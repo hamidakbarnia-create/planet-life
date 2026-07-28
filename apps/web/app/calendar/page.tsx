@@ -36,7 +36,12 @@ import {
   type ScoreBand,
 } from '@/lib/calendar-scores';
 import { HOME_LANGS } from '@/lib/home-i18n';
-import { loadCalendarSystem, type AppLang, type CalendarSystem } from '@/lib/app-settings';
+import {
+  CALENDAR_SYSTEM_CHANGED_EVENT,
+  loadCalendarSystem,
+  type AppLang,
+  type CalendarSystem,
+} from '@/lib/app-settings';
 import { formatDisplayDate, formatDisplayMonthYear } from '@/lib/date-format';
 import {
   hasConfirmedCurrentLocation,
@@ -450,7 +455,7 @@ function hourBarKind(band: ScoreBand): 'golden' | 'danger' | 'neutral' {
 export default function CalendarPage() {
   const today = new Date();
   const [lang, setLangState] = useState<LangKey>('en');
-  const [calendar] = useState<CalendarSystem>(() => loadCalendarSystem());
+  const [calendar, setCalendar] = useState<CalendarSystem>(() => loadCalendarSystem());
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [monthScoreData, setMonthScoreData] = useState<{
@@ -503,17 +508,27 @@ export default function CalendarPage() {
         setHasProfile(false);
       }
     };
+    const syncCalendar = () => setCalendar(loadCalendarSystem());
+    const refreshOnReturn = () => {
+      refreshProfile();
+      syncCalendar();
+    };
     const stored = localStorage.getItem('planet-life-lang');
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
     }
     setExportMode(loadExportMode());
     refreshProfile();
-    window.addEventListener('focus', refreshProfile);
-    document.addEventListener('visibilitychange', refreshProfile);
+    syncCalendar();
+    window.addEventListener('focus', refreshOnReturn);
+    document.addEventListener('visibilitychange', refreshOnReturn);
+    window.addEventListener(CALENDAR_SYSTEM_CHANGED_EVENT, syncCalendar);
+    window.addEventListener('storage', syncCalendar);
     return () => {
-      window.removeEventListener('focus', refreshProfile);
-      document.removeEventListener('visibilitychange', refreshProfile);
+      window.removeEventListener('focus', refreshOnReturn);
+      document.removeEventListener('visibilitychange', refreshOnReturn);
+      window.removeEventListener(CALENDAR_SYSTEM_CHANGED_EVENT, syncCalendar);
+      window.removeEventListener('storage', syncCalendar);
     };
   }, []);
 
