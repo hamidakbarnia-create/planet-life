@@ -1,5 +1,5 @@
 import type { AppLang, CalendarSystem } from '@/lib/app-settings';
-import { formatPathfinderDate } from '@/lib/pathfinder-i18n';
+import { formatDisplayDate } from '@/lib/date-format';
 
 export type ProfileCalendarType = 'gregorian' | 'persian' | 'hijri';
 
@@ -14,5 +14,5 @@ export function formatProfileBirthDate(
   isoDate: string,
   calendarType: ProfileCalendarType
 ): string {
-  return formatPathfinderDate(lang, isoDate, toCalendarSystem(calendarType));
+  return formatDisplayDate(lang, isoDate, toCalendarSystem(calendarType));
 }

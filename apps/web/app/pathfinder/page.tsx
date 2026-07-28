@@ -8,6 +8,7 @@ import { loadBirthProfile, type BirthProfile } from '@/lib/birth-profile';
 import { isPaid } from '@/lib/membership';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
 import { loadCalendarSystem, type AppLang, type CalendarSystem } from '@/lib/app-settings';
+import { formatDisplayDateRange } from '@/lib/date-format';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { todayYMD } from '@/lib/calendar-utils';
 import {
@@ -23,7 +24,6 @@ import {
 import {
   composeEffectLead,
   composeReasons,
-  formatPathfinderDateRange,
   pathfinderAngleName,
   pathfinderPlanetName,
   periodLabel,
@@ -291,7 +291,7 @@ function PeriodCard({ period, lang, calendar }: { period: { start: string; end: 
   return (
     <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
       <div className="flex items-center justify-between">
-        <div className="fi text-sm font-semibold text-white">{formatPathfinderDateRange(lang, period.start, period.end, calendar)}</div>
+        <div className="fi text-sm font-semibold text-white">{formatDisplayDateRange(lang, period.start, period.end, calendar)}</div>
         <div className="fi text-xs font-medium" style={{ color }}>{periodLabel(lang, period.score)} · {period.score}</div>
       </div>
       <div className="mt-3 grid grid-cols-7 gap-1">

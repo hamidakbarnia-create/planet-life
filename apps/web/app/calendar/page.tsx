@@ -36,7 +36,8 @@ import {
   type ScoreBand,
 } from '@/lib/calendar-scores';
 import { HOME_LANGS } from '@/lib/home-i18n';
-import type { AppLang } from '@/lib/app-settings';
+import { loadCalendarSystem, type AppLang, type CalendarSystem } from '@/lib/app-settings';
+import { formatDisplayDate } from '@/lib/date-format';
 import {
   hasConfirmedCurrentLocation,
   formatCalculatedFor,
@@ -449,6 +450,7 @@ function hourBarKind(band: ScoreBand): 'golden' | 'danger' | 'neutral' {
 export default function CalendarPage() {
   const today = new Date();
   const [lang, setLangState] = useState<LangKey>('en');
+  const [calendar] = useState<CalendarSystem>(() => loadCalendarSystem());
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [monthScoreData, setMonthScoreData] = useState<{
@@ -936,7 +938,7 @@ export default function CalendarPage() {
                   {t.selected}
                 </div>
                 <div className="fc text-lg" style={{ color: '#fbbf24' }}>
-                  {selectedDate}
+                  {formatDisplayDate(lang, selectedDate, calendar)}
                 </div>
               </div>
               {selectedScore != null && (
