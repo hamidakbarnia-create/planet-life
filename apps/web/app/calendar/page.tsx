@@ -633,16 +633,16 @@ export default function CalendarPage() {
       navLabels={HOME_LANGS[lang].nav}
       fontFamily={localeFontFamily(lang)}
     >
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="fc text-xl tracking-wide mb-1" style={{ color: '#fbbf24' }}>
+      <div className="max-w-2xl lg:max-w-5xl mx-auto px-4 py-4 lg:py-3">
+        <div className="mb-4 lg:mb-2">
+          <h1 className="fc text-xl lg:text-lg tracking-wide mb-1 lg:mb-0.5" style={{ color: '#fbbf24' }}>
             {t.title}
           </h1>
-          <p className="fi text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <p className="fi text-sm lg:text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
             {t.subtitle}
           </p>
           {hasProfile && evalLocation && (
-            <p className="fi text-[11px] mt-2" style={{ color: 'rgba(74,222,128,0.85)' }}>
+            <p className="fi text-[11px] mt-1 lg:mt-0.5" style={{ color: 'rgba(74,222,128,0.85)' }}>
               {formatCalculatedFor(locationLabel(evalLocation), lang)}
             </p>
           )}
@@ -650,7 +650,7 @@ export default function CalendarPage() {
 
         {hasProfile && !hasCurrentLocation && (
           <div
-            className="rounded-2xl p-4 mb-6 fi text-sm"
+            className="rounded-2xl p-4 mb-4 lg:mb-3 fi text-sm"
             style={{
               background: 'rgba(251,146,60,0.06)',
               border: '1px solid rgba(251,146,60,0.25)',
@@ -666,7 +666,7 @@ export default function CalendarPage() {
 
         {!hasProfile && (
           <div
-            className="rounded-2xl p-4 mb-6 fi text-sm"
+            className="rounded-2xl p-4 mb-4 lg:mb-3 fi text-sm"
             style={{
               background: 'rgba(251,191,36,0.06)',
               border: '1px solid rgba(251,191,36,0.2)',
@@ -680,8 +680,142 @@ export default function CalendarPage() {
           </div>
         )}
 
+        {/* Desktop: compact Strategic GPS KPI summary above the Calendar */}
         <section
-          className="rounded-2xl p-4 mb-6"
+          className="hidden lg:block rounded-2xl px-3 py-2.5 mb-3"
+          style={{
+            background: 'linear-gradient(145deg, rgba(251,191,36,0.06), rgba(59,130,246,0.06))',
+            border: '1px solid rgba(251,191,36,0.18)',
+          }}
+        >
+          <div className="flex items-center justify-between gap-3 mb-2 min-w-0">
+            <div
+              className="fi text-[10px] uppercase tracking-[0.22em] truncate"
+              style={{ color: 'rgba(251,191,36,0.7)' }}
+            >
+              {gps.text.title}
+            </div>
+            <div
+              className="fc text-2xl shrink-0 leading-none"
+              style={{ color: GPS_TONE_STYLES[gps.monthTone].color }}
+            >
+              {gps.monthScore ?? '--'}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
+            <div
+              className="min-w-0 rounded-xl px-2.5 py-2"
+              style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.07)',
+              }}
+            >
+              <div
+                className="fi text-[10px] uppercase tracking-widest"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {gps.text.bestHour}
+              </div>
+              {loadingHourly ? (
+                <div className="fi text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {t.loading}
+                </div>
+              ) : gps.bestHour ? (
+                <div className="fc text-sm mt-1 leading-snug" style={{ color: '#4ade80' }}>
+                  {gps.bestHourLabel} · {gps.bestHour.score}
+                </div>
+              ) : (
+                <div className="fi text-xs mt-1 leading-snug" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {gps.text.noHourly}
+                </div>
+              )}
+            </div>
+            <div
+              className="min-w-0 rounded-xl px-2.5 py-2"
+              style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.07)',
+              }}
+            >
+              <div
+                className="fi text-[10px] uppercase tracking-widest"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {gps.text.riskHour}
+              </div>
+              {loadingHourly ? (
+                <div className="fi text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {t.loading}
+                </div>
+              ) : gps.riskHour ? (
+                <div className="fc text-sm mt-1 leading-snug" style={{ color: '#f87171' }}>
+                  {gps.riskHourLabel} · {gps.riskHour.score}
+                </div>
+              ) : (
+                <div className="fi text-xs mt-1 leading-snug" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {gps.text.noHourly}
+                </div>
+              )}
+            </div>
+            <div
+              className="min-w-0 rounded-xl px-2.5 py-2"
+              style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.07)',
+              }}
+            >
+              <div
+                className="fi text-[10px] uppercase tracking-widest mb-1"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {gps.text.meso}
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {gps.weeks.map((week) => {
+                  const style = GPS_TONE_STYLES[week.tone];
+                  return (
+                    <span
+                      key={week.label}
+                      className="fi text-[10px] leading-none px-1.5 py-1 rounded-md"
+                      title={`${week.label}${week.score == null ? '' : ` · ${week.action}`}`}
+                      style={{
+                        color: style.color,
+                        background: style.bg,
+                        border: `1px solid ${style.border}`,
+                      }}
+                    >
+                      {week.score ?? '--'}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+            <div
+              className="min-w-0 rounded-xl px-2.5 py-2"
+              style={{
+                background: GPS_TONE_STYLES[gps.monthTone].bg,
+                border: `1px solid ${GPS_TONE_STYLES[gps.monthTone].border}`,
+              }}
+            >
+              <div
+                className="fi text-[10px] uppercase tracking-widest mb-1"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {gps.text.macro}
+              </div>
+              <p className="fi text-xs leading-snug" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                {gps.monthBody}
+              </p>
+              <div className="fi text-[10px] mt-1.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                {gps.goldenCount} {gps.text.goldenDays} · {gps.cautionCount} {gps.text.cautionDays}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Mobile / tablet: full Strategic GPS card (unchanged structure) */}
+        <section
+          className="lg:hidden rounded-2xl p-4 mb-4"
           style={{
             background: 'linear-gradient(145deg, rgba(251,191,36,0.06), rgba(59,130,246,0.06))',
             border: '1px solid rgba(251,191,36,0.18)',
@@ -815,13 +949,13 @@ export default function CalendarPage() {
         </section>
 
         <div
-          className="rounded-2xl p-4 mb-6"
+          className="rounded-2xl p-4 mb-4 lg:mb-3"
           style={{
             background: 'rgba(255,255,255,0.02)',
             border: '1px solid rgba(255,255,255,0.07)',
           }}
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2 lg:mb-3">
             <button
               type="button"
               onClick={() => shiftMonth(-1)}
@@ -907,9 +1041,128 @@ export default function CalendarPage() {
           )}
         </div>
 
+        {/* Desktop: verbose Strategic GPS detail kept available below the Calendar */}
+        <details
+          className="hidden lg:block rounded-2xl p-3 mb-4"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.07)',
+          }}
+        >
+          <summary
+            className="fi text-xs cursor-pointer list-outside ms-4"
+            style={{ color: 'rgba(255,255,255,0.55)' }}
+          >
+            {gps.text.title} · {gps.text.subtitle}
+          </summary>
+          <div className="grid grid-cols-3 gap-3 mt-3">
+            <div
+              className="min-w-0 rounded-xl p-3"
+              style={{
+                background: GPS_TONE_STYLES[gps.monthTone].bg,
+                border: `1px solid ${GPS_TONE_STYLES[gps.monthTone].border}`,
+              }}
+            >
+              <div
+                className="fi text-[10px] uppercase tracking-widest mb-2"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {gps.text.macro}
+              </div>
+              <p className="fi text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                {gps.monthBody}
+              </p>
+              <div className="fi text-[10px] mt-3" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                {gps.goldenCount} {gps.text.goldenDays} · {gps.cautionCount} {gps.text.cautionDays}
+              </div>
+            </div>
+            <div
+              className="min-w-0 rounded-xl p-3"
+              style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.07)',
+              }}
+            >
+              <div
+                className="fi text-[10px] uppercase tracking-widest mb-2"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {gps.text.meso}
+              </div>
+              <div className="space-y-1.5">
+                {gps.weeks.map((week) => {
+                  const style = GPS_TONE_STYLES[week.tone];
+                  return (
+                    <div key={`desk-${week.label}`} className="flex items-center gap-2 min-w-0">
+                      <span className="fi text-[10px] w-12 shrink-0" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                        {week.label}
+                      </span>
+                      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${week.score ?? 8}%`,
+                            background: style.color,
+                            opacity: week.score == null ? 0.25 : 0.9,
+                          }}
+                        />
+                      </div>
+                      <span className="fi text-[10px] w-12 text-end shrink-0" style={{ color: style.color }}>
+                        {week.score ?? '--'} {week.score == null ? '' : week.action}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div
+              className="min-w-0 rounded-xl p-3"
+              style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.07)',
+              }}
+            >
+              <div
+                className="fi text-[10px] uppercase tracking-widest mb-2"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {gps.text.micro}
+              </div>
+              {loadingHourly ? (
+                <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {t.loading}
+                </div>
+              ) : gps.bestHour && gps.riskHour ? (
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="fi text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      {gps.text.bestHour}
+                    </span>
+                    <span className="fc text-base" style={{ color: '#4ade80' }}>
+                      {gps.bestHourLabel} · {gps.bestHour.score}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="fi text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                      {gps.text.riskHour}
+                    </span>
+                    <span className="fc text-base" style={{ color: '#f87171' }}>
+                      {gps.riskHourLabel} · {gps.riskHour.score}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {gps.text.noHourly}
+                </div>
+              )}
+            </div>
+          </div>
+        </details>
+
         {/* Score legend — explains the numbers in each calendar cell */}
         <div
-          className="rounded-2xl p-4 mb-6"
+          className="rounded-2xl p-4 mb-6 lg:mb-4"
           style={{
             background: 'rgba(255,255,255,0.02)',
             border: '1px solid rgba(255,255,255,0.07)',
