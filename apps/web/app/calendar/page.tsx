@@ -42,7 +42,11 @@ import {
   type AppLang,
   type CalendarSystem,
 } from '@/lib/app-settings';
-import { formatDisplayDate, formatDisplayMonthYear } from '@/lib/date-format';
+import {
+  formatDisplayDate,
+  formatDisplayDay,
+  formatDisplayMonthCoverage,
+} from '@/lib/date-format';
 import {
   hasConfirmedCurrentLocation,
   formatCalculatedFor,
@@ -828,7 +832,7 @@ export default function CalendarPage() {
             <div className="fc text-sm" style={{ color: '#fbbf24' }}>
               {calendar === 'gregorian'
                 ? `${t.months[month - 1]} ${year}`
-                : formatDisplayMonthYear(lang, year, month, calendar)}
+                : formatDisplayMonthCoverage(lang, year, month, calendar)}
             </div>
             <button
               type="button"
@@ -884,7 +888,9 @@ export default function CalendarPage() {
                     }}
                   >
                     <span className="fi text-[11px] font-medium text-white/90">
-                      {cell.day}
+                      {calendar === 'gregorian'
+                        ? cell.day
+                        : formatDisplayDay(lang, cell.date, calendar)}
                     </span>
                     {score != null && (
                       <span

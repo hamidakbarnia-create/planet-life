@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   formatDisplayDate,
   formatDisplayDateRange,
+  formatDisplayDay,
+  formatDisplayMonthCoverage,
   formatDisplayMonthYear,
 } from './date-format';
 
@@ -51,3 +53,45 @@ describe('formatDisplayMonthYear', () => {
   });
 });
 
+describe('formatDisplayDay', () => {
+  it('keeps gregorian day numerals', () => {
+    expect(formatDisplayDay('en', '2026-07-28', 'gregorian')).toMatch(/28/);
+  });
+
+  it('derives shamsi day from the Gregorian ISO date', () => {
+    // 2026-07-28 ≈ Mordad 6, 1405
+    expect(formatDisplayDay('fa', '2026-07-28', 'shamsi')).toMatch(/6|۶/);
+  });
+
+  it('derives hijri day from the Gregorian ISO date', () => {
+    expect(formatDisplayDay('ar', '2026-07-28', 'hijri')).toMatch(/14|١٤/);
+  });
+});
+
+describe('formatDisplayMonthCoverage', () => {
+  it('matches single-month gregorian headers', () => {
+    expect(formatDisplayMonthCoverage('en', 2026, 7, 'gregorian')).toMatch(/July.*2026/);
+  });
+
+  it('characterizes July 2026 as a shamsi span across two months', () => {
+    const coverage = formatDisplayMonthCoverage('en', 2026, 7, 'shamsi');
+    expect(coverage).toContain('–');
+    expect(coverage).toMatch(/Tir/i);
+    expect(coverage).toMatch(/Mordad/i);
+    expect(coverage).toMatch(/1405/);
+  });
+
+  it('characterizes July 2026 as a hijri span across two months', () => {
+    const coverage = formatDisplayMonthCoverage('en', 2026, 7, 'hijri');
+    expect(coverage).toContain('–');
+    expect(coverage).toMatch(/Muharram/i);
+    expect(coverage).toMatch(/Safar/i);
+    expect(coverage).toMatch(/1448/);
+  });
+
+  it('keeps gregorian coverage as a single month label', () => {
+    const coverage = formatDisplayMonthCoverage('en', 2026, 7, 'gregorian');
+    expect(coverage).not.toContain('–');
+    expect(coverage).toMatch(/July.*2026/);
+  });
+});
