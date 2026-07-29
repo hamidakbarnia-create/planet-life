@@ -199,3 +199,28 @@
 | **OUTCOME** | Presence/validity gate policy: Accepted. Full Reading Contract coding: **Not granted**. Calendar/Today timing Score surfaces remain non-Confidence presentation. |
 | **LEARN** | Do not conflate timing Score with Reading Confidence; do not let presentation invent missing Reading fields to force success. |
 
+### Post-ratification verification (2026-07-29)
+
+Evidence recorded on [PRG-02](./PRG-02-reading-contract-presence-validity-gates.md) § Post-ratification verification evidence.
+
+- Approved `grep` found only the canonical Reading Contract, this PRG-02 artifact, this Decision Log entry, and ADR-0012’s non-schema reference.
+- **Conclusion:** no competing Reading Contract / Reading schema / Reading confidence validation contract found.
+- **Non-blocking debt:** `apps/web/lib/intelligence/` `InsightConfidence` / `validatePersonalIntelligenceProfile` is not a competing Reading Contract; confidence semantics must later be reconciled with Score ≠ presence ≠ completeness ≠ Confidence. No remediation authorized here.
+
+## 2026-07-29 — PRG-04 Accepted (Decision Value Semantics)
+
+| Field | Value |
+|-------|-------|
+| **ID** | PRG-04 |
+| **Title** | Decision Value Semantics (Context Fitness) |
+| **Status** | ACCEPTED |
+| **Authority** | Product / domain semantics |
+| **Owner** | METIORO Product Owner |
+| **Date** | 2026-07-29 |
+| **WHERE** | Explicit Product Owner acceptance — [PRG-04-decision-value-semantics.md](./PRG-04-decision-value-semantics.md) |
+| **References** | [PRG-04](./PRG-04-decision-value-semantics.md); [PRG-02](./PRG-02-reading-contract-presence-validity-gates.md) (Variant A); [READING-CONTRACT-SPECIFICATION.md](../architecture/READING-CONTRACT-SPECIFICATION.md) |
+| **WHY** | Decision Value must be defined as present contextual fit of a specific decision, not as outcome prediction, probability, Confidence, or any single Context score. This preserves Constraint-aligned epistemology and Variant A ownership (Producer meaning; Reading Contract envelope; presentation as pure consumer). |
+| **ACT** | Accept **Decision Value = fitness of a specific decision to the current relevant context**. Authorize v1 Value Bands only: High, Moderate, Low, Insufficient Context. Prohibit numeric/percentage/decimal/probability-like Value in v1. Bind Context inputs (timing, relationship, location, world, personal/Vault) as inputs only. Do **not** authorize Decision Advantage, Value Engine, API, schema, UI, prompts, ReadingResult wiring, or application code. Do **not** modify Reading Contract or PRG-02 Variant A. |
+| **OUTCOME** | Domain meaning of Decision Value: Accepted. Implementation / integration: **Not granted**. |
+| **LEARN** | Prefer Context Fitness over predictive Value definitions; keep Value, Score, and Confidence as independent concepts. |
+
