@@ -56,387 +56,12 @@ import {
 } from '@/lib/user-locations';
 import { todayYMD } from '@/lib/calendar-utils';
 import { GPS_TONE_STYLES, buildStrategicGps } from '@/lib/strategic-gps';
+import { CALENDAR_PAGE_LANGS } from '@/lib/calendar-page-i18n';
+import { CalendarSelectedDayInsight } from '@/components/calendar/CalendarSelectedDayInsight';
 
 type LangKey = AppLang;
 
-type LangPack = {
-  dir: 'ltr' | 'rtl';
-  title: string;
-  subtitle: string;
-  prev: string;
-  next: string;
-  loading: string;
-  noProfile: string;
-  goProfile: string;
-  noCurrentLocation: string;
-  timingLocation: string;
-  selected: string;
-  hourly: string;
-  golden: string;
-  danger: string;
-  neutral: string;
-  export: string;
-  exportAll: string;
-  exportImportant: string;
-  exportNotify: string;
-  exportDownload: string;
-  exportDisabled: string;
-  score: string;
-  dayScore: string;
-  weekdays: string[];
-  nav: Record<string, string>;
-  months: string[];
-  legend: {
-    title: string;
-    hint: string;
-    bands: { range: string; label: string; color: string }[];
-  };
-  transit: {
-    title: string;
-    hint: string;
-    retrograde: string;
-    in: string;
-    house: string;
-    empty: string;
-    detailsSummary: string;
-    detailsPlace: string;
-    detailsLocalTime: string;
-    detailsUtc: string;
-    detailsTimezone: string;
-  };
-  signs: string[];
-  planets: Record<string, string>;
-};
-
-const LANGS: Record<LangKey, LangPack> = {
-  en: {
-    dir: 'ltr',
-    title: 'Strategic Calendar',
-    subtitle: 'Golden timing windows from your natal blueprint',
-    prev: 'Prev',
-    next: 'Next',
-    loading: 'Analyzing…',
-    noProfile: 'Set your birth data on Profile first.',
-    goProfile: 'Go to Profile',
-    noCurrentLocation:
-      'Add your current living city in Profile — calendar timing uses where you live now, not your birth city.',
-    timingLocation: 'Timing location',
-    selected: 'Selected day',
-    hourly: 'Hourly timeline',
-    golden: 'Golden window',
-    danger: 'Danger zone',
-    neutral: 'Neutral',
-    export: 'Export',
-    exportAll: 'All events (every scored day)',
-    exportImportant: 'Important only (85+ and 0–39)',
-    exportNotify: 'App notifications only',
-    exportDownload: 'Download .ics',
-    exportDisabled: 'Enable an export option above to download.',
-    score: 'Score',
-    dayScore: 'Day score',
-    weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    nav: {
-      '/dashboard': 'Dashboard',
-      '/calendar': 'Calendar',
-      '/people': 'People',
-      '/profile': 'Profile',
-    },
-    months: [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ],
-    legend: {
-      title: 'What the numbers mean',
-      hint: 'Each cell shows your daily readiness score (0–100) for this action.',
-      bands: [
-        { range: '85–100', label: 'Golden — make your move', color: '#4ade80' },
-        { range: '60–84', label: 'Favorable — go ahead', color: '#fbbf24' },
-        { range: '40–59', label: 'Neutral — proceed carefully', color: '#fb923c' },
-        { range: '0–39', label: 'Avoid — wait for a better day', color: '#f87171' },
-      ],
-    },
-    transit: {
-      title: 'Sky on this day',
-      hint: 'Planetary positions for the selected day at local noon where you live.',
-      retrograde: 'Retrograde',
-      in: 'in',
-      house: 'House',
-      empty: 'No transit data yet.',
-      detailsSummary: 'Calculation details',
-      detailsPlace: 'Living location',
-      detailsLocalTime: 'Local time used',
-      detailsUtc: 'UTC instant',
-      detailsTimezone: 'Timezone',
-    },
-    signs: [
-      'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-      'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
-    ],
-    planets: {
-      sun: 'Sun', moon: 'Moon', mercury: 'Mercury', venus: 'Venus', mars: 'Mars',
-      jupiter: 'Jupiter', saturn: 'Saturn', uranus: 'Uranus', neptune: 'Neptune',
-      pluto: 'Pluto', north_node: 'North Node',
-    },
-  },
-  ru: {
-    dir: 'ltr',
-    title: 'Стратегический календарь',
-    subtitle: 'Золотые окна по вашей натальной карте',
-    prev: 'Назад',
-    next: 'Вперёд',
-    loading: 'Анализ…',
-    noProfile: 'Сначала укажите данные рождения в Профиле.',
-    goProfile: 'В профиль',
-    noCurrentLocation:
-      'Добавьте текущий город в Профиле — календарь использует место проживания, а не город рождения.',
-    timingLocation: 'Город для тайминга',
-    selected: 'Выбранный день',
-    hourly: 'Почасовой таймлайн',
-    golden: 'Золотое окно',
-    danger: 'Опасная зона',
-    neutral: 'Нейтрально',
-    export: 'Экспорт',
-    exportAll: 'Все события (каждый день со счётом)',
-    exportImportant: 'Только важные (85+ и 0–39)',
-    exportNotify: 'Только уведомления в приложении',
-    exportDownload: 'Скачать .ics',
-    exportDisabled: 'Выберите режим экспорта выше.',
-    score: 'Счёт',
-    dayScore: 'Счёт дня',
-    weekdays: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
-    nav: {
-      '/dashboard': 'Панель',
-      '/calendar': 'Календарь',
-      '/people': 'Люди',
-      '/profile': 'Профиль',
-    },
-    months: [
-      'Январь',
-      'Февраль',
-      'Март',
-      'Апрель',
-      'Май',
-      'Июнь',
-      'Июль',
-      'Август',
-      'Сентябрь',
-      'Октябрь',
-      'Ноябрь',
-      'Декабрь',
-    ],
-    legend: {
-      title: 'Что означают числа',
-      hint: 'Каждая ячейка — ваш балл готовности (0–100) для этого действия.',
-      bands: [
-        { range: '85–100', label: 'Золотое окно — действуйте', color: '#4ade80' },
-        { range: '60–84', label: 'Благоприятно — вперёд', color: '#fbbf24' },
-        { range: '40–59', label: 'Нейтрально — осторожно', color: '#fb923c' },
-        { range: '0–39', label: 'Избегайте — подождите', color: '#f87171' },
-      ],
-    },
-    transit: {
-      title: 'Небо в этот день',
-      hint: 'Положения планет на выбранный день в полдень по месту проживания.',
-      retrograde: 'Ретроград',
-      in: 'в',
-      house: 'Дом',
-      empty: 'Данных о транзитах пока нет.',
-      detailsSummary: 'Детали расчёта',
-      detailsPlace: 'Место проживания',
-      detailsLocalTime: 'Местное время',
-      detailsUtc: 'Момент UTC',
-      detailsTimezone: 'Часовой пояс',
-    },
-    signs: [
-      'Овен', 'Телец', 'Близнецы', 'Рак', 'Лев', 'Дева',
-      'Весы', 'Скорпион', 'Стрелец', 'Козерог', 'Водолей', 'Рыбы',
-    ],
-    planets: {
-      sun: 'Солнце', moon: 'Луна', mercury: 'Меркурий', venus: 'Венера', mars: 'Марс',
-      jupiter: 'Юпитер', saturn: 'Сатурн', uranus: 'Уран', neptune: 'Нептун',
-      pluto: 'Плутон', north_node: 'Сев. узел',
-    },
-  },
-  fa: {
-    dir: 'rtl',
-    title: 'تقویم استراتژیک',
-    subtitle: 'پنجره‌های طلایی از نقشه تولد شما',
-    prev: 'قبلی',
-    next: 'بعدی',
-    loading: 'در حال تحلیل…',
-    noProfile: 'ابتدا اطلاعات تولد را در پروفایل وارد کنید.',
-    goProfile: 'رفتن به پروفایل',
-    noCurrentLocation:
-      'شهر محل زندگی فعلی را در پروفایل اضافه کن — تقویم از محل زندگی فعلی استفاده می‌کند، نه شهر تولد.',
-    timingLocation: 'مکان زمان‌بندی',
-    selected: 'روز انتخاب‌شده',
-    hourly: 'خط زمانی ساعتی',
-    golden: 'پنجره طلایی',
-    danger: 'منطقه خطر',
-    neutral: 'خنثی',
-    export: 'خروجی',
-    exportAll: 'همه رویدادها (هر روز با امتیاز)',
-    exportImportant: 'فقط مهم (۸۵+ و ۰–۳۹)',
-    exportNotify: 'فقط اعلان در برنامه',
-    exportDownload: 'دانلود .ics',
-    exportDisabled: 'یک گزینه خروجی بالا را انتخاب کنید.',
-    score: 'امتیاز',
-    dayScore: 'امتیاز روز',
-    weekdays: ['ی', 'د', 'س', 'چ', 'پ', 'ج', 'ش'],
-    nav: {
-      '/dashboard': 'داشبورد',
-      '/calendar': 'تقویم',
-      '/people': 'افراد',
-      '/profile': 'پروفایل',
-    },
-    months: [
-      'ژانویه',
-      'فوریه',
-      'مارس',
-      'آوریل',
-      'مه',
-      'ژوئن',
-      'ژوئیه',
-      'اوت',
-      'سپتامبر',
-      'اکتبر',
-      'نوامبر',
-      'دسامبر',
-    ],
-    legend: {
-      title: 'معنای اعداد',
-      hint: 'هر خانه امتیاز آمادگی روزانه شما (۰ تا ۱۰۰) برای این اقدام است.',
-      bands: [
-        { range: '۸۵ تا ۱۰۰', label: 'طلایی — اقدام کنید', color: '#4ade80' },
-        { range: '۶۰ تا ۸۴', label: 'مساعد — جلو بروید', color: '#fbbf24' },
-        { range: '۴۰ تا ۵۹', label: 'خنثی — با احتیاط', color: '#fb923c' },
-        { range: '۰ تا ۳۹', label: 'اجتناب کنید — صبر', color: '#f87171' },
-      ],
-    },
-    transit: {
-      title: 'آسمان این روز',
-      hint: 'موقعیت سیارات برای روز انتخاب‌شده در ظهر محلی محل زندگی شما.',
-      retrograde: 'برگشتی',
-      in: 'در',
-      house: 'خانه',
-      empty: 'هنوز داده‌ای از ترانزیت‌ها نیست.',
-      detailsSummary: 'جزئیات محاسبه',
-      detailsPlace: 'محل زندگی',
-      detailsLocalTime: 'زمان محلی استفاده‌شده',
-      detailsUtc: 'لحظهٔ UTC',
-      detailsTimezone: 'منطقهٔ زمانی',
-    },
-    signs: [
-      'حمل', 'ثور', 'جوزا', 'سرطان', 'اسد', 'سنبله',
-      'میزان', 'عقرب', 'قوس', 'جدی', 'دلو', 'حوت',
-    ],
-    planets: {
-      sun: 'خورشید', moon: 'ماه', mercury: 'عطارد', venus: 'زهره', mars: 'مریخ',
-      jupiter: 'مشتری', saturn: 'زحل', uranus: 'اورانوس', neptune: 'نپتون',
-      pluto: 'پلوتو', north_node: 'گره شمالی',
-    },
-  },
-  ar: {
-    dir: 'rtl',
-    title: 'التقويم الاستراتيجي',
-    subtitle: 'نوافذ ذهبية من خريطة ميلادك',
-    prev: 'السابق',
-    next: 'التالي',
-    loading: 'جاري التحليل…',
-    noProfile: 'أدخل بيانات الميلاد في الملف أولاً.',
-    goProfile: 'الذهاب للملف',
-    noCurrentLocation:
-      'أضف مدينة إقامتك الحالية في الملف — التقويم يستخدم مكان إقامتك الآن وليس مدينة الميلاد.',
-    timingLocation: 'موقع التوقيت',
-    selected: 'اليوم المحدد',
-    hourly: 'الجدول الزمني بالساعة',
-    golden: 'نافذة ذهبية',
-    danger: 'منطقة خطر',
-    neutral: 'محايد',
-    export: 'تصدير',
-    exportAll: 'كل الأحداث (كل يوم بدرجة)',
-    exportImportant: 'المهم فقط (85+ و 0–39)',
-    exportNotify: 'إشعارات التطبيق فقط',
-    exportDownload: 'تنزيل .ics',
-    exportDisabled: 'اختر خيار تصدير أعلاه.',
-    score: 'الدرجة',
-    dayScore: 'درجة اليوم',
-    weekdays: ['أح', 'إث', 'ث', 'أر', 'خ', 'ج', 'س'],
-    nav: {
-      '/dashboard': 'لوحة',
-      '/calendar': 'التقويم',
-      '/people': 'الأشخاص',
-      '/profile': 'الملف',
-    },
-    months: [
-      'يناير',
-      'فبراير',
-      'مارس',
-      'أبريل',
-      'مايو',
-      'يونيو',
-      'يوليو',
-      'أغسطس',
-      'سبتمبر',
-      'أكتوبر',
-      'نوفمبر',
-      'ديسمبر',
-    ],
-    legend: {
-      title: 'معنى الأرقام',
-      hint: 'كل خلية تظهر درجة جاهزيتك اليومية (0–100) لهذا الإجراء.',
-      bands: [
-        { range: '85–100', label: 'ذهبي — تحرّك', color: '#4ade80' },
-        { range: '60–84', label: 'مواتٍ — تقدّم', color: '#fbbf24' },
-        { range: '40–59', label: 'محايد — بحذر', color: '#fb923c' },
-        { range: '0–39', label: 'تجنّب — انتظر', color: '#f87171' },
-      ],
-    },
-    transit: {
-      title: 'سماء هذا اليوم',
-      hint: 'مواقع الكواكب لليوم المحدد عند الظهيرة المحلية في مكان إقامتك.',
-      retrograde: 'تراجعي',
-      in: 'في',
-      house: 'البيت',
-      empty: 'لا توجد بيانات عبور بعد.',
-      detailsSummary: 'تفاصيل الحساب',
-      detailsPlace: 'مكان الإقامة',
-      detailsLocalTime: 'الوقت المحلي المستخدم',
-      detailsUtc: 'لحظة UTC',
-      detailsTimezone: 'المنطقة الزمنية',
-    },
-    signs: [
-      'الحمل', 'الثور', 'الجوزاء', 'السرطان', 'الأسد', 'العذراء',
-      'الميزان', 'العقرب', 'القوس', 'الجدي', 'الدلو', 'الحوت',
-    ],
-    planets: {
-      sun: 'الشمس', moon: 'القمر', mercury: 'عطارد', venus: 'الزهرة', mars: 'المريخ',
-      jupiter: 'المشتري', saturn: 'زحل', uranus: 'أورانوس', neptune: 'نبتون',
-      pluto: 'بلوتو', north_node: 'العقدة الشمالية',
-    },
-  },
-};
-
-const PLANET_GLYPHS: Record<string, string> = {
-  sun: '☉', moon: '☾', mercury: '☿', venus: '♀', mars: '♂',
-  jupiter: '♃', saturn: '♄', uranus: '♅', neptune: '♆',
-  pluto: '♇', north_node: '☊',
-};
-
-const PLANET_ORDER = [
-  'sun', 'moon', 'mercury', 'venus', 'mars',
-  'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'north_node',
-];
+const LANGS = CALENDAR_PAGE_LANGS;
 
 function calendarCells(year: number, month: number) {
   const firstDow = new Date(year, month - 1, 1).getDay();
@@ -680,7 +305,7 @@ export default function CalendarPage() {
           </div>
         )}
 
-        {/* Desktop: compact Strategic GPS KPI summary above the Calendar */}
+        {/* Desktop: compact Decision Timing KPI summary above the Calendar */}
         <section
           className="hidden lg:block rounded-2xl px-3 py-2.5 mb-3"
           style={{
@@ -813,7 +438,7 @@ export default function CalendarPage() {
           </div>
         </section>
 
-        {/* Mobile / tablet: full Strategic GPS card (unchanged structure) */}
+        {/* Mobile / tablet: full Decision Timing card (unchanged structure) */}
         <section
           className="lg:hidden rounded-2xl p-4 mb-4"
           style={{
@@ -1041,7 +666,7 @@ export default function CalendarPage() {
           )}
         </div>
 
-        {/* Desktop: verbose Strategic GPS detail kept available below the Calendar */}
+        {/* Desktop: verbose Decision Timing detail kept available below the Calendar */}
         <details
           className="hidden lg:block rounded-2xl p-3 mb-4"
           style={{
@@ -1198,6 +823,13 @@ export default function CalendarPage() {
               </div>
             ))}
           </div>
+          <p
+            className="fi text-[11px] mt-3"
+            style={{ color: 'rgba(255,255,255,0.45)' }}
+            data-testid="calendar-uncertainty-disclosure"
+          >
+            {t.uncertaintyDisclosure}
+          </p>
         </div>
 
         {selectedDate && (
@@ -1224,112 +856,22 @@ export default function CalendarPage() {
               )}
             </div>
 
-            {/* Transit snapshot — astrological details for this day */}
-            <div className="fi text-[10px] uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              {t.transit.title}
-            </div>
-            <p className="fi text-[11px] mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              {t.transit.hint}
-            </p>
-            {(transitMeta.localIso || transitMeta.utcIso || transitMeta.calculatedFor) && (
-              <details
-                className="mb-3 rounded-lg px-3 py-2"
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                }}
-                dir={t.dir}
-              >
-                <summary
-                  className="fi text-[11px] cursor-pointer select-none"
-                  style={{ color: 'rgba(212,175,55,0.85)' }}
-                >
-                  {t.transit.detailsSummary}
-                </summary>
-                <dl className="fi mt-2 flex flex-col gap-1.5 text-[11px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                  {transitMeta.calculatedFor ? (
-                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                      <dt style={{ color: 'rgba(255,255,255,0.35)' }}>{t.transit.detailsPlace}</dt>
-                      <dd className="m-0">{transitMeta.calculatedFor}</dd>
-                    </div>
-                  ) : null}
-                  {transitMeta.localIso ? (
-                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                      <dt style={{ color: 'rgba(255,255,255,0.35)' }}>{t.transit.detailsLocalTime}</dt>
-                      <dd className="m-0">{transitMeta.localIso}</dd>
-                    </div>
-                  ) : null}
-                  {transitMeta.utcIso ? (
-                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                      <dt style={{ color: 'rgba(255,255,255,0.35)' }}>{t.transit.detailsUtc}</dt>
-                      <dd className="m-0">{transitMeta.utcIso}</dd>
-                    </div>
-                  ) : null}
-                  {transitMeta.timezone ? (
-                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                      <dt style={{ color: 'rgba(255,255,255,0.35)' }}>{t.transit.detailsTimezone}</dt>
-                      <dd className="m-0">{transitMeta.timezone}</dd>
-                    </div>
-                  ) : null}
-                </dl>
-              </details>
-            )}
-            {loadingTransit ? (
-              <div className="py-4 text-center fi text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                {t.loading}
-              </div>
-            ) : transit.length === 0 ? (
-              <div className="py-3 text-center fi text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                {t.transit.empty}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-5">
-                {PLANET_ORDER.map((name) => {
-                  const body = transit.find((p) => p.name === name);
-                  if (!body) return null;
-                  const signName = t.signs[body.signIndex] ?? body.sign;
-                  const deg = Math.floor(body.degreeInSign);
-                  const min = Math.floor((body.degreeInSign - deg) * 60);
-                  return (
-                    <div
-                      key={name}
-                      className="rounded-lg px-2.5 py-2 flex items-center gap-2"
-                      style={{
-                        background: body.retrograde
-                          ? 'rgba(248,113,113,0.08)'
-                          : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${
-                          body.retrograde
-                            ? 'rgba(248,113,113,0.35)'
-                            : 'rgba(255,255,255,0.07)'
-                        }`,
-                      }}
-                    >
-                      <span
-                        className="fc text-base shrink-0"
-                        style={{ color: body.retrograde ? '#f87171' : '#fbbf24', width: 18 }}
-                      >
-                        {PLANET_GLYPHS[name] ?? '•'}
-                      </span>
-                      <div className="flex flex-col min-w-0">
-                        <span className="fc text-[11px] truncate" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                          {t.planets[name] ?? name}
-                          {body.retrograde && (
-                            <span className="fi text-[9px] ml-1" style={{ color: '#f87171' }}>
-                              ℞
-                            </span>
-                          )}
-                        </span>
-                        <span className="fi text-[10px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                          {deg}°{String(min).padStart(2, '0')}′ {t.transit.in} {signName}
-                          {body.house ? ` · ${t.transit.house} ${body.house}` : ''}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            <CalendarSelectedDayInsight
+              labels={{
+                dir: t.dir,
+                loading: t.loading,
+                whyTiming: t.whyTiming,
+                supportingReasons: t.supportingReasons,
+                advancedDetails: t.advancedDetails,
+                transit: t.transit,
+                signs: t.signs,
+                planets: t.planets,
+              }}
+              reasoning={selectedDate ? monthScoreData.reasoning[selectedDate] : null}
+              transit={transit}
+              transitMeta={transitMeta}
+              loadingTransit={loadingTransit}
+            />
 
             <div className="fi text-[10px] uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
               {t.hourly}

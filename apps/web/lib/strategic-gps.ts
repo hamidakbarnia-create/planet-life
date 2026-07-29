@@ -28,7 +28,7 @@ interface GpsTextPack {
 
 const GPS_TEXT: Record<AppLang, GpsTextPack> = {
   en: {
-    title: 'Strategic GPS',
+    title: 'Decision Timing',
     subtitle: 'Your month, weeks, and selected day as a road map.',
     macro: 'Macro lane',
     meso: 'Weekly route',
@@ -38,7 +38,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     monthYellow: 'Supportive road: useful progress with normal care.',
     monthOrange: 'Foggy road: keep plans flexible and double-check details.',
     monthRed: 'Slow lane: reduce risk and use the month for repair.',
-    goldenDays: 'golden days',
+    goldenDays: 'high-readiness days',
     cautionDays: 'caution days',
     week: 'Week',
     weekGreen: 'advance',
@@ -50,7 +50,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     noHourly: 'Select a day to load hourly guidance.',
   },
   ru: {
-    title: 'Стратегический GPS',
+    title: 'Тайминг решений',
     subtitle: 'Месяц, недели и выбранный день как карта маршрута.',
     macro: 'Макро-линия',
     meso: 'Маршрут недели',
@@ -60,7 +60,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     monthYellow: 'Поддерживающая дорога: прогресс с обычной осторожностью.',
     monthOrange: 'Туманная дорога: держите планы гибкими.',
     monthRed: 'Медленная линия: снижайте риск и чините систему.',
-    goldenDays: 'золотых дней',
+    goldenDays: 'дней высокой готовности',
     cautionDays: 'дней осторожности',
     week: 'Неделя',
     weekGreen: 'вперёд',
@@ -72,7 +72,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     noHourly: 'Выберите день, чтобы загрузить часы.',
   },
   fa: {
-    title: 'GPS استراتژیک',
+    title: 'زمان‌بندی تصمیم',
     subtitle: 'ماه، هفته‌ها و روز انتخاب‌شده به شکل نقشه راه.',
     macro: 'لاین کلان',
     meso: 'مسیر هفتگی',
@@ -82,7 +82,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     monthYellow: 'جاده مساعد: پیشرفت خوب با احتیاط معمول.',
     monthOrange: 'جاده مه‌آلود: برنامه‌ها را منعطف نگه دار.',
     monthRed: 'لاین کند: ریسک را کم کن و ماه را برای ترمیم بگذار.',
-    goldenDays: 'روز طلایی',
+    goldenDays: 'روز آمادگی بالا',
     cautionDays: 'روز احتیاط',
     week: 'هفته',
     weekGreen: 'حرکت',
@@ -94,7 +94,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     noHourly: 'یک روز را انتخاب کن تا راهنمای ساعتی بیاید.',
   },
   ar: {
-    title: 'GPS استراتيجي',
+    title: 'توقيت القرار',
     subtitle: 'الشهر والأسابيع واليوم المحدد كخريطة طريق.',
     macro: 'المسار الكلي',
     meso: 'مسار الأسبوع',
@@ -104,7 +104,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     monthYellow: 'طريق داعم: تقدم جيد مع حذر عادي.',
     monthOrange: 'طريق ضبابي: اجعل الخطط مرنة.',
     monthRed: 'مسار بطيء: قلل المخاطر واستخدم الشهر للإصلاح.',
-    goldenDays: 'أيام ذهبية',
+    goldenDays: 'أيام جاهزية عالية',
     cautionDays: 'أيام حذر',
     week: 'أسبوع',
     weekGreen: 'تقدم',
