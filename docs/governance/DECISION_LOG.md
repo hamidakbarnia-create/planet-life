@@ -224,3 +224,20 @@ Evidence recorded on [PRG-02](./PRG-02-reading-contract-presence-validity-gates.
 | **OUTCOME** | Domain meaning of Decision Value: Accepted. Implementation / integration: **Not granted**. |
 | **LEARN** | Prefer Context Fitness over predictive Value definitions; keep Value, Score, and Confidence as independent concepts. |
 
+## 2026-07-29 — PRG-05 Accepted (Decision Value Producer Model)
+
+| Field | Value |
+|-------|-------|
+| **ID** | PRG-05 |
+| **Title** | Decision Value Producer Model |
+| **Status** | ACCEPTED |
+| **Authority** | Product / Producer responsibility |
+| **Owner** | METIORO Product Owner |
+| **Date** | 2026-07-29 |
+| **WHERE** | Explicit Product Owner acceptance — [PRG-05-decision-value-producer-model.md](./PRG-05-decision-value-producer-model.md) |
+| **References** | [PRG-05](./PRG-05-decision-value-producer-model.md); [PRG-04](./PRG-04-decision-value-semantics.md); [PRG-02](./PRG-02-reading-contract-presence-validity-gates.md); [READING-CONTRACT-SPECIFICATION.md](../architecture/READING-CONTRACT-SPECIFICATION.md) |
+| **WHY** | After locking Decision Value semantics (PRG-04), the platform needs a producer-responsibility model: minimum inputs, output fields, combination boundaries, insufficiency behavior, and ownership of reasoning/uncertainty — without inventing formulas, schemas, or a Value Engine. |
+| **ACT** | Accept PRG-05 Producer Model. Bind logical v1 producer outputs: `value_band`, `reasoning`, `relevant_context`, `uncertainty`, `missing_context`. Bind context-input and insufficiency rules (including Insufficient Context as a governed outcome). Preserve PRG-04 semantics and Reading Contract / Variant A envelope ownership. **Do not** authorize Value Engine, weights, thresholds, APIs, schemas, UI, prompts, surface integration, or application code. |
+| **OUTCOME** | Producer responsibilities for Decision Value: Accepted. Implementation: **Not granted**. |
+| **LEARN** | Separate semantics (PRG-04) from producer responsibility (PRG-05); never let presentation or a single Context score invent Value. |
+
