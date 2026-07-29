@@ -65,3 +65,46 @@ This Accepted decision does **not**:
 | Meaning, calibration, semantic correctness of field values | Producer domain service |
 | Layout, collapse, label simplification without reinterpretation | Presentation |
 | Score timing estimates (Calendar / Today) | Existing timing producers — **not** Reading Confidence |
+
+---
+
+## Post-ratification verification evidence
+
+**Verified:** 2026-07-29  
+**Purpose:** Confirm the Accepted PRG-02 claim of no competing Reading validation contract with search evidence (not assertion-only).
+
+### Command
+
+```bash
+grep -ri "reading contract\|reading schema\|confidence.*validation" \
+  docs/ apps/ packages/ \
+  --include=*.md \
+  --include=*.ts \
+  --include=*.py \
+  -l
+```
+
+### Results
+
+| Path | Classification |
+|------|----------------|
+| `docs/architecture/READING-CONTRACT-SPECIFICATION.md` | Canonical Reading Contract source of truth |
+| `docs/governance/PRG-02-reading-contract-presence-validity-gates.md` | Accepted PRG-02 governance decision |
+| `docs/governance/DECISION_LOG.md` | Official decision record |
+| `docs/adr/ADR-0012-Today-and-Shared-Timing-Architecture.md` | Reference to possible Reading Contract governance only — does **not** define a competing Reading schema or validation contract |
+
+### Conclusion
+
+No competing Reading Contract, Reading schema, or Reading confidence validation contract was found using the approved verification search.
+
+This evidence supports the existing Accepted PRG-02 decision. It does **not** restate, amend, or reopen Variant A semantics. It does **not** authorize Reading implementation.
+
+---
+
+## Non-blocking semantic debt (adjacent; not a competing Reading Contract)
+
+`apps/web/lib/intelligence/` defines `InsightConfidence` and `validatePersonalIntelligenceProfile`.
+
+- This is **not** a competing Reading Contract, Reading schema, or Reading confidence validation contract under the search above.
+- Its confidence semantics **MUST** later be reconciled with the locked rule that Score, presence, completeness, and Confidence are distinct concepts.
+- Tracking this debt does **not** change PRG-02 Accepted status and does **not** authorize remediation coding.
