@@ -26,6 +26,8 @@
 | ADR-0009 | Shared Frontend Conversation and Decision Context Boundaries | Accepted | 2026-07-21 |
 | ADR-0010 | Canonical Memory Graph and Personal Intelligence Memory Boundaries | Accepted | 2026-07-23 |
 | ADR-0011 | CMG L1 Client Runtime Authorization | Accepted | 2026-07-24 |
+| ADR-0012 | Today and Shared Timing Architecture | Proposed | 2026-07-28 |
+| ADR-0013 | Decision Value Engine Architecture | Proposed | 2026-07-29 |
 | ADR-DS-001 | Design System Architecture v1 | Proposed | 2026-07-07 |
 | ADR-DS-002 | Runtime Semantic Token Consumption | Proposed | 2026-07-07 |
 
@@ -99,3 +101,10 @@ Links to related decisions, documents, PRs, or issues.
 - Date: 2026-07-28
 - Document: `docs/adr/ADR-0012-Today-and-Shared-Timing-Architecture.md`
 - Scope: Today, Calendar, shared timing clients, decision signals, compatibility migration
+
+## ADR-0013 — Decision Value Engine Architecture
+
+- Status: Proposed
+- Date: 2026-07-29
+- Document: `docs/adr/ADR-0013-Decision-Value-Engine-Architecture.md`
+- Scope: Future Decision Value Engine boundaries and data flow; preserves PRG-04/PRG-05/PRG-02/Reading Contract; coding not granted

@@ -241,3 +241,17 @@ Evidence recorded on [PRG-02](./PRG-02-reading-contract-presence-validity-gates.
 | **OUTCOME** | Producer responsibilities for Decision Value: Accepted. Implementation: **Not granted**. |
 | **LEARN** | Separate semantics (PRG-04) from producer responsibility (PRG-05); never let presentation or a single Context score invent Value. |
 
+## 2026-07-29 — ADR-0013 Proposed
+
+**Decision:** Proposed the Decision Value Engine Architecture.
+
+**Scope:**
+- Defines future technical component boundaries and data flow for a Decision Value Engine.
+- Preserves PRG-04 semantics, PRG-05 Producer responsibilities, and PRG-02 / Reading Contract envelope ownership.
+- Authorizes no implementation, Value Engine codebase, types, APIs, schemas, prompts, UI, surface wiring, numeric scoring, or Confidence derivation.
+
+**Document:**
+`docs/adr/ADR-0013-Decision-Value-Engine-Architecture.md`
+
+**Status:** PROPOSED
+
