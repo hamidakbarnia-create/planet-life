@@ -3,14 +3,9 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { DailyBriefView } from '@/components/home/DailyBriefView';
 import type { BirthProfile } from '@/lib/birth-profile';
 
-vi.mock('@/lib/calendar-scores', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/lib/calendar-scores')>();
-  return {
-    ...actual,
-    fetchDayScore: vi.fn(() => new Promise<number | null>(() => {})),
-    fetchHourlyScores: vi.fn(() => Promise.resolve([])),
-  };
-});
+vi.mock('@/lib/today-timing', () => ({
+  loadTodayTiming: vi.fn(() => new Promise(() => {})),
+}));
 
 vi.mock('@/lib/people-storage', () => ({
   loadPeople: vi.fn(() => []),
@@ -60,8 +55,14 @@ describe('DailyBriefView score loading', () => {
   });
 
   it('renders numeric score once fetch completes', async () => {
-    const { fetchDayScore } = await import('@/lib/calendar-scores');
-    vi.mocked(fetchDayScore).mockResolvedValueOnce(72);
+    const { loadTodayTiming } = await import('@/lib/today-timing');
+    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+      score: 72,
+      reasoning: null,
+      hourly: [],
+      bestHour: null,
+      riskHour: null,
+    });
 
     render(<DailyBriefView lang="en" profile={profile} hasProfile />);
 
@@ -70,5 +71,110 @@ describe('DailyBriefView score loading', () => {
     });
     expect(screen.getByText('/100')).toBeTruthy();
     expect(screen.queryByTestId('daily-score-loading')).toBeNull();
+  });
+});
+
+describe('DailyBriefView Calendar timing consumer', () => {
+  it('renders ScoreReasoning.summary when producer provides it', async () => {
+    const { loadTodayTiming } = await import('@/lib/today-timing');
+    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+      score: 80,
+      reasoning: {
+        summary: 'Producer summary for today.',
+        confidence: 0.7,
+        reasons: [],
+      },
+      hourly: [{ hour: 10, time: '10:00', score: 90, band: 'green' }],
+      bestHour: { hour: 10, time: '10:00', score: 90, band: 'green' },
+      riskHour: { hour: 18, time: '18:00', score: 25, band: 'red' },
+    });
+
+    render(<DailyBriefView lang="en" profile={profile} hasProfile />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('calendar-why-timing-summary').textContent).toBe(
+        'Producer summary for today.'
+      );
+    });
+    expect(screen.queryByText(/0\.7/)).toBeNull();
+  });
+
+  it('does not render Why this timing when summary is absent', async () => {
+    const { loadTodayTiming } = await import('@/lib/today-timing');
+    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+      score: 55,
+      reasoning: null,
+      hourly: [],
+      bestHour: null,
+      riskHour: null,
+    });
+
+    render(<DailyBriefView lang="en" profile={profile} hasProfile />);
+
+    await waitFor(() => {
+      expect(screen.getByText('55')).toBeTruthy();
+    });
+    expect(screen.queryByTestId('calendar-why-timing')).toBeNull();
+  });
+
+  it('surfaces Best window and Lower-readiness window from timing data', async () => {
+    const { loadTodayTiming } = await import('@/lib/today-timing');
+    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+      score: 70,
+      reasoning: null,
+      hourly: [
+        { hour: 9, time: '9:00', score: 91, band: 'green' },
+        { hour: 21, time: '21:00', score: 18, band: 'red' },
+      ],
+      bestHour: { hour: 9, time: '9:00', score: 91, band: 'green' },
+      riskHour: { hour: 21, time: '21:00', score: 18, band: 'red' },
+    });
+
+    render(<DailyBriefView lang="en" profile={profile} hasProfile />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Best window')).toBeTruthy();
+    });
+    expect(screen.getByText('Lower-readiness window')).toBeTruthy();
+    expect(screen.getByText('9:00 AM')).toBeTruthy();
+    expect(screen.getByText('9:00 PM')).toBeTruthy();
+  });
+
+  it('links to Calendar for more detail', async () => {
+    const { loadTodayTiming } = await import('@/lib/today-timing');
+    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+      score: 60,
+      reasoning: null,
+      hourly: [],
+      bestHour: null,
+      riskHour: null,
+    });
+
+    render(<DailyBriefView lang="en" profile={profile} hasProfile />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('today-calendar-cta')).toBeTruthy();
+    });
+    const cta = screen.getByTestId('today-calendar-cta');
+    expect(cta.getAttribute('href')).toBe('/calendar');
+    expect(cta.textContent).toBe('Open Calendar for more detail');
+  });
+
+  it('avoids user-facing Golden wording on the Today brief', async () => {
+    const { loadTodayTiming } = await import('@/lib/today-timing');
+    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+      score: 88,
+      reasoning: null,
+      hourly: [{ hour: 11, time: '11:00', score: 88, band: 'green' }],
+      bestHour: { hour: 11, time: '11:00', score: 88, band: 'green' },
+      riskHour: { hour: 11, time: '11:00', score: 88, band: 'green' },
+    });
+
+    render(<DailyBriefView lang="en" profile={profile} hasProfile />);
+
+    await waitFor(() => {
+      expect(screen.getByText('88')).toBeTruthy();
+    });
+    expect(screen.queryByText(/golden/i)).toBeNull();
   });
 });

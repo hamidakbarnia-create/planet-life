@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { PeopleHomeRow } from '@/components/PeopleHomeRow';
 import { CosmosCard } from '@/components/home/CosmosCard';
+import { WhyThisTiming } from '@/components/timing/WhyThisTiming';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { PageHeader } from '@/components/ui/PageHeader';
 import type { BirthProfile } from '@/lib/birth-profile';
@@ -12,19 +13,19 @@ import { HOME_LANGS } from '@/lib/home-i18n';
 import { COLORS } from '@/lib/brand-theme';
 import {
   API_BASE,
-  fetchDayScore,
-  fetchHourlyScores,
   formatHourLabel,
   isDangerHour,
   isGoldenHour,
   scoreToBand,
   BAND_STYLES,
   type HourScore,
+  type ScoreReasoning,
 } from '@/lib/calendar-scores';
 import { hasConfirmedCurrentLocation } from '@/lib/user-locations';
 import { todayYMD } from '@/lib/calendar-utils';
 import { loadPeople } from '@/lib/people-storage';
 import { PEOPLE_LANGS } from '@/lib/people-i18n';
+import { loadTodayTiming } from '@/lib/today-timing';
 import { useCallback, useMemo, useState } from 'react';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 
@@ -105,6 +106,9 @@ export function DailyBriefView({
   const [scoreFetchComplete, setScoreFetchComplete] = useState(false);
   const [hourly, setHourly] = useState<HourScore[]>([]);
   const [hourlyLoading, setHourlyLoading] = useState(true);
+  const [reasoning, setReasoning] = useState<ScoreReasoning | null>(null);
+  const [bestHour, setBestHour] = useState<HourScore | null>(null);
+  const [riskHour, setRiskHour] = useState<HourScore | null>(null);
   const [synergyAlerts, setSynergyAlerts] = useState<string[]>([]);
   const [aiOpen, setAiOpen] = useState(false);
   const [aiQuestion, setAiQuestion] = useState('');
@@ -120,12 +124,15 @@ export function DailyBriefView({
     hasConfirmedCurrentLocation(profile);
 
   useQueuedEffect(() => {
-    if (!profileReady) {
+    if (!profileReady || !profile) {
       setDayLoading(false);
       setScoreFetchComplete(false);
       setHourlyLoading(false);
       setDayScore(null);
       setHourly([]);
+      setReasoning(null);
+      setBestHour(null);
+      setRiskHour(null);
       return;
     }
     let cancelled = false;
@@ -134,32 +141,33 @@ export function DailyBriefView({
     setHourlyLoading(true);
     setDayScore(null);
     setHourly([]);
+    setReasoning(null);
+    setBestHour(null);
+    setRiskHour(null);
 
-    fetchDayScore(profile, today)
-      .then((score) => {
+    loadTodayTiming(profile, today, lang)
+      .then((bundle) => {
         if (cancelled) return;
-        setDayScore(score);
+        setDayScore(bundle.score);
+        setHourly(bundle.hourly);
+        setReasoning(bundle.reasoning);
+        setBestHour(bundle.bestHour);
+        setRiskHour(bundle.riskHour);
       })
       .catch(() => {
-        if (!cancelled) setDayScore(null);
+        if (cancelled) return;
+        setDayScore(null);
+        setHourly([]);
+        setReasoning(null);
+        setBestHour(null);
+        setRiskHour(null);
       })
       .finally(() => {
         if (!cancelled) {
           setDayLoading(false);
           setScoreFetchComplete(true);
+          setHourlyLoading(false);
         }
-      });
-
-    fetchHourlyScores(profile, today)
-      .then((data) => {
-        if (cancelled) return;
-        setHourly(data);
-      })
-      .catch(() => {
-        if (!cancelled) setHourly([]);
-      })
-      .finally(() => {
-        if (!cancelled) setHourlyLoading(false);
       });
 
     try {
@@ -216,24 +224,14 @@ export function DailyBriefView({
   const band = scoreToBand(dayScore ?? undefined);
   const scoreStyle = BAND_STYLES[band];
 
-  const goldenHours = useMemo(
+  const highReadinessHours = useMemo(
     () => hourly.filter((h) => isGoldenHour(h.score)),
     [hourly]
   );
-  const dangerHours = useMemo(
+  const lowerReadinessHours = useMemo(
     () => hourly.filter((h) => isDangerHour(h.score)),
     [hourly]
   );
-
-  const bestHour = useMemo(() => {
-    if (!hourly.length) return null;
-    return hourly.reduce((best, h) => (h.score > best.score ? h : best), hourly[0]);
-  }, [hourly]);
-
-  const worstHour = useMemo(() => {
-    if (!hourly.length) return null;
-    return hourly.reduce((worst, h) => (h.score < worst.score ? h : worst), hourly[0]);
-  }, [hourly]);
 
   const longDate = useMemo(() => formatLongDate(today, lang), [today, lang]);
 
@@ -305,7 +303,7 @@ export function DailyBriefView({
       <div className="mio-home-grid mio-home-grid--windows">
         <HighlightCard
           label={t.bestWindow}
-          hour={bestHour && isGoldenHour(bestHour.score) ? bestHour : null}
+          hour={bestHour}
           fallback={t.noGolden}
           loading={hourlyLoading}
           loadingLabel={t.loading}
@@ -314,7 +312,7 @@ export function DailyBriefView({
         />
         <HighlightCard
           label={t.avoidWindow}
-          hour={worstHour && isDangerHour(worstHour.score) ? worstHour : null}
+          hour={riskHour}
           fallback={t.noWarnings}
           loading={hourlyLoading}
           loadingLabel={t.loading}
@@ -322,6 +320,16 @@ export function DailyBriefView({
           lang={lang}
         />
       </div>
+
+      <WhyThisTiming
+        className="mio-glass mio-glass--secondary rounded-2xl p-4"
+        labels={{
+          dir: t.dir,
+          whyTiming: t.whyTiming,
+          supportingReasons: t.supportingReasons,
+        }}
+        reasoning={reasoning}
+      />
 
       <GlassCard variant="secondary">
         <ul className="space-y-2">
@@ -331,8 +339,8 @@ export function DailyBriefView({
             text={
               hourlyLoading
                 ? t.loading
-                : goldenHours.length
-                  ? `${t.goldenHours}: ${goldenHours.slice(0, 4).map((h) => formatHourLabel(h.hour, lang)).join(', ')}`
+                : highReadinessHours.length
+                  ? `${t.goldenHours}: ${highReadinessHours.slice(0, 4).map((h) => formatHourLabel(h.hour, lang)).join(', ')}`
                   : t.noGolden
             }
           />
@@ -342,8 +350,8 @@ export function DailyBriefView({
             text={
               hourlyLoading
                 ? t.loading
-                : dangerHours.length
-                  ? `${t.warnings}: ${dangerHours.slice(0, 3).map((h) => formatHourLabel(h.hour, lang)).join(', ')}`
+                : lowerReadinessHours.length
+                  ? `${t.warnings}: ${lowerReadinessHours.slice(0, 3).map((h) => formatHourLabel(h.hour, lang)).join(', ')}`
                   : t.noWarnings
             }
           />
@@ -358,6 +366,14 @@ export function DailyBriefView({
           />
         </ul>
       </GlassCard>
+
+      <Link
+        href="/calendar"
+        className="metioro-btn metioro-btn--secondary fc w-full no-underline text-center"
+        data-testid="today-calendar-cta"
+      >
+        {t.calendarCta}
+      </Link>
 
       <PeopleHomeRow lang={lang} />
 

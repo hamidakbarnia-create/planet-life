@@ -2,6 +2,7 @@
 
 import type { ScoreReasoning } from '@/lib/score-reasoning';
 import type { PlanetTransit, TransitSnapshotMeta } from '@/lib/calendar-scores';
+import { WhyThisTiming } from '@/components/timing/WhyThisTiming';
 
 export type CalendarSelectedDayInsightLabels = {
   dir: 'ltr' | 'rtl';
@@ -72,60 +73,17 @@ export function CalendarSelectedDayInsight({
   transitMeta,
   loadingTransit,
 }: Props) {
-  const summary = reasoning?.summary?.trim() ? reasoning.summary : null;
-  const reasons = reasoning?.reasons?.length ? reasoning.reasons : null;
-
   return (
     <div data-testid="calendar-selected-day-insight">
-      {summary ? (
-        <div className="mb-4" data-testid="calendar-why-timing">
-          <div
-            className="fi text-[10px] uppercase tracking-widest mb-2"
-            style={{ color: 'rgba(255,255,255,0.35)' }}
-          >
-            {t.whyTiming}
-          </div>
-          <p
-            className="fi text-sm leading-relaxed"
-            style={{ color: 'rgba(255,255,255,0.78)' }}
-            data-testid="calendar-why-timing-summary"
-          >
-            {summary}
-          </p>
-          {reasons ? (
-            <details
-              className="mt-3 rounded-lg px-3 py-2"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}
-              dir={t.dir}
-              data-testid="calendar-supporting-reasons"
-            >
-              <summary
-                className="fi text-[11px] cursor-pointer select-none"
-                style={{ color: 'rgba(212,175,55,0.85)' }}
-              >
-                {t.supportingReasons}
-              </summary>
-              <ul className="mt-2 space-y-2 list-none p-0 m-0">
-                {reasons.map((reason, index) => (
-                  <li
-                    key={`${reason.category}-${reason.title}-${index}`}
-                    className="fi text-[11px] leading-snug"
-                    style={{ color: 'rgba(255,255,255,0.65)' }}
-                  >
-                    <span className="fc block" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                      {reason.title}
-                    </span>
-                    {reason.explanation}
-                  </li>
-                ))}
-              </ul>
-            </details>
-          ) : null}
-        </div>
-      ) : null}
+      <WhyThisTiming
+        className="mb-4"
+        labels={{
+          dir: t.dir,
+          whyTiming: t.whyTiming,
+          supportingReasons: t.supportingReasons,
+        }}
+        reasoning={reasoning}
+      />
 
       <details
         className="mb-5 rounded-lg px-3 py-2"
