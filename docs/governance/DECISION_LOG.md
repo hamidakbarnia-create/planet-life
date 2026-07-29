@@ -181,3 +181,21 @@
 `docs/adr/ADR-0012-Today-and-Shared-Timing-Architecture.md`
 
 **Status:** PROPOSED
+
+## 2026-07-29 — PRG-02 Accepted (Variant A)
+
+| Field | Value |
+|-------|-------|
+| **ID** | PRG-02 / DEC (Reading Contract presence gates) |
+| **Title** | Reading Contract Presence & Validity Gates (Variant A) |
+| **Status** | ACCEPTED |
+| **Authority** | Product / Reading Contract governance |
+| **Owner** | METIORO Product Owner |
+| **Date** | 2026-07-29 |
+| **WHERE** | Explicit Product Owner acceptance — [PRG-02-reading-contract-presence-validity-gates.md](./PRG-02-reading-contract-presence-validity-gates.md) |
+| **References** | [READING-CONTRACT-SPECIFICATION.md](../architecture/READING-CONTRACT-SPECIFICATION.md) v1.1.0; [PRG-02](./PRG-02-reading-contract-presence-validity-gates.md) |
+| **WHY** | The platform must separate structural presence (fail-closed) from producer semantic validity, and must prevent consumers from treating Score or completeness as Confidence. |
+| **ACT** | Accept **Variant A**: Presence is enforced by the Reading Contract (fail-closed). Semantic validity, calibration, and correctness remain Producer responsibilities. Bind consumer rules: no Confidence from Score; no Confidence from Presence/completeness; Score and Confidence independent; no false precision outside approved semantics; presentation is a pure consumer. **Acceptance does not authorize coding** of Reading producers/consumers or runtime ReadingResult wiring. |
+| **OUTCOME** | Presence/validity gate policy: Accepted. Full Reading Contract coding: **Not granted**. Calendar/Today timing Score surfaces remain non-Confidence presentation. |
+| **LEARN** | Do not conflate timing Score with Reading Confidence; do not let presentation invent missing Reading fields to force success. |
+

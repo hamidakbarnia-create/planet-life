@@ -4,13 +4,14 @@
 |-------|-------|
 | **Document** | Reading Contract |
 | **Path** | `docs/architecture/READING-CONTRACT-SPECIFICATION.md` |
-| **Status** | Proposed |
-| **Version** | 1.0.0 |
-| **Date** | 2026-07-25 |
+| **Status** | Proposed (presence/validity gate policy: **Accepted** via [PRG-02](../governance/PRG-02-reading-contract-presence-validity-gates.md) Variant A) |
+| **Version** | 1.1.0 |
+| **Date** | 2026-07-29 |
 | **Phase** | P3 — Executable Specifications |
 | **Authority** | Product-level reading result contract (decision intelligence readings) |
-| **Coding authorization** | **Not granted.** Acceptance of this document does **not** authorize implementation, scoring changes, UI changes, Vault wording changes, or runtime coding. |
+| **Coding authorization** | **Not granted.** Acceptance of PRG-02 Variant A and this document do **not** authorize implementation, scoring changes, UI changes, Vault wording changes, or runtime coding. |
 | **Structural reference** | [CMG-REPOSITORY-CONTRACT-SPECIFICATION.md](./CMG-REPOSITORY-CONTRACT-SPECIFICATION.md) (documentation shape only; not a dependency) |
+| **Presence gates** | [PRG-02 — Reading Contract Presence & Validity Gates](../governance/PRG-02-reading-contract-presence-validity-gates.md) (**Accepted**, Variant A) |
 
 ---
 
@@ -22,16 +23,19 @@ This document is the **Reading Contract Specification**. It defines the canonica
 
 ## 2. Status
 
-**Proposed** (2026-07-25) at version **1.0.0**.
+**Proposed** contract shape at version **1.1.0** (2026-07-29).
 
-This Proposed Reading Contract Specification defines the canonical shape of a Reading and the fail-closed `ReadingResult` envelope. Coding remains **not granted**. This Proposed status does **not** authorize scoring, UI, Vault wording, API payload, or runtime implementation work.
+**Accepted** presence/validity gate policy: [PRG-02](../governance/PRG-02-reading-contract-presence-validity-gates.md) **Variant A** (2026-07-29).
 
-| Classification | Content in this document |
-|----------------|--------------------------|
-| **Proposed (this document)** | Reading Contract v1.0.0 — seven required fields; single `impact`; fail-closed `ReadingResult` |
-| **Explicitly not defined** | Scoring algorithms; UI presentation; Vault copy; runtime implementation |
+This Reading Contract Specification defines the canonical shape of a Reading and the fail-closed `ReadingResult` envelope. Coding remains **not granted**. Proposed status of the full contract and Accepted status of PRG-02 Variant A do **not** authorize scoring, UI, Vault wording, API payload, or runtime implementation work.
+
+| Classification | Content |
+|----------------|---------|
+| **Accepted (PRG-02 Variant A)** | Presence fail-closed gates; Score ≠ Confidence; consumers must not derive Confidence from Score or Presence; presentation is a pure consumer; semantic validity owned by Producers |
+| **Proposed (this document)** | Reading Contract v1.1.0 — seven required fields; single `impact`; fail-closed `ReadingResult` |
+| **Explicitly not defined** | Scoring algorithms; UI presentation; Vault copy; runtime implementation; producer calibration procedures |
 | **Open Question** | None in this version |
-| **Future Work** | Presentation interpretation of Impact; indexing/registry registration in governance indexes (out of scope for this artifact) |
+| **Future Work** | Presentation rendering of Impact without reinterpretation; indexing/registry registration in governance indexes (out of scope for this artifact) |
 
 ---
 
@@ -53,7 +57,8 @@ Define the canonical Reading shape so that:
 
 - The canonical Reading field contract (seven required fields).
 - The fail-closed `ReadingResult` result model.
-- Validity rules for missing required fields.
+- **Presence** validity rules for missing required fields (PRG-02 Variant A).
+- Consumer independence rules for Score vs Confidence (PRG-02).
 - The rule that `impact` is a single canonical field.
 
 ### 4.2 Out of scope (non-authorization)
@@ -61,6 +66,7 @@ Define the canonical Reading shape so that:
 This specification does **not** define, authorize, or change:
 
 - Scoring algorithms, score bands, weights, or ranking.
+- Semantic calibration or correctness procedures for field *values* (Producer responsibility under PRG-02).
 - UI layout, components, labels, localization, or presentation ordering.
 - Vault product wording, section names, brand names, or marketing copy.
 - Runtime implementation, engines, templates, prompts, or API transports.
@@ -68,7 +74,7 @@ This specification does **not** define, authorize, or change:
 - Splitting `impact` into separate canonical fields (for example `risk` and `opportunity`).
 - Governance index registration (`ADR_INDEX`, `DECISION_LOG`, `MASTER_STATUS`) — those updates are separate work.
 
-**Presentation note:** Presentation layers **MAY** later interpret or display Impact in multiple ways. Storage and this contract **MUST** retain a single `impact` field.
+**Presentation note:** Presentation layers **MAY** reorder, group, collapse, or simplify labels. Presentation **MUST NOT** reinterpret producer meaning. Storage and this contract **MUST** retain a single `impact` field.
 
 ---
 
@@ -92,7 +98,10 @@ The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** ar
 | **ReadingResult** | Fail-closed envelope that is either a successful Reading or a Reading error — never both, never a partial Reading presented as success. |
 | **ReadingError** | Structured failure describing why a Reading is invalid or could not be produced. |
 | **Fail-closed** | On missing required fields or invalid contract shape, return `ok: false` with an error; do not invent defaults; do not emit a partial Reading as success. |
-| **Canonical storage** | The logical contract shape for persistence and interchange. Distinct from presentation interpretation. |
+| **Presence** | Whether each required Reading field is present on the result. Enforced by this contract (PRG-02 Variant A). |
+| **Semantic validity** | Whether field *values* are calibrated, meaningful, and correct. Owned by the producing domain service (PRG-02). Not a Reading Contract presence check. |
+| **Score** | A timing or readiness estimate from timing producers. **Independent** of Reading `confidence`. Not a substitute for Confidence. |
+| **Canonical storage** | The logical contract shape for persistence and interchange. Distinct from presentation rendering. |
 
 ---
 
@@ -122,30 +131,45 @@ A Reading **MUST** include all seven fields below. All seven fields are **requir
 | **Decision Domain** | The decision context or domain in which the Reading applies. |
 | **Confidence** | Explicit confidence associated with the Reading. **MUST** disclose uncertainty and **MUST NOT** imply false precision (see §7.4). |
 
-### 7.2 Validity rules
+### 7.2 Presence validity rules (PRG-02 Variant A)
 
-1. A Reading with any missing required field **MUST** be treated as invalid.
-2. Missing `confidence` **MUST** mean invalid reading.
-3. Missing `impact` **MUST** mean invalid reading.
-4. Missing `action` **MUST** mean invalid reading.
-5. Missing `signal`, `meaning`, `blindSpot`, or `decisionDomain` **MUST** mean invalid reading.
-6. An invalid Reading **MUST NOT** be returned as `ReadingResult` success (`ok: true`).
-7. Producers **MUST NOT** invent placeholder values solely to force `ok: true`.
-8. A `confidence` value that omits uncertainty disclosure or implies false precision **MUST** be treated as invalid under §7.4 and **MUST** fail closed (`ok: false`).
+These rules enforce **presence**, not semantic calibration.
+
+1. Required fields **MUST** be present before a Reading is considered valid for presentation.
+2. A Reading with any missing required field **MUST** be treated as invalid.
+3. Missing required fields **MUST NOT** be inferred, synthesized, or replaced by fallback values.
+4. Missing `confidence` **MUST** mean invalid reading.
+5. Missing `impact` **MUST** mean invalid reading.
+6. Missing `action` **MUST** mean invalid reading.
+7. Missing `signal`, `meaning`, `blindSpot`, or `decisionDomain` **MUST** mean invalid reading.
+8. An invalid Reading **MUST NOT** be returned as `ReadingResult` success (`ok: true`).
+9. Producers **MUST NOT** invent placeholder values solely to force `ok: true`.
+
+**Note (non-normative for calibration):** Semantic validity, calibration, and correctness of field values remain the responsibility of the producing domain service (PRG-02). Future producer validity procedures **MUST NOT** be absorbed into this contract as competing specifications.
 
 ### 7.3 Impact unity rule
 
 1. Canonical storage and this contract **MUST** retain exactly one Impact field: `impact`.
 2. Implementations **MUST NOT** split Impact into separate canonical storage fields such as `risk` and `opportunity`.
-3. Presentation **MAY** interpret or render Impact differently; such presentation **MUST NOT** change the canonical contract.
+3. Presentation **MAY** render Impact for display; presentation **MUST NOT** reinterpret producer meaning or change the canonical contract.
 
 ### 7.4 Confidence integrity rules
 
-1. `confidence` is **required**. Absence **MUST** fail closed (see §7.2 rule 2; §8).
-2. `confidence` **MUST** disclose uncertainty so a consumer can tell what is known, inferred, or unknown.
-3. `confidence` **MUST NOT** imply false precision (for example exact predictive certainty unsupported by the Reading’s evidence).
+1. `confidence` is **required** as a **present** field. Absence **MUST** fail closed (see §7.2; §8).
+2. `confidence` is independent of Score. Consumers **MUST NOT** derive `confidence` from Score (PRG-02).
+3. Consumers **MUST NOT** derive `confidence` from Presence or completeness of other fields (PRG-02).
 4. `confidence` **MUST NOT** be used to launder missing Signal, Meaning, Blind Spot, Impact, Action, or Decision Domain into a successful Reading.
-5. Exact confidence value schema (labels, bands, or structured objects) is **not** frozen by this version beyond rules 1–4.
+5. Values **MUST NOT** be represented with false precision outside approved semantics (PRG-02). Exact confidence value schema (labels, bands, or structured objects) is **not** frozen by this version beyond presence and the false-precision prohibition.
+6. Semantic calibration of `confidence` (how sure the producer is, and how that is computed) belongs to the Producer — not to presentation and not to Score.
+
+### 7.5 Consumer and presentation rules (PRG-02)
+
+1. Presentation remains a **pure consumer**.
+2. Presentation layers **MUST NOT** reinterpret producer output.
+3. Consumers **MUST NOT** derive Confidence from Score.
+4. Consumers **MUST NOT** derive Confidence from Presence or completeness.
+5. Score and Confidence are independent concepts.
+6. Reading Contract defines **structure**, not meaning. Producer owns meaning.
 
 ---
 
@@ -222,18 +246,21 @@ This specification does **not**:
 
 ## 11. Consequences
 
-### 11.1 Proposed (contract)
+### 11.1 Proposed (contract shape) + Accepted (PRG-02 presence gates)
 
 - Reading producers and consumers share one canonical seven-field contract.
 - Impact remains one field at the contract/storage layer.
-- Invalid readings fail closed through `ReadingResult`.
+- Invalid readings fail closed through `ReadingResult` on **presence** failures (Variant A).
+- Score must not be treated as Confidence by any consumer.
+- Semantic calibration remains with Producers.
 
 ### 11.2 Still not authorized
 
 - Scoring changes
 - UI / Vault wording changes
-- Runtime implementation
+- Runtime implementation / ReadingResult wiring
 - API payload shipping under this contract without separate implementation approval
+- Mapping timing Score → Reading Confidence
 
 ---
 
@@ -242,8 +269,9 @@ This specification does **not**:
 | Version | Date | Change |
 |---------|------|--------|
 | 1.0.0 | 2026-07-25 | Initial Proposed Reading Contract: seven required fields; single `impact`; fail-closed `ReadingResult`. |
+| 1.1.0 | 2026-07-29 | Align with Accepted PRG-02 Variant A: presence vs semantic ownership; Score ≠ Confidence consumer rules; presentation pure-consumer bounds. Coding still not granted. |
 
-Supersession or field-set changes require a future Accepted revision of this specification (or a governing ADR if architecture hierarchy demands one). Until then, v1.0.0 remains the Proposed Reading Contract shape.
+Supersession or field-set changes require a future Accepted revision of this specification (or a governing ADR if architecture hierarchy demands one). Until the full contract is Accepted for coding, v1.1.0 remains the Proposed Reading Contract shape with PRG-02 Variant A binding for presence/validity gates.
 
 ---
 
@@ -251,8 +279,9 @@ Supersession or field-set changes require a future Accepted revision of this spe
 
 | Reference | Role |
 |-----------|------|
+| [PRG-02-reading-contract-presence-validity-gates.md](../governance/PRG-02-reading-contract-presence-validity-gates.md) | **Accepted** Variant A — presence fail-closed gates; Score ≠ Confidence |
 | [CMG-REPOSITORY-CONTRACT-SPECIFICATION.md](./CMG-REPOSITORY-CONTRACT-SPECIFICATION.md) | Structural documentation reference only |
-| Product decision (Reading Contract v1) | Product intent for the seven-field contract and single-impact rule; not registry-ratified while this document remains Proposed |
+| Product decision (Reading Contract v1) | Product intent for the seven-field contract and single-impact rule; full contract coding still not granted |
 
 ---
 
