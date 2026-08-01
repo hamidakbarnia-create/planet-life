@@ -48,6 +48,62 @@ export type VaultReadingUiCopy = {
   tryThis: string;
 };
 
+/** Vault-scoped selected partner identity / choice / relationship gating. */
+export type VaultPartnerSelectionCopy = {
+  readingFor: string;
+  choosePartner: string;
+  choosePartnerHint: string;
+  selectLabel: string;
+  unsupportedRelationship: string;
+  addPerson: string;
+};
+
+export const VAULT_PARTNER_SELECTION_COPY: Record<
+  AppLang,
+  VaultPartnerSelectionCopy
+> = {
+  en: {
+    readingFor: 'Reading for',
+    choosePartner: 'Choose a person',
+    choosePartnerHint:
+      'Select who this Vault reading should use. Partner Profile, Compatibility, and Shadow share the same person.',
+    selectLabel: 'Person',
+    unsupportedRelationship:
+      'This module does not support the selected person’s relationship. Compatibility and Shadow support romantic partner, spouse, friend, or business partner. Partner Profile supports romantic partner, spouse, or business partner.',
+    addPerson: 'Add a person in People to run this reading.',
+  },
+  fa: {
+    readingFor: 'خوانش برای',
+    choosePartner: 'یک نفر را انتخاب کن',
+    choosePartnerHint:
+      'مشخص کن این خوانش برای چه کسی باشد. پروفایل شریک، سازگاری و سایه از همان نفر استفاده می‌کنند.',
+    selectLabel: 'فرد',
+    unsupportedRelationship:
+      'این بخش از نوع رابطهٔ فرد انتخاب‌شده پشتیبانی نمی‌کند. سازگاری و سایه: شریک عاطفی، همسر، دوست یا شریک تجاری. پروفایل شریک: شریک عاطفی، همسر یا شریک تجاری.',
+    addPerson: 'برای این خوانش یک نفر را در افراد اضافه کن.',
+  },
+  ar: {
+    readingFor: 'قراءة لـ',
+    choosePartner: 'اختاري شخصاً',
+    choosePartnerHint:
+      'حددي من تُستخدم قراءته هنا. ملف الشريك والتوافق والظل يستخدمون الشخص نفسه.',
+    selectLabel: 'الشخص',
+    unsupportedRelationship:
+      'هذه الوحدة لا تدعم نوع علاقة الشخص المحدد. التوافق والظل: شريك عاطفي أو زوج/ة أو صديق أو شريك عمل. ملف الشريك: شريك عاطفي أو زوج/ة أو شريك عمل.',
+    addPerson: 'أضيفي شخصاً في الأشخاص لتشغيل هذه القراءة.',
+  },
+  ru: {
+    readingFor: 'Разбор для',
+    choosePartner: 'Выберите человека',
+    choosePartnerHint:
+      'Укажите, кого использовать для этого разбора. Профиль партнёра, совместимость и Тень используют одного и того же человека.',
+    selectLabel: 'Человек',
+    unsupportedRelationship:
+      'Этот модуль не поддерживает тип отношений выбранного человека. Совместимость и Тень: романтический партнёр, супруг/а, друг или деловой партнёр. Профиль партнёра: романтический партнёр, супруг/а или деловой партнёр.',
+    addPerson: 'Добавьте человека в People, чтобы запустить этот разбор.',
+  },
+};
+
 export type VaultMissingInputCopy = {
   goPeople: string;
   goProfile: string;

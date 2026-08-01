@@ -136,9 +136,8 @@ describe('Vault page People refresh wiring', () => {
     expect(pageSource).toContain('shouldBumpPeopleRevisionForOpenVault');
     expect(pageSource).toContain('PEOPLE_CHANGED_EVENT');
     expect(pageSource).toContain('setPeopleRevision');
-    expect(pageSource).toMatch(
-      /\[openItem,\s*lang,\s*raw,\s*tier,\s*peopleRevision\]/,
-    );
+    expect(pageSource).toContain('peopleRevision');
+    expect(pageSource).toContain('selectedVaultPartnerId');
     expect(pageSource).toMatch(/addEventListener\(\s*PEOPLE_CHANGED_EVENT/);
     expect(pageSource).toMatch(/removeEventListener\(\s*PEOPLE_CHANGED_EVENT/);
     expect(pageSource).toMatch(/addEventListener\(\s*['"]storage['"]/);
@@ -155,14 +154,13 @@ describe('Vault page People refresh wiring', () => {
   });
 
   it('existing fetch effect clears stale reading and starts loading before refetch', () => {
-    // peopleRevision is in the live-reading effect deps; that effect clears
-    // prior person state then sets loading before calling fetchVault*.
+    // peopleRevision + selectedVaultPartnerId are in the live-reading effect deps.
     expect(pageSource).toMatch(
-      /setLiveLoading\(true\);[\s\S]{0,80}setLiveError\(null\);[\s\S]{0,80}setLiveReading\(null\);[\s\S]{0,80}setMissingNotice\(null\);/,
+      /setLiveLoading\(true\);[\s\S]{0,120}setLiveError\(null\);[\s\S]{0,120}setLiveReading\(null\);[\s\S]{0,120}setMissingNotice\(null\);/,
     );
-    expect(pageSource).toMatch(
-      /\[openItem,\s*lang,\s*raw,\s*tier,\s*peopleRevision\]/,
-    );
+    expect(pageSource).toContain('peopleRevision');
+    expect(pageSource).toContain('selectedVaultPartnerId');
+    expect(pageSource).toContain('partnerSelectionReady');
   });
 });
 

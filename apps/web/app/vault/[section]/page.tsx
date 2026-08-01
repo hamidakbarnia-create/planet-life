@@ -34,10 +34,31 @@ import {
   PREVIEW_LOCK_LANGS,
   READING_UI,
   SECTION_LANGS,
+  VAULT_MISSING_INPUT_COPY,
+  VAULT_PARTNER_SELECTION_COPY,
   VAULT_POWER_TIMING_COPY,
   isValidVaultSection,
   type VaultSectionKey,
 } from '@/lib/vault-section-i18n';
+import {
+  PEOPLE_CHANGED_EVENT,
+  loadPeople,
+  type Person,
+} from '@/lib/people-storage';
+import {
+  isPartnerDependentVaultKey,
+  shouldBumpPeopleRevisionForOpenVault,
+  type PeopleVaultRefreshSignal,
+} from '@/lib/vault-partner-dependent';
+import {
+  VAULT_SELECTED_PARTNER_STORAGE_KEY,
+  findPersonById,
+  loadSelectedVaultPartnerId,
+  reconcileVaultPartnerSelection,
+  saveSelectedVaultPartnerId,
+  toVaultPartnerProfileGoal,
+  toVaultRelationshipType,
+} from '@/lib/vault-selected-partner';
 import { buildVaultMissingInputNotice } from '@/lib/vault-missing-inputs';
 import {
   powerRatingTitle,
@@ -51,11 +72,6 @@ import {
   VaultRankedDayChip,
   VaultYesDecisionSlot,
 } from '@/components/vault/VaultPowerTiming';
-import { PEOPLE_CHANGED_EVENT } from '@/lib/people-storage';
-import {
-  shouldBumpPeopleRevisionForOpenVault,
-  type PeopleVaultRefreshSignal,
-} from '@/lib/vault-partner-dependent';
 
 /** Vault item index → live API key (same order as section.items). */
 const LIVE_ITEM_API: Partial<Record<VaultSectionKey, string[]>> = {
@@ -96,7 +112,9 @@ export default function VaultSectionPage() {
   const [openItem, setOpenItem] = useState<string | null>(null);
   const [liveReading, setLiveReading] = useState<VaultReadingLayer | null>(null);
   const [liveLoading, setLiveLoading] = useState(false);
-  const [liveError, setLiveError] = useState<'needProfile' | 'api' | null>(null);
+  const [liveError, setLiveError] = useState<
+    'needProfile' | 'api' | 'choosePartner' | 'unsupportedRelationship' | 'needPerson' | null
+  >(null);
   const [missingNotice, setMissingNotice] = useState<
     ReturnType<typeof buildVaultMissingInputNotice>
   >(null);
@@ -106,11 +124,32 @@ export default function VaultSectionPage() {
     typeof window !== 'undefined' ? loadTier() : 'free'
   );
   const [peopleRevision, setPeopleRevision] = useState(0);
+  const [people, setPeople] = useState<Person[]>([]);
+  const [selectedVaultPartnerId, setSelectedVaultPartnerId] = useState<
+    string | null
+  >(null);
+  const [partnerSelectionReady, setPartnerSelectionReady] = useState(false);
   useQueuedEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
     }
+  }, []);
+
+  // Vault partner selection: hydrate → People → reconcile → ready (browser only).
+  useQueuedEffect(() => {
+    const list = loadPeople();
+    const persisted = loadSelectedVaultPartnerId();
+    const next = reconcileVaultPartnerSelection({
+      people: list,
+      candidateId: persisted,
+    });
+    setPeople(list);
+    setSelectedVaultPartnerId(next);
+    if (next !== persisted) {
+      saveSelectedVaultPartnerId(next);
+    }
+    setPartnerSelectionReady(true);
   }, []);
 
   useEffect(() => {
@@ -153,6 +192,53 @@ export default function VaultSectionPage() {
       window.removeEventListener('storage', onStorage);
     };
   }, [openItem, lang, raw]);
+
+  // Reconcile session selection when People data changes (not a selection signal).
+  useQueuedEffect(() => {
+    if (!partnerSelectionReady) return;
+    const list = loadPeople();
+    setPeople(list);
+    setSelectedVaultPartnerId((prev) => {
+      const next = reconcileVaultPartnerSelection({
+        people: list,
+        candidateId: prev,
+      });
+      if (next !== prev) {
+        saveSelectedVaultPartnerId(next);
+      }
+      return next;
+    });
+  }, [peopleRevision, partnerSelectionReady]);
+
+  // Cross-tab selection persistence → React state (reconcile against People).
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (
+        event.key !== VAULT_SELECTED_PARTNER_STORAGE_KEY &&
+        event.key !== null
+      ) {
+        return;
+      }
+      const list = loadPeople();
+      setPeople(list);
+      const fromStorage = loadSelectedVaultPartnerId();
+      const next = reconcileVaultPartnerSelection({
+        people: list,
+        candidateId: fromStorage,
+      });
+      setSelectedVaultPartnerId(next);
+      if (next !== fromStorage) {
+        saveSelectedVaultPartnerId(next);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  const selectVaultPartner = (id: string) => {
+    setSelectedVaultPartnerId(id);
+    saveSelectedVaultPartnerId(id);
+  };
 
   const setLang = (l: AppLang) => {
     setLangState(l);
@@ -201,12 +287,71 @@ export default function VaultSectionPage() {
         setPowerTiming(null);
         return;
       }
+
+      const partnerDependent = isPartnerDependentVaultKey(apiKey);
+      if (partnerDependent && !partnerSelectionReady) {
+        setLiveReading(null);
+        setLiveError(null);
+        setLiveLoading(false);
+        setMissingNotice(null);
+        setPowerTiming(null);
+        return;
+      }
+
+      let selectedPartner: Person | null = null;
+      let partnerGoal: ReturnType<typeof toVaultPartnerProfileGoal> = null;
+      let compatRel: ReturnType<typeof toVaultRelationshipType> = null;
+
+      if (partnerDependent) {
+        // Fresh People read inside the effect — do not depend on `people` array identity.
+        const peopleNow = loadPeople();
+        const selected = findPersonById(peopleNow, selectedVaultPartnerId);
+        if (!selectedVaultPartnerId || !selected) {
+          setLiveReading(null);
+          setPowerTiming(null);
+          setMissingNotice(null);
+          setLiveLoading(false);
+          if (peopleNow.length === 0) {
+            setLiveError('needPerson');
+          } else {
+            setLiveError('choosePartner');
+          }
+          return;
+        }
+        selectedPartner = selected;
+        partnerGoal = toVaultPartnerProfileGoal(selected.relationship);
+        compatRel = toVaultRelationshipType(selected.relationship);
+        if (apiKey === 'partner' && !partnerGoal) {
+          setLiveReading(null);
+          setPowerTiming(null);
+          setMissingNotice(null);
+          setLiveLoading(false);
+          setLiveError('unsupportedRelationship');
+          return;
+        }
+        if (
+          (apiKey === 'compatibility' ||
+            apiKey === 'radar' ||
+            apiKey === 'trust' ||
+            apiKey === 'communication') &&
+          !compatRel
+        ) {
+          setLiveReading(null);
+          setPowerTiming(null);
+          setMissingNotice(null);
+          setLiveLoading(false);
+          setLiveError('unsupportedRelationship');
+          return;
+        }
+      }
+
       let cancelled = false;
       setLiveLoading(true);
       setLiveError(null);
       setLiveReading(null);
       setMissingNotice(null);
       setPowerTiming(null);
+
       const fetchReading =
         apiKey === 'ghost'
           ? fetchVaultGhostDaysReading(profile, lang)
@@ -228,17 +373,48 @@ export default function VaultSectionPage() {
                           ? fetchVaultBestCountriesReading(profile, lang)
                           : apiKey === 'jupiter'
                             ? fetchVaultBusinessGeographyReading(profile, lang)
-                            : apiKey === 'partner'
-                              ? fetchVaultPartnerProfileReading(profile, lang)
-                              : apiKey === 'compatibility'
-                                ? fetchVaultCompatibilityReading(profile, lang)
-                                : apiKey === 'radar'
-                                  ? fetchVaultCheatingRadarReading(profile, lang)
-                                  : apiKey === 'trust'
-                                    ? fetchVaultTrustPatternsReading(profile, lang)
-                                    : apiKey === 'communication'
-                                      ? fetchVaultCommunicationRiskReading(profile, lang)
-                                      : fetchVaultMarsReading(profile, lang);
+                            : apiKey === 'partner' && partnerGoal
+                              ? fetchVaultPartnerProfileReading(
+                                  profile,
+                                  lang,
+                                  selectedPartner,
+                                  partnerGoal,
+                                )
+                              : apiKey === 'compatibility' && compatRel
+                                ? fetchVaultCompatibilityReading(
+                                    profile,
+                                    lang,
+                                    selectedPartner,
+                                    compatRel,
+                                  )
+                                : apiKey === 'radar' && compatRel
+                                  ? fetchVaultCheatingRadarReading(
+                                      profile,
+                                      lang,
+                                      selectedPartner,
+                                      compatRel,
+                                    )
+                                  : apiKey === 'trust' && compatRel
+                                    ? fetchVaultTrustPatternsReading(
+                                        profile,
+                                        lang,
+                                        selectedPartner,
+                                        compatRel,
+                                      )
+                                    : apiKey === 'communication' && compatRel
+                                      ? fetchVaultCommunicationRiskReading(
+                                          profile,
+                                          lang,
+                                          selectedPartner,
+                                          compatRel,
+                                        )
+                                      : apiKey === 'mars'
+                                        ? fetchVaultMarsReading(profile, lang)
+                                        : null;
+      if (!fetchReading) {
+        setLiveLoading(false);
+        return;
+      }
       fetchReading
         .then((res) => {
           if (cancelled) return;
@@ -272,12 +448,28 @@ export default function VaultSectionPage() {
     setLiveLoading(false);
     setMissingNotice(null);
     setPowerTiming(null);
-  }, [openItem, lang, raw, tier, peopleRevision]);
+  }, [
+    openItem,
+    lang,
+    raw,
+    tier,
+    peopleRevision,
+    selectedVaultPartnerId,
+    partnerSelectionReady,
+  ]);
 
   const unlocked = tier === 'premium' || tier === 'vip';
   const t = SECTION_LANGS[lang];
   const rui = READING_UI[lang];
   const powerUi = VAULT_POWER_TIMING_COPY[lang];
+  const partnerUi = VAULT_PARTNER_SELECTION_COPY[lang];
+  const selectedPartner = findPersonById(people, selectedVaultPartnerId);
+  const openApiKeyForUi = (() => {
+    if (!isValidVaultSection(raw) || !openItem) return undefined;
+    const idx = SECTION_LANGS[lang][raw].items.findIndex((i) => i.label === openItem);
+    return (LIVE_ITEM_API[raw] ?? [])[idx];
+  })();
+  const showPartnerIdentity = isPartnerDependentVaultKey(openApiKeyForUi);
   const dir = HOME_LANGS[lang].dir;
   const fontFamily = localeFontFamily(lang);
 
@@ -473,6 +665,65 @@ export default function VaultSectionPage() {
                           >
                             {rui.liveLabel}
                           </div>
+                          {showPartnerIdentity && partnerSelectionReady && (
+                            <div className="mb-3 space-y-2" data-vault-partner-identity="true">
+                              {selectedPartner && (
+                                <p
+                                  className="fi text-xs"
+                                  style={{ color: 'rgba(242,207,117,0.95)' }}
+                                  data-vault-partner-name={selectedPartner.name}
+                                >
+                                  <span style={{ color: 'rgba(255,255,255,0.55)' }}>
+                                    {partnerUi.readingFor}
+                                  </span>
+                                  {' '}
+                                  {selectedPartner.name}
+                                </p>
+                              )}
+                              {people.length > 1 && (
+                                <label className="block">
+                                  <span
+                                    className="fi text-[10px] tracking-[0.16em] uppercase block mb-1"
+                                    style={{ color: 'rgba(255,255,255,0.45)' }}
+                                  >
+                                    {partnerUi.selectLabel}
+                                  </span>
+                                  <select
+                                    className="w-full fi text-xs rounded-lg px-3 py-2"
+                                    style={{
+                                      background: 'rgba(0,0,0,0.35)',
+                                      border: '1px solid rgba(212,175,55,0.28)',
+                                      color: '#F2CF75',
+                                    }}
+                                    value={selectedVaultPartnerId ?? ''}
+                                    onChange={(e) => {
+                                      const id = e.target.value;
+                                      if (id) selectVaultPartner(id);
+                                    }}
+                                    aria-label={partnerUi.selectLabel}
+                                  >
+                                    <option value="" disabled>
+                                      {partnerUi.choosePartner}
+                                    </option>
+                                    {people.map((p) => (
+                                      <option key={p.id} value={p.id}>
+                                        {p.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+                              )}
+                              {!selectedPartner && people.length > 1 && (
+                                <p
+                                  className="fi text-xs leading-relaxed"
+                                  style={{ color: 'rgba(255,255,255,0.65)' }}
+                                  data-vault-choose-partner="true"
+                                >
+                                  {partnerUi.choosePartnerHint}
+                                </p>
+                              )}
+                            </div>
+                          )}
                           {liveLoading && (
                             <p
                               className="fi text-xs py-4"
@@ -508,6 +759,45 @@ export default function VaultSectionPage() {
                               style={{ color: 'rgba(248,113,113,0.85)' }}
                             >
                               {rui.apiError}
+                            </p>
+                          )}
+                          {!liveLoading && liveError === 'needPerson' && (
+                            <div className="mb-3">
+                              <p
+                                className="fi text-xs leading-relaxed mb-3"
+                                style={{ color: 'rgba(255,255,255,0.65)' }}
+                              >
+                                {partnerUi.addPerson}
+                              </p>
+                              <Link
+                                href="/people"
+                                className="fc text-xs tracking-widest px-4 py-2 rounded-lg inline-flex no-underline"
+                                style={{
+                                  background: 'rgba(212,175,55,0.15)',
+                                  border: '1px solid rgba(212,175,55,0.35)',
+                                  color: '#F2CF75',
+                                }}
+                              >
+                                {VAULT_MISSING_INPUT_COPY[lang].goPeople}
+                              </Link>
+                            </div>
+                          )}
+                          {!liveLoading && liveError === 'choosePartner' && (
+                            <p
+                              className="fi text-xs leading-relaxed"
+                              style={{ color: 'rgba(255,255,255,0.65)' }}
+                              data-vault-choose-partner-error="true"
+                            >
+                              {partnerUi.choosePartnerHint}
+                            </p>
+                          )}
+                          {!liveLoading && liveError === 'unsupportedRelationship' && (
+                            <p
+                              className="fi text-xs leading-relaxed"
+                              style={{ color: 'rgba(255,255,255,0.72)' }}
+                              data-vault-unsupported-relationship="true"
+                            >
+                              {partnerUi.unsupportedRelationship}
                             </p>
                           )}
                           {!liveLoading && raw === 'power' && powerTiming && (

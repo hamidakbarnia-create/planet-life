@@ -1,7 +1,12 @@
 import { API_BASE } from './api-config';
 import { chartPreferenceFields } from './app-settings';
 import type { BirthProfile } from './birth-profile';
-import { loadPeople } from './people-storage';
+import type { Person } from './people-storage';
+import {
+  partnerRelationshipForVaultApi,
+  type VaultPartnerProfileGoal,
+  type VaultRelationshipType,
+} from './vault-selected-partner';
 
 export type VaultReadingLayer = {
   executive: string;
@@ -435,12 +440,12 @@ export type VaultPartnerProfileResponse = {
 export async function fetchVaultPartnerProfileReading(
   profile: BirthProfile,
   lang: string,
-  goal: string = 'romantic',
+  partner: Person | null,
+  goal: VaultPartnerProfileGoal,
 ): Promise<VaultPartnerProfileResponse> {
   const prefs = chartPreferenceFields();
-  const people = loadPeople();
-  const partner = people.find(
-    (p) => p.birth_date && p.birth_time && p.location,
+  const partnerRelationship = partnerRelationshipForVaultApi(
+    partner?.relationship,
   );
   const res = await fetch(`${API_BASE}/api/vault/partner-profile`, {
     method: 'POST',
@@ -456,7 +461,9 @@ export async function fetchVaultPartnerProfileReading(
       partner_birth_date: partner?.birth_date,
       partner_birth_time: partner?.birth_time,
       partner_location: partner?.location,
-      partner_relationship: partner?.relationship,
+      ...(partnerRelationship
+        ? { partner_relationship: partnerRelationship }
+        : {}),
     }),
   });
   if (!res.ok) {
@@ -482,14 +489,11 @@ export type VaultCompatibilityResponse = {
 export async function fetchVaultCompatibilityReading(
   profile: BirthProfile,
   lang: string,
-  relationshipType: string = 'romantic',
+  partner: Person | null,
+  relationshipType: VaultRelationshipType,
   concern?: string,
 ): Promise<VaultCompatibilityResponse> {
   const prefs = chartPreferenceFields();
-  const people = loadPeople();
-  const partner = people.find(
-    (p) => p.birth_date && p.location,
-  );
   const partnerTimeKnown = Boolean(partner?.birth_time);
   const res = await fetch(`${API_BASE}/api/vault/compatibility`, {
     method: 'POST',
@@ -544,12 +548,11 @@ async function fetchVaultShadowSynastryReading(
   endpoint: 'cheating-radar' | 'trust-patterns' | 'communication-risk',
   profile: BirthProfile,
   lang: string,
-  relationshipType: string = 'romantic',
+  partner: Person | null,
+  relationshipType: VaultRelationshipType,
   concern?: string,
 ): Promise<VaultShadowSynastryResponse> {
   const prefs = chartPreferenceFields();
-  const people = loadPeople();
-  const partner = people.find((p) => p.birth_date && p.location);
   const partnerTimeKnown = Boolean(partner?.birth_time);
   const res = await fetch(`${API_BASE}/api/vault/${endpoint}`, {
     method: 'POST',
@@ -582,13 +585,15 @@ async function fetchVaultShadowSynastryReading(
 export async function fetchVaultCheatingRadarReading(
   profile: BirthProfile,
   lang: string,
-  relationshipType: string = 'romantic',
+  partner: Person | null,
+  relationshipType: VaultRelationshipType,
   concern?: string,
 ): Promise<VaultCheatingRadarResponse> {
   return fetchVaultShadowSynastryReading(
     'cheating-radar',
     profile,
     lang,
+    partner,
     relationshipType,
     concern,
   );
@@ -597,13 +602,15 @@ export async function fetchVaultCheatingRadarReading(
 export async function fetchVaultTrustPatternsReading(
   profile: BirthProfile,
   lang: string,
-  relationshipType: string = 'romantic',
+  partner: Person | null,
+  relationshipType: VaultRelationshipType,
   concern?: string,
 ): Promise<VaultTrustPatternsResponse> {
   return fetchVaultShadowSynastryReading(
     'trust-patterns',
     profile,
     lang,
+    partner,
     relationshipType,
     concern,
   );
@@ -612,13 +619,15 @@ export async function fetchVaultTrustPatternsReading(
 export async function fetchVaultCommunicationRiskReading(
   profile: BirthProfile,
   lang: string,
-  relationshipType: string = 'romantic',
+  partner: Person | null,
+  relationshipType: VaultRelationshipType,
   concern?: string,
 ): Promise<VaultCommunicationRiskResponse> {
   return fetchVaultShadowSynastryReading(
     'communication-risk',
     profile,
     lang,
+    partner,
     relationshipType,
     concern,
   );
