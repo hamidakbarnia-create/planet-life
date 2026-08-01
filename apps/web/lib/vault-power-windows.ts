@@ -80,6 +80,37 @@ export function vaultScoreBand(score: number): VaultScoreBand {
   return 'lighter';
 }
 
+/** Max length for a rating shown inside a ranked-day chip. */
+export const POWER_RATING_VISIBLE_MAX = 18;
+
+/**
+ * Concise rating for ranked-day chip layout.
+ * Long / empty / nullish values return null (never truncate mid-word).
+ */
+export function visiblePowerRating(
+  value: string | null | undefined,
+): string | null {
+  if (value == null) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed.length > POWER_RATING_VISIBLE_MAX) return null;
+  return trimmed;
+}
+
+/**
+ * Full trimmed rating for native `title` when omitted from chip layout.
+ * Returns undefined when there is nothing useful to expose.
+ */
+export function powerRatingTitle(
+  value: string | null | undefined,
+): string | undefined {
+  if (value == null) return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.length <= POWER_RATING_VISIBLE_MAX) return undefined;
+  return trimmed;
+}
+
 export function toRankedPowerDaysView(
   module: VaultPowerRankedModule,
   windows: unknown,

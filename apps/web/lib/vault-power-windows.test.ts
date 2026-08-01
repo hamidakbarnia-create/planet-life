@@ -3,10 +3,12 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import {
+  powerRatingTitle,
   toPowerTimingView,
   toRankedPowerDaysView,
   toYesPowerSlotsView,
   vaultScoreBand,
+  visiblePowerRating,
 } from './vault-power-windows';
 import { VAULT_POWER_TIMING_COPY } from './vault-section-i18n';
 
@@ -194,6 +196,38 @@ describe('vaultScoreBand', () => {
   });
 });
 
+describe('visiblePowerRating / powerRatingTitle', () => {
+  it('keeps short ratings visible', () => {
+    expect(visiblePowerRating('Favorable')).toBe('Favorable');
+    expect(visiblePowerRating('  Challenging  ')).toBe('Challenging');
+    expect(powerRatingTitle('Favorable')).toBeUndefined();
+  });
+
+  it('hides long ratings from visible chip text', () => {
+    const long = 'Mixed / Proceed with Awareness';
+    expect(long.length).toBeGreaterThan(18);
+    expect(visiblePowerRating(long)).toBeNull();
+  });
+
+  it('keeps long ratings available for title', () => {
+    const long = 'Mixed / Proceed with Awareness';
+    expect(powerRatingTitle(long)).toBe(long);
+    expect(powerRatingTitle(`  ${long}  `)).toBe(long);
+  });
+
+  it('ignores whitespace-only ratings', () => {
+    expect(visiblePowerRating('   ')).toBeNull();
+    expect(powerRatingTitle('\t  ')).toBeUndefined();
+  });
+
+  it('ignores null and undefined', () => {
+    expect(visiblePowerRating(null)).toBeNull();
+    expect(visiblePowerRating(undefined)).toBeNull();
+    expect(powerRatingTitle(null)).toBeUndefined();
+    expect(powerRatingTitle(undefined)).toBeUndefined();
+  });
+});
+
 describe('Power timing localization + page wiring', () => {
   it('exposes EN/FA/AR/RU power timing labels', () => {
     for (const lang of ['en', 'fa', 'ar', 'ru'] as const) {
@@ -222,6 +256,11 @@ describe('Power timing localization + page wiring', () => {
     expect(pageSource).toContain('setLiveReading(res.reading)');
     expect(pageSource).toContain("raw === 'power' && powerTiming");
     expect(pageSource).toContain('VAULT_POWER_TIMING_COPY');
+    expect(pageSource).toContain('visiblePowerRating');
+    expect(pageSource).toContain('powerRatingTitle');
+    // Ranked chips use the concise rating helper; Yes slots keep raw rating.
+    expect(pageSource).toMatch(/visibleRating \? ` · \$\{visibleRating\}`/);
+    expect(pageSource).toMatch(/slot\.rating \? ` · \$\{slot\.rating\}`/);
     // Timing UI is gated to the power section only.
     expect(pageSource).toMatch(/raw === ['"]power['"] && powerTiming/);
   });

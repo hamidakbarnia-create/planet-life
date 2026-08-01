@@ -40,8 +40,10 @@ import {
 } from '@/lib/vault-section-i18n';
 import { buildVaultMissingInputNotice } from '@/lib/vault-missing-inputs';
 import {
+  powerRatingTitle,
   toPowerTimingView,
   vaultScoreBand,
+  visiblePowerRating,
   type VaultPowerTimingView,
   type VaultScoreBand,
 } from '@/lib/vault-power-windows';
@@ -543,19 +545,21 @@ export default function VaultSectionPage() {
                                   <div className="flex flex-wrap gap-2">
                                     {powerTiming.days.map((day) => {
                                       const band = vaultScoreBand(day.score);
+                                      const visibleRating = visiblePowerRating(day.rating);
+                                      const ratingTitle = powerRatingTitle(day.rating);
                                       return (
                                         <div
                                           key={`${day.date}-${day.score}`}
                                           className="rounded-lg px-2.5 py-1.5"
                                           style={bandTone(band)}
-                                          title={bandLabel(band)}
+                                          title={ratingTitle ?? bandLabel(band)}
                                         >
                                           <div className="fi text-[11px] leading-tight">
                                             {formatPowerDate(day.date)}
                                           </div>
                                           <div className="fi text-[10px] leading-tight mt-0.5 opacity-90">
                                             {day.score}
-                                            {day.rating ? ` · ${day.rating}` : ''}
+                                            {visibleRating ? ` · ${visibleRating}` : ''}
                                             {' · '}
                                             {bandLabel(band)}
                                           </div>
