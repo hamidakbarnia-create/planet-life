@@ -34,10 +34,17 @@ import {
   PREVIEW_LOCK_LANGS,
   READING_UI,
   SECTION_LANGS,
+  VAULT_POWER_TIMING_COPY,
   isValidVaultSection,
   type VaultSectionKey,
 } from '@/lib/vault-section-i18n';
 import { buildVaultMissingInputNotice } from '@/lib/vault-missing-inputs';
+import {
+  toPowerTimingView,
+  vaultScoreBand,
+  type VaultPowerTimingView,
+  type VaultScoreBand,
+} from '@/lib/vault-power-windows';
 
 /** Vault item index → live API key (same order as section.items). */
 const LIVE_ITEM_API: Partial<Record<VaultSectionKey, string[]>> = {
@@ -82,6 +89,7 @@ export default function VaultSectionPage() {
   const [missingNotice, setMissingNotice] = useState<
     ReturnType<typeof buildVaultMissingInputNotice>
   >(null);
+  const [powerTiming, setPowerTiming] = useState<VaultPowerTimingView | null>(null);
   const [hasLiveApi, setHasLiveApi] = useState(false);
   const [tier, setTier] = useState<MembershipTier>(() =>
     typeof window !== 'undefined' ? loadTier() : 'free'
@@ -115,6 +123,7 @@ export default function VaultSectionPage() {
       setLiveError(null);
       setLiveLoading(false);
       setMissingNotice(null);
+      setPowerTiming(null);
       return;
     }
     const sectionData = SECTION_LANGS[lang][raw];
@@ -146,6 +155,7 @@ export default function VaultSectionPage() {
         setLiveError('needProfile');
         setLiveLoading(false);
         setMissingNotice(null);
+        setPowerTiming(null);
         return;
       }
       let cancelled = false;
@@ -153,6 +163,7 @@ export default function VaultSectionPage() {
       setLiveError(null);
       setLiveReading(null);
       setMissingNotice(null);
+      setPowerTiming(null);
       const fetchReading =
         apiKey === 'ghost'
           ? fetchVaultGhostDaysReading(profile, lang)
@@ -189,6 +200,7 @@ export default function VaultSectionPage() {
         .then((res) => {
           if (cancelled) return;
           setLiveReading(res.reading);
+          setPowerTiming(toPowerTimingView(apiKey, res));
           const missing =
             res && typeof res === 'object' && 'missing_inputs' in res
               ? (res as { missing_inputs?: unknown }).missing_inputs
@@ -200,6 +212,7 @@ export default function VaultSectionPage() {
             setLiveError('api');
             setLiveReading(null);
             setMissingNotice(null);
+            setPowerTiming(null);
           }
         })
         .finally(() => {
@@ -215,13 +228,55 @@ export default function VaultSectionPage() {
     setLiveError(null);
     setLiveLoading(false);
     setMissingNotice(null);
+    setPowerTiming(null);
   }, [openItem, lang, raw, tier]);
 
   const unlocked = tier === 'premium' || tier === 'vip';
   const t = SECTION_LANGS[lang];
   const rui = READING_UI[lang];
+  const powerUi = VAULT_POWER_TIMING_COPY[lang];
   const dir = HOME_LANGS[lang].dir;
   const fontFamily = localeFontFamily(lang);
+
+  const formatPowerDate = (iso: string) => {
+    const locale =
+      lang === 'fa' ? 'fa-IR' : lang === 'ar' ? 'ar' : lang === 'ru' ? 'ru-RU' : 'en-GB';
+    const tms = Date.parse(`${iso}T00:00:00Z`);
+    if (!Number.isFinite(tms)) return iso;
+    return new Date(tms).toLocaleDateString(locale, {
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const bandLabel = (band: VaultScoreBand) =>
+    band === 'strongest'
+      ? powerUi.strongest
+      : band === 'supportive'
+        ? powerUi.supportive
+        : powerUi.lighter;
+
+  const bandTone = (band: VaultScoreBand) => {
+    if (band === 'strongest') {
+      return {
+        background: 'rgba(212,175,55,0.18)',
+        border: '1px solid rgba(212,175,55,0.45)',
+        color: '#F2CF75',
+      };
+    }
+    if (band === 'supportive') {
+      return {
+        background: 'rgba(212,175,55,0.10)',
+        border: '1px solid rgba(212,175,55,0.28)',
+        color: 'rgba(242,207,117,0.9)',
+      };
+    }
+    return {
+      background: 'rgba(255,255,255,0.04)',
+      border: '1px solid rgba(212,175,55,0.14)',
+      color: 'rgba(255,255,255,0.72)',
+    };
+  };
 
   if (!isValidVaultSection(raw)) {
     return (
@@ -472,6 +527,79 @@ export default function VaultSectionPage() {
                                 >
                                   {rui.tryThis}: {liveReading.action}
                                 </p>
+                              )}
+                            </div>
+                          )}
+                          {!liveLoading && raw === 'power' && powerTiming && (
+                            <div className="mt-3 space-y-2">
+                              {powerTiming.kind === 'ranked_days' && (
+                                <>
+                                  <div
+                                    className="fi text-[10px] tracking-[0.2em] uppercase"
+                                    style={{ color: 'rgba(212,175,55,0.7)' }}
+                                  >
+                                    {powerUi.topDays}
+                                  </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {powerTiming.days.map((day) => {
+                                      const band = vaultScoreBand(day.score);
+                                      return (
+                                        <div
+                                          key={`${day.date}-${day.score}`}
+                                          className="rounded-lg px-2.5 py-1.5"
+                                          style={bandTone(band)}
+                                          title={bandLabel(band)}
+                                        >
+                                          <div className="fi text-[11px] leading-tight">
+                                            {formatPowerDate(day.date)}
+                                          </div>
+                                          <div className="fi text-[10px] leading-tight mt-0.5 opacity-90">
+                                            {day.score}
+                                            {day.rating ? ` · ${day.rating}` : ''}
+                                            {' · '}
+                                            {bandLabel(band)}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </>
+                              )}
+                              {powerTiming.kind === 'yes_slots' && (
+                                <div className="space-y-2">
+                                  {(
+                                    [
+                                      ['ask', powerUi.ask, powerTiming.ask],
+                                      ['commit', powerUi.commit, powerTiming.commit],
+                                      ['sign', powerUi.sign, powerTiming.sign],
+                                    ] as const
+                                  ).map(([slotKey, slotLabel, slot]) => {
+                                    const band = vaultScoreBand(slot.score);
+                                    return (
+                                      <div
+                                        key={slotKey}
+                                        className="rounded-lg px-2.5 py-2"
+                                        style={bandTone(band)}
+                                      >
+                                        <div
+                                          className="fi text-[10px] tracking-[0.18em] uppercase mb-1"
+                                          style={{ color: 'rgba(212,175,55,0.75)' }}
+                                        >
+                                          {slotLabel}
+                                        </div>
+                                        <div className="fi text-[11px] leading-tight">
+                                          {formatPowerDate(slot.date)}
+                                          {' · '}
+                                          {slot.score}
+                                          {' · '}
+                                          {bandLabel(band)}
+                                          {slot.confidence ? ` · ${slot.confidence}` : ''}
+                                          {slot.rating ? ` · ${slot.rating}` : ''}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                               )}
                             </div>
                           )}

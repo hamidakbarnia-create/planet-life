@@ -23,11 +23,18 @@ export type VaultMarsResponse = {
   reading: VaultReadingLayer;
 };
 
+/** Calendar-day window item for Power hot / money / ghost producers. */
+export type VaultPowerDayWindow = {
+  date: string;
+  score: number;
+  rating?: string | null;
+};
+
 export type VaultGhostDaysResponse = {
   planet: string;
   action_type: string;
   lang: string;
-  windows: Array<{ date: string; score: number; rating?: string }>;
+  windows: VaultPowerDayWindow[];
   verdict: Record<string, unknown>;
   reading: VaultReadingLayer;
 };
@@ -147,7 +154,32 @@ export type VaultTodaysColorResponse = {
   reading: VaultReadingLayer;
 };
 
-export type VaultYesDayResponse = VaultTodaysColorResponse;
+/** Yes Day slot — not a top-level windows[] item. */
+export type VaultYesDaySlot = {
+  date: string;
+  score: number;
+  rating?: string | null;
+  confidence: string;
+  action_type: string;
+};
+
+export type VaultYesDayVerdict = {
+  ask: VaultYesDaySlot;
+  commit: VaultYesDaySlot;
+  sign: VaultYesDaySlot;
+  horizon_days?: number;
+  confidence?: string;
+  avoid?: string;
+  reason?: string;
+  [key: string]: unknown;
+};
+
+export type VaultYesDayResponse = {
+  planet: string;
+  lang: string;
+  verdict: VaultYesDayVerdict;
+  reading: VaultReadingLayer;
+};
 
 export async function fetchVaultYesDayReading(
   profile: BirthProfile,

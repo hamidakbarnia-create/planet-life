@@ -137,6 +137,55 @@ export const VAULT_MISSING_INPUT_COPY: Record<AppLang, VaultMissingInputCopy> = 
   },
 };
 
+export type VaultPowerTimingCopy = {
+  topDays: string;
+  ask: string;
+  commit: string;
+  sign: string;
+  strongest: string;
+  supportive: string;
+  lighter: string;
+};
+
+export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
+  en: {
+    topDays: 'Top days',
+    ask: 'Ask',
+    commit: 'Commit',
+    sign: 'Sign',
+    strongest: 'Strongest',
+    supportive: 'Supportive',
+    lighter: 'Lighter',
+  },
+  fa: {
+    topDays: 'روزهای برتر',
+    ask: 'پرسیدن',
+    commit: 'تعهد',
+    sign: 'امضا',
+    strongest: 'قوی‌ترین',
+    supportive: 'حمایت‌گر',
+    lighter: 'سبک‌تر',
+  },
+  ar: {
+    topDays: 'أفضل الأيام',
+    ask: 'اطلب',
+    commit: 'التزم',
+    sign: 'وقّع',
+    strongest: 'الأقوى',
+    supportive: 'داعم',
+    lighter: 'أخف',
+  },
+  ru: {
+    topDays: 'Лучшие дни',
+    ask: 'Спросить',
+    commit: 'Решиться',
+    sign: 'Подписать',
+    strongest: 'Сильнее всего',
+    supportive: 'Поддерживает',
+    lighter: 'Слабее',
+  },
+};
+
 export type VaultPreviewLockCopy = {
   sampleLabel: string;
   teaser: string;
