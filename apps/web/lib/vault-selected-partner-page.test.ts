@@ -57,6 +57,36 @@ describe('Vault page selected-partner wiring', () => {
     expect(pageSource).toContain('<select');
   });
 
+  it('wires distinct partner UX states and CTAs', () => {
+    expect(pageSource).toContain('data-vault-no-people');
+    expect(pageSource).toContain('data-vault-unsupported-relationship');
+    expect(pageSource).toContain('data-vault-partner-profile-note');
+    expect(pageSource).toContain('partnerUi.noPeopleBody');
+    expect(pageSource).toContain('partnerUi.addPersonCta');
+    expect(pageSource).toContain('partnerUi.choosePartnerHint');
+    expect(pageSource).toContain('partnerUi.changeRelationshipCta');
+    expect(pageSource).toContain('partnerUi.partnerProfileVsCompatNote');
+    expect(pageSource).toContain(
+      'showPartnerIdentity ? partnerUi.loading : rui.loading',
+    );
+    expect(pageSource).toContain(
+      'showPartnerIdentity ? partnerUi.apiError : rui.apiError',
+    );
+  });
+
+  it('keeps one Choose Partner explanation and no inert pseudo-CTA', () => {
+    expect(pageSource).toContain('data-vault-choose-partner');
+    expect(pageSource).toContain('partnerUi.choosePartnerHint');
+    expect(pageSource).not.toContain('choosePartnerBody');
+    expect(pageSource).not.toContain('data-vault-choose-partner-error');
+    expect(pageSource).not.toMatch(
+      /liveError === 'choosePartner'[\s\S]{0,400}partnerUi\.choosePartner/,
+    );
+    expect(pageSource).toMatch(
+      /<select[\s\S]*?onChange=\{[\s\S]*?selectVaultPartner/,
+    );
+  });
+
   it('reuses per-effect cancelled closure for selection refetch', () => {
     expect(pageSource).toContain('let cancelled = false');
     expect(pageSource).toContain('if (cancelled) return');
@@ -84,9 +114,32 @@ describe('Vault partner selection i18n', () => {
       expect(copy.readingFor.length).toBeGreaterThan(0);
       expect(copy.choosePartner.length).toBeGreaterThan(0);
       expect(copy.choosePartnerHint.length).toBeGreaterThan(0);
+      expect(copy.noPeopleBody.length).toBeGreaterThan(0);
+      expect(copy.addPersonCta.length).toBeGreaterThan(0);
+      expect(copy.changeRelationshipCta.length).toBeGreaterThan(0);
+      expect(copy.partnerProfileVsCompatNote.length).toBeGreaterThan(0);
+      expect(copy.loading.length).toBeGreaterThan(0);
+      expect(copy.apiError.length).toBeGreaterThan(0);
+      expect(copy.choosePartnerHint).not.toBe(copy.noPeopleBody);
       expect(copy.unsupportedRelationship.toLowerCase()).toMatch(
         /romantic|عاطفی|романтическ|عاطفي|spouse|همسر|زوج|друг|friend|صديق|business|تجاری|делового|عمل/,
       );
+      expect(copy.unsupportedRelationship.toLowerCase()).toMatch(
+        /birth|تولد|ميلاد|рожден/,
+      );
     }
+  });
+
+  it('keeps newly changed Arabic partner strings gender-neutral', () => {
+    const ar = VAULT_PARTNER_SELECTION_COPY.ar;
+    const gendered = /اختري|أضيفي|تحققي|افتحي|أكملي/;
+    expect(ar.noPeopleBody).not.toMatch(gendered);
+    expect(ar.apiError).not.toMatch(gendered);
+    expect(ar.choosePartnerHint).not.toMatch(gendered);
+    expect(ar.addPersonCta).not.toMatch(gendered);
+    expect(ar.changeRelationshipCta).not.toMatch(gendered);
+    expect(ar.partnerProfileVsCompatNote).not.toMatch(gendered);
+    expect(ar.unsupportedRelationship).not.toMatch(gendered);
+    expect(ar.loading).not.toMatch(gendered);
   });
 });

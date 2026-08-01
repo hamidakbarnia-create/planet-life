@@ -59,7 +59,7 @@ describe('buildVaultMissingInputNotice', () => {
     expect(buildVaultMissingInputNotice(undefined, 'en')).toBeNull();
   });
 
-  it('shows People CTA for partner-profile gaps', () => {
+  it('shows Complete Profile CTA for partner-profile gaps', () => {
     const notice = buildVaultMissingInputNotice(
       ['partner_birth_date', 'partner_location'],
       'en',
@@ -67,8 +67,12 @@ describe('buildVaultMissingInputNotice', () => {
     expect(notice).not.toBeNull();
     expect(notice!.kinds).toEqual(['partner_profile']);
     expect(notice!.message).toContain('partial');
-    expect(notice!.message.toLowerCase()).toContain('person');
-    expect(notice!.cta).toEqual({ href: '/people', label: 'Go to People' });
+    expect(notice!.message.toLowerCase()).toContain('this person’s profile');
+    expect(notice!.message.toLowerCase()).not.toContain('add a person');
+    expect(notice!.cta).toEqual({
+      href: '/people',
+      label: 'Complete Profile',
+    });
     expect(JSON.stringify(notice)).not.toContain('partner_birth_date');
   });
 
@@ -97,7 +101,7 @@ describe('buildVaultMissingInputNotice', () => {
     for (const lang of ['en', 'fa', 'ar', 'ru'] as const) {
       const pack = VAULT_MISSING_INPUT_COPY[lang];
       expect(pack.genericPartial.length).toBeGreaterThan(10);
-      expect(pack.goPeople.length).toBeGreaterThan(0);
+      expect(pack.completeProfile.length).toBeGreaterThan(0);
       expect(pack.goProfile.length).toBeGreaterThan(0);
       for (const kind of [
         'birth_profile',
@@ -110,7 +114,10 @@ describe('buildVaultMissingInputNotice', () => {
       }
       const notice = buildVaultMissingInputNotice(['partner_birth_date'], lang);
       expect(notice!.message).toBe(pack.byKind.partner_profile);
-      expect(notice!.cta?.href).toBe('/people');
+      expect(notice!.cta).toEqual({
+        href: '/people',
+        label: pack.completeProfile,
+      });
     }
   });
 
@@ -120,5 +127,11 @@ describe('buildVaultMissingInputNotice', () => {
     const notice = buildVaultMissingInputNotice(['partner_location'], 'en');
     expect(reading.headline).toBe('Keep me');
     expect(notice!.message.length).toBeGreaterThan(0);
+  });
+
+  it('uses gender-neutral Arabic for the changed partner_profile notice', () => {
+    const message = VAULT_MISSING_INPUT_COPY.ar.byKind.partner_profile;
+    expect(message).not.toMatch(/اختري|أضيفي|تحققي|افتحي|أكملي/);
+    expect(message).toContain('يلزم إكمال ملف هذا الشخص');
   });
 });

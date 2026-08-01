@@ -58,7 +58,7 @@ function ctaForKind(
 ): { href: string; label: string } | undefined {
   const copy = VAULT_MISSING_INPUT_COPY[lang];
   if (kind === 'partner_profile' || kind === 'partner_birth_time') {
-    return { href: '/people', label: copy.goPeople };
+    return { href: '/people', label: copy.completeProfile };
   }
   if (kind === 'birth_profile' || kind === 'current_location') {
     return { href: '/profile', label: copy.goProfile };

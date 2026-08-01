@@ -78,6 +78,11 @@ describe('Vault section presentation copy', () => {
     ]);
   });
 
+  it('keeps FA Provider title free of romantic-default spouse framing', () => {
+    expect(SECTION_LANGS.fa.provider.title).toBe('حامی');
+    expect(SECTION_LANGS.fa.provider.title).not.toContain('همسر آینده');
+  });
+
   it('aligns live-module labels with producer semantics', () => {
     const sensuality = SECTION_LANGS.en.sensuality.items[0];
     expect(sensuality.label).toBe('Mars Desire Signature');

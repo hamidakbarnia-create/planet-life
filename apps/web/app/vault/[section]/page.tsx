@@ -34,7 +34,6 @@ import {
   PREVIEW_LOCK_LANGS,
   READING_UI,
   SECTION_LANGS,
-  VAULT_MISSING_INPUT_COPY,
   VAULT_PARTNER_SELECTION_COPY,
   VAULT_POWER_TIMING_COPY,
   isValidVaultSection,
@@ -729,7 +728,7 @@ export default function VaultSectionPage() {
                               className="fi text-xs py-4"
                               style={{ color: 'rgba(255,255,255,0.55)' }}
                             >
-                              {rui.loading}
+                              {showPartnerIdentity ? partnerUi.loading : rui.loading}
                             </p>
                           )}
                           {!liveLoading && liveError === 'needProfile' && (
@@ -758,16 +757,16 @@ export default function VaultSectionPage() {
                               className="fi text-xs leading-relaxed"
                               style={{ color: 'rgba(248,113,113,0.85)' }}
                             >
-                              {rui.apiError}
+                              {showPartnerIdentity ? partnerUi.apiError : rui.apiError}
                             </p>
                           )}
                           {!liveLoading && liveError === 'needPerson' && (
-                            <div className="mb-3">
+                            <div className="mb-3" data-vault-no-people="true">
                               <p
                                 className="fi text-xs leading-relaxed mb-3"
                                 style={{ color: 'rgba(255,255,255,0.65)' }}
                               >
-                                {partnerUi.addPerson}
+                                {partnerUi.noPeopleBody}
                               </p>
                               <Link
                                 href="/people"
@@ -778,27 +777,39 @@ export default function VaultSectionPage() {
                                   color: '#F2CF75',
                                 }}
                               >
-                                {VAULT_MISSING_INPUT_COPY[lang].goPeople}
+                                {partnerUi.addPersonCta}
                               </Link>
                             </div>
                           )}
-                          {!liveLoading && liveError === 'choosePartner' && (
-                            <p
-                              className="fi text-xs leading-relaxed"
-                              style={{ color: 'rgba(255,255,255,0.65)' }}
-                              data-vault-choose-partner-error="true"
-                            >
-                              {partnerUi.choosePartnerHint}
-                            </p>
-                          )}
                           {!liveLoading && liveError === 'unsupportedRelationship' && (
-                            <p
-                              className="fi text-xs leading-relaxed"
-                              style={{ color: 'rgba(255,255,255,0.72)' }}
-                              data-vault-unsupported-relationship="true"
-                            >
-                              {partnerUi.unsupportedRelationship}
-                            </p>
+                            <div className="mb-3" data-vault-unsupported-relationship="true">
+                              <p
+                                className="fi text-xs leading-relaxed mb-2"
+                                style={{ color: 'rgba(255,255,255,0.72)' }}
+                              >
+                                {partnerUi.unsupportedRelationship}
+                              </p>
+                              {openApiKeyForUi === 'partner' && (
+                                <p
+                                  className="fi text-xs leading-relaxed mb-3"
+                                  style={{ color: 'rgba(255,255,255,0.55)' }}
+                                  data-vault-partner-profile-note="true"
+                                >
+                                  {partnerUi.partnerProfileVsCompatNote}
+                                </p>
+                              )}
+                              <Link
+                                href="/people"
+                                className="fc text-xs tracking-widest px-4 py-2 rounded-lg inline-flex no-underline"
+                                style={{
+                                  background: 'rgba(212,175,55,0.15)',
+                                  border: '1px solid rgba(212,175,55,0.35)',
+                                  color: '#F2CF75',
+                                }}
+                              >
+                                {partnerUi.changeRelationshipCta}
+                              </Link>
+                            </div>
                           )}
                           {!liveLoading && raw === 'power' && powerTiming && (
                             <div className="mt-3 space-y-2">

@@ -51,11 +51,19 @@ export type VaultReadingUiCopy = {
 /** Vault-scoped selected partner identity / choice / relationship gating. */
 export type VaultPartnerSelectionCopy = {
   readingFor: string;
-  choosePartner: string;
-  choosePartnerHint: string;
   selectLabel: string;
+  /** Select placeholder label (interactive control is the native select). */
+  choosePartner: string;
+  /** Sole explanatory message when multiple people exist and none is selected. */
+  choosePartnerHint: string;
+  noPeopleBody: string;
+  addPersonCta: string;
   unsupportedRelationship: string;
-  addPerson: string;
+  changeRelationshipCta: string;
+  /** Extra line when Partner Profile is unavailable for a relationship Compat/Shadow may still allow. */
+  partnerProfileVsCompatNote: string;
+  loading: string;
+  apiError: string;
 };
 
 export const VAULT_PARTNER_SELECTION_COPY: Record<
@@ -64,49 +72,82 @@ export const VAULT_PARTNER_SELECTION_COPY: Record<
 > = {
   en: {
     readingFor: 'Reading for',
-    choosePartner: 'Choose a person',
-    choosePartnerHint:
-      'Select who this Vault reading should use. Partner Profile, Compatibility, and Shadow share the same person.',
     selectLabel: 'Person',
+    choosePartner: 'Choose Partner',
+    choosePartnerHint:
+      'Partner Profile, Compatibility, and Shadow share the same selected person.',
+    noPeopleBody:
+      'Add someone in People before this reading can run.',
+    addPersonCta: 'Add Person',
     unsupportedRelationship:
-      'This module does not support the selected person’s relationship. Compatibility and Shadow support romantic partner, spouse, friend, or business partner. Partner Profile supports romantic partner, spouse, or business partner.',
-    addPerson: 'Add a person in People to run this reading.',
+      'This module is unavailable for the selected person’s relationship type. Changing birth date, time, or place will not unlock it. Compatibility and Shadow support romantic partner, spouse, friend, or business partner. Partner Profile supports romantic partner, spouse, or business partner.',
+    changeRelationshipCta: 'Change Relationship',
+    partnerProfileVsCompatNote:
+      'Compatibility or Shadow may still be available for this person if their relationship is supported there.',
+    loading: 'Preparing this person’s reading…',
+    apiError:
+      'This reading could not load. Check your connection, then open this module again.',
   },
   fa: {
     readingFor: 'خوانش برای',
-    choosePartner: 'یک نفر را انتخاب کن',
-    choosePartnerHint:
-      'مشخص کن این خوانش برای چه کسی باشد. پروفایل شریک، سازگاری و سایه از همان نفر استفاده می‌کنند.',
     selectLabel: 'فرد',
+    choosePartner: 'انتخاب شریک',
+    choosePartnerHint:
+      'پروفایل شریک، سازگاری و سایه از همان فرد انتخاب‌شده استفاده می‌کنند.',
+    noPeopleBody:
+      'قبل از اجرای این خوانش، کسی را در افراد اضافه کن.',
+    addPersonCta: 'افزودن فرد',
     unsupportedRelationship:
-      'این بخش از نوع رابطهٔ فرد انتخاب‌شده پشتیبانی نمی‌کند. سازگاری و سایه: شریک عاطفی، همسر، دوست یا شریک تجاری. پروفایل شریک: شریک عاطفی، همسر یا شریک تجاری.',
-    addPerson: 'برای این خوانش یک نفر را در افراد اضافه کن.',
+      'این بخش برای نوع رابطهٔ فرد انتخاب‌شده در دسترس نیست. تغییر تاریخ، ساعت یا مکان تولد آن را باز نمی‌کند. سازگاری و سایه: شریک عاطفی، همسر، دوست یا شریک تجاری. پروفایل شریک: شریک عاطفی، همسر یا شریک تجاری.',
+    changeRelationshipCta: 'تغییر نوع رابطه',
+    partnerProfileVsCompatNote:
+      'اگر نوع رابطه در آنجا پشتیبانی شود، سازگاری یا سایه ممکن است همچنان برای همین فرد در دسترس باشد.',
+    loading: 'در حال آماده‌سازی خوانش این فرد…',
+    apiError:
+      'این خوانش بارگذاری نشد. اتصال را بررسی کن و دوباره این بخش را باز کن.',
   },
   ar: {
     readingFor: 'قراءة لـ',
-    choosePartner: 'اختاري شخصاً',
-    choosePartnerHint:
-      'حددي من تُستخدم قراءته هنا. ملف الشريك والتوافق والظل يستخدمون الشخص نفسه.',
     selectLabel: 'الشخص',
+    choosePartner: 'اختيار الشريك',
+    choosePartnerHint:
+      'ملف الشريك والتوافق والظل يستخدمون الشخص المحدد نفسه.',
+    noPeopleBody:
+      'يلزم إضافة شخص في الأشخاص قبل تشغيل هذه القراءة.',
+    addPersonCta: 'إضافة شخص',
     unsupportedRelationship:
-      'هذه الوحدة لا تدعم نوع علاقة الشخص المحدد. التوافق والظل: شريك عاطفي أو زوج/ة أو صديق أو شريك عمل. ملف الشريك: شريك عاطفي أو زوج/ة أو شريك عمل.',
-    addPerson: 'أضيفي شخصاً في الأشخاص لتشغيل هذه القراءة.',
+      'هذه الوحدة غير متاحة لنوع علاقة الشخص المحدد. تغيير تاريخ أو وقت أو مكان الميلاد لن يفتحها. التوافق والظل: شريك عاطفي أو زوج/ة أو صديق أو شريك عمل. ملف الشريك: شريك عاطفي أو زوج/ة أو شريك عمل.',
+    changeRelationshipCta: 'تغيير نوع العلاقة',
+    partnerProfileVsCompatNote:
+      'قد يظل التوافق أو الظل متاحاً لهذا الشخص إذا كان نوع العلاقة مدعوماً هناك.',
+    loading: 'جارٍ إعداد قراءة هذا الشخص…',
+    apiError:
+      'تعذّر تحميل هذه القراءة. يُرجى التحقق من الاتصال ثم إعادة فتح هذه الوحدة.',
   },
   ru: {
     readingFor: 'Разбор для',
-    choosePartner: 'Выберите человека',
-    choosePartnerHint:
-      'Укажите, кого использовать для этого разбора. Профиль партнёра, совместимость и Тень используют одного и того же человека.',
     selectLabel: 'Человек',
+    choosePartner: 'Выбрать партнёра',
+    choosePartnerHint:
+      'Профиль партнёра, совместимость и Тень используют одного и того же выбранного человека.',
+    noPeopleBody:
+      'Добавьте человека в раздел «Люди», прежде чем запускать этот разбор.',
+    addPersonCta: 'Добавить человека',
     unsupportedRelationship:
-      'Этот модуль не поддерживает тип отношений выбранного человека. Совместимость и Тень: романтический партнёр, супруг/а, друг или деловой партнёр. Профиль партнёра: романтический партнёр, супруг/а или деловой партнёр.',
-    addPerson: 'Добавьте человека в People, чтобы запустить этот разбор.',
+      'Этот модуль недоступен для типа отношений выбранного человека. Изменение даты, времени или места рождения его не откроет. Совместимость и Тень: романтический партнёр, супруг/а, друг или деловой партнёр. Профиль партнёра: романтический партнёр, супруг/а или деловой партнёр.',
+    changeRelationshipCta: 'Изменить тип отношений',
+    partnerProfileVsCompatNote:
+      'Совместимость или Тень могут оставаться доступны для этого человека, если тип отношений там поддерживается.',
+    loading: 'Готовим разбор для этого человека…',
+    apiError:
+      'Не удалось загрузить разбор. Проверьте соединение и откройте модуль снова.',
   },
 };
 
 export type VaultMissingInputCopy = {
-  goPeople: string;
   goProfile: string;
+  /** CTA when the selected partner’s birth details are incomplete. */
+  completeProfile: string;
   genericPartial: string;
   byKind: Record<
     | 'birth_profile'
@@ -120,8 +161,8 @@ export type VaultMissingInputCopy = {
 
 export const VAULT_MISSING_INPUT_COPY: Record<AppLang, VaultMissingInputCopy> = {
   en: {
-    goPeople: 'Go to People',
     goProfile: 'Go to Profile',
+    completeProfile: 'Complete Profile',
     genericPartial:
       'This reading is partial. Add a few more details to refine the guidance.',
     byKind: {
@@ -132,14 +173,14 @@ export const VAULT_MISSING_INPUT_COPY: Record<AppLang, VaultMissingInputCopy> = 
       place_shortlist:
         'This reading is partial. Place guidance needs a clearer shortlist of locations to compare.',
       partner_profile:
-        'This reading is partial. Add a person to compare relationship patterns.',
+        'This reading is partial. Complete this person’s profile — add their birth date and place.',
       partner_birth_time:
         'This reading is partial. Add their birth time so timing details can sharpen.',
     },
   },
   fa: {
-    goPeople: 'رفتن به افراد',
     goProfile: 'رفتن به پروفایل',
+    completeProfile: 'تکمیل پروفایل',
     genericPartial:
       'این خوانش ناقص است. چند جزئیات بیشتر اضافه کن تا راهنمایی دقیق‌تر شود.',
     byKind: {
@@ -150,14 +191,14 @@ export const VAULT_MISSING_INPUT_COPY: Record<AppLang, VaultMissingInputCopy> = 
       place_shortlist:
         'این خوانش ناقص است. برای مقایسه مکان‌ها به فهرست واضح‌تری از جاها نیاز است.',
       partner_profile:
-        'این خوانش ناقص است. یک نفر اضافه کن تا الگوهای رابطه مقایسه شود.',
+        'این خوانش ناقص است. پروفایل این فرد را کامل کن — تاریخ و مکان تولدش را اضافه کن.',
       partner_birth_time:
         'این خوانش ناقص است. ساعت تولد او را اضافه کن تا جزئیات تایمینگ دقیق‌تر شود.',
     },
   },
   ru: {
-    goPeople: 'К людям',
     goProfile: 'В профиль',
+    completeProfile: 'Дополнить профиль',
     genericPartial:
       'Разбор частичный. Добавьте ещё несколько деталей, чтобы уточнить подсказки.',
     byKind: {
@@ -168,14 +209,14 @@ export const VAULT_MISSING_INPUT_COPY: Record<AppLang, VaultMissingInputCopy> = 
       place_shortlist:
         'Разбор частичный. Для сравнения мест нужен более ясный список локаций.',
       partner_profile:
-        'Разбор частичный. Добавьте человека, чтобы сравнить паттерны отношений.',
+        'Разбор частичный. Дополните профиль этого человека — укажите дату и место рождения.',
       partner_birth_time:
         'Разбор частичный. Добавьте его/её время рождения — тайминг станет точнее.',
     },
   },
   ar: {
-    goPeople: 'إلى الأشخاص',
     goProfile: 'إلى الملف',
+    completeProfile: 'إكمال الملف',
     genericPartial:
       'هذه القراءة جزئية. أضيفي بعض التفاصيل لتحسين الإرشاد.',
     byKind: {
@@ -186,7 +227,7 @@ export const VAULT_MISSING_INPUT_COPY: Record<AppLang, VaultMissingInputCopy> = 
       place_shortlist:
         'هذه القراءة جزئية. إرشاد الأماكن يحتاج قائمة أوضح للمقارنة.',
       partner_profile:
-        'هذه القراءة جزئية. أضيفي شخصاً لمقارنة أنماط العلاقة.',
+        'هذه القراءة جزئية. يلزم إكمال ملف هذا الشخص — بإضافة تاريخ ومكان الميلاد.',
       partner_birth_time:
         'هذه القراءة جزئية. أضيفي وقت ميلاده/ها لتدقيق تفاصيل التوقيت.',
     },
@@ -595,7 +636,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       coming: 'به‌زودی — بازتاب چرخه با ریتم آسمان. فقط آگاهی سلامتی.',
     },
     provider: {
-      title: 'حامی (همسر آینده)',
+      title: 'حامی',
       sub: 'الگوهای امنیت، منابع، شراکت و محیط‌های حمایتی.',
       intro:
         'جایی که حمایت و منابع جمع می‌شن — مکان‌ها، الگوهای شراکت و سیگنال‌های ثبات.',
