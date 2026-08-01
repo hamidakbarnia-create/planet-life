@@ -162,7 +162,10 @@ export async function fetchMonthScores(
   if (!locFields) return { scores: {}, breakdowns: {}, reasoning: {} };
 
   const cached = loadMonthCache(year, month, profile.action_type, evalLabel);
-  if (cached) return { scores: cached, breakdowns: {}, reasoning: {} };
+  // Empty {} must not short-circuit — it is a cache miss (failed prior load).
+  if (cached && Object.keys(cached).length > 0) {
+    return { scores: cached, breakdowns: {}, reasoning: {} };
+  }
 
   const total = daysInMonth(year, month);
   const dates = Array.from({ length: total }, (_, i) =>
@@ -186,6 +189,10 @@ export async function fetchMonthScores(
       zodiac: prefs.zodiac,
       ...locFields,
     });
+    if (!res.ok) {
+      onProgress?.(total, total);
+      return { scores, breakdowns, reasoning };
+    }
     const data = await res.json();
     if (data.scores && typeof data.scores === 'object') {
       for (const [date, payload] of Object.entries(data.scores)) {
@@ -206,7 +213,9 @@ export async function fetchMonthScores(
   }
 
   onProgress?.(total, total);
-  saveMonthCache(year, month, profile.action_type, scores, evalLabel);
+  if (Object.keys(scores).length > 0) {
+    saveMonthCache(year, month, profile.action_type, scores, evalLabel);
+  }
   return { scores, breakdowns, reasoning };
 }
 
