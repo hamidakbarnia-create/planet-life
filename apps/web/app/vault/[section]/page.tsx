@@ -490,48 +490,6 @@ export default function VaultSectionPage() {
                               {rui.apiError}
                             </p>
                           )}
-                          {!liveLoading && liveReading && (
-                            <div
-                              className="rounded-lg p-3 space-y-3"
-                              style={{
-                                background: 'rgba(0,0,0,0.22)',
-                                border: '1px solid rgba(212,175,55,0.12)',
-                              }}
-                            >
-                              {liveReading.headline && (
-                                <p
-                                  className="fc text-sm leading-snug"
-                                  style={{ color: '#F2CF75' }}
-                                >
-                                  {liveReading.headline}
-                                </p>
-                              )}
-                              {liveReading.strategic && (
-                                <p
-                                  className="fi text-xs leading-relaxed whitespace-pre-line"
-                                  style={{ color: 'rgba(255,255,255,0.82)' }}
-                                >
-                                  {liveReading.strategic}
-                                </p>
-                              )}
-                              {!liveReading.strategic && liveReading.executive && (
-                                <p
-                                  className="fi text-xs leading-relaxed whitespace-pre-line"
-                                  style={{ color: 'rgba(255,255,255,0.82)' }}
-                                >
-                                  {liveReading.executive}
-                                </p>
-                              )}
-                              {liveReading.action && (
-                                <p
-                                  className="fi text-xs leading-relaxed"
-                                  style={{ color: 'rgba(242,207,117,0.9)' }}
-                                >
-                                  {rui.tryThis}: {liveReading.action}
-                                </p>
-                              )}
-                            </div>
-                          )}
                           {!liveLoading && raw === 'power' && powerTiming && (
                             <div className="mt-3 space-y-2">
                               {powerTiming.kind === 'ranked_days' && (
@@ -604,6 +562,48 @@ export default function VaultSectionPage() {
                                     );
                                   })}
                                 </div>
+                              )}
+                            </div>
+                          )}
+                          {!liveLoading && liveReading && (
+                            <div
+                              className="mt-3 rounded-lg p-3 space-y-3"
+                              style={{
+                                background: 'rgba(0,0,0,0.22)',
+                                border: '1px solid rgba(212,175,55,0.12)',
+                              }}
+                            >
+                              {liveReading.headline && (
+                                <p
+                                  className="fc text-sm leading-snug"
+                                  style={{ color: '#F2CF75' }}
+                                >
+                                  {liveReading.headline}
+                                </p>
+                              )}
+                              {liveReading.strategic && (
+                                <p
+                                  className="fi text-xs leading-relaxed whitespace-pre-line"
+                                  style={{ color: 'rgba(255,255,255,0.82)' }}
+                                >
+                                  {liveReading.strategic}
+                                </p>
+                              )}
+                              {!liveReading.strategic && liveReading.executive && (
+                                <p
+                                  className="fi text-xs leading-relaxed whitespace-pre-line"
+                                  style={{ color: 'rgba(255,255,255,0.82)' }}
+                                >
+                                  {liveReading.executive}
+                                </p>
+                              )}
+                              {liveReading.action && (
+                                <p
+                                  className="fi text-xs leading-relaxed"
+                                  style={{ color: 'rgba(242,207,117,0.9)' }}
+                                >
+                                  {rui.tryThis}: {liveReading.action}
+                                </p>
                               )}
                             </div>
                           )}
