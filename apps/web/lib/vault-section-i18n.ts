@@ -165,7 +165,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'Read the geometry of desire, fantasy, and magnetism through your chart — then choose when to lean in.',
       items: [
-        { label: 'My Desire', hint: 'Attraction patterns your chart amplifies' },
+        { label: 'Mars Desire Signature', hint: 'How Mars shapes desire and pursuit in your chart' },
         { label: 'Deep Fantasies', hint: 'Private themes of longing and intensity' },
         { label: 'Hidden Magnetism', hint: 'Presence you do not announce' },
         { label: 'Attraction Today', hint: 'Hours when your appeal peaks' },
@@ -191,7 +191,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'Where support and resources tend to gather — places, partnership patterns, and stability signals to act on.',
       items: [
-        { label: 'Wealth Partner', hint: 'Supportive partnership and resource patterns' },
+        { label: 'Prosperity Geography', hint: 'Places that score higher for expansion and resources' },
         { label: 'Love Lines Map', hint: 'Places that score higher for connection' },
         { label: 'Partner Profile', hint: 'Ideal traits and compatibility patterns' },
         { label: 'Compatibility', hint: 'Emotional, chemistry, and stability scores' },
@@ -207,7 +207,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         { label: 'Cheating Radar', hint: 'Signals to verify — never verdicts' },
         { label: 'Trust Patterns', hint: 'Building, pressure, repair — not verdicts' },
         { label: 'Communication Risk', hint: 'Clarity, reactivity, escalation — not verdicts' },
-        { label: 'Safe Secret Timing', hint: 'Lower-exposure windows for private talks' },
+        { label: 'Private Conversation Timing', hint: 'Quieter windows for private talks — reflection only' },
       ],
       coming: 'Coming soon — timing tools. Educational only.',
     },
@@ -273,7 +273,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'Геометрия желания, фантазии и магнетизма по вашей карте — и момент, когда стоит шагнуть ближе.',
       items: [
-        { label: 'Моё желание', hint: 'Паттерны притяжения, которые усиливает карта' },
+        { label: 'Сигнатура желания (Марс)', hint: 'Как Марс формирует желание и стремление в карте' },
         { label: 'Глубокие фантазии', hint: 'Личные темы томления и интенсивности' },
         { label: 'Скрытый магнетизм', hint: 'Присутствие без объявления' },
         { label: 'Притяжение сегодня', hint: 'Часы пика притягательности' },
@@ -299,7 +299,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'Где собираются поддержка и ресурсы — места, паттерны партнёрства и сигналы стабильности.',
       items: [
-        { label: 'Партнёр и богатство', hint: 'Поддержка и ресурсные паттерны' },
+        { label: 'География процветания', hint: 'Места с более высоким баллом для роста и ресурсов' },
         { label: 'Карта любви', hint: 'Места с более высоким баллом связи' },
         { label: 'Профиль партнёра', hint: 'Черты и паттерны совместимости' },
         { label: 'Совместимость', hint: 'Эмоции, химия и стабильность' },
@@ -315,7 +315,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         { label: 'Радар верности', hint: 'Сигналы для проверки — не приговоры' },
         { label: 'Паттерны доверия', hint: 'Строительство, давление, ремонт — не приговоры' },
         { label: 'Риск общения', hint: 'Ясность, реактивность, эскалация — не приговоры' },
-        { label: 'Безопасные дни', hint: 'Окна меньшей заметности для личных разговоров' },
+        { label: 'Время для частных разговоров', hint: 'Более тихие окна для личных бесед — только рефлексия' },
       ],
       coming: 'Скоро — тайминг. Только обучение.',
     },
@@ -380,7 +380,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'هندسه میل، فانتزی و مگنتیسم از روی چارت — بعد انتخاب کن کی نزدیک‌تر بشی.',
       items: [
-        { label: 'میل من', hint: 'الگوهای جذبی که چارتت تقویت می‌کنه' },
+        { label: 'امضای میل (مریخ)', hint: 'مریخ چطور میل و پیگیری را در چارتت شکل می‌دهد' },
         { label: 'فانتزی‌های عمیق', hint: 'تم‌های خصوصی اشتیاق و شدت' },
         { label: 'مگنتیسم پنهان', hint: 'حضوری که اعلام نمی‌کنی' },
         { label: 'جذابیت امروز', hint: 'ساعات اوج جذابیت' },
@@ -406,7 +406,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'جایی که حمایت و منابع جمع می‌شن — مکان‌ها، الگوهای شراکت و سیگنال‌های ثبات.',
       items: [
-        { label: 'شریک و ثروت', hint: 'شراکت حمایتی و الگوهای منابع' },
+        { label: 'جغرافیای رفاه', hint: 'جاهایی با امتیاز بالاتر برای گسترش و منابع' },
         { label: 'نقشه عشق', hint: 'جاهایی با امتیاز بالاتر برای ارتباط' },
         { label: 'پروفایل شریک', hint: 'ویژگی ایده‌آل و الگوهای هم‌خوانی' },
         { label: 'هم‌خوانی', hint: 'عاطفی، شیمی و ثبات' },
@@ -422,7 +422,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         { label: 'رادار خیانت', hint: 'نشانه‌هایی برای بررسی — نه حکم' },
         { label: 'الگوهای اعتماد', hint: 'ساخت، فشار، ترمیم — نه حکم' },
         { label: 'ریسک ارتباط', hint: 'وضوح، واکنش، تشدید — نه حکم' },
-        { label: 'روزهای امن', hint: 'پنجره‌های کم‌نمایش برای حرف خصوصی' },
+        { label: 'زمان گفت‌وگوی خصوصی', hint: 'پنجره‌های آرام‌تر برای حرف خصوصی — فقط بازتاب' },
       ],
       coming: 'به‌زودی — تایمینگ. فقط آموزشی.',
     },
@@ -487,7 +487,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'هندسة الرغبة والخيال والجاذبية من خريطتكِ — ثم اختاري متى تقتربين.',
       items: [
-        { label: 'رغبتي', hint: 'أنماط الجذب التي تعزّزها خريطتكِ' },
+        { label: 'بصمة الرغبة (المريخ)', hint: 'كيف يشكّل المريخ الرغبة والسعي في خريطتكِ' },
         { label: 'خيالات عميقة', hint: 'ثيمات خاصة من الشوق والشدّة' },
         { label: 'جاذبية خفية', hint: 'حضور بلا إعلان' },
         { label: 'جاذبية اليوم', hint: 'ساعات الذروة' },
@@ -513,7 +513,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'أين تتجمّع الدعم والموارد — أماكن وأنماط شراكة وإشارات استقرار للعمل عليها.',
       items: [
-        { label: 'الشريك والثروة', hint: 'شراكة داعمة وأنماط الموارد' },
+        { label: 'جغرافيا الازدهار', hint: 'أماكن بدرجات أعلى للتوسّع والموارد' },
         { label: 'خريطة الحب', hint: 'أماكن بدرجات أعلى للارتباط' },
         { label: 'ملف الشريك', hint: 'سمات مثالية وأنماط توافق' },
         { label: 'التوافق', hint: 'عاطفي وكيمياء واستقرار' },
@@ -529,7 +529,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         { label: 'رادار الخيانة', hint: 'إشارات للتحقّق — لا أحكام' },
         { label: 'أنماط الثقة', hint: 'بناء وضغط وإصلاح — لا أحكام' },
         { label: 'مخاطر التواصل', hint: 'وضوح وردة فعل وتصعيد — لا أحكام' },
-        { label: 'أيام آمنة', hint: 'نوافذ أقل انكشافاً لأحاديث خاصة' },
+        { label: 'توقيت المحادثة الخاصة', hint: 'نوافذ أهدأ لأحاديث خاصة — تأمّل فقط' },
       ],
       coming: 'قريباً — توقيت. تعليمي فقط.',
     },

@@ -78,6 +78,37 @@ describe('Vault section presentation copy', () => {
     ]);
   });
 
+  it('aligns live-module labels with producer semantics', () => {
+    const sensuality = SECTION_LANGS.en.sensuality.items[0];
+    expect(sensuality.label).toBe('Mars Desire Signature');
+    expect(sensuality.label.toLowerCase()).toContain('mars');
+    expect(sensuality.hint.toLowerCase()).toMatch(/mars|desire|pursuit/);
+    expect(sensuality.label.toLowerCase()).not.toContain('fantasy');
+
+    const wealth = SECTION_LANGS.en.provider.items[0];
+    expect(wealth.label).toBe('Prosperity Geography');
+    expect(wealth.label.toLowerCase()).toMatch(/geography|prosperity|resource/);
+    expect(wealth.label.toLowerCase()).not.toContain('partner');
+    expect(wealth.hint.toLowerCase()).toMatch(/place|expansion|resource/);
+
+    const shadowLocked = SECTION_LANGS.en.shadow.items[3];
+    expect(shadowLocked.label).toBe('Private Conversation Timing');
+    expect(shadowLocked.label.toLowerCase()).not.toContain('secret');
+    expect(shadowLocked.hint.toLowerCase()).toMatch(/reflection|private|conversation/);
+
+    expect(SECTION_LANGS.ru.sensuality.items[0].label).toMatch(/Марс|марс/i);
+    expect(SECTION_LANGS.fa.sensuality.items[0].label).toMatch(/مریخ/);
+    expect(SECTION_LANGS.ar.sensuality.items[0].label).toMatch(/المريخ/);
+
+    expect(SECTION_LANGS.ru.provider.items[0].label).toMatch(/География|география/);
+    expect(SECTION_LANGS.fa.provider.items[0].label).toMatch(/جغرافیا/);
+    expect(SECTION_LANGS.ar.provider.items[0].label).toMatch(/جغرافيا/);
+
+    expect(SECTION_LANGS.ru.shadow.items[3].label).toMatch(/частн|разговор/i);
+    expect(SECTION_LANGS.fa.shadow.items[3].label).toMatch(/گفت|خصوصی/);
+    expect(SECTION_LANGS.ar.shadow.items[3].label).toMatch(/محادثة|خاصة/);
+  });
+
   it('keeps i18n free of producer routing', () => {
     const i18nSource = readFileSync(resolve(__dirname, './vault-section-i18n.ts'), 'utf8');
     expect(i18nSource).not.toContain('LIVE_ITEM_API');
