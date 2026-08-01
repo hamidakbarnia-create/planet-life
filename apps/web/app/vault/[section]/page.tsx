@@ -51,6 +51,11 @@ import {
   VaultRankedDayChip,
   VaultYesDecisionSlot,
 } from '@/components/vault/VaultPowerTiming';
+import { PEOPLE_CHANGED_EVENT } from '@/lib/people-storage';
+import {
+  shouldBumpPeopleRevisionForOpenVault,
+  type PeopleVaultRefreshSignal,
+} from '@/lib/vault-partner-dependent';
 
 /** Vault item index → live API key (same order as section.items). */
 const LIVE_ITEM_API: Partial<Record<VaultSectionKey, string[]>> = {
@@ -100,6 +105,7 @@ export default function VaultSectionPage() {
   const [tier, setTier] = useState<MembershipTier>(() =>
     typeof window !== 'undefined' ? loadTier() : 'free'
   );
+  const [peopleRevision, setPeopleRevision] = useState(0);
   useQueuedEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
@@ -116,6 +122,37 @@ export default function VaultSectionPage() {
       window.removeEventListener('planet-life-membership-changed', onChange);
     };
   }, []);
+
+  useEffect(() => {
+    const resolveOpenApiKey = (): string | undefined => {
+      if (!isValidVaultSection(raw) || !openItem) return undefined;
+      const sectionData = SECTION_LANGS[lang][raw];
+      const idx = sectionData.items.findIndex((i) => i.label === openItem);
+      return (LIVE_ITEM_API[raw] ?? [])[idx];
+    };
+
+    const bumpIfNeeded = (signal: PeopleVaultRefreshSignal) => {
+      if (
+        shouldBumpPeopleRevisionForOpenVault({
+          openApiKey: resolveOpenApiKey(),
+          signal,
+        })
+      ) {
+        setPeopleRevision((n) => n + 1);
+      }
+    };
+
+    const onPeopleChanged = () => bumpIfNeeded({ type: 'people-changed' });
+    const onStorage = (event: StorageEvent) =>
+      bumpIfNeeded({ type: 'storage', key: event.key });
+
+    window.addEventListener(PEOPLE_CHANGED_EVENT, onPeopleChanged);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener(PEOPLE_CHANGED_EVENT, onPeopleChanged);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [openItem, lang, raw]);
 
   const setLang = (l: AppLang) => {
     setLangState(l);
@@ -235,7 +272,7 @@ export default function VaultSectionPage() {
     setLiveLoading(false);
     setMissingNotice(null);
     setPowerTiming(null);
-  }, [openItem, lang, raw, tier]);
+  }, [openItem, lang, raw, tier, peopleRevision]);
 
   const unlocked = tier === 'premium' || tier === 'vip';
   const t = SECTION_LANGS[lang];

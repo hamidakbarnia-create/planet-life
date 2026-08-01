@@ -18,12 +18,13 @@ export interface Person {
   createdAt: number;
 }
 
-const STORAGE_KEY = 'planet-life-people';
+export const PEOPLE_STORAGE_KEY = 'planet-life-people';
+export const PEOPLE_CHANGED_EVENT = 'planet-life-people-changed';
 
 export function loadPeople(): Person[] {
   if (typeof window === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(PEOPLE_STORAGE_KEY);
     if (!raw) return [];
     const list = JSON.parse(raw) as Person[];
     return Array.isArray(list) ? list : [];
@@ -35,7 +36,8 @@ export function loadPeople(): Person[] {
 export function savePeople(people: Person[]): boolean {
   if (typeof window === 'undefined') return false;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(people));
+    localStorage.setItem(PEOPLE_STORAGE_KEY, JSON.stringify(people));
+    window.dispatchEvent(new CustomEvent(PEOPLE_CHANGED_EVENT));
     return true;
   } catch {
     return false;
