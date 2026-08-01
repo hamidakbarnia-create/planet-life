@@ -100,24 +100,23 @@ describe('Calendar readiness percent presentation', () => {
       resolve(__dirname, '../components/calendar/CalendarMonthCell.tsx'),
       'utf8'
     );
+    const railSource = readFileSync(
+      resolve(__dirname, '../components/calendar/StrategicInsightRail.tsx'),
+      'utf8'
+    );
 
-    // Month cells (Strategic Calendar cell component) + Best/Risk/hourly/selected
-    expect(pageSource).toContain('CalendarMonthCell');
+    // Month cells + rail Best/Risk + hourly/selected
+    expect(pageSource).toContain('CalendarMonthPanel');
+    expect(pageSource).toContain('StrategicInsightRail');
     expect(cellSource).toContain('formatReadinessPercent(score)');
-    expect(pageSource).toContain(
-      '{gps.bestHourLabel} · {formatReadinessPercent(gps.bestHour.score)}'
-    );
-    expect(pageSource).toContain(
-      '{gps.riskHourLabel} · {formatReadinessPercent(gps.riskHour.score)}'
-    );
+    expect(railSource).toContain('formatReadinessPercent(selectedDay.bestHour.score)');
+    expect(railSource).toContain('formatReadinessPercent(selectedDay.riskHour.score)');
     expect(pageSource).toContain('{label} · {formatReadinessPercent(h.score)}');
     expect(pageSource).toContain(
       '{t.score}: {formatReadinessPercent(selectedScore)}'
     );
 
     // No bare numeric score renders / legacy /100 label at display sites
-    expect(pageSource).not.toContain('{gps.bestHour.score}');
-    expect(pageSource).not.toContain('{gps.riskHour.score}');
     expect(pageSource).not.toContain('{label} · {h.score}');
     expect(pageSource).not.toContain('{selectedScore}/100');
     expect(pageSource).not.toMatch(/formatReadinessPercent\([^)]+\)%/);
@@ -125,6 +124,6 @@ describe('Calendar readiness percent presentation', () => {
 
     // CSS bar widths stay as layout percentages (not double-formatted labels)
     expect(pageSource).toContain('width: `${Math.max(8, h.score)}%`');
-    expect(pageSource).toContain('width: `${week.score ?? 8}%`');
+    expect(railSource).toContain('width: `${week.score ?? 8}%`');
   });
 });

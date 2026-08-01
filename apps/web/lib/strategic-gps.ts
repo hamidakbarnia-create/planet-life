@@ -24,6 +24,10 @@ interface GpsTextPack {
   bestHour: string;
   riskHour: string;
   noHourly: string;
+  monthOutlook: string;
+  weeklyPath: string;
+  selectedDayTiming: string;
+  selectedDayScope: string;
 }
 
 const GPS_TEXT: Record<AppLang, GpsTextPack> = {
@@ -48,6 +52,10 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     bestHour: 'Best hour',
     riskHour: 'Risk hour',
     noHourly: 'Select a day to load hourly guidance.',
+    monthOutlook: 'Month Outlook',
+    weeklyPath: 'Weekly Path',
+    selectedDayTiming: 'Selected Day Timing',
+    selectedDayScope: 'Selected day',
   },
   ru: {
     title: 'Тайминг решений',
@@ -70,6 +78,10 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     bestHour: 'Лучший час',
     riskHour: 'Риск-час',
     noHourly: 'Выберите день, чтобы загрузить часы.',
+    monthOutlook: 'Обзор месяца',
+    weeklyPath: 'Путь недели',
+    selectedDayTiming: 'Тайминг выбранного дня',
+    selectedDayScope: 'Выбранный день',
   },
   fa: {
     title: 'زمان‌بندی تصمیم',
@@ -92,6 +104,10 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     bestHour: 'بهترین ساعت',
     riskHour: 'ساعت ریسک',
     noHourly: 'یک روز را انتخاب کن تا راهنمای ساعتی بیاید.',
+    monthOutlook: 'چشم‌انداز ماه',
+    weeklyPath: 'مسیر هفتگی',
+    selectedDayTiming: 'زمان‌بندی روز انتخاب‌شده',
+    selectedDayScope: 'روز انتخاب‌شده',
   },
   ar: {
     title: 'توقيت القرار',
@@ -114,6 +130,10 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     bestHour: 'أفضل ساعة',
     riskHour: 'ساعة الخطر',
     noHourly: 'اختر يوماً لتحميل الإرشاد الساعي.',
+    monthOutlook: 'نظرة الشهر',
+    weeklyPath: 'المسار الأسبوعي',
+    selectedDayTiming: 'توقيت اليوم المحدد',
+    selectedDayScope: 'اليوم المحدد',
   },
 };
 
