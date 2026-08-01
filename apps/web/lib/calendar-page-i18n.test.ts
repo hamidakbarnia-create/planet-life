@@ -96,9 +96,14 @@ describe('Calendar readiness percent presentation', () => {
       resolve(__dirname, '../app/calendar/page.tsx'),
       'utf8'
     );
+    const cellSource = readFileSync(
+      resolve(__dirname, '../components/calendar/CalendarMonthCell.tsx'),
+      'utf8'
+    );
 
-    // Month cells, Best Hour, Risk Hour, hourly timeline, selected day
-    expect(pageSource).toContain('{formatReadinessPercent(score)}');
+    // Month cells (Strategic Calendar cell component) + Best/Risk/hourly/selected
+    expect(pageSource).toContain('CalendarMonthCell');
+    expect(cellSource).toContain('formatReadinessPercent(score)');
     expect(pageSource).toContain(
       '{gps.bestHourLabel} · {formatReadinessPercent(gps.bestHour.score)}'
     );
@@ -116,6 +121,7 @@ describe('Calendar readiness percent presentation', () => {
     expect(pageSource).not.toContain('{label} · {h.score}');
     expect(pageSource).not.toContain('{selectedScore}/100');
     expect(pageSource).not.toMatch(/formatReadinessPercent\([^)]+\)%/);
+    expect(cellSource).not.toMatch(/formatReadinessPercent\([^)]+\)%/);
 
     // CSS bar widths stay as layout percentages (not double-formatted labels)
     expect(pageSource).toContain('width: `${Math.max(8, h.score)}%`');

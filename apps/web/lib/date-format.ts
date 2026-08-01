@@ -80,6 +80,75 @@ export function formatDisplayDay(
   return formatParts(lang, isoDate, calendar, { day: 'numeric' });
 }
 
+/** Shorten a localized month token for narrow calendar cells (keeps meaning). */
+function compactMonthToken(month: string): string {
+  const trimmed = month.trim();
+  if (!trimmed) return trimmed;
+  // Already abbreviated forms like "Saf." stay as-is when ≤4 visible chars.
+  const chars = [...trimmed];
+  if (chars.length <= 4) return trimmed;
+  return chars.slice(0, 3).join('');
+}
+
+/**
+ * Compact secondary label: day + short localized month (no year).
+ * Always day-first for consistent cell density across locales.
+ */
+export function formatCompactCalendarDate(
+  lang: AppLang,
+  isoDate: string,
+  calendar: CalendarSystem
+): string {
+  const date = utcDateFromIso(isoDate);
+  if (!date) return isoDate;
+  const parts = new Intl.DateTimeFormat(displayLocale(lang, calendar), {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  }).formatToParts(date);
+  const day = parts.find((p) => p.type === 'day')?.value ?? '';
+  const monthRaw = parts.find((p) => p.type === 'month')?.value ?? '';
+  const month = compactMonthToken(monthRaw);
+  if (!day || !month) {
+    return formatParts(lang, isoDate, calendar, {
+      day: 'numeric',
+      month: 'short',
+    });
+  }
+  return `${day} ${month}`;
+}
+
+const SECONDARY_ORDER: Record<CalendarSystem, CalendarSystem[]> = {
+  gregorian: ['shamsi', 'hijri'],
+  shamsi: ['gregorian', 'hijri'],
+  hijri: ['gregorian', 'shamsi'],
+};
+
+export type CalendarCellDateLabels = {
+  primary: string;
+  secondaries: [string, string];
+};
+
+/**
+ * Month-cell date labels: large primary from the active calendar,
+ * two compact secondaries from the other systems (no duplicate of active).
+ */
+export function buildCalendarCellDateLabels(
+  lang: AppLang,
+  isoDate: string,
+  active: CalendarSystem
+): CalendarCellDateLabels {
+  const primary = formatDisplayDay(lang, isoDate, active);
+  const secondarySystems = SECONDARY_ORDER[active];
+  return {
+    primary,
+    secondaries: [
+      formatCompactCalendarDate(lang, isoDate, secondarySystems[0]),
+      formatCompactCalendarDate(lang, isoDate, secondarySystems[1]),
+    ],
+  };
+}
+
 /** Format a Gregorian year/month (1–12) as a month+year label in the chosen calendar. */
 export function formatDisplayMonthYear(
   lang: AppLang,

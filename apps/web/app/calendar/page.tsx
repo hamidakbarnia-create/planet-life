@@ -45,7 +45,6 @@ import {
 } from '@/lib/app-settings';
 import {
   formatDisplayDate,
-  formatDisplayDay,
   formatDisplayMonthCoverage,
 } from '@/lib/date-format';
 import {
@@ -55,26 +54,15 @@ import {
   logLocationDebug,
   resolveCalendarEvaluationLocation,
 } from '@/lib/user-locations';
-import { todayYMD } from '@/lib/calendar-utils';
+import { calendarCells, parseIsoDate, todayYMD } from '@/lib/calendar-utils';
 import { GPS_TONE_STYLES, buildStrategicGps } from '@/lib/strategic-gps';
 import { CALENDAR_PAGE_LANGS } from '@/lib/calendar-page-i18n';
+import { CalendarMonthCell } from '@/components/calendar/CalendarMonthCell';
 import { CalendarSelectedDayInsight } from '@/components/calendar/CalendarSelectedDayInsight';
 
 type LangKey = AppLang;
 
 const LANGS = CALENDAR_PAGE_LANGS;
-
-function calendarCells(year: number, month: number) {
-  const firstDow = new Date(year, month - 1, 1).getDay();
-  const total = new Date(year, month, 0).getDate();
-  const cells: Array<{ day: number | null; date: string | null }> = [];
-  for (let i = 0; i < firstDow; i++) cells.push({ day: null, date: null });
-  for (let d = 1; d <= total; d++) {
-    cells.push({ day: d, date: formatDateYMD(year, month, d) });
-  }
-  while (cells.length % 7 !== 0) cells.push({ day: null, date: null });
-  return cells;
-}
 
 function hourBarKind(band: ScoreBand): 'golden' | 'danger' | 'neutral' {
   if (band === 'green') return 'golden';
@@ -219,6 +207,18 @@ export default function CalendarPage() {
     }
     setMonth(m);
     setYear(y);
+  };
+
+  const handleCellClick = (date: string, inCurrentMonth: boolean) => {
+    if (!inCurrentMonth) {
+      const parsed = parseIsoDate(date);
+      if (!parsed) return;
+      // Navigate to adjacent month; do not select an unscored day in the current month.
+      setYear(parsed.year);
+      setMonth(parsed.month);
+      return;
+    }
+    setSelectedDate(date);
   };
 
   const handleExportMode = (mode: CalendarExportMode) => {
@@ -627,43 +627,20 @@ export default function CalendarPage() {
             </div>
           ) : (
             <div className="grid grid-cols-7 gap-1">
-              {cells.map((cell, i) => {
-                if (!cell.day || !cell.date) {
-                  return <div key={`e-${i}`} className="aspect-square" />;
-                }
-                const score = scores[cell.date];
-                const band = scoreToBand(score);
-                const style = BAND_STYLES[band];
-                const selected = selectedDate === cell.date;
-                const isToday = cell.date === todayStr;
-                return (
-                  <button
-                    key={cell.date}
-                    type="button"
-                    onClick={() => setSelectedDate(cell.date)}
-                    className="aspect-square rounded-lg flex flex-col items-center justify-center transition-transform hover:scale-105"
-                    style={{
-                      background: style.bg,
-                      border: `2px solid ${isToday || selected ? '#fbbf24' : style.border}`,
-                      boxShadow: isToday ? '0 0 12px rgba(251,191,36,0.35)' : selected ? '0 0 0 1px #fbbf24' : undefined,
-                    }}
-                  >
-                    <span className="fi text-[11px] font-medium text-white/90">
-                      {calendar === 'gregorian'
-                        ? cell.day
-                        : formatDisplayDay(lang, cell.date, calendar)}
-                    </span>
-                    {score != null && (
-                      <span
-                        className="fi text-[9px] mt-0.5 font-semibold"
-                        style={{ color: style.text }}
-                      >
-                        {formatReadinessPercent(score)}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+              {cells.map((cell) => (
+                <CalendarMonthCell
+                  key={cell.date}
+                  date={cell.date}
+                  lang={lang}
+                  calendar={calendar}
+                  score={scores[cell.date]}
+                  inCurrentMonth={cell.inCurrentMonth}
+                  selected={selectedDate === cell.date}
+                  isToday={cell.date === todayStr}
+                  dir={t.dir}
+                  onClick={() => handleCellClick(cell.date, cell.inCurrentMonth)}
+                />
+              ))}
             </div>
           )}
         </div>
