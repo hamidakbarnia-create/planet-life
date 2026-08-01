@@ -152,11 +152,16 @@ describe('CalendarMonthCell', () => {
     expect(cell.getAttribute('dir')).toBe('rtl');
     const secondaries = cell.querySelectorAll('[data-cell-secondary]');
     expect(secondaries).toHaveLength(2);
-    expect(cell.querySelector('[data-cell-primary]')).not.toBeNull();
+    const primary = cell.querySelector('[data-cell-primary]');
+    const firstSecondary = secondaries.item(0);
+    expect(primary).toBeDefined();
+    expect(firstSecondary).toBeDefined();
+    if (!primary || !firstSecondary) {
+      throw new Error('expected primary and first secondary cell labels');
+    }
     expect(
-      cell.querySelector('[data-cell-primary]')?.compareDocumentPosition(
-        secondaries[0]
-      ) & Node.DOCUMENT_POSITION_FOLLOWING
+      primary.compareDocumentPosition(firstSecondary) &
+        Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
   });
 });

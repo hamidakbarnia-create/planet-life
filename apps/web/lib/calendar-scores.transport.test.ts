@@ -31,12 +31,23 @@ vi.mock('./user-locations', () => ({
   }),
 }));
 
-const loadMonthCache = vi.fn(() => null as Record<string, number> | null);
-const saveMonthCache = vi.fn();
+type LoadMonthCacheArgs = [year: number, month: number, action: string, evalCity?: string];
+type SaveMonthCacheArgs = [
+  year: number,
+  month: number,
+  action: string,
+  scores: Record<string, number>,
+  evalCity?: string,
+];
+
+const loadMonthCache = vi.fn<
+  (...args: LoadMonthCacheArgs) => Record<string, number> | null
+>(() => null);
+const saveMonthCache = vi.fn<(...args: SaveMonthCacheArgs) => void>(() => undefined);
 
 vi.mock('./calendar-cache', () => ({
-  loadMonthCache: (...args: unknown[]) => loadMonthCache(...args),
-  saveMonthCache: (...args: unknown[]) => saveMonthCache(...args),
+  loadMonthCache: (...args: LoadMonthCacheArgs) => loadMonthCache(...args),
+  saveMonthCache: (...args: SaveMonthCacheArgs) => saveMonthCache(...args),
 }));
 
 const profile = {
