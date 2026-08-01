@@ -47,6 +47,10 @@ import {
   type VaultPowerTimingView,
   type VaultScoreBand,
 } from '@/lib/vault-power-windows';
+import {
+  VaultRankedDayChip,
+  VaultYesDecisionSlot,
+} from '@/components/vault/VaultPowerTiming';
 
 /** Vault item index → live API key (same order as section.items). */
 const LIVE_ITEM_API: Partial<Record<VaultSectionKey, string[]>> = {
@@ -258,27 +262,6 @@ export default function VaultSectionPage() {
         ? powerUi.supportive
         : powerUi.lighter;
 
-  const bandTone = (band: VaultScoreBand) => {
-    if (band === 'strongest') {
-      return {
-        background: 'rgba(212,175,55,0.18)',
-        border: '1px solid rgba(212,175,55,0.45)',
-        color: '#F2CF75',
-      };
-    }
-    if (band === 'supportive') {
-      return {
-        background: 'rgba(212,175,55,0.10)',
-        border: '1px solid rgba(212,175,55,0.28)',
-        color: 'rgba(242,207,117,0.9)',
-      };
-    }
-    return {
-      background: 'rgba(255,255,255,0.04)',
-      border: '1px solid rgba(212,175,55,0.14)',
-      color: 'rgba(255,255,255,0.72)',
-    };
-  };
 
   if (!isValidVaultSection(raw)) {
     return (
@@ -506,22 +489,15 @@ export default function VaultSectionPage() {
                                       const visibleRating = visiblePowerRating(day.rating);
                                       const ratingTitle = powerRatingTitle(day.rating);
                                       return (
-                                        <div
+                                        <VaultRankedDayChip
                                           key={`${day.date}-${day.score}`}
-                                          className="rounded-lg px-2.5 py-1.5"
-                                          style={bandTone(band)}
+                                          dateLabel={formatPowerDate(day.date)}
+                                          score={day.score}
+                                          band={band}
+                                          bandLabel={bandLabel(band)}
+                                          rating={visibleRating}
                                           title={ratingTitle ?? bandLabel(band)}
-                                        >
-                                          <div className="fi text-[11px] leading-tight">
-                                            {formatPowerDate(day.date)}
-                                          </div>
-                                          <div className="fi text-[10px] leading-tight mt-0.5 opacity-90">
-                                            {day.score}
-                                            {visibleRating ? ` · ${visibleRating}` : ''}
-                                            {' · '}
-                                            {bandLabel(band)}
-                                          </div>
-                                        </div>
+                                        />
                                       );
                                     })}
                                   </div>
@@ -538,27 +514,16 @@ export default function VaultSectionPage() {
                                   ).map(([slotKey, slotLabel, slot]) => {
                                     const band = vaultScoreBand(slot.score);
                                     return (
-                                      <div
+                                      <VaultYesDecisionSlot
                                         key={slotKey}
-                                        className="rounded-lg px-2.5 py-2"
-                                        style={bandTone(band)}
-                                      >
-                                        <div
-                                          className="fi text-[10px] tracking-[0.18em] uppercase mb-1"
-                                          style={{ color: 'rgba(212,175,55,0.75)' }}
-                                        >
-                                          {slotLabel}
-                                        </div>
-                                        <div className="fi text-[11px] leading-tight">
-                                          {formatPowerDate(slot.date)}
-                                          {' · '}
-                                          {slot.score}
-                                          {' · '}
-                                          {bandLabel(band)}
-                                          {slot.confidence ? ` · ${slot.confidence}` : ''}
-                                          {slot.rating ? ` · ${slot.rating}` : ''}
-                                        </div>
-                                      </div>
+                                        label={slotLabel}
+                                        dateLabel={formatPowerDate(slot.date)}
+                                        score={slot.score}
+                                        band={band}
+                                        bandLabel={bandLabel(band)}
+                                        confidence={slot.confidence}
+                                        rating={slot.rating}
+                                      />
                                     );
                                   })}
                                 </div>

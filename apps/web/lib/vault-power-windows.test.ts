@@ -258,10 +258,16 @@ describe('Power timing localization + page wiring', () => {
     expect(pageSource).toContain('VAULT_POWER_TIMING_COPY');
     expect(pageSource).toContain('visiblePowerRating');
     expect(pageSource).toContain('powerRatingTitle');
-    // Ranked chips use the concise rating helper; Yes slots keep raw rating.
-    expect(pageSource).toMatch(/visibleRating \? ` · \$\{visibleRating\}`/);
-    expect(pageSource).toMatch(/slot\.rating \? ` · \$\{slot\.rating\}`/);
+    expect(pageSource).toContain('VaultRankedDayChip');
+    expect(pageSource).toContain('VaultYesDecisionSlot');
+    // Page prepares visible rating / title; Yes keeps raw rating prop.
+    expect(pageSource).toMatch(/rating=\{visibleRating\}/);
+    expect(pageSource).toMatch(/rating=\{slot\.rating\}/);
     // Timing UI is gated to the power section only.
     expect(pageSource).toMatch(/raw === ['"]power['"] && powerTiming/);
+    // Timing still renders before reading prose.
+    expect(pageSource.indexOf("raw === 'power' && powerTiming")).toBeLessThan(
+      pageSource.indexOf('{!liveLoading && liveReading && ('),
+    );
   });
 });
