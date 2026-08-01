@@ -37,6 +37,7 @@ import {
   isValidVaultSection,
   type VaultSectionKey,
 } from '@/lib/vault-section-i18n';
+import { buildVaultMissingInputNotice } from '@/lib/vault-missing-inputs';
 
 /** Vault item index → live API key (same order as section.items). */
 const LIVE_ITEM_API: Partial<Record<VaultSectionKey, string[]>> = {
@@ -78,6 +79,9 @@ export default function VaultSectionPage() {
   const [liveReading, setLiveReading] = useState<VaultReadingLayer | null>(null);
   const [liveLoading, setLiveLoading] = useState(false);
   const [liveError, setLiveError] = useState<'needProfile' | 'api' | null>(null);
+  const [missingNotice, setMissingNotice] = useState<
+    ReturnType<typeof buildVaultMissingInputNotice>
+  >(null);
   const [hasLiveApi, setHasLiveApi] = useState(false);
   const [tier, setTier] = useState<MembershipTier>(() =>
     typeof window !== 'undefined' ? loadTier() : 'free'
@@ -110,6 +114,7 @@ export default function VaultSectionPage() {
       setHasLiveApi(false);
       setLiveError(null);
       setLiveLoading(false);
+      setMissingNotice(null);
       return;
     }
     const sectionData = SECTION_LANGS[lang][raw];
@@ -140,12 +145,14 @@ export default function VaultSectionPage() {
         setLiveReading(null);
         setLiveError('needProfile');
         setLiveLoading(false);
+        setMissingNotice(null);
         return;
       }
       let cancelled = false;
       setLiveLoading(true);
       setLiveError(null);
       setLiveReading(null);
+      setMissingNotice(null);
       const fetchReading =
         apiKey === 'ghost'
           ? fetchVaultGhostDaysReading(profile, lang)
@@ -180,12 +187,19 @@ export default function VaultSectionPage() {
                                       : fetchVaultMarsReading(profile, lang);
       fetchReading
         .then((res) => {
-          if (!cancelled) setLiveReading(res.reading);
+          if (cancelled) return;
+          setLiveReading(res.reading);
+          const missing =
+            res && typeof res === 'object' && 'missing_inputs' in res
+              ? (res as { missing_inputs?: unknown }).missing_inputs
+              : undefined;
+          setMissingNotice(buildVaultMissingInputNotice(missing, lang));
         })
         .catch(() => {
           if (!cancelled) {
             setLiveError('api');
             setLiveReading(null);
+            setMissingNotice(null);
           }
         })
         .finally(() => {
@@ -200,6 +214,7 @@ export default function VaultSectionPage() {
     setLiveReading(null);
     setLiveError(null);
     setLiveLoading(false);
+    setMissingNotice(null);
   }, [openItem, lang, raw, tier]);
 
   const unlocked = tier === 'premium' || tier === 'vip';
@@ -457,6 +472,29 @@ export default function VaultSectionPage() {
                                 >
                                   {rui.tryThis}: {liveReading.action}
                                 </p>
+                              )}
+                            </div>
+                          )}
+                          {!liveLoading && liveReading && missingNotice && (
+                            <div className="mt-3">
+                              <p
+                                className="fi text-xs leading-relaxed mb-2"
+                                style={{ color: 'rgba(255,255,255,0.62)' }}
+                              >
+                                {missingNotice.message}
+                              </p>
+                              {missingNotice.cta && (
+                                <Link
+                                  href={missingNotice.cta.href}
+                                  className="fc text-xs tracking-widest px-4 py-2 rounded-lg inline-flex no-underline"
+                                  style={{
+                                    background: 'rgba(212,175,55,0.15)',
+                                    border: '1px solid rgba(212,175,55,0.35)',
+                                    color: '#F2CF75',
+                                  }}
+                                >
+                                  {missingNotice.cta.label}
+                                </Link>
                               )}
                             </div>
                           )}

@@ -48,6 +48,95 @@ export type VaultReadingUiCopy = {
   tryThis: string;
 };
 
+export type VaultMissingInputCopy = {
+  goPeople: string;
+  goProfile: string;
+  genericPartial: string;
+  byKind: Record<
+    | 'birth_profile'
+    | 'current_location'
+    | 'place_shortlist'
+    | 'partner_profile'
+    | 'partner_birth_time',
+    string
+  >;
+};
+
+export const VAULT_MISSING_INPUT_COPY: Record<AppLang, VaultMissingInputCopy> = {
+  en: {
+    goPeople: 'Go to People',
+    goProfile: 'Go to Profile',
+    genericPartial:
+      'This reading is partial. Add a few more details to refine the guidance.',
+    byKind: {
+      birth_profile:
+        'This reading is partial. Birth time is missing, so some timing details remain broad.',
+      current_location:
+        'This reading is partial. Add your current location to improve place-based guidance.',
+      place_shortlist:
+        'This reading is partial. Place guidance needs a clearer shortlist of locations to compare.',
+      partner_profile:
+        'This reading is partial. Add a person to compare relationship patterns.',
+      partner_birth_time:
+        'This reading is partial. Add their birth time so timing details can sharpen.',
+    },
+  },
+  fa: {
+    goPeople: 'رفتن به افراد',
+    goProfile: 'رفتن به پروفایل',
+    genericPartial:
+      'این خوانش ناقص است. چند جزئیات بیشتر اضافه کن تا راهنمایی دقیق‌تر شود.',
+    byKind: {
+      birth_profile:
+        'این خوانش ناقص است. ساعت تولد نیست، پس بعضی جزئیات تایمینگ کلی می‌ماند.',
+      current_location:
+        'این خوانش ناقص است. مکان فعلی‌ات را اضافه کن تا راهنمایی مکانی بهتر شود.',
+      place_shortlist:
+        'این خوانش ناقص است. برای مقایسه مکان‌ها به فهرست واضح‌تری از جاها نیاز است.',
+      partner_profile:
+        'این خوانش ناقص است. یک نفر اضافه کن تا الگوهای رابطه مقایسه شود.',
+      partner_birth_time:
+        'این خوانش ناقص است. ساعت تولد او را اضافه کن تا جزئیات تایمینگ دقیق‌تر شود.',
+    },
+  },
+  ru: {
+    goPeople: 'К людям',
+    goProfile: 'В профиль',
+    genericPartial:
+      'Разбор частичный. Добавьте ещё несколько деталей, чтобы уточнить подсказки.',
+    byKind: {
+      birth_profile:
+        'Разбор частичный. Нет времени рождения — часть тайминга остаётся общей.',
+      current_location:
+        'Разбор частичный. Добавьте текущее местоположение для более точных подсказок по местам.',
+      place_shortlist:
+        'Разбор частичный. Для сравнения мест нужен более ясный список локаций.',
+      partner_profile:
+        'Разбор частичный. Добавьте человека, чтобы сравнить паттерны отношений.',
+      partner_birth_time:
+        'Разбор частичный. Добавьте его/её время рождения — тайминг станет точнее.',
+    },
+  },
+  ar: {
+    goPeople: 'إلى الأشخاص',
+    goProfile: 'إلى الملف',
+    genericPartial:
+      'هذه القراءة جزئية. أضيفي بعض التفاصيل لتحسين الإرشاد.',
+    byKind: {
+      birth_profile:
+        'هذه القراءة جزئية. وقت الميلاد ناقص، لذا تبقى بعض تفاصيل التوقيت عامة.',
+      current_location:
+        'هذه القراءة جزئية. أضيفي موقعك الحالي لتحسين الإرشاد المكاني.',
+      place_shortlist:
+        'هذه القراءة جزئية. إرشاد الأماكن يحتاج قائمة أوضح للمقارنة.',
+      partner_profile:
+        'هذه القراءة جزئية. أضيفي شخصاً لمقارنة أنماط العلاقة.',
+      partner_birth_time:
+        'هذه القراءة جزئية. أضيفي وقت ميلاده/ها لتدقيق تفاصيل التوقيت.',
+    },
+  },
+};
+
 export type VaultPreviewLockCopy = {
   sampleLabel: string;
   teaser: string;
