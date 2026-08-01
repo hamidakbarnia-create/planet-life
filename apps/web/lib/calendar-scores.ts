@@ -52,6 +52,7 @@ export type { ScoreReasoning } from './score-reasoning';
 export {
   BAND_STYLES,
   formatHourLabel,
+  formatReadinessPercent,
   isDangerHour,
   isGoldenHour,
   scoreToBand,

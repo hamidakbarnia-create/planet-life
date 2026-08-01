@@ -89,3 +89,36 @@ describe('Calendar score thresholds unchanged', () => {
     expect(gps.cautionCount).toBe(1);
   });
 });
+
+describe('Calendar readiness percent presentation', () => {
+  it('wires percent formatting into user-visible Calendar score renders', () => {
+    const pageSource = readFileSync(
+      resolve(__dirname, '../app/calendar/page.tsx'),
+      'utf8'
+    );
+
+    // Month cells, Best Hour, Risk Hour, hourly timeline, selected day
+    expect(pageSource).toContain('{formatReadinessPercent(score)}');
+    expect(pageSource).toContain(
+      '{gps.bestHourLabel} · {formatReadinessPercent(gps.bestHour.score)}'
+    );
+    expect(pageSource).toContain(
+      '{gps.riskHourLabel} · {formatReadinessPercent(gps.riskHour.score)}'
+    );
+    expect(pageSource).toContain('{label} · {formatReadinessPercent(h.score)}');
+    expect(pageSource).toContain(
+      '{t.score}: {formatReadinessPercent(selectedScore)}'
+    );
+
+    // No bare numeric score renders / legacy /100 label at display sites
+    expect(pageSource).not.toContain('{gps.bestHour.score}');
+    expect(pageSource).not.toContain('{gps.riskHour.score}');
+    expect(pageSource).not.toContain('{label} · {h.score}');
+    expect(pageSource).not.toContain('{selectedScore}/100');
+    expect(pageSource).not.toMatch(/formatReadinessPercent\([^)]+\)%/);
+
+    // CSS bar widths stay as layout percentages (not double-formatted labels)
+    expect(pageSource).toContain('width: `${Math.max(8, h.score)}%`');
+    expect(pageSource).toContain('width: `${week.score ?? 8}%`');
+  });
+});

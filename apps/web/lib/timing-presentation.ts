@@ -65,6 +65,11 @@ export function formatHourLabel(
   return `${String(safe).padStart(2, '0')}:00`;
 }
 
+/** User-visible Calendar readiness score. Keeps the numeric value; adds % at display time only. */
+export function formatReadinessPercent(score: number): string {
+  return `${score}%`;
+}
+
 export function isGoldenHour(score: number): boolean {
   return score >= 85;
 }

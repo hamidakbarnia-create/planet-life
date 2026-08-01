@@ -29,6 +29,7 @@ import {
   fetchTransitSnapshot,
   formatDateYMD,
   formatHourLabel,
+  formatReadinessPercent,
   scoreToBand,
   type HourScore,
   type PlanetTransit,
@@ -324,7 +325,7 @@ export default function CalendarPage() {
               className="fc text-2xl shrink-0 leading-none"
               style={{ color: GPS_TONE_STYLES[gps.monthTone].color }}
             >
-              {gps.monthScore ?? '--'}
+              {gps.monthScore == null ? '--' : formatReadinessPercent(gps.monthScore)}
             </div>
           </div>
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
@@ -347,7 +348,7 @@ export default function CalendarPage() {
                 </div>
               ) : gps.bestHour ? (
                 <div className="fc text-sm mt-1 leading-snug" style={{ color: '#4ade80' }}>
-                  {gps.bestHourLabel} · {gps.bestHour.score}
+                  {gps.bestHourLabel} · {formatReadinessPercent(gps.bestHour.score)}
                 </div>
               ) : (
                 <div className="fi text-xs mt-1 leading-snug" style={{ color: 'rgba(255,255,255,0.35)' }}>
@@ -374,7 +375,7 @@ export default function CalendarPage() {
                 </div>
               ) : gps.riskHour ? (
                 <div className="fc text-sm mt-1 leading-snug" style={{ color: '#f87171' }}>
-                  {gps.riskHourLabel} · {gps.riskHour.score}
+                  {gps.riskHourLabel} · {formatReadinessPercent(gps.riskHour.score)}
                 </div>
               ) : (
                 <div className="fi text-xs mt-1 leading-snug" style={{ color: 'rgba(255,255,255,0.35)' }}>
@@ -409,7 +410,7 @@ export default function CalendarPage() {
                         border: `1px solid ${style.border}`,
                       }}
                     >
-                      {week.score ?? '--'}
+                      {week.score == null ? '--' : formatReadinessPercent(week.score)}
                     </span>
                   );
                 })}
@@ -462,7 +463,7 @@ export default function CalendarPage() {
               className="fc text-3xl shrink-0"
               style={{ color: GPS_TONE_STYLES[gps.monthTone].color }}
             >
-              {gps.monthScore ?? '--'}
+              {gps.monthScore == null ? '--' : formatReadinessPercent(gps.monthScore)}
             </div>
           </div>
 
@@ -520,7 +521,8 @@ export default function CalendarPage() {
                         />
                       </div>
                       <span className="fi text-[10px] w-12 text-end" style={{ color: style.color }}>
-                        {week.score ?? '--'} {week.score == null ? '' : week.action}
+                        {week.score == null ? '--' : formatReadinessPercent(week.score)}{' '}
+                        {week.score == null ? '' : week.action}
                       </span>
                     </div>
                   );
@@ -552,7 +554,7 @@ export default function CalendarPage() {
                       {gps.text.bestHour}
                     </span>
                     <span className="fc text-base" style={{ color: '#4ade80' }}>
-                      {gps.bestHourLabel} · {gps.bestHour.score}
+                      {gps.bestHourLabel} · {formatReadinessPercent(gps.bestHour.score)}
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between gap-2">
@@ -560,7 +562,7 @@ export default function CalendarPage() {
                       {gps.text.riskHour}
                     </span>
                     <span className="fc text-base" style={{ color: '#f87171' }}>
-                      {gps.riskHourLabel} · {gps.riskHour.score}
+                      {gps.riskHourLabel} · {formatReadinessPercent(gps.riskHour.score)}
                     </span>
                   </div>
                 </div>
@@ -656,7 +658,7 @@ export default function CalendarPage() {
                         className="fi text-[9px] mt-0.5 font-semibold"
                         style={{ color: style.text }}
                       >
-                        {score}
+                        {formatReadinessPercent(score)}
                       </span>
                     )}
                   </button>
@@ -733,7 +735,8 @@ export default function CalendarPage() {
                         />
                       </div>
                       <span className="fi text-[10px] w-12 text-end shrink-0" style={{ color: style.color }}>
-                        {week.score ?? '--'} {week.score == null ? '' : week.action}
+                        {week.score == null ? '--' : formatReadinessPercent(week.score)}{' '}
+                        {week.score == null ? '' : week.action}
                       </span>
                     </div>
                   );
@@ -764,7 +767,7 @@ export default function CalendarPage() {
                       {gps.text.bestHour}
                     </span>
                     <span className="fc text-base" style={{ color: '#4ade80' }}>
-                      {gps.bestHourLabel} · {gps.bestHour.score}
+                      {gps.bestHourLabel} · {formatReadinessPercent(gps.bestHour.score)}
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between gap-2">
@@ -772,7 +775,7 @@ export default function CalendarPage() {
                       {gps.text.riskHour}
                     </span>
                     <span className="fc text-base" style={{ color: '#f87171' }}>
-                      {gps.riskHourLabel} · {gps.riskHour.score}
+                      {gps.riskHourLabel} · {formatReadinessPercent(gps.riskHour.score)}
                     </span>
                   </div>
                 </div>
@@ -851,7 +854,7 @@ export default function CalendarPage() {
               </div>
               {selectedScore != null && (
                 <div className="fi text-sm" style={{ color: BAND_STYLES[scoreToBand(selectedScore)].text }}>
-                  {t.score}: {selectedScore}/100
+                  {t.score}: {formatReadinessPercent(selectedScore)}
                 </div>
               )}
             </div>
@@ -913,7 +916,7 @@ export default function CalendarPage() {
                           }}
                         />
                         <span className="absolute inset-0 flex items-center px-2 fi text-[10px] text-white/80">
-                          {label} · {h.score}
+                          {label} · {formatReadinessPercent(h.score)}
                         </span>
                       </div>
                       </div>

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BAND_STYLES,
   formatHourLabel,
+  formatReadinessPercent,
   isDangerHour,
   isGoldenHour,
   scoreToBand,
@@ -45,6 +46,23 @@ describe('formatHourLabel', () => {
     [-1, 'en', '11:00 PM'],
   ])('formats hour %s for %s', (hour, lang, expected) => {
     expect(formatHourLabel(hour, lang)).toBe(expected);
+  });
+});
+
+describe('formatReadinessPercent', () => {
+  it.each([
+    [85, '85%'],
+    [64, '64%'],
+    [37, '37%'],
+    [0, '0%'],
+    [100, '100%'],
+  ])('formats score %s as %s', (score, expected) => {
+    expect(formatReadinessPercent(score)).toBe(expected);
+  });
+
+  it('never produces a double percent sign', () => {
+    expect(formatReadinessPercent(85)).not.toContain('%%');
+    expect(formatReadinessPercent(64)).not.toMatch(/%{2,}/);
   });
 });
 
