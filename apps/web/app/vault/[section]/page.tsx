@@ -37,6 +37,7 @@ import {
   VAULT_PARTNER_SELECTION_COPY,
   VAULT_POWER_TIMING_COPY,
   isValidVaultSection,
+  powerAdvisoryConfidenceLabel,
   type VaultSectionKey,
 } from '@/lib/vault-section-i18n';
 import {
@@ -572,6 +573,10 @@ export default function VaultSectionPage() {
                 LIVE_READING_KEYS.has(itemApiKey) &&
                 openItem === item.label;
               const itemLive = !!itemApiKey && LIVE_READING_KEYS.has(itemApiKey);
+              const powerConfidenceLabel =
+                raw === 'power' && showLive
+                  ? powerAdvisoryConfidenceLabel(liveReading?.confidence, powerUi)
+                  : null;
               return (
                 <div
                   key={item.label}
@@ -876,6 +881,15 @@ export default function VaultSectionPage() {
                                 border: '1px solid rgba(212,175,55,0.12)',
                               }}
                             >
+                              {powerConfidenceLabel && (
+                                  <p
+                                    className="fi text-[10px] tracking-[0.16em] uppercase"
+                                    style={{ color: 'rgba(212,175,55,0.75)' }}
+                                    data-vault-power-confidence="true"
+                                  >
+                                    {powerUi.confidence}: {powerConfidenceLabel}
+                                  </p>
+                                )}
                               {liveReading.headline && (
                                 <p
                                   className="fc text-sm leading-snug"

@@ -242,6 +242,11 @@ export type VaultPowerTimingCopy = {
   strongest: string;
   supportive: string;
   lighter: string;
+  /** Response-level advisory confidence label (not outcome certainty). */
+  confidence: string;
+  confidenceHigh: string;
+  confidenceMedium: string;
+  confidenceLow: string;
 };
 
 export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
@@ -253,6 +258,10 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
     strongest: 'Strongest',
     supportive: 'Supportive',
     lighter: 'Lighter',
+    confidence: 'Advisory confidence',
+    confidenceHigh: 'Higher',
+    confidenceMedium: 'Moderate',
+    confidenceLow: 'Lower',
   },
   fa: {
     topDays: 'روزهای برتر',
@@ -262,6 +271,10 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
     strongest: 'قوی‌ترین',
     supportive: 'حمایت‌گر',
     lighter: 'سبک‌تر',
+    confidence: 'اطمینان مشورتی',
+    confidenceHigh: 'بالاتر',
+    confidenceMedium: 'متوسط',
+    confidenceLow: 'پایین‌تر',
   },
   ar: {
     topDays: 'أفضل الأيام',
@@ -271,6 +284,10 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
     strongest: 'الأقوى',
     supportive: 'داعم',
     lighter: 'أخف',
+    confidence: 'ثقة استرشادية',
+    confidenceHigh: 'أعلى',
+    confidenceMedium: 'متوسطة',
+    confidenceLow: 'أقل',
   },
   ru: {
     topDays: 'Лучшие дни',
@@ -280,8 +297,25 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
     strongest: 'Сильнее всего',
     supportive: 'Поддерживает',
     lighter: 'Слабее',
+    confidence: 'Ориентир уверенности',
+    confidenceHigh: 'Выше',
+    confidenceMedium: 'Средняя',
+    confidenceLow: 'Ниже',
   },
 };
+
+/** Map API confidence token to localized advisory label; unknown values pass through. */
+export function powerAdvisoryConfidenceLabel(
+  raw: string | undefined,
+  copy: VaultPowerTimingCopy,
+): string | null {
+  if (!raw || !raw.trim()) return null;
+  const key = raw.trim().toLowerCase();
+  if (key === 'high') return copy.confidenceHigh;
+  if (key === 'medium') return copy.confidenceMedium;
+  if (key === 'low') return copy.confidenceLow;
+  return raw.trim();
+}
 
 export type VaultPreviewLockCopy = {
   sampleLabel: string;
@@ -470,7 +504,8 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         { label: 'Ghost Days', hint: 'Strategic distance' },
         { label: 'Yes Day', hint: 'Big asks and proposals' },
       ],
-      coming: 'Coming soon — personal power calendar.',
+      coming:
+        'Live ranked timing windows for heat, money, distance, and yes-days — advisory guidance only.',
     },
     lounge: {
       title: 'Pink Lounge',
@@ -577,7 +612,8 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         { label: 'Дни тишины', hint: 'Дистанция' },
         { label: 'День «да»', hint: 'Большие просьбы' },
       ],
-      coming: 'Скоро — персональный календарь силы.',
+      coming:
+        'Живые окна тайминга для жара, денег, дистанции и дней «да» — только ориентиры, не гарантии.',
     },
     lounge: {
       title: 'Pink Lounge',
@@ -684,7 +720,8 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         { label: 'روز غیبت', hint: 'دوری استراتژیک' },
         { label: 'روز بله', hint: 'درخواست بزرگ' },
       ],
-      coming: 'به‌زودی — تقویم قدرت شخصی.',
+      coming:
+        'پنجره‌های تایمینگ زنده برای حرارت، پول، فاصله و روز بله — فقط راهنمایی مشورتی.',
     },
     lounge: {
       title: 'لانژ صورتی',
@@ -791,7 +828,8 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         { label: 'أيام الغياب', hint: 'مسافة استراتيجية' },
         { label: 'يوم نعم', hint: 'طلبات كبيرة' },
       ],
-      coming: 'قريباً — تقويم قوة شخصي.',
+      coming:
+        'نوافذ توقيت حيّة للحرارة والمال والمسافة وأيام النعم — إرشاد استرشادي فقط.',
     },
     lounge: {
       title: 'صالون الوردي',

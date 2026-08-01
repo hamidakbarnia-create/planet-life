@@ -5,8 +5,10 @@ import { describe, expect, it } from 'vitest';
 import {
   READING_UI,
   SECTION_LANGS,
+  VAULT_POWER_TIMING_COPY,
   VAULT_SECTION_ORDER,
   isValidVaultSection,
+  powerAdvisoryConfidenceLabel,
 } from './vault-section-i18n';
 
 describe('Vault section presentation copy', () => {
@@ -146,5 +148,43 @@ describe('Vault section presentation copy', () => {
     expect(isValidVaultSection('lounge')).toBe(true);
     expect(isValidVaultSection('nope')).toBe(false);
     expect(isValidVaultSection(undefined)).toBe(false);
+  });
+
+  it('keeps Power UI product labels (not backend module keys)', () => {
+    const labels = SECTION_LANGS.en.power.items.map((i) => i.label);
+    expect(labels).toEqual(['Heat Days', 'Money Days', 'Ghost Days', 'Yes Day']);
+    expect(labels.join(' ').toLowerCase()).not.toMatch(/\bhot\b/);
+    expect(labels).not.toContain('money');
+    expect(labels).not.toContain('ghost');
+    expect(labels).not.toContain('yes');
+  });
+
+  it('keeps Power coming copy honest for live timing (PD-2026-009)', () => {
+    for (const lang of ['en', 'fa', 'ar', 'ru'] as const) {
+      const coming = SECTION_LANGS[lang].power.coming.toLowerCase();
+      expect(coming).not.toMatch(/coming soon|به‌زودی|قريباً|^скоро\b/);
+      expect(SECTION_LANGS[lang].power.coming.length).toBeGreaterThan(20);
+    }
+    expect(SECTION_LANGS.en.power.coming.toLowerCase()).toMatch(/live|advisory/);
+  });
+
+  it('maps response confidence to advisory labels without inventing scores', () => {
+    const en = VAULT_POWER_TIMING_COPY.en;
+    expect(powerAdvisoryConfidenceLabel('high', en)).toBe(en.confidenceHigh);
+    expect(powerAdvisoryConfidenceLabel('medium', en)).toBe(en.confidenceMedium);
+    expect(powerAdvisoryConfidenceLabel('low', en)).toBe(en.confidenceLow);
+    expect(powerAdvisoryConfidenceLabel(undefined, en)).toBeNull();
+    expect(powerAdvisoryConfidenceLabel('', en)).toBeNull();
+    expect(en.confidence.toLowerCase()).toMatch(/advisory|confidence/);
+  });
+
+  it('composes Power response-level confidence on the section page', () => {
+    const pageSource = readFileSync(
+      resolve(__dirname, '../app/vault/[section]/page.tsx'),
+      'utf8',
+    );
+    expect(pageSource).toContain('powerAdvisoryConfidenceLabel');
+    expect(pageSource).toContain('data-vault-power-confidence');
+    expect(pageSource).toContain("power: ['hot', 'money', 'ghost', 'yes']");
   });
 });
