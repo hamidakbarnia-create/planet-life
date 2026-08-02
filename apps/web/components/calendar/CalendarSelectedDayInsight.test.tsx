@@ -10,16 +10,20 @@ afterEach(() => {
   cleanup();
 });
 
-const labels = {
-  dir: CALENDAR_PAGE_LANGS.en.dir,
-  loading: CALENDAR_PAGE_LANGS.en.loading,
-  whyTiming: CALENDAR_PAGE_LANGS.en.whyTiming,
-  supportingReasons: CALENDAR_PAGE_LANGS.en.supportingReasons,
-  advancedDetails: CALENDAR_PAGE_LANGS.en.advancedDetails,
-  transit: CALENDAR_PAGE_LANGS.en.transit,
-  signs: CALENDAR_PAGE_LANGS.en.signs,
-  planets: CALENDAR_PAGE_LANGS.en.planets,
-};
+function labelsFor(lang: 'en' | 'fa' | 'ar' | 'ru') {
+  const t = CALENDAR_PAGE_LANGS[lang];
+  return {
+    dir: t.dir,
+    loading: t.loading,
+    whyTiming: t.whyTiming,
+    whyTimingFallback: t.whyTimingFallback,
+    supportingReasons: t.supportingReasons,
+    advancedDetails: t.advancedDetails,
+    transit: t.transit,
+    signs: t.signs,
+    planets: t.planets,
+  };
+}
 
 const SAMPLE_REASONING: ScoreReasoning = {
   summary: 'Producer summary for this day.',
@@ -33,6 +37,22 @@ const SAMPLE_REASONING: ScoreReasoning = {
       title: 'Supportive window',
       explanation: 'Producer explanation text.',
       evidence: { source: 'test' },
+    },
+  ],
+};
+
+const ENGLISH_PRODUCER: ScoreReasoning = {
+  summary:
+    'Business Launch scores 63/100 (Favorable). Transit Sun conjunction natal Venus supports outreach.',
+  confidence: 0.5,
+  reasons: [
+    {
+      category: 'timing',
+      importance: 'high',
+      score: 10,
+      title: 'Transit Sun conjunction natal Venus',
+      explanation: 'This aspect favors partnership conversations.',
+      evidence: {},
     },
   ],
 };
@@ -53,7 +73,8 @@ describe('CalendarSelectedDayInsight', () => {
   it('keeps transit/sky content inside collapsed Advanced details', () => {
     render(
       <CalendarSelectedDayInsight
-        labels={labels}
+        lang="en"
+        labels={labelsFor('en')}
         reasoning={null}
         transit={SAMPLE_TRANSIT}
         transitMeta={{}}
@@ -69,10 +90,11 @@ describe('CalendarSelectedDayInsight', () => {
     expect(screen.queryByTestId('calendar-why-timing')).toBeNull();
   });
 
-  it('renders ScoreReasoning.summary when present', () => {
+  it('renders ScoreReasoning.summary when present in EN', () => {
     render(
       <CalendarSelectedDayInsight
-        labels={labels}
+        lang="en"
+        labels={labelsFor('en')}
         reasoning={SAMPLE_REASONING}
         transit={[]}
         transitMeta={{}}
@@ -89,10 +111,30 @@ describe('CalendarSelectedDayInsight', () => {
     expect(screen.queryByText(/confidence/i)).toBeNull();
   });
 
+  it('renders FA fallback instead of English producer prose', () => {
+    render(
+      <CalendarSelectedDayInsight
+        lang="fa"
+        labels={labelsFor('fa')}
+        reasoning={ENGLISH_PRODUCER}
+        transit={[]}
+        transitMeta={{}}
+        loadingTransit={false}
+      />
+    );
+
+    expect(screen.getByTestId('calendar-why-timing-summary').textContent).toBe(
+      CALENDAR_PAGE_LANGS.fa.whyTimingFallback
+    );
+    expect(screen.queryByText(/Business Launch/i)).toBeNull();
+    expect(screen.queryByText(/Transit Sun/i)).toBeNull();
+  });
+
   it('renders no reasoning section when summary is absent', () => {
     render(
       <CalendarSelectedDayInsight
-        labels={labels}
+        lang="en"
+        labels={labelsFor('en')}
         reasoning={null}
         transit={[]}
         transitMeta={{}}
@@ -107,7 +149,8 @@ describe('CalendarSelectedDayInsight', () => {
   it('places supporting reasons under progressive disclosure when present', () => {
     render(
       <CalendarSelectedDayInsight
-        labels={labels}
+        lang="en"
+        labels={labelsFor('en')}
         reasoning={SAMPLE_REASONING}
         transit={[]}
         transitMeta={{}}

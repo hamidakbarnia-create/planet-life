@@ -323,9 +323,11 @@ export function DailyBriefView({
 
       <WhyThisTiming
         className="mio-glass mio-glass--secondary rounded-2xl p-4"
+        lang={lang}
         labels={{
           dir: t.dir,
           whyTiming: t.whyTiming,
+          whyTimingFallback: t.whyTimingFallback,
           supportingReasons: t.supportingReasons,
         }}
         reasoning={reasoning}

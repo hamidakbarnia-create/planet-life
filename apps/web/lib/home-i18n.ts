@@ -28,6 +28,7 @@ export const HOME_LANGS: Record<
     bestWindow: string;
     avoidWindow: string;
     whyTiming: string;
+    whyTimingFallback: string;
     supportingReasons: string;
     calendarCta: string;
     hourlyLabel: string;
@@ -101,6 +102,8 @@ export const HOME_LANGS: Record<
     bestWindow: 'Best window',
     avoidWindow: 'Lower-readiness window',
     whyTiming: 'Why this timing',
+    whyTimingFallback:
+      'A localized timing explanation is not available for this day.',
     supportingReasons: 'Supporting details',
     calendarCta: 'Open Calendar for more detail',
     hourlyLabel: 'Hourly outlook',
@@ -180,6 +183,7 @@ export const HOME_LANGS: Record<
     bestWindow: 'Лучшее окно',
     avoidWindow: 'Окно низкой готовности',
     whyTiming: 'Почему этот тайминг',
+    whyTimingFallback: 'Локализованное объяснение тайминга для этого дня недоступно.',
     supportingReasons: 'Дополнительные детали',
     calendarCta: 'Открыть календарь для деталей',
     hourlyLabel: 'Часовой прогноз',
@@ -259,6 +263,7 @@ export const HOME_LANGS: Record<
     bestWindow: 'بهترین بازه',
     avoidWindow: 'بازهٔ آمادگی پایین',
     whyTiming: 'چرا این زمان‌بندی',
+    whyTimingFallback: 'توضیح فارسی این زمان‌بندی برای این روز در دسترس نیست.',
     supportingReasons: 'جزئیات پشتیبان',
     calendarCta: 'باز کردن تقویم برای جزئیات بیشتر',
     hourlyLabel: 'پیش‌بینی ساعتی',
@@ -338,6 +343,7 @@ export const HOME_LANGS: Record<
     bestWindow: 'أفضل نافذة',
     avoidWindow: 'نافذة جاهزية منخفضة',
     whyTiming: 'لماذا هذا التوقيت',
+    whyTimingFallback: 'الشرح المحلي لهذا التوقيت غير متاح لهذا اليوم.',
     supportingReasons: 'تفاصيل داعمة',
     calendarCta: 'افتح التقويم لمزيد من التفاصيل',
     hourlyLabel: 'التوقع الساعي',

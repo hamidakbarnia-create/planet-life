@@ -1,28 +1,60 @@
 'use client';
 
-import type { ScoreReasoning } from '@/lib/score-reasoning';
+import type { AppLang } from '@/lib/app-settings';
+import {
+  checkResponseLanguage,
+  isEnglishDominantProse,
+} from '@/lib/locale-language-guard';
+import type { ScoreReason, ScoreReasoning } from '@/lib/score-reasoning';
 
 export type WhyThisTimingLabels = {
   dir: 'ltr' | 'rtl';
   whyTiming: string;
+  whyTimingFallback: string;
   supportingReasons: string;
 };
 
 type Props = {
   labels: WhyThisTimingLabels;
+  lang: AppLang;
   reasoning: ScoreReasoning | null | undefined;
   className?: string;
 };
 
+/** True when producer prose is acceptable for the active UI language. */
+export function timingProseMatchesUiLang(text: string, lang: AppLang): boolean {
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+  if (lang === 'en') return true;
+  if (isEnglishDominantProse(trimmed)) return false;
+  return checkResponseLanguage(trimmed, lang).ok;
+}
+
+function localizedReasons(
+  reasons: ScoreReason[] | undefined,
+  lang: AppLang
+): ScoreReason[] | null {
+  if (!reasons?.length) return null;
+  const kept = reasons.filter((reason) =>
+    timingProseMatchesUiLang(`${reason.title}\n${reason.explanation}`, lang)
+  );
+  return kept.length ? kept : null;
+}
+
 /**
- * Presentation-only: renders producer ScoreReasoning.summary / reasons when present.
+ * Presentation-only: renders producer ScoreReasoning when it matches UI language.
+ * For FA/AR/RU, English (or wrong-script) producer text is replaced by a localized fallback.
  * Does not invent explanations or expose confidence as platform Confidence.
  */
-export function WhyThisTiming({ labels: t, reasoning, className }: Props) {
-  const summary = reasoning?.summary?.trim() ? reasoning.summary : null;
-  if (!summary) return null;
+export function WhyThisTiming({ labels: t, lang, reasoning, className }: Props) {
+  const rawSummary = reasoning?.summary?.trim() ? reasoning.summary : null;
+  if (!rawSummary) return null;
 
-  const reasons = reasoning?.reasons?.length ? reasoning.reasons : null;
+  const summaryMatches = timingProseMatchesUiLang(rawSummary, lang);
+  const summary = summaryMatches ? rawSummary : t.whyTimingFallback;
+  const reasons = summaryMatches
+    ? localizedReasons(reasoning?.reasons, lang)
+    : null;
 
   return (
     <div className={className} data-testid="calendar-why-timing">
@@ -36,6 +68,7 @@ export function WhyThisTiming({ labels: t, reasoning, className }: Props) {
         className="fi text-sm leading-relaxed"
         style={{ color: 'rgba(255,255,255,0.78)' }}
         data-testid="calendar-why-timing-summary"
+        data-why-timing-fallback={summaryMatches ? 'false' : 'true'}
       >
         {summary}
       </p>

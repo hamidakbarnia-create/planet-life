@@ -1,5 +1,6 @@
 'use client';
 
+import type { AppLang } from '@/lib/app-settings';
 import type { ScoreReasoning } from '@/lib/score-reasoning';
 import type { PlanetTransit, TransitSnapshotMeta } from '@/lib/calendar-scores';
 import { WhyThisTiming } from '@/components/timing/WhyThisTiming';
@@ -8,6 +9,7 @@ export type CalendarSelectedDayInsightLabels = {
   dir: 'ltr' | 'rtl';
   loading: string;
   whyTiming: string;
+  whyTimingFallback: string;
   supportingReasons: string;
   advancedDetails: string;
   transit: {
@@ -55,6 +57,7 @@ const PLANET_ORDER = [
 ];
 
 type Props = {
+  lang: AppLang;
   labels: CalendarSelectedDayInsightLabels;
   reasoning: ScoreReasoning | null | undefined;
   transit: PlanetTransit[];
@@ -67,6 +70,7 @@ type Props = {
  * Does not invent explanations or expose ScoreReasoning.confidence as platform Confidence.
  */
 export function CalendarSelectedDayInsight({
+  lang,
   labels: t,
   reasoning,
   transit,
@@ -77,9 +81,11 @@ export function CalendarSelectedDayInsight({
     <div data-testid="calendar-selected-day-insight">
       <WhyThisTiming
         className="mb-4"
+        lang={lang}
         labels={{
           dir: t.dir,
           whyTiming: t.whyTiming,
+          whyTimingFallback: t.whyTimingFallback,
           supportingReasons: t.supportingReasons,
         }}
         reasoning={reasoning}
