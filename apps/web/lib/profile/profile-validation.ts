@@ -1,3 +1,4 @@
+import { isProfileGender } from './profile-gender';
 import type { ProfileBirthPlace, ProfileDraft, ProfileRecord } from './profile-types';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -7,14 +8,17 @@ export type ProfileValidationField =
   | 'birth_date'
   | 'birth_time'
   | 'birth_place'
-  | 'name';
+  | 'name'
+  | 'gender';
 
 export interface ProfileValidationResult {
   valid: boolean;
   errors: Partial<Record<ProfileValidationField, string>>;
 }
 
-export function validateProfileDraft(draft: ProfileDraft): ProfileValidationResult {
+function validateBirthIdentityFields(
+  draft: ProfileDraft
+): Partial<Record<ProfileValidationField, string>> {
   const errors: Partial<Record<ProfileValidationField, string>> = {};
 
   if (!draft.birth_date.trim()) {
@@ -46,6 +50,20 @@ export function validateProfileDraft(draft: ProfileDraft): ProfileValidationResu
     errors.birth_place = 'Selected city is incomplete.';
   }
 
+  return errors;
+}
+
+/**
+ * Full draft validation for onboarding / profile save forms.
+ * Gender is required here — not for global product access.
+ */
+export function validateProfileDraft(draft: ProfileDraft): ProfileValidationResult {
+  const errors = validateBirthIdentityFields(draft);
+
+  if (!isProfileGender(draft.gender)) {
+    errors.gender = 'Gender is required.';
+  }
+
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
@@ -60,23 +78,38 @@ function isValidBirthPlace(place: ProfileBirthPlace): boolean {
 
 export function draftToProfileRecord(draft: ProfileDraft): ProfileRecord {
   const city = draft.selected_city!;
+  if (!isProfileGender(draft.gender)) {
+    throw new Error('draftToProfileRecord requires a valid gender');
+  }
   return {
     birth_date: draft.birth_date.trim(),
     birth_time: draft.birth_time.trim(),
     birth_place: city,
     name: draft.name?.trim() || undefined,
     action_type: 'business_launch',
+    gender: draft.gender,
   };
 }
 
+/**
+ * Birth-identity completeness for routing / Calendar / Today / Ask / Preparing.
+ * Gender is intentionally excluded so legacy users are not globally blocked (PD-2026-010).
+ */
 export function isProfileRecordComplete(record: ProfileRecord | null): boolean {
   if (!record) return false;
-  return validateProfileDraft({
+  const errors = validateBirthIdentityFields({
     birth_date: record.birth_date,
     birth_time: record.birth_time,
     city_search: record.birth_place.short,
     selected_city: record.birth_place,
     name: record.name,
+    gender: record.gender ?? '',
     updated_at: Date.now(),
-  }).valid;
+  });
+  return Object.keys(errors).length === 0;
+}
+
+/** True when gender is set — for gender-aware capability presentation only. */
+export function hasProfileGender(record: ProfileRecord | null | undefined): boolean {
+  return isProfileGender(record?.gender);
 }

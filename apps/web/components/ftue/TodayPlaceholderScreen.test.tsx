@@ -24,6 +24,7 @@ describe('TodayPlaceholderScreen', () => {
     },
     name: 'Alex',
     action_type: 'business_launch',
+    gender: 'male' as const,
   };
 
   beforeEach(() => {

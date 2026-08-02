@@ -50,6 +50,10 @@ describe('BirthProfileOnboardingScreen', () => {
     expect(screen.getByLabelText(/birth date/i)).toBeTruthy();
     expect(screen.getByLabelText(/birth time/i)).toBeTruthy();
     expect(screen.getByLabelText(/birth city/i)).toBeTruthy();
+    expect(screen.getByTestId('profile-gender-field')).toBeTruthy();
+    expect(screen.getByTestId('profile-gender-female')).toBeTruthy();
+    expect(screen.getByTestId('profile-gender-male')).toBeTruthy();
+    expect(screen.getByTestId('profile-gender-prefer_not_to_say')).toBeTruthy();
     const queue = localStorage.getItem('planet-life-ftue-events');
     expect(queue).toContain('profile.view');
   });
@@ -84,7 +88,7 @@ describe('BirthProfileOnboardingScreen', () => {
     expect(queue).toContain('profile.validation_failed');
   });
 
-  it('saves complete profile and routes to preparing', async () => {
+  it('requires gender before save', async () => {
     const repo = getProfileRepository();
     repo.saveDraft({
       birth_date: '1990-06-15',
@@ -102,12 +106,59 @@ describe('BirthProfileOnboardingScreen', () => {
     render(<BirthProfileOnboardingScreen />);
     await screen.findByRole('heading', { name: /your birth context/i });
     fireEvent.click(screen.getByRole('button', { name: /save and continue/i }));
+    const alerts = await screen.findAllByRole('alert');
+    expect(alerts.some((el) => el.textContent?.match(/gender/i))).toBe(true);
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it('saves complete profile with gender and routes to preparing', async () => {
+    const repo = getProfileRepository();
+    repo.saveDraft({
+      birth_date: '1990-06-15',
+      birth_time: '14:30',
+      city_search: 'New York',
+      selected_city: {
+        name: 'New York, NY, USA',
+        short: 'New York',
+        lat: 40.7128,
+        lon: -74.006,
+      },
+      gender: 'male',
+      updated_at: Date.now(),
+    });
+
+    render(<BirthProfileOnboardingScreen />);
+    await screen.findByRole('heading', { name: /your birth context/i });
+    fireEvent.click(screen.getByRole('button', { name: /save and continue/i }));
 
     expect(replace).toHaveBeenCalledWith('/onboarding/preparing');
     expect(repo.loadProfile()?.birth_place.short).toBe('New York');
+    expect(repo.loadProfile()?.gender).toBe('male');
     expect(repo.loadDraft()).toBeNull();
     const queue = localStorage.getItem('planet-life-ftue-events');
     expect(queue).toContain('profile.saved');
     expect(queue).toContain('profile.completed');
+  });
+
+  it('persists prefer_not_to_say', async () => {
+    const repo = getProfileRepository();
+    repo.saveDraft({
+      birth_date: '1990-06-15',
+      birth_time: '14:30',
+      city_search: 'New York',
+      selected_city: {
+        name: 'New York, NY, USA',
+        short: 'New York',
+        lat: 40.7128,
+        lon: -74.006,
+      },
+      gender: 'prefer_not_to_say',
+      updated_at: Date.now(),
+    });
+
+    render(<BirthProfileOnboardingScreen />);
+    await screen.findByRole('heading', { name: /your birth context/i });
+    fireEvent.click(screen.getByRole('button', { name: /save and continue/i }));
+    expect(repo.loadProfile()?.gender).toBe('prefer_not_to_say');
   });
 });

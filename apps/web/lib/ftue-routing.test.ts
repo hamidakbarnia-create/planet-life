@@ -17,6 +17,7 @@ const sampleProfile = {
     lon: -74.006,
   },
   action_type: 'business_launch',
+  gender: 'prefer_not_to_say' as const,
 };
 
 describe('ftue-routing', () => {
@@ -38,6 +39,20 @@ describe('ftue-routing', () => {
     getProfileRepository().saveProfile(sampleProfile);
     expect(hasLocalBirthProfile()).toBe(true);
     expect(getProfileRepository().loadProfile()?.birth_place.short).toBe('New York');
+  });
+
+  it('does not globally block legacy profiles missing gender', () => {
+    localStorage.setItem(
+      'planet-life-birth-profile',
+      JSON.stringify({
+        birth_date: '1990-06-15',
+        birth_time: '14:30',
+        location: 'New York',
+        action_type: 'business_launch',
+      })
+    );
+    expect(hasLocalBirthProfile()).toBe(true);
+    expect(resolvePostAuthPath()).toBe('/onboarding/preparing');
   });
 
   it('routes new users to profile onboarding', () => {

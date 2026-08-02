@@ -247,6 +247,7 @@ describe('ResultScreen', () => {
     },
     name: 'Alex',
     action_type: 'business_launch',
+    gender: 'female' as const,
   };
 
   const sampleQuestion = {

@@ -16,6 +16,7 @@ const sampleProfile = {
     lon: -74.006,
   },
   action_type: 'business_launch',
+  gender: 'prefer_not_to_say' as const,
 };
 
 describe('ftue-preparing orchestration', () => {

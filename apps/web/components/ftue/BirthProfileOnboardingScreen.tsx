@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useId, useRef, useState } from 'react';
 import { BrandLogo } from '@/components/BrandLogo';
 import { CityAutocomplete } from '@/components/CityAutocomplete';
+import { GenderField } from '@/components/profile/GenderField';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { trackProfileEvent } from '@/lib/ftue-analytics';
@@ -15,6 +16,7 @@ import {
   getProfileRepository,
   validateProfileDraft,
   type ProfileDraft,
+  type ProfileGender,
   type ProfileValidationField,
 } from '@/lib/profile';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
@@ -54,6 +56,7 @@ export function BirthProfileOnboardingScreen() {
           city_search: profile.birth_place.short,
           selected_city: profile.birth_place,
           name: profile.name ?? '',
+          gender: profile.gender ?? '',
           updated_at: Date.now(),
         });
       }
@@ -83,6 +86,9 @@ export function BirthProfileOnboardingScreen() {
         }
         if ('city_search' in patch || 'selected_city' in patch) {
           delete nextErrors.birth_place;
+        }
+        if ('gender' in patch) {
+          delete nextErrors.gender;
         }
         return nextErrors;
       });
@@ -118,7 +124,8 @@ export function BirthProfileOnboardingScreen() {
       draft.birth_date ||
       draft.birth_time ||
       draft.city_search ||
-      draft.name?.trim();
+      draft.name?.trim() ||
+      draft.gender;
     if (hasInput) {
       setShowDiscard(true);
       return;
@@ -300,6 +307,20 @@ export function BirthProfileOnboardingScreen() {
                   </p>
                 )}
               </div>
+
+              <GenderField
+                name={`${formId}-gender`}
+                value={draft.gender}
+                onChange={(gender: ProfileGender) => updateField({ gender })}
+                labels={{
+                  genderLabel: c.genderLabel,
+                  genderFemale: c.genderFemale,
+                  genderMale: c.genderMale,
+                  genderPreferNot: c.genderPreferNot,
+                  required: c.required,
+                }}
+                error={errors.gender}
+              />
 
               <div>
                 <label htmlFor={nameId} className="fi block text-xs text-white/50 mb-1.5">

@@ -46,6 +46,7 @@ describe('AskScreen', () => {
     },
     name: 'Alex',
     action_type: 'business_launch',
+    gender: 'female' as const,
   };
 
   beforeEach(() => {

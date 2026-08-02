@@ -1,4 +1,5 @@
 import type { BirthProfile } from '../birth-profile';
+import { parseProfileGender } from './profile-gender';
 import type { ProfileDraft, ProfileRecord } from './profile-types';
 
 export interface ProfileRepository {
@@ -25,7 +26,12 @@ class LocalProfileRepository implements ProfileRepository {
     try {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (!raw) return null;
-      return JSON.parse(raw) as ProfileDraft;
+      const draft = JSON.parse(raw) as ProfileDraft;
+      const gender = parseProfileGender(draft.gender);
+      return {
+        ...draft,
+        gender: gender ?? '',
+      };
     } catch {
       return null;
     }
@@ -67,12 +73,14 @@ class LocalProfileRepository implements ProfileRepository {
       }
 
       const name = localStorage.getItem(NAME_KEY) || undefined;
+      const gender = parseProfileGender(legacy.gender) ?? undefined;
       return {
         birth_date: legacy.birth_date,
         birth_time: legacy.birth_time,
         birth_place,
         name: name || undefined,
         action_type: legacy.action_type || 'business_launch',
+        ...(gender ? { gender } : {}),
       };
     } catch {
       return null;
@@ -81,11 +89,26 @@ class LocalProfileRepository implements ProfileRepository {
 
   saveProfile(record: ProfileRecord): void {
     if (typeof window === 'undefined') return;
+
+    let current_location: BirthProfile['current_location'];
+    try {
+      const raw = localStorage.getItem(PROFILE_KEY);
+      if (raw) {
+        const existing = JSON.parse(raw) as BirthProfile;
+        current_location = existing.current_location;
+      }
+    } catch {
+      // ignore corrupt existing blob
+    }
+
+    const gender = parseProfileGender(record.gender) ?? undefined;
     const legacy: BirthProfile = {
       birth_date: record.birth_date,
       birth_time: record.birth_time,
       location: record.birth_place.short,
       action_type: record.action_type,
+      ...(gender ? { gender } : {}),
+      ...(current_location ? { current_location } : {}),
     };
     localStorage.setItem(PROFILE_KEY, JSON.stringify(legacy));
     localStorage.setItem(PLACE_KEY, JSON.stringify(record.birth_place));

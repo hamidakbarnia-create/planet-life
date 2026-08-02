@@ -33,6 +33,11 @@ export const PROFILE_LANGS: Record<
     currentPickFromList: string;
     currentSaveFailed: string;
     nameLabel: string;
+    genderLabel: string;
+    genderFemale: string;
+    genderMale: string;
+    genderPreferNot: string;
+    genderRequired: string;
     bdate: string;
     btime: string;
     city: string;
@@ -105,6 +110,11 @@ export const PROFILE_LANGS: Record<
     currentPickFromList: 'Pick a city from the list to confirm coordinates.',
     currentSaveFailed: 'Could not resolve city coordinates. Select a city from the dropdown.',
     nameLabel: 'Name',
+    genderLabel: 'Gender',
+    genderFemale: 'Female',
+    genderMale: 'Male',
+    genderPreferNot: 'Prefer not to say',
+    genderRequired: 'Gender is required.',
     bdate: 'Birth Date',
     btime: 'Birth Time',
     city: 'Birth City',
@@ -179,6 +189,11 @@ export const PROFILE_LANGS: Record<
     currentPickFromList: 'Выберите город из списка, чтобы подтвердить координаты.',
     currentSaveFailed: 'Не удалось определить координаты города. Выберите город из списка.',
     nameLabel: 'Имя',
+    genderLabel: 'Пол',
+    genderFemale: 'Женский',
+    genderMale: 'Мужской',
+    genderPreferNot: 'Предпочитаю не указывать',
+    genderRequired: 'Укажите пол.',
     bdate: 'Дата рождения',
     btime: 'Время рождения',
     city: 'Город рождения',
@@ -252,6 +267,11 @@ export const PROFILE_LANGS: Record<
     currentPickFromList: 'برای تأیید مختصات، شهری را از فهرست انتخاب کنید.',
     currentSaveFailed: 'مختصات شهر مشخص نشد. لطفاً از فهرست انتخاب کنید.',
     nameLabel: 'نام',
+    genderLabel: 'جنسیت',
+    genderFemale: 'زن',
+    genderMale: 'مرد',
+    genderPreferNot: 'ترجیح می‌دهم نگویم',
+    genderRequired: 'انتخاب جنسیت الزامی است.',
     bdate: 'تاریخ تولد',
     btime: 'زمان تولد',
     city: 'شهر تولد',
@@ -324,6 +344,11 @@ export const PROFILE_LANGS: Record<
     currentPickFromList: 'اختر مدينة من القائمة لتأكيد الإحداثيات.',
     currentSaveFailed: 'تعذّر تحديد إحداثيات المدينة. اختر مدينة من القائمة.',
     nameLabel: 'الاسم',
+    genderLabel: 'الجنس',
+    genderFemale: 'أنثى',
+    genderMale: 'ذكر',
+    genderPreferNot: 'أفضل عدم الإفصاح',
+    genderRequired: 'الجنس مطلوب.',
     bdate: 'تاريخ الميلاد',
     btime: 'وقت الميلاد',
     city: 'مدينة الميلاد',
