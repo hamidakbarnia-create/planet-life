@@ -94,6 +94,37 @@ describe('VaultRankedDayChip', () => {
     expect(chip.getAttribute('tabindex')).toBeNull();
     expect(chip.onclick).toBeNull();
   });
+
+  it('marks only the caller-selected dominant day for visual hierarchy', () => {
+    const { container, rerender } = render(
+      <VaultRankedDayChip
+        dateLabel="1 Aug"
+        score={81}
+        band="strongest"
+        bandLabel="Strongest"
+        dominant
+      />,
+    );
+    expect(
+      (container.firstElementChild as HTMLElement).getAttribute(
+        'data-vault-day-dominant'
+      )
+    ).toBe('true');
+
+    rerender(
+      <VaultRankedDayChip
+        dateLabel="2 Aug"
+        score={82}
+        band="strongest"
+        bandLabel="Strongest"
+      />,
+    );
+    expect(
+      (container.firstElementChild as HTMLElement).getAttribute(
+        'data-vault-day-dominant'
+      )
+    ).toBeNull();
+  });
 });
 
 describe('VaultYesDecisionSlot', () => {

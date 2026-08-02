@@ -36,6 +36,7 @@ export type VaultReadingPresentationCopy = {
   recommendedActions: string;
   thingsToAvoid: string;
   practicalNextStep: string;
+  deepReading: string;
   fallbackSituation: string;
   fallbackOpportunity: string;
   fallbackRisk: string;
@@ -55,6 +56,7 @@ export const VAULT_READING_PRESENTATION_COPY: Record<
     recommendedActions: 'Recommended actions',
     thingsToAvoid: 'Things to avoid',
     practicalNextStep: 'Practical next step',
+    deepReading: 'Deep reading',
     fallbackSituation: 'Your timing context is ready — use the guidance below for this decision.',
     fallbackOpportunity: 'Lean into the clearest opening this reading highlights.',
     fallbackRisk: 'Watch for overreach, mixed signals, and forcing a weak window.',
@@ -69,6 +71,7 @@ export const VAULT_READING_PRESENTATION_COPY: Record<
     recommendedActions: 'اقدام‌های پیشنهادی',
     thingsToAvoid: 'چیزهایی که باید پرهیز کنی',
     practicalNextStep: 'قدم عملی بعدی',
+    deepReading: 'خوانش عمیق',
     fallbackSituation: 'زمینهٔ زمان‌بندی آماده است — از راهنمای زیر برای این تصمیم استفاده کن.',
     fallbackOpportunity: 'به واضح‌ترین گشایشی که این خوانش نشان می‌دهد نزدیک شو.',
     fallbackRisk: 'مراقب زیاده‌روی، سیگنال‌های درهم و اجبار روی پنجرهٔ ضعیف باش.',
@@ -83,6 +86,7 @@ export const VAULT_READING_PRESENTATION_COPY: Record<
     recommendedActions: 'Рекомендуемые действия',
     thingsToAvoid: 'Чего избегать',
     practicalNextStep: 'Практичный следующий шаг',
+    deepReading: 'Глубокое чтение',
     fallbackSituation: 'Контекст тайминга готов — используйте подсказки ниже для этого решения.',
     fallbackOpportunity: 'Опирайтесь на самое ясное окно, которое выделяет этот разбор.',
     fallbackRisk: 'Следите за перегибом, смешанными сигналами и давлением в слабом окне.',
@@ -97,6 +101,7 @@ export const VAULT_READING_PRESENTATION_COPY: Record<
     recommendedActions: 'الإجراءات الموصى بها',
     thingsToAvoid: 'ما يجب تجنّبه',
     practicalNextStep: 'الخطوة العملية التالية',
+    deepReading: 'قراءة معمّقة',
     fallbackSituation: 'سياق التوقيت جاهز — استخدمي الإرشاد أدناه لهذا القرار.',
     fallbackOpportunity: 'ميلِي إلى أوضح فرصة تُبرزها هذه القراءة.',
     fallbackRisk: 'احذري الإفراط والإشارات المختلطة وإجبار نافذة ضعيفة.',
@@ -180,7 +185,7 @@ function collapseWhitespace(text: string): string {
 
 function splitSentences(text: string): string[] {
   return text
-    .split(/(?<=[.!?…])\s+|\n+/)
+    .split(/(?<=[.!?…؟])\s+|\n+/)
     .map((part) => part.trim())
     .filter(Boolean);
 }
@@ -249,29 +254,68 @@ function extractLabeled(
   labels: string[]
 ): string | null {
   for (const label of labels) {
+    // Stop at the next sentence boundary (.!?…؟ + capital), never swallow
+    // following labeled clauses such as "Action: …".
     const re = new RegExp(
-      `${label}\\s*:\\s*([^\\n.]+(?:\\.[^A-ZА-ЯЁا-ی][^\\n.]*)?)`,
+      `${label}\\s*:\\s*([^\\n.!?…؟]+(?:[.!?…؟](?!\\s*[A-ZА-ЯЁا-ی])[^\\n.!?…؟]*)*)`,
       'i'
     );
     const match = source.match(re);
     if (match?.[1]) {
       const value = collapseWhitespace(match[1].replace(/\s+/g, ' '));
-      if (value) return value.replace(/\.$/, '');
+      if (value) return value.replace(/[.!?…؟]$/, '');
     }
   }
   return null;
 }
 
-function stripLabeledClauses(source: string): string {
-  // Remove known labeled tails so situation body stays narrative.
+/** Bounded label-clause strip: one clause after the label, never EOF wipe. */
+function stripLabeledClausesBounded(source: string): string {
   return collapseWhitespace(
     source
       .replace(
-        /(?:Action|Avoid|Opportunity|Risk|Commercial risk|Watch the risk|Next|Verify|Reason|Confidence|What this changes today|اقدام|پرهیز|فرصت|ریسک|Действие|Избегать|Возможность|Риск|Далее|الإجراء|تجنبي)\s*:[^.]*\.?/gi,
+        /(?:Action|Avoid|Opportunity|Risk|Commercial risk|Watch the risk|Next|Verify|Reason|Confidence|What this changes today|اقدام|پرهیز|فرصت|ریسک|Действие|Избегать|Возможность|Риск|Далее|الإجراء|تجنبي)\s*:[^.؟…]*[.؟…]?/gi,
         ' '
       )
       .replace(LABELED_FIELD_RE, ' ')
   );
+}
+
+/**
+ * Drop label tokens only (Action:/Avoid:/…) without consuming the preceding
+ * sentence terminator — avoids gluing neighboring clauses together.
+ */
+function stripLabelMarkersOnly(source: string): string {
+  return collapseWhitespace(
+    source.replace(
+      /(?:Action|Avoid|Opportunity|Risk|Commercial risk|Watch the risk|Next|Verify|Reason|Confidence|What this changes today|اقدام|پرهیز|فرصت|ریسک|بعدی|Действие|Избегать|Возможность|Риск|Далее|الإجراء|تجنبي|الفرصة|المخاطر)\s*:\s*/gi,
+      ' '
+    )
+  );
+}
+
+/**
+ * Situation narrative prep:
+ * - When structured action/avoid fields already exist, drop label markers and
+ *   exact copies of those field strings (no fuzzy match). Shaper de-dupes too.
+ * - Otherwise use a bounded first-clause strip (never EOF).
+ */
+function narrativeForSituation(
+  source: string,
+  hasStructuredFields: boolean,
+  structuredFragments: Array<string | null | undefined> = []
+): string {
+  let out = hasStructuredFields
+    ? stripLabelMarkersOnly(source)
+    : stripLabeledClausesBounded(source);
+  if (hasStructuredFields) {
+    for (const fragment of structuredFragments) {
+      const exact = fragment?.trim();
+      if (!exact) continue;
+      out = out.split(exact).join(' ');
+    }
+  }
+  return collapseWhitespace(out);
 }
 
 function pickClean(
@@ -340,8 +384,14 @@ export function presentVaultReading(
     'المخاطر',
   ]);
 
+  const hasStructuredFields = Boolean(
+    reading.action?.trim() || reading.avoid?.trim()
+  );
   const situationBody = sanitizeVaultReadingProse(
-    stripLabeledClauses(narrativeSource),
+    narrativeForSituation(narrativeSource, hasStructuredFields, [
+      actionRaw,
+      avoidRaw,
+    ]),
     lang
   );
   const headline = sanitizeVaultReadingProse(reading.headline, lang);
@@ -356,8 +406,9 @@ export function presentVaultReading(
           ? `إذا تم التجاهل: ${cleanAvoid}`
           : `If ignored: ${cleanAvoid}`);
 
+  // Situation only — never concatenate headline into the situation body.
   const overallSituation = pickClean(
-    [[headline, situationBody].filter(Boolean).join(' '), situationBody, headline],
+    [situationBody, headline],
     copy.fallbackSituation,
     lang
   );
@@ -390,5 +441,267 @@ export function presentVaultReading(
 
   return {
     sections: order.map(([key, title, body]) => ({ key, title, body })),
+  };
+}
+
+/** Normalize prose for presentation de-duplication (UI only). */
+export function normalizePresentationText(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Exact / near-exact match after normalization.
+ * Near-exact = identical once case, punctuation, and whitespace are normalized.
+ * Does not treat substring containment as equality (avoids dropping unique clauses).
+ */
+export function presentationTextNearlyEqual(a: string, b: string): boolean {
+  const na = normalizePresentationText(a);
+  const nb = normalizePresentationText(b);
+  if (!na || !nb) return false;
+  return na === nb;
+}
+
+/** Split decision prose into bullets without rewriting source wording. */
+export function splitPresentationBullets(text: string): string[] {
+  if (!text.trim()) return [];
+  const parts = text
+    .split(/(?<=[.!?…؟])\s+|[;•]\s*|\n+/)
+    .map((part) => part.trim().replace(/^[-–—•]\s*/, ''))
+    .filter(Boolean);
+
+  const unique: string[] = [];
+  for (const part of parts) {
+    if (unique.some((u) => presentationTextNearlyEqual(u, part))) continue;
+    unique.push(part);
+  }
+  if (unique.length === 0) return [collapseWhitespace(text)];
+  return unique;
+}
+
+/**
+ * Split into scanable bullets, optionally capped for a main presentation group.
+ * Use uncapped split + slice for overflow preservation.
+ */
+export function toPresentationBullets(text: string, max = 4): string[] {
+  return splitPresentationBullets(text).slice(0, max);
+}
+
+export type VaultReadingConfidenceLevel = 'high' | 'medium' | 'low';
+
+/** Map existing advisory confidence token only — no invented precision. */
+export function parseConfidenceLevel(
+  raw: string | null | undefined
+): VaultReadingConfidenceLevel | null {
+  if (!raw?.trim()) return null;
+  const key = raw.trim().toLowerCase();
+  if (key === 'high' || key === 'medium' || key === 'low') return key;
+  return null;
+}
+
+/** Discrete meter steps for high|medium|low (1–3). Not a percentage. */
+export function confidenceMeterSteps(
+  level: VaultReadingConfidenceLevel | null
+): 1 | 2 | 3 | null {
+  if (level === 'low') return 1;
+  if (level === 'medium') return 2;
+  if (level === 'high') return 3;
+  return null;
+}
+
+export type VaultReadingUxDeepSection = {
+  key: VaultReadingSectionKey;
+  title: string;
+  bullets: string[];
+};
+
+export type VaultReadingUxV2 = {
+  decision: string;
+  primaryRisk: string;
+  primaryAction: string;
+  whyTitle: string;
+  whyBullets: string[];
+  actionTitle: string;
+  actionItems: string[];
+  avoidTitle: string;
+  avoidItems: string[];
+  riskLabel: string;
+  actionLabel: string;
+  deepTitle: string | null;
+  deepSections: VaultReadingUxDeepSection[];
+};
+
+const MAIN_BULLET_CAP = 4;
+
+function matchesExact(bullet: string, against: string[]): boolean {
+  return against.some((item) => presentationTextNearlyEqual(bullet, item));
+}
+
+/** Append candidates using normalized exact equality only. */
+function pushUniqueExact(
+  target: string[],
+  candidates: string[],
+  seen: string[] = target
+): void {
+  for (const candidate of candidates) {
+    if (matchesExact(candidate, seen)) continue;
+    target.push(candidate);
+  }
+}
+
+function pushDeep(
+  deepSections: VaultReadingUxDeepSection[],
+  key: VaultReadingSectionKey,
+  title: string,
+  bullets: string[]
+): void {
+  if (bullets.length === 0) return;
+  const existing = deepSections.find((section) => section.key === key);
+  if (existing) {
+    pushUniqueExact(existing.bullets, bullets);
+    return;
+  }
+  deepSections.push({ key, title, bullets: [...bullets] });
+}
+
+/**
+ * Presentation-only Decision Intelligence shaping from existing sections.
+ * Each section body is split once; de-dupe is normalized exact equality only.
+ * Caps main groups at 4 bullets; preserves overflow in deepSections.
+ */
+export function shapeVaultReadingUxV2(
+  presented: VaultPresentedReading,
+  labels: VaultReadingPresentationCopy,
+  /** Sanitized headline when available — never reconstructed from situation. */
+  decisionHeadline?: string | null
+): VaultReadingUxV2 {
+  const byKey = Object.fromEntries(
+    presented.sections.map((section) => [section.key, section])
+  ) as Record<VaultReadingSectionKey, VaultReadingSection>;
+
+  // Split each section body exactly once.
+  const situationBullets = splitPresentationBullets(
+    byKey.overallSituation.body
+  );
+  const opportunityBullets = splitPresentationBullets(
+    byKey.mainOpportunity.body
+  );
+  const riskBullets = splitPresentationBullets(byKey.mainRisk.body);
+  const actionBullets = splitPresentationBullets(
+    byKey.recommendedActions.body
+  );
+  const avoidBullets = splitPresentationBullets(byKey.thingsToAvoid.body);
+  const nextBullets = splitPresentationBullets(byKey.practicalNextStep.body);
+
+  const decision =
+    collapseWhitespace(decisionHeadline ?? '') || situationBullets[0] || '';
+  const primaryAction = actionBullets[0] || nextBullets[0] || '';
+  const primaryRisk = riskBullets[0] || avoidBullets[0] || '';
+
+  // Exact suppress only — includes avoid/risk so labeled tails do not reappear in Why.
+  const suppressInWhy = [
+    decision,
+    ...actionBullets,
+    ...nextBullets,
+    ...avoidBullets,
+    ...riskBullets,
+  ].filter(Boolean);
+
+  // Why: situation then opportunity (fixed section order).
+  const whyFromSituation = situationBullets.filter(
+    (bullet) => !matchesExact(bullet, suppressInWhy)
+  );
+  const whyFromOpportunity = opportunityBullets.filter(
+    (bullet) =>
+      !matchesExact(bullet, suppressInWhy) &&
+      !matchesExact(bullet, whyFromSituation)
+  );
+
+  const whyAll = [...whyFromSituation, ...whyFromOpportunity];
+  if (whyAll.length === 0 && decision) {
+    whyAll.push(decision);
+  }
+
+  const whyBullets = whyAll.slice(0, MAIN_BULLET_CAP);
+  const whyOverflow = whyAll.slice(MAIN_BULLET_CAP);
+
+  const deepSections: VaultReadingUxDeepSection[] = [];
+
+  // Overflow attribution reuses the once-split arrays (no re-parse).
+  pushDeep(
+    deepSections,
+    'overallSituation',
+    labels.overallSituation,
+    whyOverflow.filter((b) => matchesExact(b, whyFromSituation))
+  );
+  pushDeep(
+    deepSections,
+    'mainOpportunity',
+    labels.mainOpportunity,
+    whyOverflow.filter((b) => matchesExact(b, whyFromOpportunity))
+  );
+
+  // Opportunity deferred entirely when Why is full of situation lines.
+  pushDeep(
+    deepSections,
+    'mainOpportunity',
+    labels.mainOpportunity,
+    whyFromOpportunity.filter((b) => !matchesExact(b, whyBullets))
+  );
+
+  // Action: action field bullets, then unique next-step bullets.
+  const actionAll: string[] = [];
+  pushUniqueExact(actionAll, actionBullets);
+  pushUniqueExact(actionAll, nextBullets, actionAll);
+  const actionItems = actionAll.slice(0, MAIN_BULLET_CAP);
+  const actionOverflow = actionAll.slice(MAIN_BULLET_CAP);
+  pushDeep(
+    deepSections,
+    'recommendedActions',
+    labels.recommendedActions,
+    actionOverflow.filter((b) => matchesExact(b, actionBullets))
+  );
+  pushDeep(
+    deepSections,
+    'practicalNextStep',
+    labels.practicalNextStep,
+    actionOverflow.filter(
+      (b) => matchesExact(b, nextBullets) && !matchesExact(b, actionBullets)
+    )
+  );
+
+  // Avoid: existing avoid-field bullets (+ risk overflow kept under risk).
+  const avoidItems = avoidBullets.slice(0, MAIN_BULLET_CAP);
+  pushDeep(
+    deepSections,
+    'thingsToAvoid',
+    labels.thingsToAvoid,
+    avoidBullets.slice(MAIN_BULLET_CAP)
+  );
+
+  pushDeep(
+    deepSections,
+    'mainRisk',
+    labels.mainRisk,
+    riskBullets.filter((b) => !presentationTextNearlyEqual(b, primaryRisk))
+  );
+
+  return {
+    decision,
+    primaryRisk,
+    primaryAction,
+    whyTitle: labels.overallSituation,
+    whyBullets,
+    actionTitle: labels.recommendedActions,
+    actionItems,
+    avoidTitle: labels.thingsToAvoid,
+    avoidItems,
+    riskLabel: labels.mainRisk,
+    actionLabel: labels.recommendedActions,
+    deepTitle: deepSections.length > 0 ? labels.deepReading : null,
+    deepSections,
   };
 }

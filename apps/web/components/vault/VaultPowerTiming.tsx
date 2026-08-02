@@ -10,6 +10,8 @@ export type VaultRankedDayChipProps = {
   /** Already-filtered visible rating; omit or null when not shown. */
   rating?: string | null;
   title?: string;
+  /** Visually dominate the strongest / first ranked day (presentation only). */
+  dominant?: boolean;
 };
 
 export type VaultYesDecisionSlotProps = {
@@ -52,15 +54,45 @@ export function VaultRankedDayChip({
   bandLabel,
   rating,
   title,
+  dominant = false,
 }: VaultRankedDayChipProps) {
+  // Size emphasis is caller-controlled (first ranked day only).
+  // Band tone already carries strongest / supportive / lighter weight.
+  const emphasize = dominant;
   return (
     <div
-      className="rounded-lg px-2.5 py-1.5"
-      style={bandTone(band)}
+      className={
+        emphasize
+          ? 'rounded-lg px-3 py-2 min-w-[5.25rem]'
+          : 'rounded-lg px-2.5 py-1.5 opacity-80'
+      }
+      style={{
+        ...bandTone(band),
+        ...(emphasize
+          ? {
+              boxShadow: '0 0 0 1px rgba(212,175,55,0.16)',
+            }
+          : {}),
+      }}
       title={title}
+      data-vault-day-dominant={emphasize ? 'true' : undefined}
     >
-      <div className="fi text-[11px] leading-tight">{dateLabel}</div>
-      <div className="fi text-[10px] leading-tight mt-0.5 opacity-90">
+      <div
+        className={
+          emphasize
+            ? 'fi text-[12px] leading-tight font-medium'
+            : 'fi text-[11px] leading-tight'
+        }
+      >
+        {dateLabel}
+      </div>
+      <div
+        className={
+          emphasize
+            ? 'fi text-[10px] leading-tight mt-0.5 opacity-95'
+            : 'fi text-[10px] leading-tight mt-0.5 opacity-90'
+        }
+      >
         {score}
         {rating ? ` · ${rating}` : ''}
         {' · '}

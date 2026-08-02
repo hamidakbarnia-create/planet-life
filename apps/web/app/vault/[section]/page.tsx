@@ -818,7 +818,7 @@ export default function VaultSectionPage() {
                               </Link>
                             </div>
                           )}
-                          {!liveLoading && raw === 'power' && powerTiming && (
+                          {!liveLoading && !liveReading && raw === 'power' && powerTiming && (
                             <div className="mt-3 space-y-2">
                               {powerTiming.kind === 'ranked_days' && (
                                 <>
@@ -828,8 +828,8 @@ export default function VaultSectionPage() {
                                   >
                                     {powerUi.topDays}
                                   </div>
-                                  <div className="flex flex-wrap gap-2">
-                                    {powerTiming.days.map((day) => {
+                                  <div className="flex flex-wrap items-start gap-2.5">
+                                    {powerTiming.days.map((day, dayIdx) => {
                                       const band = vaultScoreBand(day.score);
                                       const visibleRating = visiblePowerRating(day.rating);
                                       const ratingTitle = powerRatingTitle(day.rating);
@@ -842,6 +842,7 @@ export default function VaultSectionPage() {
                                           bandLabel={bandLabel(band)}
                                           rating={visibleRating}
                                           title={ratingTitle ?? bandLabel(band)}
+                                          dominant={dayIdx === 0}
                                         />
                                       );
                                     })}
@@ -889,6 +890,90 @@ export default function VaultSectionPage() {
                                 powerConfidenceLabel
                                   ? `${powerUi.confidence}: ${powerConfidenceLabel}`
                                   : null
+                              }
+                              bestWindowLabelTitle={
+                                raw === 'power' && powerTiming
+                                  ? powerUi.topDays
+                                  : null
+                              }
+                              bestWindowLabel={
+                                raw === 'power' && powerTiming
+                                  ? powerTiming.kind === 'ranked_days' &&
+                                    powerTiming.days[0]
+                                    ? `${formatPowerDate(powerTiming.days[0].date)} · ${powerTiming.days[0].score}`
+                                    : powerTiming.kind === 'yes_slots'
+                                      ? `${powerUi.ask}: ${formatPowerDate(powerTiming.ask.date)} · ${powerTiming.ask.score}`
+                                      : null
+                                  : null
+                              }
+                              windowsSlot={
+                                raw === 'power' && powerTiming ? (
+                                  <div className="space-y-2">
+                                    {powerTiming.kind === 'ranked_days' && (
+                                      <>
+                                        <div
+                                          className="fi text-[10px] tracking-[0.2em] uppercase"
+                                          style={{ color: 'rgba(212,175,55,0.55)' }}
+                                        >
+                                          {powerUi.topDays}
+                                        </div>
+                                        <div className="flex flex-wrap items-start gap-2.5">
+                                          {powerTiming.days.map((day, dayIdx) => {
+                                            const band = vaultScoreBand(day.score);
+                                            const visibleRating =
+                                              visiblePowerRating(day.rating);
+                                            const ratingTitle = powerRatingTitle(
+                                              day.rating
+                                            );
+                                            return (
+                                              <VaultRankedDayChip
+                                                key={`${day.date}-${day.score}`}
+                                                dateLabel={formatPowerDate(day.date)}
+                                                score={day.score}
+                                                band={band}
+                                                bandLabel={bandLabel(band)}
+                                                rating={visibleRating}
+                                                title={
+                                                  ratingTitle ?? bandLabel(band)
+                                                }
+                                                dominant={dayIdx === 0}
+                                              />
+                                            );
+                                          })}
+                                        </div>
+                                      </>
+                                    )}
+                                    {powerTiming.kind === 'yes_slots' && (
+                                      <div className="space-y-2">
+                                        {(
+                                          [
+                                            ['ask', powerUi.ask, powerTiming.ask],
+                                            [
+                                              'commit',
+                                              powerUi.commit,
+                                              powerTiming.commit,
+                                            ],
+                                            ['sign', powerUi.sign, powerTiming.sign],
+                                          ] as const
+                                        ).map(([slotKey, slotLabel, slot]) => {
+                                          const band = vaultScoreBand(slot.score);
+                                          return (
+                                            <VaultYesDecisionSlot
+                                              key={slotKey}
+                                              label={slotLabel}
+                                              dateLabel={formatPowerDate(slot.date)}
+                                              score={slot.score}
+                                              band={band}
+                                              bandLabel={bandLabel(band)}
+                                              confidence={slot.confidence}
+                                              rating={slot.rating}
+                                            />
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : null
                               }
                             />
                           )}
