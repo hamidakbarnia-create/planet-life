@@ -332,36 +332,36 @@ export type VaultPreviewLockCopy = {
 export const READING_UI: Record<AppLang, VaultReadingUiCopy> = {
   en: {
     liveLabel: 'Your reading',
-    loading: 'Reading your chart…',
+    loading: 'Preparing your reading…',
     needProfile:
-      'Save your birth date, time and city in Profile — then this reading is built from your chart.',
+      'Save your birth date, time and city in Profile — then this reading can be prepared for you.',
     goProfile: 'Go to Profile',
     apiError: 'Could not reach METIORO. Is the API running on port 8000?',
     tryThis: 'Your next move',
   },
   fa: {
     liveLabel: 'خوانش تو',
-    loading: 'در حال خواندن چارت…',
+    loading: 'در حال آماده‌سازی خوانش…',
     needProfile:
-      'تاریخ، ساعت و شهر تولد رو در پروفایل ذخیره کن — بعد این خوانش از چارتت ساخته می‌شه.',
+      'تاریخ، ساعت و شهر تولد را در پروفایل ذخیره کن — بعد این خوانش برایت آماده می‌شود.',
     goProfile: 'رفتن به پروفایل',
     apiError: 'به سرور وصل نشد. API روی پورت ۸۰۰۰ روشن هست؟',
     tryThis: 'قدم بعدی تو',
   },
   ru: {
     liveLabel: 'Ваш разбор',
-    loading: 'Читаем карту…',
+    loading: 'Готовим ваш разбор…',
     needProfile:
-      'Сохраните дату, время и город в Профиле — тогда разбор строится по вашей карте.',
+      'Сохраните дату, время и город в Профиле — тогда разбор можно подготовить для вас.',
     goProfile: 'В профиль',
     apiError: 'Нет связи с API. Запущен ли сервер на порту 8000?',
     tryThis: 'Ваш следующий шаг',
   },
   ar: {
     liveLabel: 'قراءتكِ',
-    loading: 'نقرأ خريطتكِ…',
+    loading: 'نحضر قراءتكِ…',
     needProfile:
-      'احفظي تاريخ الميلاد والوقت والمدينة في الملف — ثم يُبنى هذا التحليل من خريطتكِ.',
+      'احفظي تاريخ الميلاد والوقت والمدينة في الملف — ثم يمكن إعداد هذه القراءة لكِ.',
     goProfile: 'إلى الملف',
     apiError: 'تعذّر الاتصال. هل يعمل الخادم على المنفذ 8000؟',
     tryThis: 'خطوتكِ التالية',
@@ -372,7 +372,7 @@ export const PREVIEW_LOCK_LANGS: Record<AppLang, VaultPreviewLockCopy> = {
   en: {
     sampleLabel: 'Sample reading',
     teaser:
-      'A live, personal reading flows here once Premium is on — pulled from your birth chart, today’s sky, and your personal rhythm.',
+      'A live, personal reading flows here once Premium is on — timing, context, and a clear next move for your decision.',
     unlock: 'Unlock full reading',
     premium: 'Coming Soon',
     expand: 'Open',
@@ -385,7 +385,7 @@ export const PREVIEW_LOCK_LANGS: Record<AppLang, VaultPreviewLockCopy> = {
   ru: {
     sampleLabel: 'Пример разбора',
     teaser:
-      'Здесь появится живой персональный разбор после активации Премиум — из карты рождения, неба дня и вашего ритма.',
+      'Здесь появится живой персональный разбор после активации Премиум — тайминг, контекст и ясный следующий шаг.',
     unlock: 'Открыть полный разбор',
     premium: 'Скоро',
     expand: 'Открыть',
@@ -398,7 +398,7 @@ export const PREVIEW_LOCK_LANGS: Record<AppLang, VaultPreviewLockCopy> = {
   fa: {
     sampleLabel: 'نمونه خوانش',
     teaser:
-      'با فعال شدن پریمیوم اینجا یه خوانش زنده و شخصی می‌بینی — از چارت تولدت، آسمان امروز و ریتم شخصی‌ات.',
+      'با فعال شدن پریمیوم اینجا یک خوانش زنده و شخصی می‌بینی — زمان‌بندی، زمینه و قدم بعدی روشن برای تصمیم تو.',
     unlock: 'باز کردن خوانش کامل',
     premium: 'به‌زودی',
     expand: 'باز کن',
@@ -411,7 +411,7 @@ export const PREVIEW_LOCK_LANGS: Record<AppLang, VaultPreviewLockCopy> = {
   ar: {
     sampleLabel: 'قراءة تجريبية',
     teaser:
-      'ستظهر قراءة شخصية حيّة هنا عند تفعيل البريميوم — من خريطة ميلادك وسماء اليوم وإيقاعك الشخصي.',
+      'ستظهر قراءة شخصية حيّة هنا عند تفعيل البريميوم — توقيت وسياق وخطوة تالية واضحة لقراركِ.',
     unlock: 'افتحي القراءة الكاملة',
     premium: 'قريباً',
     expand: 'افتح',
@@ -432,9 +432,9 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'Sensuality',
       sub: 'Desire, fantasy and magnetism — interpreted through your personal timing.',
       intro:
-        'Read the geometry of desire, fantasy, and magnetism through your chart — then choose when to lean in.',
+        'Read desire, fantasy, and magnetism through your personal timing — then choose when to lean in.',
       items: [
-        { label: 'Mars Desire Signature', hint: 'How Mars shapes desire and pursuit in your chart' },
+        { label: 'Desire Signature', hint: 'How your desire and pursuit pattern shows up' },
         { label: 'Deep Fantasies', hint: 'Private themes of longing and intensity' },
         { label: 'Hidden Magnetism', hint: 'Presence you do not announce' },
         { label: 'Attraction Today', hint: 'Hours when your appeal peaks' },
@@ -541,14 +541,14 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'Чувственность',
       sub: 'Желание, фантазия и магнетизм — через ваш личный тайминг.',
       intro:
-        'Геометрия желания, фантазии и магнетизма по вашей карте — и момент, когда стоит шагнуть ближе.',
+        'Желание, фантазия и магнетизм через ваш личный тайминг — и момент, когда стоит шагнуть ближе.',
       items: [
-        { label: 'Сигнатура желания (Марс)', hint: 'Как Марс формирует желание и стремление в карте' },
+        { label: 'Сигнатура желания', hint: 'Как проявляется ваш паттерн желания и стремления' },
         { label: 'Глубокие фантазии', hint: 'Личные темы томления и интенсивности' },
         { label: 'Скрытый магнетизм', hint: 'Присутствие без объявления' },
         { label: 'Притяжение сегодня', hint: 'Часы пика притягательности' },
       ],
-      coming: 'Скоро — связь с картой рождения.',
+      coming: 'Скоро — связь с профилем рождения.',
     },
     cycle: {
       title: 'Тело и цикл',
@@ -649,9 +649,9 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'شهوت و جذابیت',
       sub: 'میل، فانتزی و مگنتیسم — از مسیر تایمینگ شخصی تو.',
       intro:
-        'هندسه میل، فانتزی و مگنتیسم از روی چارت — بعد انتخاب کن کی نزدیک‌تر بشی.',
+        'میل، فانتزی و مگنتیسم از مسیر تایمینگ شخصی — بعد انتخاب کن کی نزدیک‌تر بشوی.',
       items: [
-        { label: 'امضای میل (مریخ)', hint: 'مریخ چطور میل و پیگیری را در چارتت شکل می‌دهد' },
+        { label: 'امضای میل', hint: 'الگوی میل و پیگیری تو چطور دیده می‌شود' },
         { label: 'فانتزی‌های عمیق', hint: 'تم‌های خصوصی اشتیاق و شدت' },
         { label: 'مگنتیسم پنهان', hint: 'حضوری که اعلام نمی‌کنی' },
         { label: 'جذابیت امروز', hint: 'ساعات اوج جذابیت' },
@@ -757,9 +757,9 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'الحسّية',
       sub: 'الرغبة والخيال والجاذبية — عبر توقيتكِ الشخصي.',
       intro:
-        'هندسة الرغبة والخيال والجاذبية من خريطتكِ — ثم اختاري متى تقتربين.',
+        'الرغبة والخيال والجاذبية عبر توقيتكِ الشخصي — ثم اختاري متى تقتربين.',
       items: [
-        { label: 'بصمة الرغبة (المريخ)', hint: 'كيف يشكّل المريخ الرغبة والسعي في خريطتكِ' },
+        { label: 'بصمة الرغبة', hint: 'كيف يظهر نمط رغبتكِ وسعيكِ' },
         { label: 'خيالات عميقة', hint: 'ثيمات خاصة من الشوق والشدّة' },
         { label: 'جاذبية خفية', hint: 'حضور بلا إعلان' },
         { label: 'جاذبية اليوم', hint: 'ساعات الذروة' },

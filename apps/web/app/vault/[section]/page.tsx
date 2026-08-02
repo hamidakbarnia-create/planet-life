@@ -72,6 +72,8 @@ import {
   VaultRankedDayChip,
   VaultYesDecisionSlot,
 } from '@/components/vault/VaultPowerTiming';
+import { VaultConfidentialReading } from '@/components/vault/VaultConfidentialReading';
+import { VAULT_READING_PRESENTATION_COPY } from '@/lib/vault-reading-presentation';
 
 /** Vault item index → live API key (same order as section.items). */
 const LIVE_ITEM_API: Partial<Record<VaultSectionKey, string[]>> = {
@@ -874,55 +876,21 @@ export default function VaultSectionPage() {
                             </div>
                           )}
                           {!liveLoading && liveReading && (
-                            <div
-                              className="mt-3 rounded-lg p-3 space-y-3"
+                            <VaultConfidentialReading
+                              className="mt-3 rounded-lg p-3"
                               style={{
                                 background: 'rgba(0,0,0,0.22)',
                                 border: '1px solid rgba(212,175,55,0.12)',
                               }}
-                            >
-                              {powerConfidenceLabel && (
-                                  <p
-                                    className="fi text-[10px] tracking-[0.16em] uppercase"
-                                    style={{ color: 'rgba(212,175,55,0.75)' }}
-                                    data-vault-power-confidence="true"
-                                  >
-                                    {powerUi.confidence}: {powerConfidenceLabel}
-                                  </p>
-                                )}
-                              {liveReading.headline && (
-                                <p
-                                  className="fc text-sm leading-snug"
-                                  style={{ color: '#F2CF75' }}
-                                >
-                                  {liveReading.headline}
-                                </p>
-                              )}
-                              {liveReading.strategic && (
-                                <p
-                                  className="fi text-xs leading-relaxed whitespace-pre-line"
-                                  style={{ color: 'rgba(255,255,255,0.82)' }}
-                                >
-                                  {liveReading.strategic}
-                                </p>
-                              )}
-                              {!liveReading.strategic && liveReading.executive && (
-                                <p
-                                  className="fi text-xs leading-relaxed whitespace-pre-line"
-                                  style={{ color: 'rgba(255,255,255,0.82)' }}
-                                >
-                                  {liveReading.executive}
-                                </p>
-                              )}
-                              {liveReading.action && (
-                                <p
-                                  className="fi text-xs leading-relaxed"
-                                  style={{ color: 'rgba(242,207,117,0.9)' }}
-                                >
-                                  {rui.tryThis}: {liveReading.action}
-                                </p>
-                              )}
-                            </div>
+                              lang={lang}
+                              reading={liveReading}
+                              labels={VAULT_READING_PRESENTATION_COPY[lang]}
+                              confidenceLabel={
+                                powerConfidenceLabel
+                                  ? `${powerUi.confidence}: ${powerConfidenceLabel}`
+                                  : null
+                              }
+                            />
                           )}
                           {!liveLoading && liveReading && missingNotice && (
                             <div className="mt-3">

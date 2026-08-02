@@ -1,0 +1,140 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  presentVaultReading,
+  sanitizeVaultReadingProse,
+  vaultReadingTextHasBannedTerms,
+  VAULT_READING_PRESENTATION_COPY,
+} from './vault-reading-presentation';
+import type { VaultReadingLayer } from './vault-reading';
+
+const MARS_LIKE: VaultReadingLayer = {
+  executive:
+    'High-voltage attraction. Your desire signature sits in Aries, house 1. Action: Choose one pursuit today and drop the rest. Confidence: high — clear enough to act on, still not a guarantee.',
+  strategic:
+    'Your desire signature sits in Aries, house 1. You don\'t wait to be chosen — you choose. Your desire ignites fast, burns hot, and expects a match who can keep pace without flinching. Mars in the 1st house: desire is written on your body. People feel your hunger before you speak. Mars is in full command in your chart — raw desire runs clean and strong. Mars square Pluto: power struggles in intimacy. You can magnetize dangerous dynamics — choose consciously. Confidence: high — clear enough to act on, still not a guarantee. What this changes today: your desire pattern is a filter — use it before you invest. Action: Choose one pursuit today and drop the rest.',
+  technical:
+    'Mars 15.0° Aries · house 1 · dignity: rulership · Mars square Pluto (orb 5.0°) · action=rest_recovery',
+  headline: 'High-voltage attraction',
+  confidence: 'high',
+  action: 'Choose one pursuit today and drop the rest',
+};
+
+const GHOST_LIKE: VaultReadingLayer = {
+  executive:
+    'Pull back — distance works. Strongest distance window: 2026-08-03 (82/100). Action: Pull back hardest on 2026-08-03. Avoid: chasing, over-texting, and explaining the silence. Confidence: high — clear enough to act on, still not a guarantee.',
+  strategic:
+    'Distance works better than explanation here. Fewer messages, fewer justifications, more room for pull to rebuild on its own. The clearest window lands on 2026-08-03 (82/100). Confidence: high — clear enough to act on, still not a guarantee. What this changes today: silence can work harder than another reply. Action: Pull back hardest on 2026-08-03. Avoid: chasing, over-texting, and explaining the silence.',
+  technical:
+    'action=rest_recovery · horizon=14d · top=2026-08-03 score=82 · confidence=high',
+  headline: 'Pull back — distance works',
+  confidence: 'high',
+  action: 'Pull back hardest on 2026-08-03',
+  avoid: 'chasing, over-texting, and explaining the silence',
+};
+
+describe('vault reading presentation sanitize', () => {
+  it('flags engine and astrology vocabulary', () => {
+    expect(vaultReadingTextHasBannedTerms('Transit Sun conjunction natal Venus')).toBe(
+      true
+    );
+    expect(vaultReadingTextHasBannedTerms('Mars square Pluto')).toBe(true);
+    expect(vaultReadingTextHasBannedTerms('action=rest_recovery')).toBe(true);
+    expect(
+      vaultReadingTextHasBannedTerms('Choose one pursuit today and drop the rest')
+    ).toBe(false);
+  });
+
+  it('keeps decision language after stripping engine lead-ins', () => {
+    const cleaned = sanitizeVaultReadingProse(
+      'Mars square Pluto: power struggles in intimacy. You can magnetize dangerous dynamics — choose consciously.'
+    );
+    expect(cleaned.toLowerCase()).not.toMatch(/\bmars\b|\bsquare\b|\bpluto\b/);
+    expect(cleaned).toMatch(/power struggles|magnetize|choose consciously/i);
+  });
+
+  it('drops contaminated sentences that cannot be salvaged', () => {
+    const cleaned = sanitizeVaultReadingProse(
+      'Your desire signature sits in Aries, house 1. You choose your pace.'
+    );
+    expect(cleaned.toLowerCase()).not.toMatch(/aries|house/);
+    expect(cleaned).toMatch(/choose your pace/i);
+  });
+});
+
+describe('presentVaultReading', () => {
+  it('always returns the six decision sections', () => {
+    const presented = presentVaultReading(MARS_LIKE, 'en');
+    expect(presented.sections.map((s) => s.key)).toEqual([
+      'overallSituation',
+      'mainOpportunity',
+      'mainRisk',
+      'recommendedActions',
+      'thingsToAvoid',
+      'practicalNextStep',
+    ]);
+    expect(presented.sections.map((s) => s.title)).toEqual([
+      VAULT_READING_PRESENTATION_COPY.en.overallSituation,
+      VAULT_READING_PRESENTATION_COPY.en.mainOpportunity,
+      VAULT_READING_PRESENTATION_COPY.en.mainRisk,
+      VAULT_READING_PRESENTATION_COPY.en.recommendedActions,
+      VAULT_READING_PRESENTATION_COPY.en.thingsToAvoid,
+      VAULT_READING_PRESENTATION_COPY.en.practicalNextStep,
+    ]);
+  });
+
+  it('never surfaces Mars/aspect/technical producer text for EN', () => {
+    const presented = presentVaultReading(MARS_LIKE, 'en');
+    const blob = presented.sections.map((s) => s.body).join('\n');
+    expect(blob.toLowerCase()).not.toMatch(
+      /\bmars\b|\bvenus\b|\bsun\b|\bmoon\b|\bsquare\b|\bconjunction\b|\btrine\b|\bsextile\b|\bopposition\b|\bnatal\b|\btransit\b|\binferred\b|\baries\b|\bhouse\s*1\b|\bdignity\b|\baction=/
+    );
+    expect(blob).not.toContain(MARS_LIKE.technical);
+    expect(
+      presented.sections.find((s) => s.key === 'recommendedActions')?.body
+    ).toContain('Choose one pursuit');
+    expect(
+      presented.sections.find((s) => s.key === 'practicalNextStep')?.body
+    ).toContain('Choose one pursuit');
+    expect(
+      presented.sections.find((s) => s.key === 'mainOpportunity')?.body
+    ).toMatch(/desire pattern|filter|invest/i);
+  });
+
+  it('maps ghost windows into decision language without producer keys', () => {
+    const presented = presentVaultReading(GHOST_LIKE, 'en');
+    const blob = presented.sections.map((s) => s.body).join('\n');
+    expect(blob).not.toMatch(/action=|horizon=|rest_recovery/i);
+    expect(
+      presented.sections.find((s) => s.key === 'thingsToAvoid')?.body
+    ).toMatch(/chasing|over-texting/i);
+    expect(
+      presented.sections.find((s) => s.key === 'recommendedActions')?.body
+    ).toContain('Pull back hardest');
+    expect(
+      presented.sections.find((s) => s.key === 'overallSituation')?.body
+    ).toMatch(/distance|explanation|window/i);
+  });
+
+  it('uses localized section titles and FA fallbacks without English producer leakage', () => {
+    const presented = presentVaultReading(
+      {
+        executive: 'Transit Sun conjunction natal Venus supports outreach.',
+        strategic: 'Business Launch scores 63/100. Mars square Saturn.',
+        technical: 'mars_saturn_square · inferred',
+        headline: 'Transit Sun conjunction natal Venus',
+        action: undefined,
+        avoid: undefined,
+      },
+      'fa'
+    );
+    expect(presented.sections[0].title).toBe(
+      VAULT_READING_PRESENTATION_COPY.fa.overallSituation
+    );
+    const blob = presented.sections.map((s) => s.body).join('\n');
+    expect(blob.toLowerCase()).not.toMatch(
+      /transit|conjunction|natal|venus|mars|square|saturn|business launch|inferred/
+    );
+    expect(blob).toContain(VAULT_READING_PRESENTATION_COPY.fa.fallbackSituation);
+  });
+});

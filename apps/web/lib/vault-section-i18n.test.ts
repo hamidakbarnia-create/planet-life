@@ -85,11 +85,12 @@ describe('Vault section presentation copy', () => {
     expect(SECTION_LANGS.fa.provider.title).not.toContain('همسر آینده');
   });
 
-  it('aligns live-module labels with producer semantics', () => {
+  it('keeps live-module labels in decision language (no planet names)', () => {
     const sensuality = SECTION_LANGS.en.sensuality.items[0];
-    expect(sensuality.label).toBe('Mars Desire Signature');
-    expect(sensuality.label.toLowerCase()).toContain('mars');
-    expect(sensuality.hint.toLowerCase()).toMatch(/mars|desire|pursuit/);
+    expect(sensuality.label).toBe('Desire Signature');
+    expect(sensuality.label.toLowerCase()).not.toMatch(/\bmars\b/);
+    expect(sensuality.hint.toLowerCase()).toMatch(/desire|pursuit/);
+    expect(sensuality.hint.toLowerCase()).not.toMatch(/\bmars\b|\bchart\b/);
     expect(sensuality.label.toLowerCase()).not.toContain('fantasy');
 
     const wealth = SECTION_LANGS.en.provider.items[0];
@@ -103,9 +104,12 @@ describe('Vault section presentation copy', () => {
     expect(shadowLocked.label.toLowerCase()).not.toContain('secret');
     expect(shadowLocked.hint.toLowerCase()).toMatch(/reflection|private|conversation/);
 
-    expect(SECTION_LANGS.ru.sensuality.items[0].label).toMatch(/Марс|марс/i);
-    expect(SECTION_LANGS.fa.sensuality.items[0].label).toMatch(/مریخ/);
-    expect(SECTION_LANGS.ar.sensuality.items[0].label).toMatch(/المريخ/);
+    expect(SECTION_LANGS.ru.sensuality.items[0].label).toMatch(/желани/i);
+    expect(SECTION_LANGS.ru.sensuality.items[0].label).not.toMatch(/Марс|марс/i);
+    expect(SECTION_LANGS.fa.sensuality.items[0].label).toMatch(/میل/);
+    expect(SECTION_LANGS.fa.sensuality.items[0].label).not.toMatch(/مریخ/);
+    expect(SECTION_LANGS.ar.sensuality.items[0].label).toMatch(/الرغبة/);
+    expect(SECTION_LANGS.ar.sensuality.items[0].label).not.toMatch(/المريخ/);
 
     expect(SECTION_LANGS.ru.provider.items[0].label).toMatch(/География|география/);
     expect(SECTION_LANGS.fa.provider.items[0].label).toMatch(/جغرافیا/);
@@ -114,6 +118,24 @@ describe('Vault section presentation copy', () => {
     expect(SECTION_LANGS.ru.shadow.items[3].label).toMatch(/частн|разговор/i);
     expect(SECTION_LANGS.fa.shadow.items[3].label).toMatch(/گفت|خصوصی/);
     expect(SECTION_LANGS.ar.shadow.items[3].label).toMatch(/محادثة|خاصة/);
+  });
+
+  it('keeps reading chrome free of chart/engine vocabulary', () => {
+    for (const lang of ['en', 'fa', 'ar', 'ru'] as const) {
+      const blob = [
+        READING_UI[lang].loading,
+        READING_UI[lang].needProfile,
+        SECTION_LANGS[lang].sensuality.intro,
+        SECTION_LANGS[lang].sensuality.items[0].label,
+        SECTION_LANGS[lang].sensuality.items[0].hint,
+      ]
+        .join(' ')
+        .toLowerCase();
+      expect(blob).not.toMatch(/\bmars\b|\bvenus\b|\bnatal\b|\btransit\b|\baspect\b/);
+      expect(blob).not.toMatch(/مریخ|المريخ|марс/);
+    }
+    expect(READING_UI.en.loading.toLowerCase()).not.toContain('chart');
+    expect(READING_UI.en.needProfile.toLowerCase()).not.toContain('chart');
   });
 
   it('keeps i18n free of producer routing', () => {
@@ -178,13 +200,18 @@ describe('Vault section presentation copy', () => {
     expect(en.confidence.toLowerCase()).toMatch(/advisory|confidence/);
   });
 
-  it('composes Power response-level confidence on the section page', () => {
+  it('composes Power response-level confidence via confidential reading presentation', () => {
     const pageSource = readFileSync(
       resolve(__dirname, '../app/vault/[section]/page.tsx'),
       'utf8',
     );
+    const readingSource = readFileSync(
+      resolve(__dirname, '../components/vault/VaultConfidentialReading.tsx'),
+      'utf8',
+    );
     expect(pageSource).toContain('powerAdvisoryConfidenceLabel');
-    expect(pageSource).toContain('data-vault-power-confidence');
+    expect(pageSource).toContain('VaultConfidentialReading');
+    expect(readingSource).toContain('data-vault-power-confidence');
     expect(pageSource).toContain("power: ['hot', 'money', 'ghost', 'yes']");
   });
 });
