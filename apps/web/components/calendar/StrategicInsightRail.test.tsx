@@ -176,13 +176,22 @@ describe('Phase 2 page wiring', () => {
     expect(pageSource).not.toContain('<details');
   });
 
-  it('keeps CalendarMonthCell markup unchanged from Phase 1 commit', () => {
-    const cellPath = resolve(__dirname, './CalendarMonthCell.tsx');
+  it('keeps CalendarMonthCell hierarchy with Phase 3 readability tweaks only', () => {
+    const cellSource = readFileSync(
+      resolve(__dirname, './CalendarMonthCell.tsx'),
+      'utf8'
+    );
+    expect(cellSource).toContain('data-cell-primary');
+    expect(cellSource).toContain('data-cell-secondary');
+    expect(cellSource).toContain('data-cell-score');
+    expect(cellSource).toContain('buildCalendarCellDateLabels');
+    // Hierarchy unchanged: primary + two secondaries + score
+    expect(cellSource.match(/data-cell-secondary/g)?.length).toBe(2);
     const hash = createHash('sha256')
-      .update(readFileSync(cellPath))
+      .update(cellSource)
       .digest('hex');
     expect(hash).toBe(
-      '6e4979859768695de49d8d464b9422717a84e8447d393788390e8692ef5a9f8a'
+      'c75389546609cccd47988d1401045e540067c0d1a13332ab14bfb2315884f289'
     );
   });
 

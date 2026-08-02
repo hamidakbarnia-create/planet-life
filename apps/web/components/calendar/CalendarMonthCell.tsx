@@ -46,7 +46,7 @@ export function CalendarMonthCell({
       data-adjacent={!inCurrentMonth ? 'true' : undefined}
       dir={dir}
       onClick={onClick}
-      className="rounded-lg flex flex-col items-stretch justify-between min-h-[4.25rem] sm:min-h-[4.75rem] px-0.5 py-0.5 sm:px-1 sm:py-1 transition-transform hover:scale-[1.02]"
+      className="rounded-lg flex flex-col items-stretch justify-between min-h-[4.5rem] sm:min-h-[5.25rem] px-0.5 py-0.5 sm:px-1 sm:py-1 transition-transform hover:scale-[1.02]"
       style={{
         background: inCurrentMonth ? style.bg : 'rgba(255,255,255,0.015)',
         border: `2px solid ${
@@ -70,14 +70,14 @@ export function CalendarMonthCell({
         </span>
         <span
           data-cell-secondary
-          className="fi text-[7px] sm:text-[9px] leading-[1.05] sm:leading-tight max-w-full text-center whitespace-normal break-words"
+          className="fi text-[6.5px] sm:text-[8px] leading-[1.1] sm:leading-snug max-w-full text-center whitespace-normal break-words"
           style={{ color: 'rgba(255,255,255,0.38)', fontVariantNumeric: 'tabular-nums' }}
         >
           {labels.secondaries[0]}
         </span>
         <span
           data-cell-secondary
-          className="fi text-[7px] sm:text-[9px] leading-[1.05] sm:leading-tight max-w-full text-center whitespace-normal break-words"
+          className="fi text-[6.5px] sm:text-[8px] leading-[1.1] sm:leading-snug max-w-full text-center whitespace-normal break-words"
           style={{ color: 'rgba(255,255,255,0.38)', fontVariantNumeric: 'tabular-nums' }}
         >
           {labels.secondaries[1]}

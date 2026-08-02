@@ -25,6 +25,8 @@ export type CalendarPageLangPack = {
   score: string;
   dayScore: string;
   whyTiming: string;
+  /** Shown when producer reasoning is not in the active UI language. */
+  whyTimingFallback: string;
   supportingReasons: string;
   advancedDetails: string;
   uncertaintyDisclosure: string;
@@ -80,6 +82,8 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
     score: 'Score',
     dayScore: 'Day score',
     whyTiming: 'Why this timing',
+    whyTimingFallback:
+      'A localized timing explanation is not available for this day.',
     supportingReasons: 'Supporting details',
     advancedDetails: 'Advanced details',
     uncertaintyDisclosure: 'Timing scores are relative estimates, not guarantees.',
@@ -163,6 +167,7 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
     score: 'Счёт',
     dayScore: 'Счёт дня',
     whyTiming: 'Почему этот тайминг',
+    whyTimingFallback: 'Локализованное объяснение тайминга для этого дня недоступно.',
     supportingReasons: 'Дополнительные детали',
     advancedDetails: 'Расширенные детали',
     uncertaintyDisclosure: 'Оценки тайминга относительны и не являются гарантией.',
@@ -246,6 +251,7 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
     score: 'امتیاز',
     dayScore: 'امتیاز روز',
     whyTiming: 'چرا این زمان‌بندی',
+    whyTimingFallback: 'توضیح فارسی این زمان‌بندی برای این روز در دسترس نیست.',
     supportingReasons: 'جزئیات پشتیبان',
     advancedDetails: 'جزئیات پیشرفته',
     uncertaintyDisclosure: 'امتیازهای زمان‌بندی برآورد نسبی‌اند، نه تضمین.',
@@ -329,6 +335,7 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
     score: 'الدرجة',
     dayScore: 'درجة اليوم',
     whyTiming: 'لماذا هذا التوقيت',
+    whyTimingFallback: 'الشرح المحلي لهذا التوقيت غير متاح لهذا اليوم.',
     supportingReasons: 'تفاصيل داعمة',
     advancedDetails: 'تفاصيل متقدمة',
     uncertaintyDisclosure: 'درجات التوقيت تقديرات نسبية وليست ضمانات.',

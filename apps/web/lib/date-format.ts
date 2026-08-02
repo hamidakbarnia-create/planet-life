@@ -80,7 +80,7 @@ export function formatDisplayDay(
   return formatParts(lang, isoDate, calendar, { day: 'numeric' });
 }
 
-/** Shorten a localized month token for narrow calendar cells (keeps meaning). */
+/** Shorten Latin/Cyrillic month tokens for narrow EN/RU cells only. */
 function compactMonthToken(month: string): string {
   const trimmed = month.trim();
   if (!trimmed) return trimmed;
@@ -90,9 +90,104 @@ function compactMonthToken(month: string): string {
   return chars.slice(0, 3).join('');
 }
 
+function usesFullMonthNames(lang: AppLang): boolean {
+  return lang === 'fa' || lang === 'ar';
+}
+
+/** Canonical Shamsi month names (ICU `ar` + persian calendar corrupts several). */
+const SHAMSI_MONTHS_FA = [
+  'فروردین',
+  'اردیبهشت',
+  'خرداد',
+  'تیر',
+  'مرداد',
+  'شهریور',
+  'مهر',
+  'آبان',
+  'آذر',
+  'دی',
+  'بهمن',
+  'اسفند',
+] as const;
+
+/** Arabic UI still uses Persian Shamsi month names (full, not transliterated). */
+const SHAMSI_MONTHS_AR = SHAMSI_MONTHS_FA;
+
+const HIJRI_MONTHS_FA = [
+  'محرم',
+  'صفر',
+  'ربیع‌الاول',
+  'ربیع‌الثانی',
+  'جمادی‌الاول',
+  'جمادی‌الثانی',
+  'رجب',
+  'شعبان',
+  'رمضان',
+  'شوال',
+  'ذی‌القعده',
+  'ذی‌الحجه',
+] as const;
+
+const HIJRI_MONTHS_AR = [
+  'محرم',
+  'صفر',
+  'ربيع الأول',
+  'ربيع الآخر',
+  'جمادى الأولى',
+  'جمادى الآخرة',
+  'رجب',
+  'شعبان',
+  'رمضان',
+  'شوال',
+  'ذو القعدة',
+  'ذو الحجة',
+] as const;
+
+function calendarMonthIndex(
+  isoDate: string,
+  calendar: CalendarSystem
+): number | null {
+  const date = utcDateFromIso(isoDate);
+  if (!date) return null;
+  // Prefer en-US numeric month so ICU name corruption cannot affect the index.
+  const parts = new Intl.DateTimeFormat(`en-US-u-ca-${CALENDAR_EXT[calendar]}`, {
+    month: 'numeric',
+    timeZone: 'UTC',
+  }).formatToParts(date);
+  const raw = parts.find((p) => p.type === 'month')?.value;
+  const month = raw ? Number(raw) : NaN;
+  if (!Number.isFinite(month) || month < 1 || month > 12) return null;
+  return month - 1;
+}
+
+function localizedFullMonthName(
+  lang: AppLang,
+  isoDate: string,
+  calendar: CalendarSystem
+): string | null {
+  if (!usesFullMonthNames(lang)) return null;
+  const index = calendarMonthIndex(isoDate, calendar);
+  if (index == null) return null;
+  if (calendar === 'shamsi') {
+    return (lang === 'ar' ? SHAMSI_MONTHS_AR : SHAMSI_MONTHS_FA)[index] ?? null;
+  }
+  if (calendar === 'hijri') {
+    return (lang === 'ar' ? HIJRI_MONTHS_AR : HIJRI_MONTHS_FA)[index] ?? null;
+  }
+  // Gregorian: ICU long names are reliable for fa/ar.
+  const date = utcDateFromIso(isoDate);
+  if (!date) return null;
+  const parts = new Intl.DateTimeFormat(displayLocale(lang, 'gregorian'), {
+    month: 'long',
+    timeZone: 'UTC',
+  }).formatToParts(date);
+  return parts.find((p) => p.type === 'month')?.value?.trim() ?? null;
+}
+
 /**
- * Compact secondary label: day + short localized month (no year).
+ * Compact secondary label: day + localized month (no year).
  * Always day-first for consistent cell density across locales.
+ * FA/AR keep full month names (no truncation / Latin abbreviations).
  */
 export function formatCompactCalendarDate(
   lang: AppLang,
@@ -101,18 +196,29 @@ export function formatCompactCalendarDate(
 ): string {
   const date = utcDateFromIso(isoDate);
   if (!date) return isoDate;
-  const parts = new Intl.DateTimeFormat(displayLocale(lang, calendar), {
+  const fullMonth = usesFullMonthNames(lang);
+  const dayParts = new Intl.DateTimeFormat(displayLocale(lang, calendar), {
     day: 'numeric',
-    month: 'short',
     timeZone: 'UTC',
   }).formatToParts(date);
-  const day = parts.find((p) => p.type === 'day')?.value ?? '';
+  const day = dayParts.find((p) => p.type === 'day')?.value ?? '';
+  const mappedMonth = fullMonth
+    ? localizedFullMonthName(lang, isoDate, calendar)
+    : null;
+  if (fullMonth && day && mappedMonth) {
+    return `${day} ${mappedMonth}`;
+  }
+  const parts = new Intl.DateTimeFormat(displayLocale(lang, calendar), {
+    day: 'numeric',
+    month: fullMonth ? 'long' : 'short',
+    timeZone: 'UTC',
+  }).formatToParts(date);
   const monthRaw = parts.find((p) => p.type === 'month')?.value ?? '';
-  const month = compactMonthToken(monthRaw);
+  const month = fullMonth ? monthRaw.trim() : compactMonthToken(monthRaw);
   if (!day || !month) {
     return formatParts(lang, isoDate, calendar, {
       day: 'numeric',
-      month: 'short',
+      month: fullMonth ? 'long' : 'short',
     });
   }
   return `${day} ${month}`;

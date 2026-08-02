@@ -58,4 +58,52 @@ describe('formatCompactCalendarDate', () => {
     expect(shamsi.length).toBeLessThanOrEqual(8);
     expect(shamsi).not.toMatch(/1405/);
   });
+
+  it('keeps full Persian month names for FA (no truncation)', () => {
+    const mordad = formatCompactCalendarDate('fa', '2026-08-05', 'shamsi');
+    const rabi = formatCompactCalendarDate('fa', '2026-08-14', 'hijri');
+    const jumada = formatCompactCalendarDate('fa', '2026-10-15', 'hijri');
+    expect(mordad).toContain('مرداد');
+    // Must not be the 3-glyph truncation of مرداد
+    expect(mordad.endsWith('مرد')).toBe(false);
+    expect(mordad).not.toMatch(/Mor|Saf\.|…|\.\.\./);
+    // Locked Persian Hijri spellings
+    expect(rabi).toMatch(/ربیع[\u200c\s]?الاول/);
+    expect(rabi).not.toMatch(/ربی(?!ع)/);
+    expect(jumada).toContain('جمادی‌الاول');
+    expect(jumada).not.toContain('جمادی‌الاولی');
+  });
+
+  it('keeps full Arabic Hijri month names for AR (no truncation)', () => {
+    const rabi = formatCompactCalendarDate('ar', '2026-08-14', 'hijri');
+    const jumada = formatCompactCalendarDate('ar', '2026-10-15', 'hijri');
+    expect(rabi).toContain('ربيع الأول');
+    expect(jumada).toContain('جمادى الأولى');
+    expect(rabi).not.toMatch(/ربي(?!ع)|…|\.\.\.|Rabi|Jum/);
+    expect(jumada).not.toMatch(/جما(?!د)|…|\.\.\./);
+  });
+
+  it('uses canonical Shamsi names in AR (not corrupted ICU شهرفار)', () => {
+    const shahrivar = formatCompactCalendarDate('ar', '2026-08-23', 'shamsi');
+    expect(shahrivar).toContain('شهریور');
+    expect(shahrivar).not.toContain('شهرفار');
+  });
+});
+
+describe('FA/AR calendar cell labels stay complete and distinct', () => {
+  it('renders full FA secondaries for three distinct calendars with readiness visible in cell tests', () => {
+    const labels = buildCalendarCellDateLabels('fa', '2026-08-14', 'gregorian');
+    expect(labels.primary).toMatch(/14|۱۴/);
+    expect(labels.secondaries[0]).toContain('مرداد');
+    expect(labels.secondaries[1]).toMatch(/ربیع[\u200c\s]?الاول/);
+    expect(new Set([labels.primary, ...labels.secondaries]).size).toBe(3);
+    expect(labels.secondaries.join(' ')).not.toMatch(/truncate|ellipsis|…|\.\.\./);
+  });
+
+  it('renders full AR Hijri names and keeps three distinct systems', () => {
+    const labels = buildCalendarCellDateLabels('ar', '2026-10-15', 'gregorian');
+    expect(labels.secondaries.some((s) => s.includes('جمادى الأولى'))).toBe(true);
+    expect(new Set([labels.primary, ...labels.secondaries]).size).toBe(3);
+    expect(labels.secondaries.join(' ')).not.toMatch(/\bMor\b|\bSaf\.|…|\.\.\./);
+  });
 });

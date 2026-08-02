@@ -164,4 +164,56 @@ describe('CalendarMonthCell', () => {
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
   });
+
+  it('renders full FA month names without ellipsis or Latin abbreviations', () => {
+    renderInNarrowGrid(
+      <CalendarMonthCell
+        date="2026-08-14"
+        lang="fa"
+        calendar="gregorian"
+        score={64}
+        inCurrentMonth
+        selected={false}
+        isToday={false}
+        dir="rtl"
+        onClick={() => {}}
+      />
+    );
+    const cell = screen.getByRole('button');
+    const text = cell.textContent ?? '';
+    expect(text).toContain('مرداد');
+    expect(text).toMatch(/ربیع[\u200c\s]?الاول/);
+    expect(text).not.toMatch(/Mor|Saf\.|…|\.\.\./);
+    expect(cell.querySelector('[data-cell-score]')?.textContent).toBe('64%');
+    for (const el of cell.querySelectorAll('[data-cell-secondary]')) {
+      expect(el.className).not.toMatch(/\btruncate\b|\bellipsis\b/);
+      expect(getComputedStyle(el).textOverflow).not.toBe('ellipsis');
+      expect(el.scrollWidth).toBeLessThanOrEqual(el.clientWidth + 1);
+    }
+  });
+
+  it('renders full AR Hijri month names without clipping classes', () => {
+    renderInNarrowGrid(
+      <CalendarMonthCell
+        date="2026-10-15"
+        lang="ar"
+        calendar="gregorian"
+        score={55}
+        inCurrentMonth
+        selected={false}
+        isToday={false}
+        dir="rtl"
+        onClick={() => {}}
+      />
+    );
+    const cell = screen.getByRole('button');
+    const text = cell.textContent ?? '';
+    expect(text).toContain('جمادى الأولى');
+    expect(text).not.toMatch(/\bMor\b|\bSaf\.|…|\.\.\./);
+    expect(cell.querySelector('[data-cell-score]')?.textContent).toBe('55%');
+    for (const el of cell.querySelectorAll('[data-cell-secondary]')) {
+      expect(el.className).not.toMatch(/\btruncate\b|\bellipsis\b/);
+      expect(el.scrollWidth).toBeLessThanOrEqual(el.clientWidth + 1);
+    }
+  });
 });

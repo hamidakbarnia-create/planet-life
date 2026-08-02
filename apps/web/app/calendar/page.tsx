@@ -452,10 +452,12 @@ export default function CalendarPage() {
             </div>
 
             <CalendarSelectedDayInsight
+              lang={lang}
               labels={{
                 dir: t.dir,
                 loading: t.loading,
                 whyTiming: t.whyTiming,
+                whyTimingFallback: t.whyTimingFallback,
                 supportingReasons: t.supportingReasons,
                 advancedDetails: t.advancedDetails,
                 transit: t.transit,

@@ -7,6 +7,7 @@ import {
   type StrategicGps,
   type StrategicGpsWeek,
 } from '@/lib/strategic-gps';
+import { WeeklyPathChart } from '@/components/calendar/WeeklyPathChart';
 
 export type StrategicInsightRailProps = {
   /** Month + week summaries derived from monthly scores only (ignore hourly). */
@@ -134,7 +135,12 @@ export function StrategicInsightRail({
         >
           {text.weeklyPath}
         </div>
-        <WeekRows weeks={monthOutlook.weeks} />
+        {/* Desktop: SVG weekly path chart. Mobile compact: retain list summary. */}
+        {compact ? (
+          <WeekRows weeks={monthOutlook.weeks} />
+        ) : (
+          <WeeklyPathChart weeks={monthOutlook.weeks} />
+        )}
       </section>
 
       {/* 3. Selected Day Timing — selected-day hourly only */}
