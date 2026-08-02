@@ -2,6 +2,9 @@
 import { Suspense, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { BirthProfileOnboardingScreen } from '@/components/ftue/BirthProfileOnboardingScreen';
+import { GenderField } from '@/components/profile/GenderField';
+import type { ProfileGender } from '@/lib/profile';
+import { isProfileGender } from '@/lib/profile';
 import {
   NatalChart,
   NatalChartAnalysis,
@@ -95,6 +98,8 @@ function ProfileEditor() {
   const [birthTime, setBirthTime] = useState('14:30');
   const [location, setLocation] = useState('');
   const [name, setName] = useState('');
+  const [gender, setGender] = useState<ProfileGender | ''>('');
+  const [genderError, setGenderError] = useState('');
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [pendingGeocodeChart, setPendingGeocodeChart] = useState<ChartData | null>(null);
   const [selectedCity, setSelectedCity] = useState<CitySelection | null>(null);
@@ -190,6 +195,7 @@ function ProfileEditor() {
       setBirthTime(saved.birth_time);
       setLocation(saved.location);
       setCitySearch(saved.location);
+      setGender(saved.gender ?? '');
       if (saved.current_location?.city) {
         setCurrentLocation(saved.current_location);
         setCurrentCitySearch(saved.current_location.city);
@@ -229,6 +235,11 @@ function ProfileEditor() {
 
   const handleSaveProfile = useCallback(async () => {
     setCurrentLocationError('');
+    setGenderError('');
+    if (!isProfileGender(gender)) {
+      setGenderError(t.genderRequired);
+      return;
+    }
     const previous = loadBirthProfile();
     let locToSave = currentLocation;
 
@@ -254,6 +265,7 @@ function ProfileEditor() {
       birth_time: birthTime,
       location,
       action_type: 'business_launch' as const,
+      gender,
       ...(locToSave?.confirmed ? { current_location: locToSave } : {}),
     };
 
@@ -284,9 +296,11 @@ function ProfileEditor() {
     birthTime,
     location,
     name,
+    gender,
     currentLocation,
     currentSelectedCity,
     t.currentPickFromList,
+    t.genderRequired,
     t.currentSaveFailed,
   ]);
 
@@ -663,6 +677,24 @@ function ProfileEditor() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="metioro-input fi"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <GenderField
+                  name="profile-edit-gender"
+                  value={gender}
+                  onChange={(next) => {
+                    setGender(next);
+                    setGenderError('');
+                  }}
+                  labels={{
+                    genderLabel: t.genderLabel,
+                    genderFemale: t.genderFemale,
+                    genderMale: t.genderMale,
+                    genderPreferNot: t.genderPreferNot,
+                  }}
+                  error={genderError}
+                  dir={t.dir}
                 />
               </div>
               <div>
