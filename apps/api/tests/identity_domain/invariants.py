@@ -20,7 +20,7 @@ FROZEN_NON_GOALS: frozenset[str] = frozenset(
     }
 )
 
-# Ratified identity table names (schema spec). Absent in PR-01 baseline.
+# Ratified identity table names (schema spec).
 IDENTITY_TABLE_NAMES: tuple[str, ...] = (
     "users",
     "auth_identities",
@@ -28,6 +28,24 @@ IDENTITY_TABLE_NAMES: tuple[str, ...] = (
     "guest_claim_token_nonces",
     "guest_claim_conflicts",
     "guest_claim_audit",
+)
+
+# EPIC-01 PR-02 production tables.
+AUTHENTICATED_IDENTITY_TABLES: frozenset[str] = frozenset(
+    {
+        "users",
+        "auth_identities",
+    }
+)
+
+# Not implemented until later PRs — must remain absent after PR-02 migrations.
+GUEST_IDENTITY_TABLES: frozenset[str] = frozenset(
+    {
+        "guest_installations",
+        "guest_claim_token_nonces",
+        "guest_claim_conflicts",
+        "guest_claim_audit",
+    }
 )
 
 # Legal (lifecycle_state, claim_state) pairs from IDENTITY-DOMAIN-POSTGRES-SCHEMA.
@@ -59,6 +77,18 @@ PROVIDER_SUBJECT_COLUMN_NAMES: frozenset[str] = frozenset(
         "clerk_user_id",
         "auth_provider_id",
         "external_subject",
+    }
+)
+
+USERS_FORBIDDEN_PROVIDER_COLUMNS: frozenset[str] = frozenset(
+    {
+        "provider",
+        "provider_subject",
+        "clerk_sub",
+        "clerk_user_id",
+        "auth_provider_id",
+        "external_subject",
+        "identity_kind",
     }
 )
 

@@ -1,29 +1,39 @@
 """Isolated PostgreSQL harness for EPIC-01 identity-domain tests.
 
-Connects to a dedicated test database, verifies the empty identity baseline,
-and supports setup/teardown. Does not create identity tables, run migrations,
-or implement production identity behavior.
+Connects to a dedicated test database, applies ratified Identity migrations
+for the current epic slice, and supports setup/teardown. Does not implement
+production identity runtime behavior.
 
 Requires:
   METIORO_IDENTITY_TEST_DATABASE_URL — PostgreSQL URL whose database name
-  contains ``identity_test`` (isolation guard).
+  contains ``identity_test`` (isolation guard), unless an embedded test
+  database is provisioned by the pytest fixtures.
 """
 
 from __future__ import annotations
 
 import os
+import sys
 from contextlib import contextmanager
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Iterator
 from urllib.parse import urlparse
 
 import psycopg
 from psycopg import Connection
 
-from .invariants import IDENTITY_TABLE_NAMES
+from .invariants import (
+    AUTHENTICATED_IDENTITY_TABLES,
+    GUEST_IDENTITY_TABLES,
+)
 
 IDENTITY_TEST_DATABASE_URL_ENV = "METIORO_IDENTITY_TEST_DATABASE_URL"
 REQUIRED_DATABASE_NAME_SUBSTRING = "identity_test"
+
+_SRC = Path(__file__).resolve().parents[2] / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
 
 
 class IdentityHarnessError(RuntimeError):
@@ -87,33 +97,97 @@ def list_public_tables(conn: Connection) -> set[str]:
         return {row[0] for row in cur.fetchall()}
 
 
-def assert_identity_baseline_empty(conn: Connection) -> None:
-    """Current baseline: no ratified identity tables exist yet."""
-    present = list_public_tables(conn).intersection(IDENTITY_TABLE_NAMES)
+def list_table_columns(conn: Connection, table_name: str) -> set[str]:
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = %s
+            """,
+            (table_name,),
+        )
+        return {row[0] for row in cur.fetchall()}
+
+
+def assert_guest_identity_tables_absent(conn: Connection) -> None:
+    present = list_public_tables(conn).intersection(GUEST_IDENTITY_TABLES)
     if present:
         raise IdentityHarnessError(
-            "Identity baseline must be empty (no identity tables); "
+            "Guest identity tables must remain absent in PR-02; "
             f"found {sorted(present)}"
         )
 
 
-def setup_identity_harness(conn: Connection) -> None:
-    """Prepare a clean session on the empty/baseline identity schema."""
+def assert_authenticated_identity_tables_present(conn: Connection) -> None:
+    present = list_public_tables(conn)
+    missing = AUTHENTICATED_IDENTITY_TABLES - present
+    if missing:
+        raise IdentityHarnessError(
+            "Authenticated identity tables missing after migrate; "
+            f"missing {sorted(missing)}"
+        )
+
+
+def drop_identity_schema_objects(conn: Connection) -> None:
+    """Reset PR-02 identity objects and migration tracking (test isolation)."""
     conn.rollback()
-    assert_identity_baseline_empty(conn)
+    previous = conn.autocommit
+    conn.autocommit = True
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DROP TABLE IF EXISTS auth_identities CASCADE")
+            cur.execute("DROP TABLE IF EXISTS users CASCADE")
+            cur.execute("DROP FUNCTION IF EXISTS users_merge_acyclic_fn() CASCADE")
+            cur.execute("DROP TABLE IF EXISTS schema_migrations CASCADE")
+    finally:
+        conn.autocommit = previous
+
+
+def apply_identity_migrations(database_url: str) -> None:
+    from db_migrate.discovery import default_migrations_dir
+    from db_migrate.runner import apply_migrations
+
+    apply_migrations(database_url, default_migrations_dir())
+
+
+def reset_identity_schema(database_url: str) -> None:
+    """Drop PR-02 objects and re-apply canonical migrations from empty state."""
+    conn = connect_identity_database(database_url)
+    try:
+        drop_identity_schema_objects(conn)
+    finally:
+        conn.close()
+    apply_identity_migrations(database_url)
+
+
+def truncate_authenticated_identity_data(conn: Connection) -> None:
+    conn.rollback()
+    with conn.cursor() as cur:
+        cur.execute("TRUNCATE auth_identities, users RESTART IDENTITY CASCADE")
+    conn.commit()
+
+
+def setup_identity_harness(conn: Connection) -> None:
+    """Prepare a clean session on the PR-02 migrated identity schema."""
+    conn.rollback()
+    assert_authenticated_identity_tables_present(conn)
+    assert_guest_identity_tables_absent(conn)
+    truncate_authenticated_identity_data(conn)
 
 
 def teardown_identity_harness(conn: Connection) -> None:
-    """Roll back any open work and re-assert empty identity baseline."""
+    """Roll back open work and leave tables present without guest scope."""
     conn.rollback()
-    assert_identity_baseline_empty(conn)
+    assert_authenticated_identity_tables_present(conn)
+    assert_guest_identity_tables_absent(conn)
 
 
 @contextmanager
 def identity_harness_session(
     database_url: str | None = None,
 ) -> Iterator[IdentityHarnessSession]:
-    """Connect → setup → yield → teardown → close."""
+    """Reset schema → connect → setup → yield → teardown → close."""
     url = database_url or get_identity_test_database_url()
     if not url:
         raise IdentityHarnessError(
@@ -121,6 +195,7 @@ def identity_harness_session(
         )
     database_name = parse_database_name(url)
     assert_isolated_database_name(database_name)
+    reset_identity_schema(url)
     conn = connect_identity_database(url)
     try:
         setup_identity_harness(conn)
