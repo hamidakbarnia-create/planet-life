@@ -1,18 +1,17 @@
 # Identity Domain PostgreSQL Schema — Errata 01
 
-**Status:** Proposed — awaiting explicit ratification
-**Date:** 2026-08-03
-**Amends (if ratified):** [IDENTITY-DOMAIN-POSTGRES-SCHEMA.md](./IDENTITY-DOMAIN-POSTGRES-SCHEMA.md) §§4–5 only
-**Inputs:** Identity Domain Design · Guest-to-User Migration State Machine · Identity PostgreSQL Schema · EPIC-01 Implementation Charter
+**Status:** Accepted  
+**Date:** 2026-08-03  
+**Ratified:** 2026-08-03 — explicit Product Owner approval of proposed resolutions §5.1–§5.6  
+**Amends:** [IDENTITY-DOMAIN-POSTGRES-SCHEMA.md](./IDENTITY-DOMAIN-POSTGRES-SCHEMA.md) §§4–5 only  
+**Inputs:** Identity Domain Design · Guest-to-User Migration State Machine · Identity PostgreSQL Schema · EPIC-01 Implementation Charter  
 
 ---
 
 ## 1. Status
 
-**Proposed governance clarification.**
-This document is **not** ratified and does **not** authorize DDL by itself.
-
-It drafts the smallest fail-closed resolutions needed before `guest_claim_conflicts` and `guest_claim_audit` can be implemented without inventing predicates.
+**Accepted.**  
+This errata is explicitly ratified. It authorizes DDL for `guest_claim_conflicts` and `guest_claim_audit` only, under DB-003 versioned SQL migrations.
 
 It does **not** redesign Identity, the state machine, migration strategy, or previously implemented tables (`users`, `auth_identities`, `guest_installations`, `guest_claim_token_nonces`).
 
@@ -20,19 +19,17 @@ It does **not** redesign Identity, the state machine, migration strategy, or pre
 
 ## 2. Scope
 
-| In scope (proposal) | Out of scope |
+| In scope | Out of scope |
 |---|---|
 | Canonical stored `event_type` vocabulary | Claim transaction / orchestration |
 | Conflict `status` / `resolved_at` CHECK | Resource ownership transfer |
 | Audit UPDATE / DELETE database guards | Clerk / JWT / auth routes |
 | `delivery_state` / `published_at` CHECK | Repositories, services, UI, billing |
-| Proposed authorization for conflicts + audit DDL only | New columns or tables |
+| Authorization for conflicts + audit DDL only | New columns or tables |
 
 ---
 
-## 3. Facts already ratified (unchanged)
-
-These are already locked in committed Identity documents and are **not** reopened:
+## 3. Facts already ratified before this errata (unchanged)
 
 | Fact | Source |
 |---|---|
@@ -54,25 +51,25 @@ These are already locked in committed Identity documents and are **not** reopene
 
 ---
 
-## 4. Contradictions / gaps found
+## 4. Contradictions / gaps this errata closed
 
 | ID | Gap | Fragments in tension |
 |---|---|---|
-| G1 | Complete stored `event_type` set missing | Schema: “`guest_created` … `transition_rejected`”; SM E2 uses `identity.*`; TR effects use bare names; TR12 says `claim_idempotent` while E2 says `guest_claim_idempotent` |
-| G2 | Conflict “status rules as before” undefined | Schema §4 CHECK points to absent prior text; only vocabulary is locked |
-| G3 | Audit UPDATE column permissions underspecified | Schema §5 prose allows delivery + PII scrub updates without exact column sets / once-vs-many rules |
-| G4 | Audit DELETE predicate missing | “No delete … before policy allows” without a DB-expressible condition |
-| G5 | `delivery_state` ↔ `published_at` relationship missing | Vocabulary locked; pairing/monotonicity not locked |
+| G1 | Complete stored `event_type` set missing | Schema ellipsis; SM `identity.*`; TR12 `claim_idempotent` vs E2 `guest_claim_idempotent` |
+| G2 | Conflict “status rules as before” undefined | Schema §4 |
+| G3 | Audit UPDATE column permissions underspecified | Schema §5 prose |
+| G4 | Audit DELETE predicate missing | Retention prose without DB rule |
+| G5 | `delivery_state` ↔ `published_at` relationship missing | Vocabulary only |
 
 ---
 
-## 5. Proposed resolutions
+## 5. Ratified resolutions
 
 ### 5.1 Canonical stored `event_type` vocabulary
 
-**Proposal (governance choice):** store **bare** snake_case strings in PostgreSQL. Treat `identity.*` as application/event-bus naming only.
+**Accepted:** store **bare** snake_case strings in PostgreSQL. Treat `identity.*` as application/event-bus naming only.
 
-**Proposed closed CHECK set:**
+**Closed CHECK set:**
 
 ```text
 event_type IN (
@@ -93,28 +90,26 @@ event_type IN (
 
 | Stored value | Mandatory? | Traceability |
 |---|---|---|
-| `guest_created` | Yes, on guest create | SM TR1 audit `guest_created`; schema ellipsis start |
+| `guest_created` | Yes, on guest create | SM TR1; schema ellipsis start |
 | `claim_token_issued` | Yes, when token issued | SM TR4 |
-| `claim_started` | Optional | SM E2 `identity.claim_started` (optional); no TR mandatory audit |
-| `claim_choice_required` | Yes, in awaiting_choice short TX | SM TR8b; schema state-guard row |
+| `claim_started` | Optional | SM E2 optional |
+| `claim_choice_required` | Yes, in awaiting_choice short TX | SM TR8b; schema state-guard |
 | `claim_choice_submitted` | Yes, when choices persist | SM TR9; SM E2 |
 | `guest_claimed` | Yes, with CLAIMED commit | SM TR7; schema state-guard; S-INV-5 |
 | `guest_claim_failed` | Yes, in claim_failed short TX | SM TR11b; schema state-guard |
-| `guest_claim_idempotent` | Yes, when that audit is written | SM E2 / I1; **prefer over** TR12 shorthand `claim_idempotent` |
+| `guest_claim_idempotent` | Yes, when that audit is written | SM E2 / I1; rejects alias `claim_idempotent` |
 | `guest_discarded` | Yes, when discard persists | SM TR14; schema state-guard |
 | `guest_expired` | Yes, when expiry persists | SM TR15; schema state-guard |
 | `guest_purged` | Yes, when purge marks purged | SM TR16; schema state-guard |
 | `transition_rejected` | Optional | SM TR21 / E2 optional; schema ellipsis end |
 
-**Proposed rejected aliases:** `identity.*` stored forms; `claim_idempotent`; bare `expired` / `purged` as event types.
-
-**Requires approval:** yes — closed vocabulary + alias rejection.
+**Rejected aliases:** `identity.*` stored forms; `claim_idempotent`; bare `expired` / `purged` as event types.
 
 ---
 
 ### 5.2 Conflict status / `resolved_at` predicate
 
-**Proposal (governance choice; fail-closed):**
+**Accepted:**
 
 ```text
 status IN ('open','resolved','cancelled')
@@ -128,50 +123,42 @@ AND (status IN ('resolved','cancelled')) = (resolved_at IS NOT NULL)
 | `resolved` | MUST be NOT NULL |
 | `cancelled` | MUST be NOT NULL |
 
-**Traceability:** reconciles schema vocabulary (`open|resolved|cancelled`) and §4 “status rules as before” gap; aligns with terminal conflict handling in purge prelude (open → cancelled/resolved).
-
-**Requires approval:** yes — especially cancelled ⇒ `resolved_at NOT NULL`.
+Unchanged: `(conflict_classes_redacted = true) = (scrubbed_at IS NOT NULL)`; UNIQUE one `open` per guest; UNIQUE `(idempotency_key)`.
 
 ---
 
 ### 5.3 Audit UPDATE permissions
 
-**Proposal (governance choice; append-oriented, fail-closed):**
+**Accepted (append-oriented, fail-closed):**
 
-**Immutable (any change fails):**
+**Immutable (any change fails):**  
 `id`, `event_type`, `guest_installation_id`, `user_id`, `claim_token_nonce`, `idempotency_key`, `created_at`, `retention_until`
 
-**Mutable delivery group:** `delivery_state`, `published_at`
-- Only transition: `pending` → `published` (once)
-- Inserted `not_required` remains `not_required` forever
-- After publish: both fields immutable
+**Mutable delivery group:** `delivery_state`, `published_at`  
+- Only transition: `pending` → `published` (once)  
+- Inserted `not_required` remains `not_required` forever  
+- After publish: both fields immutable  
 
-**Mutable PII-scrub group:** `payload_pii`, `pii_state`, `scrubbed_at`
-- Only transition: `present` → `redacted` (once), with `scrubbed_at` set and payload cleared to NULL/`{}`
-- Parent redaction CHECK unchanged
-- After redacted: scrub fields immutable
+**Mutable PII-scrub group:** `payload_pii`, `pii_state`, `scrubbed_at`  
+- Only transition: `present` → `redacted` (once), with `scrubbed_at` set and payload cleared to NULL/`{}`  
+- Parent redaction CHECK unchanged  
+- After redacted: scrub fields immutable  
 
-**Traceability:** refines schema §5 “Skeleton columns are never updated except delivery_state/published_at and PII scrub fields” into exact column sets and once-only limits; keeps fail-closed append posture from S-INV-8 / retention scrub preference.
-
-**Requires approval:** yes — once-only delivery/scrub and `not_required` freeze.
+Event identity and payload meaning must never be rewritten.
 
 ---
 
 ### 5.4 Audit DELETE policy
 
-**Proposal (governance choice; strictest fail-closed):**
-**Direct `DELETE` on `guest_claim_audit` is always forbidden at database level.**
-Retention uses scrub-in-place only.
-
-**Traceability:** chooses a DB-expressible rule where schema only says “No delete of skeleton before policy allows” and “scrub PII instead of dropping rows when possible” / preserve claim skeletons (retention section, S-INV-10). Hard-delete purge condition is **not** defined in ratified text, so proposing forbid-DELETE rather than inventing a purge predicate.
-
-**Requires approval:** yes.
+**Accepted:**  
+**Direct `DELETE` on `guest_claim_audit` is always forbidden at the database level.**  
+Retention uses scrub-in-place only. Any future hard-delete policy requires a separate ratified schema amendment.
 
 ---
 
 ### 5.5 `delivery_state` / `published_at` transition policy
 
-**Proposal (governance choice):**
+**Accepted:**
 
 ```text
 delivery_state IN ('pending','published','not_required')
@@ -185,50 +172,60 @@ AND (delivery_state <> 'published') = (published_at IS NULL)
 | `published` | anything | No |
 | `not_required` | anything | No |
 
-`published_at` immutable once set.
-
-**Traceability:** pairs schema vocabulary for `delivery_state` with outbox semantics implied by “Outbox” note on `delivery_state` / `published_at` columns; adds monotonic publish because schema lacked pairing rules.
-
-**Requires approval:** yes.
+Delivery transitions are monotonic. `published_at` is immutable once set.
 
 ---
 
-### 5.6 Schema scope confirmation (proposal)
+### 5.6 Schema scope confirmation
 
-**No new columns.** Do not add `conflict_policy`, `resource_key`, `transaction_correlation`, `external_event_id`, or new payload fields.
-Correlation remains via existing `claim_token_nonce` and `idempotency_key` only.
-
----
-
-## 6. Decisions requiring explicit approval
-
-Before any conflicts/audit DDL PR:
-
-1. Approve bare `event_type` closed set and alias rejections in §5.1
-2. Approve conflict `status`/`resolved_at` CHECK in §5.2
-3. Approve audit UPDATE immutability / once-only delivery & scrub rules in §5.3
-4. Approve forbid-DELETE on `guest_claim_audit` in §5.4
-5. Approve delivery/published CHECK and monotonic publish in §5.5
-
-Until those approvals are recorded, this errata remains **Proposed**.
+**Accepted:** no additional columns. Do not add `conflict_policy`, `resource_key`, `transaction_correlation`, `external_event_id`, or new payload fields. Existing ratified columns remain the complete schema scope. Correlation remains via `claim_token_nonce` and `idempotency_key` only.
 
 ---
 
-## 7. Proposed implementation authorization (only if ratified)
+## 6. Ratification record
 
-If and when this errata is **explicitly ratified**, engineering would then be authorized to implement **only**:
+Explicit Product Owner approval recorded 2026-08-03 for resolutions §5.1–§5.6:
 
-1. `guest_claim_conflicts` DDL + schema tests
-2. `guest_claim_audit` DDL + schema tests
+1. Canonical bare `event_type` closed set and alias rejections  
+2. Conflict `status` / `resolved_at` CHECK  
+3. Audit UPDATE immutability / once-only delivery & scrub rules  
+4. Forbid `DELETE` on `guest_claim_audit`  
+5. Delivery/published CHECK and monotonic publish  
+6. No new columns  
 
-via next versioned SQL migrations under DB-003.
+---
 
-Still forbidden in that PR: claim transaction, resource transfer, merge execution, claim APIs, Clerk/JWT, repositories/services/UI/billing, ORM, migration-runner changes, any additional tables.
+## 7. Implementation authorization
 
-**Until ratification:** conflicts/audit schema PR remains **blocked**.
+Engineering is authorized to implement **only**:
+
+1. `guest_claim_conflicts` DDL + schema tests  
+2. `guest_claim_audit` DDL + schema tests  
+
+via next versioned SQL migrations under DB-003, citing this Accepted errata and the parent schema.
+
+**Still forbidden:**
+
+- claim transaction / orchestration  
+- resource ownership transfer  
+- merge execution  
+- claim APIs / routes  
+- Clerk / JWT / authentication middleware  
+- repositories / services / UI / billing  
+- ORM / migration-runner changes  
+- any new runtime product behavior  
+- any table beyond the two named above  
+
+**Expected post-implementation status:**
+
+- conflict evidence schema: implemented  
+- audit evidence schema: implemented  
+- claim transaction: not implemented  
+- resource transfer: not implemented  
+- runtime enforcement: not implemented  
 
 ---
 
 ## 8. Explicit non-changes
 
-This proposal does not change migrations `0001`–`0006`, Identity Design, state-machine transitions, Strategy Freeze topics, or previously implemented Identity tables.
+This Accepted errata does not change migrations `0001`–`0006`, Identity Design, state-machine transitions, Strategy Freeze topics, or previously implemented Identity tables.
