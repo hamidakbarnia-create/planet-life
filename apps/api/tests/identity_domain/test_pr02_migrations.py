@@ -34,6 +34,7 @@ def test_canonical_migrations_include_users_auth_and_guest_core() -> None:
         "0002__auth_identities.sql",
         "0003__guest_installations.sql",
         "0004__guest_claim_token_nonces.sql",
+        "0005__guest_claim_token_nonces_terminal_irreversibility.sql",
     ]
 
 
@@ -51,6 +52,7 @@ def test_apply_from_empty_is_idempotent_and_verifiable(identity_database_url: st
         "0002__auth_identities.sql",
         "0003__guest_installations.sql",
         "0004__guest_claim_token_nonces.sql",
+        "0005__guest_claim_token_nonces_terminal_irreversibility.sql",
     ]
 
     status = status_migrations(identity_database_url, directory)
@@ -59,6 +61,7 @@ def test_apply_from_empty_is_idempotent_and_verifiable(identity_database_url: st
         "0002__auth_identities.sql",
         "0003__guest_installations.sql",
         "0004__guest_claim_token_nonces.sql",
+        "0005__guest_claim_token_nonces_terminal_irreversibility.sql",
     ]
     assert status.pending == []
 

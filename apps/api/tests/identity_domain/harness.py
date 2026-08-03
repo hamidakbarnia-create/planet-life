@@ -152,6 +152,9 @@ def drop_identity_schema_objects(conn: Connection) -> None:
     try:
         with conn.cursor() as cur:
             cur.execute("DROP TABLE IF EXISTS guest_claim_token_nonces CASCADE")
+            cur.execute(
+                "DROP FUNCTION IF EXISTS guest_claim_token_nonces_transition_guard_fn() CASCADE"
+            )
             cur.execute("DROP TABLE IF EXISTS guest_installations CASCADE")
             cur.execute(
                 "DROP FUNCTION IF EXISTS guest_installations_claimed_immutable_fn() CASCADE"
