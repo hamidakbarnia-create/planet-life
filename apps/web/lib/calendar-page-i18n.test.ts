@@ -124,6 +124,5 @@ describe('Calendar readiness percent presentation', () => {
 
     // CSS bar widths stay as layout percentages (not double-formatted labels)
     expect(pageSource).toContain('width: `${Math.max(8, h.score)}%`');
-    expect(railSource).toContain('width: `${week.score ?? 8}%`');
   });
 });

@@ -65,7 +65,7 @@ describe('WeeklyPathChart', () => {
 });
 
 describe('Weekly Path chart desktop vs mobile rail', () => {
-  it('shows chart on desktop rail and list on compact mobile rail', () => {
+  it('shows chart on desktop and compact mobile rails', () => {
     const monthOutlook = buildStrategicGps(
       {
         '2026-08-01': 54,
@@ -113,7 +113,7 @@ describe('Weekly Path chart desktop vs mobile rail', () => {
         loadingLabel="Loading"
       />
     );
-    expect(document.querySelector('[data-weekly-path-chart]')).toBeNull();
+    expect(document.querySelector('[data-weekly-path-chart]')).toBeTruthy();
     expect(document.querySelector('[data-rail-weekly-path]')).toBeTruthy();
   });
 });
