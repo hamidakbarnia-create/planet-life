@@ -29,39 +29,6 @@ export type StrategicInsightRailProps = {
   compact?: boolean;
 };
 
-function WeekRows({ weeks }: { weeks: StrategicGpsWeek[] }) {
-  return (
-    <div className="space-y-1.5" data-rail-weekly-path>
-      {weeks.map((week) => {
-        const style = GPS_TONE_STYLES[week.tone];
-        return (
-          <div key={week.label} className="flex items-center gap-2 min-w-0">
-            <span className="fi text-[10px] w-12 shrink-0" style={{ color: 'rgba(255,255,255,0.45)' }}>
-              {week.label}
-            </span>
-            <div
-              className="flex-1 h-1.5 rounded-full overflow-hidden"
-              style={{ background: 'rgba(255,255,255,0.06)' }}
-            >
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${week.score ?? 8}%`,
-                  background: style.color,
-                  opacity: week.score == null ? 0.25 : 0.9,
-                }}
-              />
-            </div>
-            <span className="fi text-[10px] w-14 text-end shrink-0" style={{ color: style.color }}>
-              {week.score == null ? '--' : formatReadinessPercent(week.score)}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 export function StrategicInsightRail({
   monthOutlook,
   selectedDay,
@@ -135,12 +102,8 @@ export function StrategicInsightRail({
         >
           {text.weeklyPath}
         </div>
-        {/* Desktop: SVG weekly path chart. Mobile compact: retain list summary. */}
-        {compact ? (
-          <WeekRows weeks={monthOutlook.weeks} />
-        ) : (
-          <WeeklyPathChart weeks={monthOutlook.weeks} />
-        )}
+        {/* Responsive SVG weekly path chart for mobile and desktop. */}
+        <WeeklyPathChart weeks={monthOutlook.weeks} />
       </section>
 
       {/* 3. Selected Day Timing — selected-day hourly only */}
