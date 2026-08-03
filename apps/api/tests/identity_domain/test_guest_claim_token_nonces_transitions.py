@@ -114,15 +114,11 @@ def test_consumed_cannot_be_consumed_again(identity_db) -> None:
     conn.commit()
     with conn.cursor() as cur:
         with pytest.raises(Exception, match="guest_claim_token_nonces_transition_guard"):
-            # Re-consume attempt: change terminal_at while remaining consumed is allowed
-            # by status equality; force a status flip attempt via issued then consumed.
             cur.execute(
                 """
                 UPDATE guest_claim_token_nonces
-                   SET token_status = 'issued',
-                       terminal_at = NULL,
-                       token_hash = 'hash-1',
-                       scrubbed_at = NULL
+                   SET token_status = 'consumed',
+                       terminal_at = TIMESTAMPTZ '2026-08-03 15:00:00+00'
                  WHERE nonce = 'n-transition'
                 """
             )
@@ -135,7 +131,7 @@ def test_terminal_at_cannot_be_cleared(identity_db) -> None:
     _set_status(conn, "revoked")
     conn.commit()
     with conn.cursor() as cur:
-        with pytest.raises(Exception, match="terminal_at cannot be cleared"):
+        with pytest.raises(Exception, match="terminal_at is immutable"):
             cur.execute(
                 """
                 UPDATE guest_claim_token_nonces
