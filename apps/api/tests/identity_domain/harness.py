@@ -25,7 +25,8 @@ from psycopg import Connection
 
 from .invariants import (
     AUTHENTICATED_IDENTITY_TABLES,
-    GUEST_IDENTITY_TABLES,
+    DEFERRED_GUEST_IDENTITY_TABLES,
+    GUEST_CORE_IDENTITY_TABLES,
 )
 
 IDENTITY_TEST_DATABASE_URL_ENV = "METIORO_IDENTITY_TEST_DATABASE_URL"
@@ -110,13 +111,17 @@ def list_table_columns(conn: Connection, table_name: str) -> set[str]:
         return {row[0] for row in cur.fetchall()}
 
 
-def assert_guest_identity_tables_absent(conn: Connection) -> None:
-    present = list_public_tables(conn).intersection(GUEST_IDENTITY_TABLES)
+def assert_deferred_guest_tables_absent(conn: Connection) -> None:
+    present = list_public_tables(conn).intersection(DEFERRED_GUEST_IDENTITY_TABLES)
     if present:
         raise IdentityHarnessError(
-            "Guest identity tables must remain absent in PR-02; "
+            "Deferred guest identity tables must remain absent; "
             f"found {sorted(present)}"
         )
+
+
+# Backward-compatible name for PR-02-era callers.
+assert_guest_identity_tables_absent = assert_deferred_guest_tables_absent
 
 
 def assert_authenticated_identity_tables_present(conn: Connection) -> None:
@@ -129,13 +134,28 @@ def assert_authenticated_identity_tables_present(conn: Connection) -> None:
         )
 
 
+def assert_guest_core_identity_tables_present(conn: Connection) -> None:
+    present = list_public_tables(conn)
+    missing = GUEST_CORE_IDENTITY_TABLES - present
+    if missing:
+        raise IdentityHarnessError(
+            "Guest core identity tables missing after migrate; "
+            f"missing {sorted(missing)}"
+        )
+
+
 def drop_identity_schema_objects(conn: Connection) -> None:
-    """Reset PR-02 identity objects and migration tracking (test isolation)."""
+    """Reset identity objects and migration tracking (test isolation)."""
     conn.rollback()
     previous = conn.autocommit
     conn.autocommit = True
     try:
         with conn.cursor() as cur:
+            cur.execute("DROP TABLE IF EXISTS guest_claim_token_nonces CASCADE")
+            cur.execute("DROP TABLE IF EXISTS guest_installations CASCADE")
+            cur.execute(
+                "DROP FUNCTION IF EXISTS guest_installations_claimed_immutable_fn() CASCADE"
+            )
             cur.execute("DROP TABLE IF EXISTS auth_identities CASCADE")
             cur.execute("DROP TABLE IF EXISTS users CASCADE")
             cur.execute("DROP FUNCTION IF EXISTS users_merge_acyclic_fn() CASCADE")
@@ -152,7 +172,7 @@ def apply_identity_migrations(database_url: str) -> None:
 
 
 def reset_identity_schema(database_url: str) -> None:
-    """Drop PR-02 objects and re-apply canonical migrations from empty state."""
+    """Drop identity objects and re-apply canonical migrations from empty state."""
     conn = connect_identity_database(database_url)
     try:
         drop_identity_schema_objects(conn)
@@ -161,26 +181,34 @@ def reset_identity_schema(database_url: str) -> None:
     apply_identity_migrations(database_url)
 
 
-def truncate_authenticated_identity_data(conn: Connection) -> None:
+def truncate_identity_data(conn: Connection) -> None:
     conn.rollback()
     with conn.cursor() as cur:
-        cur.execute("TRUNCATE auth_identities, users RESTART IDENTITY CASCADE")
+        cur.execute(
+            """
+            TRUNCATE guest_claim_token_nonces, guest_installations,
+                     auth_identities, users
+            RESTART IDENTITY CASCADE
+            """
+        )
     conn.commit()
 
 
 def setup_identity_harness(conn: Connection) -> None:
-    """Prepare a clean session on the PR-02 migrated identity schema."""
+    """Prepare a clean session on the migrated identity schema for this slice."""
     conn.rollback()
     assert_authenticated_identity_tables_present(conn)
-    assert_guest_identity_tables_absent(conn)
-    truncate_authenticated_identity_data(conn)
+    assert_guest_core_identity_tables_present(conn)
+    assert_deferred_guest_tables_absent(conn)
+    truncate_identity_data(conn)
 
 
 def teardown_identity_harness(conn: Connection) -> None:
-    """Roll back open work and leave tables present without guest scope."""
+    """Roll back open work and re-assert current-slice table presence."""
     conn.rollback()
     assert_authenticated_identity_tables_present(conn)
-    assert_guest_identity_tables_absent(conn)
+    assert_guest_core_identity_tables_present(conn)
+    assert_deferred_guest_tables_absent(conn)
 
 
 @contextmanager

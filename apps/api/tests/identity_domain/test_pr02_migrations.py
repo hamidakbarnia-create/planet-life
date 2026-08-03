@@ -1,4 +1,4 @@
-"""Migration apply / status / verify checks for EPIC-01 PR-02."""
+"""Migration apply / status / verify checks for Identity schema migrations."""
 
 from __future__ import annotations
 
@@ -16,21 +16,25 @@ from db_migrate.runner import apply_migrations, status_migrations, verify_migrat
 
 from .harness import (
     assert_authenticated_identity_tables_present,
-    assert_guest_identity_tables_absent,
-    drop_identity_schema_objects,
+    assert_deferred_guest_tables_absent,
+    assert_guest_core_identity_tables_present,
     connect_identity_database,
+    drop_identity_schema_objects,
 )
 
 
 pytestmark = pytest.mark.identity_db
 
 
-def test_canonical_migrations_include_users_and_auth_identities() -> None:
+def test_canonical_migrations_include_users_auth_and_guest_core() -> None:
     found = discover_migrations(default_migrations_dir())
     names = [m.filename for m in found]
-    assert "0001__users.sql" in names
-    assert "0002__auth_identities.sql" in names
-    assert [m.version_int for m in found if m.version_int in (1, 2)] == [1, 2]
+    assert names == [
+        "0001__users.sql",
+        "0002__auth_identities.sql",
+        "0003__guest_installations.sql",
+        "0004__guest_claim_token_nonces.sql",
+    ]
 
 
 def test_apply_from_empty_is_idempotent_and_verifiable(identity_database_url: str) -> None:
@@ -42,15 +46,20 @@ def test_apply_from_empty_is_idempotent_and_verifiable(identity_database_url: st
 
     directory = default_migrations_dir()
     first = apply_migrations(identity_database_url, directory)
-    assert {m.filename for m in first.applied_now} >= {
+    assert [m.filename for m in first.applied_now] == [
         "0001__users.sql",
         "0002__auth_identities.sql",
-    }
+        "0003__guest_installations.sql",
+        "0004__guest_claim_token_nonces.sql",
+    ]
 
     status = status_migrations(identity_database_url, directory)
-    applied_names = {row.filename for row in status.applied}
-    assert "0001__users.sql" in applied_names
-    assert "0002__auth_identities.sql" in applied_names
+    assert [row.filename for row in status.applied] == [
+        "0001__users.sql",
+        "0002__auth_identities.sql",
+        "0003__guest_installations.sql",
+        "0004__guest_claim_token_nonces.sql",
+    ]
     assert status.pending == []
 
     second = apply_migrations(identity_database_url, directory)
@@ -63,6 +72,7 @@ def test_apply_from_empty_is_idempotent_and_verifiable(identity_database_url: st
     conn = connect_identity_database(identity_database_url)
     try:
         assert_authenticated_identity_tables_present(conn)
-        assert_guest_identity_tables_absent(conn)
+        assert_guest_core_identity_tables_present(conn)
+        assert_deferred_guest_tables_absent(conn)
     finally:
         conn.close()

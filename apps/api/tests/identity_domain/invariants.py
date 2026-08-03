@@ -38,15 +38,24 @@ AUTHENTICATED_IDENTITY_TABLES: frozenset[str] = frozenset(
     }
 )
 
-# Not implemented until later PRs — must remain absent after PR-02 migrations.
-GUEST_IDENTITY_TABLES: frozenset[str] = frozenset(
+# Guest schema implemented in this slice.
+GUEST_CORE_IDENTITY_TABLES: frozenset[str] = frozenset(
     {
         "guest_installations",
         "guest_claim_token_nonces",
+    }
+)
+
+# Not implemented until later PRs — must remain absent after this slice.
+DEFERRED_GUEST_IDENTITY_TABLES: frozenset[str] = frozenset(
+    {
         "guest_claim_conflicts",
         "guest_claim_audit",
     }
 )
+
+# Backward-compatible alias used by older helpers/tests.
+GUEST_IDENTITY_TABLES: frozenset[str] = DEFERRED_GUEST_IDENTITY_TABLES
 
 # Legal (lifecycle_state, claim_state) pairs from IDENTITY-DOMAIN-POSTGRES-SCHEMA.
 LEGAL_GUEST_LIFECYCLE_CLAIM_PAIRS: frozenset[tuple[str, str]] = frozenset(
