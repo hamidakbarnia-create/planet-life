@@ -38,7 +38,7 @@ AUTHENTICATED_IDENTITY_TABLES: frozenset[str] = frozenset(
     }
 )
 
-# Guest schema implemented in this slice.
+# Guest principal + nonce ledger.
 GUEST_CORE_IDENTITY_TABLES: frozenset[str] = frozenset(
     {
         "guest_installations",
@@ -46,16 +46,35 @@ GUEST_CORE_IDENTITY_TABLES: frozenset[str] = frozenset(
     }
 )
 
-# Not implemented until later PRs — must remain absent after this slice.
-DEFERRED_GUEST_IDENTITY_TABLES: frozenset[str] = frozenset(
+# Conflict + audit evidence schema implemented in this slice.
+EVIDENCE_IDENTITY_TABLES: frozenset[str] = frozenset(
     {
         "guest_claim_conflicts",
         "guest_claim_audit",
     }
 )
 
+# No remaining guest identity tables deferred after this slice.
+DEFERRED_GUEST_IDENTITY_TABLES: frozenset[str] = frozenset()
+
 # Backward-compatible alias used by older helpers/tests.
 GUEST_IDENTITY_TABLES: frozenset[str] = DEFERRED_GUEST_IDENTITY_TABLES
+
+# Canonical bare stored event_type values (Errata 01).
+CANONICAL_AUDIT_EVENT_TYPES: tuple[str, ...] = (
+    "guest_created",
+    "claim_token_issued",
+    "claim_started",
+    "claim_choice_required",
+    "claim_choice_submitted",
+    "guest_claimed",
+    "guest_claim_failed",
+    "guest_claim_idempotent",
+    "guest_discarded",
+    "guest_expired",
+    "guest_purged",
+    "transition_rejected",
+)
 
 # Legal (lifecycle_state, claim_state) pairs from IDENTITY-DOMAIN-POSTGRES-SCHEMA.
 LEGAL_GUEST_LIFECYCLE_CLAIM_PAIRS: frozenset[tuple[str, str]] = frozenset(
@@ -98,6 +117,42 @@ USERS_FORBIDDEN_PROVIDER_COLUMNS: frozenset[str] = frozenset(
         "auth_provider_id",
         "external_subject",
         "identity_kind",
+    }
+)
+
+GUEST_CLAIM_CONFLICTS_COLUMNS: frozenset[str] = frozenset(
+    {
+        "id",
+        "guest_installation_id",
+        "user_id",
+        "status",
+        "conflict_classes",
+        "conflict_classes_redacted",
+        "choices",
+        "idempotency_key",
+        "created_at",
+        "updated_at",
+        "resolved_at",
+        "expires_at",
+        "scrubbed_at",
+    }
+)
+
+GUEST_CLAIM_AUDIT_COLUMNS: frozenset[str] = frozenset(
+    {
+        "id",
+        "event_type",
+        "guest_installation_id",
+        "user_id",
+        "claim_token_nonce",
+        "idempotency_key",
+        "payload_pii",
+        "pii_state",
+        "scrubbed_at",
+        "created_at",
+        "delivery_state",
+        "published_at",
+        "retention_until",
     }
 )
 

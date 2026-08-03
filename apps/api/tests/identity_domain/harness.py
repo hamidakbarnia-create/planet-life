@@ -26,6 +26,7 @@ from psycopg import Connection
 from .invariants import (
     AUTHENTICATED_IDENTITY_TABLES,
     DEFERRED_GUEST_IDENTITY_TABLES,
+    EVIDENCE_IDENTITY_TABLES,
     GUEST_CORE_IDENTITY_TABLES,
 )
 
@@ -144,6 +145,16 @@ def assert_guest_core_identity_tables_present(conn: Connection) -> None:
         )
 
 
+def assert_evidence_identity_tables_present(conn: Connection) -> None:
+    present = list_public_tables(conn)
+    missing = EVIDENCE_IDENTITY_TABLES - present
+    if missing:
+        raise IdentityHarnessError(
+            "Evidence identity tables missing after migrate; "
+            f"missing {sorted(missing)}"
+        )
+
+
 def drop_identity_schema_objects(conn: Connection) -> None:
     """Reset identity objects and migration tracking (test isolation)."""
     conn.rollback()
@@ -151,6 +162,17 @@ def drop_identity_schema_objects(conn: Connection) -> None:
     conn.autocommit = True
     try:
         with conn.cursor() as cur:
+            cur.execute("DROP TABLE IF EXISTS guest_claim_audit CASCADE")
+            cur.execute(
+                "DROP FUNCTION IF EXISTS guest_claim_audit_state_guard_fn() CASCADE"
+            )
+            cur.execute(
+                "DROP FUNCTION IF EXISTS guest_claim_audit_update_guard_fn() CASCADE"
+            )
+            cur.execute(
+                "DROP FUNCTION IF EXISTS guest_claim_audit_delete_guard_fn() CASCADE"
+            )
+            cur.execute("DROP TABLE IF EXISTS guest_claim_conflicts CASCADE")
             cur.execute("DROP TABLE IF EXISTS guest_claim_token_nonces CASCADE")
             cur.execute(
                 "DROP FUNCTION IF EXISTS guest_claim_token_nonces_transition_guard_fn() CASCADE"
@@ -189,7 +211,8 @@ def truncate_identity_data(conn: Connection) -> None:
     with conn.cursor() as cur:
         cur.execute(
             """
-            TRUNCATE guest_claim_token_nonces, guest_installations,
+            TRUNCATE guest_claim_audit, guest_claim_conflicts,
+                     guest_claim_token_nonces, guest_installations,
                      auth_identities, users
             RESTART IDENTITY CASCADE
             """
@@ -202,6 +225,7 @@ def setup_identity_harness(conn: Connection) -> None:
     conn.rollback()
     assert_authenticated_identity_tables_present(conn)
     assert_guest_core_identity_tables_present(conn)
+    assert_evidence_identity_tables_present(conn)
     assert_deferred_guest_tables_absent(conn)
     truncate_identity_data(conn)
 
@@ -211,6 +235,7 @@ def teardown_identity_harness(conn: Connection) -> None:
     conn.rollback()
     assert_authenticated_identity_tables_present(conn)
     assert_guest_core_identity_tables_present(conn)
+    assert_evidence_identity_tables_present(conn)
     assert_deferred_guest_tables_absent(conn)
 
 
