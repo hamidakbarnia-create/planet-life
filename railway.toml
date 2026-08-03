@@ -15,6 +15,7 @@ watchPatterns = [
 ]
 
 [deploy]
+# DB-003: migrations are explicit/operational — do not add migrate to startCommand.
 startCommand = "cd apps/api/src && python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/"
 restartPolicyType = "ON_FAILURE"
