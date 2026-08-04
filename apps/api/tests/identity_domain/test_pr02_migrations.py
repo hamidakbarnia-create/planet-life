@@ -35,6 +35,7 @@ EXPECTED_MIGRATIONS = [
     "0006__guest_claim_token_nonces_terminal_freeze.sql",
     "0007__guest_claim_conflicts.sql",
     "0008__guest_claim_audit.sql",
+    "0009__decision_cases.sql",
 ]
 
 

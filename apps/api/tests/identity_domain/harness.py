@@ -162,6 +162,22 @@ def drop_identity_schema_objects(conn: Connection) -> None:
     conn.autocommit = True
     try:
         with conn.cursor() as cur:
+            # EPIC-001 Decision Case tables (must drop before schema_migrations reset)
+            cur.execute("DROP TABLE IF EXISTS decision_comparison_ranks CASCADE")
+            cur.execute("DROP TABLE IF EXISTS decision_comparisons CASCADE")
+            cur.execute("DROP TABLE IF EXISTS decision_candidate_dates CASCADE")
+            cur.execute("DROP TABLE IF EXISTS decision_history_events CASCADE")
+            cur.execute("DROP TABLE IF EXISTS decision_participants CASCADE")
+            cur.execute("DROP TABLE IF EXISTS decision_evidence_bindings CASCADE")
+            cur.execute("DROP TABLE IF EXISTS decision_evaluations CASCADE")
+            cur.execute("DROP TABLE IF EXISTS decision_versions CASCADE")
+            cur.execute("DROP TABLE IF EXISTS decision_cases CASCADE")
+            cur.execute(
+                "DROP FUNCTION IF EXISTS decision_immutable_update_guard_fn() CASCADE"
+            )
+            cur.execute(
+                "DROP FUNCTION IF EXISTS decision_immutable_delete_guard_fn() CASCADE"
+            )
             cur.execute("DROP TABLE IF EXISTS guest_claim_audit CASCADE")
             cur.execute(
                 "DROP FUNCTION IF EXISTS guest_claim_audit_state_guard_fn() CASCADE"
