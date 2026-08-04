@@ -178,3 +178,23 @@ def test_legacy_engine_never_invoked() -> None:
 def test_existing_route_still_uses_default_validation_behavior() -> None:
     response = client.post("/api/finance/analyze", json={"action_type": "invest"})
     assert response.status_code == 422
+
+
+def test_decision_validation_prefix_does_not_capture_decision_cases() -> None:
+    """ADR-0006 handler must match /api/v1/decision/* only, not decision-cases."""
+    from routes.decision import _is_decision_api_path
+
+    assert _is_decision_api_path("/api/v1/decision") is True
+    assert _is_decision_api_path("/api/v1/decision/execute") is True
+    assert _is_decision_api_path("/api/v1/decision-cases") is False
+    assert _is_decision_api_path("/api/v1/decision-cases/x") is False
+
+
+def test_decision_execute_validation_still_returns_400_envelope() -> None:
+    body = dict(VALID_REQUEST)
+    del body["locale"]
+    response = client.post("/api/v1/decision/execute", json=body)
+    assert response.status_code == 400
+    error = response.json()["error"]
+    assert error["code"] == "VALIDATION_ERROR"
+    assert set(error.keys()) == {"code", "message", "requestId"}

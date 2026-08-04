@@ -26,6 +26,13 @@ EXECUTION_BUDGET_SECONDS = 4.0
 DECISION_API_PATH_PREFIX = "/api/v1/decision"
 
 
+def _is_decision_api_path(path: str) -> bool:
+    """True for ADR-0006 Decision API paths only (not /api/v1/decision-cases)."""
+    return path == DECISION_API_PATH_PREFIX or path.startswith(
+        DECISION_API_PATH_PREFIX + "/"
+    )
+
+
 def _error_response(
     *,
     status_code: int,
@@ -72,7 +79,7 @@ def register_decision_exception_handlers(app: Any) -> None:
         request: Request,
         exc: RequestValidationError,
     ) -> JSONResponse:
-        if not request.url.path.startswith(DECISION_API_PATH_PREFIX):
+        if not _is_decision_api_path(request.url.path):
             return await request_validation_exception_handler(request, exc)
         body = await request.body()
         return _error_response(

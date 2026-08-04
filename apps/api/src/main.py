@@ -29,6 +29,11 @@ from routes.conversation import (
     router as conversation_router,
     register_conversation_openapi_filter,
 )
+from decision_case.routes import (
+    router as decision_case_router,
+    register_decision_case_exception_handlers,
+    register_decision_case_openapi_filter,
+)
 from packages.astro_engine.scoring_context import CONTEXT_CALENDAR_DAY, CONTEXT_CALENDAR_HOURLY
 from schemas.score_breakdown import build_scoring_response, validate_component_breakdown
 from services.scoring_pipeline import score_with_context
@@ -76,9 +81,16 @@ app.include_router(decision_router, prefix="/api/v1/decision", tags=["decision"]
 app.include_router(
     conversation_router, prefix="/api/v1/conversation", tags=["conversation"]
 )
+app.include_router(
+    decision_case_router,
+    prefix="/api/v1/decision-cases",
+    tags=["decision-cases"],
+)
 
 register_decision_exception_handlers(app)
+register_decision_case_exception_handlers(app)
 register_decision_openapi_filter(app)
+register_decision_case_openapi_filter(app)
 register_conversation_openapi_filter(app)
 
 
