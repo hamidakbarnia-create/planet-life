@@ -17,16 +17,20 @@ Repository
     ↓
 Level 0 — METIORO Constitution
     ↓
-Level 1 — Trust Architecture / Brand Identity Standard
+Level 1 — Product Constitution · Trust Architecture · Brand Identity Standard
     ↓
-Level 2 — Requirement Registry / Evidence Registry / Legal & Compliance Policies
+Level 2 — Architecture Consolidation Resolution (ACR) ← OS conflict resolver
     ↓
-Level 3 — Engineering Standards
+Level 3 — Decision Operating System Blueprint (+ Requirements / Evidence / Legal registries)
     ↓
-Level 4 — UX Standards
+Level 4 — Engine internals (DIE, Evidence Pipeline, Explainability) · ADRs · Quality Standards
     ↓
-Level 5 — Operational Procedures
+Level 5 — UX Standards · Operational Procedures
+    ↓
+Implementation → Tests → Deployments
 ```
+
+**Conflict rule:** On Decision Case object model, evaluation pathway, Evaluation Contract, state machine, repository, or evidence eligibility, [ACR-0001](../architecture/ARCHITECTURE_CONSOLIDATION_RESOLUTION.md) wins over all documents beneath Level 0–1 identity constraints. See ACR §B1.
 
 ---
 
@@ -38,16 +42,17 @@ The supreme governing document. Establishes purpose, identity, permanent princip
 
 ---
 
-## Level 1 — Trust Architecture & Brand Identity Standard
+## Level 1 — Product Constitution, Trust Architecture & Brand Identity Standard
 
-Documents at this level define how METIORO earns and maintains user trust, and how the brand is expressed consistently.
+Documents at this level define product laws, how METIORO earns and maintains user trust, and how the brand is expressed consistently.
 
 | Document | Status | Location |
 |----------|--------|----------|
+| [Product Constitution](./METIORO_PRODUCT_CONSTITUTION.md) | Draft for ratification | `docs/governance/METIORO_PRODUCT_CONSTITUTION.md` |
 | [Trust Architecture](./TRUST_ARCHITECTURE.md) | Draft | `docs/governance/TRUST_ARCHITECTURE.md` |
 | [Brand Identity Standard](./BRAND_IDENTITY_STANDARD.md) | Draft | `docs/governance/BRAND_IDENTITY_STANDARD.md` |
 
-**Canonical hub:** Level 0–2 governance documents live under `docs/governance/`.
+**Canonical hub:** Level 0–2 governance documents live under `docs/governance/` (ACR lives under `docs/architecture/` as Level 2 conflict resolver).
 
 **Existing related assets:**
 
@@ -56,29 +61,47 @@ Documents at this level define how METIORO earns and maintains user trust, and h
 
 ---
 
-## Level 2 — Requirement Registry, Evidence Registry, Legal & Compliance Policies
-
-Documents at this level capture what METIORO must do, what evidence supports its claims, and the legal framework under which it operates.
+## Level 2 — Architecture Consolidation Resolution
 
 | Document | Status | Location |
 |----------|--------|----------|
+| [Architecture Consolidation Resolution (ACR-0001)](../architecture/ARCHITECTURE_CONSOLIDATION_RESOLUTION.md) | Proposed for ratification | `docs/architecture/ARCHITECTURE_CONSOLIDATION_RESOLUTION.md` |
+
+ACR-0001 is the **conflict-resolution authority** for Decision Case SoR, one evaluation pathway, Decision Evaluation Contract v1, state machine, repository model, evidence eligibility, and migration. It does not invent product features.
+
+---
+
+## Level 3 — Decision OS Blueprint · Requirement / Evidence / Legal Registries
+
+Documents at this level elaborate the consolidated architecture and capture what METIORO must do, what evidence supports its claims, and the legal framework under which it operates. They **must not contradict ACR-0001**.
+
+| Document | Status | Location |
+|----------|--------|----------|
+| [Decision Operating System Blueprint](../architecture/METIORO_DECISION_OPERATING_SYSTEM_BLUEPRINT.md) | Draft — subordinate to ACR | `docs/architecture/METIORO_DECISION_OPERATING_SYSTEM_BLUEPRINT.md` |
 | [Requirement Registry](./REQUIREMENT_REGISTRY.md) | Draft | `docs/governance/REQUIREMENT_REGISTRY.md` |
 | [Evidence Registry](./EVIDENCE_REGISTRY.md) | Draft | `docs/governance/EVIDENCE_REGISTRY.md` |
 | [Legal & Compliance Policies](./LEGAL_COMPLIANCE_POLICIES.md) | Draft | `docs/governance/LEGAL_COMPLIANCE_POLICIES.md` |
 
-**Note:** This document defines governance-level legal policy intent. Runtime legal content also exists in application code at `apps/web/lib/legal-content.ts`. Dedicated standalone legal documents may be authored later without removing the runtime source.
+**Note:** Legal policy intent is governed here. Runtime legal content also exists in application code at `apps/web/lib/legal-content.ts`. Dedicated standalone legal documents may be authored later without removing the runtime source.
 
 ---
 
-## Level 3 — Engineering Standards
+## Level 4 — Engine Internals · ADRs · Quality Standards
 
-Documents at this level define how METIORO is built — architecture patterns, API contracts, scoring methodology, deployment, and code conventions.
+Documents at this level define engine internals, API/ADR locks, and measurable quality standards. They elaborate ACR/Blueprint; they may not redefine primary object, pathway exclusivity, or Evaluation Contract module IDs.
 
 | Document | Status | Location |
 |----------|--------|----------|
-| [Decision Intelligence Engine Specification](../architecture/DECISION_INTELLIGENCE_ENGINE.md) | Draft | `docs/architecture/DECISION_INTELLIGENCE_ENGINE.md` |
+| [Decision Intelligence Engine Specification](../architecture/DECISION_INTELLIGENCE_ENGINE.md) | Draft — subordinate to ACR | `docs/architecture/DECISION_INTELLIGENCE_ENGINE.md` |
 | [Evidence Pipeline Specification](../architecture/EVIDENCE_PIPELINE_SPECIFICATION.md) | Draft | `docs/architecture/EVIDENCE_PIPELINE_SPECIFICATION.md` |
 | [Explainability Engine Specification](../architecture/EXPLAINABILITY_ENGINE_SPECIFICATION.md) | Draft | `docs/architecture/EXPLAINABILITY_ENGINE_SPECIFICATION.md` |
+| [Decision Quality Standard](./DECISION_QUALITY_STANDARD.md) | Draft for ratification — Part 7 bound to ACR Contract v1 | `docs/governance/DECISION_QUALITY_STANDARD.md` |
+| [ADR-0014 — Decision Case SoR & Pathway Consolidation](../adr/ADR-0014-Decision-Case-System-of-Record-and-Pathway-Consolidation.md) | RATIFIED | `docs/adr/ADR-0014-Decision-Case-System-of-Record-and-Pathway-Consolidation.md` |
+| [ADR-0015 — Decision Case API Contract v1](../adr/ADR-0015-Decision-Case-API-Contract-v1.md) | ACCEPTED | `docs/adr/ADR-0015-Decision-Case-API-Contract-v1.md` |
+| [ADR-0015 Wire Supplement 01 — E5 Activation](../adr/ADR-0015-WIRE-SUPPLEMENT-01-E5-Activation.md) | RATIFIED (DEC-0020 ACCEPTED) | `docs/adr/ADR-0015-WIRE-SUPPLEMENT-01-E5-Activation.md` — E5 subset + wire; no ACR amend |
+| [GOV-ISSUE-003 — ADR-0015 wire gaps](./GOV-ISSUE-003-ADR0015-WIRE-CONTRACT-GAPS.md) | CLOSED | `docs/governance/GOV-ISSUE-003-ADR0015-WIRE-CONTRACT-GAPS.md` |
+| [EPIC-001 Lifecycle Activation Profile (LAP-001)](./EPIC-001-LIFECYCLE-ACTIVATION-PROFILE.md) | ACCEPTED (incl. §2.9–§2.11 per DEC-0019) | `docs/governance/EPIC-001-LIFECYCLE-ACTIVATION-PROFILE.md` |
+| [GOV-ISSUE-002 — Side-state & activation clarification](./GOV-ISSUE-002-LIFECYCLE-SIDE-STATE-AND-ACTIVATION-CLARIFICATION.md) | CLOSED | `docs/governance/GOV-ISSUE-002-LIFECYCLE-SIDE-STATE-AND-ACTIVATION-CLARIFICATION.md` — DEC-0019; does not amend ACR |
 | Phase 3 Architecture Blueprint | Draft | `docs/architecture/PHASE3_ARCHITECTURE_BLUEPRINT.md` |
 | [ADR-0010 — Canonical Memory Graph L0 Boundaries](../adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md) | Accepted (2026-07-23) | `docs/adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md` — L0 ownership/admission only; **does not authorize implementation** |
 | [CMG Final Lock Report](../architecture/CMG-FINAL-LOCK-REPORT.md) | Companion (Accepted L0) | `docs/architecture/CMG-FINAL-LOCK-REPORT.md` |

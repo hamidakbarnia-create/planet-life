@@ -253,5 +253,118 @@ Evidence recorded on [PRG-02](./PRG-02-reading-contract-presence-validity-gates.
 **Document:**
 `docs/adr/ADR-0013-Decision-Value-Engine-Architecture.md`
 
-**Status:** PROPOSED
+**Status:** PROPOSED — constrained by ACR-0001 / ADR-0014 to **context-fitness signal only** (not a parallel recommendation pathway).
 
+---
+
+## DEC-0015 — Architecture Consolidation (Decision Case SoR)
+
+| Field | Value |
+|-------|-------|
+| **ID** | DEC-0015 |
+| **Title** | Architecture Consolidation — Decision Case System of Record |
+| **Status** | ACCEPTED |
+| **Authority** | ADR |
+| **Owner** | METIORO project owner |
+| **Date** | 2026-08-04 |
+| **WHERE** | Architecture Consolidation Board — [ARCHITECTURE_CONSOLIDATION_RESOLUTION.md](../architecture/ARCHITECTURE_CONSOLIDATION_RESOLUTION.md) |
+| **References** | ACR-0001; [ADR-0014](../adr/ADR-0014-Decision-Case-System-of-Record-and-Pathway-Consolidation.md); [EPIC-001](../architecture/EPIC-001-DECISION-CASE-V1-ENGINEERING-SPEC.md); Product Constitution; DQS; DIE; ADR-0006; ADR-0007 |
+| **WHY** | Implementation readiness FAIL caused by competing primary objects, dual evaluation pathways, conflicting output contracts, empty evidence authority vs locked conversation decisions, and unregistered binding drafts. Consolidation required without product redesign. |
+| **ACT** | Accept ACR-0001 as conflict resolver: **Decision Case** sole SoR; one Case→Engine→`DecisionEvaluationPackage` pathway; repository model; evidence eligibility; M0–M4 migration; ADR-0006/0007 superseded **in part**. Authorize engineering execution via EPIC-001 only. |
+| **OUTCOME** | ACR + ADR-0014 ratified; EPIC-001 engineering spec authorized. |
+| **LEARN** | Prefer one demotion table over parallel canonical stacks. |
+
+---
+
+## DEC-0016 — EPIC-001 Lifecycle Activation Profile (EG-01)
+
+| Field | Value |
+|-------|-------|
+| **ID** | DEC-0016 |
+| **Title** | EPIC-001 is a Lifecycle Activation Profile (not a lifecycle redefinition) |
+| **Status** | ACCEPTED |
+| **Authority** | ADR |
+| **Owner** | Governance Resolution Board / METIORO project owner |
+| **Date** | 2026-08-04 |
+| **WHERE** | [EPIC-001-LIFECYCLE-ACTIVATION-PROFILE.md](./EPIC-001-LIFECYCLE-ACTIVATION-PROFILE.md) (LAP-001) |
+| **References** | ACR-0001 §B4; ADR-0014; EPIC-001 Engineering Spec Part 5; EG-01 |
+| **WHY** | EPIC-001 docs appeared to define `evaluated→completed` and `completed→archived` as SoR edges, contradicting ACR. Need minimum resolution that preserves ACR unchanged. |
+| **ACT** | Accept **LAP-001**: EPIC-001 is determination **A** (legal Activation Profile). Canonical lifecycle remains ACR-0001 §B4 only. Repository stores only ACR states. `complete_case` and `archive_case` are **composites** that execute ACR paths (`→ planned → executing → completed` with `scheduled` skipped; `→ reflected → archived`) with atomic history. `activation_phase` is derived only. Amend EPIC-001 Part 5 reading accordingly. **Do not amend ACR.** |
+| **OUTCOME** | EG-01 resolved. |
+| **LEARN** | Prefer activation profiles with composite commands over rewriting canonical edges. |
+
+---
+
+## DEC-0017 — GOV-ISSUE-001 Option A + Safety/Language mapping (EG-02)
+
+| Field | Value |
+|-------|-------|
+| **ID** | DEC-0017 |
+| **Title** | ACR DecisionEvaluationPackage modules remain normative; brief labels abbreviated |
+| **Status** | ACCEPTED |
+| **Authority** | ADR |
+| **Owner** | Governance Resolution Board / METIORO project owner |
+| **Date** | 2026-08-04 |
+| **WHERE** | [GOV-ISSUE-001](./GOV-ISSUE-001-EPIC001-PACKAGE-MODULE-CONFLICT.md) CLOSED |
+| **References** | ACR-0001 §B3; DQS Parts 5–6; EG-02; EG-04 |
+| **WHY** | Workstream briefs listed a shorter module set; ACR owns the contract. Safety/Language standards exist as DQS Parts 5–6. |
+| **ACT** | Accept **GOV-ISSUE-001 Option A**. Brief labels are abbreviated; normative modules are full ACR-0001 §B3 (including `evidence`, `counter_recommendation`, `next_decisions`). Option B rejected. For EPIC-001: **Decision Safety Standard ≡ DQS Part 5**; **Decision Language Standard ≡ DQS Part 6**. Close GOV-ISSUE-001. |
+| **OUTCOME** | EG-02 resolved. Package schema must implement full ACR module set. |
+| **LEARN** | Label tables in briefs are not contract amendments. |
+
+---
+
+## DEC-0018 — Decision Case API Contract v1 (EG-03)
+
+| Field | Value |
+|-------|-------|
+| **ID** | DEC-0018 |
+| **Title** | Ratify public contract for `/api/v1/decision-cases` |
+| **Status** | ACCEPTED |
+| **Authority** | ADR |
+| **Owner** | Governance Resolution Board / METIORO project owner |
+| **Date** | 2026-08-04 |
+| **WHERE** | [ADR-0015-Decision-Case-API-Contract-v1.md](../adr/ADR-0015-Decision-Case-API-Contract-v1.md) |
+| **References** | ADR-0014; ACR-0001 §B7–B8; LAP-001; EG-03 |
+| **WHY** | Engineering froze the Case API path without a ratified wire contract. Pathway prose is not a public contract. |
+| **ACT** | Accept **ADR-0015**. Determination **B**: a public contract was required. Freeze minimum endpoints and Case/Evaluation/History shapes for EPIC-001 only. `state` = ACR SoR; `activation_phase` derived. ADR-0006/0007 remain non-SoR projections. No extra endpoints in EPIC-001. |
+| **OUTCOME** | EG-03 resolved. Case route coding authorized under ADR-0015. |
+| **LEARN** | Path freezes in plans require Accepted API ADRs before implementation. |
+
+---
+
+## DEC-0019 — Lifecycle side-state `*` enumeration + activation total map (GOV-LC-01…04)
+
+| Field | Value |
+|-------|-------|
+| **ID** | DEC-0019 |
+| **Title** | Clarify ACR side-state wildcards and LAP activation derivation without amending ACR |
+| **Status** | **ACCEPTED** |
+| **Authority** | ADR / Lifecycle clarification (subordinate to ACR-0001 §B4) |
+| **Owner** | METIORO Product Owner / Governance Ratification Authority |
+| **Date** | 2026-08-04 |
+| **WHERE** | [GOV-ISSUE-002](./GOV-ISSUE-002-LIFECYCLE-SIDE-STATE-AND-ACTIVATION-CLARIFICATION.md) CLOSED; [LAP-001](./EPIC-001-LIFECYCLE-ACTIVATION-PROFILE.md) §2.9–§2.11 |
+| **References** | ACR-0001 §B4.2–B4.3; LAP-001; DEC-0016; EPIC-001-E3-TASK-SPEC; GOV-LC-01…GOV-LC-04 |
+| **WHY** | E3 blocked: ACR `*` not enumerable; `prior active` undefined; “terminal or parking” unassigned; LAP activation map incomplete for several Case states. |
+| **ACT** | Accept GOV-ISSUE-002 canonical interpretation: (1) `paused` = parking; `superseded`/`rejected`/`archived` = terminal; (2) enumerate pause/supersede/reject source sets with no wildcard; (3) require `prior_active_state` metadata for pause/resume; (4) total CaseState→activation derivation including explicit `NO_ACTIVE_PHASE` for `superseded`/`rejected` and invalid pause metadata; `reflected`→`completed`; plan/schedule/execute phases from `mode`. **Do not amend ACR-0001 text.** Clarify LAP-001 §2.9–§2.11. Correct E3 task spec to match. After Owner ratification, E3 implementation may proceed; E4 must not begin until E3 PASS. |
+| **OUTCOME** | **RATIFIED.** Owner adopts **Option A**: `activation_phase` is a derived projection only — when `state=paused` and `prior_active_state` is absent/invalid, return `NO_ACTIVE_PHASE` (does not fail loudly). Resume, repository, state-machine, and persistence validation remain fail-loudly. GOV-LC-01…04 closed. **E3 implementation authorized.** E4 remains blocked until E3 PASS. |
+| **LEARN** | Prefer enumerable clarification under LAP/DEC over ACR prose amendment when product intent is unchanged. Derived projections must not own lifecycle validation. |
+
+---
+
+## DEC-0020 — ADR-0015 E5 wire activation subset (GOV-API-01…06)
+
+| Field | Value |
+|-------|-------|
+| **ID** | DEC-0020 |
+| **Title** | Ratify ADR-0015 Wire Supplement 01 for honest E5 API activation |
+| **Status** | **ACCEPTED** |
+| **Authority** | ADR / API wire clarification (supplements ADR-0015; subordinate to ACR-0001 / ADR-0014) |
+| **Owner** | Governance Resolution Board / METIORO project owner |
+| **Date** | 2026-08-04 |
+| **WHERE** | [GOV-ISSUE-003](./GOV-ISSUE-003-ADR0015-WIRE-CONTRACT-GAPS.md) CLOSED; [ADR-0015-WS-01](../adr/ADR-0015-WIRE-SUPPLEMENT-01-E5-Activation.md) |
+| **References** | ADR-0015; ADR-0006 error shape; LAP-001; DEC-0019; E3/E4 commits; EPIC-001 Execution Plan |
+| **WHY** | E5 blocked: missing request/response/error wire detail; no concurrency field on wire; owner transport undefined under paused Auth; full ADR route matrix includes E6/E8/E10+ capabilities. |
+| **ACT** | Accept **ADR-0015 Wire Supplement 01**: (1) E5 activates only create/list/get, complete, archive, evaluation reads, history; intake writes → E6; NL create → E8; POST evaluations/comparisons → E10+; (2) `expected_case_version` required JSON body on material writes (create exempt); (3) freeze response envelopes + `201` create; `activation_phase` null for NO_ACTIVE_PHASE; (4) ADR-0006-shaped error envelope with Case codes; (5) owner isolation Option A — single internal owner context; `403` reserved; (6) OpenAPI lists only ACTIVE_IN_E5 routes; no stubs. **Do not amend ACR-0001 or ADR-0014.** After Owner ratification, E5 implementation may proceed. |
+| **OUTCOME** | **RATIFIED.** Owner accepts ADR-0015-WS-01. GOV-API-01…06 resolved; GOV-ISSUE-003 CLOSED. **E5 implementation authorized** for the ACTIVE_IN_E5 subset. Create-time type/entry-mode/`family_id`/`mode` authority remains the Decision Type Registry (minimal E2 seam authorized). |
+| **LEARN** | Prefer activation subsets + wire supplements over early stubs for later-task capabilities. |
