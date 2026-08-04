@@ -48,7 +48,7 @@ Documents at this level define product laws, how METIORO earns and maintains use
 
 | Document | Status | Location |
 |----------|--------|----------|
-| [Product Constitution](./METIORO_PRODUCT_CONSTITUTION.md) | Draft for ratification | `docs/governance/METIORO_PRODUCT_CONSTITUTION.md` |
+| [Product Constitution](./METIORO_PRODUCT_CONSTITUTION.md) | LOCKED | `docs/governance/METIORO_PRODUCT_CONSTITUTION.md` |
 | [Trust Architecture](./TRUST_ARCHITECTURE.md) | Draft | `docs/governance/TRUST_ARCHITECTURE.md` |
 | [Brand Identity Standard](./BRAND_IDENTITY_STANDARD.md) | Draft | `docs/governance/BRAND_IDENTITY_STANDARD.md` |
 
@@ -65,7 +65,7 @@ Documents at this level define product laws, how METIORO earns and maintains use
 
 | Document | Status | Location |
 |----------|--------|----------|
-| [Architecture Consolidation Resolution (ACR-0001)](../architecture/ARCHITECTURE_CONSOLIDATION_RESOLUTION.md) | Proposed for ratification | `docs/architecture/ARCHITECTURE_CONSOLIDATION_RESOLUTION.md` |
+| [Architecture Consolidation Resolution (ACR-0001)](../architecture/ARCHITECTURE_CONSOLIDATION_RESOLUTION.md) | RATIFIED | `docs/architecture/ARCHITECTURE_CONSOLIDATION_RESOLUTION.md` |
 
 ACR-0001 is the **conflict-resolution authority** for Decision Case SoR, one evaluation pathway, Decision Evaluation Contract v1, state machine, repository model, evidence eligibility, and migration. It does not invent product features.
 
@@ -77,7 +77,7 @@ Documents at this level elaborate the consolidated architecture and capture what
 
 | Document | Status | Location |
 |----------|--------|----------|
-| [Decision Operating System Blueprint](../architecture/METIORO_DECISION_OPERATING_SYSTEM_BLUEPRINT.md) | Draft — subordinate to ACR | `docs/architecture/METIORO_DECISION_OPERATING_SYSTEM_BLUEPRINT.md` |
+| [Decision Operating System Blueprint](../architecture/METIORO_DECISION_OPERATING_SYSTEM_BLUEPRINT.md) | LOCKED | `docs/architecture/METIORO_DECISION_OPERATING_SYSTEM_BLUEPRINT.md` |
 | [Requirement Registry](./REQUIREMENT_REGISTRY.md) | Draft | `docs/governance/REQUIREMENT_REGISTRY.md` |
 | [Evidence Registry](./EVIDENCE_REGISTRY.md) | Draft | `docs/governance/EVIDENCE_REGISTRY.md` |
 | [Legal & Compliance Policies](./LEGAL_COMPLIANCE_POLICIES.md) | Draft | `docs/governance/LEGAL_COMPLIANCE_POLICIES.md` |
@@ -95,12 +95,13 @@ Documents at this level define engine internals, API/ADR locks, and measurable q
 | [Decision Intelligence Engine Specification](../architecture/DECISION_INTELLIGENCE_ENGINE.md) | Draft — subordinate to ACR | `docs/architecture/DECISION_INTELLIGENCE_ENGINE.md` |
 | [Evidence Pipeline Specification](../architecture/EVIDENCE_PIPELINE_SPECIFICATION.md) | Draft | `docs/architecture/EVIDENCE_PIPELINE_SPECIFICATION.md` |
 | [Explainability Engine Specification](../architecture/EXPLAINABILITY_ENGINE_SPECIFICATION.md) | Draft | `docs/architecture/EXPLAINABILITY_ENGINE_SPECIFICATION.md` |
-| [Decision Quality Standard](./DECISION_QUALITY_STANDARD.md) | Draft for ratification — Part 7 bound to ACR Contract v1 | `docs/governance/DECISION_QUALITY_STANDARD.md` |
+| Decision Quality Standard | DRAFT (future artifact; not in repository baseline) | — |
 | [ADR-0014 — Decision Case SoR & Pathway Consolidation](../adr/ADR-0014-Decision-Case-System-of-Record-and-Pathway-Consolidation.md) | RATIFIED | `docs/adr/ADR-0014-Decision-Case-System-of-Record-and-Pathway-Consolidation.md` |
 | [ADR-0015 — Decision Case API Contract v1](../adr/ADR-0015-Decision-Case-API-Contract-v1.md) | ACCEPTED | `docs/adr/ADR-0015-Decision-Case-API-Contract-v1.md` |
 | [ADR-0015 Wire Supplement 01 — E5 Activation](../adr/ADR-0015-WIRE-SUPPLEMENT-01-E5-Activation.md) | RATIFIED (DEC-0020 ACCEPTED) | `docs/adr/ADR-0015-WIRE-SUPPLEMENT-01-E5-Activation.md` — E5 subset + wire; no ACR amend |
 | [GOV-ISSUE-003 — ADR-0015 wire gaps](./GOV-ISSUE-003-ADR0015-WIRE-CONTRACT-GAPS.md) | CLOSED | `docs/governance/GOV-ISSUE-003-ADR0015-WIRE-CONTRACT-GAPS.md` |
 | [EPIC-001 Lifecycle Activation Profile (LAP-001)](./EPIC-001-LIFECYCLE-ACTIVATION-PROFILE.md) | ACCEPTED (incl. §2.9–§2.11 per DEC-0019) | `docs/governance/EPIC-001-LIFECYCLE-ACTIVATION-PROFILE.md` |
+| [GOV-ISSUE-001 — EPIC-001 package module conflict](./GOV-ISSUE-001-EPIC001-PACKAGE-MODULE-CONFLICT.md) | CLOSED | `docs/governance/GOV-ISSUE-001-EPIC001-PACKAGE-MODULE-CONFLICT.md` |
 | [GOV-ISSUE-002 — Side-state & activation clarification](./GOV-ISSUE-002-LIFECYCLE-SIDE-STATE-AND-ACTIVATION-CLARIFICATION.md) | CLOSED | `docs/governance/GOV-ISSUE-002-LIFECYCLE-SIDE-STATE-AND-ACTIVATION-CLARIFICATION.md` — DEC-0019; does not amend ACR |
 | Phase 3 Architecture Blueprint | Draft | `docs/architecture/PHASE3_ARCHITECTURE_BLUEPRINT.md` |
 | [ADR-0010 — Canonical Memory Graph L0 Boundaries](../adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md) | Accepted (2026-07-23) | `docs/adr/ADR-0010-Canonical-Memory-Graph-and-Personal-Intelligence-Memory-Boundaries.md` — L0 ownership/admission only; **does not authorize implementation** |

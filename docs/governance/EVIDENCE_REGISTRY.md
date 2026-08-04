@@ -189,3 +189,20 @@ Future extensions must remain compatible with this registry and require governan
 | [Evidence Pipeline Specification](../architecture/EVIDENCE_PIPELINE_SPECIFICATION.md) | Level 3 — conceptual evidence flow; Validation stage enforces registry quality levels |
 
 **Registered evidence entries:** *None yet — registry framework only. Approved evidence frameworks will be added later.*
+
+---
+
+## Eligibility States (ACR-0001)
+
+Normative eligibility vocabulary for binding evidence to Decision Cases (see [ACR-0001 §B6](../architecture/ARCHITECTURE_CONSOLIDATION_RESOLUTION.md)):
+
+| State | May support decision-bearing claims? |
+|-------|--------------------------------------|
+| `supported` | Yes |
+| `partial` | Yes, with mandatory confidence penalty |
+| `unknown` | No |
+| `unavailable` | No — must surface in improve_accuracy / penalties |
+| `provisional` | Yes only under ACR M1 provisional policy with labeled claims + confidence cap |
+| `rejected` | No |
+
+This registry remains the sole authority for **framework registration**. ACR governs how eligibility states constrain recommendations. After migration phase M2, decision-bearing claims without eligible evidence are rejected.

@@ -4,11 +4,11 @@
 
 **Version:** 1.0.0
 
-**Authority:** This document derives from [METIORO Constitution](../governance/METIORO_CONSTITUTION.md), [Trust Architecture](../governance/TRUST_ARCHITECTURE.md), and [Brand Identity Standard](../governance/BRAND_IDENTITY_STANDARD.md).
+**Authority:** This document derives from [METIORO Product Constitution](../governance/METIORO_PRODUCT_CONSTITUTION.md), [Trust Architecture](../governance/TRUST_ARCHITECTURE.md), [Brand Identity Standard](../governance/BRAND_IDENTITY_STANDARD.md), and is **subordinate to [ACR-0001](./ARCHITECTURE_CONSOLIDATION_RESOLUTION.md)** on Decision Case SoR, evaluation pathway exclusivity, Evaluation Contract, and repository ownership.
 
-**Document type:** Canonical architecture specification — conceptual only.
+**Document type:** Canonical architecture specification — conceptual only — **engine internals layer**.
 
-**Purpose:** Define the single authoritative conceptual model of the METIORO Decision Intelligence Engine. Every future engineering design, ADR, API contract, implementation, and product module must derive from this specification.
+**Purpose:** Define the conceptual model of the METIORO Decision Intelligence Engine *within* the consolidated Decision Case pathway. Decision Request is an **invocation view** of a Decision Case. Decision Outcome Package is renamed **DecisionEvaluationPackage** (ACR §B3). This document does not outrank ACR-0001.
 
 **Scope:** Concepts, responsibilities, boundaries, relationships, and invariants of the Decision Intelligence Engine. This document does not prescribe technology, interfaces, algorithms, data structures, deployment, or operational procedures.
 
