@@ -31,13 +31,17 @@ vi.mock('./user-locations', () => ({
   }),
 }));
 
-type LoadMonthCacheArgs = [year: number, month: number, action: string, evalCity?: string];
+type CalendarScoringInput = {
+  dates: string[];
+  action_type: string;
+  [key: string]: unknown;
+};
+
+type LoadMonthCacheArgs = [input: CalendarScoringInput];
 type SaveMonthCacheArgs = [
-  year: number,
-  month: number,
-  action: string,
+  input: CalendarScoringInput,
   scores: Record<string, number>,
-  evalCity?: string,
+  options?: { backendVersion?: string | null },
 ];
 
 const loadMonthCache = vi.fn<
@@ -45,10 +49,16 @@ const loadMonthCache = vi.fn<
 >(() => null);
 const saveMonthCache = vi.fn<(...args: SaveMonthCacheArgs) => void>(() => undefined);
 
-vi.mock('./calendar-cache', () => ({
-  loadMonthCache: (...args: LoadMonthCacheArgs) => loadMonthCache(...args),
-  saveMonthCache: (...args: SaveMonthCacheArgs) => saveMonthCache(...args),
-}));
+vi.mock('./calendar-cache', async () => {
+  const actual = await vi.importActual<typeof import('./calendar-cache')>(
+    './calendar-cache'
+  );
+  return {
+    ...actual,
+    loadMonthCache: (...args: LoadMonthCacheArgs) => loadMonthCache(...args),
+    saveMonthCache: (...args: SaveMonthCacheArgs) => saveMonthCache(...args),
+  };
+});
 
 const profile = {
   birth_date: '1980-09-17',
@@ -231,7 +241,7 @@ describe('fetchMonthScores empty-cache regression', () => {
     expect(saveMonthCache).not.toHaveBeenCalled();
   });
 
-  it('caches and returns valid daily scores from /api/batch', async () => {
+  it('does not cache an incomplete month from /api/batch', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -250,10 +260,26 @@ describe('fetchMonthScores empty-cache regression', () => {
       '2026-07-01': 72,
       '2026-07-02': 88,
     });
-    expect(saveMonthCache).toHaveBeenCalledTimes(1);
-    expect(saveMonthCache.mock.calls[0]?.[3]).toEqual({
-      '2026-07-01': 72,
-      '2026-07-02': 88,
+    expect(saveMonthCache).not.toHaveBeenCalled();
+  });
+
+  it('caches a complete month from /api/batch', async () => {
+    const dayPayloads: Record<string, { executive: { score: number } }> = {};
+    for (let day = 1; day <= 31; day += 1) {
+      const date = `2026-07-${String(day).padStart(2, '0')}`;
+      dayPayloads[date] = { executive: { score: 60 + (day % 10) } };
+    }
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ scores: dayPayloads }),
     });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await fetchMonthScores(profile, 2026, 7);
+
+    expect(Object.keys(result.scores)).toHaveLength(31);
+    expect(saveMonthCache).toHaveBeenCalledTimes(1);
+    expect(saveMonthCache.mock.calls[0]?.[1]).toEqual(result.scores);
+    expect(saveMonthCache.mock.calls[0]?.[0]?.dates).toHaveLength(31);
   });
 });

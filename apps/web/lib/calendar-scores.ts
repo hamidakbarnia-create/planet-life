@@ -19,8 +19,12 @@ import {
   type ScoreBand,
 } from './timing-presentation';
 import {
+  buildCalendarFetchDiagnostic,
   loadMonthCache,
+  normalizeCalendarScoringInput,
   saveMonthCache,
+  setLastCalendarScoreFetchDiagnostic,
+  type CalendarScoringInput,
 } from './calendar-cache';
 
 import {
@@ -31,6 +35,15 @@ import {
 } from './calendar-client';
 
 export { API_BASE } from './api-config';
+export {
+  CALENDAR_CACHE_VERSION,
+  clearMonthScoreCaches,
+  fingerprintCalendarScoringInput,
+  getLastCalendarScoreFetchDiagnostic,
+  scoreMapChecksum,
+  type CalendarScoreFetchDiagnostic,
+  type CalendarScoringInput,
+} from './calendar-cache';
 
 export interface DayScore {
   date: string;
@@ -76,6 +89,12 @@ export function scoringLocationFields(
     location: payload.location,
     evaluation_location: payload.evaluation_location,
   };
+  if (payload.birth_latitude != null) {
+    out.birth_latitude = payload.birth_latitude;
+  }
+  if (payload.birth_longitude != null) {
+    out.birth_longitude = payload.birth_longitude;
+  }
   if (payload.evaluation_latitude != null) {
     out.evaluation_latitude = payload.evaluation_latitude;
   }
@@ -86,6 +105,68 @@ export function scoringLocationFields(
     out.evaluation_timezone = payload.evaluation_timezone;
   }
   return out;
+}
+
+function monthDateList(year: number, month: number): string[] {
+  const total = daysInMonth(year, month);
+  return Array.from({ length: total }, (_, i) =>
+    formatDateYMD(year, month, i + 1)
+  );
+}
+
+/** Canonical score-affecting identity for month batch cache + diagnostics. */
+export function buildMonthScoringInput(
+  profile: BirthProfile,
+  year: number,
+  month: number,
+  evaluation?: UserLocation | null
+): CalendarScoringInput | null {
+  const evalLoc = evaluation ?? resolveCalendarEvaluationLocation(profile);
+  const locFields = scoringLocationFields(profile, evalLoc);
+  if (!locFields) return null;
+  const prefs = chartPreferenceFields();
+  return normalizeCalendarScoringInput({
+    birth_date: profile.birth_date,
+    birth_time: profile.birth_time,
+    birth_location: String(locFields.location ?? profile.location),
+    birth_latitude:
+      typeof locFields.birth_latitude === 'number'
+        ? locFields.birth_latitude
+        : null,
+    birth_longitude:
+      typeof locFields.birth_longitude === 'number'
+        ? locFields.birth_longitude
+        : null,
+    evaluation_location: String(locFields.evaluation_location ?? ''),
+    evaluation_latitude:
+      typeof locFields.evaluation_latitude === 'number'
+        ? locFields.evaluation_latitude
+        : null,
+    evaluation_longitude:
+      typeof locFields.evaluation_longitude === 'number'
+        ? locFields.evaluation_longitude
+        : null,
+    evaluation_timezone:
+      typeof locFields.evaluation_timezone === 'string'
+        ? locFields.evaluation_timezone
+        : null,
+    house_system: prefs.house_system,
+    zodiac: prefs.zodiac,
+    action_type: profile.action_type,
+    year,
+    month,
+    dates: monthDateList(year, month),
+  });
+}
+
+function isCompleteMonthScores(
+  scores: Record<string, number>,
+  dates: string[]
+): boolean {
+  return dates.every(
+    (date) =>
+      typeof scores[date] === 'number' && Number.isFinite(scores[date])
+  );
 }
 
 export async function fetchDayScore(
@@ -158,20 +239,29 @@ export async function fetchMonthScores(
   evaluation?: UserLocation | null
 ): Promise<MonthScoresResult> {
   const evalLoc = evaluation ?? resolveCalendarEvaluationLocation(profile);
-  const evalLabel = evalLoc?.city;
   const locFields = scoringLocationFields(profile, evalLoc);
-  if (!locFields) return { scores: {}, breakdowns: {}, reasoning: {} };
+  const scoringInput = buildMonthScoringInput(profile, year, month, evalLoc);
+  if (!locFields || !scoringInput) {
+    return { scores: {}, breakdowns: {}, reasoning: {} };
+  }
 
-  const cached = loadMonthCache(year, month, profile.action_type, evalLabel);
+  const cached = loadMonthCache(scoringInput);
   // Empty {} must not short-circuit — it is a cache miss (failed prior load).
   if (cached && Object.keys(cached).length > 0) {
+    const diagnostic = buildCalendarFetchDiagnostic({
+      cache: 'hit',
+      input: scoringInput,
+      scores: cached,
+    });
+    setLastCalendarScoreFetchDiagnostic(diagnostic);
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[calendar-scores]', diagnostic);
+    }
     return { scores: cached, breakdowns: {}, reasoning: {} };
   }
 
-  const total = daysInMonth(year, month);
-  const dates = Array.from({ length: total }, (_, i) =>
-    formatDateYMD(year, month, i + 1)
-  );
+  const dates = scoringInput.dates;
+  const total = dates.length;
 
   onProgress?.(0, total);
 
@@ -192,6 +282,13 @@ export async function fetchMonthScores(
     });
     if (!res.ok) {
       onProgress?.(total, total);
+      setLastCalendarScoreFetchDiagnostic(
+        buildCalendarFetchDiagnostic({
+          cache: 'miss',
+          input: scoringInput,
+          scores,
+        })
+      );
       return { scores, breakdowns, reasoning };
     }
     const data = await res.json();
@@ -214,12 +311,22 @@ export async function fetchMonthScores(
   }
 
   onProgress?.(total, total);
-  if (Object.keys(scores).length > 0) {
-    saveMonthCache(year, month, profile.action_type, scores, evalLabel);
+  // Persist only complete months so Outlook / Weekly Path / cells share one map.
+  if (isCompleteMonthScores(scores, dates)) {
+    saveMonthCache(scoringInput, scores);
+  }
+  const diagnostic = buildCalendarFetchDiagnostic({
+    cache: 'miss',
+    input: scoringInput,
+    scores,
+  });
+  setLastCalendarScoreFetchDiagnostic(diagnostic);
+  if (process.env.NODE_ENV === 'development') {
+    // No raw birth fields — fingerprint + checksum only.
+    console.debug('[calendar-scores]', diagnostic);
   }
   return { scores, breakdowns, reasoning };
 }
-
 export async function fetchHourlyScores(
   profile: BirthProfile,
   targetDate: string,

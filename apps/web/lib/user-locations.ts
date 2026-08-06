@@ -134,7 +134,12 @@ export function clearCalendarScoreCaches(): void {
   const keys: string[] = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key?.startsWith('planet-life-cal-')) keys.push(key);
+    if (
+      key?.startsWith('planet-life-cal-') ||
+      key?.startsWith('metioro-cal-v2-')
+    ) {
+      keys.push(key);
+    }
   }
   for (const key of keys) {
     localStorage.removeItem(key);
