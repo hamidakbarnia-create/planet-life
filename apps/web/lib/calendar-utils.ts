@@ -87,3 +87,45 @@ export function parseIsoDate(
   if (!year || !month || !day) return null;
   return { year, month, day };
 }
+
+/**
+ * Sunday-start week (7 ISO dates) containing `isoDate`.
+ * Matches `calendarCells` week rows, including cross-month days.
+ */
+export function sundayWeekDatesContaining(isoDate: string): string[] {
+  const parsed = parseIsoDate(isoDate);
+  if (!parsed) return [];
+  const dow = new Date(parsed.year, parsed.month - 1, parsed.day).getDay();
+  const dates: string[] = [];
+  for (let offset = 0; offset < 7; offset += 1) {
+    const d = new Date(
+      parsed.year,
+      parsed.month - 1,
+      parsed.day - dow + offset
+    );
+    dates.push(formatDateYMD(d.getFullYear(), d.getMonth() + 1, d.getDate()));
+  }
+  return dates;
+}
+
+/** Keep a day-of-month when navigating months (clamped to month length). */
+export function clampIsoDateToMonth(
+  isoDate: string | null | undefined,
+  year: number,
+  month: number
+): string {
+  const parsed = isoDate ? parseIsoDate(isoDate) : null;
+  const day = parsed?.day ?? 1;
+  const dim = new Date(year, month, 0).getDate();
+  return formatDateYMD(year, month, Math.min(Math.max(day, 1), dim));
+}
+
+/** True when ISO date falls in the Gregorian year/month. */
+export function isoDateInMonth(
+  isoDate: string | null | undefined,
+  year: number,
+  month: number
+): boolean {
+  const parsed = isoDate ? parseIsoDate(isoDate) : null;
+  return parsed != null && parsed.year === year && parsed.month === month;
+}

@@ -1,5 +1,7 @@
-import type { AppLang } from './app-settings';
+import type { AppLang, CalendarSystem } from './app-settings';
 import { formatHourLabel, type HourScore } from './calendar-scores';
+import { parseIsoDate, sundayWeekDatesContaining } from './calendar-utils';
+import { DATE_LOCALES, formatCompactCalendarDate } from './date-format';
 
 type GpsTone = 'green' | 'yellow' | 'orange' | 'red' | 'empty';
 
@@ -138,11 +140,24 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
 };
 
 export interface StrategicGpsWeek {
+  /** Localized weekday or compact date axis label. */
   label: string;
+  /** Exact `scores[date]` from the canonical month score map (never avg/max). */
   score: number | null;
   tone: GpsTone;
   action: string;
+  /** Date (YYYY-MM-DD) for this path point. */
+  date: string | null;
+  /** Single-date membership for highlight/sync (length 0–1). */
+  dates: string[];
 }
+
+export type BuildStrategicGpsOptions = {
+  /** Canonical selected Gregorian ISO date — Weekly Path is this date's Sunday-start week. */
+  selectedDate?: string | null;
+  /** Active display calendar for compact cross-month axis labels. */
+  calendar?: CalendarSystem;
+};
 
 export interface StrategicGps {
   text: GpsTextPack;
@@ -187,10 +202,69 @@ function weekAction(tone: GpsTone, text: GpsTextPack): string {
   return text.noData;
 }
 
+function shortWeekdayLabel(isoDate: string, lang: AppLang): string {
+  const parsed = parseIsoDate(isoDate);
+  if (!parsed) return isoDate;
+  const date = new Date(Date.UTC(parsed.year, parsed.month - 1, parsed.day));
+  return new Intl.DateTimeFormat(DATE_LOCALES[lang] ?? DATE_LOCALES.en, {
+    weekday: 'short',
+    timeZone: 'UTC',
+  }).format(date);
+}
+
+/** Weekday when in the selected date's month; compact date when the week crosses months. */
+export function weeklyPathAxisLabel(
+  isoDate: string,
+  selectedDate: string,
+  lang: AppLang,
+  calendar: CalendarSystem
+): string {
+  const point = parseIsoDate(isoDate);
+  const selected = parseIsoDate(selectedDate);
+  if (
+    point &&
+    selected &&
+    (point.year !== selected.year || point.month !== selected.month)
+  ) {
+    return formatCompactCalendarDate(lang, isoDate, calendar);
+  }
+  return shortWeekdayLabel(isoDate, lang);
+}
+
+/**
+ * Weekly Path = seven canonical day scores for the Sunday-start week containing
+ * `selectedDate`. Each point is `scores[date]` exactly — no average, no max.
+ */
+export function buildWeeklyPathPoints(
+  scores: Record<string, number>,
+  selectedDate: string | null | undefined,
+  lang: AppLang,
+  calendar: CalendarSystem = 'gregorian',
+  text?: GpsTextPack
+): StrategicGpsWeek[] {
+  const pack = text ?? GPS_TEXT[lang] ?? GPS_TEXT.en;
+  if (!selectedDate) return [];
+  return sundayWeekDatesContaining(selectedDate).map((date) => {
+    const raw = scores[date];
+    const score =
+      typeof raw === 'number' && !Number.isNaN(raw) ? raw : null;
+    const tone = toneFromScore(score);
+    return {
+      label: weeklyPathAxisLabel(date, selectedDate, lang, calendar),
+      score,
+      tone,
+      action: weekAction(tone, pack),
+      date,
+      dates: [date],
+    };
+  });
+}
+
 export function buildStrategicGps(
   scores: Record<string, number>,
   hourly: HourScore[],
-  lang: AppLang
+  lang: AppLang,
+  options: BuildStrategicGpsOptions = {}
 ): StrategicGps {
   const text = GPS_TEXT[lang] ?? GPS_TEXT.en;
   const values = Object.values(scores).filter((score) => typeof score === 'number');
@@ -198,28 +272,15 @@ export function buildStrategicGps(
   const monthTone = toneFromScore(monthScore);
   const goldenCount = values.filter((score) => score >= 85).length;
   const cautionCount = values.filter((score) => score < 40).length;
+  const calendar = options.calendar ?? 'gregorian';
 
-  const weekBuckets = new Map<number, number[]>();
-  for (const [date, score] of Object.entries(scores)) {
-    if (typeof score !== 'number') continue;
-    const day = Number(date.slice(-2));
-    if (!Number.isFinite(day)) continue;
-    const week = Math.floor((day - 1) / 7) + 1;
-    const bucket = weekBuckets.get(week) ?? [];
-    bucket.push(score);
-    weekBuckets.set(week, bucket);
-  }
-
-  const weeks = Array.from({ length: 5 }, (_, index) => {
-    const score = average(weekBuckets.get(index + 1) ?? []);
-    const tone = toneFromScore(score);
-    return {
-      label: `${text.week} ${index + 1}`,
-      score,
-      tone,
-      action: weekAction(tone, text),
-    };
-  });
+  const weeks = buildWeeklyPathPoints(
+    scores,
+    options.selectedDate,
+    lang,
+    calendar,
+    text
+  );
 
   const bestHour = hourly.length
     ? hourly.reduce((best, hour) => (hour.score > best.score ? hour : best), hourly[0])

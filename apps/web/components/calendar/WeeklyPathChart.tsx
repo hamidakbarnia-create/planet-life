@@ -5,6 +5,8 @@ import { GPS_TONE_STYLES, type StrategicGpsWeek } from '@/lib/strategic-gps';
 
 export type WeeklyPathChartProps = {
   weeks: StrategicGpsWeek[];
+  /** Highlight the point whose `date` equals this canonical selected ISO date. */
+  selectedDate?: string | null;
 };
 
 const WIDTH = 280;
@@ -38,15 +40,20 @@ function smoothPath(points: Array<{ x: number; y: number }>): string {
   return d;
 }
 
-/** Short axis label derived from existing week.label (no new score math). */
+/** Axis label as provided (weekday / compact date) — no score math. */
 export function shortWeekAxisLabel(label: string): string {
   const trimmed = label.trim();
-  const match = trimmed.match(/(\d+)\s*$/);
-  if (match) return match[1];
-  return trimmed.length > 4 ? trimmed.slice(0, 4) : trimmed;
+  if (!trimmed) return trimmed;
+  // Legacy "Week N" → digit only (tests / older callers).
+  const weekMatch = trimmed.match(/^(?:Week|Неделя|هفته|أسبوع)\s+(\d+)$/i);
+  if (weekMatch) return weekMatch[1];
+  return trimmed;
 }
 
-export function WeeklyPathChart({ weeks }: WeeklyPathChartProps) {
+export function WeeklyPathChart({
+  weeks,
+  selectedDate = null,
+}: WeeklyPathChartProps) {
   const plotWidth = WIDTH - PAD_X * 2;
   const plotHeight = HEIGHT - PAD_TOP - PAD_BOTTOM;
   const count = Math.max(weeks.length, 1);
@@ -60,13 +67,22 @@ export function WeeklyPathChart({ weeks }: WeeklyPathChartProps) {
     return { week, x, y, index };
   });
 
-  let peakIndex = -1;
-  let peakScore = -Infinity;
+  let highlightIndex = -1;
   for (let i = 0; i < points.length; i += 1) {
-    const score = points[i].week.score;
-    if (score != null && score > peakScore) {
-      peakScore = score;
-      peakIndex = i;
+    if (selectedDate && points[i].week.date === selectedDate) {
+      highlightIndex = i;
+      break;
+    }
+  }
+  // If no selectedDate match, emphasize the highest scored day in the week.
+  if (highlightIndex < 0) {
+    let peakScore = -Infinity;
+    for (let i = 0; i < points.length; i += 1) {
+      const score = points[i].week.score;
+      if (score != null && score > peakScore) {
+        peakScore = score;
+        highlightIndex = i;
+      }
     }
   }
 
@@ -105,11 +121,16 @@ export function WeeklyPathChart({ weeks }: WeeklyPathChartProps) {
           const style = GPS_TONE_STYLES[week.tone];
           const percent =
             week.score == null ? '--' : formatReadinessPercent(week.score);
-          const isPeak = index === peakIndex;
+          const isHighlighted = index === highlightIndex;
           const aria = `${week.label}, ${percent}, ${week.action}`;
           return (
-            <g key={week.label} data-week-point={week.label}>
-              {isPeak && (
+            <g
+              key={week.date ?? week.label}
+              data-week-point={week.label}
+              data-path-date={week.date ?? ''}
+              data-path-highlighted={isHighlighted ? 'true' : 'false'}
+            >
+              {isHighlighted && (
                 <circle
                   cx={x}
                   cy={y}
@@ -122,7 +143,7 @@ export function WeeklyPathChart({ weeks }: WeeklyPathChartProps) {
               <circle
                 cx={x}
                 cy={y}
-                r={isPeak ? 5 : 3.75}
+                r={isHighlighted ? 5 : 3.75}
                 fill={style.color}
                 stroke="rgba(8,12,24,0.85)"
                 strokeWidth={1.25}
@@ -133,7 +154,7 @@ export function WeeklyPathChart({ weeks }: WeeklyPathChartProps) {
               </circle>
               <text
                 x={x}
-                y={y - (isPeak ? 14 : 11)}
+                y={y - (isHighlighted ? 14 : 11)}
                 textAnchor="middle"
                 className="fi"
                 style={{
@@ -166,7 +187,7 @@ export function WeeklyPathChart({ weeks }: WeeklyPathChartProps) {
       {/* Screen-reader list mirrors existing week fields without color-only meaning */}
       <ul className="sr-only">
         {weeks.map((week) => (
-          <li key={`sr-${week.label}`}>
+          <li key={`sr-${week.date ?? week.label}`}>
             {week.label},{' '}
             {week.score == null ? '--' : formatReadinessPercent(week.score)},{' '}
             {week.action}

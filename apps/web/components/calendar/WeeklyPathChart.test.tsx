@@ -12,55 +12,142 @@ afterEach(() => {
   cleanup();
 });
 
-const WEEKS: StrategicGpsWeek[] = [
-  { label: 'Week 1', score: 59, tone: 'orange', action: 'review' },
-  { label: 'Week 2', score: 64, tone: 'yellow', action: 'build' },
-  { label: 'Week 3', score: 82, tone: 'yellow', action: 'build' },
-  { label: 'Week 4', score: 48, tone: 'orange', action: 'review' },
-  { label: 'Week 5', score: 37, tone: 'red', action: 'pause' },
+const DAYS: StrategicGpsWeek[] = [
+  {
+    label: 'Sun',
+    score: 46,
+    tone: 'orange',
+    action: 'review',
+    date: '2026-08-02',
+    dates: ['2026-08-02'],
+  },
+  {
+    label: 'Mon',
+    score: 65,
+    tone: 'yellow',
+    action: 'build',
+    date: '2026-08-03',
+    dates: ['2026-08-03'],
+  },
+  {
+    label: 'Tue',
+    score: 86,
+    tone: 'green',
+    action: 'advance',
+    date: '2026-08-04',
+    dates: ['2026-08-04'],
+  },
+  {
+    label: 'Wed',
+    score: 58,
+    tone: 'orange',
+    action: 'review',
+    date: '2026-08-05',
+    dates: ['2026-08-05'],
+  },
+  {
+    label: 'Thu',
+    score: 56,
+    tone: 'orange',
+    action: 'review',
+    date: '2026-08-06',
+    dates: ['2026-08-06'],
+  },
+  {
+    label: 'Fri',
+    score: 70,
+    tone: 'yellow',
+    action: 'build',
+    date: '2026-08-07',
+    dates: ['2026-08-07'],
+  },
+  {
+    label: 'Sat',
+    score: 62,
+    tone: 'yellow',
+    action: 'build',
+    date: '2026-08-08',
+    dates: ['2026-08-08'],
+  },
 ];
 
 describe('WeeklyPathChart', () => {
-  it('renders one point per week with existing percentages and labels', () => {
-    render(<WeeklyPathChart weeks={WEEKS} />);
+  it('renders one point per provided day with percentages and labels', () => {
+    render(<WeeklyPathChart weeks={DAYS} />);
     expect(document.querySelector('[data-weekly-path-chart]')).toBeTruthy();
     const points = document.querySelectorAll('[data-week-point]');
-    expect(points).toHaveLength(5);
+    expect(points).toHaveLength(7);
 
-    for (const week of WEEKS) {
-      expect(document.querySelector(`[data-week-point="${week.label}"]`)).toBeTruthy();
+    for (const day of DAYS) {
+      expect(document.querySelector(`[data-week-point="${day.label}"]`)).toBeTruthy();
       expect(
-        document.querySelector(`[data-week-axis-label="${week.label}"]`)
+        document.querySelector(`[data-week-axis-label="${day.label}"]`)
       ).toBeTruthy();
-      expect(screen.getByText(`${week.score}%`)).toBeTruthy();
+      expect(screen.getByText(`${day.score}%`)).toBeTruthy();
     }
 
-    // Axis short form derives from existing label — no score recalculation
     expect(shortWeekAxisLabel('Week 3')).toBe('3');
-    expect(shortWeekAxisLabel('هفته 2')).toBe('2');
+    expect(shortWeekAxisLabel('Mon')).toBe('Mon');
+    expect(shortWeekAxisLabel('26 Jul')).toBe('26 Jul');
   });
 
-  it('does not recalculate week scores — renders provided values only', () => {
+  it('does not recalculate scores — renders provided values only', () => {
     const source = readFileSync(
       resolve(__dirname, './WeeklyPathChart.tsx'),
       'utf8'
     );
     expect(source).not.toMatch(/\baverage\b|\btoneFromScore\b/);
     expect(source).toContain('formatReadinessPercent(week.score)');
-    // Chart only plots provided week.score values
     expect(source).toContain('week.score');
 
-    render(<WeeklyPathChart weeks={WEEKS} />);
-    expect(screen.getByText('82%')).toBeTruthy();
-    expect(screen.getByText('37%')).toBeTruthy();
-    expect(screen.queryByText('58%')).toBeNull(); // not an average of inputs
+    render(<WeeklyPathChart weeks={DAYS} />);
+    expect(screen.getByText('86%')).toBeTruthy();
+    expect(screen.queryByText('79%')).toBeNull();
   });
 
-  it('exposes accessible aria-labels with week label, percentage, and action', () => {
-    render(<WeeklyPathChart weeks={WEEKS} />);
-    const labeled = screen.getByLabelText('Week 3, 82%, build');
-    expect(labeled).toBeTruthy();
-    expect(screen.getByLabelText('Week 5, 37%, pause')).toBeTruthy();
+  it('highlights the path point whose date equals selectedDate', () => {
+    render(<WeeklyPathChart weeks={DAYS} selectedDate="2026-08-04" />);
+    const highlighted = document.querySelector(
+      '[data-path-highlighted="true"]'
+    );
+    expect(highlighted?.getAttribute('data-path-date')).toBe('2026-08-04');
+    expect(highlighted?.getAttribute('data-week-point')).toBe('Tue');
+  });
+
+  it('renders GPS selected-week scores matching calendar cells', () => {
+    const monthOutlook = buildStrategicGps(
+      {
+        '2026-08-02': 46,
+        '2026-08-03': 65,
+        '2026-08-04': 86,
+        '2026-08-05': 58,
+        '2026-08-06': 56,
+        '2026-08-07': 70,
+        '2026-08-08': 62,
+      },
+      [],
+      'en',
+      { selectedDate: '2026-08-05' }
+    );
+    expect(monthOutlook.weeks).toHaveLength(7);
+    render(
+      <WeeklyPathChart
+        weeks={monthOutlook.weeks}
+        selectedDate="2026-08-05"
+      />
+    );
+    expect(screen.getByText('86%')).toBeTruthy();
+    expect(screen.queryByText('79%')).toBeNull();
+    const highlighted = document.querySelector(
+      '[data-path-highlighted="true"]'
+    );
+    expect(highlighted?.getAttribute('data-path-date')).toBe('2026-08-05');
+  });
+
+  it('exposes accessible aria-labels with day label, percentage, and action', () => {
+    render(<WeeklyPathChart weeks={DAYS} />);
+    expect(screen.getByLabelText('Tue, 86%, advance')).toBeTruthy();
+    expect(screen.getByLabelText('Sat, 62%, build')).toBeTruthy();
   });
 });
 
@@ -68,20 +155,24 @@ describe('Weekly Path chart desktop vs mobile rail', () => {
   it('shows chart on desktop and compact mobile rails', () => {
     const monthOutlook = buildStrategicGps(
       {
-        '2026-08-01': 54,
-        '2026-08-08': 70,
-        '2026-08-15': 82,
-        '2026-08-22': 40,
-        '2026-08-29': 30,
+        '2026-08-02': 54,
+        '2026-08-03': 70,
+        '2026-08-04': 82,
+        '2026-08-05': 40,
+        '2026-08-06': 30,
+        '2026-08-07': 50,
+        '2026-08-08': 60,
       },
       [],
-      'en'
+      'en',
+      { selectedDate: '2026-08-05' }
     );
 
     const { rerender } = render(
       <StrategicInsightRail
         monthOutlook={monthOutlook}
         selectedDay={{
+          date: '2026-08-05',
           dateLabel: null,
           bestHour: null,
           riskHour: null,
@@ -103,6 +194,7 @@ describe('Weekly Path chart desktop vs mobile rail', () => {
         compact
         monthOutlook={monthOutlook}
         selectedDay={{
+          date: '2026-08-05',
           dateLabel: null,
           bestHour: null,
           riskHour: null,

@@ -17,6 +17,8 @@ export type StrategicInsightRailProps = {
   >;
   /** Selected-day hourly extrema only. */
   selectedDay: {
+    /** ISO YYYY-MM-DD for Weekly Path highlight alignment with calendar selection. */
+    date?: string | null;
     dateLabel: string | null;
     bestHour: HourScore | null;
     riskHour: HourScore | null;
@@ -103,7 +105,10 @@ export function StrategicInsightRail({
           {text.weeklyPath}
         </div>
         {/* Responsive SVG weekly path chart for mobile and desktop. */}
-        <WeeklyPathChart weeks={monthOutlook.weeks} />
+        <WeeklyPathChart
+          weeks={monthOutlook.weeks}
+          selectedDate={selectedDay.date ?? null}
+        />
       </section>
 
       {/* 3. Selected Day Timing — selected-day hourly only */}

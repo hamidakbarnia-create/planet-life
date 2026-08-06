@@ -32,12 +32,15 @@ const HOURLY_B: HourScore[] = [
 
 describe('StrategicInsightRail', () => {
   it('renders rail sections in Month → Week → Selected Day order', () => {
-    const monthOutlook = buildStrategicGps(MONTH_SCORES, [], 'en');
+    const monthOutlook = buildStrategicGps(MONTH_SCORES, [], 'en', {
+      selectedDate: '2026-08-05',
+    });
     const dayGps = buildStrategicGps({}, HOURLY_A, 'en');
     render(
       <StrategicInsightRail
         monthOutlook={monthOutlook}
         selectedDay={{
+          date: '2026-08-05',
           dateLabel: 'Aug 5, 2026',
           bestHour: dayGps.bestHour,
           riskHour: dayGps.riskHour,
@@ -63,12 +66,15 @@ describe('StrategicInsightRail', () => {
   });
 
   it('shows selected date label with Best/Risk as selected-day data', () => {
-    const monthOutlook = buildStrategicGps(MONTH_SCORES, [], 'en');
+    const monthOutlook = buildStrategicGps(MONTH_SCORES, [], 'en', {
+      selectedDate: '2026-08-05',
+    });
     const dayGps = buildStrategicGps({}, HOURLY_A, 'en');
     render(
       <StrategicInsightRail
         monthOutlook={monthOutlook}
         selectedDay={{
+          date: '2026-08-05',
           dateLabel: 'Aug 5, 2026',
           bestHour: dayGps.bestHour,
           riskHour: dayGps.riskHour,
@@ -92,7 +98,9 @@ describe('StrategicInsightRail', () => {
   });
 
   it('does not change Month Outlook when only selected-day hourly data changes', () => {
-    const monthOutlook = buildStrategicGps(MONTH_SCORES, [], 'en');
+    const monthOutlook = buildStrategicGps(MONTH_SCORES, [], 'en', {
+      selectedDate: '2026-08-05',
+    });
     const dayA = buildStrategicGps({}, HOURLY_A, 'en');
     const dayB = buildStrategicGps({}, HOURLY_B, 'en');
 
@@ -100,6 +108,7 @@ describe('StrategicInsightRail', () => {
       <StrategicInsightRail
         monthOutlook={monthOutlook}
         selectedDay={{
+          date: '2026-08-05',
           dateLabel: 'Day A',
           bestHour: dayA.bestHour,
           riskHour: dayA.riskHour,
@@ -125,6 +134,7 @@ describe('StrategicInsightRail', () => {
       <StrategicInsightRail
         monthOutlook={monthOutlook}
         selectedDay={{
+          date: '2026-08-05',
           dateLabel: 'Day B',
           bestHour: dayB.bestHour,
           riskHour: dayB.riskHour,
@@ -166,8 +176,12 @@ describe('Phase 2 page wiring', () => {
     expect(pageSource).toContain('CalendarMonthPanel');
     expect(pageSource).toContain('data-calendar-desktop-rail');
     expect(pageSource).toContain('data-calendar-mobile-timing');
-    expect(pageSource).toContain('buildStrategicGps(scores, [], lang)');
-    expect(pageSource).toContain('buildStrategicGps({}, hourly, lang)');
+    expect(pageSource).toContain('buildStrategicGps(scores, [], lang, {');
+    expect(pageSource).toContain('selectedDate');
+    expect(pageSource).toContain(
+      'buildStrategicGps({}, hourly, lang, { selectedDate, calendar })'
+    );
+    expect(pageSource).toContain('clampIsoDateToMonth');
     // Removed duplicated desktop KPI / verbose details
     expect(pageSource).not.toContain('Desktop: compact Decision Timing KPI');
     expect(pageSource).not.toContain(

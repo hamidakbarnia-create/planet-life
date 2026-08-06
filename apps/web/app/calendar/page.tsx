@@ -54,7 +54,13 @@ import {
   logLocationDebug,
   resolveCalendarEvaluationLocation,
 } from '@/lib/user-locations';
-import { calendarCells, parseIsoDate, todayYMD } from '@/lib/calendar-utils';
+import {
+  calendarCells,
+  clampIsoDateToMonth,
+  parseIsoDate,
+  shiftYearMonth,
+  todayYMD,
+} from '@/lib/calendar-utils';
 import { buildStrategicGps } from '@/lib/strategic-gps';
 import { CALENDAR_PAGE_LANGS } from '@/lib/calendar-page-i18n';
 import { CalendarMonthPanel } from '@/components/calendar/CalendarMonthPanel';
@@ -104,15 +110,19 @@ export default function CalendarPage() {
 
   const t = LANGS[lang];
   const cells = useMemo(() => calendarCells(year, month), [year, month]);
-  // Month Outlook + Weekly Path: monthly scores only (stable when selected day changes).
+  // Month Outlook from month scores; Weekly Path = selectedDate's Sunday-start week.
   const monthGps = useMemo(
-    () => buildStrategicGps(scores, [], lang),
-    [scores, lang]
+    () =>
+      buildStrategicGps(scores, [], lang, {
+        selectedDate,
+        calendar,
+      }),
+    [scores, lang, selectedDate, calendar]
   );
   // Selected Day Timing: hourly extrema for the selected date only.
   const dayGps = useMemo(
-    () => buildStrategicGps({}, hourly, lang),
-    [hourly, lang]
+    () => buildStrategicGps({}, hourly, lang, { selectedDate, calendar }),
+    [hourly, lang, selectedDate, calendar]
   );
 
   const setLang = (l: LangKey) => {
@@ -202,27 +212,21 @@ export default function CalendarPage() {
   }, [selectedDate, profile]);
 
   const shiftMonth = (delta: number) => {
-    let m = month + delta;
-    let y = year;
-    if (m < 1) {
-      m = 12;
-      y -= 1;
-    }
-    if (m > 12) {
-      m = 1;
-      y += 1;
-    }
-    setMonth(m);
-    setYear(y);
+    const next = shiftYearMonth(year, month, delta);
+    setYear(next.year);
+    setMonth(next.month);
+    // Keep Selected Day Timing / Weekly Path on a date inside the viewed month.
+    setSelectedDate((prev) => clampIsoDateToMonth(prev, next.year, next.month));
   };
 
   const handleCellClick = (date: string, inCurrentMonth: boolean) => {
     if (!inCurrentMonth) {
       const parsed = parseIsoDate(date);
       if (!parsed) return;
-      // Navigate to adjacent month; do not select an unscored day in the current month.
+      // Navigate to the adjacent month and select that canonical date.
       setYear(parsed.year);
       setMonth(parsed.month);
+      setSelectedDate(date);
       return;
     }
     setSelectedDate(date);
@@ -319,6 +323,7 @@ export default function CalendarPage() {
             compact
             monthOutlook={monthGps}
             selectedDay={{
+              date: selectedDate,
               dateLabel: selectedDate
                 ? formatDisplayDate(lang, selectedDate, calendar)
                 : null,
@@ -366,6 +371,7 @@ export default function CalendarPage() {
             <StrategicInsightRail
               monthOutlook={monthGps}
               selectedDay={{
+                date: selectedDate,
                 dateLabel: selectedDate
                   ? formatDisplayDate(lang, selectedDate, calendar)
                   : null,
