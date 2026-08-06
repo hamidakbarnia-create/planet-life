@@ -9,6 +9,7 @@ import {
 import {
   buildStrategicGps,
   buildWeeklyPathPoints,
+  findMonthBest,
   weeklyPathAxisLabel,
 } from '@/lib/strategic-gps';
 
@@ -132,5 +133,27 @@ describe('Weekly Path = selected week daily scores', () => {
     expect(clampIsoDateToMonth('2026-08-06', 2026, 3)).toBe('2026-03-06');
     expect(clampIsoDateToMonth('2026-08-31', 2026, 2)).toBe('2026-02-28');
     expect(clampIsoDateToMonth(null, 2026, 8)).toBe('2026-08-01');
+  });
+
+  it('month best finds the true maximum from the same score map without altering the week path', () => {
+    const monthScores = {
+      ...WEEK_SCORES,
+      '2026-08-04': 75, // week still has a high day, but not the month peak
+      '2026-08-20': 86, // month peak outside the selected week
+      '2026-08-21': 80,
+    };
+    const selectedDate = '2026-08-05';
+    const gps = buildStrategicGps(monthScores, [], 'en', { selectedDate });
+
+    expect(gps.weeks).toHaveLength(7);
+    expect(gps.weeks.map((p) => p.score)).toEqual([46, 65, 75, 58, 56, 70, 62]);
+    expect(gps.monthBest?.score).toBe(86);
+    expect(gps.monthBest?.date).toBe('2026-08-20');
+    // Selected day (Wed Aug 5, score 58) differs from month best date
+    expect(selectedDate).not.toBe(gps.monthBest?.date);
+    expect(gps.weeks.find((p) => p.date === selectedDate)?.score).toBe(58);
+
+    const again = findMonthBest(monthScores, 'en', 'gregorian');
+    expect(again).toEqual(gps.monthBest);
   });
 });

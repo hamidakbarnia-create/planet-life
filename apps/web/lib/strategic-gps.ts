@@ -28,6 +28,7 @@ interface GpsTextPack {
   noHourly: string;
   monthOutlook: string;
   weeklyPath: string;
+  monthBest: string;
   selectedDayTiming: string;
   selectedDayScope: string;
 }
@@ -56,6 +57,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     noHourly: 'Select a day to load hourly guidance.',
     monthOutlook: 'Month Outlook',
     weeklyPath: 'Weekly Path',
+    monthBest: 'Month best',
     selectedDayTiming: 'Selected Day Timing',
     selectedDayScope: 'Selected day',
   },
@@ -82,6 +84,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     noHourly: 'Выберите день, чтобы загрузить часы.',
     monthOutlook: 'Обзор месяца',
     weeklyPath: 'Путь недели',
+    monthBest: 'Лучший день месяца',
     selectedDayTiming: 'Тайминг выбранного дня',
     selectedDayScope: 'Выбранный день',
   },
@@ -108,6 +111,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     noHourly: 'یک روز را انتخاب کن تا راهنمای ساعتی بیاید.',
     monthOutlook: 'چشم‌انداز ماه',
     weeklyPath: 'مسیر هفتگی',
+    monthBest: 'بهترین روز ماه',
     selectedDayTiming: 'زمان‌بندی روز انتخاب‌شده',
     selectedDayScope: 'روز انتخاب‌شده',
   },
@@ -134,6 +138,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     noHourly: 'اختر يوماً لتحميل الإرشاد الساعي.',
     monthOutlook: 'نظرة الشهر',
     weeklyPath: 'المسار الأسبوعي',
+    monthBest: 'أفضل يوم في الشهر',
     selectedDayTiming: 'توقيت اليوم المحدد',
     selectedDayScope: 'اليوم المحدد',
   },
@@ -159,6 +164,15 @@ export type BuildStrategicGpsOptions = {
   calendar?: CalendarSystem;
 };
 
+export type MonthBestSummary = {
+  /** Canonical Gregorian ISO date of the highest score in the month map. */
+  date: string;
+  /** Exact score from the canonical month scores map. */
+  score: number;
+  /** Compact localized date label for the callout. */
+  dateLabel: string;
+};
+
 export interface StrategicGps {
   text: GpsTextPack;
   monthScore: number | null;
@@ -166,6 +180,8 @@ export interface StrategicGps {
   monthBody: string;
   goldenCount: number;
   cautionCount: number;
+  /** Peak day in the canonical month scores map (outside Weekly Path chart). */
+  monthBest: MonthBestSummary | null;
   weeks: StrategicGpsWeek[];
   bestHour: HourScore | null;
   riskHour: HourScore | null;
@@ -232,6 +248,30 @@ export function weeklyPathAxisLabel(
 }
 
 /**
+ * Highest day in the canonical month score map.
+ * Does not feed the Weekly Path chart (lookup only; no rescaling).
+ */
+export function findMonthBest(
+  scores: Record<string, number>,
+  lang: AppLang,
+  calendar: CalendarSystem = 'gregorian'
+): MonthBestSummary | null {
+  let best: { date: string; score: number } | null = null;
+  for (const [date, score] of Object.entries(scores)) {
+    if (typeof score !== 'number' || Number.isNaN(score)) continue;
+    if (!best || score > best.score) {
+      best = { date, score };
+    }
+  }
+  if (!best) return null;
+  return {
+    date: best.date,
+    score: best.score,
+    dateLabel: formatCompactCalendarDate(lang, best.date, calendar),
+  };
+}
+
+/**
  * Weekly Path = seven canonical day scores for the Sunday-start week containing
  * `selectedDate`. Each point is `scores[date]` exactly — no average, no max.
  */
@@ -281,6 +321,7 @@ export function buildStrategicGps(
     calendar,
     text
   );
+  const monthBest = findMonthBest(scores, lang, calendar);
 
   const bestHour = hourly.length
     ? hourly.reduce((best, hour) => (hour.score > best.score ? hour : best), hourly[0])
@@ -296,6 +337,7 @@ export function buildStrategicGps(
     monthBody: monthBodyFor(monthTone, text),
     goldenCount,
     cautionCount,
+    monthBest,
     weeks,
     bestHour,
     riskHour,

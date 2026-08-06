@@ -2,18 +2,21 @@
 
 import type { HourScore } from '@/lib/calendar-scores';
 import { formatReadinessPercent } from '@/lib/calendar-scores';
-import {
-  GPS_TONE_STYLES,
-  type StrategicGps,
-  type StrategicGpsWeek,
-} from '@/lib/strategic-gps';
+import { GPS_TONE_STYLES, type StrategicGps } from '@/lib/strategic-gps';
 import { WeeklyPathChart } from '@/components/calendar/WeeklyPathChart';
 
 export type StrategicInsightRailProps = {
   /** Month + week summaries derived from monthly scores only (ignore hourly). */
   monthOutlook: Pick<
     StrategicGps,
-    'text' | 'monthScore' | 'monthTone' | 'monthBody' | 'goldenCount' | 'cautionCount' | 'weeks'
+    | 'text'
+    | 'monthScore'
+    | 'monthTone'
+    | 'monthBody'
+    | 'goldenCount'
+    | 'cautionCount'
+    | 'monthBest'
+    | 'weeks'
   >;
   /** Selected-day hourly extrema only. */
   selectedDay: {
@@ -109,6 +112,28 @@ export function StrategicInsightRail({
           weeks={monthOutlook.weeks}
           selectedDate={selectedDay.date ?? null}
         />
+        {/* Compact month peak — outside the chart; does not alter weekly data/scale. */}
+        {monthOutlook.monthBest ? (
+          <div
+            data-rail-month-best
+            data-month-best-date={monthOutlook.monthBest.date}
+            data-month-best-score={String(monthOutlook.monthBest.score)}
+            className="fi text-[11px] mt-2 leading-snug truncate"
+            style={{ color: 'rgba(255,255,255,0.55)' }}
+          >
+            <span style={{ color: 'rgba(255,255,255,0.45)' }}>
+              {text.monthBest}
+            </span>
+            {' · '}
+            <span style={{ color: 'rgba(251,191,36,0.9)' }}>
+              {monthOutlook.monthBest.dateLabel}
+            </span>
+            {' · '}
+            <span className="fc" style={{ color: '#4ade80' }}>
+              {formatReadinessPercent(monthOutlook.monthBest.score)}
+            </span>
+          </div>
+        ) : null}
       </section>
 
       {/* 3. Selected Day Timing — selected-day hourly only */}

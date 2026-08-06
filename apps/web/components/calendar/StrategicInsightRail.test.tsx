@@ -166,6 +166,95 @@ describe('StrategicInsightRail', () => {
   });
 });
 
+describe('Month best callout', () => {
+  it('shows month best from the canonical map while weekly chart stays at 7 points', () => {
+    const monthOutlook = buildStrategicGps(
+      {
+        '2026-08-02': 46,
+        '2026-08-03': 65,
+        '2026-08-04': 58,
+        '2026-08-05': 56,
+        '2026-08-06': 70,
+        '2026-08-07': 62,
+        '2026-08-08': 50,
+        '2026-08-20': 86,
+      },
+      [],
+      'en',
+      { selectedDate: '2026-08-05' }
+    );
+    expect(monthOutlook.weeks).toHaveLength(7);
+    expect(monthOutlook.monthBest?.score).toBe(86);
+    expect(monthOutlook.monthBest?.date).toBe('2026-08-20');
+    expect(monthOutlook.monthBest?.date).not.toBe('2026-08-05');
+
+    render(
+      <StrategicInsightRail
+        monthOutlook={monthOutlook}
+        selectedDay={{
+          date: '2026-08-05',
+          dateLabel: 'Aug 5, 2026',
+          bestHour: null,
+          riskHour: null,
+          bestHourLabel: null,
+          riskHourLabel: null,
+        }}
+        loadingHourly={false}
+        loadingLabel="Loading"
+      />
+    );
+
+    const callout = document.querySelector('[data-rail-month-best]');
+    expect(callout?.getAttribute('data-month-best-date')).toBe('2026-08-20');
+    expect(callout?.getAttribute('data-month-best-score')).toBe('86');
+    expect(callout?.textContent).toContain('Month best');
+    expect(callout?.textContent).toContain('86%');
+    expect(document.querySelectorAll('[data-week-point]')).toHaveLength(7);
+    expect(
+      document
+        .querySelector('[data-path-highlighted="true"]')
+        ?.getAttribute('data-path-date')
+    ).toBe('2026-08-05');
+    // Single chart only — no second monthly path chart
+    expect(document.querySelectorAll('[data-weekly-path-chart]')).toHaveLength(1);
+  });
+
+  it('keeps month best on compact mobile rail without a second chart', () => {
+    const monthOutlook = buildStrategicGps(
+      {
+        '2026-08-05': 40,
+        '2026-08-20': 86,
+      },
+      [],
+      'en',
+      { selectedDate: '2026-08-05' }
+    );
+    render(
+      <StrategicInsightRail
+        compact
+        monthOutlook={monthOutlook}
+        selectedDay={{
+          date: '2026-08-05',
+          dateLabel: 'Aug 5, 2026',
+          bestHour: null,
+          riskHour: null,
+          bestHourLabel: null,
+          riskHourLabel: null,
+        }}
+        loadingHourly={false}
+        loadingLabel="Loading"
+      />
+    );
+    expect(
+      document
+        .querySelector('[data-strategic-insight-rail]')
+        ?.getAttribute('data-rail-compact')
+    ).toBe('true');
+    expect(document.querySelector('[data-rail-month-best]')).toBeTruthy();
+    expect(document.querySelectorAll('[data-weekly-path-chart]')).toHaveLength(1);
+  });
+});
+
 describe('Phase 2 page wiring', () => {
   it('wires desktop grid+rail and removes duplicate KPI/details', () => {
     const pageSource = readFileSync(
