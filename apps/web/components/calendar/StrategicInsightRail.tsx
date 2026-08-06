@@ -32,6 +32,11 @@ export type StrategicInsightRailProps = {
   loadingLabel: string;
   /** Tighter padding for the compact mobile strip. */
   compact?: boolean;
+  /**
+   * Presentation-only: select Month Best date (no score recalculation).
+   * Parent updates canonical `selectedDate`.
+   */
+  onMonthBestSelect?: (date: string) => void;
 };
 
 export function StrategicInsightRail({
@@ -40,6 +45,7 @@ export function StrategicInsightRail({
   loadingHourly,
   loadingLabel,
   compact = false,
+  onMonthBestSelect,
 }: StrategicInsightRailProps) {
   const { text } = monthOutlook;
   const pad = compact ? 'p-3' : 'p-3.5';
@@ -114,12 +120,22 @@ export function StrategicInsightRail({
         />
         {/* Compact month peak — outside the chart; does not alter weekly data/scale. */}
         {monthOutlook.monthBest ? (
-          <div
+          <button
+            type="button"
             data-rail-month-best
             data-month-best-date={monthOutlook.monthBest.date}
             data-month-best-score={String(monthOutlook.monthBest.score)}
-            className="fi text-[11px] mt-2 leading-snug truncate"
-            style={{ color: 'rgba(255,255,255,0.55)' }}
+            className="fi text-[11px] mt-2 leading-snug truncate w-full text-start rounded-md px-0.5 -mx-0.5 py-0.5 transition-colors hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{
+              color: 'rgba(255,255,255,0.55)',
+              outlineColor: 'rgba(251,191,36,0.55)',
+              cursor: onMonthBestSelect ? 'pointer' : 'default',
+            }}
+            aria-label={`${text.monthBest} · ${monthOutlook.monthBest.dateLabel} · ${formatReadinessPercent(monthOutlook.monthBest.score)}`}
+            onClick={() => {
+              if (!onMonthBestSelect || !monthOutlook.monthBest) return;
+              onMonthBestSelect(monthOutlook.monthBest.date);
+            }}
           >
             <span style={{ color: 'rgba(255,255,255,0.45)' }}>
               {text.monthBest}
@@ -132,7 +148,7 @@ export function StrategicInsightRail({
             <span className="fc" style={{ color: '#4ade80' }}>
               {formatReadinessPercent(monthOutlook.monthBest.score)}
             </span>
-          </div>
+          </button>
         ) : null}
       </section>
 

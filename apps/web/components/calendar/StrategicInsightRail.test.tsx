@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -219,6 +219,82 @@ describe('Month best callout', () => {
     expect(document.querySelectorAll('[data-weekly-path-chart]')).toHaveLength(1);
   });
 
+  it('E/F: clicking Month Best selects that date and keeps rail highlights in sync', () => {
+    const scores = {
+      '2026-08-02': 46,
+      '2026-08-03': 65,
+      '2026-08-04': 58,
+      '2026-08-05': 56,
+      '2026-08-06': 70,
+      '2026-08-07': 62,
+      '2026-08-08': 50,
+      '2026-08-16': 72,
+      '2026-08-17': 68,
+      '2026-08-18': 74,
+      '2026-08-19': 80,
+      '2026-08-20': 86,
+      '2026-08-21': 77,
+      '2026-08-22': 71,
+    };
+    let selectedDate = '2026-08-05';
+    const onMonthBestSelect = vi.fn((date: string) => {
+      selectedDate = date;
+    });
+
+    const initial = buildStrategicGps(scores, [], 'en', { selectedDate });
+    const { rerender } = render(
+      <StrategicInsightRail
+        monthOutlook={initial}
+        selectedDay={{
+          date: selectedDate,
+          dateLabel: 'Aug 5, 2026',
+          bestHour: null,
+          riskHour: null,
+          bestHourLabel: null,
+          riskHourLabel: null,
+        }}
+        loadingHourly={false}
+        loadingLabel="Loading"
+        onMonthBestSelect={onMonthBestSelect}
+      />
+    );
+
+    const scoresBefore = structuredClone(scores);
+    fireEvent.click(document.querySelector('[data-rail-month-best]')!);
+    expect(onMonthBestSelect).toHaveBeenCalledWith('2026-08-20');
+    expect(selectedDate).toBe('2026-08-20');
+    expect(scores).toEqual(scoresBefore);
+
+    const after = buildStrategicGps(scores, [], 'en', { selectedDate });
+    rerender(
+      <StrategicInsightRail
+        monthOutlook={after}
+        selectedDay={{
+          date: selectedDate,
+          dateLabel: 'Aug 20, 2026',
+          bestHour: null,
+          riskHour: null,
+          bestHourLabel: null,
+          riskHourLabel: null,
+        }}
+        loadingHourly={false}
+        loadingLabel="Loading"
+        onMonthBestSelect={onMonthBestSelect}
+      />
+    );
+
+    expect(
+      document
+        .querySelector('[data-path-highlighted="true"]')
+        ?.getAttribute('data-path-date')
+    ).toBe('2026-08-20');
+    expect(
+      document.querySelector('[data-rail-selected-date]')?.textContent
+    ).toContain('Aug 20, 2026');
+    expect(after.weeks.find((p) => p.date === '2026-08-20')?.score).toBe(86);
+    expect(document.querySelectorAll('[data-week-point]')).toHaveLength(7);
+  });
+
   it('keeps month best on compact mobile rail without a second chart', () => {
     const monthOutlook = buildStrategicGps(
       {
@@ -270,6 +346,7 @@ describe('Phase 2 page wiring', () => {
     expect(pageSource).toContain(
       'buildStrategicGps({}, hourly, lang, { selectedDate, calendar })'
     );
+    expect(pageSource).toContain('onMonthBestSelect={handleMonthBestSelect}');
     expect(pageSource).toContain('clampIsoDateToMonth');
     // Removed duplicated desktop KPI / verbose details
     expect(pageSource).not.toContain('Desktop: compact Decision Timing KPI');

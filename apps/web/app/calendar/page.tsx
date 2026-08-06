@@ -232,6 +232,26 @@ export default function CalendarPage() {
     setSelectedDate(date);
   };
 
+  /** Presentation-only: jump selection to Month Best without touching scores. */
+  const handleMonthBestSelect = useCallback((date: string) => {
+    setSelectedDate(date);
+    requestAnimationFrame(() => {
+      const el = document.querySelector(
+        `[data-calendar-cell="${date}"]`
+      );
+      if (!(el instanceof HTMLElement)) return;
+      const rect = el.getBoundingClientRect();
+      const inView =
+        rect.top >= 0 &&
+        rect.bottom <=
+          (window.innerHeight || document.documentElement.clientHeight);
+      if (!inView) {
+        el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+      el.focus({ preventScroll: true });
+    });
+  }, []);
+
   const handleExportMode = (mode: CalendarExportMode) => {
     setExportMode(mode);
     saveExportMode(mode);
@@ -334,6 +354,7 @@ export default function CalendarPage() {
             }}
             loadingHourly={loadingHourly}
             loadingLabel={t.loading}
+            onMonthBestSelect={handleMonthBestSelect}
           />
         </div>
 
@@ -382,6 +403,7 @@ export default function CalendarPage() {
               }}
               loadingHourly={loadingHourly}
               loadingLabel={t.loading}
+              onMonthBestSelect={handleMonthBestSelect}
             />
           </div>
         </div>

@@ -67,21 +67,13 @@ export function WeeklyPathChart({
     return { week, x, y, index };
   });
 
+  // Highlight only the canonical selectedDate — never substitute week-max.
   let highlightIndex = -1;
-  for (let i = 0; i < points.length; i += 1) {
-    if (selectedDate && points[i].week.date === selectedDate) {
-      highlightIndex = i;
-      break;
-    }
-  }
-  // If no selectedDate match, emphasize the highest scored day in the week.
-  if (highlightIndex < 0) {
-    let peakScore = -Infinity;
+  if (selectedDate) {
     for (let i = 0; i < points.length; i += 1) {
-      const score = points[i].week.score;
-      if (score != null && score > peakScore) {
-        peakScore = score;
+      if (points[i].week.date === selectedDate) {
         highlightIndex = i;
+        break;
       }
     }
   }

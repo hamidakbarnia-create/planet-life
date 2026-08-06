@@ -95,9 +95,10 @@ export function stableStringify(value: unknown): string {
 
 /** Deterministic FNV-1a 64-bit hex fingerprint (browser-safe, sync). */
 export function fnv1a64Hex(text: string): string {
-  let hash = 0xcbf29ce484222325n;
-  const prime = 0x100000001b3n;
-  const mask = 0xffffffffffffffffn;
+  // BigInt() constructors (not `n` literals) — required below ES2020 target.
+  let hash = BigInt('14695981039346656037'); // FNV offset basis 0xcbf29ce484222325
+  const prime = BigInt('1099511628211'); // FNV prime 0x100000001b3
+  const mask = BigInt('18446744073709551615'); // 0xffffffffffffffff
   for (let i = 0; i < text.length; i += 1) {
     hash ^= BigInt(text.charCodeAt(i));
     hash = (hash * prime) & mask;

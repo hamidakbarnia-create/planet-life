@@ -114,6 +114,42 @@ describe('WeeklyPathChart', () => {
     expect(highlighted?.getAttribute('data-week-point')).toBe('Tue');
   });
 
+  it('does not substitute week-maximum highlight when selectedDate is absent', () => {
+    render(<WeeklyPathChart weeks={DAYS} />);
+    expect(document.querySelector('[data-path-highlighted="true"]')).toBeNull();
+  });
+
+  it('B: calendar cell score 86% appears as 86% on Weekly Path for that week', () => {
+    const monthOutlook = buildStrategicGps(
+      {
+        '2026-08-02': 46,
+        '2026-08-03': 65,
+        '2026-08-04': 86,
+        '2026-08-05': 58,
+        '2026-08-06': 56,
+        '2026-08-07': 70,
+        '2026-08-08': 62,
+      },
+      [],
+      'en',
+      { selectedDate: '2026-08-04' }
+    );
+    const tue = monthOutlook.weeks.find((p) => p.date === '2026-08-04');
+    expect(tue?.score).toBe(86);
+    render(
+      <WeeklyPathChart
+        weeks={monthOutlook.weeks}
+        selectedDate="2026-08-04"
+      />
+    );
+    expect(screen.getByText('86%')).toBeTruthy();
+    expect(
+      document
+        .querySelector('[data-path-highlighted="true"]')
+        ?.getAttribute('data-path-date')
+    ).toBe('2026-08-04');
+  });
+
   it('renders GPS selected-week scores matching calendar cells', () => {
     const monthOutlook = buildStrategicGps(
       {

@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   CALENDAR_CACHE_VERSION,
   fingerprintCalendarScoringInput,
+  fnv1a64Hex,
   legacyV1MonthCacheKey,
   loadMonthCache,
   monthCacheStorageKey,
@@ -12,6 +13,11 @@ import {
   type CalendarScoringInput,
 } from './calendar-cache';
 import { buildStrategicGps, findMonthBest } from './strategic-gps';
+
+/** Frozen goldens — must stay byte-identical across BigInt syntax refactors. */
+const GOLDEN_FNV_EMPTY = 'cbf29ce484222325';
+const GOLDEN_FNV_HELLO = 'a430d84680aabd0b';
+const GOLDEN_BASE_INPUT_FINGERPRINT = '8e86cf9dab1fbb2d';
 
 function baseInput(
   overrides: Partial<CalendarScoringInput> = {}
@@ -48,6 +54,14 @@ function fullMonthScores(seed = 60): Record<string, number> {
 }
 
 describe('calendar scoring-input fingerprint', () => {
+  it('golden: FNV-1a and base scoring-input fingerprints stay byte-identical', () => {
+    expect(fnv1a64Hex('')).toBe(GOLDEN_FNV_EMPTY);
+    expect(fnv1a64Hex('hello')).toBe(GOLDEN_FNV_HELLO);
+    expect(fingerprintCalendarScoringInput(baseInput())).toBe(
+      GOLDEN_BASE_INPUT_FINGERPRINT
+    );
+  });
+
   it('A: same normalized scoring inputs produce the same fingerprint', () => {
     const a = baseInput({
       birth_date: ' 1980-09-17 ',
@@ -61,6 +75,9 @@ describe('calendar scoring-input fingerprint', () => {
     const b = baseInput();
     expect(fingerprintCalendarScoringInput(a)).toBe(
       fingerprintCalendarScoringInput(b)
+    );
+    expect(fingerprintCalendarScoringInput(b)).toBe(
+      GOLDEN_BASE_INPUT_FINGERPRINT
     );
   });
 
