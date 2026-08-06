@@ -97,20 +97,23 @@ describe('Calendar readiness percent presentation', () => {
       'utf8'
     );
     const cellSource = readFileSync(
-      resolve(__dirname, '../components/calendar/CalendarMonthCell.tsx'),
+      resolve(__dirname, '../components/calendar/CalendarDayCell.tsx'),
       'utf8'
     );
-    const railSource = readFileSync(
-      resolve(__dirname, '../components/calendar/StrategicInsightRail.tsx'),
+    const insightSource = readFileSync(
+      resolve(
+        __dirname,
+        '../components/calendar/SelectedDayInsightPanel.tsx'
+      ),
       'utf8'
     );
 
-    // Month cells + rail Best/Risk + hourly/selected
-    expect(pageSource).toContain('CalendarMonthPanel');
-    expect(pageSource).toContain('StrategicInsightRail');
+    // Month cells + insight Best/Risk + hourly/selected
+    expect(pageSource).toContain('CalendarMonthGrid');
+    expect(pageSource).toContain('CalendarInsightStack');
     expect(cellSource).toContain('formatReadinessPercent(score)');
-    expect(railSource).toContain('formatReadinessPercent(selectedDay.bestHour.score)');
-    expect(railSource).toContain('formatReadinessPercent(selectedDay.riskHour.score)');
+    expect(insightSource).toContain('formatReadinessPercent(bestHour.score)');
+    expect(insightSource).toContain('formatReadinessPercent(riskHour.score)');
     expect(pageSource).toContain('{label} · {formatReadinessPercent(h.score)}');
     expect(pageSource).toContain(
       '{t.score}: {formatReadinessPercent(selectedScore)}'
