@@ -19,6 +19,7 @@ const RAF_PROFILE: BirthProfile = {
     country: 'United Kingdom',
     latitude: 51.5074,
     longitude: -0.1278,
+    timezone: 'Europe/London',
     confirmed: true,
     coordinate_source: 'selected_city_coordinates',
   },
@@ -53,6 +54,19 @@ describe('user-locations', () => {
     expect(payload?.location).toBe('Rafsanjan');
     expect(payload?.evaluation_location).toBe('London, United Kingdom');
     expect(payload?.evaluation_latitude).toBe(51.5074);
+    expect(payload?.evaluation_longitude).toBe(-0.1278);
+    expect(payload?.evaluation_timezone).toBe('Europe/London');
+  });
+
+  it('keeps living-location timezone with coordinates (no browser tz field)', () => {
+    const payload = buildScoringLocationPayload(RAF_PROFILE);
+    expect(payload).toMatchObject({
+      evaluation_latitude: 51.5074,
+      evaluation_longitude: -0.1278,
+      evaluation_timezone: 'Europe/London',
+    });
+    expect(payload).not.toHaveProperty('lang');
+    expect(payload).not.toHaveProperty('locale');
   });
 
   it('builds NYC property payload separately from birth city', () => {

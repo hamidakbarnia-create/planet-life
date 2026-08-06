@@ -1,6 +1,6 @@
 import type { BirthProfile } from './birth-profile';
 import { chartPreferenceFields } from './app-settings';
-import { API_BASE } from './calendar-scores';
+import { API_BASE } from './api-config';
 
 export type PathfinderArea =
   | 'love'

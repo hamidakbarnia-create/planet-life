@@ -70,7 +70,8 @@ export function MonthHeatmapGrid({
       ) : (
         <div className={`grid grid-cols-7 ${fullWidth ? 'gap-1.5' : 'gap-1'}`}>
           {cells.map((cell, i) => {
-            if (!cell.day || !cell.date) {
+            // Home heatmap keeps empty pads for adjacent-month slots (Strategic Calendar owns that UX).
+            if (!cell.inCurrentMonth) {
               return <div key={`e-${i}`} className={fullWidth ? 'aspect-[1.1]' : 'aspect-square'} />;
             }
             const score = scores[cell.date];
@@ -107,7 +108,7 @@ export function MonthHeatmapGrid({
                 <button
                   key={cell.date}
                   type="button"
-                  onClick={() => onSelectDate(cell.date!)}
+                  onClick={() => onSelectDate(cell.date)}
                   className={cls}
                   style={boxStyle}
                 >

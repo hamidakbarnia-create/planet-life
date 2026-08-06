@@ -285,7 +285,7 @@ const RULES: StrengthRule[] = [
     match: ({ planets }) => inSign(planets.saturn, 10),
     text: {
       en: 'Long-horizon builder and durable leadership',
-      ru: 'Строитель на длинной дистанции и долговечное лидерство',
+      ru: 'Вы умеете строить долгосрочные проекты и сохранять устойчивое лидерство.',
       fa: 'ساختارسازی بزرگ و رهبری بلندمدت',
       ar: 'بناء بعيد المدى وقيادة دائمة',
     },
@@ -330,7 +330,7 @@ const RULES: StrengthRule[] = [
     match: ({ planets }) => inSign(planets.venus, 12),
     text: {
       en: 'Loving heart and artistic intuition',
-      ru: 'Любящее сердце и художественная интуиция',
+      ru: 'Вы сочетаете искреннюю эмпатию с развитой творческой интуицией.',
       fa: 'دل عاشق و شهود هنری',
       ar: 'قلب محبّ وحدس فنّي',
     },
@@ -446,7 +446,7 @@ const RULES: StrengthRule[] = [
     match: ({ planets }) => inHouse(planets.jupiter, 7),
     text: {
       en: 'Attracts powerful partners and prosperous agreements',
-      ru: 'Притягивает сильных партнёров и выгодные договоры',
+      ru: 'Вы умеете привлекать сильных партнёров и выстраивать взаимовыгодное сотрудничество.',
       fa: 'جذب شرکای قدرتمند و قراردادهای پربرکت',
       ar: 'يجذب شركاء أقوياء واتفاقات مزدهرة',
     },
@@ -536,7 +536,7 @@ const RULES: StrengthRule[] = [
     match: ({ balance }) => balance.percent.water >= 40,
     text: {
       en: 'Deep intuition and emotional intelligence',
-      ru: 'Глубокая интуиция и эмоциональный интеллект',
+      ru: 'Ваша сильная сторона — глубокая интуиция и высокий эмоциональный интеллект.',
       fa: 'شهود عمیق و هوش هیجانی',
       ar: 'حدس عميق وذكاء عاطفي',
     },

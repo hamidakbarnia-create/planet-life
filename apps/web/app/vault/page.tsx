@@ -1,292 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
+import { localeFontFamily } from '@/lib/brand-theme';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
 import type { AppLang } from '@/lib/app-settings';
+import {
+  VAULT_HOME_CARD_ROLE,
+  VAULT_HOME_LANGS,
+  VAULT_HOME_VISIBLE_ORDER,
+  type VaultHomeCardKey,
+} from '@/lib/vault-home-i18n';
 
 const VAULT_ENTERED_KEY = 'planet-life-vault-entered';
 
-// Vault gate — the locked entrance to the women-focused inner sanctum.
-// This R0 stub presents the curiosity-driving preview: what's behind the
-// lock without actually building it yet. Verification (Pink Firewall) is
-// intentionally light — once unlocked, anyone willing to subscribe gets
-// in. The Pink Lounge (chat rooms) remains gender-verified internally.
-
-type VaultKey =
-  | 'sensuality'
-  | 'cycle'
-  | 'provider'
-  | 'shadow'
-  | 'look'
-  | 'power'
-  | 'lounge';
-
-const VAULT_LANGS: Record<
-  AppLang,
-  {
-    eyebrow: string;
-    title: string;
-    subtitle: string;
-    promise: string;
-    cta: string;
-    ctaInside: string;
-    ctaHint: string;
-    backToToday: string;
-    inside: string;
-    sections: Record<
-      VaultKey,
-      { title: string; sub: string; preview: string }
-    >;
-  }
-> = {
-  en: {
-    eyebrow: '· Members only ·',
-    title: 'The Vault',
-    subtitle:
-      'A private chamber for the deepest, most personal use of astrology — desire, cycles, attraction, secrets, money, magnetism.',
-    promise:
-      'Your charts and chats are encrypted. No real names. No screenshots. A door you can close in one tap.',
-    cta: 'Step inside',
-    ctaInside: 'Welcome — preview unlocked',
-    ctaHint: 'Full features arrive in Sprint R8 with Premium.',
-    backToToday: '← Back to Today',
-    inside: 'Inside, you will find',
-    sections: {
-      sensuality: {
-        title: 'Sensuality',
-        sub: 'Your Mars · Pluto · Lilith',
-        preview:
-          'The geometry of your desire, your fantasy, your magnetism — and the hours your appeal peaks.',
-      },
-      cycle: {
-        title: 'Body & Cycle',
-        sub: 'Period · Ovulation · Hormones',
-        preview:
-          'Sync your cycle to the Moon. Know your peak, your dip, your fertile window — to the day.',
-      },
-      provider: {
-        title: 'The Provider',
-        sub: 'Your Jupiter · Astrocartography',
-        preview:
-          'Where on Earth your wealth-line falls. What kind of partner your chart calls. Map your luckiest geography.',
-      },
-      shadow: {
-        title: 'Shadow Room',
-        sub: 'Honesty · Loyalty · Truth',
-        preview:
-          'Patterns of secrecy and trust in any chart. Read with care. We show signals, never verdicts.',
-      },
-      look: {
-        title: 'Cosmic Look',
-        sub: 'Color · Scent · Style of the day',
-        preview:
-          'Today the Moon is in Scorpio — wear black velvet. Today Venus is loud — wear honey. Daily.',
-      },
-      power: {
-        title: 'Power Calendar',
-        sub: 'Sex · Money · Distance · Yes-days',
-        preview:
-          'Hot days. Money-ask days. Quiet days that pull people back. The rhythm of attraction, mapped.',
-      },
-      lounge: {
-        title: 'Pink Lounge',
-        sub: 'Verified · Anonymous · Private',
-        preview:
-          'A chat room only verified members enter. Aliases only. End-to-end encrypted.',
-      },
-    },
-  },
-  ru: {
-    eyebrow: '· Только для участников ·',
-    title: 'Хранилище',
-    subtitle:
-      'Закрытая комната для самой личной астрологии — желание, циклы, притяжение, тайны, деньги, магнетизм.',
-    promise:
-      'Карты и беседы зашифрованы. Только псевдонимы. Без скриншотов. Дверь закрывается одним касанием.',
-    cta: 'Войти',
-    ctaInside: 'Добро пожаловать — превью открыто',
-    ctaHint: 'Полный доступ откроется в спринте R8 с Премиум.',
-    backToToday: '← Назад к Сегодня',
-    inside: 'Внутри вас ждёт',
-    sections: {
-      sensuality: {
-        title: 'Чувственность',
-        sub: 'Марс · Плутон · Лилит',
-        preview:
-          'Геометрия вашего желания, фантазии и магнетизма — и часы, когда ваша притягательность на пике.',
-      },
-      cycle: {
-        title: 'Тело и цикл',
-        sub: 'Цикл · Овуляция · Гормоны',
-        preview:
-          'Синхронизируйте цикл с Луной. Зная пик, спад и фертильное окно — день в день.',
-      },
-      provider: {
-        title: 'Покровитель',
-        sub: 'Юпитер · Астрокартография',
-        preview:
-          'Где на карте мира проходит ваша линия богатства. Какого партнёра зовёт ваша карта.',
-      },
-      shadow: {
-        title: 'Теневая комната',
-        sub: 'Честность · Верность · Правда',
-        preview:
-          'Паттерны скрытности и доверия в любой карте. Мы показываем сигналы — не приговоры.',
-      },
-      look: {
-        title: 'Космический образ',
-        sub: 'Цвет · Аромат · Стиль дня',
-        preview:
-          'Сегодня Луна в Скорпионе — чёрный бархат. Сегодня Венера громкая — медовые тона. Ежедневно.',
-      },
-      power: {
-        title: 'Календарь силы',
-        sub: 'Секс · Деньги · Дистанция · Дни-да',
-        preview:
-          'Горячие дни. Дни просьб о деньгах. Тихие дни, что возвращают. Ритм притяжения на карте.',
-      },
-      lounge: {
-        title: 'Pink Lounge',
-        sub: 'Проверено · Анонимно · Приватно',
-        preview:
-          'Комната, куда входят только верифицированные участницы. Псевдонимы. Сквозное шифрование.',
-      },
-    },
-  },
-  fa: {
-    eyebrow: '· فقط برای اعضا ·',
-    title: 'محرمانه',
-    subtitle:
-      'اتاقی خصوصی برای عمیق‌ترین استفاده شخصی از استرولوژی — میل، چرخه‌ها، جذابیت، رازها، پول، مگنتیسم.',
-    promise:
-      'چارت‌ها و چت‌ها رمزنگاری شده‌اند. فقط نام مستعار. بدون اسکرین‌شات. دری که با یک کلیک می‌بندی.',
-    cta: 'برو داخل',
-    ctaInside: 'خوش اومدی — پیش‌نمایش باز شد',
-    ctaHint: 'دسترسی کامل با اشتراک پریمیوم در اسپرینت R8.',
-    backToToday: '→ بازگشت به امروز',
-    inside: 'داخلش پیدا می‌کنی',
-    sections: {
-      sensuality: {
-        title: 'شهوت و جذابیت',
-        sub: 'مریخ · پلوتو · لیلیت تو',
-        preview:
-          'هندسه میل، فانتزی و مگنتیسم تو — و ساعت‌هایی که جذابیتت در اوج است.',
-      },
-      cycle: {
-        title: 'بدن و چرخه',
-        sub: 'پریود · تخمک‌گذاری · هورمون',
-        preview:
-          'چرخه‌ات را با ماه هم‌گام کن. اوج، فرود و پنجره باروری — روز به روز.',
-      },
-      provider: {
-        title: 'حامی (همسر آینده)',
-        sub: 'ژوپیتر · آستروکارتوگرافی',
-        preview:
-          'خط ثروتت روی نقشه دنیا. شوهر چارتت چه نوع آدمی‌ست. خوش‌شانس‌ترین جغرافیا.',
-      },
-      shadow: {
-        title: 'اتاق سایه',
-        sub: 'صداقت · وفاداری · حقیقت',
-        preview:
-          'الگوهای پنهان‌کاری و اعتماد در هر چارت. ما نشانه می‌دهیم — نه حکم.',
-      },
-      look: {
-        title: 'استایل کیهانی',
-        sub: 'رنگ · عطر · استایل روز',
-        preview:
-          'امروز ماه در عقرب است — مخمل مشکی. امروز ونوس بلند است — عسلی. هر روز.',
-      },
-      power: {
-        title: 'تقویم قدرت',
-        sub: 'سکس · پول · دوری · روزهای بله',
-        preview:
-          'روزهای داغ. روزهای درخواست پول. روزهای سکوت که آدم‌ها را برمی‌گردانند.',
-      },
-      lounge: {
-        title: 'لانژ صورتی',
-        sub: 'تأییدشده · ناشناس · خصوصی',
-        preview:
-          'اتاقی که فقط عضو تأییدشده وارد می‌شود. فقط نام مستعار. رمزنگاری دو سر.',
-      },
-    },
-  },
-  ar: {
-    eyebrow: '· للأعضاء فقط ·',
-    title: 'الخزانة',
-    subtitle:
-      'غرفة خاصة لأعمق استخدام شخصي للفلك — الرغبة، الدورات، الجاذبية، الأسرار، المال، المغناطيسية.',
-    promise:
-      'خرائطك ومحادثاتك مشفّرة. أسماء مستعارة فقط. بلا لقطات شاشة. باب يُغلق بضغطة.',
-    cta: 'ادخلي',
-    ctaInside: 'أهلاً بكِ — المعاينة مفتوحة',
-    ctaHint: 'الميزات الكاملة تأتي في R8 مع البريميوم.',
-    backToToday: '← العودة إلى اليوم',
-    inside: 'في الداخل تجدين',
-    sections: {
-      sensuality: {
-        title: 'الحسّية',
-        sub: 'مرّيخك · بلوتوك · ليليت',
-        preview:
-          'هندسة رغبتك وخيالك وجاذبيتك — والساعات التي تبلغ فيها ذروتها.',
-      },
-      cycle: {
-        title: 'الجسد والدورة',
-        sub: 'الدورة · الإباضة · الهرمونات',
-        preview:
-          'زامني دورتك مع القمر. اعرفي الذروة والهبوط ونافذة الخصوبة — يوماً بيوم.',
-      },
-      provider: {
-        title: 'العائل',
-        sub: 'مشتريك · الجغرافيا الفلكية',
-        preview:
-          'أين يقع خط ثروتك على الكوكب. أيّ شريك تستدعيه خريطتك. أحظى الجغرافيا.',
-      },
-      shadow: {
-        title: 'غرفة الظل',
-        sub: 'الصدق · الولاء · الحقيقة',
-        preview:
-          'أنماط الكتمان والثقة في أي خريطة. نعرض إشارات — لا أحكاماً.',
-      },
-      look: {
-        title: 'الإطلالة الكونية',
-        sub: 'لون · عطر · أسلوب اليوم',
-        preview:
-          'اليوم القمر في العقرب — مخمل أسود. اليوم الزهرة عالية — لون العسل. يومياً.',
-      },
-      power: {
-        title: 'تقويم القوة',
-        sub: 'الجنس · المال · المسافة · أيام النعم',
-        preview:
-          'أيام حارّة. أيام طلب المال. أيام صمت تُعيد الناس. إيقاع الجاذبية.',
-      },
-      lounge: {
-        title: 'صالون الوردي',
-        sub: 'موثّق · مجهول · خاص',
-        preview:
-          'غرفة لا يدخلها إلا عضو موثّق. أسماء مستعارة فقط. تشفير طرفي.',
-      },
-    },
-  },
-};
-
-const VAULT_ORDER: VaultKey[] = [
-  'sensuality',
-  'cycle',
-  'provider',
-  'shadow',
-  'look',
-  'power',
-  'lounge',
-];
+// Vault Home — Decision Intelligence hub entry.
+// Enter ritual unlocks card navigation only; it is not Premium entitlement.
 
 export default function VaultPage() {
   const [lang, setLangState] = useState<AppLang>('en');
   const [entered, setEntered] = useState(false);
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
@@ -314,9 +52,9 @@ export default function VaultPage() {
     saveAppLang(l);
   };
 
-  const t = VAULT_LANGS[lang];
+  const t = VAULT_HOME_LANGS[lang];
   const dir = HOME_LANGS[lang].dir;
-  const fontFamily = lang === 'fa' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif';
+  const fontFamily = localeFontFamily(lang);
 
   return (
     <AppShell
@@ -326,27 +64,26 @@ export default function VaultPage() {
       navLabels={HOME_LANGS[lang].nav}
       fontFamily={fontFamily}
     >
-      <div className="relative min-h-[calc(100vh-60px)] overflow-hidden">
+      <div className="relative overflow-hidden">
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(244,114,182,0.10), transparent 60%), radial-gradient(ellipse 50% 50% at 50% 100%, rgba(168,85,247,0.06), transparent 60%)',
+              'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(212,175,55,0.10), transparent 60%), radial-gradient(ellipse 50% 50% at 50% 100%, rgba(181,148,16,0.06), transparent 60%)',
           }}
         />
 
         <div className="relative max-w-3xl mx-auto px-6 py-10">
-          {/* Locked icon hero */}
           <div className="text-center mb-10">
             <div
               className="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 relative"
               style={{
                 background:
-                  'radial-gradient(circle, rgba(244,114,182,0.18), rgba(168,85,247,0.06))',
-                border: '1px solid rgba(244,114,182,0.35)',
+                  'radial-gradient(circle, rgba(212,175,55,0.18), rgba(181,148,16,0.06))',
+                border: '1px solid rgba(212,175,55,0.35)',
                 boxShadow:
-                  '0 0 60px rgba(244,114,182,0.25), inset 0 0 0 1px rgba(244,114,182,0.15)',
+                  '0 0 60px rgba(212,175,55,0.25), inset 0 0 0 1px rgba(212,175,55,0.15)',
               }}
             >
               <svg
@@ -354,7 +91,7 @@ export default function VaultPage() {
                 height="40"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#f9a8d4"
+                stroke="#D4AF37"
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -363,22 +100,21 @@ export default function VaultPage() {
                 <path d="M8 11V8a4 4 0 0 1 8 0v3" />
                 <path
                   d="M12 14.5c-.5-1-2-1-2 .2 0 1 1 1.6 2 2.3 1-.7 2-1.3 2-2.3 0-1.2-1.5-1.2-2-.2z"
-                  fill="#f9a8d4"
+                  fill="#D4AF37"
                 />
               </svg>
             </div>
 
             <div
               className="fc text-[11px] tracking-[0.3em] mb-3"
-              style={{ color: 'rgba(244,114,182,0.7)' }}
+              style={{ color: 'rgba(212,175,55,0.7)' }}
             >
               {t.eyebrow}
             </div>
             <h1
               className="fc text-4xl md:text-5xl mb-4"
               style={{
-                background:
-                  'linear-gradient(135deg, #f9a8d4, #d8b4fe)',
+                background: 'linear-gradient(135deg, #F2CF75, #D4AF37)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 letterSpacing: '0.05em',
@@ -394,54 +130,53 @@ export default function VaultPage() {
             </p>
           </div>
 
-          {/* Inside preview / live grid */}
           <div id="vault-grid" className="mb-8 scroll-mt-6">
             <div
               className="fi text-[11px] tracking-[0.25em] uppercase mb-4 text-center"
-              style={{ color: 'rgba(244,114,182,0.55)' }}
+              style={{ color: 'rgba(212,175,55,0.55)' }}
             >
               {t.inside}
               {entered && (
                 <span
                   className="block mt-2 normal-case tracking-normal text-[11px]"
-                  style={{ color: 'rgba(244,114,182,0.75)' }}
+                  style={{ color: 'rgba(212,175,55,0.75)' }}
                 >
-                  {lang === 'fa'
-                    ? 'روی هر کارت بزن — واردش می‌شی'
-                    : lang === 'ar'
-                      ? 'اضغطي على أي بطاقة للدخول'
-                      : lang === 'ru'
-                        ? 'Нажмите на карточку — войдёте внутрь'
-                        : 'Tap any card to go inside'}
+                  {t.tapHint}
                 </span>
               )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {VAULT_ORDER.map((key) => {
-                const s = t.sections[key];
+              {VAULT_HOME_VISIBLE_ORDER.map((key: VaultHomeCardKey) => {
+                const s = t.cards[key];
+                const role = VAULT_HOME_CARD_ROLE[key];
+                const isPrimary = role === 'primary';
+                const isExperimental = role === 'experimental';
                 const card = (
                   <>
                     <div
                       aria-hidden
-                      className="absolute top-3 right-3"
-                      style={{ opacity: entered ? 0 : 0.4, transition: 'opacity 0.4s' }}
+                      className="absolute top-3 end-3"
+                      style={{
+                        opacity: entered ? 0 : 0.4,
+                        transition: 'opacity 0.4s',
+                      }}
                     >
                       <svg
                         width="14"
                         height="14"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="#f9a8d4"
+                        stroke="#D4AF37"
                         strokeWidth="1.5"
                       >
                         <rect x="5" y="11" width="14" height="9" rx="2" />
                         <path d="M8 11V8a4 4 0 0 1 8 0v3" />
                       </svg>
                     </div>
-                    {entered && (
+                    {entered && !s.badge && (
                       <div
                         aria-hidden
-                        className="absolute top-3 right-3"
+                        className="absolute top-3 end-3"
                         style={{ opacity: 0.7 }}
                       >
                         <svg
@@ -449,7 +184,7 @@ export default function VaultPage() {
                           height="14"
                           viewBox="0 0 24 24"
                           fill="none"
-                          stroke="#f9a8d4"
+                          stroke="#D4AF37"
                           strokeWidth="1.8"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -458,50 +193,102 @@ export default function VaultPage() {
                         </svg>
                       </div>
                     )}
+                    {s.badge ? (
+                      <div
+                        className="fi text-[10px] tracking-wider uppercase mb-2 inline-flex"
+                        data-vault-home-badge={role}
+                        style={{
+                          color: isPrimary
+                            ? 'rgba(242,207,117,0.95)'
+                            : 'rgba(212,175,55,0.65)',
+                          letterSpacing: '0.14em',
+                        }}
+                      >
+                        {s.badge}
+                      </div>
+                    ) : null}
                     <h3
-                      className="fc text-base mb-1"
-                      style={{ color: '#f9a8d4', letterSpacing: '0.03em' }}
+                      className={`fc mb-1 ${isPrimary ? 'text-lg' : 'text-base'}`}
+                      style={{ color: '#D4AF37', letterSpacing: '0.03em' }}
                     >
                       {s.title}
                     </h3>
                     <div
                       className="fi text-[10px] tracking-wider mb-2"
-                      style={{ color: 'rgba(244,114,182,0.5)' }}
+                      style={{ color: 'rgba(212,175,55,0.5)' }}
                     >
                       {s.sub}
                     </div>
                     <p
-                      className="fi text-xs leading-relaxed"
-                      style={{ color: 'rgba(255,255,255,0.6)' }}
+                      className={`fi leading-relaxed ${isPrimary ? 'text-sm' : 'text-xs'}`}
+                      style={{
+                        color: isExperimental
+                          ? 'rgba(255,255,255,0.5)'
+                          : 'rgba(255,255,255,0.6)',
+                      }}
                     >
                       {s.preview}
                     </p>
+                    {entered && (
+                      <div
+                        className="fc text-[11px] tracking-widest mt-3"
+                        data-vault-home-cta={key}
+                        style={{
+                          color: isPrimary
+                            ? '#F2CF75'
+                            : isExperimental
+                              ? 'rgba(212,175,55,0.55)'
+                              : 'rgba(212,175,55,0.75)',
+                          letterSpacing: '0.12em',
+                        }}
+                      >
+                        {s.cta}
+                      </div>
+                    )}
                   </>
                 );
-                const baseClasses =
-                  'relative block rounded-xl p-4 overflow-hidden no-underline transition-all';
+                const baseClasses = `relative block rounded-xl overflow-hidden no-underline transition-all ${
+                  isPrimary ? 'p-5 md:col-span-2' : 'p-4'
+                } ${isExperimental ? 'opacity-90' : ''}`;
                 const baseStyle = {
-                  background:
-                    'linear-gradient(135deg, rgba(40,20,40,0.6), rgba(20,14,28,0.6))',
+                  background: isPrimary
+                    ? 'linear-gradient(135deg, rgba(48,28,48,0.72), rgba(22,16,30,0.72))'
+                    : 'linear-gradient(135deg, rgba(40,20,40,0.6), rgba(20,14,28,0.6))',
                   border: entered
-                    ? '1px solid rgba(244,114,182,0.28)'
-                    : '1px solid rgba(244,114,182,0.12)',
+                    ? isPrimary
+                      ? '1px solid rgba(212,175,55,0.42)'
+                      : isExperimental
+                        ? '1px solid rgba(212,175,55,0.16)'
+                        : '1px solid rgba(212,175,55,0.28)'
+                    : isPrimary
+                      ? '1px solid rgba(212,175,55,0.22)'
+                      : '1px solid rgba(212,175,55,0.12)',
                   boxShadow: entered
-                    ? '0 0 24px rgba(244,114,182,0.12), inset 0 0 0 1px rgba(244,114,182,0.08)'
-                    : 'inset 0 0 0 1px rgba(244,114,182,0.04), 0 0 24px rgba(244,114,182,0.04)',
+                    ? isPrimary
+                      ? '0 0 28px rgba(212,175,55,0.14), inset 0 0 0 1px rgba(212,175,55,0.1)'
+                      : '0 0 24px rgba(212,175,55,0.08), inset 0 0 0 1px rgba(212,175,55,0.06)'
+                    : 'inset 0 0 0 1px rgba(212,175,55,0.04), 0 0 24px rgba(212,175,55,0.04)',
                   cursor: entered ? 'pointer' : 'default',
                 };
                 return entered ? (
                   <Link
                     key={key}
                     href={`/vault/${key}`}
-                    className={`${baseClasses} hover:scale-[1.02]`}
+                    className={`${baseClasses} hover:scale-[1.01]`}
                     style={baseStyle}
+                    data-vault-home-card={key}
+                    data-vault-home-role={role}
                   >
                     {card}
                   </Link>
                 ) : (
-                  <div key={key} className={baseClasses} style={baseStyle}>
+                  <div
+                    key={key}
+                    className={baseClasses}
+                    style={baseStyle}
+                    data-vault-home-card={key}
+                    data-vault-home-role={role}
+                  >
                     {card}
                   </div>
                 );
@@ -509,23 +296,21 @@ export default function VaultPage() {
             </div>
           </div>
 
-          {/* Privacy promise */}
           <div
             className="rounded-xl p-4 mb-8 text-center"
             style={{
-              background: 'rgba(244,114,182,0.04)',
-              border: '1px solid rgba(244,114,182,0.12)',
+              background: 'rgba(212,175,55,0.04)',
+              border: '1px solid rgba(212,175,55,0.12)',
             }}
           >
             <p
-              className="fi text-xs leading-relaxed italic"
+              className="fi text-xs leading-relaxed"
               style={{ color: 'rgba(255,255,255,0.6)' }}
             >
               {t.promise}
             </p>
           </div>
 
-          {/* CTA */}
           <div className="text-center">
             <button
               type="button"
@@ -534,15 +319,15 @@ export default function VaultPage() {
               className="fc text-sm tracking-widest no-underline px-8 py-3.5 rounded-xl inline-flex items-center gap-2 transition-all hover:scale-[1.02]"
               style={{
                 background: entered
-                  ? 'linear-gradient(135deg, rgba(74,222,128,0.18), rgba(34,197,94,0.12))'
-                  : 'linear-gradient(135deg, rgba(244,114,182,0.3), rgba(168,85,247,0.28))',
+                  ? 'linear-gradient(135deg, rgba(11,23,54,0.95), rgba(10,15,28,0.95))'
+                  : 'linear-gradient(135deg, rgba(212,175,55,0.3), rgba(181,148,16,0.28))',
                 border: entered
-                  ? '1px solid rgba(74,222,128,0.4)'
-                  : '1px solid rgba(244,114,182,0.5)',
-                color: entered ? '#bbf7d0' : '#fce7f3',
+                  ? '1px solid rgba(212,175,55,0.45)'
+                  : '1px solid rgba(212,175,55,0.5)',
+                color: '#F2CF75',
                 boxShadow: entered
-                  ? '0 0 24px rgba(74,222,128,0.18)'
-                  : '0 0 30px rgba(244,114,182,0.3), inset 0 0 0 1px rgba(255,255,255,0.05)',
+                  ? '0 0 24px rgba(212,175,55,0.18)'
+                  : '0 0 30px rgba(212,175,55,0.3), inset 0 0 0 1px rgba(255,255,255,0.05)',
                 letterSpacing: '0.15em',
                 cursor: entered ? 'default' : 'pointer',
               }}

@@ -1,5 +1,7 @@
-import type { AppLang } from './app-settings';
+import type { AppLang, CalendarSystem } from './app-settings';
 import { formatHourLabel, type HourScore } from './calendar-scores';
+import { parseIsoDate, sundayWeekDatesContaining } from './calendar-utils';
+import { DATE_LOCALES, formatCompactCalendarDate } from './date-format';
 
 type GpsTone = 'green' | 'yellow' | 'orange' | 'red' | 'empty';
 
@@ -24,11 +26,16 @@ interface GpsTextPack {
   bestHour: string;
   riskHour: string;
   noHourly: string;
+  monthOutlook: string;
+  weeklyPath: string;
+  monthBest: string;
+  selectedDayTiming: string;
+  selectedDayScope: string;
 }
 
 const GPS_TEXT: Record<AppLang, GpsTextPack> = {
   en: {
-    title: 'Strategic GPS',
+    title: 'Decision Timing',
     subtitle: 'Your month, weeks, and selected day as a road map.',
     macro: 'Macro lane',
     meso: 'Weekly route',
@@ -38,7 +45,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     monthYellow: 'Supportive road: useful progress with normal care.',
     monthOrange: 'Foggy road: keep plans flexible and double-check details.',
     monthRed: 'Slow lane: reduce risk and use the month for repair.',
-    goldenDays: 'golden days',
+    goldenDays: 'high-readiness days',
     cautionDays: 'caution days',
     week: 'Week',
     weekGreen: 'advance',
@@ -48,9 +55,14 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     bestHour: 'Best hour',
     riskHour: 'Risk hour',
     noHourly: 'Select a day to load hourly guidance.',
+    monthOutlook: 'Month Outlook',
+    weeklyPath: 'Weekly Path',
+    monthBest: 'Month best',
+    selectedDayTiming: 'Selected Day Timing',
+    selectedDayScope: 'Selected day',
   },
   ru: {
-    title: 'Стратегический GPS',
+    title: 'Тайминг решений',
     subtitle: 'Месяц, недели и выбранный день как карта маршрута.',
     macro: 'Макро-линия',
     meso: 'Маршрут недели',
@@ -60,7 +72,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     monthYellow: 'Поддерживающая дорога: прогресс с обычной осторожностью.',
     monthOrange: 'Туманная дорога: держите планы гибкими.',
     monthRed: 'Медленная линия: снижайте риск и чините систему.',
-    goldenDays: 'золотых дней',
+    goldenDays: 'дней высокой готовности',
     cautionDays: 'дней осторожности',
     week: 'Неделя',
     weekGreen: 'вперёд',
@@ -70,9 +82,14 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     bestHour: 'Лучший час',
     riskHour: 'Риск-час',
     noHourly: 'Выберите день, чтобы загрузить часы.',
+    monthOutlook: 'Обзор месяца',
+    weeklyPath: 'Путь недели',
+    monthBest: 'Лучший день месяца',
+    selectedDayTiming: 'Тайминг выбранного дня',
+    selectedDayScope: 'Выбранный день',
   },
   fa: {
-    title: 'GPS استراتژیک',
+    title: 'زمان‌بندی تصمیم',
     subtitle: 'ماه، هفته‌ها و روز انتخاب‌شده به شکل نقشه راه.',
     macro: 'لاین کلان',
     meso: 'مسیر هفتگی',
@@ -82,7 +99,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     monthYellow: 'جاده مساعد: پیشرفت خوب با احتیاط معمول.',
     monthOrange: 'جاده مه‌آلود: برنامه‌ها را منعطف نگه دار.',
     monthRed: 'لاین کند: ریسک را کم کن و ماه را برای ترمیم بگذار.',
-    goldenDays: 'روز طلایی',
+    goldenDays: 'روز آمادگی بالا',
     cautionDays: 'روز احتیاط',
     week: 'هفته',
     weekGreen: 'حرکت',
@@ -92,9 +109,14 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     bestHour: 'بهترین ساعت',
     riskHour: 'ساعت ریسک',
     noHourly: 'یک روز را انتخاب کن تا راهنمای ساعتی بیاید.',
+    monthOutlook: 'چشم‌انداز ماه',
+    weeklyPath: 'مسیر هفتگی',
+    monthBest: 'بهترین روز ماه',
+    selectedDayTiming: 'زمان‌بندی روز انتخاب‌شده',
+    selectedDayScope: 'روز انتخاب‌شده',
   },
   ar: {
-    title: 'GPS استراتيجي',
+    title: 'توقيت القرار',
     subtitle: 'الشهر والأسابيع واليوم المحدد كخريطة طريق.',
     macro: 'المسار الكلي',
     meso: 'مسار الأسبوع',
@@ -104,7 +126,7 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     monthYellow: 'طريق داعم: تقدم جيد مع حذر عادي.',
     monthOrange: 'طريق ضبابي: اجعل الخطط مرنة.',
     monthRed: 'مسار بطيء: قلل المخاطر واستخدم الشهر للإصلاح.',
-    goldenDays: 'أيام ذهبية',
+    goldenDays: 'أيام جاهزية عالية',
     cautionDays: 'أيام حذر',
     week: 'أسبوع',
     weekGreen: 'تقدم',
@@ -114,15 +136,42 @@ const GPS_TEXT: Record<AppLang, GpsTextPack> = {
     bestHour: 'أفضل ساعة',
     riskHour: 'ساعة الخطر',
     noHourly: 'اختر يوماً لتحميل الإرشاد الساعي.',
+    monthOutlook: 'نظرة الشهر',
+    weeklyPath: 'المسار الأسبوعي',
+    monthBest: 'أفضل يوم في الشهر',
+    selectedDayTiming: 'توقيت اليوم المحدد',
+    selectedDayScope: 'اليوم المحدد',
   },
 };
 
 export interface StrategicGpsWeek {
+  /** Localized weekday or compact date axis label. */
   label: string;
+  /** Exact `scores[date]` from the canonical month score map (never avg/max). */
   score: number | null;
   tone: GpsTone;
   action: string;
+  /** Date (YYYY-MM-DD) for this path point. */
+  date: string | null;
+  /** Single-date membership for highlight/sync (length 0–1). */
+  dates: string[];
 }
+
+export type BuildStrategicGpsOptions = {
+  /** Canonical selected Gregorian ISO date — Weekly Path is this date's Sunday-start week. */
+  selectedDate?: string | null;
+  /** Active display calendar for compact cross-month axis labels. */
+  calendar?: CalendarSystem;
+};
+
+export type MonthBestSummary = {
+  /** Canonical Gregorian ISO date of the highest score in the month map. */
+  date: string;
+  /** Exact score from the canonical month scores map. */
+  score: number;
+  /** Compact localized date label for the callout. */
+  dateLabel: string;
+};
 
 export interface StrategicGps {
   text: GpsTextPack;
@@ -131,6 +180,8 @@ export interface StrategicGps {
   monthBody: string;
   goldenCount: number;
   cautionCount: number;
+  /** Peak day in the canonical month scores map (outside Weekly Path chart). */
+  monthBest: MonthBestSummary | null;
   weeks: StrategicGpsWeek[];
   bestHour: HourScore | null;
   riskHour: HourScore | null;
@@ -167,10 +218,93 @@ function weekAction(tone: GpsTone, text: GpsTextPack): string {
   return text.noData;
 }
 
+function shortWeekdayLabel(isoDate: string, lang: AppLang): string {
+  const parsed = parseIsoDate(isoDate);
+  if (!parsed) return isoDate;
+  const date = new Date(Date.UTC(parsed.year, parsed.month - 1, parsed.day));
+  return new Intl.DateTimeFormat(DATE_LOCALES[lang] ?? DATE_LOCALES.en, {
+    weekday: 'short',
+    timeZone: 'UTC',
+  }).format(date);
+}
+
+/** Weekday when in the selected date's month; compact date when the week crosses months. */
+export function weeklyPathAxisLabel(
+  isoDate: string,
+  selectedDate: string,
+  lang: AppLang,
+  calendar: CalendarSystem
+): string {
+  const point = parseIsoDate(isoDate);
+  const selected = parseIsoDate(selectedDate);
+  if (
+    point &&
+    selected &&
+    (point.year !== selected.year || point.month !== selected.month)
+  ) {
+    return formatCompactCalendarDate(lang, isoDate, calendar);
+  }
+  return shortWeekdayLabel(isoDate, lang);
+}
+
+/**
+ * Highest day in the canonical month score map.
+ * Does not feed the Weekly Path chart (lookup only; no rescaling).
+ */
+export function findMonthBest(
+  scores: Record<string, number>,
+  lang: AppLang,
+  calendar: CalendarSystem = 'gregorian'
+): MonthBestSummary | null {
+  let best: { date: string; score: number } | null = null;
+  for (const [date, score] of Object.entries(scores)) {
+    if (typeof score !== 'number' || Number.isNaN(score)) continue;
+    if (!best || score > best.score) {
+      best = { date, score };
+    }
+  }
+  if (!best) return null;
+  return {
+    date: best.date,
+    score: best.score,
+    dateLabel: formatCompactCalendarDate(lang, best.date, calendar),
+  };
+}
+
+/**
+ * Weekly Path = seven canonical day scores for the Sunday-start week containing
+ * `selectedDate`. Each point is `scores[date]` exactly — no average, no max.
+ */
+export function buildWeeklyPathPoints(
+  scores: Record<string, number>,
+  selectedDate: string | null | undefined,
+  lang: AppLang,
+  calendar: CalendarSystem = 'gregorian',
+  text?: GpsTextPack
+): StrategicGpsWeek[] {
+  const pack = text ?? GPS_TEXT[lang] ?? GPS_TEXT.en;
+  if (!selectedDate) return [];
+  return sundayWeekDatesContaining(selectedDate).map((date) => {
+    const raw = scores[date];
+    const score =
+      typeof raw === 'number' && !Number.isNaN(raw) ? raw : null;
+    const tone = toneFromScore(score);
+    return {
+      label: weeklyPathAxisLabel(date, selectedDate, lang, calendar),
+      score,
+      tone,
+      action: weekAction(tone, pack),
+      date,
+      dates: [date],
+    };
+  });
+}
+
 export function buildStrategicGps(
   scores: Record<string, number>,
   hourly: HourScore[],
-  lang: AppLang
+  lang: AppLang,
+  options: BuildStrategicGpsOptions = {}
 ): StrategicGps {
   const text = GPS_TEXT[lang] ?? GPS_TEXT.en;
   const values = Object.values(scores).filter((score) => typeof score === 'number');
@@ -178,28 +312,16 @@ export function buildStrategicGps(
   const monthTone = toneFromScore(monthScore);
   const goldenCount = values.filter((score) => score >= 85).length;
   const cautionCount = values.filter((score) => score < 40).length;
+  const calendar = options.calendar ?? 'gregorian';
 
-  const weekBuckets = new Map<number, number[]>();
-  for (const [date, score] of Object.entries(scores)) {
-    if (typeof score !== 'number') continue;
-    const day = Number(date.slice(-2));
-    if (!Number.isFinite(day)) continue;
-    const week = Math.floor((day - 1) / 7) + 1;
-    const bucket = weekBuckets.get(week) ?? [];
-    bucket.push(score);
-    weekBuckets.set(week, bucket);
-  }
-
-  const weeks = Array.from({ length: 5 }, (_, index) => {
-    const score = average(weekBuckets.get(index + 1) ?? []);
-    const tone = toneFromScore(score);
-    return {
-      label: `${text.week} ${index + 1}`,
-      score,
-      tone,
-      action: weekAction(tone, text),
-    };
-  });
+  const weeks = buildWeeklyPathPoints(
+    scores,
+    options.selectedDate,
+    lang,
+    calendar,
+    text
+  );
+  const monthBest = findMonthBest(scores, lang, calendar);
 
   const bestHour = hourly.length
     ? hourly.reduce((best, hour) => (hour.score > best.score ? hour : best), hourly[0])
@@ -215,6 +337,7 @@ export function buildStrategicGps(
     monthBody: monthBodyFor(monthTone, text),
     goldenCount,
     cautionCount,
+    monthBest,
     weeks,
     bestHour,
     riskHour,
@@ -223,6 +346,11 @@ export function buildStrategicGps(
   };
 }
 
+/**
+ * Tier 3 domain presentation map (DS-01 registry).
+ * ADR-DS-001 Principle 3: raw literals — semantic token consumption deferred.
+ * @see docs/design/system/design-token-registry.md
+ */
 export const GPS_TONE_STYLES: Record<GpsTone, { color: string; bg: string; border: string }> = {
   green: { color: '#4ade80', bg: 'rgba(74,222,128,0.08)', border: 'rgba(74,222,128,0.35)' },
   yellow: { color: '#fbbf24', bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.35)' },

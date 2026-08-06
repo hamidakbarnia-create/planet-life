@@ -160,6 +160,14 @@ ACTIVITY_PROFILES: Final[dict[str, ActivityProfile]] = {
         supportive_houses=(2, 8, 10),
         executive_focus="liquidity, timing, and transactional integrity",
     ),
+    # Vault Hot Attraction Days — Venus/Mars chemistry (not business momentum).
+    "hot_attraction": ActivityProfile(
+        label="Hot Attraction",
+        primary_planets=("venus", "mars", "moon"),
+        secondary_planets=("sun", "jupiter"),
+        supportive_houses=(5, 7, 8),
+        executive_focus="chemistry, desire, and magnetic presence",
+    ),
 }
 
 DEFAULT_ACTIVITY: Final[str] = "negotiation"
@@ -197,6 +205,36 @@ TRANSIT_HOUSE_RULES: Final[dict[str, dict[str, tuple[int, ...]]]] = {
         "caution": (12, 8, 7),
         "positive_planets": ("venus", "moon", "jupiter", "mercury"),
         "caution_planets": ("mars", "saturn", "neptune", "pluto"),
+    },
+    "hot_attraction": {
+        "positive": (5, 7, 8, 1),
+        "caution": (12, 6),
+        "positive_planets": ("venus", "mars", "moon", "sun", "jupiter"),
+        "caution_planets": ("saturn", "neptune", "pluto"),
+    },
+    "rest_recovery": {
+        "positive": (4, 12, 6),
+        "caution": (1, 10, 7),
+        "positive_planets": ("moon", "neptune", "saturn", "venus"),
+        "caution_planets": ("mars", "sun", "uranus", "pluto"),
+    },
+    "networking": {
+        "positive": (3, 7, 11, 5),
+        "caution": (12, 8),
+        "positive_planets": ("venus", "mercury", "jupiter", "sun", "moon"),
+        "caution_planets": ("saturn", "mars", "neptune", "pluto"),
+    },
+    "creative_work": {
+        "positive": (5, 11, 12, 3),
+        "caution": (6, 10),
+        "positive_planets": ("venus", "neptune", "uranus", "sun", "mercury"),
+        "caution_planets": ("saturn", "mars", "pluto"),
+    },
+    "finance_transaction": {
+        "positive": (2, 8, 10, 11),
+        "caution": (12, 6),
+        "positive_planets": ("venus", "jupiter", "saturn", "mercury", "sun"),
+        "caution_planets": ("mars", "neptune", "pluto", "uranus"),
     },
     "default": {
         "positive": (1, 10, 11, 2),
@@ -420,7 +458,17 @@ def _retrograde_penalty(transit: dict[str, dict[str, Any]], profile: ActivityPro
 
 def _transit_house_rules_key(activity_type: str) -> str:
     key = activity_type.strip().lower().replace("-", "_").replace(" ", "_")
-    if key in ("business_launch", "contract_signing", "real_estate", "negotiation"):
+    if key in (
+        "business_launch",
+        "contract_signing",
+        "real_estate",
+        "negotiation",
+        "hot_attraction",
+        "rest_recovery",
+        "networking",
+        "creative_work",
+        "finance_transaction",
+    ):
         return key
     if key in ("contract", "sign", "lease_signing"):
         return "contract_signing"
@@ -428,9 +476,25 @@ def _transit_house_rules_key(activity_type: str) -> str:
         return "real_estate"
     if key in ("launch", "startup", "fresh_start"):
         return "business_launch"
+    if key in ("finance", "loan_application"):
+        return "finance_transaction"
+    if key in ("rest", "relationship_repair", "ending_chapter"):
+        return "rest_recovery"
+    if key in (
+        "social_media_post",
+        "presentation",
+        "pr",
+        "job_application",
+        "romantic_meeting",
+        "social_meeting",
+        "first_meeting",
+        "mentorship_session",
+    ):
+        return "networking"
+    if key in ("creative_project", "workout_routine"):
+        return "creative_work"
     if key in (
         "reconciliation",
-        "first_meeting",
         "marriage_proposal",
         "relationship_ending",
         "difficult_conversation",
@@ -669,7 +733,16 @@ def _resolve_profile(activity_type: str) -> ActivityProfile:
         "fresh_start": "business_launch",
         "ending_chapter": "rest_recovery",
         "major_decision": "negotiation",
-        "chance_event": "investment",
+        # Oracle: Relationship meeting semantics (synastry best-days)
+        "romantic_meeting": "networking",
+        "relationship_repair": "rest_recovery",
+        "shared_life_planning": "real_estate",
+        "social_meeting": "networking",
+        "mentorship_session": "networking",
+        "family_discussion": "negotiation",
+        "investor_pitch": "investment",
+        "client_meeting": "contract_signing",
+        "cofounder_planning": "business_launch",
     }
     return ACTIVITY_PROFILES.get(aliases.get(key, DEFAULT_ACTIVITY), ACTIVITY_PROFILES[DEFAULT_ACTIVITY])
 

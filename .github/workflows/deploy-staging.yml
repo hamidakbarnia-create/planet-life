@@ -1,0 +1,87 @@
+# Manual staging-only deploy. Cannot deploy production.
+# Requires GitHub Environment "staging" with staging-only secrets.
+name: Deploy staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Exact commit SHA to deploy to staging
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy-staging:
+    name: Deploy frontend to staging Worker
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Validate commit SHA format
+        run: |
+          if [[ ! "${{ inputs.commit_sha }}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "commit_sha must be a full 40-character lowercase hex SHA"
+            exit 1
+          fi
+
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit_sha }}
+
+      - name: Confirm checked-out SHA
+        run: |
+          ACTUAL="$(git rev-parse HEAD)"
+          echo "Requested: ${{ inputs.commit_sha }}"
+          echo "Actual:    ${ACTUAL}"
+          test "$ACTUAL" = "${{ inputs.commit_sha }}"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install web dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Refuse production Wrangler config in staging job
+        working-directory: apps/web
+        run: |
+          test -f wrangler.staging.jsonc
+          ! grep -q '"name": "planet-life-web"' wrangler.staging.jsonc
+          grep -q '"name": "planet-life-web-staging"' wrangler.staging.jsonc
+
+      - name: Web tests
+        working-directory: apps/web
+        run: npm test
+
+      - name: Staging environment guard + build + deploy
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_APP_ENV: staging
+          NEXT_PUBLIC_DEPLOYMENT_ENV: staging
+          NEXT_PUBLIC_API_BASE: ${{ vars.NEXT_PUBLIC_API_BASE }}
+          NEXT_PUBLIC_RELEASE_SHA: ${{ inputs.commit_sha }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "${NEXT_PUBLIC_API_BASE}" ]; then
+            echo "GitHub Environment variable NEXT_PUBLIC_API_BASE is required"
+            exit 1
+          fi
+          npm run deploy:cf:staging
+
+      - name: Record staging deployment identity
+        run: |
+          echo "Staging deploy commit=${{ inputs.commit_sha }}"
+          echo "Worker=planet-life-web-staging"
+          echo "Do not treat this as production verification."

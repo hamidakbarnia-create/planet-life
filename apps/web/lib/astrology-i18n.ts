@@ -229,10 +229,10 @@ const THEME_FIXED: Record<string, Record<AstroLang, string>> = {
     ar: 'الجوانب الصعبة تشير إلى مقاومة أو تأخير أو إعادة عمل.',
   },
   'Overall sky favors initiative over hesitation.': {
-    en: 'Overall sky favors initiative over hesitation.',
-    ru: 'Небо в целом благоприятствует инициативе, а не промедлению.',
-    fa: 'آسمان به‌طور کلی ابتکار را بر تردید ترجیح می‌دهد.',
-    ar: 'السماء عموماً تفضل المبادرة على التردد.',
+    en: 'Overall signals favor initiative over hesitation.',
+    ru: 'В целом сигналы благоприятствуют инициативе, а не промедлению.',
+    fa: 'به‌طور کلی سیگنال‌ها ابتکار را بر تردید ترجیح می‌دهند.',
+    ar: 'الإشارات عموماً تفضل المبادرة على التردد.',
   },
   'Consolidate and plan; avoid overextension.': {
     en: 'Consolidate and plan; avoid overextension.',
@@ -345,10 +345,10 @@ export function translateRecommendation(text: string, lang: AstroLang): string {
         const act = trActivityLabel(m[1], l);
         const focus = trFocus(m[2], l);
         const translated = {
-          en: `Friction in the sky. Delay or restructure ${act} unless urgent; shore up ${focus} before committing.`,
-          ru: `Трение в небесах. Отложите или пересмотрите ${act}, если это не срочно; укрепите ${focus} перед обязательствами.`,
-          fa: `اصطکاک در آسمان. ${act} را به تعویق بیندازید یا بازسازی کنید مگر فوری باشد؛ قبل از تعهد ${focus} را تقویت کنید.`,
-          ar: `احتكاك في السماء. أجل أو أعد هيكلة ${act} ما لم يكن عاجلاً؛ عزز ${focus} قبل الالتزام.`,
+          en: `Timing friction detected. Delay or restructure ${act} unless urgent; shore up ${focus} before committing.`,
+          ru: `Обнаружено трение в тайминге. Отложите или пересмотрите ${act}, если это не срочно; укрепите ${focus} перед обязательствами.`,
+          fa: `اصطکاک در زمان‌بندی. ${act} را به تعویق بیندازید یا بازسازی کنید مگر فوری باشد؛ قبل از تعهد ${focus} را تقویت کنید.`,
+          ar: `احتكاك في التوقيت. أجل أو أعد هيكلة ${act} ما لم يكن عاجلاً؛ عزز ${focus} قبل الالتزام.`,
         }[l];
         return translated ?? m[0] ?? '';
       },
@@ -391,6 +391,7 @@ export function translateStringList(
 }
 
 import type { ScoreBreakdown } from './score-breakdown';
+import type { ScoreReasoning } from './score-reasoning';
 
 export interface AnalysisPayload {
   executive: {
@@ -408,6 +409,8 @@ export interface AnalysisPayload {
   };
   /** Normalized score decomposition — populated by analyze API adapter. */
   scoreBreakdown?: ScoreBreakdown | null;
+  /** Deterministic reasoning — populated by analyze API adapter. */
+  scoreReasoning?: ScoreReasoning | null;
 }
 
 export function translateAnalysis(
@@ -439,5 +442,5 @@ export function translateAnalysis(
     st.timing_notes = translateStringList(st.timing_notes, lang, 'timing');
   }
 
-  return { executive: ex, strategic: st, scoreBreakdown: data.scoreBreakdown };
+  return { executive: ex, strategic: st, scoreBreakdown: data.scoreBreakdown, scoreReasoning: data.scoreReasoning };
 }

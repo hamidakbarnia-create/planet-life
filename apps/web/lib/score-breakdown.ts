@@ -3,6 +3,8 @@
  * UI should consume ScoreBreakdown — not raw snake_case API fields.
  */
 
+import { extractAnalyzeReasoning, type ScoreReasoning } from './score-reasoning';
+
 export type LocationMode =
   | 'birthOnly'
   | 'currentLiving'
@@ -179,19 +181,20 @@ export function extractHourlyScoreBreakdown(entry: unknown): ScoreBreakdown | nu
   );
 }
 
-/** Parsed analyze response with optional normalized breakdown. */
+/** Parsed analyze response with optional normalized breakdown and reasoning. */
 export interface ParsedAnalyzeResponse {
   score: number | null;
   breakdown: ScoreBreakdown | null;
+  reasoning: ScoreReasoning | null;
 }
 
 export function parseAnalyzeResponse(data: unknown): ParsedAnalyzeResponse {
   if (data == null || typeof data !== 'object') {
-    return { score: null, breakdown: null };
+    return { score: null, breakdown: null, reasoning: null };
   }
   const payload = data as { executive?: { score?: unknown }; detail?: unknown };
   if (payload.detail) {
-    return { score: null, breakdown: null };
+    return { score: null, breakdown: null, reasoning: null };
   }
   const score =
     typeof payload.executive?.score === 'number' && !Number.isNaN(payload.executive.score)
@@ -200,11 +203,13 @@ export function parseAnalyzeResponse(data: unknown): ParsedAnalyzeResponse {
   return {
     score,
     breakdown: extractAnalyzeScoreBreakdown(data),
+    reasoning: extractAnalyzeReasoning(data),
   };
 }
 
-/** Calendar month fetch bundle — scores for UI + breakdown map. */
+/** Calendar month fetch bundle — scores for UI + breakdown/reasoning maps. */
 export interface MonthScoresResult {
   scores: Record<string, number>;
   breakdowns: Record<string, ScoreBreakdown | null>;
+  reasoning: Record<string, ScoreReasoning | null>;
 }

@@ -87,4 +87,27 @@ describe('birth-profile current_location persistence', () => {
       confirmed: true,
     });
   });
+
+  it('persists gender like other profile attributes', () => {
+    saveBirthProfile({ ...baseProfile(LONDON), gender: 'male' });
+    expect(loadBirthProfile()?.gender).toBe('male');
+    saveBirthProfile({ ...baseProfile(LONDON), gender: 'prefer_not_to_say' });
+    expect(loadBirthProfile()?.gender).toBe('prefer_not_to_say');
+  });
+
+  it('loads legacy profiles without gender without throwing', () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        birth_date: '1982-02-25',
+        birth_time: '05:47',
+        location: 'Rafsanjan',
+        action_type: 'business_launch',
+      })
+    );
+    const loaded = loadBirthProfile();
+    expect(loaded?.location).toBe('Rafsanjan');
+    expect(loaded?.gender).toBeUndefined();
+  });
+
 });

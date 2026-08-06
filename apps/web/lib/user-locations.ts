@@ -74,6 +74,7 @@ export interface ScoringLocationPayload {
   evaluation_location: string;
   evaluation_latitude?: number;
   evaluation_longitude?: number;
+  evaluation_timezone?: string;
 }
 
 export function buildScoringLocationPayload(
@@ -90,6 +91,9 @@ export function buildScoringLocationPayload(
   if (evalLoc.latitude != null && evalLoc.longitude != null) {
     payload.evaluation_latitude = evalLoc.latitude;
     payload.evaluation_longitude = evalLoc.longitude;
+  }
+  if (evalLoc.timezone?.trim()) {
+    payload.evaluation_timezone = evalLoc.timezone.trim();
   }
   return payload;
 }
@@ -130,7 +134,12 @@ export function clearCalendarScoreCaches(): void {
   const keys: string[] = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key?.startsWith('planet-life-cal-')) keys.push(key);
+    if (
+      key?.startsWith('planet-life-cal-') ||
+      key?.startsWith('metioro-cal-v2-')
+    ) {
+      keys.push(key);
+    }
   }
   for (const key of keys) {
     localStorage.removeItem(key);

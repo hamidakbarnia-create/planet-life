@@ -16,49 +16,49 @@ export const DISCLAIMER_LANGS: Record<
 > = {
   en: {
     dir: 'ltr',
-    onboardingTitle: 'Before you continue',
+    onboardingTitle: 'The Final Decision Is Always Yours',
     onboardingBody:
-      'Planet Life is an educational tool based on astronomical calculations. All content is for informational purposes only and does not replace financial, legal, or medical advice. All decisions are your sole responsibility.',
+      'METIORO helps you evaluate your options with data and analysis. It never decides for you. Every decision remains yours.',
     onboardingCheckbox: 'I understand and agree',
     onboardingContinue: 'Continue',
     moduleWarning:
-      'This analysis is based on planetary positions. Not financial advice.',
+      'This analysis is based on analytical timing models. Not financial advice.',
     actionDisclaimer:
       'Acting on this timing is your personal decision and responsibility.',
   },
   ru: {
     dir: 'ltr',
-    onboardingTitle: 'Прежде чем продолжить',
+    onboardingTitle: 'Окончательное решение всегда за вами',
     onboardingBody:
-      'Planet Life — образовательный инструмент на основе астрономических расчётов. Весь контент носит информационный характер и не заменяет финансовые, юридические или медицинские консультации. Все решения — ваша личная ответственность.',
+      'METIORO помогает оценить возможные варианты с помощью анализа и данных, но никогда не принимает решение вместо вас. Окончательный выбор всегда остаётся за вами.',
     onboardingCheckbox: 'Я понимаю и соглашаюсь',
     onboardingContinue: 'Продолжить',
     moduleWarning:
-      'Этот анализ основан на положении планет. Не является финансовой консультацией.',
+      'Этот анализ основан на аналитических моделях тайминга. Не является финансовой консультацией.',
     actionDisclaimer:
       'Действие в это время — ваше личное решение и ответственность.',
   },
   fa: {
     dir: 'rtl',
-    onboardingTitle: 'قبل از ادامه',
+    onboardingTitle: 'تصمیم نهایی همیشه با شماست',
     onboardingBody:
-      'Planet Life یک ابزار آموزشی بر پایه محاسبات نجومی است. تمام محتوا صرفاً جهت اطلاع‌رسانی است و جایگزین مشاوره مالی، حقوقی یا پزشکی نیست. تمام تصمیم‌ها بر عهده خود شماست.',
+      'METIORO با تحلیل و اطلاعات به شما کمک می‌کند تصمیم آگاهانه‌تری بگیرید، اما هرگز به جای شما تصمیم نمی‌گیرد. انتخاب نهایی همیشه با شماست.',
     onboardingCheckbox: 'می‌فهمم و موافقم',
     onboardingContinue: 'ادامه',
     moduleWarning:
-      'این تحلیل بر اساس موقعیت سیارات است. مشاوره مالی نیست.',
+      'این تحلیل بر اساس مدل‌های تحلیلی زمان‌بندی است. مشاوره مالی نیست.',
     actionDisclaimer:
       'اقدام در این زمان تصمیم و مسئولیت شخصی شماست.',
   },
   ar: {
     dir: 'rtl',
-    onboardingTitle: 'قبل المتابعة',
+    onboardingTitle: 'القرار النهائي لك دائماً',
     onboardingBody:
-      'Planet Life أداة تعليمية تعتمد على الحسابات الفلكية. كل المحتوى لأغراض معلوماتية فقط ولا يحل محل المشورة المالية أو القانونية أو الطبية. جميع القرارات مسؤوليتك وحدك.',
+      'يساعدك METIORO على تقييم خياراتك من خلال التحليل والبيانات، لكنه لا يقرر بدلاً منك. القرار النهائي يبقى لك دائماً.',
     onboardingCheckbox: 'أفهم وأوافق',
     onboardingContinue: 'متابعة',
     moduleWarning:
-      'هذا التحليل مبني على مواقع الكواكب. ليس نصيحة مالية.',
+      'هذا التحليل مبني على نماذج توقيت تحليلية. ليس نصيحة مالية.',
     actionDisclaimer:
       'التصرف في هذا التوقيت قرارك ومسؤوليتك الشخصية.',
   },

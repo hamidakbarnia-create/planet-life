@@ -1,12 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
+import { BrandLogo } from '@/components/BrandLogo';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
 import type { AppLang } from '@/lib/app-settings';
 import { loadTier, saveTier, type MembershipTier } from '@/lib/membership';
+import {
+  COLORS,
+  COLORS_RGBA,
+  GRADIENTS,
+  TIER_THEME,
+  type TierKey,
+  localeFontFamily,
+} from '@/lib/brand-theme';
 
 // /upgrade — pricing & tier comparison page.
 // This is the destination for every Vault unlock CTA, every paywalled
@@ -14,7 +24,6 @@ import { loadTier, saveTier, type MembershipTier } from '@/lib/membership';
 // flow (Stripe + entitlements) lands in Sprint R3; this page locks in
 // the pricing narrative + curiosity hook in 4 languages.
 
-type TierKey = 'free' | 'pro' | 'premium' | 'vip';
 type Cycle = 'monthly' | 'yearly';
 
 type TierCopy = {
@@ -67,7 +76,7 @@ type Copy = {
 const LANGS: Record<AppLang, Copy> = {
   en: {
     eyebrow: '· Choose your altitude ·',
-    title: 'Upgrade Planet Life',
+    title: 'Upgrade METIORO',
     subtitle:
       'Free covers the basics. Pro unlocks decision tools. Premium opens the Vault. VIP gives you Julia.',
     cycleMonthly: 'Monthly',
@@ -105,12 +114,12 @@ const LANGS: Record<AppLang, Copy> = {
     tiers: {
       free: {
         name: 'Free',
-        tagline: 'Your daily cosmic snapshot.',
+        tagline: 'Your daily style insight.',
         monthly: '0',
         yearly: '0',
         cta: 'Your plan',
         features: [
-          'Daily cosmic score',
+          'Daily decision score',
           '7-day calendar window',
           '3 questions per day',
           '2 people in your circle',
@@ -120,7 +129,7 @@ const LANGS: Record<AppLang, Copy> = {
           'Anyone curious — try the engine, get a feel for the daily score before paying.',
         details: [
           {
-            heading: 'Daily cosmic score',
+            heading: 'Daily decision score',
             body: 'Each morning we compute your day’s 0–100 score from real Swiss Ephemeris transits against your natal chart. One number tells you if today is a green light, neutral, or friction.',
           },
           {
@@ -149,7 +158,7 @@ const LANGS: Record<AppLang, Copy> = {
           '10 people in your circle',
           'Real-time golden-hour notifications',
           'Persian & Hijri calendars',
-          'Cosmic Look (daily color & scent)',
+          'Style Timing (daily color & scent)',
         ],
         whoFor:
           'Founders, traders, freelancers, anyone who plans their week and wants their timing to actually work.',
@@ -175,7 +184,7 @@ const LANGS: Record<AppLang, Copy> = {
             body: 'Switch between Gregorian, Solar Hijri (Shamsi) and Lunar Hijri so dates always make sense in your culture and family.',
           },
           {
-            heading: 'Cosmic Look',
+            heading: 'Style Timing',
             body: 'Daily color and scent suggestion based on the Moon’s sign and Venus aspects — small ritual that compounds attraction over weeks.',
           },
         ],
@@ -279,7 +288,7 @@ const LANGS: Record<AppLang, Copy> = {
   },
   ru: {
     eyebrow: '· Выберите высоту ·',
-    title: 'Обновите Planet Life',
+    title: 'Обновите METIORO',
     subtitle:
       'Free — основа. Pro — инструменты решений. Premium — открывает Хранилище. VIP — это Юлия лично.',
     cycleMonthly: 'Ежемесячно',
@@ -317,12 +326,12 @@ const LANGS: Record<AppLang, Copy> = {
     tiers: {
       free: {
         name: 'Free',
-        tagline: 'Ежедневный космический снимок.',
+        tagline: 'Ежедневный стилевой инсайт.',
         monthly: '0',
         yearly: '0',
         cta: 'Ваш план',
         features: [
-          'Космическая оценка дня',
+          'Ежедневная оценка решений',
           'Календарь на 7 дней',
           '3 вопроса в день',
           '2 человека в вашем круге',
@@ -332,7 +341,7 @@ const LANGS: Record<AppLang, Copy> = {
           'Любому, кто хочет попробовать движок и понять оценку дня перед оплатой.',
         details: [
           {
-            heading: 'Космическая оценка дня',
+            heading: 'Ежедневная оценка решений',
             body: 'Каждое утро рассчитываем 0–100 по реальным транзитам Swiss Ephemeris к вашей карте. Одно число — зелёный, нейтрал или трение.',
           },
           {
@@ -361,7 +370,7 @@ const LANGS: Record<AppLang, Copy> = {
           '10 человек в круге',
           'Уведомления о золотых часах',
           'Персидский и хиджри календарь',
-          'Cosmic Look — цвет и аромат дня',
+          'Style Timing — цвет и аромат дня',
         ],
         whoFor:
           'Основателям, трейдерам, фрилансерам — всем, кому важно, чтобы тайминг работал.',
@@ -387,7 +396,7 @@ const LANGS: Record<AppLang, Copy> = {
             body: 'Григорианский, шамси, хиджри — переключение, чтобы даты всегда соответствовали культуре и семье.',
           },
           {
-            heading: 'Cosmic Look',
+            heading: 'Style Timing',
             body: 'Цвет и аромат дня — маленький ритуал, усиливающий притяжение неделями.',
           },
         ],
@@ -491,7 +500,7 @@ const LANGS: Record<AppLang, Copy> = {
   },
   fa: {
     eyebrow: '· ارتفاعت رو انتخاب کن ·',
-    title: 'ارتقای Planet Life',
+    title: 'ارتقای METIORO',
     subtitle:
       'رایگان: اصول. Pro: ابزار تصمیم. Premium: محرمانه باز می‌شه. VIP: جولیا در دسترس.',
     cycleMonthly: 'ماهانه',
@@ -529,12 +538,12 @@ const LANGS: Record<AppLang, Copy> = {
     tiers: {
       free: {
         name: 'رایگان',
-        tagline: 'تصویر کیهانی روزانه.',
+        tagline: 'بینش روزانهٔ استایل.',
         monthly: '۰',
         yearly: '۰',
         cta: 'پلن فعلی',
         features: [
-          'امتیاز کیهانی روزانه',
+          'امتیاز تصمیم روزانه',
           'تقویم ۷ روز جلو',
           '۳ پرسش در روز',
           '۲ نفر تو حلقه‌ت',
@@ -544,7 +553,7 @@ const LANGS: Record<AppLang, Copy> = {
           'هر کسی که می‌خواد قبل از پرداخت، موتور رو امتحان کنه و حس امتیاز روزانه رو بگیره.',
         details: [
           {
-            heading: 'امتیاز کیهانی روزانه',
+            heading: 'امتیاز تصمیم روزانه',
             body: 'هر صبح، با ترانزیت‌های واقعی Swiss Ephemeris روی چارت تو، یه نمره ۰ تا ۱۰۰ حساب می‌شه. یه عدد می‌گه امروز سبزه، خنثی یا اصطکاکی.',
           },
           {
@@ -573,7 +582,7 @@ const LANGS: Record<AppLang, Copy> = {
           '۱۰ نفر تو حلقه‌ت',
           'هشدار ساعت طلایی',
           'تقویم شمسی و هجری',
-          'Cosmic Look — رنگ و عطر روز',
+          'Style Timing — رنگ و عطر روز',
         ],
         whoFor:
           'بنیان‌گذار، تریدر، فریلنسر — هر کی هفته‌ش رو برنامه‌ریزی می‌کنه و می‌خواد تایمینگش واقعاً جواب بده.',
@@ -599,7 +608,7 @@ const LANGS: Record<AppLang, Copy> = {
             body: 'بین میلادی، شمسی و هجری جابجا می‌شی تا تاریخ‌ها همیشه برای فرهنگ و خانواده‌ت معنی بدن.',
           },
           {
-            heading: 'Cosmic Look',
+            heading: 'Style Timing',
             body: 'رنگ و عطر روزانه بر اساس برج ماه و زاویه‌های ونوس — یه ریتوال کوچیک که جذابیت رو هفته به هفته بیشتر می‌کنه.',
           },
         ],
@@ -703,7 +712,7 @@ const LANGS: Record<AppLang, Copy> = {
   },
   ar: {
     eyebrow: '· اختاري ارتفاعك ·',
-    title: 'ترقية Planet Life',
+    title: 'ترقية METIORO',
     subtitle:
       'المجاني للأساسيات. Pro لأدوات القرار. Premium يفتح الخزانة. VIP يمنحكِ جوليا.',
     cycleMonthly: 'شهري',
@@ -741,12 +750,12 @@ const LANGS: Record<AppLang, Copy> = {
     tiers: {
       free: {
         name: 'مجاني',
-        tagline: 'لقطة كونية يومية.',
+        tagline: 'رؤية يومية للأسلوب.',
         monthly: '0',
         yearly: '0',
         cta: 'خطتكِ الحالية',
         features: [
-          'درجة اليوم الكونية',
+          'درجة القرار اليومية',
           'تقويم 7 أيام',
           '٣ أسئلة يومياً',
           'شخصان في دائرتك',
@@ -755,7 +764,7 @@ const LANGS: Record<AppLang, Copy> = {
         whoFor:
           'لمن يريد تجربة المحرّك ومعرفة درجة اليوم قبل الاشتراك.',
         details: [
-          { heading: 'درجة كونية يومية', body: 'كل صباح نحسب درجة من 0 إلى 100 من العبور الفعلي على خريطتك. رقم واحد يخبركِ: أخضر، محايد، أم احتكاك.' },
+          { heading: 'درجة القرار اليومية', body: 'كل صباح نحسب درجة من 0 إلى 100 من العبور الفعلي على خريطتك. رقم واحد يخبركِ: أخضر، محايد، أم احتكاك.' },
           { heading: 'تقويم 7 أيام', body: 'ترين الأسبوع القادم لخطط صغيرة. النمط السنوي الكامل في Pro.' },
           { heading: '٣ أسئلة يومياً', body: 'ثلاثة أسئلة محدّدة بإجابة بدرجة. مثال: «هل غداً مناسب للتوقيع؟»' },
           { heading: 'شخصان', body: 'أضيفي شريكاً وصديقة لرؤية نوافذ التوافق الأساسية.' },
@@ -773,7 +782,7 @@ const LANGS: Record<AppLang, Copy> = {
           '10 أشخاص في دائرتك',
           'تنبيهات الساعة الذهبية',
           'تقويم فارسي وهجري',
-          'Cosmic Look — لون وعطر اليوم',
+          'Style Timing — لون وعطر اليوم',
         ],
         whoFor:
           'لكل مؤسّس، تاجر، فريلنسر — كل من يخطّط أسبوعه ويريد توقيتاً يعمل.',
@@ -783,7 +792,7 @@ const LANGS: Record<AppLang, Copy> = {
           { heading: '10 أشخاص', body: 'الشريك، المؤسّس المشارك، الأهل، العملاء — نوافذ التآزر والتوتر للمجموعة.' },
           { heading: 'تنبيهات الساعة الذهبية', body: 'حين يفتح ترين المشتري على شمسك في الساعة 14 — يخبركِ هاتفكِ.' },
           { heading: 'فارسي وهجري', body: 'تبديل بين الميلادي والفارسي والهجري كي يفهم التاريخ ثقافتكِ.' },
-          { heading: 'Cosmic Look', body: 'لون وعطر اليوم — طقس صغير يضاعف الجاذبية على مدى الأسابيع.' },
+          { heading: 'Style Timing', body: 'لون وعطر اليوم — طقس صغير يضاعف الجاذبية على مدى الأسابيع.' },
         ],
       },
       premium: {
@@ -845,13 +854,6 @@ const LANGS: Record<AppLang, Copy> = {
 
 const TIER_ORDER: TierKey[] = ['free', 'pro', 'premium', 'vip'];
 
-const TIER_THEME: Record<TierKey, { glow: string; ring: string; tint: string; popular?: boolean }> = {
-  free: { glow: 'rgba(255,255,255,0.06)', ring: 'rgba(255,255,255,0.1)', tint: 'rgba(255,255,255,0.7)' },
-  pro: { glow: 'rgba(251,191,36,0.18)', ring: 'rgba(251,191,36,0.4)', tint: '#fbbf24', popular: true },
-  premium: { glow: 'rgba(244,114,182,0.22)', ring: 'rgba(244,114,182,0.45)', tint: '#f9a8d4' },
-  vip: { glow: 'rgba(196,181,253,0.22)', ring: 'rgba(196,181,253,0.45)', tint: '#c4b5fd' },
-};
-
 function isValidContact(s: string): boolean {
   const v = s.trim();
   if (v.length < 5) return false;
@@ -881,7 +883,7 @@ export default function UpgradePage() {
   const [successCode, setSuccessCode] = useState<string | null>(null);
   const [currentTier, setCurrentTier] = useState<MembershipTier>('free');
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
@@ -905,7 +907,7 @@ export default function UpgradePage() {
 
   const t = LANGS[lang];
   const dir = HOME_LANGS[lang].dir;
-  const fontFamily = lang === 'fa' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif';
+  const fontFamily = localeFontFamily(lang);
 
   const openReserve = (key: TierKey) => {
     if (key === 'free') return;
@@ -988,41 +990,43 @@ export default function UpgradePage() {
       navLabels={HOME_LANGS[lang].nav}
       fontFamily={fontFamily}
     >
-      <div className="relative min-h-[calc(100vh-60px)] overflow-hidden">
+      <div className="relative overflow-hidden">
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none"
           style={{
-            background:
-              'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(251,191,36,0.06), transparent 60%), radial-gradient(ellipse 50% 40% at 70% 60%, rgba(244,114,182,0.06), transparent 60%), radial-gradient(ellipse 50% 40% at 30% 80%, rgba(196,181,253,0.05), transparent 60%)',
+            background: GRADIENTS.pageAmbient,
           }}
         />
 
         <div className="relative max-w-6xl mx-auto px-6 py-10">
           <Link
             href="/vault"
-            className="fi text-xs no-underline inline-block mb-4"
-            style={{ color: 'rgba(244,114,182,0.7)' }}
+            className="fi text-xs no-underline inline-block mb-4 transition-opacity hover:opacity-80"
+            style={{ color: COLORS.goldMain }}
           >
             {t.back}
           </Link>
 
           <div className="text-center mb-10">
+            <div className="flex justify-center mb-6">
+              <BrandLogo lang={lang} href="/home" size="md" showTagline onDark />
+            </div>
             <div
               className="fc text-[11px] tracking-[0.3em] mb-3"
-              style={{ color: 'rgba(251,191,36,0.6)' }}
+              style={{ color: COLORS_RGBA.royalBlue45 }}
             >
               {t.eyebrow}
             </div>
             <h1
-              className="fc text-4xl md:text-5xl mb-3"
-              style={{ color: '#fbbf24', letterSpacing: '0.05em' }}
+              className="fc text-4xl md:text-5xl mb-3 font-semibold"
+              style={{ color: COLORS.white, letterSpacing: '0.04em' }}
             >
               {t.title}
             </h1>
             <p
               className="fi text-sm md:text-base max-w-2xl mx-auto leading-relaxed"
-              style={{ color: 'rgba(255,255,255,0.6)' }}
+              style={{ color: COLORS_RGBA.white60 }}
             >
               {t.subtitle}
             </p>
@@ -1031,8 +1035,8 @@ export default function UpgradePage() {
             <div
               className="inline-flex mt-6 p-1 rounded-full"
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: COLORS_RGBA.white04,
+                border: `1px solid ${COLORS_RGBA.white08}`,
               }}
             >
               {(['monthly', 'yearly'] as Cycle[]).map((c) => (
@@ -1040,16 +1044,16 @@ export default function UpgradePage() {
                   key={c}
                   type="button"
                   onClick={() => setCycle(c)}
-                  className="fi text-xs px-4 py-2 rounded-full transition-all"
+                  className="fi text-xs px-4 py-2 rounded-full transition-all focus-visible:outline-none"
                   style={{
                     background:
                       cycle === c
-                        ? 'rgba(251,191,36,0.12)'
+                        ? COLORS_RGBA.royalBlue18
                         : 'transparent',
-                    color: cycle === c ? '#fbbf24' : 'rgba(255,255,255,0.5)',
+                    color: cycle === c ? '#93B4FF' : COLORS_RGBA.white45,
                     border:
                       cycle === c
-                        ? '1px solid rgba(251,191,36,0.3)'
+                        ? `1px solid ${COLORS_RGBA.royalBlue45}`
                         : '1px solid transparent',
                     minWidth: 100,
                   }}
@@ -1061,7 +1065,7 @@ export default function UpgradePage() {
             {cycle === 'yearly' && (
               <div
                 className="fi text-[11px] mt-2"
-                style={{ color: 'rgba(74,222,128,0.85)' }}
+                style={{ color: COLORS.goldHighlight }}
               >
                 {t.yearlyHint}
               </div>
@@ -1080,18 +1084,17 @@ export default function UpgradePage() {
                   key={key}
                   className="relative rounded-2xl p-6 flex flex-col"
                   style={{
-                    background:
-                      'linear-gradient(135deg, rgba(20,24,40,0.7), rgba(14,18,32,0.7))',
+                    background: key === 'vip' ? GRADIENTS.vipSurface : GRADIENTS.cardSurface,
                     border: `1px solid ${theme.ring}`,
                     boxShadow: `0 0 40px ${theme.glow}, inset 0 0 0 1px rgba(255,255,255,0.02)`,
                   }}
                 >
                   {theme.popular && (
                     <span
-                      className="fi text-[10px] tracking-[0.18em] uppercase absolute -top-2.5 right-5 px-2 py-0.5 rounded-full"
+                      className="fi text-[10px] tracking-[0.18em] uppercase absolute -top-2.5 right-5 px-2 py-0.5 rounded-full font-semibold"
                       style={{
-                        background: '#fbbf24',
-                        color: '#1a1305',
+                        background: COLORS.royalBlue,
+                        color: COLORS.white,
                       }}
                     >
                       {t.popular}
@@ -1099,10 +1102,10 @@ export default function UpgradePage() {
                   )}
                   {key === 'premium' && (
                     <span
-                      className="fi text-[10px] absolute -top-2.5 right-5 px-2 py-0.5 rounded-full"
+                      className="fi text-[10px] absolute -top-2.5 right-5 px-2 py-0.5 rounded-full font-semibold"
                       style={{
-                        background: '#f9a8d4',
-                        color: '#3b0d2a',
+                        background: GRADIENTS.gold,
+                        color: COLORS.navy,
                       }}
                     >
                       {t.vaultUnlocks}
@@ -1251,14 +1254,14 @@ export default function UpgradePage() {
                     style={{
                       background:
                         key === 'free'
-                          ? 'rgba(255,255,255,0.04)'
+                          ? COLORS_RGBA.white04
                           : sent
-                            ? 'linear-gradient(135deg, rgba(74,222,128,0.2), rgba(34,197,94,0.15))'
-                            : `linear-gradient(135deg, ${theme.glow}, ${theme.glow})`,
+                            ? `linear-gradient(135deg, ${COLORS_RGBA.royalBlue18}, ${COLORS_RGBA.royalBlue12})`
+                            : theme.ctaBg,
                       border: sent
-                        ? '1px solid rgba(74,222,128,0.4)'
-                        : `1px solid ${theme.ring}`,
-                      color: sent ? '#bbf7d0' : theme.tint,
+                        ? `1px solid ${COLORS_RGBA.royalBlue45}`
+                        : `1px solid ${theme.ctaBorder}`,
+                      color: sent ? '#93B4FF' : theme.ctaText,
                       letterSpacing: '0.14em',
                       cursor: key === 'free' ? 'default' : 'pointer',
                     }}
@@ -1284,13 +1287,13 @@ export default function UpgradePage() {
           <div
             className="mt-10 max-w-2xl mx-auto rounded-xl p-5 text-center"
             style={{
-              background: 'rgba(251,191,36,0.04)',
-              border: '1px solid rgba(251,191,36,0.15)',
+              background: COLORS_RGBA.goldMain12,
+              border: `1px solid ${COLORS_RGBA.goldMain28}`,
             }}
           >
             <div
               className="fc text-[11px] tracking-[0.25em] uppercase mb-2"
-              style={{ color: 'rgba(251,191,36,0.7)' }}
+              style={{ color: COLORS.goldHighlight }}
             >
               {t.comingSoon}
             </div>
@@ -1310,7 +1313,7 @@ export default function UpgradePage() {
             aria-modal="true"
             className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 overflow-y-auto"
             style={{
-              background: 'rgba(4,6,14,0.78)',
+              background: 'rgba(10,15,28,0.78)',
               backdropFilter: 'blur(8px)',
             }}
             onClick={closeReserve}
@@ -1319,8 +1322,7 @@ export default function UpgradePage() {
               onClick={(e) => e.stopPropagation()}
               className="relative rounded-2xl w-full max-w-md p-6"
               style={{
-                background:
-                  'linear-gradient(135deg, rgba(28,18,40,0.96), rgba(18,14,28,0.96))',
+                background: GRADIENTS.navySurface,
                 border: `1px solid ${TIER_THEME[reserveTier].ring}`,
                 boxShadow: `0 0 50px ${TIER_THEME[reserveTier].glow}, 0 20px 60px rgba(0,0,0,0.6)`,
               }}
@@ -1420,9 +1422,9 @@ export default function UpgradePage() {
                     disabled={submitting}
                     className="fc w-full py-3 rounded-xl text-sm tracking-widest transition-all hover:scale-[1.01]"
                     style={{
-                      background: `linear-gradient(135deg, ${TIER_THEME[reserveTier].glow}, ${TIER_THEME[reserveTier].glow})`,
-                      border: `1px solid ${TIER_THEME[reserveTier].ring}`,
-                      color: TIER_THEME[reserveTier].tint,
+                      background: TIER_THEME[reserveTier].ctaBg,
+                      border: `1px solid ${TIER_THEME[reserveTier].ctaBorder}`,
+                      color: TIER_THEME[reserveTier].ctaText,
                       letterSpacing: '0.16em',
                       cursor: submitting ? 'wait' : 'pointer',
                     }}
@@ -1443,8 +1445,8 @@ export default function UpgradePage() {
                     className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
                     style={{
                       background:
-                        'radial-gradient(circle, rgba(74,222,128,0.25), rgba(34,197,94,0.1))',
-                      border: '1px solid rgba(74,222,128,0.4)',
+                        `radial-gradient(circle, ${COLORS_RGBA.royalBlue18}, ${COLORS_RGBA.royalBlue12})`,
+                      border: `1px solid ${COLORS_RGBA.royalBlue45}`,
                     }}
                   >
                     <svg
@@ -1452,7 +1454,7 @@ export default function UpgradePage() {
                       height="28"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="#86efac"
+                      stroke="#93B4FF"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -1476,20 +1478,19 @@ export default function UpgradePage() {
                   <div
                     className="rounded-xl p-4 mb-5"
                     style={{
-                      background:
-                        'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(244,114,182,0.1))',
-                      border: '1px solid rgba(251,191,36,0.3)',
+                      background: GRADIENTS.goldSubtle,
+                      border: `1px solid ${COLORS_RGBA.goldMain45}`,
                     }}
                   >
                     <div
                       className="fi text-[10px] tracking-[0.25em] uppercase mb-1"
-                      style={{ color: 'rgba(251,191,36,0.85)' }}
+                      style={{ color: COLORS.goldHighlight }}
                     >
                       {t.reserve.founderCode} · {t.reserve.discount}
                     </div>
                     <div
                       className="fc text-base tracking-wider select-all"
-                      style={{ color: '#fbbf24', letterSpacing: '0.1em' }}
+                      style={{ color: COLORS.goldMain, letterSpacing: '0.1em' }}
                     >
                       {successCode}
                     </div>

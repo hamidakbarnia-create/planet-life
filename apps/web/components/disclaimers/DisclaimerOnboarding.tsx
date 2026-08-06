@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   acceptDisclaimer,
   DISCLAIMER_LANGS,
@@ -8,26 +8,29 @@ import {
   resolveDisclaimerLang,
   type DisclaimerLang,
 } from '@/lib/disclaimers';
+import { BrandLogo } from '@/components/BrandLogo';
+import type { BrandLang } from '@/lib/brand';
+import { localeFcFiCss, localeFontFamily } from '@/lib/brand-theme';
+import { LEGAL_NAV_LINKS } from '@/lib/legal-nav';
+import Link from 'next/link';
 
 export function DisclaimerOnboarding({
   onAccepted,
 }: {
   onAccepted: () => void;
 }) {
-  const [lang, setLang] = useState<DisclaimerLang>('en');
+  const [lang, setLang] = useState<DisclaimerLang>(() =>
+    typeof window !== 'undefined' ? resolveDisclaimerLang() : 'en'
+  );
   const [checked, setChecked] = useState(false);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    if (!isDisclaimerAccepted()) setVisible(true);
-    setLang(resolveDisclaimerLang());
-  }, []);
+  const [visible, setVisible] = useState(
+    () => typeof window !== 'undefined' && !isDisclaimerAccepted()
+  );
 
   if (!visible) return null;
 
   const t = DISCLAIMER_LANGS[lang];
-  const fontFamily =
-    lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif';
+  const fontFamily = localeFontFamily(lang);
 
   const handleContinue = () => {
     if (!checked) return;
@@ -46,10 +49,7 @@ export function DisclaimerOnboarding({
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
-        @import url('https://fonts.googleapis.com/earlyaccess/vazirmatn.css');
-        .fc{font-family:'Cinzel',serif}
-        .fi{font-family:'Inter',sans-serif}
+        ${localeFcFiCss(lang)}
       `}</style>
 
       <div
@@ -61,10 +61,7 @@ export function DisclaimerOnboarding({
         }}
       >
         <div className="flex justify-center mb-6">
-          <svg width="40" height="40" viewBox="0 0 30 30" fill="none">
-            <circle cx="15" cy="15" r="13" stroke="#fbbf24" strokeWidth="0.5" opacity="0.5" />
-            <circle cx="15" cy="15" r="2.5" fill="#fbbf24" />
-          </svg>
+          <BrandLogo lang={lang as BrandLang} href={null} size="md" showTagline={false} />
         </div>
 
         <h1
@@ -114,6 +111,22 @@ export function DisclaimerOnboarding({
             </button>
           ))}
         </div>
+
+        <nav
+          aria-label="Legal"
+          className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-6"
+        >
+          {LEGAL_NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="fi text-[11px] underline hover:opacity-100"
+              style={{ color: 'rgba(255,255,255,0.45)' }}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
 
         <button
           type="button"

@@ -37,6 +37,7 @@ describe('AnalysisResultBreakdown', () => {
     expect(screen.queryByTestId('score-breakdown-panel')).toBeNull();
     expect(container.querySelector('[data-testid="score-breakdown-panel"]')).toBeNull();
   });
+});
 
 describe('Ask result wiring', () => {
   it('renders ScoreBreakdownPanel when scoreBreakdown exists', () => {

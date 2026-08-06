@@ -1,4 +1,5 @@
-import type { AppLang, CalendarSystem } from './app-settings';
+import type { AppLang } from './app-settings';
+import { DATE_LOCALES } from './date-format';
 import type { PathfinderEffect, PathfinderReason } from './pathfinder-api';
 
 // Localized planet + angle names so the Pathfinder body text (not just the
@@ -176,21 +177,6 @@ const PERIOD_LABELS: Record<AppLang, { favorable: string; balanced: string; chal
   ar: { favorable: 'مواتٍ', balanced: 'متوازن', challenging: 'صعب' },
 };
 
-const DATE_LOCALES: Record<AppLang, string> = {
-  en: 'en-US',
-  ru: 'ru-RU',
-  fa: 'fa-IR',
-  ar: 'ar',
-};
-
-// Maps our calendar choice to a BCP-47 calendar extension. Gregorian is the
-// shared default; Shamsi = Persian (Solar Hijri); Ghamari = Umm al-Qura Hijri.
-const CALENDAR_EXT: Record<CalendarSystem, string> = {
-  gregorian: 'gregory',
-  shamsi: 'persian',
-  hijri: 'islamic-umalqura',
-};
-
 function planetName(lang: AppLang, planet: string): string {
   return PLANET_NAMES[lang][planet] ?? PLANET_NAMES.en[planet] ?? planet;
 }
@@ -245,33 +231,6 @@ export function periodLabel(lang: AppLang, score: number): string {
   if (score >= 65) return l.favorable;
   if (score <= 42) return l.challenging;
   return l.balanced;
-}
-
-export function formatPathfinderDate(
-  lang: AppLang,
-  isoDate: string,
-  calendar: CalendarSystem = 'gregorian'
-): string {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  if (!year || !month || !day) return isoDate;
-  const date = new Date(Date.UTC(year, month - 1, day));
-  const baseLocale = DATE_LOCALES[lang] ?? DATE_LOCALES.en;
-  const locale = `${baseLocale}-u-ca-${CALENDAR_EXT[calendar] ?? CALENDAR_EXT.gregorian}`;
-  return new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(date);
-}
-
-export function formatPathfinderDateRange(
-  lang: AppLang,
-  start: string,
-  end: string,
-  calendar: CalendarSystem = 'gregorian'
-): string {
-  return `${formatPathfinderDate(lang, start, calendar)} - ${formatPathfinderDate(lang, end, calendar)}`;
 }
 
 export function pathfinderPlanetName(lang: AppLang, planet: string): string {

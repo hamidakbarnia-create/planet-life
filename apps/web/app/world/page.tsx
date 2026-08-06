@@ -1,8 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
+import { localeFontFamily } from '@/lib/brand-theme';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
 import type { AppLang } from '@/lib/app-settings';
@@ -15,17 +17,46 @@ import {
   fetchCitySky,
   figureSignalToSky,
   citySignalToSky,
+  formatNewsPublicationDate,
+  assertNever,
   type MarketQuote,
-  type NewsItem,
+  type WorldNewsItem,
+  type WorldNewsResponse,
   type SkySignal,
 } from '@/lib/world-api';
 import { skySignalParts, skySignalDetail, strengthFromOrb, orbText, toneColor } from '@/lib/world-i18n';
 
-const LIVE_LABELS: Record<AppLang, { live: string; free: string; cosmic: string; context: string; noRead: string; loading: string; openFull: string; searchFigure: string; searchCity: string; close: string; fullRead: string; sources: string; searchPlaceholder: string; cityPlaceholder: string; searchBtn: string; searchHint: string; cityHint: string; foundFigure: string; missingFigure: string; foundCity: string; missingCity: string }> = {
-  en: { live: 'LIVE', free: 'Free', cosmic: 'What the stars say', context: "What's happening", noRead: 'The sky is quiet on this theme right now.', loading: 'Reading the sky…', openFull: 'Open full reading', searchFigure: 'Search a figure', searchCity: 'Search a city', close: 'Close', fullRead: 'Full cosmic reading', sources: 'Live sources', searchPlaceholder: 'e.g. Trump, Musk, Ronaldo…', cityPlaceholder: 'e.g. Dubai, Istanbul, London…', searchBtn: 'Search', searchHint: 'Search any public figure to see live news + the current sky.', cityHint: 'Search any city to see property-market news + the current real-estate sky.', foundFigure: 'Reading current transits to this person\u2019s own chart.', missingFigure: 'No birth data on file for this name yet \u2014 showing live news with the global sky.', foundCity: 'Reading the sky over this city\u2019s local angles right now.', missingCity: 'Could not locate that city \u2014 showing live news with the global sky.' },
-  ru: { live: 'LIVE', free: 'Бесплатно', cosmic: 'Что говорят звёзды', context: 'Что происходит', noRead: 'Небо сейчас спокойно по этой теме.', loading: 'Читаем небо…', openFull: 'Открыть полный разбор', searchFigure: 'Искать персону', searchCity: 'Искать город', close: 'Закрыть', fullRead: 'Полный космический разбор', sources: 'Живые источники', searchPlaceholder: 'напр. Трамп, Маск, Роналду…', cityPlaceholder: 'напр. Дубай, Стамбул, Лондон…', searchBtn: 'Найти', searchHint: 'Найдите любую публичную персону — живые новости + текущее небо.', cityHint: 'Найдите любой город — новости рынка недвижимости + текущее небо недвижимости.', foundFigure: 'Читаем текущие транзиты к натальной карте этого человека.', missingFigure: 'Данных о рождении для этого имени пока нет — показываем живые новости и общее небо.', foundCity: 'Читаем небо над локальными углами этого города прямо сейчас.', missingCity: 'Не удалось найти этот город — показываем живые новости и общее небо.' },
-  fa: { live: 'زنده', free: 'رایگان', cosmic: 'ستارگان چه می‌گویند', context: 'چه خبر است', noRead: 'آسمان فعلاً در این موضوع آرام است.', loading: 'در حال خواندن آسمان…', openFull: 'باز کردن خوانش کامل', searchFigure: 'جستجوی شخص', searchCity: 'جستجوی شهر', close: 'بستن', fullRead: 'خوانش کامل کیهانی', sources: 'منابع زنده', searchPlaceholder: 'مثلاً ترامپ، ماسک، رونالدو…', cityPlaceholder: 'مثلاً دبی، استانبول، لندن…', searchBtn: 'جستجو', searchHint: 'هر شخصیت عمومی را جستجو کن تا خبرهای زنده و آسمان امروز را ببینی.', cityHint: 'هر شهر را جستجو کن تا خبرهای بازار ملک و آسمان امروزِ املاک را ببینی.', foundFigure: 'گذرهای کنونی روی چارت تولدِ همین شخص خوانده می‌شود.', missingFigure: 'هنوز دادهٔ تولدی برای این نام نداریم — خبرهای زنده همراه آسمان کلی نمایش داده می‌شود.', foundCity: 'آسمان روی زوایای محلیِ همین شهر همین حالا خوانده می‌شود.', missingCity: 'این شهر پیدا نشد — خبرهای زنده همراه آسمان کلی نمایش داده می‌شود.' },
-  ar: { live: 'مباشر', free: 'مجاني', cosmic: 'ماذا تقول النجوم', context: 'ما الذي يجري', noRead: 'السماء هادئة في هذا الموضوع الآن.', loading: 'نقرأ السماء…', openFull: 'افتح القراءة الكاملة', searchFigure: 'ابحث عن شخصية', searchCity: 'ابحث عن مدينة', close: 'إغلاق', fullRead: 'قراءة كونية كاملة', sources: 'مصادر مباشرة', searchPlaceholder: 'مثل ترامب، ماسك، رونالدو…', cityPlaceholder: 'مثل دبي، إسطنبول، لندن…', searchBtn: 'بحث', searchHint: 'ابحث عن أي شخصية عامة لرؤية الأخبار الحيّة والسماء الحالية.', cityHint: 'ابحث عن أي مدينة لرؤية أخبار العقار والسماء الحالية للعقار.', foundFigure: 'نقرأ العبور الحالي إلى خريطة ميلاد هذا الشخص.', missingFigure: 'لا تتوفّر بيانات ميلاد لهذا الاسم بعد — نعرض الأخبار الحيّة مع السماء العامة.', foundCity: 'نقرأ السماء فوق الزوايا المحلية لهذه المدينة الآن.', missingCity: 'تعذّر تحديد هذه المدينة — نعرض الأخبار الحيّة مع السماء العامة.' },
+type LiveLabels = {
+  live: string;
+  free: string;
+  cosmic: string;
+  context: string;
+  noRead: string;
+  loading: string;
+  openFull: string;
+  searchFigure: string;
+  searchCity: string;
+  close: string;
+  fullRead: string;
+  sources: string;
+  searchPlaceholder: string;
+  cityPlaceholder: string;
+  searchBtn: string;
+  searchHint: string;
+  cityHint: string;
+  foundFigure: string;
+  missingFigure: string;
+  foundCity: string;
+  missingCity: string;
+  newsLowSignal: string;
+  newsUnavailable: string;
+};
+
+const LIVE_LABELS: Record<AppLang, LiveLabels> = {
+  en: { live: 'LIVE', free: 'Free', cosmic: 'Location insight', context: "What's happening", noRead: 'No notable signals on this theme right now.', loading: 'Analyzing…', openFull: 'Open full reading', searchFigure: 'Search a figure', searchCity: 'Search a city', close: 'Close', fullRead: 'Full insight read', sources: 'Live sources', searchPlaceholder: 'e.g. Trump, Musk, Ronaldo…', cityPlaceholder: 'e.g. Dubai, Istanbul, London…', searchBtn: 'Search', searchHint: 'Search any public figure to see live news plus current decision signals.', cityHint: 'Search any city to see property-market news plus current location signals.', foundFigure: 'Analyzing current transits against this person\u2019s chart.', missingFigure: 'No birth data on file for this name yet \u2014 showing live news with global signals.', foundCity: 'Analyzing location signals for this city right now.', missingCity: 'Could not locate that city \u2014 showing live news with global signals.', newsLowSignal: 'Not enough recent news is available for this topic.', newsUnavailable: 'News is temporarily unavailable. Please try again later.' },
+  ru: { live: 'LIVE', free: 'Бесплатно', cosmic: 'Локационный инсайт', context: 'Что происходит', noRead: 'Заметных сигналов по этой теме сейчас нет.', loading: 'Анализ…', openFull: 'Открыть полный разбор', searchFigure: 'Искать персону', searchCity: 'Искать город', close: 'Закрыть', fullRead: 'Полный аналитический разбор', sources: 'Живые источники', searchPlaceholder: 'напр. Трамп, Маск, Роналду…', cityPlaceholder: 'напр. Дубай, Стамбул, Лондон…', searchBtn: 'Найти', searchHint: 'Найдите любую публичную персону — живые новости и текущие сигналы решений.', cityHint: 'Найдите любой город — новости рынка недвижимости и сигналы по локации.', foundFigure: 'Анализируем текущие транзиты к натальной карте этого человека.', missingFigure: 'Данных о рождении для этого имени пока нет — показываем живые новости и глобальные сигналы.', foundCity: 'Анализируем сигналы для этого города прямо сейчас.', missingCity: 'Не удалось найти этот город — показываем живые новости и глобальные сигналы.', newsLowSignal: 'Недостаточно свежих новостей по этой теме.', newsUnavailable: 'Новости временно недоступны. Попробуйте позже.' },
+  fa: { live: 'زنده', free: 'رایگان', cosmic: 'بینش موقعیت', context: 'چه خبر است', noRead: 'فعلاً سیگنال قابل‌توجهی در این موضوع نیست.', loading: 'در حال تحلیل…', openFull: 'باز کردن خوانش کامل', searchFigure: 'جستجوی شخص', searchCity: 'جستجوی شهر', close: 'بستن', fullRead: 'خوانش کامل بینش', sources: 'منابع زنده', searchPlaceholder: 'مثلاً ترامپ، ماسک، رونالدو…', cityPlaceholder: 'مثلاً دبی، استانبول، لندن…', searchBtn: 'جستجو', searchHint: 'هر شخصیت عمومی را جستجو کن تا خبرهای زنده و سیگنال‌های تصمیم فعلی را ببینی.', cityHint: 'هر شهر را جستجو کن تا خبرهای بازار ملک و سیگنال‌های موقعیت فعلی را ببینی.', foundFigure: 'گذرهای کنونی روی چارت تولدِ همین شخص تحلیل می‌شود.', missingFigure: 'هنوز دادهٔ تولدی برای این نام نداریم — خبرهای زنده همراه سیگنال‌های کلی نمایش داده می‌شود.', foundCity: 'سیگنال‌های موقعیت برای همین شهر همین حالا تحلیل می‌شود.', missingCity: 'این شهر پیدا نشد — خبرهای زنده همراه سیگنال‌های کلی نمایش داده می‌شود.', newsLowSignal: 'خبر تازهٔ کافی برای این موضوع در دسترس نیست.', newsUnavailable: 'اخبار موقتاً در دسترس نیست. لطفاً بعداً دوباره تلاش کنید.' },
+  ar: { live: 'مباشر', free: 'مجاني', cosmic: 'رؤية الموقع', context: 'ما الذي يجري', noRead: 'لا توجد إشارات بارزة في هذا الموضوع الآن.', loading: 'جاري التحليل…', openFull: 'افتح القراءة الكاملة', searchFigure: 'ابحث عن شخصية', searchCity: 'ابحث عن مدينة', close: 'إغلاق', fullRead: 'قراءة رؤية كاملة', sources: 'مصادر مباشرة', searchPlaceholder: 'مثل ترامب، ماسك، رونالدو…', cityPlaceholder: 'مثل دبي، إسطنبول، لندن…', searchBtn: 'بحث', searchHint: 'ابحث عن أي شخصية عامة لرؤية الأخبار الحيّة وإشارات القرار الحالية.', cityHint: 'ابحث عن أي مدينة لرؤية أخبار العقار وإشارات الموقع الحالية.', foundFigure: 'نحلّل العبور الحالي مقابل خريطة ميلاد هذا الشخص.', missingFigure: 'لا تتوفّر بيانات ميلاد لهذا الاسم بعد — نعرض الأخبار الحيّة مع الإشارات العامة.', foundCity: 'نحلّل إشارات الموقع لهذه المدينة الآن.', missingCity: 'تعذّر تحديد هذه المدينة — نعرض الأخبار الحيّة مع الإشارات العامة.', newsLowSignal: 'لا تتوفّر أخبار حديثة كافية لهذا الموضوع.', newsUnavailable: 'الأخبار غير متاحة مؤقتاً. يرجى المحاولة لاحقاً.' },
 };
 
 // World tab — Macro-level public-facing content engine.
@@ -57,7 +88,7 @@ const WORLD_LANGS: Record<
   en: {
     title: 'World',
     subtitle:
-      'Cosmic intelligence on the markets, world leaders, and the cities that shape your life.',
+      'Decision intelligence on the markets, world leaders, and the cities that shape your life.',
     comingSoon: 'Sprint 6',
     explore: 'Preview',
     sections: {
@@ -91,7 +122,7 @@ const WORLD_LANGS: Record<
       },
       dailyBrief: {
         title: 'World Brief',
-        sub: 'A 60-second cosmic snapshot of the day',
+        sub: 'Your daily style insight in 60 seconds',
         tagline:
           'Every morning, one short note: who is under tension, what asset is in motion, where the next golden hour is.',
         tags: ['Daily', 'Free'],
@@ -101,7 +132,7 @@ const WORLD_LANGS: Record<
   ru: {
     title: 'Мир',
     subtitle:
-      'Космическая разведка по рынкам, лидерам и городам, формирующим вашу жизнь.',
+      'Интеллект решений по рынкам, лидерам и городам, формирующим вашу жизнь.',
     comingSoon: 'Спринт 6',
     explore: 'Предпросмотр',
     sections: {
@@ -135,7 +166,7 @@ const WORLD_LANGS: Record<
       },
       dailyBrief: {
         title: 'Мировой обзор',
-        sub: 'Космический снимок дня за 60 секунд',
+        sub: 'Ежедневный стилевой инсайт за 60 секунд',
         tagline:
           'Каждое утро короткая заметка: кто под напряжением, какой актив в движении, где следующий золотой час.',
         tags: ['Ежедневно', 'Бесплатно'],
@@ -145,7 +176,7 @@ const WORLD_LANGS: Record<
   fa: {
     title: 'جهان',
     subtitle:
-      'هوش کیهانی دربارهٔ بازارها، رهبران جهان و شهرهایی که زندگی‌ات را شکل می‌دهند.',
+      'هوش تصمیم دربارهٔ بازارها، رهبران جهان و شهرهایی که زندگی‌ات را شکل می‌دهند.',
     comingSoon: 'اسپرینت ۶',
     explore: 'پیش‌نمایش',
     sections: {
@@ -179,7 +210,7 @@ const WORLD_LANGS: Record<
       },
       dailyBrief: {
         title: 'جهان در یک نگاه',
-        sub: 'نگاه شصت‌ثانیه‌ای به کیهان امروز',
+        sub: 'بینش روزانهٔ استایل در ۶۰ ثانیه',
         tagline:
           'هر بامداد، یک یادداشت کوتاه: چه کسی تحت فشار است، کدام دارایی در حرکت است و ساعت طلایی بعدی کجاست.',
         tags: ['روزانه', 'رایگان'],
@@ -189,7 +220,7 @@ const WORLD_LANGS: Record<
   ar: {
     title: 'العالم',
     subtitle:
-      'استخبارات كونية على الأسواق وقادة العالم والمدن التي تشكّل حياتك.',
+      'ذكاء القرار على الأسواق وقادة العالم والمدن التي تشكّل حياتك.',
     comingSoon: 'سبرنت ٦',
     explore: 'معاينة',
     sections: {
@@ -223,7 +254,7 @@ const WORLD_LANGS: Record<
       },
       dailyBrief: {
         title: 'موجز العالم',
-        sub: 'لقطة كونية لليوم في 60 ثانية',
+        sub: 'رؤية يومية للأسلوب في 60 ثانية',
         tagline:
           'كل صباح ملاحظة قصيرة: من تحت الضغط، أي أصل في حركة، وأين الساعة الذهبية القادمة.',
         tags: ['يومي', 'مجاني'],
@@ -304,17 +335,73 @@ function QuoteList({ quotes }: { quotes: MarketQuote[] }) {
   );
 }
 
-function NewsList({ items }: { items: NewsItem[] }) {
+function NewsList({ items, lang, limit = 3 }: { items: WorldNewsItem[]; lang: AppLang; limit?: number }) {
   if (!items || items.length === 0) return null;
   return (
-    <div className="mb-4 space-y-1">
-      {items.slice(0, 3).map((n, i) => (
-        <a key={i} href={n.link} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="fi block truncate text-[11px] leading-relaxed no-underline transition-colors hover:text-white/80" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          · {n.title}
-        </a>
-      ))}
+    <div className="mb-4 space-y-1.5" data-testid="world-news-list">
+      {items.slice(0, limit).map((n, i) => {
+        const publishedLabel = formatNewsPublicationDate(n.published, lang);
+        return (
+          <a
+            key={i}
+            href={n.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="fi block no-underline transition-colors hover:text-white/80"
+            style={{ color: 'rgba(255,255,255,0.5)' }}
+            data-testid="world-news-item"
+          >
+            <div className="truncate text-[11px] leading-relaxed">· {n.title}</div>
+            {(n.source || publishedLabel) && (
+              <div className="fi mt-0.5 truncate text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }} data-testid="world-news-meta">
+                {[n.source, publishedLabel].filter(Boolean).join(' · ')}
+              </div>
+            )}
+          </a>
+        );
+      })}
     </div>
   );
+}
+
+/** Renders BFF news state exhaustively — UI never reclassifies coverage. */
+export function WorldNewsBlock({
+  response,
+  lang,
+  labels,
+  limit = 3,
+}: {
+  response: WorldNewsResponse;
+  lang: AppLang;
+  labels: Pick<LiveLabels, 'newsLowSignal' | 'newsUnavailable'>;
+  limit?: number;
+}) {
+  switch (response.state) {
+    case 'ok':
+      return <NewsList items={response.items} lang={lang} limit={limit} />;
+    case 'low_signal':
+      return (
+        <div data-testid="world-news-low-signal">
+          <p className="fi mb-2 text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            {labels.newsLowSignal}
+          </p>
+          <NewsList items={response.items} lang={lang} limit={limit} />
+        </div>
+      );
+    case 'unavailable':
+      return (
+        <p
+          className="fi mb-4 text-[11px] leading-relaxed"
+          style={{ color: 'rgba(255,255,255,0.45)' }}
+          data-testid="world-news-unavailable"
+        >
+          {labels.newsUnavailable}
+        </p>
+      );
+    default:
+      return assertNever(response);
+  }
 }
 
 // Full expanded reading for a section — every signal with its deeper meaning,
@@ -335,8 +422,8 @@ function SectionDetail({
   tint: string;
   signals: SkySignal[];
   quotes: MarketQuote[];
-  news: NewsItem[];
-  labels: (typeof LIVE_LABELS)[AppLang];
+  news: WorldNewsResponse | null;
+  labels: LiveLabels;
   search?: { query: string; setQuery: (v: string) => void; onSearch: () => void; loading: boolean; placeholder: string; hint: string; notice?: string };
   onClose: () => void;
 }) {
@@ -411,17 +498,10 @@ function SectionDetail({
           </div>
         )}
 
-        {news.length > 0 && (
+        {news && (
           <div className="mt-4">
             <div className="fi mb-2 text-[10px] uppercase tracking-[0.18em]" style={{ color: 'rgba(255,255,255,0.3)' }}>{labels.sources}</div>
-            <div className="space-y-2">
-              {news.slice(0, 8).map((n, i) => (
-                <a key={i} href={n.link} target="_blank" rel="noopener noreferrer" className="block rounded-lg px-3 py-2 no-underline transition-colors hover:bg-white/[0.06]" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                  <div className="fi text-[12px] leading-snug text-white/85">{n.title}</div>
-                  {n.source && <div className="fi mt-0.5 text-[10px]" style={{ color: 'rgba(255,255,255,0.4)' }}>{n.source}</div>}
-                </a>
-              ))}
-            </div>
+            <WorldNewsDetail news={news} lang={lang} labels={labels} />
           </div>
         )}
       </div>
@@ -429,17 +509,78 @@ function SectionDetail({
   );
 }
 
+function WorldNewsDetail({
+  news,
+  lang,
+  labels,
+}: {
+  news: WorldNewsResponse;
+  lang: AppLang;
+  labels: Pick<LiveLabels, 'newsLowSignal' | 'newsUnavailable'>;
+}) {
+  switch (news.state) {
+    case 'ok':
+      return <NewsDetailList items={news.items} lang={lang} />;
+    case 'low_signal':
+      return (
+        <div data-testid="world-news-detail-low-signal">
+          <p className="fi mb-2 text-[12px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            {labels.newsLowSignal}
+          </p>
+          <NewsDetailList items={news.items} lang={lang} />
+        </div>
+      );
+    case 'unavailable':
+      return (
+        <p className="fi text-[12px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }} data-testid="world-news-detail-unavailable">
+          {labels.newsUnavailable}
+        </p>
+      );
+    default:
+      return assertNever(news);
+  }
+}
+
+function NewsDetailList({ items, lang }: { items: WorldNewsItem[]; lang: AppLang }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="space-y-2" data-testid="world-news-detail-list">
+      {items.slice(0, 8).map((n, i) => {
+        const publishedLabel = formatNewsPublicationDate(n.published, lang);
+        return (
+          <a
+            key={i}
+            href={n.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block rounded-lg px-3 py-2 no-underline transition-colors hover:bg-white/[0.06]"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+            data-testid="world-news-detail-item"
+          >
+            <div className="fi text-[12px] leading-snug text-white/85">{n.title}</div>
+            {(n.source || publishedLabel) && (
+              <div className="fi mt-0.5 text-[10px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                {[n.source, publishedLabel].filter(Boolean).join(' · ')}
+              </div>
+            )}
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function WorldPage() {
   const [lang, setLangState] = useState<AppLang>('en');
   const [quotes, setQuotes] = useState<MarketQuote[]>([]);
-  const [geoNews, setGeoNews] = useState<NewsItem[]>([]);
-  const [marketNews, setMarketNews] = useState<NewsItem[]>([]);
-  const [realEstateNews, setRealEstateNews] = useState<NewsItem[]>([]);
+  const [geoNews, setGeoNews] = useState<WorldNewsResponse | null>(null);
+  const [marketNews, setMarketNews] = useState<WorldNewsResponse | null>(null);
+  const [realEstateNews, setRealEstateNews] = useState<WorldNewsResponse | null>(null);
   const [sky, setSky] = useState<{ markets: SkySignal[]; geopolitics: SkySignal[] } | null>(null);
   const [liveLoading, setLiveLoading] = useState(true);
   const [openSection, setOpenSection] = useState<WorldKey | null>(null);
   const [figureQuery, setFigureQuery] = useState('');
-  const [figureNews, setFigureNews] = useState<NewsItem[]>([]);
+  const [figureNews, setFigureNews] = useState<WorldNewsResponse | null>(null);
   const [figureLoading, setFigureLoading] = useState(false);
   const [figureSignals, setFigureSignals] = useState<SkySignal[] | null>(null);
   const [figureNotice, setFigureNotice] = useState<string>('');
@@ -448,7 +589,7 @@ export default function WorldPage() {
   const [realEstateSignals, setRealEstateSignals] = useState<SkySignal[] | null>(null);
   const [realEstateNotice, setRealEstateNotice] = useState<string>('');
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
@@ -472,8 +613,8 @@ export default function WorldPage() {
     setLiveLoading(false);
   }, []);
 
-  useEffect(() => {
-    loadLive(lang);
+  useQueuedEffect(() => {
+    void loadLive(lang);
   }, [lang, loadLive]);
 
   const setLang = (l: AppLang) => {
@@ -484,7 +625,7 @@ export default function WorldPage() {
   const t = WORLD_LANGS[lang];
   const live = LIVE_LABELS[lang];
   const isLiveSection = (key: WorldKey) => key === 'markets' || key === 'geopolitics' || key === 'dailyBrief' || key === 'figures' || key === 'realEstate';
-  const sectionData = (key: WorldKey): { signals: SkySignal[]; quotes: MarketQuote[]; news: NewsItem[] } => {
+  const sectionData = (key: WorldKey): { signals: SkySignal[]; quotes: MarketQuote[]; news: WorldNewsResponse | null } => {
     if (key === 'markets') return { signals: sky?.markets ?? [], quotes, news: marketNews };
     if (key === 'geopolitics') return { signals: sky?.geopolitics ?? [], quotes: [], news: geoNews };
     if (key === 'figures') return { signals: figureSignals ?? sky?.geopolitics ?? [], quotes: [], news: figureNews };
@@ -493,9 +634,9 @@ export default function WorldPage() {
       return {
         signals: [...(sky?.geopolitics ?? []), ...(sky?.markets ?? [])],
         quotes,
-        news: marketNews.length ? marketNews : geoNews,
+        news: marketNews ?? geoNews,
       };
-    return { signals: [], quotes: [], news: [] };
+    return { signals: [], quotes: [], news: null };
   };
   const searchFigure = async () => {
     const q = figureQuery.trim();
@@ -547,7 +688,7 @@ export default function WorldPage() {
     }
   };
   const dir = HOME_LANGS[lang].dir;
-  const fontFamily = lang === 'fa' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif';
+  const fontFamily = localeFontFamily(lang);
 
   return (
     <AppShell
@@ -557,7 +698,7 @@ export default function WorldPage() {
       navLabels={HOME_LANGS[lang].nav}
       fontFamily={fontFamily}
     >
-      <div className="relative min-h-[calc(100vh-60px)] overflow-hidden">
+      <div className="relative overflow-hidden">
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none"
@@ -667,28 +808,30 @@ export default function WorldPage() {
                         <CosmicRead lang={lang} signals={sky?.markets ?? []} label={live.cosmic} emptyLabel={liveLoading ? live.loading : live.noRead} tint={accent.tint} />
                         <ContextRow label={live.context} />
                         <QuoteList quotes={quotes} />
-                        <NewsList items={marketNews} />
+                        {!liveLoading && marketNews && <WorldNewsBlock response={marketNews} lang={lang} labels={live} />}
                       </>
                     )}
                     {key === 'geopolitics' && (
                       <>
                         <CosmicRead lang={lang} signals={sky?.geopolitics ?? []} label={live.cosmic} emptyLabel={liveLoading ? live.loading : live.noRead} tint={accent.tint} />
                         <ContextRow label={live.context} />
-                        <NewsList items={geoNews} />
+                        {!liveLoading && geoNews && <WorldNewsBlock response={geoNews} lang={lang} labels={live} />}
                       </>
                     )}
                     {key === 'dailyBrief' && (
                       <>
                         <CosmicRead lang={lang} signals={[...(sky?.geopolitics ?? []), ...(sky?.markets ?? [])].slice(0, 3)} label={live.cosmic} emptyLabel={liveLoading ? live.loading : live.noRead} tint={accent.tint} />
                         <ContextRow label={live.context} />
-                        <NewsList items={marketNews.length ? marketNews.slice(0, 2) : geoNews.slice(0, 2)} />
+                        {!liveLoading && (marketNews ?? geoNews) && (
+                          <WorldNewsBlock response={(marketNews ?? geoNews)!} lang={lang} labels={live} limit={2} />
+                        )}
                       </>
                     )}
                     {key === 'realEstate' && (
                       <>
                         <CosmicRead lang={lang} signals={sky?.markets ?? []} label={live.cosmic} emptyLabel={liveLoading ? live.loading : live.noRead} tint={accent.tint} />
                         <ContextRow label={live.context} />
-                        <NewsList items={realEstateNews} />
+                        {!liveLoading && realEstateNews && <WorldNewsBlock response={realEstateNews} lang={lang} labels={live} />}
                       </>
                     )}
                     {key === 'figures' && (

@@ -1,6 +1,10 @@
 'use client';
 
-import { FA_CHART_CONFIRM } from '@/lib/chart-profile-i18n';
+import {
+  getChartConfirmLabels,
+  isRtlLang,
+  type ProfileLang,
+} from '@/lib/chart-profile-i18n';
 import {
   resolveConfirmDisplayValue,
   type PreConfirmSummary,
@@ -10,93 +14,81 @@ type Props = {
   summary: PreConfirmSummary;
   onConfirm: () => void;
   onEdit: () => void;
+  lang?: ProfileLang;
 };
 
-export function FaChartConfirmModal({ summary, onConfirm, onEdit }: Props) {
-  const timezoneDisplay = resolveConfirmDisplayValue(summary.timezone, summary.resolving);
+export function FaChartConfirmModal({
+  summary,
+  onConfirm,
+  onEdit,
+  lang = 'fa',
+}: Props) {
+  const labels = getChartConfirmLabels(lang);
+  const rtl = isRtlLang(lang);
+
+  const timezoneDisplay = resolveConfirmDisplayValue(
+    summary.timezone,
+    summary.resolving,
+    lang
+  );
   const coordinatesDisplay = resolveConfirmDisplayValue(
     summary.coordinates,
-    summary.resolving
+    summary.resolving,
+    lang
   );
 
-  const fields: { label: string; value: string; multiline?: boolean }[] = [
-    { label: FA_CHART_CONFIRM.fields.name, value: summary.name },
-    { label: FA_CHART_CONFIRM.fields.birthDate, value: summary.birthDate },
-    { label: FA_CHART_CONFIRM.fields.birthTime, value: summary.birthTime },
-    { label: FA_CHART_CONFIRM.fields.city, value: summary.city },
-    { label: FA_CHART_CONFIRM.fields.timezone, value: timezoneDisplay },
+  const fields: { label: string; value: string; multiline?: boolean; testId?: string }[] = [
+    { label: labels.fields.name, value: summary.name },
+    { label: labels.fields.birthDate, value: summary.birthDate },
+    { label: labels.fields.birthTime, value: summary.birthTime },
+    { label: labels.fields.city, value: summary.city },
     {
-      label: FA_CHART_CONFIRM.fields.coordinates,
+      label: labels.fields.timezone,
+      value: timezoneDisplay,
+      testId: 'fa-confirm-timezone',
+    },
+    {
+      label: labels.fields.coordinates,
       value: coordinatesDisplay,
       multiline: !!summary.coordinates?.includes('\n'),
+      testId: 'fa-confirm-coordinates',
     },
-    { label: FA_CHART_CONFIRM.fields.zodiac, value: summary.zodiac },
-    { label: FA_CHART_CONFIRM.fields.houseSystem, value: summary.houseSystem },
-    { label: FA_CHART_CONFIRM.fields.nodeType, value: summary.nodeType },
+    { label: labels.fields.zodiac, value: summary.zodiac },
+    { label: labels.fields.houseSystem, value: summary.houseSystem },
+    { label: labels.fields.nodeType, value: summary.nodeType },
   ];
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.78)' }}
+      className="mio-modal-overlay"
       data-testid="fa-chart-confirm-modal"
       role="dialog"
       aria-modal="true"
       aria-labelledby="fa-chart-confirm-title"
     >
       <div
-        className="w-full max-w-md rounded-2xl p-6"
-        dir="rtl"
-        style={{ background: '#0d1220', border: '1px solid rgba(251,191,36,0.35)' }}
+        className="mio-modal mio-glass mio-glass--primary"
+        dir={rtl ? 'rtl' : 'ltr'}
       >
-        <div
-          id="fa-chart-confirm-title"
-          className="fc text-sm tracking-widest mb-2"
-          style={{ color: '#fbbf24' }}
-        >
-          {FA_CHART_CONFIRM.title}
-        </div>
-        <p
-          className="fi text-xs leading-relaxed mb-4"
-          style={{ color: 'rgba(255,255,255,0.72)' }}
-        >
-          {FA_CHART_CONFIRM.body}
-        </p>
+        <p className="mio-modal__eyebrow fc">METIORO</p>
+        <h2 id="fa-chart-confirm-title" className="mio-modal__title fc">
+          {labels.title}
+        </h2>
+        <p className="mio-modal__body fi">{labels.body}</p>
 
         {summary.showGeocodeWarning && !summary.resolving && (
-          <div
-            className="rounded-xl px-3 py-2.5 mb-4"
-            style={{
-              background: 'rgba(251,146,60,0.12)',
-              border: '1px solid rgba(251,146,60,0.4)',
-            }}
-            data-testid="fa-geocode-warning"
-          >
-            <p
-              className="fi text-[11px] leading-relaxed whitespace-pre-line"
-              style={{ color: '#fdba74' }}
-            >
-              {FA_CHART_CONFIRM.geocodeWarning}
-            </p>
+          <div className="mio-modal__notice fi" data-testid="fa-geocode-warning">
+            <p className="mio-modal__notice-text">{labels.geocodeWarning}</p>
           </div>
         )}
 
-        <dl className="fi flex flex-col gap-2.5 text-[11px] mb-5">
+        <dl className="mio-modal__rows fi">
           {fields.map((field) => (
-            <div key={field.label} className="flex justify-between gap-4 items-start">
-              <dt className="shrink-0 pt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                {field.label}
-              </dt>
+            <div key={field.label} className="mio-modal__row">
+              <dt className="mio-modal__label">{field.label}</dt>
               <dd
-                className={`text-left leading-relaxed ${field.multiline ? 'whitespace-pre-line' : ''}`}
-                style={{ color: 'rgba(255,255,255,0.92)' }}
-                data-testid={
-                  field.label === FA_CHART_CONFIRM.fields.timezone
-                    ? 'fa-confirm-timezone'
-                    : field.label === FA_CHART_CONFIRM.fields.coordinates
-                      ? 'fa-confirm-coordinates'
-                      : undefined
-                }
+                className={`mio-modal__value ${field.multiline ? 'mio-modal__value--multiline' : ''}`}
+                data-testid={field.testId}
               >
                 {field.value}
               </dd>
@@ -104,33 +96,23 @@ export function FaChartConfirmModal({ summary, onConfirm, onEdit }: Props) {
           ))}
         </dl>
 
-        <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
+        <div className="mio-modal__actions">
           <button
             type="button"
             onClick={onEdit}
             data-testid="fa-chart-confirm-edit"
-            className="fi py-2.5 px-4 rounded-xl text-xs border"
-            style={{
-              borderColor: 'rgba(255,255,255,0.15)',
-              color: 'rgba(255,255,255,0.65)',
-            }}
+            className="metioro-btn metioro-btn--secondary mio-modal__btn fc"
           >
-            {FA_CHART_CONFIRM.edit}
+            {labels.edit}
           </button>
           <button
             type="button"
             onClick={onConfirm}
             disabled={summary.resolving}
             data-testid="fa-chart-confirm-submit"
-            className="fi py-2.5 px-4 rounded-xl text-xs disabled:opacity-50"
-            style={{
-              background: 'linear-gradient(135deg,#d97706,#f59e0b)',
-              color: '#000',
-            }}
+            className="metioro-btn metioro-btn--primary mio-modal__btn fc"
           >
-            {summary.showGeocodeWarning
-              ? FA_CHART_CONFIRM.geocodeConfirm
-              : FA_CHART_CONFIRM.confirm}
+            {summary.showGeocodeWarning ? labels.geocodeConfirm : labels.confirm}
           </button>
         </div>
       </div>

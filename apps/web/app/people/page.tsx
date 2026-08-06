@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
+import { localeFontFamily } from '@/lib/brand-theme';
 import { AppShell } from '@/components/AppShell';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { CityAutocomplete } from '@/components/CityAutocomplete';
@@ -18,14 +20,10 @@ import {
   type Person,
   type RelationshipType,
 } from '@/lib/people-storage';
+import { relationshipProfileLabel } from '@/lib/relationship-profile-i18n';
+import { RELATIONSHIP_PICKER_TYPES } from '@/lib/relationship-profile';
 
-const RELATIONSHIPS: RelationshipType[] = [
-  'spouse',
-  'business_partner',
-  'family',
-  'friend',
-  'rival',
-];
+const RELATIONSHIPS = RELATIONSHIP_PICKER_TYPES;
 
 export default function PeoplePage() {
   const [lang, setLangState] = useState<PeopleLang>('en');
@@ -42,6 +40,8 @@ export default function PeoplePage() {
 
   const t = PEOPLE_LANGS[lang];
 
+  const relLabel = (r: RelationshipType) => relationshipProfileLabel(lang, r);
+
   const setLang = (l: PeopleLang) => {
     setLangState(l);
     saveAppLang(l);
@@ -49,7 +49,7 @@ export default function PeoplePage() {
 
   const refresh = () => setPeople(loadPeople());
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const stored = localStorage.getItem('planet-life-lang');
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
       setLangState(stored);
@@ -170,9 +170,7 @@ export default function PeoplePage() {
       setLang={setLang}
       dir={t.dir}
       navLabels={HOME_LANGS[lang].nav}
-      fontFamily={
-        lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'
-      }
+      fontFamily={localeFontFamily(lang)}
     >
       <div className="max-w-lg mx-auto px-4 py-6">
         <div className="mb-6">
@@ -286,7 +284,7 @@ export default function PeoplePage() {
               >
                 {RELATIONSHIPS.map((r) => (
                   <option key={r} value={r}>
-                    {t.relationships[r]}
+                    {relLabel(r)}
                   </option>
                 ))}
               </select>
@@ -319,7 +317,7 @@ export default function PeoplePage() {
 
         <ul className="space-y-2">
           {people.map((p) => {
-            const rel = t.relationships[p.relationship];
+            const rel = relLabel(p.relationship);
             const badgeStyle = p.synergyBadge ? BADGE_STYLES[p.synergyBadge] : null;
             return (
               <li key={p.id}>

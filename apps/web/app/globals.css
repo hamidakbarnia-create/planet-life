@@ -1,52 +1,144 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0A0E1A;
-  --foreground: #ededed;
-  --input-bg: #131929;
-  --input-border: rgba(255, 255, 255, 0.12);
-  --input-text: #ededed;
-  --input-placeholder: rgba(255, 255, 255, 0.35);
-  --accent: #f59e0b;
+  --background: #0A0F1C;
+  --foreground: #F6F8FC;
+  --input-bg: #1A2333;
+  --input-border: rgba(230, 234, 241, 0.12);
+  --input-text: #F6F8FC;
+  --input-placeholder: rgba(246, 248, 252, 0.35);
+  --accent: #305CDE;
+  --brand-royal-blue: #305CDE;
+  --brand-navy: #0B1736;
+  --brand-gold: #D4AF37;
+  --brand-gold-highlight: #F2CF75;
+  --brand-charcoal: #1A2333;
+  --brand-black: #0A0F1C;
+
+  /* Type scale (px) — shared reference; language rules may refine applied sizes */
+  --type-display: 48px;
+  --type-hero: 40px;
+  --type-h1: 32px;
+  --type-h2: 28px;
+  --type-h3: 24px;
+  --type-title: 20px;
+  --type-subtitle: 18px;
+  --type-body: 16px;
+  --type-small: 14px;
+  --type-caption: 12px;
+  --type-weight-regular: 400;
+  --type-weight-medium: 500;
+  --type-weight-semibold: 600;
+  --type-weight-bold: 700;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sora), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-padding-top: calc(var(--metioro-header-h) + var(--metioro-safe-top));
+  overflow-x: clip;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+  font-family: var(--font-sora), var(--font-geist-sans, Arial, Helvetica, sans-serif);
 }
-
 /* ── RTL typography polish ──────────────────────────────────────────────────
-   Persian/Arabic glyphs sit lower and have descenders (ی، گ، ج). They need
-   more line-height and a slightly larger optical size to read comfortably
-   on screens. Latin text keeps default proportions.
+   Persian/Arabic need tuned line-height and dedicated font stacks.
+   Do not bump global RTL font size — FA cards use scoped scale in metioro-ui-v2.css.
+   Arabic readability is scoped under AppShell lang selectors below (not a layout redesign).
 */
 [dir="rtl"] {
-  font-size: 1.06em;
-  line-height: 1.7;
+  line-height: 1.65;
   letter-spacing: 0;
 }
 
+html[lang="fa"],
+html[lang="fa"] body,
+[dir="rtl"][lang="fa"] {
+  font-family: var(--font-vazirmatn), "Vazirmatn", "Tahoma", "Arial", sans-serif;
+}
+
 [dir="rtl"] .fc {
-  font-family: var(--font-vazirmatn), var(--font-cairo), 'Cinzel', serif;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
-[dir="rtl"] .fi {
-  font-family: var(--font-vazirmatn), var(--font-cairo), var(--font-geist-sans), sans-serif;
+[dir="rtl"][lang="fa"] .fc,
+html[lang="fa"] .fc {
+  font-family: var(--font-vazirmatn), "Vazirmatn", "Tahoma", "Arial", sans-serif;
+  letter-spacing: 0;
 }
 
-[dir="rtl"][lang="ar"] .fc,
+[dir="rtl"] .fi {
+  font-family: var(--font-vazirmatn), "Vazirmatn", "Tahoma", "Arial", sans-serif;
+}
+
+[dir="rtl"][lang="fa"] .fi,
+html[lang="fa"] .fi {
+  font-family: var(--font-vazirmatn), "Vazirmatn", "Tahoma", "Arial", sans-serif;
+}
+
+/* ── Arabic (ar) — premium UAE-grade typography ─────────────────────────────
+   Runtime activators (AppShell): .metioro-shell[lang="ar"] and
+   .metioro-main[lang="ar"] / main[lang="ar"][dir="rtl"].
+   RootLayout keeps <html lang="en">; do not rely on html[lang="ar"].
+*/
+.metioro-shell[lang="ar"],
+.metioro-main[lang="ar"],
+main[lang="ar"],
+[dir="rtl"][lang="ar"] {
+  font-family: var(--font-ibm-plex-sans-arabic), "IBM Plex Sans Arabic",
+    "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  line-height: 1.8;
+  letter-spacing: 0;
+  word-spacing: 0;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.metioro-main[lang="ar"] .fc,
+main[lang="ar"] .fc,
+[dir="rtl"][lang="ar"] .fc {
+  font-family: var(--font-ibm-plex-sans-arabic), "IBM Plex Sans Arabic",
+    "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0;
+  word-spacing: 0;
+  line-height: 1.55;
+}
+
+.metioro-main[lang="ar"] .fi,
+main[lang="ar"] .fi,
 [dir="rtl"][lang="ar"] .fi {
-  font-family: var(--font-cairo), var(--font-vazirmatn), sans-serif;
+  font-family: var(--font-ibm-plex-sans-arabic), "IBM Plex Sans Arabic",
+    "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  word-spacing: 0.01em;
+  line-height: 1.8;
+}
+
+.metioro-main[lang="ar"] h1,
+.metioro-main[lang="ar"] h2,
+.metioro-main[lang="ar"] h3,
+main[lang="ar"] h1,
+main[lang="ar"] h2,
+main[lang="ar"] h3,
+[dir="rtl"][lang="ar"] h1,
+[dir="rtl"][lang="ar"] h2,
+[dir="rtl"][lang="ar"] h3 {
+  line-height: 1.55;
+  font-weight: 600;
+  letter-spacing: 0;
+  word-spacing: 0;
 }
 
 [dir="rtl"] h1,
@@ -61,6 +153,34 @@ body {
 [dir="rtl"] select {
   font-family: inherit;
   font-size: 1em;
+}
+
+/* Arabic controls — balanced vertical rhythm without changing layout padding */
+.metioro-main[lang="ar"] button,
+.metioro-main[lang="ar"] .ask-chip,
+.metioro-main[lang="ar"] .ask-submit,
+.metioro-main[lang="ar"] input,
+.metioro-main[lang="ar"] textarea,
+.metioro-main[lang="ar"] select {
+  font-family: inherit;
+  line-height: 1.5;
+  letter-spacing: 0;
+  word-spacing: 0;
+}
+
+.metioro-main[lang="ar"] button,
+.metioro-main[lang="ar"] .ask-submit {
+  font-weight: 500;
+}
+
+/* Mixed Arabic + Latin / numbers stay optically stable */
+.metioro-main[lang="ar"] .mio-ltr-num,
+.metioro-main[lang="ar"] [dir="ltr"] {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  word-spacing: 0;
 }
 
 /* ── Fix native form controls on dark background ─────────────────────────── */

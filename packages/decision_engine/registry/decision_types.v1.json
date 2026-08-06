@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "decision_types": [
+    {
+      "decision_type_id": "tim-compare-three",
+      "family_id": "timing_opt",
+      "create_mode": "none",
+      "available_entry_modes": ["structured"]
+    },
+    {
+      "decision_type_id": "car-interview",
+      "family_id": "visibility",
+      "create_mode": "none",
+      "available_entry_modes": ["structured"]
+    },
+    {
+      "decision_type_id": "mar-wedding-date",
+      "family_id": "timing_opt",
+      "create_mode": "none",
+      "available_entry_modes": ["structured"]
+    }
+  ]
+}

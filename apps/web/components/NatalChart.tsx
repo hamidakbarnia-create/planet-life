@@ -173,7 +173,7 @@ function NatalChartWheel({
       width="320"
       height="320"
       viewBox="0 0 320 320"
-      className="w-[320px] md:w-[420px] h-auto"
+      className="w-[220px] md:w-[275px] h-auto"
       style={{ maxWidth: '100%' }}
     >
       <circle
@@ -478,7 +478,7 @@ function ChartInsights({
   return (
     <div className="w-full mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
       <ElementBalanceCard balance={balance} labels={labels} />
-      <StrengthsCard strengths={strengths} title={labels.strengthsTitle} lang={labels.lang} />
+      <StrengthsCard strengths={strengths} title={labels.strengthsTitle} />
     </div>
   );
 }
@@ -492,50 +492,28 @@ function ElementBalanceCard({
   balance: ElementBalance;
   labels: NatalChartLabels;
 }) {
-  const rtl = labels.lang === 'fa' || labels.lang === 'ar';
   return (
-    <div
-      className="rounded-xl p-4"
-      style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
-      <div
-        className={`fi ${rtl ? 'text-xs' : 'text-[11px]'} tracking-widest uppercase mb-3`}
-        style={{ color: 'rgba(255,255,255,0.45)' }}
-      >
-        {labels.elementsTitle}
-      </div>
-      <div className="flex flex-col gap-2.5">
+    <div className="mio-insight-card">
+      <div className="mio-insight-card__title fi">{labels.elementsTitle}</div>
+      <div className="mio-element-list">
         {ELEMENT_ORDER.map((key) => {
           const pct = balance.percent[key];
           const color = balance.color[key];
           return (
-            <div key={key} className="flex items-center gap-2.5">
-              <div
-                className={`fi ${rtl ? 'text-sm' : 'text-xs'} w-12 shrink-0`}
-                style={{ color }}
-              >
+            <div key={key} className="mio-element-row">
+              <div className="mio-element-row__label fi" style={{ color }}>
                 {labels.elements[key]}
               </div>
-              <div
-                className="flex-1 h-2 rounded-full overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.06)' }}
-              >
+              <div className="mio-element-row__track">
                 <div
-                  className="h-full rounded-full"
+                  className="mio-element-row__fill"
                   style={{
                     width: `${pct}%`,
                     background: color,
-                    transition: 'width 600ms ease-out',
                   }}
                 />
               </div>
-              <div
-                className="fi text-[11px] w-9 text-right shrink-0"
-                style={{ color: 'rgba(255,255,255,0.65)' }}
-              >
+              <div className="mio-element-row__pct fi" dir="ltr">
                 {pct}%
               </div>
             </div>
@@ -549,40 +527,18 @@ function ElementBalanceCard({
 function StrengthsCard({
   strengths,
   title,
-  lang,
 }: {
   strengths: string[];
   title: string;
-  lang: ChartLang;
 }) {
-  const rtl = lang === 'fa' || lang === 'ar';
   return (
-    <div
-      className="rounded-xl p-4"
-      style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
-      <div
-        className={`fi ${rtl ? 'text-xs' : 'text-[11px]'} tracking-widest uppercase mb-3`}
-        style={{ color: 'rgba(255,255,255,0.45)' }}
-      >
-        {title}
-      </div>
-      <ul className="flex flex-col gap-2">
+    <div className="mio-insight-card">
+      <div className="mio-insight-card__title fi">{title}</div>
+      <ul className="mio-strengths-list">
         {strengths.map((line, idx) => (
-          <li key={idx} className="flex items-start gap-2">
-            <span
-              className="mt-1.5 inline-block w-1.5 h-1.5 rounded-full shrink-0"
-              style={{ background: '#fbbf24' }}
-            />
-            <span
-              className={`fi ${rtl ? 'text-sm' : 'text-xs'} leading-relaxed`}
-              style={{ color: 'rgba(255,255,255,0.85)' }}
-            >
-              {line}
-            </span>
+          <li key={idx} className="mio-strengths-list__item">
+            <span className="mio-strengths-list__bullet" aria-hidden />
+            <span className="mio-strengths-list__text fi">{line}</span>
           </li>
         ))}
       </ul>
@@ -595,15 +551,27 @@ export function NatalChart({
   labels,
   empty,
   projectionMode = 'quadrant',
+  showInsights = true,
+  observatory = false,
 }: {
   chart: ChartData | null;
   labels: NatalChartLabels;
   empty?: boolean;
   projectionMode?: WheelProjectionMode;
+  showInsights?: boolean;
+  observatory?: boolean;
 }) {
   if (empty || !chart || Object.keys(chart.planets).length === 0) {
+    if (observatory) {
+      return (
+        <div className="mio-chart-empty">
+          <div className="mio-chart-empty__ring" aria-hidden />
+          <p className="mio-chart-empty__text fi">{labels.empty}</p>
+        </div>
+      );
+    }
     return (
-      <div className="w-[320px] h-[320px] flex items-center justify-center">
+      <div className="flex items-center justify-center w-[220px] h-[220px]">
         <p className="fi text-xs text-center px-4" style={{ color: 'rgba(255,255,255,0.2)' }}>
           {labels.empty}
         </p>
@@ -615,8 +583,11 @@ export function NatalChart({
   const layouts = computeLayouts(chart.planets, chart, projectionMode);
 
   return (
-    <div className="w-full flex flex-col items-center">
-      <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '50%', padding: 6 }}>
+    <div className={`w-full flex flex-col items-center ${observatory ? 'mio-chart-stage' : ''}`}>
+      <div
+        className={observatory ? 'mio-chart-stage__wheel' : ''}
+        style={observatory ? undefined : { background: 'rgba(0,0,0,0.3)', borderRadius: '50%', padding: 6 }}
+      >
         <NatalChartWheel
           chart={chart}
           aspects={aspects}
@@ -625,7 +596,21 @@ export function NatalChart({
         />
       </div>
       <AspectLegend labels={labels} />
-      <ChartInsights planets={chart.planets} aspects={aspects} labels={labels} />
+      {showInsights && (
+        <ChartInsights planets={chart.planets} aspects={aspects} labels={labels} />
+      )}
     </div>
   );
+}
+
+/** Elemental balance + strengths — render below first viewport on Profile. */
+export function NatalChartAnalysis({
+  chart,
+  labels,
+}: {
+  chart: ChartData;
+  labels: NatalChartLabels;
+}) {
+  const aspects = findNatalAspects(chart.planets);
+  return <ChartInsights planets={chart.planets} aspects={aspects} labels={labels} />;
 }

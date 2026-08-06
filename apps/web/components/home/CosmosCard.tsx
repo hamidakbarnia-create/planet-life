@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { getBirthProfile } from '@/lib/birth-profile';
 import type { AppLang } from '@/lib/app-settings';
 import { chartPreferenceFields } from '@/lib/app-settings';
-import { getBirthProfile } from '@/lib/birth-profile';
+import { COLORS } from '@/lib/brand-theme';
 import { API_BASE, fetchTransitSnapshot } from '@/lib/calendar-scores';
 import { getMoonPhase, MOON_PHASE_NAMES } from '@/lib/moon-phase';
 import { todayYMD } from '@/lib/calendar-utils';
+import { GlassCard } from '@/components/ui/GlassCard';
 
 interface PlanetSnapshot {
   sign: string;
@@ -58,10 +60,10 @@ const PLANET_NAMES: Record<AppLang, Record<string, string>> = {
 };
 
 const LABELS: Record<AppLang, { skyToday: string; moonPhase: string; sunIn: string; moonIn: string; retrograde: string; noRetro: string; loading: string }> = {
-  en: { skyToday: "Today's sky", moonPhase: 'Moon phase', sunIn: 'Sun in', moonIn: 'Moon in', retrograde: 'Retrograde', noRetro: 'No planets are retrograde today.', loading: 'Reading the sky…' },
-  ru: { skyToday: 'Небо сегодня', moonPhase: 'Фаза Луны', sunIn: 'Солнце в', moonIn: 'Луна в', retrograde: 'Ретроград', noRetro: 'Сегодня нет ретроградных планет.', loading: 'Читаем небо…' },
-  fa: { skyToday: 'آسمان امروز', moonPhase: 'فاز ماه', sunIn: 'خورشید در', moonIn: 'ماه در', retrograde: 'رتروگراد', noRetro: 'امروز هیچ سیاره‌ای رتروگراد نیست.', loading: 'در حال خواندن آسمان…' },
-  ar: { skyToday: 'سماء اليوم', moonPhase: 'مرحلة القمر', sunIn: 'الشمس في', moonIn: 'القمر في', retrograde: 'تراجع', noRetro: 'لا كواكب متراجعة اليوم.', loading: 'نقرأ السماء…' },
+  en: { skyToday: "Today's sky", moonPhase: 'Moon phase', sunIn: 'Sun in', moonIn: 'Moon in', retrograde: 'Retrograde', noRetro: 'No planets are retrograde today.', loading: 'Analyzing…' },
+  ru: { skyToday: 'Небо сегодня', moonPhase: 'Фаза Луны', sunIn: 'Солнце в', moonIn: 'Луна в', retrograde: 'Ретроград', noRetro: 'Сегодня нет ретроградных планет.', loading: 'Анализ…' },
+  fa: { skyToday: 'آسمان امروز', moonPhase: 'فاز ماه', sunIn: 'خورشید در', moonIn: 'ماه در', retrograde: 'رتروگراد', noRetro: 'امروز هیچ سیاره‌ای رتروگراد نیست.', loading: 'در حال تحلیل…' },
+  ar: { skyToday: 'سماء اليوم', moonPhase: 'مرحلة القمر', sunIn: 'الشمس في', moonIn: 'القمر في', retrograde: 'تراجع', noRetro: 'لا كواكب متراجعة اليوم.', loading: 'جاري التحليل…' },
 };
 
 function MoonGlyph({ fraction, size = 80 }: { fraction: number; size?: number }) {
@@ -106,7 +108,7 @@ function MoonGlyph({ fraction, size = 80 }: { fraction: number; size?: number })
   );
 }
 
-export function CosmosCard({ lang }: { lang: AppLang }) {
+export function CosmosCard({ lang, className = '' }: { lang: AppLang; className?: string }) {
   const t = LABELS[lang];
   const today = todayYMD();
   const [planets, setPlanets] = useState<Record<string, PlanetSnapshot> | null>(null);
@@ -122,10 +124,10 @@ export function CosmosCard({ lang }: { lang: AppLang }) {
       try {
         const transit = await fetchTransitSnapshot(profile, today);
         if (cancelled) return;
-        if (transit.length > 0) {
+        if (transit.planets.length > 0) {
           setPlanets(
             Object.fromEntries(
-              transit.map((planet) => [
+              transit.planets.map((planet) => [
                 planet.name,
                 {
                   sign: planet.sign,
@@ -183,41 +185,26 @@ export function CosmosCard({ lang }: { lang: AppLang }) {
   }, [planets]);
 
   return (
-    <section
-      className="rounded-2xl p-5"
-      style={{
-        background: 'linear-gradient(160deg, rgba(34,11,61,0.35), rgba(7,11,20,0.6))',
-        border: '1px solid rgba(251,191,36,0.18)',
-      }}
-    >
-      <div
-        className="fi text-[10px] uppercase tracking-[0.3em] mb-3"
-        style={{ color: 'rgba(251,191,36,0.7)' }}
-      >
-        {t.skyToday}
-      </div>
-
-      <div className="flex items-center gap-5">
+    <GlassCard variant="primary" eyebrow={t.skyToday} className={className}>
+      <div className="flex items-center gap-4">
         <div
           className="relative shrink-0"
           style={{
             filter:
-              'drop-shadow(0 0 18px rgba(251,191,36,0.25)) drop-shadow(0 0 32px rgba(251,191,36,0.12))',
+              'drop-shadow(0 0 18px rgba(212,175,55,0.25)) drop-shadow(0 0 32px rgba(212,175,55,0.12))',
           }}
         >
-          <MoonGlyph fraction={moon.fraction} size={120} />
+          <MoonGlyph fraction={moon.fraction} size={72} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="fc text-2xl leading-tight" style={{ color: '#ffffff' }}>
-            {moonPhaseName}
-          </div>
-          <div className="fi text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+          <div className="mio-value mio-value--lg fc">{moonPhaseName}</div>
+          <div className="mio-caption fi mt-1">
             {Math.round(moon.illumination * 100)}% · {t.moonPhase}
           </div>
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="mt-3 grid grid-cols-2 gap-2">
         <SkyTile
           icon={PLANET_GLYPHS.sun}
           label={t.sunIn}
@@ -230,27 +217,12 @@ export function CosmosCard({ lang }: { lang: AppLang }) {
         />
       </div>
 
-      <div
-        className="mt-4 rounded-xl p-3"
-        style={{
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
-        <div
-          className="fi text-[10px] uppercase tracking-widest mb-2"
-          style={{ color: 'rgba(255,255,255,0.45)' }}
-        >
-          {t.retrograde}
-        </div>
+      <div className="mt-3 mio-glass mio-glass--secondary !p-3 !rounded-[var(--mio-radius-sm)]">
+        <div className="mio-label fi mb-2">{t.retrograde}</div>
         {loading ? (
-          <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            {t.loading}
-          </div>
+          <div className="mio-caption fi">{t.loading}</div>
         ) : retrogrades.length === 0 ? (
-          <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
-            {t.noRetro}
-          </div>
+          <div className="mio-caption fi">{t.noRetro}</div>
         ) : (
           <div className="flex flex-wrap gap-2">
             {retrogrades.map((r) => (
@@ -263,7 +235,7 @@ export function CosmosCard({ lang }: { lang: AppLang }) {
                   color: '#fca5a5',
                 }}
               >
-                <span style={{ color: '#fca5a5' }}>{PLANET_GLYPHS[r.name]}</span>
+                <span>{PLANET_GLYPHS[r.name]}</span>
                 <span>{planetNames[r.name] ?? r.name}</span>
                 <span style={{ color: 'rgba(255,255,255,0.45)' }}>
                   {signs[r.sign] ?? r.sign}
@@ -274,7 +246,7 @@ export function CosmosCard({ lang }: { lang: AppLang }) {
           </div>
         )}
       </div>
-    </section>
+    </GlassCard>
   );
 }
 
@@ -288,33 +260,20 @@ function SkyTile({
   value: string;
 }) {
   return (
-    <div
-      className="rounded-xl p-3 flex items-center gap-3"
-      style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
+    <div className="mio-glass mio-glass--metric !p-2 flex items-center gap-2">
       <div
-        className="fc text-lg w-8 h-8 rounded-full flex items-center justify-center"
+        className="fc text-lg w-8 h-8 rounded-full flex items-center justify-center shrink-0"
         style={{
-          background: 'rgba(251,191,36,0.08)',
-          border: '1px solid rgba(251,191,36,0.25)',
-          color: '#fbbf24',
+          background: 'rgba(212, 175, 55, 0.08)',
+          border: '1px solid rgba(212, 175, 55, 0.25)',
+          color: COLORS.goldMain,
         }}
       >
         {icon}
       </div>
       <div className="min-w-0">
-        <div
-          className="fi text-[10px] uppercase tracking-widest"
-          style={{ color: 'rgba(255,255,255,0.4)' }}
-        >
-          {label}
-        </div>
-        <div className="fi text-sm truncate" style={{ color: 'rgba(255,255,255,0.85)' }}>
-          {value}
-        </div>
+        <div className="mio-label fi">{label}</div>
+        <div className="mio-value fi text-sm truncate">{value}</div>
       </div>
     </div>
   );

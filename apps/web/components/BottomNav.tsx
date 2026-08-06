@@ -1,39 +1,61 @@
 'use client';
 
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  COLORS,
+  COLORS_RGBA,
+  SURFACES,
+  VAULT_PILL_STYLE,
+} from '@/lib/brand-theme';
 
 type NavKey =
   | 'today'
-  | 'map'
+  | 'calendar'
   | 'ask'
   | 'people'
   | 'pathfinder'
   | 'world'
-  | 'me'
+  | 'profile'
   | 'settings'
-  | 'vault';
+  | 'vault'
+  | 'upgrade'
+  | 'more';
 
-const TABS: { href: string; key: NavKey; fallback: string }[] = [
+const DESKTOP_TABS: { href: string; key: NavKey; fallback: string }[] = [
   { href: '/home', key: 'today', fallback: 'Today' },
-  { href: '/calendar', key: 'map', fallback: 'Map' },
+  { href: '/calendar', key: 'calendar', fallback: 'Calendar' },
   { href: '/ask', key: 'ask', fallback: 'Ask' },
   { href: '/people', key: 'people', fallback: 'People' },
-  { href: '/pathfinder', key: 'pathfinder', fallback: 'Path' },
+  { href: '/pathfinder', key: 'pathfinder', fallback: 'Pathfinder' },
   { href: '/world', key: 'world', fallback: 'World' },
-  { href: '/profile', key: 'me', fallback: 'Me' },
+  { href: '/profile', key: 'profile', fallback: 'My Profile' },
   { href: '/settings', key: 'settings', fallback: 'Settings' },
 ];
 
-// Vault has been moved out of the sidebar list and promoted to a
-// top-right header button (see AppShell + page-level navs). The icon
-// component is still exported so headers can render the same lock SVG.
+/** Primary mobile bottom tabs (order is logical; CSS `dir` mirrors for RTL). */
+const MOBILE_TABS: { href: string; key: NavKey; fallback: string }[] = [
+  { href: '/home', key: 'today', fallback: 'Today' },
+  { href: '/calendar', key: 'calendar', fallback: 'Calendar' },
+  { href: '/ask', key: 'ask', fallback: 'Ask' },
+  { href: '/people', key: 'people', fallback: 'People' },
+];
 
-function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
-  const stroke = active ? '#fbbf24' : 'rgba(255,255,255,0.55)';
+const MORE_DESTINATIONS: { href: string; key: NavKey; fallback: string }[] = [
+  { href: '/pathfinder', key: 'pathfinder', fallback: 'Pathfinder' },
+  { href: '/world', key: 'world', fallback: 'World' },
+  { href: '/vault', key: 'vault', fallback: 'Vault' },
+  { href: '/profile', key: 'profile', fallback: 'My Profile' },
+  { href: '/settings', key: 'settings', fallback: 'Settings' },
+  { href: '/upgrade', key: 'upgrade', fallback: 'Upgrade' },
+];
+
+function NavIcon({ name, active, size = 22 }: { name: NavKey; active: boolean; size?: number }) {
+  const stroke = active ? COLORS.goldMain : SURFACES.navInactive;
   const props = {
-    width: 22,
-    height: 22,
+    width: size,
+    height: size,
     viewBox: '0 0 24 24',
     fill: 'none' as const,
     stroke,
@@ -49,11 +71,12 @@ function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
           <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
         </svg>
       );
-    case 'map':
+    case 'calendar':
       return (
         <svg {...props}>
-          <path d="M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2-6-2z" />
-          <path d="M9 4v14M15 6v14" />
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M3 10h18M8 3v4M16 3v4" />
+          <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
         </svg>
       );
     case 'ask':
@@ -85,12 +108,10 @@ function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
           <circle cx="12" cy="12" r="8.5" />
           <path d="M3.5 13.5c4 2.2 10.5 1.2 17-3" />
           <path d="M4.5 9.5c5.3-1.7 10.2-.9 15 2.4" />
-          <path d="M12 3.5c2.2 2.7 2.2 14.3 0 17" />
-          <path d="M12 3.5c-2.2 2.7-2.2 14.3 0 17" />
           <path d="M17.2 6.2l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1z" />
         </svg>
       );
-    case 'me':
+    case 'profile':
       return (
         <svg {...props}>
           <circle cx="12" cy="9" r="3.2" />
@@ -108,145 +129,273 @@ function NavIcon({ name, active }: { name: NavKey; active: boolean }) {
     case 'vault':
       return (
         <svg
-          width={22}
-          height={22}
+          width={size}
+          height={size}
           viewBox="0 0 24 24"
           fill="none"
-          stroke={active ? '#f9a8d4' : 'rgba(244,114,182,0.85)'}
+          stroke={active ? COLORS.goldHighlight : COLORS.goldMain}
           strokeWidth={1.6}
           strokeLinecap="round"
           strokeLinejoin="round"
         >
           <rect x="5" y="11" width="14" height="9" rx="2" />
           <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-          <path
-            d="M12 14.5c-.5-1-2-1-2 .2 0 1 1 1.6 2 2.3 1-.7 2-1.3 2-2.3 0-1.2-1.5-1.2-2-.2z"
-            fill={active ? '#f9a8d4' : 'rgba(244,114,182,0.85)'}
-          />
+        </svg>
+      );
+    case 'upgrade':
+      return (
+        <svg {...props}>
+          <path d="M12 3l3.2 6.5L22 10.8l-5 4.9 1.2 7L12 19.3 5.8 22.7 7 15.7l-5-4.9 6.8-1.3L12 3z" />
+        </svg>
+      );
+    case 'more':
+      return (
+        <svg {...props}>
+          <circle cx="5" cy="12" r="1.6" fill={stroke} />
+          <circle cx="12" cy="12" r="1.6" fill={stroke} />
+          <circle cx="19" cy="12" r="1.6" fill={stroke} />
         </svg>
       );
   }
 }
 
-export function BottomNav({ labels }: { labels?: Record<string, string> }) {
+function isActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(href + '/');
+}
+
+function isMoreRouteActive(pathname: string): boolean {
+  return MORE_DESTINATIONS.some((item) => isActive(pathname, item.href));
+}
+
+function SidebarLink({
+  href,
+  navKey,
+  label,
+  active,
+}: {
+  href: string;
+  navKey: NavKey;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`metioro-sidebar__link ${active ? 'metioro-sidebar__link--active' : 'metioro-sidebar__link--idle'}`}
+    >
+      <span className="metioro-sidebar__icon" aria-hidden>
+        <NavIcon name={navKey} active={active} size={24} />
+      </span>
+      <span className="metioro-sidebar__label fi">{label}</span>
+    </Link>
+  );
+}
+
+/** Desktop sidebar — hidden below 768px */
+export function DesktopSidebar({ labels }: { labels?: Record<string, string> }) {
   const pathname = usePathname();
 
   return (
-    <nav
-      className="fixed top-0 left-0 bottom-0 z-40 w-20 flex flex-col"
-      style={{
-        background:
-          'linear-gradient(180deg, rgba(8,12,24,0.96) 0%, rgba(10,14,28,0.96) 50%, rgba(14,10,30,0.96) 100%)',
-        backdropFilter: 'blur(16px)',
-        borderRight: '1px solid rgba(251,191,36,0.06)',
-        direction: 'ltr',
-        boxShadow: 'inset -1px 0 0 rgba(255,255,255,0.02), 4px 0 24px rgba(0,0,0,0.4)',
-      }}
-    >
-      {/* subtle starfield accent */}
-      <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none opacity-40"
-        style={{
-          background:
-            'radial-gradient(circle at 50% 20%, rgba(251,191,36,0.06), transparent 50%), radial-gradient(circle at 50% 85%, rgba(244,114,182,0.05), transparent 50%)',
-        }}
-      />
+    <nav className="metioro-sidebar" aria-label="Main navigation">
+      <div className="metioro-sidebar__inner">
+        {DESKTOP_TABS.map((tab) => (
+          <SidebarLink
+            key={tab.href}
+            href={tab.href}
+            navKey={tab.key}
+            label={labels?.[tab.href] ?? tab.fallback}
+            active={isActive(pathname, tab.href)}
+          />
+        ))}
+      </div>
+    </nav>
+  );
+}
 
-      <div className="relative flex flex-col gap-1 px-2 pt-16 pb-3 flex-1">
-        {TABS.map((tab) => {
-          const active =
-            pathname === tab.href || pathname.startsWith(tab.href + '/');
+/** Mobile bottom tab bar — hidden at 768px and above */
+export function MobileTabBar({
+  labels,
+  dir = 'ltr',
+}: {
+  labels?: Record<string, string>;
+  dir?: 'ltr' | 'rtl';
+}) {
+  const pathname = usePathname();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [pathnameAtRender, setPathnameAtRender] = useState(pathname);
+  const morePanelId = useId();
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const morePanelRef = useRef<HTMLDivElement>(null);
+  const moreActive = isMoreRouteActive(pathname);
+
+  // Reset open state when the route changes (back/forward, tab links, etc.)
+  // without a pathname→setState effect (react-hooks/set-state-in-effect).
+  if (pathname !== pathnameAtRender) {
+    setPathnameAtRender(pathname);
+    if (moreOpen) {
+      setMoreOpen(false);
+    }
+  }
+
+  const closeMore = useCallback(() => setMoreOpen(false), []);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeMore();
+        moreButtonRef.current?.focus();
+      }
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKeyDown);
+
+    const firstLink = morePanelRef.current?.querySelector<HTMLElement>('a');
+    firstLink?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [moreOpen, closeMore]);
+
+  const moreLabel = labels?.more ?? 'More';
+
+  return (
+    <>
+      {moreOpen ? (
+        <div className="metioro-more-sheet" role="presentation">
+          <button
+            type="button"
+            className="metioro-more-sheet__backdrop"
+            aria-label="Close menu"
+            onClick={closeMore}
+          />
+          <div
+            ref={morePanelRef}
+            id={morePanelId}
+            className="metioro-more-sheet__panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={moreLabel}
+            dir={dir}
+          >
+            <ul className="metioro-more-sheet__list">
+              {MORE_DESTINATIONS.map((item) => {
+                const active = isActive(pathname, item.href);
+                const label = labels?.[item.href] ?? item.fallback;
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={`metioro-more-sheet__link ${active ? 'metioro-more-sheet__link--active' : ''}`}
+                      aria-current={active ? 'page' : undefined}
+                      onClick={closeMore}
+                    >
+                      <span className="metioro-more-sheet__icon" aria-hidden>
+                        <NavIcon name={item.key} active={active} size={22} />
+                      </span>
+                      <span className="metioro-more-sheet__label fi">{label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      ) : null}
+
+      <nav className="metioro-mobile-nav" aria-label="Mobile navigation" dir={dir}>
+        {MOBILE_TABS.map((tab) => {
+          const active = isActive(pathname, tab.href);
           const label = labels?.[tab.href] ?? tab.fallback;
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className="group flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl no-underline transition-all"
-              style={{
-                color: active ? '#fbbf24' : 'rgba(255,255,255,0.5)',
-                background: active
-                  ? 'linear-gradient(180deg, rgba(251,191,36,0.12), rgba(251,191,36,0.04))'
-                  : 'transparent',
-                boxShadow: active
-                  ? 'inset 0 0 0 1px rgba(251,191,36,0.18), 0 0 16px rgba(251,191,36,0.08)'
-                  : 'none',
-              }}
+              className={`metioro-mobile-nav__link ${active ? 'metioro-mobile-nav__link--active' : 'metioro-mobile-nav__link--idle'}`}
+              aria-current={active ? 'page' : undefined}
+              onClick={closeMore}
             >
-              <NavIcon name={tab.key} active={active} />
-              <span
-                className="text-[10px] font-medium tracking-wide text-center leading-tight"
-                style={{
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {label}
+              <span className="metioro-sidebar__icon" aria-hidden>
+                <NavIcon name={tab.key} active={active} size={26} />
               </span>
+              <span className="metioro-mobile-nav__label fi">{label}</span>
             </Link>
           );
         })}
-      </div>
-
-    </nav>
+        <button
+          ref={moreButtonRef}
+          type="button"
+          className={`metioro-mobile-nav__link metioro-mobile-nav__button ${
+            moreOpen || moreActive
+              ? 'metioro-mobile-nav__link--active'
+              : 'metioro-mobile-nav__link--idle'
+          }`}
+          aria-expanded={moreOpen}
+          aria-controls={morePanelId}
+          aria-haspopup="dialog"
+          onClick={() => setMoreOpen((open) => !open)}
+        >
+          <span className="metioro-sidebar__icon" aria-hidden>
+            <NavIcon name="more" active={moreOpen || moreActive} size={26} />
+          </span>
+          <span className="metioro-mobile-nav__label fi">{moreLabel}</span>
+        </button>
+      </nav>
+    </>
   );
 }
 
-/**
- * Top-right Vault entry button. High-visibility, pulsing pink/rose CTA
- * that pulls the user into the curiosity-driven inner sanctum from any
- * page header.
- */
+/** @deprecated Use DesktopSidebar + MobileTabBar */
+export function BottomNav({
+  labels,
+  dir = 'ltr',
+}: {
+  labels?: Record<string, string>;
+  dir?: 'ltr' | 'rtl';
+}) {
+  return (
+    <>
+      <DesktopSidebar labels={labels} />
+      <MobileTabBar labels={labels} dir={dir} />
+    </>
+  );
+}
+
 export function VaultPill({ label }: { label?: string }) {
   return (
     <Link
       href="/vault"
       title="Open the Vault"
-      className="group relative no-underline inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full transition-all overflow-hidden"
+      className="no-underline inline-flex items-center gap-2 shrink-0 rounded-full transition-opacity hover:opacity-90"
       style={{
-        background:
-          'linear-gradient(135deg, rgba(244,114,182,0.22), rgba(168,85,247,0.18))',
-        border: '1px solid rgba(244,114,182,0.45)',
-        color: '#fce7f3',
-        boxShadow:
-          '0 0 18px rgba(244,114,182,0.25), inset 0 0 0 1px rgba(255,255,255,0.05)',
+        ...VAULT_PILL_STYLE,
+        paddingInline: '16px',
+        paddingBlock: '8px',
+        boxShadow: `0 0 18px ${COLORS_RGBA.goldMain18}`,
       }}
     >
-      <span
-        aria-hidden
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(circle at 50% 50%, rgba(244,114,182,0.25), transparent 70%)',
-          animation: 'vault-pill-pulse 2.4s ease-in-out infinite',
-          opacity: 0.6,
-        }}
-      />
       <svg
         width="14"
         height="14"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#f9a8d4"
+        stroke={COLORS.goldHighlight}
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="relative"
       >
         <rect x="5" y="11" width="14" height="9" rx="2" />
         <path d="M8 11V8a4 4 0 0 1 8 0v3" />
       </svg>
-      <span
-        className="relative fc text-[11px] font-semibold tracking-[0.18em] uppercase"
-      >
+      <span className="fc text-[11px] font-semibold tracking-[0.18em] uppercase whitespace-nowrap">
         {label ?? 'Vault'}
       </span>
-      <style>{`
-        @keyframes vault-pill-pulse {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 0.85; }
-        }
-      `}</style>
     </Link>
   );
 }

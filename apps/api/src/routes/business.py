@@ -1,5 +1,6 @@
-import sys, os
-sys.path.insert(0, r"C:\planet-life")
+from repo_path import ensure_repo_on_path
+
+ensure_repo_on_path()
 
 import logging
 
@@ -53,6 +54,7 @@ class BusinessAnalysisRequest(BaseModel):
     evaluation_location: str | None = None
     evaluation_latitude: float | None = None
     evaluation_longitude: float | None = None
+    evaluation_timezone: str | None = None
     country: str | None = None
     node_type: str = "mean"  # mean | true — Astro-Seek default reference uses Mean Node
 
@@ -60,7 +62,7 @@ class BusinessAnalysisRequest(BaseModel):
 async def analyze_business(request: BusinessAnalysisRequest):
     action = request.action_type.lower().strip()
     try:
-        result, _, transit = score_with_context(
+        result, natal, transit = score_with_context(
             birth_date=request.birth_date,
             birth_time=request.birth_time,
             location=request.location,
@@ -73,6 +75,7 @@ async def analyze_business(request: BusinessAnalysisRequest):
             evaluation_location=request.evaluation_location,
             evaluation_latitude=request.evaluation_latitude,
             evaluation_longitude=request.evaluation_longitude,
+            evaluation_timezone=request.evaluation_timezone,
             house_system=request.house_system,
             zodiac=request.zodiac,
         )
@@ -82,7 +85,14 @@ async def analyze_business(request: BusinessAnalysisRequest):
     except Exception as e:
         log_chart_error("computation", str(e), location=request.location)
         raise HTTPException(status_code=503, detail=f"Chart computation failed: {e}")
-    return build_scoring_response(result, location_context=transit.get("evaluation", {}))
+    return build_scoring_response(
+        result,
+        location_context=transit.get("evaluation", {}),
+        natal=natal,
+        transit=transit,
+        activity_type=action,
+        context=CONTEXT_ASK_ELECTIONAL,
+    )
 
 @router.post("/chart")
 async def get_birth_chart(request: BusinessAnalysisRequest):

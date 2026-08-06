@@ -1,20 +1,39 @@
-import sys
-import os
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
 
-sys.path.insert(0, r"C:\planet-life")
+from repo_path import ensure_repo_on_path
+
+ensure_repo_on_path()
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional
+from cors_origins import (
+    resolve_cors_allowed_origins,
+    validate_staging_cors_configuration,
+)
 from routes.business import router as business_router
 from routes.finance import router as finance_router
 from routes.real_estate import router as real_estate_router
 from routes.vault import router as vault_router
 from routes.pathfinder import router as pathfinder_router
 from routes.world import router as world_router
+from routes.decision import (
+    router as decision_router,
+    register_decision_exception_handlers,
+    register_decision_openapi_filter,
+)
+from routes.conversation import (
+    router as conversation_router,
+    register_conversation_openapi_filter,
+)
+from decision_case.routes import (
+    router as decision_case_router,
+    register_decision_case_exception_handlers,
+    register_decision_case_openapi_filter,
+)
 from packages.astro_engine.scoring_context import CONTEXT_CALENDAR_DAY, CONTEXT_CALENDAR_HOURLY
 from schemas.score_breakdown import build_scoring_response, validate_component_breakdown
 from services.scoring_pipeline import score_with_context
@@ -25,11 +44,28 @@ from services.chart_data import build_chart_payload
 # so threads give us real parallelism on multi-core machines.
 _BATCH_EXECUTOR = ThreadPoolExecutor(max_workers=8, thread_name_prefix="batch")
 
-app = FastAPI(title="Planet Life API", version="1.0.0")
+
+@asynccontextmanager
+async def _app_lifespan(app: FastAPI):
+    """Fail fast when conversation generation runtime configuration is invalid."""
+    from services.generation.factory import validate_generation_provider_configuration
+
+    _ = app
+    validate_staging_cors_configuration()
+    validate_generation_provider_configuration()
+    yield
+
+
+app = FastAPI(
+    title="METIORO API",
+    description="METIORO personal decision intelligence platform API",
+    version="1.0.0",
+    lifespan=_app_lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=resolve_cors_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,11 +77,26 @@ app.include_router(real_estate_router, prefix="/api/real-estate", tags=["real-es
 app.include_router(vault_router, prefix="/api/vault", tags=["vault"])
 app.include_router(pathfinder_router, prefix="/api/pathfinder", tags=["pathfinder"])
 app.include_router(world_router, prefix="/api/world", tags=["world"])
+app.include_router(decision_router, prefix="/api/v1/decision", tags=["decision"])
+app.include_router(
+    conversation_router, prefix="/api/v1/conversation", tags=["conversation"]
+)
+app.include_router(
+    decision_case_router,
+    prefix="/api/v1/decision-cases",
+    tags=["decision-cases"],
+)
+
+register_decision_exception_handlers(app)
+register_decision_case_exception_handlers(app)
+register_decision_openapi_filter(app)
+register_decision_case_openapi_filter(app)
+register_conversation_openapi_filter(app)
 
 
 @app.get("/")
 def health_check():
-    return {"status": "healthy", "platform": "Planet Life"}
+    return {"status": "healthy", "platform": "METIORO"}
 
 
 # ── Batch endpoint ────────────────────────────────────────────────────────────
@@ -62,6 +113,7 @@ class BatchDayRequest(BaseModel):
     evaluation_location: str | None = None
     evaluation_latitude: float | None = None
     evaluation_longitude: float | None = None
+    evaluation_timezone: str | None = None
 
 
 def _score_one(
@@ -76,10 +128,11 @@ def _score_one(
     evaluation_location=None,
     evaluation_latitude=None,
     evaluation_longitude=None,
+    evaluation_timezone=None,
 ):
     """Synchronous worker run inside a thread."""
     try:
-        result, _, transit = score_with_context(
+        result, natal, transit = score_with_context(
             birth_date=birth_date,
             birth_time=birth_time,
             location=location,
@@ -90,11 +143,19 @@ def _score_one(
             evaluation_location=evaluation_location,
             evaluation_latitude=evaluation_latitude,
             evaluation_longitude=evaluation_longitude,
+            evaluation_timezone=evaluation_timezone,
             house_system=house_system,
             zodiac=zodiac,
         )
         score = result
-        payload = build_scoring_response(score)
+        scoring_context = CONTEXT_CALENDAR_HOURLY if target_time else CONTEXT_CALENDAR_DAY
+        payload = build_scoring_response(
+            score,
+            natal=natal if not target_time else None,
+            transit=transit if not target_time else None,
+            activity_type=action if not target_time else None,
+            context=scoring_context if not target_time else None,
+        )
         return {
             **payload,
             "transit": transit.get("planets", {}),
@@ -136,6 +197,7 @@ async def batch_score(request: BatchDayRequest):
             request.evaluation_location,
             request.evaluation_latitude,
             request.evaluation_longitude,
+            request.evaluation_timezone,
         )
         for target_date in request.dates
     ]
@@ -163,6 +225,7 @@ class HourlyBatchRequest(BaseModel):
     evaluation_location: str | None = None
     evaluation_latitude: float | None = None
     evaluation_longitude: float | None = None
+    evaluation_timezone: str | None = None
 
 
 @app.post("/api/batch-hourly")
@@ -197,6 +260,7 @@ async def batch_hourly(request: HourlyBatchRequest):
             request.evaluation_location,
             request.evaluation_latitude,
             request.evaluation_longitude,
+            request.evaluation_timezone,
         )
         for h in hours
     ]
@@ -228,6 +292,8 @@ class TransitSnapshotRequest(BaseModel):
     evaluation_location: str | None = None
     evaluation_latitude: float | None = None
     evaluation_longitude: float | None = None
+    evaluation_timezone: str | None = None
+    calculation_instant: str | None = None
 
 
 @app.post("/api/transit")
@@ -247,6 +313,8 @@ async def transit_snapshot(request: TransitSnapshotRequest):
             evaluation_location=request.evaluation_location,
             evaluation_latitude=request.evaluation_latitude,
             evaluation_longitude=request.evaluation_longitude,
+            evaluation_timezone=request.evaluation_timezone,
+            calculation_instant=request.calculation_instant,
         )
         return {
             "natal": natal.get("planets", {}),

@@ -1,28 +1,33 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { PeopleHomeRow } from '@/components/PeopleHomeRow';
 import { CosmosCard } from '@/components/home/CosmosCard';
+import { WhyThisTiming } from '@/components/timing/WhyThisTiming';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { PageHeader } from '@/components/ui/PageHeader';
 import type { BirthProfile } from '@/lib/birth-profile';
 import type { AppLang } from '@/lib/app-settings';
 import { chartPreferenceFields } from '@/lib/app-settings';
 import { HOME_LANGS } from '@/lib/home-i18n';
+import { COLORS } from '@/lib/brand-theme';
 import {
   API_BASE,
-  fetchDayScore,
-  fetchHourlyScores,
   formatHourLabel,
   isDangerHour,
   isGoldenHour,
   scoreToBand,
   BAND_STYLES,
   type HourScore,
+  type ScoreReasoning,
 } from '@/lib/calendar-scores';
 import { hasConfirmedCurrentLocation } from '@/lib/user-locations';
 import { todayYMD } from '@/lib/calendar-utils';
 import { loadPeople } from '@/lib/people-storage';
 import { PEOPLE_LANGS } from '@/lib/people-i18n';
+import { loadTodayTiming } from '@/lib/today-timing';
+import { useCallback, useMemo, useState } from 'react';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 
 const LOCALE_MAP: Record<AppLang, string> = {
   en: 'en-US',
@@ -98,57 +103,71 @@ export function DailyBriefView({
   const today = todayYMD();
   const [dayScore, setDayScore] = useState<number | null>(null);
   const [dayLoading, setDayLoading] = useState(true);
+  const [scoreFetchComplete, setScoreFetchComplete] = useState(false);
   const [hourly, setHourly] = useState<HourScore[]>([]);
   const [hourlyLoading, setHourlyLoading] = useState(true);
+  const [reasoning, setReasoning] = useState<ScoreReasoning | null>(null);
+  const [bestHour, setBestHour] = useState<HourScore | null>(null);
+  const [riskHour, setRiskHour] = useState<HourScore | null>(null);
   const [synergyAlerts, setSynergyAlerts] = useState<string[]>([]);
   const [aiOpen, setAiOpen] = useState(false);
   const [aiQuestion, setAiQuestion] = useState('');
   const [aiAnswer, setAiAnswer] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
-  useEffect(() => {
-    if (
-      !hasProfile ||
-      !profile ||
-      !profile.birth_date ||
-      !profile.birth_time ||
-      !profile.location ||
-      !hasConfirmedCurrentLocation(profile)
-    ) {
+  const profileReady =
+    hasProfile &&
+    !!profile &&
+    !!profile.birth_date &&
+    !!profile.birth_time &&
+    !!profile.location &&
+    hasConfirmedCurrentLocation(profile);
+
+  useQueuedEffect(() => {
+    if (!profileReady || !profile) {
       setDayLoading(false);
+      setScoreFetchComplete(false);
       setHourlyLoading(false);
       setDayScore(null);
       setHourly([]);
+      setReasoning(null);
+      setBestHour(null);
+      setRiskHour(null);
       return;
     }
     let cancelled = false;
     setDayLoading(true);
+    setScoreFetchComplete(false);
     setHourlyLoading(true);
     setDayScore(null);
     setHourly([]);
+    setReasoning(null);
+    setBestHour(null);
+    setRiskHour(null);
 
-    fetchDayScore(profile, today)
-      .then((score) => {
+    loadTodayTiming(profile, today, lang)
+      .then((bundle) => {
         if (cancelled) return;
-        setDayScore(score);
+        setDayScore(bundle.score);
+        setHourly(bundle.hourly);
+        setReasoning(bundle.reasoning);
+        setBestHour(bundle.bestHour);
+        setRiskHour(bundle.riskHour);
       })
       .catch(() => {
-        if (!cancelled) setDayScore(null);
-      })
-      .finally(() => {
-        if (!cancelled) setDayLoading(false);
-      });
-
-    fetchHourlyScores(profile, today)
-      .then((data) => {
         if (cancelled) return;
-        setHourly(data);
-      })
-      .catch(() => {
-        if (!cancelled) setHourly([]);
+        setDayScore(null);
+        setHourly([]);
+        setReasoning(null);
+        setBestHour(null);
+        setRiskHour(null);
       })
       .finally(() => {
-        if (!cancelled) setHourlyLoading(false);
+        if (!cancelled) {
+          setDayLoading(false);
+          setScoreFetchComplete(true);
+          setHourlyLoading(false);
+        }
       });
 
     try {
@@ -171,7 +190,9 @@ export function DailyBriefView({
     return () => {
       cancelled = true;
     };
-  }, [hasProfile, profile, today, lang]);
+  }, [profileReady, profile, today, lang]);
+
+  const showScoreCalculating = profileReady && (!scoreFetchComplete || dayLoading);
 
   const askAi = useCallback(async () => {
     const q = aiQuestion.trim();
@@ -203,158 +224,86 @@ export function DailyBriefView({
   const band = scoreToBand(dayScore ?? undefined);
   const scoreStyle = BAND_STYLES[band];
 
-  const goldenHours = useMemo(
+  const highReadinessHours = useMemo(
     () => hourly.filter((h) => isGoldenHour(h.score)),
     [hourly]
   );
-  const dangerHours = useMemo(
+  const lowerReadinessHours = useMemo(
     () => hourly.filter((h) => isDangerHour(h.score)),
     [hourly]
   );
 
-  const bestHour = useMemo(() => {
-    if (!hourly.length) return null;
-    return hourly.reduce((best, h) => (h.score > best.score ? h : best), hourly[0]);
-  }, [hourly]);
-
-  const worstHour = useMemo(() => {
-    if (!hourly.length) return null;
-    return hourly.reduce((worst, h) => (h.score < worst.score ? h : worst), hourly[0]);
-  }, [hourly]);
-
   const longDate = useMemo(() => formatLongDate(today, lang), [today, lang]);
 
   return (
-    <div className="space-y-5">
-      <header className="space-y-1">
+    <div className="mio-home-dashboard">
+      <PageHeader eyebrow={t.dailyBrief} title={longDate} subtitle={t.todayLabel} />
+
+      <div className="mio-home-grid mio-home-grid--primary">
         <div
-          className="fi text-[10px] tracking-[0.3em] uppercase"
-          style={{ color: 'rgba(251,191,36,0.7)' }}
-        >
-          {t.dailyBrief}
-        </div>
-        <h1
-          className="fc text-2xl tracking-wide"
-          style={{ color: '#ffffff' }}
-        >
-          {longDate}
-        </h1>
-        <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          {t.todayLabel}
-        </div>
-      </header>
-
-      {!hasProfile && (
-        <div
-          className="rounded-2xl p-4 fi text-sm"
-          style={{
-            background: 'rgba(251,191,36,0.06)',
-            border: '1px solid rgba(251,191,36,0.2)',
-            color: 'rgba(255,255,255,0.7)',
-          }}
-        >
-          {t.noProfile}{' '}
-          <Link href="/profile" style={{ color: '#fbbf24' }}>
-            {t.goProfile}
-          </Link>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-stretch">
-        <CosmosCard lang={lang} />
-
-        <section
-          className="rounded-2xl px-5 py-6 flex flex-col items-center justify-center gap-3 md:w-44"
+          className="mio-home-score mio-glass mio-glass--metric"
           style={{
             background: scoreStyle.bg,
             border: `1px solid ${scoreStyle.border}`,
           }}
         >
-          <div
-            className="fi text-[10px] uppercase tracking-[0.22em] text-center"
-            style={{ color: 'rgba(255,255,255,0.55)' }}
-          >
-            {t.todayScore}
-          </div>
-          {dayLoading ? (
+          <div className="mio-label fi">{t.todayScore}</div>
+          {showScoreCalculating ? (
             <div
-              className="fi text-sm"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
+              className="fi text-sm text-center mio-caption"
+              data-testid="daily-score-loading"
             >
-              {t.loading}
+              {t.calculatingScore}
+            </div>
+          ) : dayScore != null ? (
+            <div className="flex items-baseline justify-center gap-1">
+              <div className="mio-home-score__value fc" style={{ color: scoreStyle.text }}>
+                {dayScore}
+              </div>
+              <div className="fi text-xs mio-caption">/100</div>
             </div>
           ) : (
-            <div className="flex items-baseline justify-center gap-1">
-              <div
-                className="fc text-5xl leading-none"
-                style={{ color: scoreStyle.text }}
-              >
-                {dayScore != null ? dayScore : '—'}
-              </div>
-              <div
-                className="fi text-xs"
-                style={{ color: 'rgba(255,255,255,0.45)' }}
-              >
-                /100
-              </div>
+            <div className="mio-home-score__value fc" style={{ color: scoreStyle.text }}>
+              —
             </div>
           )}
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{
-              background: 'rgba(0,0,0,0.3)',
-              border: `1px solid ${scoreStyle.border}`,
-              color: scoreStyle.text,
-            }}
-          >
-            <span className="fc text-base">◐</span>
-          </div>
-        </section>
+        </div>
+
+        <CosmosCard lang={lang} className="mio-home-cosmos" />
       </div>
 
-      <section
-        className="rounded-2xl px-4 py-3 flex items-center gap-3"
-        style={{
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.07)',
-        }}
-      >
-        <div
-          className="fi text-[10px] uppercase tracking-widest shrink-0"
-          style={{ color: 'rgba(255,255,255,0.45)' }}
-        >
-          {t.hourlyLabel}
+      <GlassCard variant="secondary" className="!py-3 !px-4">
+        <div className="flex items-center gap-3">
+          <div className="mio-label fi shrink-0">{t.hourlyLabel}</div>
+          {hourlyLoading ? (
+            <div className="flex-1 h-6 rounded-md" style={{ background: 'rgba(255,255,255,0.04)' }} />
+          ) : hourly.length === 0 ? (
+            <div className="fi text-xs mio-caption">{t.noWindow}</div>
+          ) : (
+            <div
+              className="flex gap-[2px] h-6 rounded-md overflow-hidden flex-1"
+              style={{ direction: 'ltr' }}
+            >
+              {hourly.map((h) => {
+                const s = BAND_STYLES[h.band];
+                return (
+                  <div
+                    key={h.hour}
+                    title={`${formatHourLabel(h.hour, lang)} · ${h.score}/100`}
+                    className="flex-1 relative group"
+                    style={{ background: s.bg, borderTop: `2px solid ${s.border}` }}
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
-        {hourlyLoading ? (
-          <div className="flex-1 h-6 rounded-md" style={{ background: 'rgba(255,255,255,0.04)' }} />
-        ) : hourly.length === 0 ? (
-          <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            {t.noWindow}
-          </div>
-        ) : (
-          <div
-            className="flex gap-[2px] h-6 rounded-md overflow-hidden flex-1"
-            style={{ direction: 'ltr' }}
-          >
-            {hourly.map((h) => {
-              const s = BAND_STYLES[h.band];
-              return (
-                <div
-                  key={h.hour}
-                  title={`${formatHourLabel(h.hour, lang)} · ${h.score}/100`}
-                  className="flex-1 relative group"
-                  style={{ background: s.bg, borderTop: `2px solid ${s.border}` }}
-                />
-              );
-            })}
-          </div>
-        )}
-      </section>
+      </GlassCard>
 
-      <section className="grid grid-cols-2 gap-3">
+      <div className="mio-home-grid mio-home-grid--windows">
         <HighlightCard
           label={t.bestWindow}
-          hour={bestHour && isGoldenHour(bestHour.score) ? bestHour : null}
+          hour={bestHour}
           fallback={t.noGolden}
           loading={hourlyLoading}
           loadingLabel={t.loading}
@@ -363,31 +312,37 @@ export function DailyBriefView({
         />
         <HighlightCard
           label={t.avoidWindow}
-          hour={worstHour && isDangerHour(worstHour.score) ? worstHour : null}
+          hour={riskHour}
           fallback={t.noWarnings}
           loading={hourlyLoading}
           loadingLabel={t.loading}
           accent="red"
           lang={lang}
         />
-      </section>
+      </div>
 
-      <section
-        className="rounded-2xl p-5"
-        style={{
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.07)',
+      <WhyThisTiming
+        className="mio-glass mio-glass--secondary rounded-2xl p-4"
+        lang={lang}
+        labels={{
+          dir: t.dir,
+          whyTiming: t.whyTiming,
+          whyTimingFallback: t.whyTimingFallback,
+          supportingReasons: t.supportingReasons,
         }}
-      >
-        <ul className="space-y-3">
+        reasoning={reasoning}
+      />
+
+      <GlassCard variant="secondary">
+        <ul className="space-y-2">
           <BulletLine
             icon="✦"
             color="#4ade80"
             text={
               hourlyLoading
                 ? t.loading
-                : goldenHours.length
-                  ? `${t.goldenHours}: ${goldenHours.slice(0, 4).map((h) => formatHourLabel(h.hour, lang)).join(', ')}`
+                : highReadinessHours.length
+                  ? `${t.goldenHours}: ${highReadinessHours.slice(0, 4).map((h) => formatHourLabel(h.hour, lang)).join(', ')}`
                   : t.noGolden
             }
           />
@@ -397,14 +352,14 @@ export function DailyBriefView({
             text={
               hourlyLoading
                 ? t.loading
-                : dangerHours.length
-                  ? `${t.warnings}: ${dangerHours.slice(0, 3).map((h) => formatHourLabel(h.hour, lang)).join(', ')}`
+                : lowerReadinessHours.length
+                  ? `${t.warnings}: ${lowerReadinessHours.slice(0, 3).map((h) => formatHourLabel(h.hour, lang)).join(', ')}`
                   : t.noWarnings
             }
           />
           <BulletLine
             icon="◆"
-            color="#fbbf24"
+            color={COLORS.goldMain}
             text={
               synergyAlerts.length
                 ? `${t.synergyAlerts}: ${synergyAlerts.join(' · ')}`
@@ -412,63 +367,47 @@ export function DailyBriefView({
             }
           />
         </ul>
-      </section>
+      </GlassCard>
+
+      <Link
+        href="/calendar"
+        className="metioro-btn metioro-btn--secondary fc w-full no-underline text-center"
+        data-testid="today-calendar-cta"
+      >
+        {t.calendarCta}
+      </Link>
 
       <PeopleHomeRow lang={lang} />
 
       <JuliaTrustCard lang={lang} />
 
       <div>
-        <button
-          type="button"
-          onClick={() => setAiOpen((o) => !o)}
-          className="w-full py-3 rounded-xl fc text-sm tracking-wide"
-          style={{
-            background: 'rgba(251,191,36,0.12)',
-            border: '1px solid rgba(251,191,36,0.35)',
-            color: '#fbbf24',
-          }}
-        >
+        <button type="button" onClick={() => setAiOpen((o) => !o)} className="metioro-btn metioro-btn--secondary fc w-full">
           {t.askAi}
         </button>
         {aiOpen && (
-          <div
-            className="mt-3 rounded-2xl p-4 space-y-3"
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
+          <GlassCard variant="secondary" className="mt-3 !p-4 space-y-3">
             <input
               type="text"
               value={aiQuestion}
               onChange={(e) => setAiQuestion(e.target.value)}
               placeholder={t.askPlaceholder}
-              className="w-full fi text-sm px-3 py-2.5 rounded-lg bg-black/30 border border-white/10 text-white outline-none focus:border-amber-500/40"
+              className="metioro-input fi w-full"
               onKeyDown={(e) => e.key === 'Enter' && askAi()}
             />
             <button
               type="button"
               disabled={aiLoading || !aiQuestion.trim()}
               onClick={askAi}
-              className="fi text-xs px-4 py-2 rounded-lg"
-              style={{
-                background: '#fbbf24',
-                color: '#0A0E1A',
-                opacity: aiLoading || !aiQuestion.trim() ? 0.5 : 1,
-              }}
+              className="metioro-btn metioro-btn--primary fi !w-auto !min-h-0 px-4 py-2"
+              style={{ opacity: aiLoading || !aiQuestion.trim() ? 0.5 : 1 }}
             >
               {aiLoading ? t.askLoading : t.askAi}
             </button>
             {aiAnswer && (
-              <p
-                className="fi text-sm leading-relaxed"
-                style={{ color: 'rgba(255,255,255,0.75)' }}
-              >
-                {aiAnswer}
-              </p>
+              <p className="fi text-sm leading-relaxed mio-caption">{aiAnswer}</p>
             )}
-          </div>
+          </GlassCard>
         )}
       </div>
     </div>
@@ -478,52 +417,34 @@ export function DailyBriefView({
 function JuliaTrustCard({ lang }: { lang: AppLang }) {
   const t = JULIA_CARD[lang];
   return (
-    <section
-      className="rounded-2xl p-5 flex items-center gap-4"
-      style={{
-        background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(124,58,237,0.10))',
-        border: '1px solid rgba(251,191,36,0.22)',
-      }}
-    >
+    <GlassCard variant="signature" className="flex items-center gap-4 !p-4">
       <div
         className="w-14 h-14 rounded-full flex items-center justify-center shrink-0 fc text-xl"
         style={{
-          background: 'rgba(251,191,36,0.12)',
-          border: '1px solid rgba(251,191,36,0.35)',
-          color: '#fbbf24',
+          background: 'rgba(212, 175, 55, 0.12)',
+          border: '1px solid rgba(212, 175, 55, 0.35)',
+          color: COLORS.goldMain,
         }}
       >
         J
       </div>
       <div className="flex-1 min-w-0">
-        <div
-          className="fi text-[10px] uppercase tracking-[0.22em] mb-1"
-          style={{ color: 'rgba(251,191,36,0.7)' }}
-        >
-          {t.eyebrow}
-        </div>
-        <div className="fc text-base mb-1" style={{ color: '#ffffff' }}>
-          {t.title}
-        </div>
-        <p
-          className="fi text-xs leading-relaxed mb-3"
-          style={{ color: 'rgba(255,255,255,0.62)' }}
-        >
-          {t.body}
-        </p>
+        <div className="mio-label fi mb-1">{t.eyebrow}</div>
+        <div className="mio-value fc mb-1">{t.title}</div>
+        <p className="mio-caption fi mb-3">{t.body}</p>
         <Link
           href="/ask"
-          className="inline-flex fi text-xs px-3 py-1.5 rounded-lg no-underline"
+          className="inline-flex fi text-xs px-3 py-1.5 rounded-lg no-underline metioro-header-chip"
           style={{
-            background: 'rgba(251,191,36,0.14)',
-            border: '1px solid rgba(251,191,36,0.35)',
-            color: '#fbbf24',
+            borderColor: 'rgba(212, 175, 55, 0.35)',
+            color: COLORS.goldMain,
+            background: 'rgba(212, 175, 55, 0.1)',
           }}
         >
           {t.cta}
         </Link>
       </div>
-    </section>
+    </GlassCard>
   );
 }
 
@@ -547,16 +468,12 @@ function HighlightCard({
   const palette =
     accent === 'green'
       ? { border: 'rgba(74,222,128,0.35)', text: '#4ade80', bg: 'rgba(74,222,128,0.05)', dot: '#4ade80' }
-      : { border: 'rgba(248,113,113,0.35)', text: '#f87171', bg: 'rgba(248,113,113,0.05)', dot: '#fbbf24' };
-  // A live, gently pulsing status dot so the box reads as an active monitor
-  // even when there is no window to show (empty state still feels alive).
+      : { border: 'rgba(248,113,113,0.35)', text: '#f87171', bg: 'rgba(248,113,113,0.05)', dot: '#f87171' };
+
   return (
-    <div
-      className="rounded-2xl p-4"
-      style={{ background: palette.bg, border: `1px solid ${palette.border}` }}
-    >
+    <GlassCard variant="metric">
       <div
-        className="fi text-[10px] uppercase tracking-widest mb-1 flex items-center gap-1.5"
+        className="fi text-[10px] uppercase tracking-widest mb-1 flex items-center gap-1.5 mio-label"
         style={{ color: 'rgba(255,255,255,0.45)' }}
       >
         <span
@@ -567,24 +484,18 @@ function HighlightCard({
         {label}
       </div>
       {loading ? (
-        <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          {loadingLabel}
-        </div>
+        <div className="fi text-xs mio-caption">{loadingLabel}</div>
       ) : hour ? (
         <div className="flex items-baseline gap-2 flex-wrap">
-          <div className="fc text-2xl" style={{ color: palette.text }}>
+          <div className="fc text-2xl mio-value" style={{ color: palette.text }}>
             {formatHourLabel(hour.hour, lang)}
           </div>
-          <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            {hour.score}/100
-          </div>
+          <div className="fi text-xs mio-caption">{hour.score}/100</div>
         </div>
       ) : (
-        <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          {fallback}
-        </div>
+        <div className="fi text-xs mio-caption">{fallback}</div>
       )}
-    </div>
+    </GlassCard>
   );
 }
 
@@ -598,10 +509,7 @@ function BulletLine({
   text: string;
 }) {
   return (
-    <li
-      className="flex items-start gap-2 fi text-sm"
-      style={{ color: 'rgba(255,255,255,0.75)' }}
-    >
+    <li className="flex items-start gap-2 fi text-sm mio-caption">
       <span style={{ color }}>{icon}</span>
       <span>{text}</span>
     </li>

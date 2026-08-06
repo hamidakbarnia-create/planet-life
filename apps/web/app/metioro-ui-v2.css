@@ -1,0 +1,1392 @@
+/* METIORO UI Foundation V2 — Premium AI Observatory */
+/* Token authority: docs/design/system/design-token-registry.md (ADR-DS-001) */
+
+:root {
+  --mio-space-1: 4px;
+  --mio-space-2: 8px;
+  --mio-space-3: 12px;
+  --mio-space-4: 16px;
+  --mio-space-5: 20px;
+  --mio-space-6: 24px;
+  --mio-radius-sm: 10px;
+  --mio-radius-md: 14px;
+  --mio-radius-lg: 18px;
+  --mio-radius-xl: 22px;
+  --mio-glass-bg: rgba(8, 14, 28, 0.72);
+  --mio-glass-border: rgba(255, 255, 255, 0.09);
+  --mio-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --mio-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
+  --mio-gold: #d4af37;
+  --mio-gold-soft: rgba(212, 175, 55, 0.22);
+  --mio-blue-glow: rgba(48, 92, 222, 0.35);
+  --mio-navy-deep: #030508;
+  --mio-navy: #060a14;
+  --mio-text-muted: rgba(255, 255, 255, 0.42);
+  --mio-text-body: rgba(255, 255, 255, 0.88);
+  --mio-label: 9px;
+  --mio-caption: 11px;
+  --mio-body: 13px;
+  /* DS-01 registry: alias for type.bodySm — was referenced but undefined */
+  --mio-body-sm: var(--mio-body);
+  --mio-value: 15px;
+  --mio-heading-sm: 0.7rem;
+  --mio-heading-md: 1.125rem;
+  --mio-heading-lg: 1.35rem;
+}
+
+/* ── App cosmic background ───────────────────────────────────────────────── */
+
+.mio-app-bg {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(30, 58, 138, 0.22), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 100% 0%, rgba(212, 175, 55, 0.08), transparent 45%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, rgba(59, 130, 246, 0.1), transparent 50%),
+    linear-gradient(180deg, #04070f 0%, var(--mio-navy) 40%, var(--mio-navy-deep) 100%);
+}
+
+.mio-app-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 60% 70%, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1px 1px at 80% 10%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 40% 80%, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(1.5px 1.5px at 10% 60%, rgba(212, 175, 55, 0.45), transparent),
+    radial-gradient(1px 1px at 90% 40%, rgba(147, 180, 255, 0.4), transparent);
+  background-size: 100% 100%;
+}
+
+/* Keep page content above the cosmic star field; header stays above scrollable main */
+.mio-app-bg > .metioro-header {
+  z-index: 110;
+}
+
+.mio-app-bg > .metioro-main {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Glass card system ───────────────────────────────────────────────────── */
+
+.mio-glass {
+  background: var(--mio-glass-bg);
+  border: 1px solid var(--mio-glass-border);
+  box-shadow: var(--mio-glass-shadow), var(--mio-glass-highlight);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border-radius: var(--mio-radius-lg);
+}
+
+.mio-glass--primary {
+  background: linear-gradient(145deg, rgba(12, 22, 44, 0.88), rgba(6, 10, 20, 0.92));
+  border-color: rgba(212, 175, 55, 0.18);
+  padding: var(--mio-space-3) var(--mio-space-4);
+}
+
+.mio-glass--secondary {
+  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(255, 255, 255, 0.07);
+  padding: var(--mio-space-3) var(--mio-space-4);
+}
+
+.mio-glass--metric {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+  border-color: rgba(255, 255, 255, 0.08);
+  border-radius: var(--mio-radius-md);
+  padding: var(--mio-space-3);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.mio-glass--metric:hover {
+  border-color: rgba(212, 175, 55, 0.22);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+}
+
+.mio-glass--action {
+  padding: var(--mio-space-4);
+}
+
+.mio-glass--technical {
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--mio-radius-md);
+}
+
+.mio-glass--signature {
+  background:
+    linear-gradient(145deg, rgba(12, 22, 44, 0.92), rgba(6, 10, 20, 0.96)),
+    radial-gradient(ellipse 80% 60% at 100% 0%, rgba(212, 175, 55, 0.12), transparent 55%);
+  border-color: rgba(212, 175, 55, 0.22);
+  padding: var(--mio-space-3) var(--mio-space-4);
+  box-shadow:
+    var(--mio-glass-shadow),
+    var(--mio-glass-highlight),
+    inset 0 0 0 1px rgba(212, 175, 55, 0.08);
+}
+
+/* ── Page header ─────────────────────────────────────────────────────────── */
+
+.mio-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mio-space-4);
+  margin-bottom: var(--mio-space-4);
+}
+
+.mio-page-header__eyebrow {
+  margin: 0 0 var(--mio-space-1);
+  font-size: var(--mio-heading-sm);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.82);
+}
+
+.mio-page-header__title {
+  margin: 0;
+  font-size: var(--mio-heading-lg);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.mio-page-header__subtitle {
+  margin: var(--mio-space-1) 0 0;
+  font-size: var(--mio-caption);
+  color: rgba(255, 255, 255, 0.48);
+  line-height: 1.45;
+}
+
+.mio-page-header__trailing {
+  flex-shrink: 0;
+}
+
+/* ── Alert banner ────────────────────────────────────────────────────────── */
+
+.mio-alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mio-space-2) var(--mio-space-3);
+  padding: var(--mio-space-3) var(--mio-space-4);
+  border-radius: var(--mio-radius-md);
+  font-size: var(--mio-body);
+  line-height: 1.45;
+  margin-bottom: var(--mio-space-4);
+}
+
+.mio-alert--warning {
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.24);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.mio-alert--info {
+  background: rgba(48, 92, 222, 0.1);
+  border: 1px solid rgba(48, 92, 222, 0.28);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.mio-alert--success {
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.24);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.mio-alert__action {
+  color: var(--mio-gold);
+  text-decoration: none;
+  font-size: var(--mio-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mio-alert__action:hover {
+  color: #f2cf75;
+}
+
+/* ── Segment control ───────────────────────────────────────────────────────── */
+
+.mio-segment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mio-space-2);
+}
+
+.mio-segment__option {
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: var(--mio-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.52);
+  font-size: var(--mio-caption);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.mio-segment__option--active {
+  border-color: rgba(212, 175, 55, 0.45);
+  background: rgba(212, 175, 55, 0.1);
+  color: #f2cf75;
+}
+
+/* ── Typography scale ────────────────────────────────────────────────────── */
+
+.mio-eyebrow {
+  font-size: var(--mio-heading-sm);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.85);
+  margin: 0 0 var(--mio-space-3);
+}
+
+.mio-label {
+  font-size: var(--mio-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mio-text-muted);
+}
+
+.mio-value {
+  font-size: var(--mio-value);
+  font-weight: 600;
+  color: var(--mio-text-body);
+  line-height: 1.3;
+}
+
+.mio-value--lg {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.mio-caption {
+  font-size: var(--mio-caption);
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.45;
+}
+
+/* ── Observatory hero ────────────────────────────────────────────────────── */
+
+.mio-obs-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--mio-radius-xl);
+  padding: var(--mio-space-3) var(--mio-space-4);
+  min-height: 96px;
+  margin-bottom: var(--mio-space-3);
+  scroll-margin-top: calc(var(--metioro-header-h, 84px) + var(--metioro-safe-top, 0px) + 12px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  background:
+    radial-gradient(ellipse 70% 100% at 0% 50%, var(--mio-blue-glow), transparent 60%),
+    radial-gradient(ellipse 50% 80% at 100% 0%, rgba(212, 175, 55, 0.14), transparent 55%),
+    linear-gradient(135deg, rgba(11, 23, 54, 0.95), rgba(4, 7, 15, 0.98));
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 767px) {
+  .mio-obs-hero {
+    min-height: 132px;
+    padding: var(--mio-space-3);
+  }
+}
+
+.mio-obs-hero__orbit {
+  position: absolute;
+  inset: -20% -10% auto auto;
+  width: 200px;
+  height: 200px;
+  border: 1px solid rgba(212, 175, 55, 0.12);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.mio-obs-hero__orbit::before {
+  content: '';
+  position: absolute;
+  inset: 24px;
+  border: 1px dashed rgba(147, 180, 255, 0.15);
+  border-radius: 50%;
+}
+
+.mio-obs-hero__glow {
+  position: absolute;
+  top: -40px;
+  right: 10%;
+  width: 200px;
+  height: 120px;
+  background: radial-gradient(ellipse, rgba(59, 130, 246, 0.25), transparent 70%);
+  pointer-events: none;
+}
+
+.mio-obs-hero__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.mio-obs-hero__title {
+  font-size: var(--mio-heading-lg);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  margin: 0 0 var(--mio-space-1);
+  line-height: 1.2;
+}
+
+.mio-obs-hero__tagline {
+  font-size: var(--mio-caption);
+  color: rgba(255, 255, 255, 0.58);
+  margin: 0 0 var(--mio-space-3);
+  max-width: 48ch;
+  line-height: 1.5;
+}
+
+.mio-obs-hero__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--mio-space-2) var(--mio-space-4);
+}
+
+@media (min-width: 640px) {
+  .mio-obs-hero__metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .mio-obs-hero__metrics {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
+.mio-obs-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mio-obs-metric__label {
+  font-size: var(--mio-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.mio-obs-metric__value {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mio-obs-metric__value--ready { color: #86efac; }
+.mio-obs-metric__value--pending { color: rgba(255, 255, 255, 0.45); }
+.mio-obs-metric__value--loading { color: #f2cf75; }
+
+/* ── Observatory dashboard grid ──────────────────────────────────────────── */
+
+.mio-obs-dashboard {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding: 0 0 var(--mio-space-4);
+}
+
+@media (max-width: 767px) {
+  .mio-obs-dashboard {
+    padding-inline: 0;
+  }
+}
+
+.mio-obs-grid {
+  display: grid;
+  gap: var(--mio-space-3);
+  grid-template-columns: 1fr;
+  direction: ltr;
+  align-items: start;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-obs-grid {
+  direction: rtl;
+}
+
+/* Mobile / narrow: decision summary before chart */
+.mio-obs-slot--identity { order: 1; }
+.mio-obs-slot--signature { order: 2; }
+.mio-obs-slot--chart { order: 3; }
+.mio-obs-slot--cultural { order: 4; }
+.mio-obs-slot--birth { order: 5; }
+.mio-obs-slot--analysis { order: 6; }
+.mio-obs-slot--transparency { order: 7; }
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .mio-obs-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      'identity signature'
+      'chart chart'
+      'birth birth'
+      'analysis analysis'
+      'transparency transparency';
+  }
+
+  .mio-obs-slot--identity { grid-area: identity; order: unset; }
+  .mio-obs-slot--chart { grid-area: chart; order: unset; }
+  .mio-obs-slot--signature { grid-area: signature; order: unset; }
+  .mio-obs-slot--cultural { grid-area: cultural; order: unset; display: none; }
+  .mio-obs-slot--birth { grid-area: birth; order: unset; }
+  .mio-obs-slot--transparency { grid-area: transparency; order: unset; }
+  .mio-obs-slot--analysis { grid-area: analysis; order: unset; }
+}
+
+@media (min-width: 1100px) {
+  .mio-obs-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 1fr);
+    grid-template-areas:
+      'identity signature birth'
+      'chart chart chart'
+      'analysis analysis analysis'
+      'transparency transparency transparency';
+  }
+
+  .mio-obs-slot--birth { grid-area: birth; order: unset; }
+  .mio-obs-slot--chart { grid-area: chart; order: unset; }
+  .mio-obs-slot--identity { grid-area: identity; order: unset; }
+  .mio-obs-slot--signature { grid-area: signature; order: unset; }
+  .mio-obs-slot--cultural { grid-area: cultural; order: unset; display: none; }
+  .mio-obs-slot--transparency { grid-area: transparency; order: unset; }
+  .mio-obs-slot--analysis { grid-area: analysis; order: unset; }
+}
+
+/* Birth controls — collapsible when chart exists */
+.mio-birth-collapsible__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--mio-space-3);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+.mio-birth-collapsible__chevron {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
+}
+
+.mio-birth-collapsible__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mio-space-2);
+  margin-top: var(--mio-space-3);
+}
+
+.mio-birth-collapsible--collapsed .mio-birth-collapsible__body {
+  display: none;
+}
+
+.mio-birth-collapsible__summary {
+  font-size: var(--mio-caption);
+  color: rgba(255, 255, 255, 0.48);
+  margin-top: var(--mio-space-1);
+}
+
+/* Home dashboard grid */
+.mio-home-dashboard {
+  display: flex;
+  flex-direction: column;
+  /* Match Calendar section rhythm (mb-6 / space-y-6) */
+  gap: var(--mio-space-6);
+}
+
+/* Let column gap own vertical rhythm (avoid gap + header margin stacking) */
+.mio-home-dashboard > .mio-page-header {
+  margin-bottom: 0;
+}
+
+.mio-home-grid {
+  display: grid;
+  gap: var(--mio-space-4);
+  grid-template-columns: 1fr;
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .mio-home-grid--primary {
+    grid-template-columns: minmax(132px, 156px) minmax(0, 1fr);
+    grid-template-areas: 'score cosmos';
+  }
+
+  .mio-home-score {
+    grid-area: score;
+  }
+
+  .mio-home-cosmos {
+    grid-area: cosmos;
+  }
+
+  .mio-home-grid--windows {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .mio-home-grid--wide {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    align-items: start;
+  }
+}
+
+.mio-home-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mio-space-2);
+  min-height: 0;
+  padding: var(--mio-space-3);
+  border-radius: var(--mio-radius-lg);
+}
+
+.mio-home-score__value {
+  font-size: 2.25rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.mio-home-cosmos {
+  opacity: 0.92;
+}
+
+.mio-home-cosmos .mio-glass--primary {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.mio-obs-slot--chart .mio-glass {
+  padding: var(--mio-space-3);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.mio-obs-slot--chart .mio-eyebrow {
+  color: rgba(255, 255, 255, 0.42);
+  letter-spacing: 0.14em;
+}
+
+/* ── Premium empty / unlock states ───────────────────────────────────────── */
+
+.mio-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--mio-space-3);
+  padding: var(--mio-space-4) var(--mio-space-3);
+  min-height: 140px;
+}
+
+.mio-empty-state__ring {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+  box-shadow: 0 0 24px rgba(212, 175, 55, 0.12);
+  position: relative;
+}
+
+.mio-empty-state__ring::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.mio-empty-state__text {
+  max-width: 22rem;
+  font-size: var(--mio-body-sm);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.mio-chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--mio-space-3);
+  width: 100%;
+  min-height: 180px;
+  padding: var(--mio-space-3);
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.35) 0%, transparent 72%);
+  border-radius: 50%;
+}
+
+.mio-chart-empty__ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 65%);
+  box-shadow: 0 0 32px rgba(147, 180, 255, 0.15);
+  position: relative;
+}
+
+.mio-chart-empty__ring::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mio-chart-empty__text {
+  max-width: 16rem;
+  font-size: var(--mio-body-sm);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Chart observatory presentation ──────────────────────────────────────── */
+
+.mio-chart-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.mio-chart-stage__wheel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+  margin-inline: auto;
+  padding: var(--mio-space-1);
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.35) 0%, transparent 72%);
+  border-radius: 50%;
+}
+
+.mio-chart-stage__wheel svg {
+  width: min(360px, 100%);
+  height: auto;
+  max-height: 360px;
+}
+
+@media (max-width: 767px) {
+  .mio-chart-stage__wheel {
+    max-width: 220px;
+  }
+
+  .mio-chart-stage__wheel svg {
+    width: min(220px, 100%);
+    max-height: 220px;
+  }
+}
+
+.mio-chart-stage .flex.flex-wrap.justify-center {
+  margin-top: var(--mio-space-2) !important;
+  gap: var(--mio-space-2) !important;
+}
+
+/* ── Signature metric grid ───────────────────────────────────────────────── */
+
+.mio-sig-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mio-space-2);
+}
+
+.mio-sig-metric {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--mio-space-3);
+  min-width: 0;
+}
+
+.mio-sig-metric__icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  border-radius: var(--mio-radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mio-sig-metric__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mio-sig-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+/* ── Compact birth controls ──────────────────────────────────────────────── */
+
+.mio-birth-compact .metioro-input,
+.mio-birth-compact .metioro-select {
+  padding: 8px 10px;
+  font-size: var(--mio-body);
+  border-radius: var(--mio-radius-sm);
+}
+
+.mio-birth-compact .metioro-btn {
+  min-height: 44px;
+  border-radius: var(--mio-radius-sm);
+}
+
+.mio-birth-date-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mio-space-2);
+  margin-bottom: 6px;
+}
+
+.mio-birth-date-head .metioro-field-label {
+  margin-bottom: 0;
+}
+
+.mio-select-inline {
+  width: auto;
+  max-width: 48%;
+  padding: 6px 8px !important;
+  font-size: 10px !important;
+  flex-shrink: 0;
+}
+
+.mio-birth-alt-date {
+  margin-top: 6px;
+  font-size: var(--mio-caption);
+  font-weight: 600;
+  color: rgba(212, 175, 55, 0.8);
+}
+
+/* ── Identity rows ───────────────────────────────────────────────────────── */
+
+.mio-id-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  align-items: baseline;
+  gap: var(--mio-space-2) var(--mio-space-3);
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mio-id-row .mio-label {
+  min-width: 0;
+}
+
+.mio-id-row .mio-value {
+  min-width: 0;
+  text-align: end;
+  word-break: break-word;
+}
+
+.mio-id-row:last-child {
+  border-bottom: none;
+}
+
+/* ── Below-fold analysis zone ────────────────────────────────────────────── */
+
+.mio-obs-below {
+  margin-top: var(--mio-space-3);
+  display: grid;
+  gap: var(--mio-space-3);
+}
+
+.mio-analysis-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mio-space-3);
+}
+
+@media (min-width: 768px) {
+  .mio-analysis-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ── Chart insight cards (elemental balance, strengths) ──────────────────── */
+
+.mio-insight-card {
+  border-radius: var(--mio-radius-md);
+  padding: var(--mio-space-3);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.mio-insight-card__title {
+  margin: 0 0 var(--mio-space-2);
+  font-size: var(--mio-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.mio-element-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mio-space-2);
+}
+
+.mio-element-row {
+  display: grid;
+  grid-template-columns: minmax(2.75rem, 3.5rem) minmax(0, 1fr) 2.35rem;
+  align-items: center;
+  column-gap: var(--mio-space-2);
+}
+
+.mio-element-row__label {
+  font-size: var(--mio-caption);
+  text-align: start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mio-element-row__track {
+  height: 0.5rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mio-element-row__fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 600ms ease-out;
+}
+
+.mio-element-row__pct {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: end;
+  font-size: var(--mio-caption);
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+}
+
+.mio-strengths-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mio-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mio-strengths-list__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mio-space-2);
+  min-width: 0;
+}
+
+.mio-strengths-list__bullet {
+  margin-top: 0.45rem;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #fbbf24;
+}
+
+.mio-strengths-list__text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--mio-caption);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+  overflow-wrap: anywhere;
+}
+
+/* ── RTL content (shell stays LTR) ───────────────────────────────────────── */
+
+.mio-obs-dashboard[dir='rtl'] .mio-glass,
+.mio-obs-dashboard[dir='rtl'] .mio-obs-hero,
+.mio-obs-dashboard[dir='rtl'] .mio-obs-below > *,
+.mio-obs-dashboard[dir='rtl'] .mio-insight-card {
+  direction: rtl;
+  text-align: right;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-birth-date-head {
+  flex-direction: row-reverse;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-obs-metric,
+.mio-obs-dashboard[dir='rtl'] .mio-sig-metric__body {
+  text-align: right;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-id-row {
+  direction: rtl;
+  text-align: right;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-id-row .mio-label {
+  text-align: right;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-id-row .mio-value {
+  text-align: left;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-element-row__label {
+  text-align: right;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-strengths-list__item {
+  flex-direction: row-reverse;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-strengths-list__text {
+  text-align: right;
+}
+
+.mio-obs-dashboard[dir='rtl'] .mio-sig-metric {
+  flex-direction: row-reverse;
+  direction: rtl;
+}
+
+.mio-obs-dashboard[dir='rtl'] [dir='ltr'],
+.mio-obs-dashboard[dir='rtl'] .mio-element-row__pct {
+  direction: ltr;
+  text-align: end;
+}
+
+.mio-obs-below [data-testid='calculation-details'] {
+  margin-top: 0;
+  border: none;
+  border-radius: 0;
+}
+
+/* ── Modal (birth confirm, etc.) ─────────────────────────────────────────── */
+
+.mio-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mio-space-4);
+  background: rgba(3, 5, 8, 0.74);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.mio-modal {
+  width: min(680px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: var(--mio-space-5);
+  border-radius: var(--mio-radius-xl);
+}
+
+.mio-modal__eyebrow {
+  margin: 0 0 var(--mio-space-1);
+  font-size: var(--mio-heading-sm);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(212, 175, 55, 0.72);
+}
+
+.mio-modal__title {
+  margin: 0 0 var(--mio-space-2);
+  font-size: var(--mio-heading-md);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  line-height: 1.25;
+}
+
+.mio-modal__body {
+  margin: 0 0 var(--mio-space-4);
+  font-size: var(--mio-body);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.mio-modal__notice {
+  margin-bottom: var(--mio-space-3);
+  padding: var(--mio-space-2) var(--mio-space-3);
+  border-radius: var(--mio-radius-sm);
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+}
+
+.mio-modal__notice-text {
+  margin: 0;
+  font-size: var(--mio-caption);
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: pre-line;
+}
+
+.mio-modal__rows {
+  margin: 0 0 var(--mio-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mio-modal__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--mio-space-3);
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: var(--mio-caption);
+}
+
+.mio-modal__row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.mio-modal__label {
+  flex: 0 0 auto;
+  max-width: 42%;
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.4;
+}
+
+.mio-modal__value {
+  flex: 1 1 auto;
+  margin: 0;
+  text-align: end;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.mio-modal__value--multiline {
+  white-space: pre-line;
+}
+
+.mio-modal[dir='ltr'] .mio-modal__value {
+  font-variant-numeric: tabular-nums;
+}
+
+.mio-modal__actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: stretch;
+  gap: 13px;
+  margin-top: var(--mio-space-2);
+}
+
+.mio-modal[dir='rtl'] .mio-modal__actions {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+}
+
+.mio-modal .mio-modal__btn.metioro-btn {
+  width: auto;
+  min-width: 148px;
+  flex: 0 1 auto;
+  min-height: 50px;
+  padding: 0 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.mio-modal .mio-modal__btn.metioro-btn:focus-visible {
+  outline: 2px solid rgba(212, 175, 55, 0.65);
+  outline-offset: 2px;
+}
+
+@media (max-width: 520px) {
+  .mio-modal {
+    padding: var(--mio-space-4);
+  }
+
+  .mio-modal__actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+
+  .mio-modal[dir='rtl'] .mio-modal__actions {
+    flex-direction: column-reverse;
+  }
+
+  .mio-modal .mio-modal__btn.metioro-btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+  }
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+
+.mio-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 60;
+  padding: 12px 24px;
+  border-radius: var(--mio-radius-md);
+  background: #16a34a;
+  color: #fff;
+  font-size: var(--mio-body);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Persian (fa) typography & profile density ─────────────────────────── */
+
+html[lang='fa'],
+.metioro-main[lang='fa'],
+main[lang='fa'] {
+  --mio-label: 8px;
+  --mio-caption: 10px;
+  --mio-body: 12px;
+  --mio-value: 13px;
+  --mio-heading-sm: 0.65rem;
+  --mio-heading-md: 1rem;
+  --mio-heading-lg: 1.18rem;
+}
+
+html[lang='fa'] .mio-glass--primary,
+html[lang='fa'] .mio-glass--secondary,
+html[lang='fa'] .mio-glass--signature,
+html[lang='fa'] .mio-insight-card,
+.metioro-main[lang='fa'] .mio-glass--primary,
+.metioro-main[lang='fa'] .mio-glass--secondary,
+.metioro-main[lang='fa'] .mio-glass--signature,
+.metioro-main[lang='fa'] .mio-insight-card,
+main[lang='fa'] .mio-glass--primary,
+main[lang='fa'] .mio-glass--secondary,
+main[lang='fa'] .mio-glass--signature,
+main[lang='fa'] .mio-insight-card {
+  padding: var(--mio-space-2) var(--mio-space-3);
+}
+
+html[lang='fa'] .mio-glass--metric,
+.metioro-main[lang='fa'] .mio-glass--metric,
+main[lang='fa'] .mio-glass--metric {
+  padding: var(--mio-space-2);
+}
+
+html[lang='fa'] .mio-eyebrow,
+html[lang='fa'] .mio-insight-card__title,
+html[lang='fa'] .mio-label,
+.metioro-main[lang='fa'] .mio-eyebrow,
+.metioro-main[lang='fa'] .mio-insight-card__title,
+.metioro-main[lang='fa'] .mio-label,
+main[lang='fa'] .mio-eyebrow,
+main[lang='fa'] .mio-insight-card__title,
+main[lang='fa'] .mio-label {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html[lang='fa'] .mio-obs-grid,
+html[lang='fa'] .mio-analysis-grid,
+html[lang='fa'] .mio-sig-grid,
+html[lang='fa'] .mio-obs-below,
+.metioro-main[lang='fa'] .mio-obs-grid,
+.metioro-main[lang='fa'] .mio-analysis-grid,
+.metioro-main[lang='fa'] .mio-sig-grid,
+.metioro-main[lang='fa'] .mio-obs-below {
+  gap: var(--mio-space-2);
+}
+
+html[lang='fa'] .mio-obs-hero,
+.metioro-main[lang='fa'] .mio-obs-hero {
+  margin-bottom: var(--mio-space-2);
+  padding: var(--mio-space-2) var(--mio-space-3);
+}
+
+html[lang='fa'] .mio-obs-hero__tagline,
+.metioro-main[lang='fa'] .mio-obs-hero__tagline {
+  margin-bottom: var(--mio-space-2);
+  line-height: 1.55;
+}
+
+html[lang='fa'] .mio-id-row,
+.metioro-main[lang='fa'] .mio-id-row {
+  padding: 4px 0;
+  gap: var(--mio-space-1) var(--mio-space-2);
+}
+
+html[lang='fa'] .mio-element-row,
+.metioro-main[lang='fa'] .mio-element-row {
+  grid-template-columns: minmax(2.5rem, 3rem) minmax(0, 1fr) 2.1rem;
+  column-gap: var(--mio-space-1);
+}
+
+html[lang='fa'] .mio-element-row__label,
+.metioro-main[lang='fa'] .mio-element-row__label {
+  font-size: 11px;
+}
+
+html[lang='fa'] .mio-strengths-list__text,
+.metioro-main[lang='fa'] .mio-strengths-list__text {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+html[lang='fa'] .mio-obs-metric__value,
+html[lang='fa'] .mio-value,
+.metioro-main[lang='fa'] .mio-obs-metric__value,
+.metioro-main[lang='fa'] .mio-value {
+  font-size: 12px;
+}
+
+html[lang='fa'] .mio-value--lg,
+.metioro-main[lang='fa'] .mio-value--lg {
+  font-size: 0.95rem;
+}
+
+html[lang='fa'] .mio-home-score__value,
+.metioro-main[lang='fa'] .mio-home-score__value {
+  font-size: 2rem;
+}
+
+html[lang='fa'] .mio-ltr-num,
+html[lang='fa'] .mio-element-row__pct,
+html[lang='fa'] [dir='ltr'],
+.metioro-main[lang='fa'] .mio-ltr-num,
+.metioro-main[lang='fa'] .mio-element-row__pct,
+.metioro-main[lang='fa'] [dir='ltr'] {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Arabic (ar) typography — readability only (no density / padding redesign)
+   Activators: .metioro-main[lang='ar'] / main[lang='ar'] (AppShell), not html[lang]. */
+
+.metioro-main[lang='ar'],
+main[lang='ar'] {
+  --mio-label: 12px;
+  --mio-caption: 13px;
+  --mio-body: 16px;
+  --mio-body-sm: 14px;
+  --mio-value: 16px;
+  --mio-heading-sm: 0.8125rem;
+  --mio-heading-md: 1.25rem;
+  --mio-heading-lg: 1.5rem;
+  font-feature-settings: 'kern';
+}
+
+.metioro-main[lang='ar'] .mio-eyebrow,
+.metioro-main[lang='ar'] .mio-insight-card__title,
+.metioro-main[lang='ar'] .mio-label,
+.metioro-main[lang='ar'] .mio-obs-metric__label,
+main[lang='ar'] .mio-eyebrow,
+main[lang='ar'] .mio-insight-card__title,
+main[lang='ar'] .mio-label,
+main[lang='ar'] .mio-obs-metric__label {
+  letter-spacing: 0;
+  word-spacing: 0;
+  text-transform: none;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.metioro-main[lang='ar'] .mio-page-header__title,
+.metioro-main[lang='ar'] .mio-obs-hero__title,
+main[lang='ar'] .mio-page-header__title,
+main[lang='ar'] .mio-obs-hero__title {
+  line-height: 1.55;
+  font-weight: 600;
+  letter-spacing: 0;
+  word-spacing: 0;
+}
+
+.metioro-main[lang='ar'] .mio-page-header__subtitle,
+.metioro-main[lang='ar'] .mio-obs-hero__tagline,
+.metioro-main[lang='ar'] .mio-alert,
+.metioro-main[lang='ar'] .mio-caption,
+main[lang='ar'] .mio-page-header__subtitle,
+main[lang='ar'] .mio-obs-hero__tagline,
+main[lang='ar'] .mio-alert,
+main[lang='ar'] .mio-caption {
+  line-height: 1.8;
+  letter-spacing: 0;
+  word-spacing: 0.01em;
+}
+
+.metioro-main[lang='ar'] .mio-segment__option,
+main[lang='ar'] .mio-segment__option {
+  font-weight: 500;
+  letter-spacing: 0;
+  word-spacing: 0;
+  line-height: 1.5;
+}
+
+.metioro-main[lang='ar'] .mio-value,
+.metioro-main[lang='ar'] .mio-obs-metric__value,
+main[lang='ar'] .mio-value,
+main[lang='ar'] .mio-obs-metric__value {
+  font-weight: 500;
+  line-height: 1.45;
+  word-spacing: 0;
+}
+
+.metioro-main[lang='ar'] .mio-strengths-list__text,
+main[lang='ar'] .mio-strengths-list__text {
+  font-size: var(--mio-body-sm);
+  line-height: 1.75;
+  word-spacing: 0.01em;
+}
+
+.metioro-main[lang='ar'] .mio-ltr-num,
+.metioro-main[lang='ar'] .mio-element-row__pct,
+.metioro-main[lang='ar'] [dir='ltr'],
+main[lang='ar'] .mio-ltr-num,
+main[lang='ar'] .mio-element-row__pct,
+main[lang='ar'] [dir='ltr'] {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+  word-spacing: 0;
+}

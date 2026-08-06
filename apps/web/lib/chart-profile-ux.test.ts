@@ -73,7 +73,8 @@ describe('formatConfirmCoordinates', () => {
 
 describe('resolveConfirmDisplayValue', () => {
   it('shows loading text while resolving', () => {
-    expect(resolveConfirmDisplayValue(null, true)).toContain('در حال دریافت');
+    expect(resolveConfirmDisplayValue(null, true, 'fa')).toContain('در حال دریافت');
+    expect(resolveConfirmDisplayValue(null, true, 'en')).toContain('Fetching');
   });
 
   it('shows timezone when resolved', () => {
@@ -107,7 +108,7 @@ describe('buildPreConfirmSummary', () => {
       resolving: true,
     });
     expect(summary.resolving).toBe(true);
-    expect(resolveConfirmDisplayValue(summary.timezone, summary.resolving)).toContain(
+    expect(resolveConfirmDisplayValue(summary.timezone, summary.resolving, 'fa')).toContain(
       'در حال دریافت'
     );
   });

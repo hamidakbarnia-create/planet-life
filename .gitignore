@@ -1,3 +1,36 @@
 venv/ 
 __pycache__/ 
 *.pyc 
+
+# Python virtual environments
+.venv/
+**/.venv/
+venv/
+**/venv/
+
+# Local generated folders
+apps/web/.wrangler/
+apps/web/qa-screenshots/
+
+# Local extraction / IDE temp
+.idea-extract/
+
+# Local generated brand previews
+apps/web/public/brand/_history/
+apps/web/public/brand/_preview/
+apps/web/public/brand/preview-logos.html
+
+# Playwright / test artifacts
+apps/web/.playwright-browsers/
+apps/web/test-results/
+
+# Playwright
+apps/web/.playwright-browsers/
+apps/web/test-results/
+
+# Logs
+*.log
+
+
+# Local test-output artifacts
+/test-output-pytest.txt

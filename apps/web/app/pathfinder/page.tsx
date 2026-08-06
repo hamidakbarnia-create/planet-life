@@ -2,11 +2,13 @@
 
 import Link from 'next/link';
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { localeFontFamily } from '@/lib/brand-theme';
 import { AppShell } from '@/components/AppShell';
 import { loadBirthProfile, type BirthProfile } from '@/lib/birth-profile';
 import { isPaid } from '@/lib/membership';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
 import { loadCalendarSystem, type AppLang, type CalendarSystem } from '@/lib/app-settings';
+import { formatDisplayDateRange } from '@/lib/date-format';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { todayYMD } from '@/lib/calendar-utils';
 import {
@@ -22,7 +24,6 @@ import {
 import {
   composeEffectLead,
   composeReasons,
-  formatPathfinderDateRange,
   pathfinderAngleName,
   pathfinderPlanetName,
   periodLabel,
@@ -227,7 +228,7 @@ function lineColor(line: PathfinderLine) {
 function GlobePreview({ note, title }: { note: string; title: string }) {
   return (
     <div
-      className="relative overflow-hidden rounded-3xl min-h-[280px]"
+      className="relative overflow-hidden rounded-3xl min-h-[200px]"
       style={{
         background:
           'radial-gradient(circle at 45% 38%, rgba(96,165,250,0.5), rgba(20,30,60,0.55) 35%, rgba(4,8,18,0.95) 70%), radial-gradient(circle at 70% 20%, rgba(251,191,36,0.25), transparent 28%)',
@@ -290,7 +291,7 @@ function PeriodCard({ period, lang, calendar }: { period: { start: string; end: 
   return (
     <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
       <div className="flex items-center justify-between">
-        <div className="fi text-sm font-semibold text-white">{formatPathfinderDateRange(lang, period.start, period.end, calendar)}</div>
+        <div className="fi text-sm font-semibold text-white">{formatDisplayDateRange(lang, period.start, period.end, calendar)}</div>
         <div className="fi text-xs font-medium" style={{ color }}>{periodLabel(lang, period.score)} · {period.score}</div>
       </div>
       <div className="mt-3 grid grid-cols-7 gap-1">
@@ -399,7 +400,7 @@ export default function PathfinderPage() {
       setLang={setLang}
       dir={shellLabels.dir}
       navLabels={shellLabels.nav}
-      fontFamily={lang === 'fa' || lang === 'ar' ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif'}
+      fontFamily={localeFontFamily(lang)}
     >
       <div className="mx-auto max-w-6xl px-5 py-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.05fr_0.95fr]">
@@ -465,9 +466,9 @@ export default function PathfinderPage() {
             </button>
 
             {blocked && (
-              <div className="mt-4 rounded-2xl p-4 fi text-sm" style={{ background: 'rgba(244,114,182,0.08)', border: '1px solid rgba(244,114,182,0.22)', color: 'rgba(255,255,255,0.78)' }}>
+              <div className="mt-4 rounded-2xl p-4 fi text-sm" style={{ background: 'rgba(48,92,222,0.08)', border: '1px solid rgba(48,92,222,0.22)', color: 'rgba(255,255,255,0.78)' }}>
                 {labels.freeTeaser}{' '}
-                <Link href="/upgrade" className="text-pink-300 underline">{labels.upgrade}</Link>
+                <Link href="/upgrade" className="underline" style={{ color: '#93B4FF' }}>{labels.upgrade}</Link>
               </div>
             )}
             {error && <div className="fi mt-4 text-sm text-red-300">{error}</div>}

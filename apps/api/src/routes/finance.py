@@ -1,11 +1,13 @@
-import sys, os
-sys.path.insert(0, r"C:\planet-life")
+from repo_path import ensure_repo_on_path
+
+ensure_repo_on_path()
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from schemas.score_breakdown import ActivityScoreResponse, build_scoring_response
+from packages.decision_engine import DecisionRequest
+from schemas.score_breakdown import ActivityScoreResponse
 from packages.astro_engine.scoring_context import CONTEXT_ASK_ELECTIONAL
-from services.scoring_pipeline import score_with_context
+from services.decision_engine import generate_decision_outcome
 
 router = APIRouter()
 
@@ -30,20 +32,25 @@ async def analyze_finance(request: FinanceAnalysisRequest):
     if action not in FINANCE_ACTIONS:
         raise HTTPException(status_code=422, detail=f"Unknown finance action '{action}'.")
     try:
-        result, _, _ = score_with_context(
-            birth_date=request.birth_date,
-            birth_time=request.birth_time,
-            location=request.location,
-            target_date=request.target_date,
-            target_time=None,
-            action_type=action,
-            context=CONTEXT_ASK_ELECTIONAL,
-            evaluation_location=request.evaluation_location,
-            evaluation_latitude=request.evaluation_latitude,
-            evaluation_longitude=request.evaluation_longitude,
+        outcome = generate_decision_outcome(
+            DecisionRequest(
+                module_origin="finance",
+                decision_intent=action,
+                birth_date=request.birth_date,
+                birth_time=request.birth_time,
+                location=request.location,
+                target_date=request.target_date,
+                target_time=None,
+                action_type=action,
+                context=CONTEXT_ASK_ELECTIONAL,
+                evaluation_location=request.evaluation_location,
+                evaluation_latitude=request.evaluation_latitude,
+                evaluation_longitude=request.evaluation_longitude,
+                include_location_context=False,
+            )
         )
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Chart computation failed: {e}")
-    return build_scoring_response(result)
+    return outcome.source_activity_response

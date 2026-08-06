@@ -581,7 +581,7 @@ const ANSWER_TEMPLATES: Record<
     gold: {
       headline: 'Golden window — {score}/100',
       body:
-        '{when} scores {score}/100 for this action. The cosmic gates are wide open: supportive transits dominate and friction is minimal. Move with confidence; this is one of your strongest windows.',
+        '{when} scores {score}/100 for this action. The window is strongly favorable: supportive transits dominate and friction is minimal. Move with confidence; this is one of your strongest windows.',
     },
     green: {
       headline: 'Favorable — {score}/100',

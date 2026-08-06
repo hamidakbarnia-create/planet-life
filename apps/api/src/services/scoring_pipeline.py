@@ -26,6 +26,7 @@ def score_with_context(
     evaluation_location: str | None = None,
     evaluation_latitude: float | None = None,
     evaluation_longitude: float | None = None,
+    evaluation_timezone: str | None = None,
     house_system: str = "placidus",
     zodiac: str = "tropical",
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
@@ -35,10 +36,12 @@ def score_with_context(
     eval_location = evaluation_location
     eval_lat = evaluation_latitude
     eval_lon = evaluation_longitude
+    eval_tz = evaluation_timezone
     if context.location_mode == "birthOnly":
         eval_location = None
         eval_lat = None
         eval_lon = None
+        eval_tz = None
 
     natal, transit = build_chart_payload(
         birth_date=birth_date,
@@ -53,6 +56,7 @@ def score_with_context(
         evaluation_location=eval_location,
         evaluation_latitude=eval_lat,
         evaluation_longitude=eval_lon,
+        evaluation_timezone=eval_tz,
     )
     if transit.get("evaluation") is not None:
         transit["evaluation"]["scoring_context"] = {

@@ -1,27 +1,27 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { PEOPLE_LANGS, type PeopleLang } from '@/lib/people-i18n';
 import { BADGE_STYLES } from '@/lib/synergy';
 import { initials, loadPeople, type Person } from '@/lib/people-storage';
 import { loadAppLang } from '@/lib/calendar-preferences';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 
 export function PeopleHomeRow({ lang: langProp }: { lang?: PeopleLang } = {}) {
   const [people, setPeople] = useState<Person[]>([]);
-  const [lang, setLang] = useState<PeopleLang>(langProp ?? 'en');
+  const [storedLang, setStoredLang] = useState<PeopleLang>(() => {
+    const stored = loadAppLang();
+    if (stored === 'ru' || stored === 'fa' || stored === 'ar' || stored === 'en') return stored;
+    return 'en';
+  });
+  const lang = langProp ?? storedLang;
 
-  // When the parent controls the language (e.g. the landing page), follow it
-  // live so the section title switches with the rest of the page.
-  useEffect(() => {
-    if (langProp) setLang(langProp);
-  }, [langProp]);
-
-  useEffect(() => {
+  useQueuedEffect(() => {
     if (!langProp) {
       const stored = loadAppLang();
       if (stored === 'ru' || stored === 'fa' || stored === 'ar' || stored === 'en') {
-        setLang(stored);
+        setStoredLang(stored);
       }
     }
     setPeople(loadPeople().slice(0, 8));
@@ -32,14 +32,14 @@ export function PeopleHomeRow({ lang: langProp }: { lang?: PeopleLang } = {}) {
   const t = PEOPLE_LANGS[lang];
 
   return (
-    <section className="px-8 py-10 max-w-5xl mx-auto border-t border-white/10">
+    <section className="border-t border-white/10 pt-1">
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-lg font-semibold text-white/90">{t.homeTitle}</h2>
         <Link href="/people" className="text-sm text-amber-400 hover:text-amber-300 no-underline">
           {t.homeSeeAll}
         </Link>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-2">
+      <div className="flex gap-4 overflow-x-auto pb-3">
         {people.map((p) => {
           const badge = p.synergyBadge;
           const style = badge ? BADGE_STYLES[badge] : null;
@@ -49,7 +49,7 @@ export function PeopleHomeRow({ lang: langProp }: { lang?: PeopleLang } = {}) {
               href={`/people/${p.id}`}
               className="flex-shrink-0 flex flex-col items-center gap-2 no-underline w-20"
             >
-              <div className="relative">
+              <div className="flex flex-col items-center gap-1.5 min-h-[4.75rem]">
                 {p.photoDataUrl ? (
                   <img
                     src={p.photoDataUrl}
@@ -69,9 +69,9 @@ export function PeopleHomeRow({ lang: langProp }: { lang?: PeopleLang } = {}) {
                     {initials(p.name)}
                   </div>
                 )}
-                {badge && (
+                {badge ? (
                   <span
-                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[8px] px-1.5 py-0.5 rounded-full whitespace-nowrap font-medium"
+                    className="text-[8px] leading-none px-1.5 py-0.5 rounded-full whitespace-nowrap font-medium"
                     style={{
                       background: style!.bg,
                       color: style!.text,
@@ -80,6 +80,8 @@ export function PeopleHomeRow({ lang: langProp }: { lang?: PeopleLang } = {}) {
                   >
                     {t.badges[badge]}
                   </span>
+                ) : (
+                  <span className="h-3.5" aria-hidden />
                 )}
               </div>
               <span className="text-[11px] text-white/60 text-center truncate w-full">

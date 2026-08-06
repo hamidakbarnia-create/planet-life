@@ -7,18 +7,43 @@ import {
   type MonthScoresResult,
   type ScoreBreakdown,
 } from './score-breakdown';
+import { extractBatchDayReasoning } from './score-reasoning';
+import type { ScoreReasoning } from './score-reasoning';
 import {
   buildScoringLocationPayload,
   resolveCalendarEvaluationLocation,
   type UserLocation,
 } from './user-locations';
+import {
+  scoreToBand,
+  type ScoreBand,
+} from './timing-presentation';
+import {
+  buildCalendarFetchDiagnostic,
+  loadMonthCache,
+  normalizeCalendarScoringInput,
+  saveMonthCache,
+  setLastCalendarScoreFetchDiagnostic,
+  type CalendarScoringInput,
+} from './calendar-cache';
 
-// Backend base URL. Override at build/dev time with NEXT_PUBLIC_API_BASE
-// (e.g. when sharing the app over a Cloudflare/ngrok tunnel).
-export const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
+import {
+  postCalendarAnalyze,
+  postCalendarBatch,
+  postCalendarBatchHourly,
+  postCalendarTransit,
+} from './calendar-client';
 
-export type ScoreBand = 'green' | 'yellow' | 'orange' | 'red' | 'empty';
+export { API_BASE } from './api-config';
+export {
+  CALENDAR_CACHE_VERSION,
+  clearMonthScoreCaches,
+  fingerprintCalendarScoringInput,
+  getLastCalendarScoreFetchDiagnostic,
+  scoreMapChecksum,
+  type CalendarScoreFetchDiagnostic,
+  type CalendarScoringInput,
+} from './calendar-cache';
 
 export interface DayScore {
   date: string;
@@ -36,50 +61,20 @@ export interface HourScore {
 }
 
 export type { MonthScoresResult, ScoreBreakdown };
-
-export function scoreToBand(score: number | null | undefined): ScoreBand {
-  if (score == null || Number.isNaN(score)) return 'empty';
-  if (score >= 85) return 'green';
-  if (score >= 60) return 'yellow';
-  if (score >= 40) return 'orange';
-  return 'red';
-}
-
-export const BAND_STYLES: Record<
-  ScoreBand,
-  { bg: string; border: string; text: string }
-> = {
-  green: {
-    bg: 'rgba(74,222,128,0.32)',
-    border: '#4ade80',
-    text: '#4ade80',
-  },
-  yellow: {
-    bg: 'rgba(251,191,36,0.28)',
-    border: '#fbbf24',
-    text: '#fbbf24',
-  },
-  orange: {
-    bg: 'rgba(251,146,60,0.28)',
-    border: '#fb923c',
-    text: '#fb923c',
-  },
-  red: {
-    bg: 'rgba(248,113,113,0.28)',
-    border: '#f87171',
-    text: '#f87171',
-  },
-  empty: {
-    bg: 'rgba(255,255,255,0.04)',
-    border: 'rgba(255,255,255,0.1)',
-    text: 'rgba(255,255,255,0.25)',
-  },
-};
-
-function cacheKey(year: number, month: number, action: string, evalCity?: string) {
-  const loc = evalCity ? evalCity.replace(/\s+/g, '_') : 'default';
-  return `planet-life-cal-${year}-${String(month).padStart(2, '0')}-${action}-${loc}`;
-}
+export type { ScoreReasoning } from './score-reasoning';
+export {
+  BAND_STYLES,
+  formatHourLabel,
+  formatReadinessPercent,
+  isDangerHour,
+  isGoldenHour,
+  scoreToBand,
+  type ScoreBand,
+} from './timing-presentation';
+export {
+  loadMonthCache,
+  saveMonthCache,
+} from './calendar-cache';
 
 export function scoringLocationFields(
   profile: BirthProfile,
@@ -94,47 +89,83 @@ export function scoringLocationFields(
     location: payload.location,
     evaluation_location: payload.evaluation_location,
   };
+  if (payload.birth_latitude != null) {
+    out.birth_latitude = payload.birth_latitude;
+  }
+  if (payload.birth_longitude != null) {
+    out.birth_longitude = payload.birth_longitude;
+  }
   if (payload.evaluation_latitude != null) {
     out.evaluation_latitude = payload.evaluation_latitude;
   }
   if (payload.evaluation_longitude != null) {
     out.evaluation_longitude = payload.evaluation_longitude;
   }
+  if (payload.evaluation_timezone) {
+    out.evaluation_timezone = payload.evaluation_timezone;
+  }
   return out;
 }
 
-export function loadMonthCache(
-  year: number,
-  month: number,
-  action: string,
-  evalCity?: string
-): Record<string, number> | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(cacheKey(year, month, action, evalCity));
-    if (!raw) return null;
-    const { scores, savedAt } = JSON.parse(raw) as {
-      scores: Record<string, number>;
-      savedAt: number;
-    };
-    if (Date.now() - savedAt > 1000 * 60 * 60 * 12) return null;
-    return scores;
-  } catch {
-    return null;
-  }
+function monthDateList(year: number, month: number): string[] {
+  const total = daysInMonth(year, month);
+  return Array.from({ length: total }, (_, i) =>
+    formatDateYMD(year, month, i + 1)
+  );
 }
 
-export function saveMonthCache(
+/** Canonical score-affecting identity for month batch cache + diagnostics. */
+export function buildMonthScoringInput(
+  profile: BirthProfile,
   year: number,
   month: number,
-  action: string,
+  evaluation?: UserLocation | null
+): CalendarScoringInput | null {
+  const evalLoc = evaluation ?? resolveCalendarEvaluationLocation(profile);
+  const locFields = scoringLocationFields(profile, evalLoc);
+  if (!locFields) return null;
+  const prefs = chartPreferenceFields();
+  return normalizeCalendarScoringInput({
+    birth_date: profile.birth_date,
+    birth_time: profile.birth_time,
+    birth_location: String(locFields.location ?? profile.location),
+    birth_latitude:
+      typeof locFields.birth_latitude === 'number'
+        ? locFields.birth_latitude
+        : null,
+    birth_longitude:
+      typeof locFields.birth_longitude === 'number'
+        ? locFields.birth_longitude
+        : null,
+    evaluation_location: String(locFields.evaluation_location ?? ''),
+    evaluation_latitude:
+      typeof locFields.evaluation_latitude === 'number'
+        ? locFields.evaluation_latitude
+        : null,
+    evaluation_longitude:
+      typeof locFields.evaluation_longitude === 'number'
+        ? locFields.evaluation_longitude
+        : null,
+    evaluation_timezone:
+      typeof locFields.evaluation_timezone === 'string'
+        ? locFields.evaluation_timezone
+        : null,
+    house_system: prefs.house_system,
+    zodiac: prefs.zodiac,
+    action_type: profile.action_type,
+    year,
+    month,
+    dates: monthDateList(year, month),
+  });
+}
+
+function isCompleteMonthScores(
   scores: Record<string, number>,
-  evalCity?: string
-) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(
-    cacheKey(year, month, action, evalCity),
-    JSON.stringify({ scores, savedAt: Date.now() })
+  dates: string[]
+): boolean {
+  return dates.every(
+    (date) =>
+      typeof scores[date] === 'number' && Number.isFinite(scores[date])
   );
 }
 
@@ -157,18 +188,14 @@ export async function fetchDayScoreDetail(
   const locFields = scoringLocationFields(profile, evaluation);
   if (!locFields) return { score: null, breakdown: null };
   try {
-    const res = await fetch(`${API_BASE}/api/business/analyze`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        birth_date: profile.birth_date,
-        birth_time: profile.birth_time,
-        action_type: profile.action_type,
-        target_date: targetDate,
-        ...(targetTime ? { target_time: targetTime } : {}),
-        ...locFields,
-        ...chartPreferenceFields(),
-      }),
+    const res = await postCalendarAnalyze({
+      birth_date: profile.birth_date,
+      birth_time: profile.birth_time,
+      action_type: profile.action_type,
+      target_date: targetDate,
+      ...(targetTime ? { target_time: targetTime } : {}),
+      ...locFields,
+      ...chartPreferenceFields(),
     });
     const data = await res.json();
     return parseAnalyzeResponse(data);
@@ -183,19 +210,6 @@ export function daysInMonth(year: number, month: number): number {
 
 export function formatDateYMD(year: number, month: number, day: number): string {
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-}
-
-// Format an hour (0-23) for display. English uses 12-hour with AM/PM
-// (e.g. 18 -> "6:00 PM"), other locales keep 24-hour (e.g. "18:00") which
-// is the native convention there.
-export function formatHourLabel(hour: number, lang: string = 'en'): string {
-  const safe = ((hour % 24) + 24) % 24;
-  if (lang === 'en') {
-    const period = safe >= 12 ? 'PM' : 'AM';
-    const h12 = safe % 12 === 0 ? 12 : safe % 12;
-    return `${h12}:00 ${period}`;
-  }
-  return `${String(safe).padStart(2, '0')}:00`;
 }
 
 async function mapPool<T, R>(
@@ -225,38 +239,58 @@ export async function fetchMonthScores(
   evaluation?: UserLocation | null
 ): Promise<MonthScoresResult> {
   const evalLoc = evaluation ?? resolveCalendarEvaluationLocation(profile);
-  const evalLabel = evalLoc?.city;
   const locFields = scoringLocationFields(profile, evalLoc);
-  if (!locFields) return { scores: {}, breakdowns: {} };
+  const scoringInput = buildMonthScoringInput(profile, year, month, evalLoc);
+  if (!locFields || !scoringInput) {
+    return { scores: {}, breakdowns: {}, reasoning: {} };
+  }
 
-  const cached = loadMonthCache(year, month, profile.action_type, evalLabel);
-  if (cached) return { scores: cached, breakdowns: {} };
+  const cached = loadMonthCache(scoringInput);
+  // Empty {} must not short-circuit — it is a cache miss (failed prior load).
+  if (cached && Object.keys(cached).length > 0) {
+    const diagnostic = buildCalendarFetchDiagnostic({
+      cache: 'hit',
+      input: scoringInput,
+      scores: cached,
+    });
+    setLastCalendarScoreFetchDiagnostic(diagnostic);
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[calendar-scores]', diagnostic);
+    }
+    return { scores: cached, breakdowns: {}, reasoning: {} };
+  }
 
-  const total = daysInMonth(year, month);
-  const dates = Array.from({ length: total }, (_, i) =>
-    formatDateYMD(year, month, i + 1)
-  );
+  const dates = scoringInput.dates;
+  const total = dates.length;
 
   onProgress?.(0, total);
 
   const prefs = chartPreferenceFields();
   const scores: Record<string, number> = {};
   const breakdowns: Record<string, ScoreBreakdown | null> = {};
+  const reasoning: Record<string, ScoreReasoning | null> = {};
 
   try {
-    const res = await fetch(`${API_BASE}/api/batch`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        birth_date: profile.birth_date,
-        birth_time: profile.birth_time,
-        action_type: profile.action_type,
-        dates,
-        house_system: prefs.house_system,
-        zodiac: prefs.zodiac,
-        ...locFields,
-      }),
+    const res = await postCalendarBatch({
+      birth_date: profile.birth_date,
+      birth_time: profile.birth_time,
+      action_type: profile.action_type,
+      dates,
+      house_system: prefs.house_system,
+      zodiac: prefs.zodiac,
+      ...locFields,
     });
+    if (!res.ok) {
+      onProgress?.(total, total);
+      setLastCalendarScoreFetchDiagnostic(
+        buildCalendarFetchDiagnostic({
+          cache: 'miss',
+          input: scoringInput,
+          scores,
+        })
+      );
+      return { scores, breakdowns, reasoning };
+    }
     const data = await res.json();
     if (data.scores && typeof data.scores === 'object') {
       for (const [date, payload] of Object.entries(data.scores)) {
@@ -269,6 +303,7 @@ export async function fetchMonthScores(
           scores[date] = score;
         }
         breakdowns[date] = extractAnalyzeScoreBreakdown(payload);
+        reasoning[date] = extractBatchDayReasoning(payload);
       }
     }
   } catch {
@@ -276,10 +311,22 @@ export async function fetchMonthScores(
   }
 
   onProgress?.(total, total);
-  saveMonthCache(year, month, profile.action_type, scores, evalLabel);
-  return { scores, breakdowns };
+  // Persist only complete months so Outlook / Weekly Path / cells share one map.
+  if (isCompleteMonthScores(scores, dates)) {
+    saveMonthCache(scoringInput, scores);
+  }
+  const diagnostic = buildCalendarFetchDiagnostic({
+    cache: 'miss',
+    input: scoringInput,
+    scores,
+  });
+  setLastCalendarScoreFetchDiagnostic(diagnostic);
+  if (process.env.NODE_ENV === 'development') {
+    // No raw birth fields — fingerprint + checksum only.
+    console.debug('[calendar-scores]', diagnostic);
+  }
+  return { scores, breakdowns, reasoning };
 }
-
 export async function fetchHourlyScores(
   profile: BirthProfile,
   targetDate: string,
@@ -294,18 +341,14 @@ export async function fetchHourlyScores(
 
   // Prefer the new single-request hourly batch (parallelised on the backend).
   try {
-    const res = await fetch(`${API_BASE}/api/batch-hourly`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        birth_date: profile.birth_date,
-        birth_time: profile.birth_time,
-        action_type: profile.action_type,
-        target_date: targetDate,
-        house_system: prefs.house_system,
-        zodiac: prefs.zodiac,
-        ...locFields,
-      }),
+    const res = await postCalendarBatchHourly({
+      birth_date: profile.birth_date,
+      birth_time: profile.birth_time,
+      action_type: profile.action_type,
+      target_date: targetDate,
+      house_system: prefs.house_system,
+      zodiac: prefs.zodiac,
+      ...locFields,
     });
     if (res.ok) {
       const data = await res.json();
@@ -360,6 +403,18 @@ export interface PlanetTransit {
   retrograde?: boolean;
 }
 
+export interface TransitSnapshotMeta {
+  calculatedFor?: string;
+  timezone?: string;
+  localIso?: string;
+  utcIso?: string;
+}
+
+export interface TransitSnapshotResult {
+  planets: PlanetTransit[];
+  meta: TransitSnapshotMeta;
+}
+
 const ZODIAC_SIGNS = [
   'Aries',
   'Taurus',
@@ -390,30 +445,27 @@ export async function fetchTransitSnapshot(
   targetDate: string,
   targetTime?: string,
   evaluation?: UserLocation | null
-): Promise<PlanetTransit[]> {
+): Promise<TransitSnapshotResult> {
   const locFields = scoringLocationFields(
     profile,
     evaluation ?? resolveCalendarEvaluationLocation(profile)
   );
-  if (!locFields) return [];
+  if (!locFields) return { planets: [], meta: {} };
   const prefs = chartPreferenceFields();
   try {
-    const res = await fetch(`${API_BASE}/api/transit`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        birth_date: profile.birth_date,
-        birth_time: profile.birth_time,
-        target_date: targetDate,
-        ...(targetTime ? { target_time: targetTime } : {}),
-        house_system: prefs.house_system,
-        zodiac: prefs.zodiac,
-        ...locFields,
-      }),
+    const res = await postCalendarTransit({
+      birth_date: profile.birth_date,
+      birth_time: profile.birth_time,
+      target_date: targetDate,
+      ...(targetTime ? { target_time: targetTime } : {}),
+      house_system: prefs.house_system,
+      zodiac: prefs.zodiac,
+      ...locFields,
     });
-    if (!res.ok) return [];
+    if (!res.ok) return { planets: [], meta: {} };
     const data = await res.json();
     const planets = data?.transit ?? {};
+    const ctx = (data?.location_context ?? {}) as Record<string, unknown>;
     const out: PlanetTransit[] = [];
     for (const [name, raw] of Object.entries(planets)) {
       const body = raw as {
@@ -433,16 +485,29 @@ export async function fetchTransitSnapshot(
         retrograde: body.retrograde === true,
       });
     }
-    return out;
+    return {
+      planets: out,
+      meta: {
+        calculatedFor:
+          typeof ctx.calculated_for === 'string'
+            ? ctx.calculated_for
+            : typeof ctx.location === 'string'
+              ? ctx.location
+              : undefined,
+        timezone: typeof ctx.timezone === 'string' ? ctx.timezone : undefined,
+        localIso:
+          typeof ctx.resolved_local_datetime === 'string'
+            ? ctx.resolved_local_datetime
+            : undefined,
+        utcIso:
+          typeof ctx.resolved_utc_datetime === 'string'
+            ? ctx.resolved_utc_datetime
+            : typeof ctx.calculation_instant === 'string'
+              ? ctx.calculation_instant
+              : undefined,
+      },
+    };
   } catch {
-    return [];
+    return { planets: [], meta: {} };
   }
-}
-
-export function isGoldenHour(score: number) {
-  return score >= 85;
-}
-
-export function isDangerHour(score: number) {
-  return score <= 39;
 }

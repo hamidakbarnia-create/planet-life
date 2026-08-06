@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   translateAnalysis,
   type AstroLang,
@@ -8,23 +8,29 @@ import {
 import { AnalysisResultBreakdown } from '@/components/AnalysisResultBreakdown';
 import { parseAnalyzeResponse } from '@/lib/score-breakdown';
 import { BottomNav, VaultPill } from '@/components/BottomNav';
+import { BrandLogo } from '@/components/BrandLogo';
 import { ActionDisclaimer } from '@/components/disclaimers/ActionDisclaimer';
 import { ModuleDisclaimerBanner } from '@/components/disclaimers/ModuleDisclaimerBanner';
 import { loadBirthProfile } from '@/lib/birth-profile';
 import type { DisclaimerLang } from '@/lib/disclaimers';
+import { BRAND_I18N } from '@/lib/brand';
+import type { BrandLang } from '@/lib/brand';
+import { localeFontFamily } from '@/lib/brand-theme';
 import { HOME_LANGS } from '@/lib/home-i18n';
+import type { CitySelection } from '@/lib/chart-types';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
 
-const API = 'http://localhost:8000';
+const API = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
 
 const LANGS = {
   en: {
     dir: 'ltr', name: 'EN',
-    title: 'Planet Life', sub: 'Astrological Intelligence',
+    title: 'METIORO', sub: BRAND_I18N.en.tagline,
     bdate: 'Birth Date', btime: 'Birth Time',
     loc: 'City of Birth', tdate: 'Target Date', action: 'Action',
-    analyze: 'Analyze My Stars', loading: 'Reading the cosmos...',
+    analyze: 'Analyze timing', loading: 'Analyzing…',
     business: 'Business', finance: 'Finance', realestate: 'Real Estate',
-    rec: 'Guidance', opps: '✦ Cosmic Tailwinds', risks: '⚡ Watch Out For',
+    rec: 'Guidance', opps: '✦ Favorable signals', risks: '⚡ Watch Out For',
     themes: '◈ Key Themes', timing: '◷ Timing Notes',
     placeholder: 'Type a city name...', noResults: 'No cities found', searching: 'Searching...',
     calendar: 'Calendar',
@@ -36,12 +42,12 @@ const LANGS = {
   },
   ru: {
     dir: 'ltr', name: 'RU',
-    title: 'Planet Life', sub: 'Астрологический анализ',
+    title: 'METIORO', sub: BRAND_I18N.ru.tagline,
     bdate: 'Дата рождения', btime: 'Время рождения',
     loc: 'Город рождения', tdate: 'Целевая дата', action: 'Действие',
-    analyze: 'Анализировать', loading: 'Читаем космос...',
+    analyze: 'Анализировать', loading: 'Анализ…',
     business: 'Бизнес', finance: 'Финансы', realestate: 'Недвижимость',
-    rec: 'Рекомендация', opps: '✦ Попутный ветер', risks: '⚡ Остерегайтесь',
+    rec: 'Рекомендация', opps: '✦ Благоприятные сигналы', risks: '⚡ Остерегайтесь',
     themes: '◈ Ключевые темы', timing: '◷ Заметки о времени',
     placeholder: 'Введите город...', noResults: 'Города не найдены', searching: 'Поиск...',
     calendar: 'Календарь',
@@ -53,12 +59,12 @@ const LANGS = {
   },
   fa: {
     dir: 'rtl', name: 'FA',
-    title: 'Planet Life', sub: 'هوش نجومی',
+    title: 'METIORO', sub: BRAND_I18N.fa.tagline,
     bdate: 'تاریخ تولد', btime: 'زمان تولد',
     loc: 'شهر تولد', tdate: 'تاریخ هدف', action: 'نوع فعالیت',
-    analyze: 'تحلیل ستاره‌هایم', loading: 'در حال خواندن کیهان...',
+    analyze: 'تحلیل زمان‌بندی', loading: 'در حال تحلیل…',
     business: 'کسب‌وکار', finance: 'مالی', realestate: 'مسکن',
-    rec: 'راهنمایی', opps: '✦ بادهای موافق', risks: '⚡ هشدارها',
+    rec: 'راهنمایی', opps: '✦ سیگنال‌های مساعد', risks: '⚡ هشدارها',
     themes: '◈ موضوعات کلیدی', timing: '◷ نکات زمانی',
     placeholder: 'نام شهر را بنویسید...', noResults: 'شهری یافت نشد', searching: 'جستجو...',
     calendar: 'تقویم',
@@ -70,12 +76,12 @@ const LANGS = {
   },
   ar: {
     dir: 'rtl', name: 'AR',
-    title: 'Planet Life', sub: 'الذكاء الفلكي',
+    title: 'METIORO', sub: BRAND_I18N.ar.tagline,
     bdate: 'تاريخ الميلاد', btime: 'وقت الميلاد',
     loc: 'مدينة الميلاد', tdate: 'التاريخ المستهدف', action: 'نوع النشاط',
-    analyze: 'تحليل نجومي', loading: 'نقرأ الكون...',
+    analyze: 'تحليل التوقيت', loading: 'جاري التحليل…',
     business: 'أعمال', finance: 'مالية', realestate: 'عقارات',
-    rec: 'التوجيه', opps: '✦ رياح مواتية', risks: '⚡ تحذيرات',
+    rec: 'التوجيه', opps: '✦ إشارات مواتية', risks: '⚡ تحذيرات',
     themes: '◈ المواضيع الرئيسية', timing: '◷ ملاحظات التوقيت',
     placeholder: 'اكتب اسم مدينة...', noResults: 'لا توجد مدن', searching: 'جاري البحث...',
     calendar: 'التقويم',
@@ -95,24 +101,24 @@ const DOMAIN_ACTIONS: Record<string, string[]> = {
 
 const SCORE_MSG: Record<string, Record<string, string>> = {
   en: {
-    high: "The stars are with you. This is a rare golden window — move forward with confidence and bold action.",
-    mid: "The cosmos offers mixed signals. Thoughtful preparation and flexibility will serve you well right now.",
-    low: "The planets suggest patience. If you wait a little longer, a much stronger window is coming your way.",
+    high: 'Strong timing support. This is a favorable window — move forward with confidence and clear intent.',
+    mid: 'Mixed signals today. Thoughtful preparation and flexibility will serve you well right now.',
+    low: 'Patience is advised. Waiting briefly may reveal a stronger window ahead.',
   },
   ru: {
-    high: "Звёзды на вашей стороне. Это редкое золотое окно — действуйте смело и уверенно.",
-    mid: "Космос посылает смешанные сигналы. Тщательная подготовка и гибкость сейчас будут вашими союзниками.",
-    low: "Планеты советуют терпение. Если подождать немного, впереди вас ждёт гораздо более сильное окно.",
+    high: 'Сильная поддержка тайминга. Благоприятное окно — действуйте уверенно и осознанно.',
+    mid: 'Сегодня смешанные сигналы. Тщательная подготовка и гибкость сейчас будут полезны.',
+    low: 'Рекомендуется терпение. Небольшое ожидание может открыть более сильное окно.',
   },
   fa: {
-    high: "ستاره‌ها با شما هستند. این یک پنجره طلایی نادر است — با اطمینان و جسارت پیش بروید.",
-    mid: "کیهان سیگنال‌های متفاوتی می‌فرستد. آمادگی دقیق و انعطاف‌پذیری همین الان بهترین مسیر است.",
-    low: "سیاره‌ها صبر را توصیه می‌کنند. اگر کمی صبر کنی، یک پنجره بسیار قوی‌تر در راه است.",
+    high: 'پشتیبانی قوی از زمان‌بندی. پنجره مساعد است — با اطمینان و قصد روشن پیش بروید.',
+    mid: 'امروز سیگنال‌های متنوعی وجود دارد. آمادگی دقیق و انعطاف‌پذیری بهترین مسیر است.',
+    low: 'صبر توصیه می‌شود. کمی انتظار می‌تواند پنجره قوی‌تری نشان دهد.',
   },
   ar: {
-    high: "النجوم في صفك. هذه نافذة ذهبية نادرة — تقدم بثقة وجرأة.",
-    mid: "الكون يرسل إشارات متباينة. الاستعداد الدقيق والمرونة هما أفضل مسار الآن.",
-    low: "الكواكب توصي بالصبر. إذا انتظرت قليلاً، نافذة أقوى بكثير في طريقها إليك.",
+    high: 'دعم قوي للتوقيت. نافذة مواتية — تقدّم بثقة ونية واضحة.',
+    mid: 'إشارات متباينة اليوم. الاستعداد الدقيق والمرونة أفضل مسار الآن.',
+    low: 'يُنصح بالصبر. انتظار قصير قد يكشف نافذة أقوى.',
   },
 };
 
@@ -125,14 +131,14 @@ export default function Dashboard() {
   const [rawResult, setRawResult] = useState<AnalysisPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [cities, setCities] = useState<any[]>([]);
+  const [cities, setCities] = useState<CitySelection[]>([]);
   const [citySearch, setCitySearch] = useState('New York');
   const [showCities, setShowCities] = useState(false);
   const [cityLoading, setCityLoading] = useState(false);
   const [animated, setAnimated] = useState(false);
   const [moduleBannerDismissed, setModuleBannerDismissed] = useState(false);
   const cityRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<any>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const t = LANGS[lang];
 
   const result = useMemo(
@@ -150,7 +156,7 @@ export default function Dashboard() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  useEffect(() => {
+  useQueuedEffect(() => {
     const saved = loadBirthProfile();
     if (saved) {
       setForm(f => ({
@@ -178,7 +184,7 @@ export default function Dashboard() {
     }, 300);
   }, []);
 
-  const selectCity = (city: any) => {
+  const selectCity = (city: CitySelection) => {
     setCitySearch(city.short);
     setForm(f => ({ ...f, location: city.short }));
     setShowCities(false);
@@ -204,6 +210,7 @@ export default function Dashboard() {
         setRawResult({
           ...data,
           scoreBreakdown: parsed.breakdown,
+          scoreReasoning: parsed.reasoning,
         });
         setTimeout(() => setAnimated(true), 100);
       }
@@ -222,7 +229,7 @@ export default function Dashboard() {
   const getMsgKey = (s: number) => s >= 65 ? 'high' : s >= 45 ? 'mid' : 'low';
 
   return (
-    <div style={{ direction: t.dir as any, fontFamily: (lang==='fa'||lang==='ar') ? 'Vazirmatn, sans-serif' : 'Inter, sans-serif', fontFeatureSettings: '"kern"' }}
+    <div style={{ direction: t.dir as 'ltr' | 'rtl', fontFamily: localeFontFamily(lang), fontFeatureSettings: '"kern"' }}
         className="min-h-screen bg-[#070B14] text-white pl-20">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
@@ -245,20 +252,7 @@ export default function Dashboard() {
       `}</style>
 
       <nav className="flex items-center justify-between px-6 py-4 border-b border-white/5">
-        <a href="/" className="flex items-center gap-3 no-underline">
-          <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-            <circle cx="15" cy="15" r="13" stroke="#fbbf24" strokeWidth="0.5" opacity="0.4"/>
-            <circle cx="15" cy="15" r="7" stroke="#fbbf24" strokeWidth="0.5" opacity="0.6"/>
-            <circle cx="15" cy="15" r="2.5" fill="#fbbf24"/>
-            <line x1="15" y1="2" x2="15" y2="28" stroke="#fbbf24" strokeWidth="0.3" opacity="0.3"/>
-            <line x1="2" y1="15" x2="28" y2="15" stroke="#fbbf24" strokeWidth="0.3" opacity="0.3"/>
-            <ellipse cx="15" cy="15" rx="13" ry="4.5" stroke="#fbbf24" strokeWidth="0.3" opacity="0.2"/>
-          </svg>
-          <div>
-            <div className="fc text-sm font-semibold tracking-widest" style={{color:'#fbbf24'}}>Planet Life</div>
-            <div className="fi text-[10px] tracking-wider" style={{color:'rgba(255,255,255,0.3)'}}>Astrological Intelligence</div>
-          </div>
-        </a>
+        <BrandLogo lang={lang as BrandLang} href="/home" size="md" showTagline />
         <div className="flex items-center gap-3">
           <VaultPill label={HOME_LANGS[lang]?.nav?.['/vault'] ?? 'Vault'} />
           <span
@@ -370,7 +364,7 @@ export default function Dashboard() {
                   <line x1="22" y1="3" x2="22" y2="41" stroke="white" strokeWidth="0.3"/>
                   <line x1="3" y1="22" x2="41" y2="22" stroke="white" strokeWidth="0.3"/>
                 </svg>
-                <div className="fi text-xs tracking-wider" style={{color:'rgba(255,255,255,0.15)'}}>Your cosmic blueprint awaits</div>
+                <div className="fi text-xs tracking-wider" style={{color:'rgba(255,255,255,0.15)'}}>Your analysis will appear here</div>
               </div>
             )}
 

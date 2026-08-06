@@ -81,26 +81,30 @@ def resolve_coordinates(location):
             raise ValueError("Invalid coordinates.")
         return lat, lon
     from geopy.geocoders import Nominatim
-    geolocator = Nominatim(user_agent="planet-life-api/1.0")
+    geolocator = Nominatim(user_agent="METIORO-API/1.0")
     result = geolocator.geocode(location.strip(), timeout=10)
     if result is None:
         raise ValueError(f"Could not resolve location: {location!r}")
     return float(result.latitude), float(result.longitude)
 
-@lru_cache(maxsize=2048)
 def _timezone_at(lat, lon):
-    from timezonefinder import TimezoneFinder
-    tz_name = TimezoneFinder().timezone_at(lat=lat, lng=lon)
-    if not tz_name:
-        raise ValueError(f"No timezone found for ({lat}, {lon}).")
-    return tz_name
+    from services.transit_instant import timezone_at
 
-def _local_datetime(date_str, time_str, lat, lon):
-    import pytz
-    hour, minute = (int(p) for p in time_str.split(":"))
-    tz = pytz.timezone(_timezone_at(lat, lon))
-    naive_dt = datetime(*[int(x) for x in date_str.split("-")], hour=hour, minute=minute)
-    return tz.localize(naive_dt)
+    return timezone_at(lat, lon)
+
+
+def _local_datetime(date_str, time_str, lat, lon, timezone_name: str | None = None):
+    """Localize civil date/time at lat/lon (or explicit IANA zone) once."""
+    from services.transit_instant import resolve_transit_instant
+
+    instant = resolve_transit_instant(
+        target_date=date_str,
+        target_time=time_str,
+        latitude=lat,
+        longitude=lon,
+        timezone_name=timezone_name,
+    )
+    return instant["local_datetime"]
 
 def _planet_house(longitude, cusps):
     lon = longitude % 360.0
@@ -197,9 +201,20 @@ def _tropical_longitude(swe, jd_ut: float, pid: int, flags: int) -> float:
 
 def _build_chart_payload(dt_local, lat, lon, *, house_system: str = "placidus", zodiac: str = "tropical"):
     swe = _import_swisseph()
+    # dt_local must already be timezone-aware; convert to UTC exactly once.
+    if dt_local.tzinfo is None:
+        raise ValueError("Chart datetime must be timezone-aware before ephemeris calculation.")
     dt_utc = dt_local.astimezone(timezone.utc)
-    jd_ut = swe.julday(dt_utc.year, dt_utc.month, dt_utc.day,
-        dt_utc.hour + dt_utc.minute / 60.0 + dt_utc.second / 3600.0, swe.GREG_CAL)
+    jd_ut = swe.julday(
+        dt_utc.year,
+        dt_utc.month,
+        dt_utc.day,
+        dt_utc.hour
+        + dt_utc.minute / 60.0
+        + dt_utc.second / 3600.0
+        + dt_utc.microsecond / 3_600_000_000.0,
+        swe.GREG_CAL,
+    )
     hs = _HOUSE_SYSTEMS.get(house_system, b"P")
     cusps, ascmc = swe.houses(jd_ut, lat, lon, hs)
     cusp_list = _extract_cusp_list(cusps)
@@ -352,6 +367,8 @@ def build_chart_payload(
     evaluation_location: str | None = None,
     evaluation_latitude: float | None = None,
     evaluation_longitude: float | None = None,
+    evaluation_timezone: str | None = None,
+    calculation_instant: str | None = None,
 ):
     """Build natal + transit charts with separate birth and evaluation locations.
 
@@ -362,6 +379,7 @@ def build_chart_payload(
         build_location_context_meta,
         resolve_evaluation_coords,
     )
+    from services.transit_instant import resolve_transit_instant
 
     (
         birth_lat,
@@ -380,9 +398,17 @@ def build_chart_payload(
         evaluation_longitude=evaluation_longitude,
     )
     natal_dt = _local_datetime(birth_date, birth_time, birth_lat, birth_lon)
-    effective_transit_time = target_time if target_time is not None else "12:00"
-    transit_dt = _local_datetime(target_date, effective_transit_time, eval_lat, eval_lon)
-    eval_tz = _timezone_at(eval_lat, eval_lon)
+    transit_instant = resolve_transit_instant(
+        target_date=target_date,
+        target_time=target_time,
+        latitude=eval_lat,
+        longitude=eval_lon,
+        timezone_name=evaluation_timezone,
+        calculation_instant=calculation_instant,
+    )
+    transit_dt = transit_instant["local_datetime"]
+    effective_transit_time = transit_instant["target_time"]
+    eval_tz = transit_instant["timezone"]
     chart_kw = {"house_system": house_system, "zodiac": zodiac}
     user_natal_data = _build_chart_payload(natal_dt, birth_lat, birth_lon, **chart_kw)
     current_transit_data = _build_chart_payload(transit_dt, eval_lat, eval_lon, **chart_kw)
@@ -397,16 +423,18 @@ def build_chart_payload(
         eval_src=eval_src,
     )
     current_transit_data["evaluation"] = {
-        "target_date": target_date,
+        "target_date": transit_instant["target_date"],
         "target_time": effective_transit_time,
-        "resolved_local_datetime": transit_dt.isoformat(),
-        "resolved_utc_datetime": transit_dt.astimezone(timezone.utc)
-        .replace(tzinfo=timezone.utc)
-        .isoformat()
-        .replace("+00:00", "Z"),
-        "timezone": eval_tz,
+        "resolved_local_datetime": transit_instant["local_iso"],
+        "resolved_utc_datetime": transit_instant["utc_iso"],
+        "calculation_instant": transit_instant["utc_iso"],
+        "instant_source": transit_instant["source"],
         "location_role": "evaluation",
         **location_meta,
+        # Authoritative timing keys win over location_meta derivations.
+        "timezone": eval_tz,
+        "timezone_source": transit_instant.get("timezone_source"),
+        "evaluation_timezone": eval_tz,
         # Legacy keys kept for older clients
         "location": eval_label,
         "latitude": eval_lat,

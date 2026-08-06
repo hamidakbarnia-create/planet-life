@@ -9,6 +9,9 @@ const HOUSE_KEY = 'planet-life-house-system';
 const ZODIAC_KEY = 'planet-life-zodiac-system';
 const CALENDAR_KEY = 'planet-life-calendar-system';
 
+/** Same-document signal when calendar-system preference is saved (mirrors lang). */
+export const CALENDAR_SYSTEM_CHANGED_EVENT = 'planet-life-calendar-system-changed';
+
 export function loadHomeView(): HomeViewMode | null {
   if (typeof window === 'undefined') return null;
   const v = localStorage.getItem(HOME_VIEW_KEY);
@@ -63,6 +66,7 @@ export function loadCalendarSystem(): CalendarSystem {
 export function saveCalendarSystem(system: CalendarSystem): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(CALENDAR_KEY, system);
+  window.dispatchEvent(new Event(CALENDAR_SYSTEM_CHANGED_EVENT));
 }
 
 /** Extra fields for chart/analyze API bodies */

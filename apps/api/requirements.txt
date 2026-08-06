@@ -5,3 +5,5 @@ pyswisseph>=2.10.3.2
 geopy>=2.4.0
 timezonefinder>=6.5.0
 pytz>=2024.1
+openai>=2.0.0,<3.0.0
+psycopg[binary]>=3.2,<4
