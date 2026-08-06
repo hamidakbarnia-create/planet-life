@@ -19,9 +19,13 @@ export type WeeklyTrendChartProps = {
   weeks: StrategicGpsWeek[];
   selectedDate?: string | null;
   monthBestDate?: string | null;
+  monthBestScore?: number | null;
+  monthBestDateLabel?: string | null;
   weekdayLabels: string[];
   lang?: AppLang;
   calendar?: CalendarSystem;
+  /** Jump selectedDate to month peak so Weekly Trend shows that week. */
+  onViewMonthBestWeek?: (date: string) => void;
 };
 
 const WIDTH = 320;
@@ -38,9 +42,12 @@ export function WeeklyTrendChart({
   weeks,
   selectedDate = null,
   monthBestDate = null,
+  monthBestScore = null,
+  monthBestDateLabel = null,
   weekdayLabels,
   lang = 'en',
   calendar = 'gregorian',
+  onViewMonthBestWeek,
 }: WeeklyTrendChartProps) {
   const plotWidth = WIDTH - PAD_X * 2;
   const count = Math.max(weeks.length, 1);
@@ -79,6 +86,17 @@ export function WeeklyTrendChart({
     weeks.map((w) => ({ date: w.date, score: w.score })),
     weekdayLabels
   );
+
+  const monthBestOutsideSelectedWeek = !!(
+    monthBestDate &&
+    monthBestScore != null &&
+    !weeks.some((w) => w.date === monthBestDate)
+  );
+  const showMonthBestAction =
+    !!monthBestDate &&
+    monthBestScore != null &&
+    !!onViewMonthBestWeek &&
+    monthBestDate !== selectedDate;
 
   return (
     <section
@@ -252,6 +270,25 @@ export function WeeklyTrendChart({
           Week best: {weekBest.weekdayLabel} ·{' '}
           {formatReadinessPercent(weekBest.score)}
         </div>
+      ) : null}
+
+      {showMonthBestAction ? (
+        <button
+          type="button"
+          data-month-best-view-week
+          data-month-best-outside-week={
+            monthBestOutsideSelectedWeek ? 'true' : 'false'
+          }
+          onClick={() => onViewMonthBestWeek?.(monthBestDate!)}
+          className="fi text-[11px] mt-1.5 text-left w-full rounded-md px-0 py-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          style={{
+            color: POWER_BAND_STYLES.excellent.color,
+            outlineColor: CALENDAR_UI.gold,
+          }}
+        >
+          Month best: {monthBestDateLabel ?? monthBestDate} ·{' '}
+          {formatReadinessPercent(monthBestScore)} → View week
+        </button>
       ) : null}
     </section>
   );

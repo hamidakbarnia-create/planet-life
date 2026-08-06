@@ -111,7 +111,7 @@ export default function CalendarPage() {
 
   const t = LANGS[lang];
   const cells = useMemo(() => calendarCells(year, month), [year, month]);
-  // Weekly Trend points + month peak date from the same canonical map.
+  // Weekly Trend points + month peak from the same canonical map + selectedDate.
   const monthGps = useMemo(
     () =>
       buildStrategicGps(scores, [], lang, {
@@ -279,6 +279,8 @@ export default function CalendarPage() {
       ? formatDisplayDate(lang, selectedDate, calendar)
       : null,
     monthBestDate: monthGps.monthBest?.date ?? null,
+    monthBestScore: monthGps.monthBest?.score ?? null,
+    monthBestDateLabel: monthGps.monthBest?.dateLabel ?? null,
     weekdayLabels: t.weekdays.map((w) => w.trim()),
     lang,
     calendar,
@@ -286,6 +288,15 @@ export default function CalendarPage() {
     riskHour: dayGps.riskHour,
     loadingHourly,
     loadingLabel: t.loading,
+    onViewMonthBestWeek: (date: string) => {
+      const parsed = parseIsoDate(date);
+      if (!parsed) return;
+      if (parsed.year !== year || parsed.month !== month) {
+        setYear(parsed.year);
+        setMonth(parsed.month);
+      }
+      setSelectedDate(date);
+    },
   };
 
   return (

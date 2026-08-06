@@ -15,6 +15,8 @@ export type CalendarInsightStackProps = {
   selectedDate: string | null;
   selectedDateLabel: string | null;
   monthBestDate: string | null;
+  monthBestScore?: number | null;
+  monthBestDateLabel?: string | null;
   weekdayLabels: string[];
   lang: AppLang;
   calendar: CalendarSystem;
@@ -22,6 +24,7 @@ export type CalendarInsightStackProps = {
   riskHour: HourScore | null;
   loadingHourly: boolean;
   loadingLabel: string;
+  onViewMonthBestWeek?: (date: string) => void;
 };
 
 /** Right-column / stacked insight panels matching the reference order. */
@@ -31,6 +34,8 @@ export function CalendarInsightStack({
   selectedDate,
   selectedDateLabel,
   monthBestDate,
+  monthBestScore = null,
+  monthBestDateLabel = null,
   weekdayLabels,
   lang,
   calendar,
@@ -38,6 +43,7 @@ export function CalendarInsightStack({
   riskHour,
   loadingHourly,
   loadingLabel,
+  onViewMonthBestWeek,
 }: CalendarInsightStackProps) {
   return (
     <aside
@@ -61,9 +67,12 @@ export function CalendarInsightStack({
         weeks={weeks}
         selectedDate={selectedDate}
         monthBestDate={monthBestDate}
+        monthBestScore={monthBestScore}
+        monthBestDateLabel={monthBestDateLabel}
         weekdayLabels={weekdayLabels}
         lang={lang}
         calendar={calendar}
+        onViewMonthBestWeek={onViewMonthBestWeek}
       />
 
       <div className="md:col-span-2 xl:col-span-1">
