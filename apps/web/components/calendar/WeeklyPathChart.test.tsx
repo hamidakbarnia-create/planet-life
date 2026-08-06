@@ -3,7 +3,15 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { WeeklyPathChart, shortWeekAxisLabel } from './WeeklyPathChart';
+import {
+  WeeklyPathChart,
+  formatWeekRangeLabel,
+  scoreToPlotY,
+  shortWeekAxisLabel,
+  WEEKLY_PATH_HEIGHT,
+  WEEKLY_PATH_PAD_BOTTOM,
+  WEEKLY_PATH_PAD_TOP,
+} from './WeeklyPathChart';
 import { StrategicInsightRail } from './StrategicInsightRail';
 import { buildStrategicGps } from '@/lib/strategic-gps';
 import type { StrategicGpsWeek } from '@/lib/strategic-gps';
@@ -184,6 +192,98 @@ describe('WeeklyPathChart', () => {
     render(<WeeklyPathChart weeks={DAYS} />);
     expect(screen.getByLabelText('Tue, 86%, advance')).toBeTruthy();
     expect(screen.getByLabelText('Sat, 62%, build')).toBeTruthy();
+  });
+
+  it('uses fixed 0–100 scale so low scores sit far below high scores', () => {
+    const y31 = scoreToPlotY(31);
+    const y46 = scoreToPlotY(46);
+    const y79 = scoreToPlotY(79);
+    const y86 = scoreToPlotY(86);
+    const y100 = scoreToPlotY(100);
+    const y0 = scoreToPlotY(0);
+    const plotHeight =
+      WEEKLY_PATH_HEIGHT - WEEKLY_PATH_PAD_TOP - WEEKLY_PATH_PAD_BOTTOM;
+
+    expect(y0).toBeCloseTo(WEEKLY_PATH_PAD_TOP + plotHeight, 5);
+    expect(y100).toBeCloseTo(WEEKLY_PATH_PAD_TOP, 5);
+    // 31 must be dramatically lower (larger y) than mid/high scores
+    expect(y31 - y86).toBeGreaterThan(plotHeight * 0.45);
+    expect(y31).toBeGreaterThan(y46);
+    expect(y46).toBeGreaterThan(y79);
+    expect(y79).toBeGreaterThan(y86);
+    // No week min/max normalization — absolute score math only
+    expect(y86).toBeCloseTo(
+      WEEKLY_PATH_PAD_TOP + plotHeight * (1 - 86 / 100),
+      5
+    );
+  });
+
+  it('renders week range label and glows month-best only when in the week', () => {
+    const withBest = DAYS.map((d) =>
+      d.date === '2026-08-04' ? { ...d, score: 86 } : d
+    );
+    render(
+      <WeeklyPathChart
+        weeks={withBest}
+        selectedDate="2026-08-05"
+        monthBestDate="2026-08-04"
+        lang="en"
+        calendar="gregorian"
+      />
+    );
+    expect(document.querySelector('[data-week-range]')?.textContent).toMatch(
+      /2 Aug|Aug 2/
+    );
+    expect(
+      document
+        .querySelector('[data-path-date="2026-08-04"]')
+        ?.getAttribute('data-path-month-best')
+    ).toBe('true');
+    expect(
+      document
+        .querySelector('[data-path-date="2026-08-05"]')
+        ?.getAttribute('data-path-month-best')
+    ).toBe('false');
+
+    cleanup();
+    render(
+      <WeeklyPathChart
+        weeks={DAYS}
+        selectedDate="2026-08-05"
+        monthBestDate="2026-08-20"
+      />
+    );
+    expect(
+      document.querySelector('[data-path-month-best="true"]')
+    ).toBeNull();
+    expect(formatWeekRangeLabel(DAYS, 'en', 'gregorian')).toMatch(/–/);
+  });
+
+  it('maps acceptance fixtures with absolute vertical separation', () => {
+    const scores = [31, 46, 52, 74, 86, 80, 54];
+    const ys = scores.map((s) => scoreToPlotY(s));
+    const maxIdx = scores.indexOf(86);
+    for (let i = 0; i < ys.length; i += 1) {
+      if (i === maxIdx) continue;
+      expect(ys[maxIdx]).toBeLessThan(ys[i]);
+    }
+    // First point (31) much lower than the rest
+    expect(ys[0]).toBeGreaterThan(ys[1] + 10);
+  });
+
+  it('is taller than the previous flat chart and exposes plot y on points', () => {
+    expect(WEEKLY_PATH_HEIGHT).toBeGreaterThanOrEqual(Math.round(132 * 1.25));
+    render(<WeeklyPathChart weeks={DAYS} selectedDate="2026-08-04" />);
+    expect(
+      document
+        .querySelector('[data-weekly-path-chart]')
+        ?.getAttribute('data-weekly-path-height')
+    ).toBe(String(WEEKLY_PATH_HEIGHT));
+    const tue = document.querySelector('[data-path-date="2026-08-04"]');
+    expect(Number(tue?.getAttribute('data-path-y'))).toBeCloseTo(
+      scoreToPlotY(86),
+      5
+    );
   });
 });
 

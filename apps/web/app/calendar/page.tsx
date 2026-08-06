@@ -341,6 +341,8 @@ export default function CalendarPage() {
         <div className="lg:hidden mb-4" data-calendar-mobile-timing>
           <StrategicInsightRail
             compact
+            lang={lang}
+            calendar={calendar}
             monthOutlook={monthGps}
             selectedDay={{
               date: selectedDate,
@@ -390,6 +392,8 @@ export default function CalendarPage() {
           />
           <div className="hidden lg:block min-w-0" data-calendar-desktop-rail>
             <StrategicInsightRail
+              lang={lang}
+              calendar={calendar}
               monthOutlook={monthGps}
               selectedDay={{
                 date: selectedDate,

@@ -1,5 +1,6 @@
 'use client';
 
+import type { AppLang, CalendarSystem } from '@/lib/app-settings';
 import type { HourScore } from '@/lib/calendar-scores';
 import { formatReadinessPercent } from '@/lib/calendar-scores';
 import { GPS_TONE_STYLES, type StrategicGps } from '@/lib/strategic-gps';
@@ -32,6 +33,10 @@ export type StrategicInsightRailProps = {
   loadingLabel: string;
   /** Tighter padding for the compact mobile strip. */
   compact?: boolean;
+  /** Presentation locale for week-range label. */
+  lang?: AppLang;
+  /** Active calendar system for week-range label. */
+  calendar?: CalendarSystem;
   /**
    * Presentation-only: select Month Best date (no score recalculation).
    * Parent updates canonical `selectedDate`.
@@ -45,6 +50,8 @@ export function StrategicInsightRail({
   loadingHourly,
   loadingLabel,
   compact = false,
+  lang = 'en',
+  calendar = 'gregorian',
   onMonthBestSelect,
 }: StrategicInsightRailProps) {
   const { text } = monthOutlook;
@@ -117,6 +124,9 @@ export function StrategicInsightRail({
         <WeeklyPathChart
           weeks={monthOutlook.weeks}
           selectedDate={selectedDay.date ?? null}
+          monthBestDate={monthOutlook.monthBest?.date ?? null}
+          lang={lang}
+          calendar={calendar}
         />
         {/* Compact month peak — outside the chart; does not alter weekly data/scale. */}
         {monthOutlook.monthBest ? (
