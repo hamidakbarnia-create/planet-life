@@ -21,7 +21,6 @@ import {
   downloadIcs,
 } from '@/lib/calendar-ics';
 import {
-  BAND_STYLES,
   fetchHourlyScores,
   fetchMonthScores,
   type ScoreBreakdown,
@@ -30,7 +29,6 @@ import {
   formatDateYMD,
   formatHourLabel,
   formatReadinessPercent,
-  scoreToBand,
   type HourScore,
   type PlanetTransit,
   type TransitSnapshotMeta,
@@ -63,8 +61,9 @@ import {
 } from '@/lib/calendar-utils';
 import { buildStrategicGps } from '@/lib/strategic-gps';
 import { CALENDAR_PAGE_LANGS } from '@/lib/calendar-page-i18n';
-import { CalendarMonthPanel } from '@/components/calendar/CalendarMonthPanel';
-import { StrategicInsightRail } from '@/components/calendar/StrategicInsightRail';
+import { CALENDAR_UI } from '@/lib/calendar-power-presentation';
+import { CalendarMonthGrid } from '@/components/calendar/CalendarMonthGrid';
+import { CalendarInsightStack } from '@/components/calendar/CalendarInsightStack';
 import { CalendarSelectedDayInsight } from '@/components/calendar/CalendarSelectedDayInsight';
 
 type LangKey = AppLang;
@@ -80,7 +79,9 @@ function hourBarKind(band: ScoreBand): 'golden' | 'danger' | 'neutral' {
 export default function CalendarPage() {
   const today = new Date();
   const [lang, setLangState] = useState<LangKey>('en');
-  const [calendar, setCalendar] = useState<CalendarSystem>(() => loadCalendarSystem());
+  const [calendar, setCalendar] = useState<CalendarSystem>(() =>
+    loadCalendarSystem()
+  );
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [monthScoreData, setMonthScoreData] = useState<{
@@ -110,7 +111,7 @@ export default function CalendarPage() {
 
   const t = LANGS[lang];
   const cells = useMemo(() => calendarCells(year, month), [year, month]);
-  // Month Outlook from month scores; Weekly Path = selectedDate's Sunday-start week.
+  // Weekly Trend points + month peak date from the same canonical map.
   const monthGps = useMemo(
     () =>
       buildStrategicGps(scores, [], lang, {
@@ -119,7 +120,6 @@ export default function CalendarPage() {
       }),
     [scores, lang, selectedDate, calendar]
   );
-  // Selected Day Timing: hourly extrema for the selected date only.
   const dayGps = useMemo(
     () => buildStrategicGps({}, hourly, lang, { selectedDate, calendar }),
     [hourly, lang, selectedDate, calendar]
@@ -149,7 +149,12 @@ export default function CalendarPage() {
       syncCalendar();
     };
     const stored = localStorage.getItem('planet-life-lang');
-    if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
+    if (
+      stored === 'en' ||
+      stored === 'ru' ||
+      stored === 'fa' ||
+      stored === 'ar'
+    ) {
       setLangState(stored);
     }
     setExportMode(loadExportMode());
@@ -171,11 +176,12 @@ export default function CalendarPage() {
     setLoadingMonth(true);
     setProgress({ done: 0, total: 0 });
     try {
-      const { scores: monthScores, breakdowns, reasoning } = await fetchMonthScores(
-        profile,
-        year,
-        month,
-        (done, total) => setProgress({ done, total })
+      const {
+        scores: monthScores,
+        breakdowns,
+        reasoning,
+      } = await fetchMonthScores(profile, year, month, (done, total) =>
+        setProgress({ done, total })
       );
       setMonthScoreData({ scores: monthScores, breakdowns, reasoning });
     } finally {
@@ -192,7 +198,6 @@ export default function CalendarPage() {
     let cancelled = false;
     setLoadingHourly(true);
     setLoadingTransit(true);
-    // Kick off hourly + transit in parallel so the panel populates fast.
     fetchHourlyScores(profile, selectedDate).then((data) => {
       if (!cancelled) {
         setHourly(data);
@@ -215,15 +220,15 @@ export default function CalendarPage() {
     const next = shiftYearMonth(year, month, delta);
     setYear(next.year);
     setMonth(next.month);
-    // Keep Selected Day Timing / Weekly Path on a date inside the viewed month.
-    setSelectedDate((prev) => clampIsoDateToMonth(prev, next.year, next.month));
+    setSelectedDate((prev) =>
+      clampIsoDateToMonth(prev, next.year, next.month)
+    );
   };
 
   const handleCellClick = (date: string, inCurrentMonth: boolean) => {
     if (!inCurrentMonth) {
       const parsed = parseIsoDate(date);
       if (!parsed) return;
-      // Navigate to the adjacent month and select that canonical date.
       setYear(parsed.year);
       setMonth(parsed.month);
       setSelectedDate(date);
@@ -231,26 +236,6 @@ export default function CalendarPage() {
     }
     setSelectedDate(date);
   };
-
-  /** Presentation-only: jump selection to Month Best without touching scores. */
-  const handleMonthBestSelect = useCallback((date: string) => {
-    setSelectedDate(date);
-    requestAnimationFrame(() => {
-      const el = document.querySelector(
-        `[data-calendar-cell="${date}"]`
-      );
-      if (!(el instanceof HTMLElement)) return;
-      const rect = el.getBoundingClientRect();
-      const inView =
-        rect.top >= 0 &&
-        rect.bottom <=
-          (window.innerHeight || document.documentElement.clientHeight);
-      if (!inView) {
-        el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }
-      el.focus({ preventScroll: true });
-    });
-  }, []);
 
   const handleExportMode = (mode: CalendarExportMode) => {
     setExportMode(mode);
@@ -281,6 +266,27 @@ export default function CalendarPage() {
 
   const selectedScore = selectedDate ? scores[selectedDate] : undefined;
   const todayStr = todayYMD();
+  const monthLabel =
+    calendar === 'gregorian'
+      ? `${t.months[month - 1]} ${year}`
+      : formatDisplayMonthCoverage(lang, year, month, calendar);
+
+  const insightProps = {
+    scores,
+    weeks: monthGps.weeks,
+    selectedDate,
+    selectedDateLabel: selectedDate
+      ? formatDisplayDate(lang, selectedDate, calendar)
+      : null,
+    monthBestDate: monthGps.monthBest?.date ?? null,
+    weekdayLabels: t.weekdays.map((w) => w.trim()),
+    lang,
+    calendar,
+    bestHour: dayGps.bestHour,
+    riskHour: dayGps.riskHour,
+    loadingHourly,
+    loadingLabel: t.loading,
+  };
 
   return (
     <AppShell
@@ -290,16 +296,29 @@ export default function CalendarPage() {
       navLabels={HOME_LANGS[lang].nav}
       fontFamily={localeFontFamily(lang)}
     >
-      <div className="max-w-2xl lg:max-w-5xl mx-auto px-4 py-4 lg:py-3">
-        <div className="mb-4 lg:mb-2">
-          <h1 className="fc text-xl lg:text-lg tracking-wide mb-1 lg:mb-0.5" style={{ color: '#fbbf24' }}>
+      <div
+        data-calendar-workspace
+        className="max-w-[1440px] mx-auto px-3 sm:px-4 py-3 lg:py-4 overflow-x-hidden"
+        style={{ background: 'transparent' }}
+      >
+        <div className="mb-3 lg:mb-4">
+          <h1
+            className="fc text-xl lg:text-lg tracking-wide mb-0.5"
+            style={{ color: CALENDAR_UI.gold }}
+          >
             {t.title}
           </h1>
-          <p className="fi text-sm lg:text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <p
+            className="fi text-sm lg:text-xs"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
             {t.subtitle}
           </p>
           {hasProfile && evalLocation && (
-            <p className="fi text-[11px] mt-1 lg:mt-0.5" style={{ color: 'rgba(74,222,128,0.85)' }}>
+            <p
+              className="fi text-[11px] mt-1"
+              style={{ color: 'rgba(68,189,50,0.9)' }}
+            >
               {formatCalculatedFor(locationLabel(evalLocation), lang)}
             </p>
           )}
@@ -307,15 +326,15 @@ export default function CalendarPage() {
 
         {hasProfile && !hasCurrentLocation && (
           <div
-            className="rounded-2xl p-4 mb-4 lg:mb-3 fi text-sm"
+            className="rounded-xl p-3 mb-3 fi text-sm"
             style={{
               background: 'rgba(251,146,60,0.06)',
-              border: '1px solid rgba(251,146,60,0.25)',
+              border: `1px solid ${CALENDAR_UI.panelBorder}`,
               color: 'rgba(255,255,255,0.75)',
             }}
           >
             {t.noCurrentLocation}{' '}
-            <Link href="/profile" style={{ color: '#fbbf24' }}>
+            <Link href="/profile" style={{ color: CALENDAR_UI.gold }}>
               {t.goProfile}
             </Link>
           </div>
@@ -323,59 +342,33 @@ export default function CalendarPage() {
 
         {!hasProfile && (
           <div
-            className="rounded-2xl p-4 mb-4 lg:mb-3 fi text-sm"
+            className="rounded-xl p-3 mb-3 fi text-sm"
             style={{
-              background: 'rgba(251,191,36,0.06)',
-              border: '1px solid rgba(251,191,36,0.2)',
+              background: 'rgba(197,160,89,0.06)',
+              border: `1px solid ${CALENDAR_UI.panelBorder}`,
               color: 'rgba(255,255,255,0.7)',
             }}
           >
             {t.noProfile}{' '}
-            <Link href="/profile" style={{ color: '#fbbf24' }}>
+            <Link href="/profile" style={{ color: CALENDAR_UI.gold }}>
               {t.goProfile}
             </Link>
           </div>
         )}
 
-        {/* Mobile / tablet: one compact timing summary (no desktop rail) */}
-        <div className="lg:hidden mb-4" data-calendar-mobile-timing>
-          <StrategicInsightRail
-            compact
-            lang={lang}
-            calendar={calendar}
-            monthOutlook={monthGps}
-            selectedDay={{
-              date: selectedDate,
-              dateLabel: selectedDate
-                ? formatDisplayDate(lang, selectedDate, calendar)
-                : null,
-              bestHour: dayGps.bestHour,
-              riskHour: dayGps.riskHour,
-              bestHourLabel: dayGps.bestHourLabel,
-              riskHourLabel: dayGps.riskHourLabel,
-            }}
-            loadingHourly={loadingHourly}
-            loadingLabel={t.loading}
-            onMonthBestSelect={handleMonthBestSelect}
-          />
-        </div>
-
-        {/* Desktop lg+: month grid (~68%) + insight rail (~32%) */}
+        {/* Desktop: calendar dominant + insight stack. Tablet: stack; md two-col insights */}
         <div
           data-strategic-calendar-desktop
-          className="mb-4 lg:mb-3 lg:grid lg:grid-cols-[minmax(0,68fr)_minmax(0,32fr)] lg:gap-3 lg:items-start"
+          data-calendar-desktop-layout
+          className="mb-4 grid grid-cols-1 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.9fr)] gap-3 items-start"
         >
-          <CalendarMonthPanel
+          <CalendarMonthGrid
             lang={lang}
             dir={t.dir}
             calendar={calendar}
             year={year}
             month={month}
-            monthLabel={
-              calendar === 'gregorian'
-                ? `${t.months[month - 1]} ${year}`
-                : formatDisplayMonthCoverage(lang, year, month, calendar)
-            }
+            monthLabel={monthLabel}
             weekdays={t.weekdays}
             cells={cells}
             scores={scores}
@@ -390,94 +383,52 @@ export default function CalendarPage() {
             onNextMonth={() => shiftMonth(1)}
             onCellClick={handleCellClick}
           />
-          <div className="hidden lg:block min-w-0" data-calendar-desktop-rail>
-            <StrategicInsightRail
-              lang={lang}
-              calendar={calendar}
-              monthOutlook={monthGps}
-              selectedDay={{
-                date: selectedDate,
-                dateLabel: selectedDate
-                  ? formatDisplayDate(lang, selectedDate, calendar)
-                  : null,
-                bestHour: dayGps.bestHour,
-                riskHour: dayGps.riskHour,
-                bestHourLabel: dayGps.bestHourLabel,
-                riskHourLabel: dayGps.riskHourLabel,
-              }}
-              loadingHourly={loadingHourly}
-              loadingLabel={t.loading}
-              onMonthBestSelect={handleMonthBestSelect}
-            />
+
+          <div
+            className="min-w-0"
+            data-calendar-desktop-rail
+            data-calendar-insight-column
+          >
+            <div className="xl:block">
+              <CalendarInsightStack {...insightProps} />
+            </div>
           </div>
         </div>
 
-        {/* Score legend — explains the numbers in each calendar cell */}
-        <div
-          className="rounded-2xl p-4 mb-6 lg:mb-4"
-          style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.07)',
-          }}
+        <p
+          className="fi text-[11px] mb-4"
+          style={{ color: 'rgba(255,255,255,0.4)' }}
+          data-testid="calendar-uncertainty-disclosure"
         >
-          <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
-            <div className="fi text-[10px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.45)' }}>
-              {t.legend.title}
-            </div>
-            <div className="fi text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              {t.legend.hint}
-            </div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
-            {t.legend.bands.map((b) => (
-              <div
-                key={b.range}
-                className="flex items-center gap-2 rounded-lg px-2 py-2"
-                style={{
-                  background: `${b.color}14`,
-                  border: `1px solid ${b.color}55`,
-                }}
-              >
-                <span
-                  className="fc text-[11px] font-semibold"
-                  style={{ color: b.color, minWidth: 52 }}
-                >
-                  {b.range}
-                </span>
-                <span className="fi text-[11px]" style={{ color: 'rgba(255,255,255,0.75)' }}>
-                  {b.label}
-                </span>
-              </div>
-            ))}
-          </div>
-          <p
-            className="fi text-[11px] mt-3"
-            style={{ color: 'rgba(255,255,255,0.45)' }}
-            data-testid="calendar-uncertainty-disclosure"
-          >
-            {t.uncertaintyDisclosure}
-          </p>
-        </div>
+          {t.uncertaintyDisclosure}
+        </p>
 
         {selectedDate && (
           <div
-            className="rounded-2xl p-4 mb-6"
+            className="rounded-xl p-4 mb-4"
             style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.07)',
+              background: CALENDAR_UI.panel,
+              border: `1px solid ${CALENDAR_UI.panelBorder}`,
             }}
+            data-calendar-advanced-day
           >
-            <div className="flex items-baseline justify-between mb-4">
+            <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
               <div>
-                <div className="fi text-[10px] uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                <div
+                  className="fi text-[10px] uppercase tracking-widest mb-1"
+                  style={{ color: CALENDAR_UI.textMuted }}
+                >
                   {t.selected}
                 </div>
-                <div className="fc text-lg" style={{ color: '#fbbf24' }}>
+                <div className="fc text-lg" style={{ color: CALENDAR_UI.gold }}>
                   {formatDisplayDate(lang, selectedDate, calendar)}
                 </div>
               </div>
               {selectedScore != null && (
-                <div className="fi text-sm" style={{ color: BAND_STYLES[scoreToBand(selectedScore)].text }}>
+                <div
+                  className="fi text-sm"
+                  style={{ color: 'rgba(255,255,255,0.65)' }}
+                >
                   {t.score}: {formatReadinessPercent(selectedScore)}
                 </div>
               )}
@@ -496,18 +447,26 @@ export default function CalendarPage() {
                 signs: t.signs,
                 planets: t.planets,
               }}
-              reasoning={selectedDate ? monthScoreData.reasoning[selectedDate] : null}
+              reasoning={
+                selectedDate ? monthScoreData.reasoning[selectedDate] : null
+              }
               transit={transit}
               transitMeta={transitMeta}
               loadingTransit={loadingTransit}
             />
 
-            <div className="fi text-[10px] uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <div
+              className="fi text-[10px] uppercase tracking-widest mb-3 mt-4"
+              style={{ color: CALENDAR_UI.textMuted }}
+            >
               {t.hourly}
             </div>
 
             {loadingHourly ? (
-              <div className="py-8 text-center fi text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              <div
+                className="py-6 text-center fi text-xs"
+                style={{ color: 'rgba(255,255,255,0.3)' }}
+              >
                 {t.loading}
               </div>
             ) : (
@@ -516,9 +475,9 @@ export default function CalendarPage() {
                   const kind = hourBarKind(h.band);
                   const barColor =
                     kind === 'golden'
-                      ? '#4ade80'
+                      ? '#44bd32'
                       : kind === 'danger'
-                        ? '#f87171'
+                        ? '#ff5a5a'
                         : 'rgba(255,255,255,0.15)';
                   const label =
                     kind === 'golden'
@@ -529,22 +488,28 @@ export default function CalendarPage() {
                   return (
                     <div key={h.hour} className="mb-2">
                       <div className="flex items-center gap-2">
-                      <span className="fi text-[10px] w-16 shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                        {formatHourLabel(h.hour, lang)}
-                      </span>
-                      <div className="flex-1 h-6 rounded-md overflow-hidden relative" style={{ background: 'rgba(0,0,0,0.3)' }}>
-                        <div
-                          className="h-full rounded-md transition-all"
-                          style={{
-                            width: `${Math.max(8, h.score)}%`,
-                            background: barColor,
-                            opacity: kind === 'neutral' ? 0.5 : 0.85,
-                          }}
-                        />
-                        <span className="absolute inset-0 flex items-center px-2 fi text-[10px] text-white/80">
-                          {label} · {formatReadinessPercent(h.score)}
+                        <span
+                          className="fi text-[10px] w-16 shrink-0"
+                          style={{ color: 'rgba(255,255,255,0.4)' }}
+                        >
+                          {formatHourLabel(h.hour, lang)}
                         </span>
-                      </div>
+                        <div
+                          className="flex-1 h-6 rounded-md overflow-hidden relative"
+                          style={{ background: 'rgba(0,0,0,0.3)' }}
+                        >
+                          <div
+                            className="h-full rounded-md transition-all"
+                            style={{
+                              width: `${Math.max(8, h.score)}%`,
+                              background: barColor,
+                              opacity: kind === 'neutral' ? 0.5 : 0.85,
+                            }}
+                          />
+                          <span className="absolute inset-0 flex items-center px-2 fi text-[10px] text-white/80">
+                            {label} · {formatReadinessPercent(h.score)}
+                          </span>
+                        </div>
                       </div>
                       {kind === 'golden' && (
                         <ActionDisclaimer lang={lang as DisclaimerLang} />
@@ -558,13 +523,16 @@ export default function CalendarPage() {
         )}
 
         <div
-          className="rounded-2xl p-4"
+          className="rounded-xl p-4"
           style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.07)',
+            background: CALENDAR_UI.panel,
+            border: `1px solid ${CALENDAR_UI.panelBorder}`,
           }}
         >
-          <div className="fi text-[10px] uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
+          <div
+            className="fi text-[10px] uppercase tracking-widest mb-3"
+            style={{ color: CALENDAR_UI.textMuted }}
+          >
             {t.export}
           </div>
           <div className="space-y-2 mb-4">
@@ -592,7 +560,10 @@ export default function CalendarPage() {
             ))}
           </div>
           {exportMode === 'notifications' ? (
-            <p className="fi text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <p
+              className="fi text-xs"
+              style={{ color: 'rgba(255,255,255,0.4)' }}
+            >
               {t.exportDisabled}
             </p>
           ) : (
@@ -603,8 +574,8 @@ export default function CalendarPage() {
                 disabled={loadingMonth || Object.keys(scores).length === 0}
                 className="fc flex-1 py-2.5 rounded-xl text-xs tracking-wider disabled:opacity-40"
                 style={{
-                  background: 'linear-gradient(135deg,#d97706,#f59e0b)',
-                  color: '#000',
+                  background: 'linear-gradient(135deg,#c5a059,#e1b12c)',
+                  color: '#0b0d17',
                 }}
               >
                 {t.exportDownload} ({t.months[month - 1]})
@@ -613,7 +584,8 @@ export default function CalendarPage() {
                 type="button"
                 onClick={handleDownloadDay}
                 disabled={!selectedDate || loadingHourly}
-                className="fi flex-1 py-2.5 rounded-xl text-xs border border-white/15 text-white/70 hover:border-amber-500/40 disabled:opacity-40"
+                className="fi flex-1 py-2.5 rounded-xl text-xs border text-white/70 disabled:opacity-40"
+                style={{ borderColor: CALENDAR_UI.panelBorder }}
               >
                 {t.exportDownload} ({t.hourly})
               </button>
