@@ -1,7 +1,10 @@
-"""Minimal Decision Type Registry loader (E2 activation seam for E5).
+"""Strict Decision Type Registry loader for EPIC-001 E2.
 
-Canonical type records live only in ``decision_types.v1.json``.
-No HTTP, persistence, intake, classification, or lifecycle logic.
+Canonical records live only in ``decision_types.v1.json``.
+
+This module owns registry loading, integrity validation, read-only lookup, and
+the existing E5 create-authority compatibility seam. It does not implement
+intake execution, classification, HTTP, persistence, or lifecycle behavior.
 """
 
 from __future__ import annotations
@@ -10,16 +13,21 @@ import json
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Final
+from types import MappingProxyType
+from typing import Any, Final, Mapping
 
-_REGISTRY_PATH: Final[Path] = Path(__file__).resolve().parent / "decision_types.v1.json"
-_E4_CREATE_MODES: Final[frozenset[str]] = frozenset(
-    {"none", "evaluate_date", "compare_dates"}
+from pydantic import ValidationError
+
+from packages.decision_engine.registry.schema import (
+    DecisionTypeRecord,
+    DecisionTypeRegistry,
+    EXPECTED_RECORDS,
+    EXPECTED_TYPE_IDS,
 )
-_RECORD_KEYS: Final[frozenset[str]] = frozenset(
-    {"decision_type_id", "family_id", "create_mode", "available_entry_modes"}
+
+_REGISTRY_PATH: Final[Path] = (
+    Path(__file__).resolve().parent / "decision_types.v1.json"
 )
-_ROOT_KEYS: Final[frozenset[str]] = frozenset({"schema_version", "decision_types"})
 
 
 class UnknownDecisionTypeError(Exception):
@@ -36,105 +44,107 @@ class RegistryLoadError(Exception):
 
 @dataclass(frozen=True, slots=True)
 class DecisionTypeResolution:
+    """Compatibility result consumed by the E5 Decision Case create route."""
+
     decision_type_id: str
     family_id: str
     mode: str
 
 
-@dataclass(frozen=True, slots=True)
-class _TypeRecord:
-    decision_type_id: str
-    family_id: str
-    create_mode: str
-    available_entry_modes: frozenset[str]
-
-
-def _require_nonempty_str(value: Any, *, field: str) -> str:
-    if not isinstance(value, str):
-        raise RegistryLoadError(f"{field} must be a string")
-    trimmed = value.strip()
-    if not trimmed:
-        raise RegistryLoadError(f"{field} must be non-empty")
-    return trimmed
-
-
-def _parse_record(raw: Any, *, index: int) -> _TypeRecord:
-    if not isinstance(raw, dict):
-        raise RegistryLoadError(f"decision_types[{index}] must be an object")
-    keys = frozenset(raw.keys())
-    unknown = keys - _RECORD_KEYS
-    if unknown:
-        raise RegistryLoadError(
-            f"decision_types[{index}] has unknown fields: {sorted(unknown)}"
-        )
-    missing = _RECORD_KEYS - keys
-    if missing:
-        raise RegistryLoadError(
-            f"decision_types[{index}] missing fields: {sorted(missing)}"
-        )
-
-    type_id = _require_nonempty_str(raw["decision_type_id"], field="decision_type_id")
-    family_id = _require_nonempty_str(raw["family_id"], field="family_id")
-    create_mode = _require_nonempty_str(raw["create_mode"], field="create_mode")
-    if create_mode not in _E4_CREATE_MODES:
-        raise RegistryLoadError(
-            f"decision_types[{index}] create_mode invalid: {create_mode!r}"
-        )
-
-    modes_raw = raw["available_entry_modes"]
-    if not isinstance(modes_raw, list) or not modes_raw:
-        raise RegistryLoadError(
-            f"decision_types[{index}] available_entry_modes must be a non-empty list"
-        )
-    entry_modes: list[str] = []
-    for mode in modes_raw:
-        entry = _require_nonempty_str(mode, field="available_entry_modes[]")
-        entry_modes.append(entry)
-    if len(entry_modes) != len(set(entry_modes)):
-        raise RegistryLoadError(
-            f"decision_types[{index}] available_entry_modes contains duplicates"
-        )
-
-    return _TypeRecord(
-        decision_type_id=type_id,
-        family_id=family_id,
-        create_mode=create_mode,
-        available_entry_modes=frozenset(entry_modes),
-    )
-
-
-def _load_registry(path: Path) -> dict[str, _TypeRecord]:
+def _read_payload(path: Path) -> Any:
     if not path.is_file():
         raise RegistryLoadError(f"registry file missing: {path}")
+
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         raise RegistryLoadError(f"registry JSON malformed: {exc}") from exc
-    if not isinstance(payload, dict):
-        raise RegistryLoadError("registry root must be an object")
-    root_unknown = frozenset(payload.keys()) - _ROOT_KEYS
-    if root_unknown:
-        raise RegistryLoadError(f"registry has unknown fields: {sorted(root_unknown)}")
-    if "schema_version" not in payload or "decision_types" not in payload:
-        raise RegistryLoadError("registry requires schema_version and decision_types")
-    _require_nonempty_str(payload["schema_version"], field="schema_version")
-    types_raw = payload["decision_types"]
-    if not isinstance(types_raw, list) or not types_raw:
-        raise RegistryLoadError("decision_types must be a non-empty list")
+    except OSError as exc:
+        raise RegistryLoadError(f"registry file unreadable: {path}") from exc
 
-    by_id: dict[str, _TypeRecord] = {}
-    for index, raw in enumerate(types_raw):
-        record = _parse_record(raw, index=index)
-        if record.decision_type_id in by_id:
+
+def _reject_duplicate_ids(payload: Any) -> None:
+    """Give a deterministic duplicate error before Pydantic validation."""
+
+    if not isinstance(payload, dict):
+        return
+
+    rows = payload.get("decision_types")
+    if not isinstance(rows, list):
+        return
+
+    seen: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        type_id = row.get("decision_type_id")
+        if not isinstance(type_id, str):
+            continue
+        if type_id in seen:
+            raise RegistryLoadError(f"duplicate decision_type_id: {type_id}")
+        seen.add(type_id)
+
+
+def _validate_authority(registry: DecisionTypeRegistry) -> None:
+    records = registry.decision_types
+    ids = {record.decision_type_id for record in records}
+
+    if len(records) != 3:
+        raise RegistryLoadError(
+            f"EPIC-001 registry requires exactly 3 decision types; got {len(records)}"
+        )
+
+    if ids != EXPECTED_TYPE_IDS:
+        missing = sorted(EXPECTED_TYPE_IDS - ids)
+        unexpected = sorted(ids - EXPECTED_TYPE_IDS)
+        raise RegistryLoadError(
+            "registry decision type set does not match EPIC-001 authority: "
+            f"missing={missing}, unexpected={unexpected}"
+        )
+
+    for record in records:
+        expected_family, expected_modes = EXPECTED_RECORDS[
+            record.decision_type_id
+        ]
+
+        if record.family_id != expected_family:
             raise RegistryLoadError(
-                f"duplicate decision_type_id: {record.decision_type_id}"
+                f"{record.decision_type_id} family_id must be "
+                f"{expected_family!r}; got {record.family_id!r}"
             )
-        by_id[record.decision_type_id] = record
-    return by_id
+
+        if tuple(record.allowed_modes) != expected_modes:
+            raise RegistryLoadError(
+                f"{record.decision_type_id} allowed_modes must be "
+                f"{expected_modes!r}; got {tuple(record.allowed_modes)!r}"
+            )
+
+        if tuple(record.available_entry_modes) != ("structured",):
+            raise RegistryLoadError(
+                f"{record.decision_type_id} available_entry_modes must be "
+                "('structured',)"
+            )
+
+
+def _load_registry(path: Path) -> dict[str, DecisionTypeRecord]:
+    payload = _read_payload(path)
+    _reject_duplicate_ids(payload)
+
+    try:
+        registry = DecisionTypeRegistry.model_validate(payload)
+    except ValidationError as exc:
+        raise RegistryLoadError(f"registry validation failed: {exc}") from exc
+
+    _validate_authority(registry)
+
+    return {
+        record.decision_type_id: record
+        for record in registry.decision_types
+    }
 
 
 @lru_cache(maxsize=1)
-def _registry() -> dict[str, _TypeRecord]:
+def _registry() -> dict[str, DecisionTypeRecord]:
     return _load_registry(_REGISTRY_PATH)
 
 
@@ -142,26 +152,49 @@ def _reset_registry_cache_for_tests() -> None:
     _registry.cache_clear()
 
 
+def list_decision_types() -> tuple[DecisionTypeRecord, ...]:
+    """Return the immutable canonical records in registry order."""
+
+    return tuple(_registry().values())
+
+
+def get_decision_type(decision_type_id: str) -> DecisionTypeRecord:
+    """Return one canonical record or fail with a domain-specific error."""
+
+    type_id = (decision_type_id or "").strip()
+    if not type_id:
+        raise UnknownDecisionTypeError("decision_type_id is required")
+
+    record = _registry().get(type_id)
+    if record is None:
+        raise UnknownDecisionTypeError(f"unknown decision_type_id: {type_id}")
+
+    return record
+
+
+def registry_by_id() -> Mapping[str, DecisionTypeRecord]:
+    """Expose a read-only map without leaking the mutable cache dictionary."""
+
+    return MappingProxyType(_registry())
+
+
 def resolve_decision_type(
     decision_type_id: str,
     entry_mode: str,
 ) -> DecisionTypeResolution:
-    """Resolve create-time type authority from the canonical registry JSON."""
-    type_id = (decision_type_id or "").strip()
+    """Resolve E5 create-time authority from the canonical Registry."""
+
     mode = (entry_mode or "").strip()
-    if not type_id:
-        raise UnknownDecisionTypeError("decision_type_id is required")
     if not mode:
         raise EntryModeUnavailableError("entry_mode is required")
 
-    records = _registry()
-    record = records.get(type_id)
-    if record is None:
-        raise UnknownDecisionTypeError(f"unknown decision_type_id: {type_id}")
+    record = get_decision_type(decision_type_id)
+
     if mode not in record.available_entry_modes:
         raise EntryModeUnavailableError(
             f"entry_mode unavailable for {record.decision_type_id}: {mode}"
         )
+
     return DecisionTypeResolution(
         decision_type_id=record.decision_type_id,
         family_id=record.family_id,
@@ -174,5 +207,8 @@ __all__ = [
     "EntryModeUnavailableError",
     "RegistryLoadError",
     "UnknownDecisionTypeError",
+    "get_decision_type",
+    "list_decision_types",
+    "registry_by_id",
     "resolve_decision_type",
 ]
