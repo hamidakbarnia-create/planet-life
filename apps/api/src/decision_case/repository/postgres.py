@@ -630,6 +630,12 @@ class DecisionCaseRepository:
                         to_state=CaseState.EVALUATED.value,
                         case_version=new_token,
                     )
+                recommendation = package.get("recommendation")
+                stance = (
+                    recommendation.get("stance")
+                    if isinstance(recommendation, dict)
+                    else None
+                )
                 self._insert_history(
                     cur,
                     case_id=case_id,
@@ -638,6 +644,9 @@ class DecisionCaseRepository:
                     payload={
                         "evaluation_id": str(eid),
                         "evaluation_version": next_eval,
+                        "dq_status": dq_status,
+                        "stance": stance,
+                        "engine_id": engine_id,
                     },
                     case_version=new_token,
                 )

@@ -19,6 +19,7 @@ vi.mock('./api-client', async () => {
     getDecisionCaseHistory: vi.fn(),
     listDecisionCaseEvaluations: vi.fn(),
     getEvaluation: vi.fn(),
+    updateDecisionCaseFraming: vi.fn(),
   };
 });
 

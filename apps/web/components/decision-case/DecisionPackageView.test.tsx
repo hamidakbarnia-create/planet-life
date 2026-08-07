@@ -31,9 +31,8 @@ describe('DecisionPackageView', () => {
     );
     expect(screen.queryByText(/81/)).toBeNull();
     expect(screen.queryByText(/72/)).toBeNull();
-    expect(screen.getByRole('heading', { name: /Timing \(demo\)/i })).toBeTruthy();
-    expect(
-      screen.getByRole('heading', { name: /Confidence \(demo\)/i })
-    ).toBeTruthy();
+    expect(screen.getByTestId('evaluate-result-view')).toBeTruthy();
+    expect(screen.queryByText(/run a small experiment/i)).toBeNull();
+    expect(screen.queryByText(/best case/i)).toBeNull();
   });
 });

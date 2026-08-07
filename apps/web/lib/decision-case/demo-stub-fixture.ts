@@ -81,9 +81,11 @@ export function assertPackageRenderContract(
   if (pkg.schema_version !== '1.0.0') {
     throw new Error('invalid schema_version');
   }
-  if (pkg.engine_id !== STUB_ENGINE_ID) {
-    throw new Error('demo fixture must use decision-engine-stub-v1');
+  if (!pkg.engine_id || !pkg.engine_id.trim()) {
+    throw new Error('package engine_id is required');
   }
+  // Stub and real runtime packages are both valid render contracts.
+  // Stub banner is gated on engine_id === STUB_ENGINE_ID in the view.
   if (pkg.mode === 'evaluate_date' && pkg.timing.candidates.length !== 1) {
     throw new Error('evaluate_date requires exactly one timing candidate');
   }

@@ -7,6 +7,11 @@ import { API_BASE } from '@/lib/api-config';
 import type { DecisionEvaluationPackage } from './package-types';
 import type { CarInterviewIntake } from './car-interview-form';
 
+export type DecisionCaseIntake = CarInterviewIntake & {
+  decision_frame?: Record<string, unknown>;
+  [key: string]: unknown;
+};
+
 export type DecisionCaseResource = {
   case_id: string;
   owner_subject_id: string;
@@ -20,14 +25,36 @@ export type DecisionCaseResource = {
   case_version: number;
   created_at: string;
   updated_at: string;
-  intake?: CarInterviewIntake;
+  intake?: DecisionCaseIntake;
 };
 
 export type IntakeMutationResult = {
   case: DecisionCaseResource;
-  intake: CarInterviewIntake;
+  intake: DecisionCaseIntake;
   missing_required: string[];
   is_complete: boolean;
+};
+
+/** Canonical Case-persisted framing shapes by operation. */
+export type PersistedDecisionFraming = {
+  operation: 'evaluate' | 'compare' | 'find';
+  time_scope: 'specific_date' | 'multiple_dates' | 'date_range' | 'none';
+  /** EVALUATE + specific_date */
+  date?: string;
+  /** COMPARE + multiple_dates */
+  dates?: string[];
+  /** FIND + date_range */
+  start?: string;
+  end?: string;
+  options?: Array<{ id: string; label: string; date?: string }>;
+  objective?: string;
+  raw_intent?: string;
+};
+
+export type FramingMutationResult = {
+  case: DecisionCaseResource;
+  intake: DecisionCaseIntake;
+  framing: Record<string, unknown>;
 };
 
 export type DecisionHistoryEvent = {
@@ -132,6 +159,41 @@ export function createDecisionCase(input: {
   });
 }
 
+export function createDecisionCaseFromFraming(input: {
+  decisionTypeId: string;
+  title: string;
+  framing: PersistedDecisionFraming;
+}): Promise<FramingMutationResult> {
+  return requestJson<FramingMutationResult>(
+    '/api/v1/decision-cases/from-framing',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        decision_type_id: input.decisionTypeId,
+        title: input.title,
+        framing: input.framing,
+      }),
+    }
+  );
+}
+
+export function updateDecisionCaseFraming(input: {
+  caseId: string;
+  expectedCaseVersion: number;
+  framing: PersistedDecisionFraming;
+}): Promise<FramingMutationResult> {
+  return requestJson<FramingMutationResult>(
+    `/api/v1/decision-cases/${input.caseId}/framing`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({
+        expected_case_version: input.expectedCaseVersion,
+        framing: input.framing,
+      }),
+    }
+  );
+}
+
 export function getDecisionCase(
   caseId: string
 ): Promise<DecisionCaseResource> {
@@ -140,10 +202,23 @@ export function getDecisionCase(
   );
 }
 
+export type NatalEvidencePayload = {
+  birth_date: string;
+  birth_time: string;
+  location: string;
+  latitude?: number;
+  longitude?: number;
+  evaluation_location?: string;
+  evaluation_latitude?: number;
+  evaluation_longitude?: number;
+};
+
 export function saveIntakeAnswers(input: {
   caseId: string;
   expectedCaseVersion: number;
-  answers: Partial<CarInterviewIntake>;
+  answers: Partial<CarInterviewIntake> & {
+    natal_evidence?: NatalEvidencePayload;
+  };
 }): Promise<IntakeMutationResult> {
   return requestJson<IntakeMutationResult>(
     `/api/v1/decision-cases/${input.caseId}/intake/answers`,

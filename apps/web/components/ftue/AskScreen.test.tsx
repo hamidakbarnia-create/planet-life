@@ -207,7 +207,7 @@ describe('AskScreen', () => {
     expect(stored?.source).toBe('suggestion');
     expect(stored?.suggestion_id).toBe('career-focus-week');
     expect(stored?.text).toBeUndefined();
-    expect(push).toHaveBeenCalledWith('/result');
+    expect(push).toHaveBeenCalledWith('/ask/frame');
   });
 
   it('stores edited suggestion text as typed', async () => {
@@ -230,7 +230,7 @@ describe('AskScreen', () => {
     expect(stored?.suggestion_id).toBeUndefined();
   });
 
-  it('stores the question and navigates to /result on submit', async () => {
+  it('stores the question and navigates to /ask/frame on submit', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
     const home = getAskHomeCopy('en');
@@ -244,7 +244,7 @@ describe('AskScreen', () => {
     const stored = getAskQuestionRepository().loadQuestion();
     expect(stored?.text).toBe('What should I do today?');
     expect(stored?.source).toBe('typed');
-    expect(push).toHaveBeenCalledWith('/result');
+    expect(push).toHaveBeenCalledWith('/ask/frame');
   });
 
   it('fires analytics events on view, interaction, and submit', async () => {
@@ -364,6 +364,7 @@ describe('AskScreen', () => {
 
     expect(push).toHaveBeenCalledWith('/decision-cases/car-interview');
     expect(push).not.toHaveBeenCalledWith('/result');
+    expect(push).not.toHaveBeenCalledWith('/ask/frame');
   });
 
   it('routes job-interview guided chips into Decision Case intake', async () => {
@@ -381,9 +382,10 @@ describe('AskScreen', () => {
 
     expect(push).toHaveBeenCalledWith('/decision-cases/car-interview');
     expect(push).not.toHaveBeenCalledWith('/result');
+    expect(push).not.toHaveBeenCalledWith('/ask/frame');
   });
 
-  it('keeps unrelated guided questions on the legacy Ask → /result path', async () => {
+  it('routes unrelated guided questions into Decision Frame path', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
     await screen.findByRole('heading', {
@@ -402,6 +404,6 @@ describe('AskScreen', () => {
     fireEvent.click(
       screen.getByRole('button', { name: getAskHomeCopy('en').searchSubmitAria })
     );
-    expect(push).toHaveBeenCalledWith('/result');
+    expect(push).toHaveBeenCalledWith('/ask/frame');
   });
 });

@@ -25,7 +25,9 @@ from main import app  # noqa: E402
 
 ACTIVE_PATHS = {
     "/api/v1/decision-cases": {"post", "get"},
+    "/api/v1/decision-cases/from-framing": {"post"},
     "/api/v1/decision-cases/{case_id}": {"get"},
+    "/api/v1/decision-cases/{case_id}/framing": {"put"},
     "/api/v1/decision-cases/{case_id}/complete": {"post"},
     "/api/v1/decision-cases/{case_id}/archive": {"post"},
     "/api/v1/decision-cases/{case_id}/history": {"get"},
