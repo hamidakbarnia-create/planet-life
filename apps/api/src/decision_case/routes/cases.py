@@ -33,6 +33,7 @@ from decision_case.repository.errors import (
 )
 from decision_case.schemas.cases import (
     CaseVersionCommandRequest,
+    CreateCaseFromFramingRequest,
     CreateDecisionCaseRequest,
     CreateEvaluationRequest,
     DecisionApiErrorBody,
@@ -43,9 +44,11 @@ from decision_case.schemas.cases import (
     DecisionEvaluationListEnvelope,
     DecisionEvaluationResource,
     DecisionHistoryEnvelope,
+    FramingMutationResponse,
     IntakeAnswersRequest,
     IntakeCompleteRequest,
     IntakeMutationResponse,
+    UpdateCaseFramingRequest,
 )
 from decision_case.services.car_interview_intake import (
     IntakeIncompleteError,
@@ -53,6 +56,13 @@ from decision_case.services.car_interview_intake import (
     complete_car_interview_intake,
     evaluate_car_interview_case,
     save_car_interview_answers,
+)
+from decision_case.services.decision_frame import (
+    FramingUnresolvedError,
+    FramingValidationError,
+    create_case_with_framing,
+    extract_framing_from_intake,
+    update_case_framing,
 )
 from packages.decision_engine.registry import (
     EntryModeUnavailableError,
@@ -133,6 +143,8 @@ def _safe_message(code: str) -> str:
         "DUPLICATE_CASE": "Duplicate decision case",
         "INTAKE_INCOMPLETE": "Intake is incomplete",
         "UNSUPPORTED_DECISION_TYPE": "Decision type is not supported for this operation",
+        "FRAMING_UNRESOLVED": "Decision Frame is unresolved",
+        "FRAMING_INVALID": "Decision Frame failed validation",
         "INTERNAL_ERROR": "Internal server error",
     }.get(code, "Request failed")
 
@@ -285,6 +297,69 @@ def register_decision_case_openapi_filter(app: Any) -> None:
 
 
 @router.post(
+    "/from-framing",
+    response_model=FramingMutationResponse,
+    status_code=201,
+    responses=_ERROR_RESPONSES,
+)
+def create_decision_case_from_framing(
+    body: CreateCaseFromFramingRequest,
+    request: Request,
+    response: Response,
+    repo: DecisionCaseRepository = Depends(get_decision_case_repository),
+    owner_subject_id: str = Depends(get_e5_owner_subject_id),
+) -> FramingMutationResponse | JSONResponse:
+    """Persist resolved Decision Frame onto a new Case. No runtime execution."""
+    request_id = get_request_id(request)
+    try:
+        case, intake = create_case_with_framing(
+            repo,
+            owner_subject_id=owner_subject_id,
+            decision_type_id=body.decision_type_id,
+            title=body.title,
+            framing_raw=body.framing.model_dump(),
+        )
+        framing = extract_framing_from_intake(intake) or {}
+        response.headers["Location"] = f"{CASE_API_PATH_PREFIX}/{case.case_id}"
+        return FramingMutationResponse(
+            case=to_case_resource(case),
+            intake=intake,
+            framing=framing,
+        )
+    except FramingUnresolvedError as exc:
+        return _error_response(
+            status_code=400,
+            code="FRAMING_UNRESOLVED",
+            message=str(exc) or _safe_message("FRAMING_UNRESOLVED"),
+            request_id=request_id,
+        )
+    except FramingValidationError as exc:
+        return _error_response(
+            status_code=400,
+            code="VALIDATION_ERROR",
+            message=str(exc) or _safe_message("VALIDATION_ERROR"),
+            request_id=request_id,
+            details=exc.details,
+        )
+    except UnknownDecisionTypeError:
+        return _error_response(
+            status_code=400,
+            code="UNKNOWN_DECISION_TYPE",
+            message=_safe_message("UNKNOWN_DECISION_TYPE"),
+            request_id=request_id,
+        )
+    except EntryModeUnavailableError:
+        return _error_response(
+            status_code=400,
+            code="ENTRY_MODE_UNAVAILABLE",
+            message=_safe_message("ENTRY_MODE_UNAVAILABLE"),
+            request_id=request_id,
+        )
+    except Exception as exc:
+        return _map_repository_error(exc, request_id=request_id)
+
+
+@router.post(
     "",
     response_model=DecisionCaseResource,
     status_code=201,
@@ -369,6 +444,60 @@ def get_decision_case(
             repo=repo,
             case_id=case_id,
             owner_subject_id=owner_subject_id,
+        )
+
+
+@router.put(
+    "/{case_id}/framing",
+    response_model=FramingMutationResponse,
+    responses=_ERROR_RESPONSES,
+)
+def put_decision_case_framing(
+    case_id: UUID,
+    body: UpdateCaseFramingRequest,
+    request: Request,
+    repo: DecisionCaseRepository = Depends(get_decision_case_repository),
+    owner_subject_id: str = Depends(get_e5_owner_subject_id),
+) -> FramingMutationResponse | JSONResponse:
+    """Update persisted Decision Frame on an existing Case (CAS). No runtime."""
+    request_id = get_request_id(request)
+    try:
+        case, intake = update_case_framing(
+            repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
+            framing_raw=body.framing.model_dump(),
+        )
+        framing = extract_framing_from_intake(intake) or {}
+        return FramingMutationResponse(
+            case=to_case_resource(case),
+            intake=intake,
+            framing=framing,
+        )
+    except FramingUnresolvedError as exc:
+        return _error_response(
+            status_code=400,
+            code="FRAMING_UNRESOLVED",
+            message=str(exc) or _safe_message("FRAMING_UNRESOLVED"),
+            request_id=request_id,
+        )
+    except FramingValidationError as exc:
+        return _error_response(
+            status_code=400,
+            code="VALIDATION_ERROR",
+            message=str(exc) or _safe_message("VALIDATION_ERROR"),
+            request_id=request_id,
+            details=exc.details,
+        )
+    except Exception as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
         )
 
 

@@ -4,3 +4,4 @@ export * from './frame';
 export * from './package-adapter';
 export * from './presentation';
 export * from './storage';
+export * from './persist';

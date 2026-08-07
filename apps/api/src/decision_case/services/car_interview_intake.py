@@ -17,6 +17,7 @@ from packages.decision_engine.evaluate.stub_package import (
     STUB_ENGINE_ID,
     build_car_interview_stub_package_dict,
 )
+from decision_case.services.decision_frame import DECISION_FRAME_INTAKE_KEY
 from packages.decision_engine.intake.car_interview import (
     CAR_INTERVIEW_DECISION_TYPE_ID,
     merge_intake,
@@ -70,8 +71,12 @@ def save_car_interview_answers(
     _require_car_interview(case)
 
     current_intake = _intake_snapshot(repo, case)
+    # Preserve authoritative Decision Frame namespace across slot merges.
+    existing_frame = current_intake.get(DECISION_FRAME_INTAKE_KEY)
     merged = merge_intake(current_intake, answers)
     intake_dict = merged.as_dict()
+    if isinstance(existing_frame, dict):
+        intake_dict[DECISION_FRAME_INTAKE_KEY] = existing_frame
 
     # Domain draft gate: refuse empty first write with no required progress.
     evaluation = evaluate_car_interview_intake(intake_dict)
@@ -108,6 +113,8 @@ def save_car_interview_answers(
         pass
 
     normalized, missing, is_complete = _evaluation_status(intake_dict)
+    if DECISION_FRAME_INTAKE_KEY in intake_dict:
+        normalized[DECISION_FRAME_INTAKE_KEY] = intake_dict[DECISION_FRAME_INTAKE_KEY]
     case = repo.get_case(case_id, owner_subject_id)
     return case, normalized, missing, is_complete
 
@@ -124,6 +131,8 @@ def complete_car_interview_intake(
 
     intake_dict = _intake_snapshot(repo, case)
     normalized, missing, is_complete = _evaluation_status(intake_dict)
+    if DECISION_FRAME_INTAKE_KEY in intake_dict:
+        normalized[DECISION_FRAME_INTAKE_KEY] = intake_dict[DECISION_FRAME_INTAKE_KEY]
     if not is_complete:
         raise IntakeIncompleteError(tuple(missing))
 
