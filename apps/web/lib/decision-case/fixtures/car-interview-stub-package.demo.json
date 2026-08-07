@@ -1,0 +1,129 @@
+{
+  "case_id": "00000000-0000-4000-8000-000000000001",
+  "evaluation_id": "00000000-0000-4000-8000-000000000002",
+  "evaluation_version": 1,
+  "case_version": 1,
+  "decision_type_id": "car-interview",
+  "family_id": "visibility",
+  "mode": "evaluate_date",
+  "precision_level": "L3",
+  "engine_id": "decision-engine-stub-v1",
+  "created_at": "2026-08-07T10:00:00Z",
+  "schema_version": "1.0.0",
+  "recommendation": {
+    "stance": "proceed_with_conditions",
+    "conditions": [
+      "Prepare concrete examples tied to the role",
+      "Rehearse for a onsite interview format"
+    ],
+    "summary": "Proceed with the Frontend Engineer interview at Metioro, provided preparation and practical constraints are addressed."
+  },
+  "timing": {
+    "material": true,
+    "band": "high",
+    "score": 81.0,
+    "candidates": [
+      {
+        "date": "2026-08-10",
+        "rank": 1,
+        "score": 81.0,
+        "band": "high"
+      }
+    ],
+    "notes": "Stub timing supports attending on the selected date."
+  },
+  "confidence": {
+    "value": 72.0,
+    "precision_level": "L3",
+    "penalties": [
+      {
+        "code": "STUB_ENGINE",
+        "message": "Runtime stub \u2014 not a production evaluation."
+      }
+    ]
+  },
+  "evidence": {
+    "items": [
+      {
+        "framework_id": "astro_timing",
+        "eligibility": "provisional",
+        "artifact_ref": "evidence://stub/car-interview/1",
+        "limits": [
+          "Stub evidence does not determine interview outcome."
+        ]
+      }
+    ]
+  },
+  "drivers": {
+    "items": [
+      {
+        "id": "visibility",
+        "label": "Visibility",
+        "score": 78.0,
+        "band": "high",
+        "support": "The selected date supports clear presentation.",
+        "friction": "Preparation quality remains decisive."
+      }
+    ]
+  },
+  "tradeoffs": {
+    "items": [
+      "Attend now \u2014 less preparation buffer"
+    ]
+  },
+  "risks": {
+    "items": [
+      "Under-preparation may weaken interview performance."
+    ]
+  },
+  "opportunities": {
+    "items": [
+      "Use the interview to present a clear narrative for Frontend Engineer."
+    ]
+  },
+  "action_plan": {
+    "steps": [
+      {
+        "order": 1,
+        "action": "Prepare three evidence-based examples for Frontend Engineer.",
+        "condition": null
+      },
+      {
+        "order": 2,
+        "action": "Confirm logistics and materials the day before.",
+        "condition": null
+      }
+    ]
+  },
+  "counter_recommendation": {
+    "stance": "wait",
+    "summary": "Delay only when preparation is materially incomplete.",
+    "reason": "Preparation quality outweighs a favorable date."
+  },
+  "explainability": {
+    "why": "Stub evidence moderately supports attending on the selected date.",
+    "why_not": "The date cannot compensate for incomplete preparation.",
+    "assumptions": [
+      "The interview date can still be changed if needed."
+    ],
+    "limits": [
+      "Stub runtime does not inspect live employer process data."
+    ]
+  },
+  "improve_accuracy": {
+    "items": [
+      "Add interviewers or seniority level for higher precision."
+    ]
+  },
+  "next_decisions": {
+    "items": [
+      {
+        "decision_type_id": "car-negotiate-offer",
+        "label": "Negotiate job offer"
+      }
+    ]
+  },
+  "related_decisions": {
+    "items": []
+  }
+}

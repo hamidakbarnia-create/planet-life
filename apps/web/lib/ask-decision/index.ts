@@ -177,6 +177,7 @@ export { parseAskDecisionResponse } from './parse';
 export { validateAskDecisionResult } from './validate';
 export { buildStructuredFallback } from './fallback';
 export {
+  loadAskDecisionsFromVault,
   saveAskDecisionToVault,
   toAskVaultSavePayload,
 } from './vault-adapter';

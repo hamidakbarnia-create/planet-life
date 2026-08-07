@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "decision_types": [
+    {
+      "decision_type_id": "tim-compare-three",
+      "family_id": "timing_opt",
+      "label": "Compare three candidate dates",
+      "create_mode": "none",
+      "available_entry_modes": [
+        "structured"
+      ],
+      "allowed_modes": [
+        "compare_dates"
+      ],
+      "output_profile": "decision_evaluation_package.v1"
+    },
+    {
+      "decision_type_id": "car-interview",
+      "family_id": "visibility",
+      "label": "Attend job interview",
+      "create_mode": "none",
+      "available_entry_modes": [
+        "structured"
+      ],
+      "allowed_modes": [
+        "evaluate_date"
+      ],
+      "output_profile": "decision_evaluation_package.v1"
+    },
+    {
+      "decision_type_id": "mar-wedding-date",
+      "family_id": "timing_opt",
+      "label": "Choose wedding date",
+      "create_mode": "none",
+      "available_entry_modes": [
+        "structured"
+      ],
+      "allowed_modes": [
+        "evaluate_date",
+        "compare_dates"
+      ],
+      "output_profile": "decision_evaluation_package.v1"
+    }
+  ]
+}

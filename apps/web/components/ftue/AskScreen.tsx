@@ -1,22 +1,41 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useId, useRef, useState } from 'react';
+import { useId, useMemo, useRef, useState, type FormEvent } from 'react';
+import { QuestionTopics } from '@/components/ask/QuestionTopics';
+import {
+  AskHero,
+  DecisionEntryCards,
+  DecisionSearch,
+  EnergyWidget,
+  HowItWorksWidget,
+  HumanAgencyBanner,
+  PopularDecisionGrid,
+  RecentDecisionList,
+  TimingWidget,
+} from '@/components/ask/home';
+import askHomeStyles from '@/components/ask/home/ask-home.module.css';
 import { useRequireAuth } from '@/hooks/use-require-auth';
-import { getAskQuestionRepository } from '@/lib/ask-question-repository';
 import type { AppLang } from '@/lib/app-settings';
+import {
+  getAskHomeCopy,
+  listPopularDecisions,
+  listRecentDecisions,
+  type AskHomeEnergyState,
+  type AskHomeTimingState,
+  type DecisionEntryModeId,
+  type PopularDecision,
+} from '@/lib/ask-home';
+import { getAskQuestionRepository } from '@/lib/ask-question-repository';
+import { loadBirthProfile } from '@/lib/birth-profile';
+import { formatHourLabel } from '@/lib/calendar-scores';
+import { todayYMD } from '@/lib/calendar-utils';
 import { trackAskEvent } from '@/lib/ftue-analytics';
 import type { AskCopy } from '@/lib/ftue-i18n';
 import {
   getProfileRepository,
   isProfileRecordComplete,
 } from '@/lib/profile';
-import { detectIntent } from '@/lib/ask-decision';
-import {
-  getDecisionUi,
-  localizeIntent,
-} from '@/lib/decision-ui-i18n';
-import { getAskProfileContext } from '@/lib/intelligence-profile';
 import {
   findGuidedQuestion,
   getAllQuestionCategories,
@@ -25,8 +44,9 @@ import {
   type GuidedQuestionId,
   type QuestionCategoryId,
 } from '@/lib/question-library';
+import { loadTodayTiming } from '@/lib/today-timing';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
-import { QuestionTopics } from '@/components/ask/QuestionTopics';
+import { hasConfirmedCurrentLocation } from '@/lib/user-locations';
 
 const MAX_CHARS = 500;
 const QUESTION_CATEGORIES = getAllQuestionCategories();
@@ -41,17 +61,32 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
   const authed = useRequireAuth();
   const repo = getProfileRepository();
   const askRepo = getAskQuestionRepository();
-  const c = copy;
+  const home = getAskHomeCopy(lang);
   const formId = useId();
   const inputId = `${formId}-question`;
-  const counterId = `${formId}-counter`;
+  const searchRef = useRef<HTMLDivElement | null>(null);
+  const initRef = useRef(false);
+  const startedRef = useRef(false);
 
   const [typedQuestion, setTypedQuestion] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] =
     useState<QuestionCategoryId>(DEFAULT_CATEGORY_ID);
-  const [selectedSuggestionId, setSelectedSuggestionId] = useState<GuidedQuestionId | null>(null);
-  const initRef = useRef(false);
-  const startedRef = useRef(false);
+  const [selectedSuggestionId, setSelectedSuggestionId] =
+    useState<GuidedQuestionId | null>(null);
+  const [entryMode, setEntryMode] = useState<DecisionEntryModeId | null>(null);
+  const [energy, setEnergy] = useState<AskHomeEnergyState>({
+    score: null,
+    loading: true,
+    description: home.energyDescription,
+    bestWindowLabel: home.energyLoading,
+    detailsHref: '/home',
+  });
+  const [timing, setTiming] = useState<AskHomeTimingState>({
+    loading: true,
+    points: [],
+    bestWindowLabel: home.timingLoading,
+    emptyLabel: home.timingLoading,
+  });
 
   const categoryQuestions = questionsByCategory(selectedCategoryId);
   const profileComplete = isProfileRecordComplete(repo.loadProfile());
@@ -63,6 +98,13 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     : typedQuestion;
   const trimmed = question.trim();
   const canSubmit = trimmed.length > 0 && trimmed.length <= MAX_CHARS;
+
+  const popularItems = useMemo(() => listPopularDecisions(lang), [lang]);
+
+  const recentRows = useMemo(
+    () => listRecentDecisions(lang, home.unknownDecisionType),
+    [lang, home.unknownDecisionType]
+  );
 
   const markStarted = () => {
     if (startedRef.current) return;
@@ -82,6 +124,97 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     trackAskEvent('ftue.ask.view');
   }, [authed, profileComplete, router]);
 
+  useQueuedEffect(() => {
+    if (!authed || !profileComplete) return;
+
+    const profile = loadBirthProfile();
+    const profileReady =
+      !!profile &&
+      !!profile.birth_date &&
+      !!profile.birth_time &&
+      !!profile.location &&
+      hasConfirmedCurrentLocation(profile);
+
+    if (!profileReady || !profile) {
+      setEnergy({
+        score: null,
+        loading: false,
+        description: home.energyDescription,
+        bestWindowLabel: home.energyUnavailable,
+        detailsHref: '/home',
+      });
+      setTiming({
+        loading: false,
+        points: [],
+        bestWindowLabel: home.energyUnavailable,
+        emptyLabel: home.timingEmpty,
+      });
+      return;
+    }
+
+    let cancelled = false;
+    setEnergy((prev) => ({ ...prev, loading: true }));
+    setTiming((prev) => ({
+      ...prev,
+      loading: true,
+      emptyLabel: home.timingLoading,
+    }));
+
+    loadTodayTiming(profile, todayYMD(), lang)
+      .then((bundle) => {
+        if (cancelled) return;
+        const bestLabel = bundle.bestHour
+          ? formatHourLabel(bundle.bestHour.hour, lang)
+          : home.energyUnavailable;
+        setEnergy({
+          score: bundle.score,
+          loading: false,
+          description: home.energyDescription,
+          bestWindowLabel: bestLabel,
+          detailsHref: '/home',
+        });
+        setTiming({
+          loading: false,
+          points: bundle.hourly.map((hour) => ({
+            hour: hour.hour,
+            label: formatHourLabel(hour.hour, lang),
+            score: hour.score,
+            isBest: bundle.bestHour?.hour === hour.hour,
+          })),
+          bestWindowLabel: bestLabel,
+          emptyLabel: home.timingEmpty,
+        });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setEnergy({
+          score: null,
+          loading: false,
+          description: home.energyDescription,
+          bestWindowLabel: home.energyUnavailable,
+          detailsHref: '/home',
+        });
+        setTiming({
+          loading: false,
+          points: [],
+          bestWindowLabel: home.energyUnavailable,
+          emptyLabel: home.timingEmpty,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    authed,
+    profileComplete,
+    lang,
+    home.energyDescription,
+    home.energyUnavailable,
+    home.timingEmpty,
+    home.timingLoading,
+  ]);
+
   const handleChange = (value: string) => {
     if (value.length > MAX_CHARS) {
       trackAskEvent('ftue.ask.validation_failed', { reason: 'max_length' });
@@ -92,19 +225,58 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     setTypedQuestion(value);
   };
 
-  const handleCategory = (categoryId: QuestionCategoryId) => {
-    setSelectedCategoryId(categoryId);
-  };
-
   const handleGuidedQuestion = (questionId: GuidedQuestionId) => {
     const guidedQuestion = findGuidedQuestion(questionId);
     if (!guidedQuestion) return;
     markStarted();
     trackAskEvent('ftue.ask.question_selected', { suggestion_id: questionId });
+    // PR-1/PR-2: car-interview enters Decision Case intake (backend Case API).
+    if (questionId === 'job-interview') {
+      router.push('/decision-cases/car-interview');
+      return;
+    }
     setSelectedSuggestionId(questionId);
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const focusSearch = () => {
+    searchRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    window.requestAnimationFrame(() => {
+      document.getElementById(inputId)?.focus();
+    });
+  };
+
+  const handleEntrySelect = (modeId: DecisionEntryModeId) => {
+    setEntryMode(modeId);
+    if (modeId === 'ask-anything') {
+      focusSearch();
+    }
+  };
+
+  const handlePopularSelect = (item: PopularDecision) => {
+    markStarted();
+    // PR-1/PR-2: Interview popular card enters Decision Case API flow.
+    if (
+      item.decisionTypeId === 'car-interview' ||
+      item.guidedQuestionId === 'job-interview'
+    ) {
+      trackAskEvent('ftue.ask.question_selected', {
+        suggestion_id: item.decisionTypeId ?? item.guidedQuestionId,
+      });
+      router.push('/decision-cases/car-interview');
+      return;
+    }
+    if (item.guidedQuestionId) {
+      handleGuidedQuestion(item.guidedQuestionId);
+      setEntryMode('help-me-decide');
+      return;
+    }
+    setSelectedSuggestionId(null);
+    setTypedQuestion(item.label);
+    setEntryMode('ask-anything');
+    focusSearch();
+  };
+
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     const text = question.trim();
     if (!text) {
@@ -142,135 +314,115 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
 
   if (!authed || !profileComplete) {
     return (
-      <div
-        className="min-h-[50vh] flex items-center justify-center"
-        aria-busy="true"
-      />
+      <div className="min-h-[50vh] flex items-center justify-center" aria-busy="true" />
     );
   }
 
-  const charCount = question.length;
-  const askIntel = getAskProfileContext();
-  const decisionUi = getDecisionUi(lang);
-  // Decision-style tags stay as standard English labels (Analytical · Cautious …);
-  // only the section title follows locale. getAskProfileContext already Title-Cases IDs.
-  const decisionStyleTags = askIntel?.decisionStyles ?? [];
-  const liveIntent = trimmed ? detectIntent(trimmed).primaryIntent : null;
-
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6" data-ftue-screen="ask" data-lang={lang}>
-      <header className="mb-6">
-        <p className="fi text-xs uppercase tracking-widest text-amber-400/80 mb-2">{c.step}</p>
-        <h1 className="fc text-2xl tracking-wide text-white mb-2">{c.title}</h1>
-        <p className="fi text-sm text-white/60 leading-relaxed">{c.sub}</p>
-        <p className="fi text-xs text-white/45 mt-2">{decisionUi.askIntro}</p>
-        {decisionStyleTags.length > 0 ? (
-          <p
-            className="fi text-xs text-[#93B4FF] mt-3"
-            data-testid="ask-decision-style"
-          >
-            {decisionUi.decisionStyle}: {decisionStyleTags.join(' · ')}
-          </p>
-        ) : null}
-        {liveIntent ? (
-          <p
-            className="fi text-xs text-white/55 mt-2"
-            data-testid="ask-live-intent"
-          >
-            {decisionUi.detectedIntent}:{' '}
-            <span className="text-[#93B4FF]">
-              {localizeIntent(liveIntent, lang)}
-            </span>
-          </p>
-        ) : null}
-      </header>
+    <div
+      className={askHomeStyles.workspace}
+      data-ftue-screen="ask"
+      data-lang={lang}
+      data-ask-home="v2"
+    >
+      <div className={askHomeStyles.layout}>
+        <div className={askHomeStyles.main}>
+          <div ref={searchRef}>
+            <AskHero title={home.heroTitle} subtitle={home.heroSubtitle}>
+              <DecisionSearch
+                id={inputId}
+                value={question}
+                placeholder={home.searchPlaceholder}
+                ariaLabel={home.searchAriaLabel}
+                submitAria={home.searchSubmitAria}
+                counterLabel={home.charCounter(question.length, MAX_CHARS)}
+                disabled={!canSubmit}
+                onChange={handleChange}
+                onSubmit={handleSubmit}
+              />
+            </AskHero>
+          </div>
 
-      <div className="mb-4 flex flex-wrap gap-2" data-testid="ask-example-prompts">
-        {decisionUi.examplePrompts.map((example) => (
-          <button
-            key={example}
-            type="button"
-            onClick={() => {
-              markStarted();
-              setSelectedSuggestionId(null);
-              setTypedQuestion(example);
-            }}
-            className="ask-chip fi text-xs px-3 py-1.5 rounded-full border border-white/10 text-white/60 hover:text-white hover:border-amber-400/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
-          >
-            {example}
-          </button>
-        ))}
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div>
-          <label htmlFor={inputId} className="fi text-sm text-white/80 mb-2 block">
-            {c.inputLabel}
-          </label>
-          <textarea
-            id={inputId}
-            name="question"
-            value={question}
-            onChange={(e) => handleChange(e.target.value)}
-            placeholder={c.inputPlaceholder}
-            rows={4}
-            maxLength={MAX_CHARS}
-            aria-describedby={counterId}
-            className="ask-input w-full fi text-sm px-4 py-3 rounded-xl bg-black/30 border border-white/10 text-white outline-none resize-y min-h-[120px]"
+          <PopularDecisionGrid
+            title={home.popularTitle}
+            items={popularItems}
+            seeAllLabel={home.seeAllDecisions}
+            onSeeAll={() => handleEntrySelect('help-me-decide')}
+            onSelect={handlePopularSelect}
           />
-          <p
-            id={counterId}
-            aria-live="polite"
-            className="fi text-xs text-white/45 mt-2 text-end"
-          >
-            {c.charCounter(charCount, MAX_CHARS)}
-          </p>
+
+          <div>
+            <DecisionEntryCards
+              title={home.entryTitle}
+              modes={home.entryModes}
+              activeMode={entryMode}
+              onSelect={handleEntrySelect}
+            />
+
+            {entryMode === 'help-me-decide' ? (
+              <div
+                className={askHomeStyles.guidedPanel}
+                data-testid="ask-guided-panel"
+              >
+                <p className={`fi ${askHomeStyles.sectionTitle}`}>
+                  {home.guidedTopicsLabel}
+                </p>
+                <QuestionTopics
+                  categories={QUESTION_CATEGORIES}
+                  selectedCategoryId={selectedCategoryId}
+                  onSelect={setSelectedCategoryId}
+                  lang={lang}
+                  label={copy.suggestionsLabel}
+                />
+                <ul className={askHomeStyles.guidedChips}>
+                  {categoryQuestions.map((guidedQuestion) => {
+                    const label = resolveGuidedQuestionText(guidedQuestion, lang);
+                    const active = selectedSuggestionId === guidedQuestion.id;
+                    return (
+                      <li key={guidedQuestion.id}>
+                        <button
+                          type="button"
+                          className={`fi ${askHomeStyles.guidedChip} ${
+                            active ? askHomeStyles.guidedChipActive : ''
+                          }`.trim()}
+                          onClick={() => handleGuidedQuestion(guidedQuestion.id)}
+                        >
+                          {label}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ) : null}
+          </div>
+
+          <RecentDecisionList
+            title={home.recentTitle}
+            emptyLabel={home.recentEmpty}
+            columns={home.recentColumns}
+            rows={recentRows}
+          />
+
+          <HumanAgencyBanner line1={home.agencyLine1} line2={home.agencyLine2} />
         </div>
 
-        <fieldset>
-          <legend className="fi text-xs uppercase tracking-widest text-white/45 mb-3">
-            {c.suggestionsLabel}
-          </legend>
-          <QuestionTopics
-            categories={QUESTION_CATEGORIES}
-            selectedCategoryId={selectedCategoryId}
-            onSelect={handleCategory}
-            lang={lang}
-            label={c.suggestionsLabel}
+        <aside className={askHomeStyles.rail} aria-label="Decision context">
+          <EnergyWidget
+            title={home.energyTitle}
+            description={home.energyDescription}
+            bestWindowPrefix={home.energyBestWindow}
+            seeDetailsLabel={home.energySeeDetails}
+            state={energy}
           />
-          <div className="flex flex-wrap gap-2 mt-3" role="tabpanel">
-            {categoryQuestions.map((guidedQuestion) => (
-              <button
-                key={guidedQuestion.id}
-                type="button"
-                onClick={() => handleGuidedQuestion(guidedQuestion.id)}
-                className="ask-chip fi text-sm px-3.5 py-2 rounded-full border border-white/15 text-white/75 hover:text-white hover:border-amber-400/40 transition-colors"
-              >
-                {resolveGuidedQuestionText(guidedQuestion, lang)}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          aria-busy={false}
-          className="ask-submit w-full fc py-3.5 rounded-xl text-sm font-medium tracking-wide disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400"
-          style={{
-            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-            color: '#0a0a0a',
-          }}
-        >
-          {c.submit}
-        </button>
-      </form>
-
-      <style>{`
-        .ask-input:focus-visible{outline:2px solid rgba(251,191,36,0.7);outline-offset:2px;border-color:rgba(251,191,36,0.4)}
-        .ask-chip:focus-visible{outline:2px solid rgba(251,191,36,0.7);outline-offset:2px}
-        .ask-submit:focus-visible:not(:disabled){outline:2px solid rgba(251,191,36,0.7);outline-offset:2px}
-      `}</style>
+          <TimingWidget
+            title={home.timingTitle}
+            bestWindowPrefix={home.timingBestWindow}
+            state={timing}
+          />
+          <HowItWorksWidget title={home.howTitle} steps={home.howSteps} />
+        </aside>
+      </div>
     </div>
   );
 }

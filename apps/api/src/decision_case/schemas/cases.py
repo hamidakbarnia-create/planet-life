@@ -58,6 +58,31 @@ class CaseVersionCommandRequest(BaseModel):
     expected_case_version: int = Field(..., ge=1)
 
 
+class IntakeAnswersRequest(BaseModel):
+    """Persist partial intake answers on an existing Decision Case."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    expected_case_version: int = Field(..., ge=1)
+    answers: dict[str, Any] = Field(default_factory=dict)
+
+
+class IntakeCompleteRequest(BaseModel):
+    """Mark intake complete when domain evaluator permits."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    expected_case_version: int = Field(..., ge=1)
+
+
+class CreateEvaluationRequest(BaseModel):
+    """Request a DecisionEvaluationPackage via the Case evaluation boundary."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    expected_case_version: int = Field(..., ge=1)
+
+
 class DecisionCaseResource(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -73,6 +98,23 @@ class DecisionCaseResource(BaseModel):
     case_version: int
     created_at: str
     updated_at: str
+
+
+class DecisionCaseDetailResource(DecisionCaseResource):
+    """GET case detail including current intake snapshot (not a second Case model)."""
+
+    intake: dict[str, Any] = Field(default_factory=dict)
+
+
+class IntakeMutationResponse(BaseModel):
+    """Case + authoritative intake snapshot after an intake write."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    case: DecisionCaseResource
+    intake: dict[str, Any]
+    missing_required: list[str]
+    is_complete: bool
 
 
 class DecisionCaseListEnvelope(BaseModel):

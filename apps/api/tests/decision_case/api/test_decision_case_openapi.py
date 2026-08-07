@@ -1,4 +1,4 @@
-"""OpenAPI activation tests for Decision Case API (E5)."""
+"""OpenAPI activation tests for Decision Case API (E5 + PR-2 intake/eval)."""
 
 from __future__ import annotations
 
@@ -29,13 +29,13 @@ ACTIVE_PATHS = {
     "/api/v1/decision-cases/{case_id}/complete": {"post"},
     "/api/v1/decision-cases/{case_id}/archive": {"post"},
     "/api/v1/decision-cases/{case_id}/history": {"get"},
-    "/api/v1/decision-cases/{case_id}/evaluations": {"get"},
+    "/api/v1/decision-cases/{case_id}/intake/answers": {"post"},
+    "/api/v1/decision-cases/{case_id}/intake/complete": {"post"},
+    "/api/v1/decision-cases/{case_id}/evaluations": {"get", "post"},
     "/api/v1/decision-cases/{case_id}/evaluations/{evaluation_id}": {"get"},
 }
 
 RESERVED_PATHS = {
-    "/api/v1/decision-cases/{case_id}/intake/answers",
-    "/api/v1/decision-cases/{case_id}/intake/complete",
     "/api/v1/decision-cases/{case_id}/comparisons",
 }
 
@@ -61,8 +61,6 @@ def test_reserved_routes_absent_from_openapi() -> None:
     paths = schema["paths"]
     for reserved in RESERVED_PATHS:
         assert reserved not in paths
-    evaluations = paths.get("/api/v1/decision-cases/{case_id}/evaluations", {})
-    assert "post" not in evaluations
 
 
 def test_openapi_documents_case_error_contracts_without_reserved_403() -> None:

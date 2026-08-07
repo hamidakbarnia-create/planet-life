@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { AskScreen } from '@/components/ftue/AskScreen';
 import {
   getAskQuestionRepository,
@@ -8,6 +15,7 @@ import {
 import { saveSession } from '@/lib/auth';
 import { getAskCopy } from '@/lib/ftue-i18n';
 import type { AppLang } from '@/lib/app-settings';
+import { getAskHomeCopy } from '@/lib/ask-home';
 import { getProfileRepository, resetProfileRepositoryForTests } from '@/lib/profile';
 import { questionsByCategory } from '@/lib/question-library';
 
@@ -18,13 +26,32 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace, push }),
 }));
 
+vi.mock('@/lib/today-timing', () => ({
+  loadTodayTiming: vi.fn(async () => ({
+    score: null,
+    reasoning: null,
+    hourly: [],
+    bestHour: null,
+    riskHour: null,
+  })),
+}));
+
 function renderAsk(lang: AppLang = 'en') {
   return render(<AskScreen copy={getAskCopy(lang)} lang={lang} />);
 }
 
+function openHelpMeDecide(lang: AppLang = 'en') {
+  const home = getAskHomeCopy(lang);
+  fireEvent.click(screen.getByRole('button', { name: home.entryModes[0].title }));
+}
+
+function guidedPanel() {
+  return within(screen.getByTestId('ask-guided-panel'));
+}
+
 function clickCareerFocusQuestion() {
   fireEvent.click(
-    screen.getByRole('button', {
+    guidedPanel().getByRole('button', {
       name: /what should i focus on in my career this week/i,
     })
   );
@@ -66,14 +93,23 @@ describe('AskScreen', () => {
     resetAskQuestionRepositoryForTests();
   });
 
-  it('renders the Ask screen', async () => {
+  it('renders the Ask Home decision-start surface', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
+    const home = getAskHomeCopy('en');
 
-    expect(await screen.findByRole('heading', { name: /ask metioro/i })).toBeTruthy();
-    expect(screen.getByLabelText(/your question/i)).toBeTruthy();
-    expect(screen.getByRole('button', { name: /get guidance/i })).toBeTruthy();
-    expect(screen.getByRole('tab', { name: /career & work/i })).toBeTruthy();
+    expect(
+      await screen.findByRole('heading', { name: home.heroTitle })
+    ).toBeTruthy();
+    expect(screen.getByLabelText(home.searchAriaLabel)).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: home.searchSubmitAria })
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('heading', { name: home.popularTitle })
+    ).toBeTruthy();
+    expect(screen.getByRole('heading', { name: home.entryTitle })).toBeTruthy();
+    expect(screen.getByText(home.agencyLine1)).toBeTruthy();
   });
 
   it('redirects to profile onboarding when birth profile is missing', async () => {
@@ -87,31 +123,42 @@ describe('AskScreen', () => {
   it('disables submit when the question is empty', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
+    const home = getAskHomeCopy('en');
 
-    const submit = await screen.findByRole('button', { name: /get guidance/i });
+    const submit = await screen.findByRole('button', {
+      name: home.searchSubmitAria,
+    });
     expect(submit).toHaveProperty('disabled', true);
   });
 
   it('enables submit after typing a question', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
+    const home = getAskHomeCopy('en');
 
-    const input = await screen.findByLabelText(/your question/i);
+    const input = await screen.findByLabelText(home.searchAriaLabel);
     fireEvent.change(input, { target: { value: 'What should I do today?' } });
 
-    const submit = screen.getByRole('button', { name: /get guidance/i });
+    const submit = screen.getByRole('button', { name: home.searchSubmitAria });
     expect(submit).toHaveProperty('disabled', false);
   });
 
-  it('shows eight questions for the selected category', async () => {
+  it('shows guided topics after Help me Decide', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
-    await screen.findByRole('tab', { name: /career & work/i });
+    await screen.findByRole('heading', {
+      name: getAskHomeCopy('en').heroTitle,
+    });
+
+    openHelpMeDecide('en');
+    const panel = guidedPanel();
+
+    expect(panel.getByRole('tab', { name: /career & work/i })).toBeTruthy();
 
     const careerQuestions = questionsByCategory('career-work');
     for (const guided of careerQuestions) {
       expect(
-        screen.getByRole('button', { name: new RegExp(guided.labels.en, 'i') })
+        panel.getByRole('button', { name: new RegExp(guided.labels.en, 'i') })
       ).toBeTruthy();
     }
 
@@ -119,32 +166,42 @@ describe('AskScreen', () => {
     const relationshipQuestions = questionsByCategory('relationships');
     for (const guided of relationshipQuestions) {
       expect(
-        screen.getByRole('button', { name: new RegExp(guided.labels.en, 'i') })
+        panel.getByRole('button', { name: new RegExp(guided.labels.en, 'i') })
       ).toBeTruthy();
     }
     expect(
-      screen.queryByRole('button', { name: /what should i focus on in my career this week/i })
+      panel.queryByRole('button', {
+        name: /what should i focus on in my career this week/i,
+      })
     ).toBeNull();
   });
 
-  it('fills the textbox when a guided question is clicked', async () => {
+  it('fills the search field when a guided question is clicked', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
-    await screen.findByRole('tab', { name: /career & work/i });
+    const home = getAskHomeCopy('en');
+    await screen.findByRole('heading', { name: home.heroTitle });
 
+    openHelpMeDecide('en');
     clickCareerFocusQuestion();
 
-    const input = screen.getByLabelText(/your question/i) as HTMLTextAreaElement;
-    expect(input.value).toBe('What should I focus on in my career this week?');
+    const input = screen.getByLabelText(home.searchAriaLabel) as HTMLInputElement;
+    expect(input.value).toBe(
+      'What should I focus on in my career this week?'
+    );
   });
 
   it('stores a suggestion by id without locale-specific text', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
-    await screen.findByRole('tab', { name: /career & work/i });
+    const home = getAskHomeCopy('en');
+    await screen.findByRole('heading', { name: home.heroTitle });
 
+    openHelpMeDecide('en');
     clickCareerFocusQuestion();
-    fireEvent.click(screen.getByRole('button', { name: /get guidance/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: home.searchSubmitAria })
+    );
 
     const stored = getAskQuestionRepository().loadQuestion();
     expect(stored?.source).toBe('suggestion');
@@ -156,12 +213,16 @@ describe('AskScreen', () => {
   it('stores edited suggestion text as typed', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
-    await screen.findByRole('tab', { name: /career & work/i });
+    const home = getAskHomeCopy('en');
+    await screen.findByRole('heading', { name: home.heroTitle });
 
+    openHelpMeDecide('en');
     clickCareerFocusQuestion();
-    const input = screen.getByLabelText(/your question/i);
+    const input = screen.getByLabelText(home.searchAriaLabel);
     fireEvent.change(input, { target: { value: 'Custom career question' } });
-    fireEvent.click(screen.getByRole('button', { name: /get guidance/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: home.searchSubmitAria })
+    );
 
     const stored = getAskQuestionRepository().loadQuestion();
     expect(stored?.source).toBe('typed');
@@ -172,10 +233,13 @@ describe('AskScreen', () => {
   it('stores the question and navigates to /result on submit', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
+    const home = getAskHomeCopy('en');
 
-    const input = await screen.findByLabelText(/your question/i);
+    const input = await screen.findByLabelText(home.searchAriaLabel);
     fireEvent.change(input, { target: { value: 'What should I do today?' } });
-    fireEvent.click(screen.getByRole('button', { name: /get guidance/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: home.searchSubmitAria })
+    );
 
     const stored = getAskQuestionRepository().loadQuestion();
     expect(stored?.text).toBe('What should I do today?');
@@ -186,15 +250,16 @@ describe('AskScreen', () => {
   it('fires analytics events on view, interaction, and submit', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
+    const home = getAskHomeCopy('en');
 
-    await screen.findByRole('heading', { name: /ask metioro/i });
+    await screen.findByRole('heading', { name: home.heroTitle });
 
     await waitFor(() => {
       const queue = localStorage.getItem('planet-life-ftue-events');
       expect(queue).toContain('ftue.ask.view');
     });
 
-    const input = screen.getByLabelText(/your question/i);
+    const input = screen.getByLabelText(home.searchAriaLabel);
     fireEvent.change(input, { target: { value: 'Test question' } });
 
     await waitFor(() => {
@@ -202,9 +267,10 @@ describe('AskScreen', () => {
       expect(queue).toContain('ftue.ask.started');
     });
 
+    openHelpMeDecide('en');
     fireEvent.click(getCategoryTab(/love & people/i));
     fireEvent.click(
-      screen.getByRole('button', {
+      guidedPanel().getByRole('button', {
         name: /how can i strengthen an important relationship right now/i,
       })
     );
@@ -213,61 +279,129 @@ describe('AskScreen', () => {
       expect(queue).toContain('ftue.ask.question_selected');
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /get guidance/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: home.searchSubmitAria })
+    );
     await waitFor(() => {
       const queue = localStorage.getItem('planet-life-ftue-events');
       expect(queue).toContain('ftue.ask.submitted');
     });
   });
 
-  it('updates category labels when parent passes a new locale', async () => {
+  it('updates Ask Home copy when parent passes a new locale', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     const { rerender } = renderAsk('en');
-    await screen.findByRole('tab', { name: /career & work/i });
+    const en = getAskHomeCopy('en');
+    await screen.findByRole('heading', { name: en.heroTitle });
 
     rerender(<AskScreen copy={getAskCopy('fa')} lang="fa" />);
+    const fa = getAskHomeCopy('fa');
 
-    expect(screen.getByRole('heading', { name: /از METIORO بپرسید/i })).toBeTruthy();
-    expect(screen.getByLabelText(/پرسش شما/i)).toBeTruthy();
-    expect(screen.getByRole('button', { name: /دریافت راهنمایی/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: fa.heroTitle })).toBeTruthy();
+    expect(screen.getByLabelText(fa.searchAriaLabel)).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: fa.searchSubmitAria })
+    ).toBeTruthy();
+    expect(screen.getByText(fa.agencyLine1)).toBeTruthy();
+  });
+
+  it('localizes guided topics when Help me Decide is opened in fa', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('fa');
+    const fa = getAskHomeCopy('fa');
+
+    await screen.findByRole('heading', { name: fa.heroTitle });
+    openHelpMeDecide('fa');
+
     expect(screen.getByRole('tab', { name: /مسیر شغلی و کار/i })).toBeTruthy();
     expect(screen.getByRole('tab', { name: /عشق و افراد/i })).toBeTruthy();
   });
 
-  it('localizes Ask intro, example chips, and keeps English decision-style tags for fa', async () => {
-    getProfileRepository().saveProfile(sampleProfile);
-    renderAsk('fa');
-
-    expect(
-      await screen.findByText(
-        /Ask سؤال شما را به هوش تصمیم ساخت‌یافته تبدیل می‌کند/
-      )
-    ).toBeTruthy();
-    expect(
-      screen.getByRole('button', { name: /آیا باید این پیشنهاد شغلی را بپذیرم؟/ })
-    ).toBeTruthy();
-    expect(
-      screen.queryByText(/Ask turns your question into structured decision intelligence/i)
-    ).toBeNull();
-    expect(
-      screen.queryByRole('button', { name: /Should I accept this job offer/i })
-    ).toBeNull();
-  });
-
-  it('updates question labels when parent passes a new locale', async () => {
+  it('updates guided question labels when parent passes a new locale', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     const { rerender } = renderAsk('en');
-    await screen.findByRole('tab', { name: /career & work/i });
+    const en = getAskHomeCopy('en');
+    await screen.findByRole('heading', { name: en.heroTitle });
+
+    openHelpMeDecide('en');
     clickCareerFocusQuestion();
 
     rerender(<AskScreen copy={getAskCopy('fa')} lang="fa" />);
+    const fa = getAskHomeCopy('fa');
 
-    const input = screen.getByLabelText(/پرسش شما/i) as HTMLTextAreaElement;
-    expect(input.value).toBe('این هفته روی چه چیزی در مسیر شغلی‌ام تمرکز کنم؟');
+    const input = screen.getByLabelText(fa.searchAriaLabel) as HTMLInputElement;
+    expect(input.value).toBe(
+      'این هفته روی چه چیزی در مسیر شغلی‌ام تمرکز کنم؟'
+    );
     expect(
-      screen.getByRole('button', {
+      guidedPanel().getByRole('button', {
         name: /این هفته روی چه چیزی در مسیر شغلی‌ام تمرکز کنم/i,
       })
     ).toBeTruthy();
+  });
+
+  it('renders popular decisions from the data provider', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('en');
+    await screen.findByRole('heading', {
+      name: getAskHomeCopy('en').popularTitle,
+    });
+
+    expect(
+      screen.getByRole('button', { name: 'Attend job interview' })
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Choose wedding date' })
+    ).toBeTruthy();
+  });
+
+  it('routes car-interview popular cards into Decision Case intake', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('en');
+    await screen.findByRole('button', { name: 'Attend job interview' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Attend job interview' }));
+
+    expect(push).toHaveBeenCalledWith('/decision-cases/car-interview');
+    expect(push).not.toHaveBeenCalledWith('/result');
+  });
+
+  it('routes job-interview guided chips into Decision Case intake', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('en');
+    await screen.findByRole('heading', {
+      name: getAskHomeCopy('en').heroTitle,
+    });
+    openHelpMeDecide();
+    await waitFor(() => expect(screen.getByTestId('ask-guided-panel')).toBeTruthy());
+
+    fireEvent.click(
+      guidedPanel().getByRole('button', { name: /^job interview$/i })
+    );
+
+    expect(push).toHaveBeenCalledWith('/decision-cases/car-interview');
+    expect(push).not.toHaveBeenCalledWith('/result');
+  });
+
+  it('keeps unrelated guided questions on the legacy Ask → /result path', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('en');
+    await screen.findByRole('heading', {
+      name: getAskHomeCopy('en').heroTitle,
+    });
+    openHelpMeDecide();
+    await waitFor(() => expect(screen.getByTestId('ask-guided-panel')).toBeTruthy());
+
+    fireEvent.click(
+      guidedPanel().getByRole('button', {
+        name: /send a resume or job application/i,
+      })
+    );
+    expect(push).not.toHaveBeenCalledWith('/decision-cases/car-interview');
+
+    fireEvent.click(
+      screen.getByRole('button', { name: getAskHomeCopy('en').searchSubmitAria })
+    );
+    expect(push).toHaveBeenCalledWith('/result');
   });
 });
