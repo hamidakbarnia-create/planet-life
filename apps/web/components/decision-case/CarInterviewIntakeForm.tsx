@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   CAR_INTERVIEW_FORM_FIELDS,
   demoHasFirstRequiredAnswer,
@@ -18,10 +18,14 @@ export function CarInterviewIntakeForm({
 }: {
   initialIntake?: CarInterviewIntake;
   submitting?: boolean;
-  onSubmitAnswers: (answers: Partial<CarInterviewIntake>) => void;
-  onComplete: (answers: Partial<CarInterviewIntake>) => void;
+  onSubmitAnswers: (answers: Partial<CarInterviewIntake>) => void | Promise<void>;
+  onComplete: (answers: Partial<CarInterviewIntake>) => void | Promise<void>;
 }) {
   const [draft, setDraft] = useState<CarInterviewIntake>(initialIntake ?? {});
+
+  useEffect(() => {
+    setDraft(initialIntake ?? {});
+  }, [initialIntake]);
   const missingRequired = useMemo(
     () => demoMissingRequiredFields(draft),
     [draft]
@@ -42,7 +46,7 @@ export function CarInterviewIntakeForm({
       data-testid="car-interview-intake-form"
       onSubmit={(event) => {
         event.preventDefault();
-        onSubmitAnswers(draft);
+        void onSubmitAnswers(draft);
       }}
     >
       <div className="space-y-4">
@@ -90,7 +94,7 @@ export function CarInterviewIntakeForm({
 
       <p className="fi text-xs text-white/45" data-testid="intake-status">
         {requiredPresent
-          ? 'Required demo fields filled — you can generate the demo package.'
+          ? 'Required fields filled — backend will confirm completeness.'
           : `Required remaining: ${missingRequired.join(', ') || 'none'}`}
       </p>
 
@@ -109,11 +113,13 @@ export function CarInterviewIntakeForm({
         <button
           type="button"
           disabled={submitting || !requiredPresent}
-          onClick={() => onComplete(draft)}
+          onClick={() => {
+            void onComplete(draft);
+          }}
           className="fc rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white/85 disabled:cursor-not-allowed disabled:opacity-40"
           data-testid="intake-complete"
         >
-          Generate demo package
+          Complete intake
         </button>
       </div>
     </form>

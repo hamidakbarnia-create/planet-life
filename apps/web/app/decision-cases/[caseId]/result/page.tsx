@@ -7,10 +7,11 @@ import { AppShell } from '@/components/AppShell';
 import { DecisionPackageView } from '@/components/decision-case/DecisionPackageView';
 import { localeFontFamily } from '@/lib/brand-theme';
 import {
-  bindDemoCarInterviewPackage,
-  getDemoCase,
-  listLocalDemoEvents,
-  type DemoCaseRecord,
+  DecisionCaseApiError,
+  loadCaseResult,
+  type DecisionCaseResource,
+  type DecisionEvaluationResource,
+  type DecisionHistoryEvent,
 } from '@/lib/decision-case';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
@@ -22,26 +23,38 @@ export default function DecisionCaseResultPage() {
   const t = HOME_LANGS[lang];
   const params = useParams<{ caseId: string }>();
   const caseId = params?.caseId;
-  const [demoCase, setDemoCase] = useState<DemoCaseRecord | null>(null);
+  const [caseRecord, setCaseRecord] = useState<DecisionCaseResource | null>(
+    null
+  );
+  const [evaluation, setEvaluation] =
+    useState<DecisionEvaluationResource | null>(null);
+  const [history, setHistory] = useState<DecisionHistoryEvent[]>([]);
   const [error, setError] = useState('');
-  const [localEventCount, setLocalEventCount] = useState(0);
 
   useQueuedEffect(() => {
     if (!ready || !caseId) return;
-    try {
-      let current = getDemoCase(caseId);
-      if (!current) {
-        setError('Demo case not found in local session adapter.');
-        return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const loaded = await loadCaseResult(caseId);
+        if (cancelled) return;
+        setCaseRecord(loaded.caseRecord);
+        setEvaluation(loaded.evaluation);
+        setHistory(loaded.history);
+      } catch (err) {
+        if (cancelled) return;
+        if (err instanceof DecisionCaseApiError) {
+          setError(`${err.code}: ${err.message}`);
+        } else {
+          setError(
+            err instanceof Error ? err.message : 'Failed to load case result'
+          );
+        }
       }
-      if (!current.package) {
-        current = bindDemoCarInterviewPackage(caseId);
-      }
-      setDemoCase(current);
-      setLocalEventCount(listLocalDemoEvents(caseId).length);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to bind demo package');
-    }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [ready, caseId]);
 
   if (!ready) {
@@ -61,15 +74,15 @@ export default function DecisionCaseResultPage() {
       <div className="mx-auto max-w-3xl px-4 py-8 space-y-6">
         <header className="space-y-2">
           <p className="fi text-xs uppercase tracking-[0.16em] text-amber-400/80">
-            Walking skeleton result
+            Decision Case Result
           </p>
           <h1 className="fc text-2xl text-white">
-            {demoCase?.title ?? 'Demo decision package'}
+            {caseRecord?.title ?? 'Decision package'}
           </h1>
-          {demoCase ? (
-            <p className="fi text-xs text-white/45" data-testid="result-demo-meta">
-              {demoCase.decisionTypeId} · {demoCase.uiState} · local demo events{' '}
-              {localEventCount}
+          {caseRecord ? (
+            <p className="fi text-xs text-white/45" data-testid="result-case-meta">
+              {caseRecord.decision_type_id} · {caseRecord.state} · v
+              {caseRecord.case_version} · Case history events {history.length}
             </p>
           ) : null}
         </header>
@@ -80,12 +93,34 @@ export default function DecisionCaseResultPage() {
           </p>
         ) : null}
 
-        {demoCase?.package ? (
+        {evaluation?.package ? (
           <div className="mio-glass mio-glass--primary !p-5">
-            <DecisionPackageView package={demoCase.package} />
+            <DecisionPackageView package={evaluation.package} />
           </div>
         ) : !error ? (
-          <p className="fi text-sm text-white/55">Binding demo package…</p>
+          <p className="fi text-sm text-white/55">Loading evaluation…</p>
+        ) : null}
+
+        {history.length > 0 ? (
+          <section
+            className="space-y-2"
+            aria-labelledby="case-history-heading"
+            data-testid="case-history"
+          >
+            <h2 id="case-history-heading" className="fc text-sm text-amber-300/90">
+              Case history
+            </h2>
+            <ul className="fi text-xs text-white/55 space-y-1">
+              {history.map((event) => (
+                <li key={event.history_id}>
+                  {event.at} · {event.event}
+                  {event.from_state && event.to_state
+                    ? ` (${event.from_state} → ${event.to_state})`
+                    : ''}
+                </li>
+              ))}
+            </ul>
+          </section>
         ) : null}
 
         <Link

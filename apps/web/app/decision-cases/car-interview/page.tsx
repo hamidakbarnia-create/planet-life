@@ -8,21 +8,60 @@ import { localeFontFamily } from '@/lib/brand-theme';
 import {
   CAR_INTERVIEW_DECISION_TYPE_ID,
   CAR_INTERVIEW_LABEL,
-  saveDemoCarInterviewAnswers,
+  DecisionCaseApiError,
+  completeCaseIntake,
+  ensureCaseAndSaveAnswers,
+  getDecisionCase,
   type CarInterviewIntake,
 } from '@/lib/decision-case';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
+import { useQueuedEffect } from '@/lib/use-queued-effect';
+
+function readCaseIdFromQuery(): string | null {
+  if (typeof window === 'undefined') return null;
+  return new URLSearchParams(window.location.search).get('caseId');
+}
 
 export default function CarInterviewIntakePage() {
   const ready = useClientReady();
   const [lang, setLang] = useAppLang();
   const t = HOME_LANGS[lang];
   const router = useRouter();
-  const [demoCaseId, setDemoCaseId] = useState<string | null>(null);
+  const [caseId, setCaseId] = useState<string | null>(null);
+  const [caseVersion, setCaseVersion] = useState<number | null>(null);
   const [intake, setIntake] = useState<CarInterviewIntake>({});
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+
+  useQueuedEffect(() => {
+    if (!ready) return;
+    const fromQuery = readCaseIdFromQuery();
+    if (fromQuery && fromQuery !== caseId) {
+      setCaseId(fromQuery);
+      return;
+    }
+    if (!caseId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const current = await getDecisionCase(caseId);
+        if (cancelled) return;
+        setCaseVersion(current.case_version);
+        setIntake(current.intake ?? {});
+      } catch (err) {
+        if (cancelled) return;
+        setError(
+          err instanceof DecisionCaseApiError
+            ? err.message
+            : 'Unable to load Decision Case'
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, caseId]);
 
   if (!ready) {
     return (
@@ -41,16 +80,17 @@ export default function CarInterviewIntakePage() {
       <div className="mx-auto max-w-2xl px-4 py-8 space-y-6">
         <header className="space-y-2">
           <p className="fi text-xs uppercase tracking-[0.16em] text-amber-400/80">
-            Walking skeleton · {CAR_INTERVIEW_DECISION_TYPE_ID}
+            Decision Case · {CAR_INTERVIEW_DECISION_TYPE_ID}
           </p>
           <h1 className="fc text-2xl text-white">{CAR_INTERVIEW_LABEL}</h1>
           <p className="fi text-sm text-white/60">
-            Demo intake only. Answers stay in a temporary client adapter until
-            the Decision Case intake API is wired.
+            Answer required intake fields. A Decision Case is created only after
+            your first meaningful required answer, via the backend Case API.
           </p>
-          {demoCaseId ? (
-            <p className="fi text-xs text-white/45" data-testid="active-demo-case-id">
-              Demo case {demoCaseId}
+          {caseId ? (
+            <p className="fi text-xs text-white/45" data-testid="active-case-id">
+              Case {caseId}
+              {caseVersion != null ? ` · v${caseVersion}` : ''}
             </p>
           ) : null}
         </header>
@@ -65,40 +105,53 @@ export default function CarInterviewIntakePage() {
           <CarInterviewIntakeForm
             initialIntake={intake}
             submitting={busy}
-            onSubmitAnswers={(answers) => {
+            onSubmitAnswers={async (answers) => {
               setBusy(true);
               setError('');
               try {
-                const result = saveDemoCarInterviewAnswers({
-                  demoCaseId,
+                const result = await ensureCaseAndSaveAnswers({
+                  caseId,
+                  caseVersion,
                   answers,
                 });
-                setDemoCaseId(result.demoCase.demoCaseId);
-                setIntake(result.demoCase.intake);
+                setCaseId(result.case.case_id);
+                setCaseVersion(result.case.case_version);
+                setIntake(result.intake);
+                router.replace(
+                  `/decision-cases/car-interview?caseId=${result.case.case_id}`
+                );
               } catch (err) {
-                setError(err instanceof Error ? err.message : 'Save failed');
+                setError(
+                  err instanceof Error ? err.message : 'Save failed'
+                );
               } finally {
                 setBusy(false);
               }
             }}
-            onComplete={(answers) => {
+            onComplete={async (answers) => {
               setBusy(true);
               setError('');
               try {
-                const result = saveDemoCarInterviewAnswers({
-                  demoCaseId,
+                const saved = await ensureCaseAndSaveAnswers({
+                  caseId,
+                  caseVersion,
                   answers,
                 });
-                setDemoCaseId(result.demoCase.demoCaseId);
-                setIntake(result.demoCase.intake);
-                if (!result.requiredPresent) {
+                setCaseId(saved.case.case_id);
+                setCaseVersion(saved.case.case_version);
+                setIntake(saved.intake);
+                if (!saved.is_complete) {
                   setError(
-                    `Complete required fields: ${result.missingRequired.join(', ')}`
+                    `Complete required fields: ${saved.missing_required.join(', ')}`
                   );
                   return;
                 }
+                const completed = await completeCaseIntake({
+                  caseId: saved.case.case_id,
+                  caseVersion: saved.case.case_version,
+                });
                 router.push(
-                  `/decision-cases/${result.demoCase.demoCaseId}/result`
+                  `/decision-cases/${completed.case.case_id}/result`
                 );
               } catch (err) {
                 setError(

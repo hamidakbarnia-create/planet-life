@@ -1,9 +1,9 @@
 /**
- * PR-1 demo fixture adapter for DecisionEvaluationPackage v1.
+ * Test/contract helper for DecisionEvaluationPackage v1 fixtures.
  *
+ * Production evaluation packages come from the Decision Case evaluation API.
  * Authoritative stub builder: packages/decision_engine/evaluate/stub_package.py
- * This module only binds identity fields onto a checked-in schema-valid fixture
- * produced from that Python stub. It is not a second runtime implementation.
+ * This module must not be used as the production result-page evaluation source.
  */
 
 import demoFixture from './fixtures/car-interview-stub-package.demo.json';

@@ -34,13 +34,25 @@ from decision_case.repository.errors import (
 from decision_case.schemas.cases import (
     CaseVersionCommandRequest,
     CreateDecisionCaseRequest,
+    CreateEvaluationRequest,
     DecisionApiErrorBody,
     DecisionApiErrorResponse,
+    DecisionCaseDetailResource,
     DecisionCaseListEnvelope,
     DecisionCaseResource,
     DecisionEvaluationListEnvelope,
     DecisionEvaluationResource,
     DecisionHistoryEnvelope,
+    IntakeAnswersRequest,
+    IntakeCompleteRequest,
+    IntakeMutationResponse,
+)
+from decision_case.services.car_interview_intake import (
+    IntakeIncompleteError,
+    UnsupportedDecisionTypeError,
+    complete_car_interview_intake,
+    evaluate_car_interview_case,
+    save_car_interview_answers,
 )
 from packages.decision_engine.registry import (
     EntryModeUnavailableError,
@@ -54,8 +66,6 @@ CASE_API_PATH_PREFIX = "/api/v1/decision-cases"
 
 _RESERVED_OPENAPI_PATHS: frozenset[str] = frozenset(
     {
-        "/api/v1/decision-cases/{case_id}/intake/answers",
-        "/api/v1/decision-cases/{case_id}/intake/complete",
         "/api/v1/decision-cases/{case_id}/comparisons",
     }
 )
@@ -121,8 +131,24 @@ def _safe_message(code: str) -> str:
         "VERSION_CONFLICT": "Case version conflict",
         "ILLEGAL_TRANSITION": "Illegal case lifecycle transition",
         "DUPLICATE_CASE": "Duplicate decision case",
+        "INTAKE_INCOMPLETE": "Intake is incomplete",
+        "UNSUPPORTED_DECISION_TYPE": "Decision type is not supported for this operation",
         "INTERNAL_ERROR": "Internal server error",
     }.get(code, "Request failed")
+
+
+def _to_case_detail(
+    repo: DecisionCaseRepository,
+    case_id: UUID,
+    owner_subject_id: str,
+) -> DecisionCaseDetailResource:
+    case = repo.get_case(case_id, owner_subject_id)
+    version = repo.get_current_version(case_id, owner_subject_id)
+    base = to_case_resource(case)
+    return DecisionCaseDetailResource(
+        **base.model_dump(),
+        intake=dict(version.intake or {}),
+    )
 
 
 def _current_version_details(
@@ -253,8 +279,6 @@ def register_decision_case_openapi_filter(app: Any) -> None:
                 if isinstance(method_item, dict):
                     method_item.get("responses", {}).pop("422", None)
                     method_item.get("responses", {}).pop("403", None)
-            if path == "/api/v1/decision-cases/{case_id}/evaluations":
-                path_item.pop("post", None)
         return schema
 
     app.openapi = filtered_openapi
@@ -326,7 +350,7 @@ def list_decision_cases(
 
 @router.get(
     "/{case_id}",
-    response_model=DecisionCaseResource,
+    response_model=DecisionCaseDetailResource,
     responses=_ERROR_RESPONSES,
 )
 def get_decision_case(
@@ -334,10 +358,10 @@ def get_decision_case(
     request: Request,
     repo: DecisionCaseRepository = Depends(get_decision_case_repository),
     owner_subject_id: str = Depends(get_e5_owner_subject_id),
-) -> DecisionCaseResource | JSONResponse:
+) -> DecisionCaseDetailResource | JSONResponse:
     request_id = get_request_id(request)
     try:
-        return to_case_resource(repo.get_case(case_id, owner_subject_id))
+        return _to_case_detail(repo, case_id, owner_subject_id)
     except Exception as exc:
         return _map_repository_error(
             exc,
@@ -345,6 +369,162 @@ def get_decision_case(
             repo=repo,
             case_id=case_id,
             owner_subject_id=owner_subject_id,
+        )
+
+
+@router.post(
+    "/{case_id}/intake/answers",
+    response_model=IntakeMutationResponse,
+    responses=_ERROR_RESPONSES,
+)
+def post_intake_answers(
+    case_id: UUID,
+    body: IntakeAnswersRequest,
+    request: Request,
+    repo: DecisionCaseRepository = Depends(get_decision_case_repository),
+    owner_subject_id: str = Depends(get_e5_owner_subject_id),
+) -> IntakeMutationResponse | JSONResponse:
+    request_id = get_request_id(request)
+    try:
+        case, intake, missing, is_complete = save_car_interview_answers(
+            repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
+            answers=body.answers,
+        )
+        return IntakeMutationResponse(
+            case=to_case_resource(case),
+            intake=intake,
+            missing_required=missing,
+            is_complete=is_complete,
+        )
+    except IntakeIncompleteError as exc:
+        return _error_response(
+            status_code=400,
+            code="INTAKE_INCOMPLETE",
+            message=_safe_message("INTAKE_INCOMPLETE"),
+            request_id=request_id,
+            details={"missing_required": list(exc.missing_required)},
+        )
+    except UnsupportedDecisionTypeError as exc:
+        return _error_response(
+            status_code=400,
+            code="UNSUPPORTED_DECISION_TYPE",
+            message=_safe_message("UNSUPPORTED_DECISION_TYPE"),
+            request_id=request_id,
+            details={"decision_type_id": exc.decision_type_id},
+        )
+    except Exception as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
+        )
+
+
+@router.post(
+    "/{case_id}/intake/complete",
+    response_model=IntakeMutationResponse,
+    responses=_ERROR_RESPONSES,
+)
+def post_intake_complete(
+    case_id: UUID,
+    body: IntakeCompleteRequest,
+    request: Request,
+    repo: DecisionCaseRepository = Depends(get_decision_case_repository),
+    owner_subject_id: str = Depends(get_e5_owner_subject_id),
+) -> IntakeMutationResponse | JSONResponse:
+    request_id = get_request_id(request)
+    try:
+        case, intake, missing, is_complete = complete_car_interview_intake(
+            repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
+        )
+        return IntakeMutationResponse(
+            case=to_case_resource(case),
+            intake=intake,
+            missing_required=missing,
+            is_complete=is_complete,
+        )
+    except IntakeIncompleteError as exc:
+        return _error_response(
+            status_code=400,
+            code="INTAKE_INCOMPLETE",
+            message=_safe_message("INTAKE_INCOMPLETE"),
+            request_id=request_id,
+            details={"missing_required": list(exc.missing_required)},
+        )
+    except UnsupportedDecisionTypeError as exc:
+        return _error_response(
+            status_code=400,
+            code="UNSUPPORTED_DECISION_TYPE",
+            message=_safe_message("UNSUPPORTED_DECISION_TYPE"),
+            request_id=request_id,
+            details={"decision_type_id": exc.decision_type_id},
+        )
+    except Exception as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
+        )
+
+
+@router.post(
+    "/{case_id}/evaluations",
+    response_model=DecisionEvaluationResource,
+    status_code=201,
+    responses=_ERROR_RESPONSES,
+)
+def create_decision_case_evaluation(
+    case_id: UUID,
+    body: CreateEvaluationRequest,
+    request: Request,
+    repo: DecisionCaseRepository = Depends(get_decision_case_repository),
+    owner_subject_id: str = Depends(get_e5_owner_subject_id),
+) -> DecisionEvaluationResource | JSONResponse:
+    request_id = get_request_id(request)
+    try:
+        record = evaluate_car_interview_case(
+            repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
+        )
+        return to_evaluation_resource(record)
+    except IntakeIncompleteError as exc:
+        return _error_response(
+            status_code=400,
+            code="INTAKE_INCOMPLETE",
+            message=_safe_message("INTAKE_INCOMPLETE"),
+            request_id=request_id,
+            details={"missing_required": list(exc.missing_required)},
+        )
+    except UnsupportedDecisionTypeError as exc:
+        return _error_response(
+            status_code=400,
+            code="UNSUPPORTED_DECISION_TYPE",
+            message=_safe_message("UNSUPPORTED_DECISION_TYPE"),
+            request_id=request_id,
+            details={"decision_type_id": exc.decision_type_id},
+        )
+    except Exception as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
         )
 
 

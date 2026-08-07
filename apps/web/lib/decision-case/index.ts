@@ -21,14 +21,24 @@ export {
   bindDemoStubPackage,
 } from './demo-stub-fixture';
 export {
-  bindDemoCarInterviewPackage,
-  getDemoCase,
-  listDemoCases,
-  listLocalDemoEvents,
-  resetClientDemoAdapterForTests,
-  saveDemoCarInterviewAnswers,
-  type DemoCaseRecord,
-  type DemoUiState,
-  type LocalDemoEvent,
-} from './client-demo-adapter';
+  DecisionCaseApiError,
+  completeIntake,
+  createDecisionCase,
+  evaluateDecisionCase,
+  getDecisionCase,
+  getDecisionCaseHistory,
+  getEvaluation,
+  listDecisionCaseEvaluations,
+  saveIntakeAnswers,
+  type DecisionCaseResource,
+  type DecisionEvaluationResource,
+  type DecisionHistoryEvent,
+  type IntakeMutationResult,
+} from './api-client';
+export {
+  completeCaseIntake,
+  ensureCaseAndSaveAnswers,
+  loadCaseResult,
+  requestCaseEvaluation,
+} from './session';
 export type { DecisionEvaluationPackage } from './package-types';
