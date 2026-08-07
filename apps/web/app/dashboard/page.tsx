@@ -17,10 +17,9 @@ import { BRAND_I18N } from '@/lib/brand';
 import type { BrandLang } from '@/lib/brand';
 import { localeFontFamily } from '@/lib/brand-theme';
 import { HOME_LANGS } from '@/lib/home-i18n';
+import { API_BASE } from '@/lib/api-config';
 import type { CitySelection } from '@/lib/chart-types';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
-
-const API = process.env.NEXT_PUBLIC_API_BASE ?? 'https://api.metioro.com';
 
 const LANGS = {
   en: {
@@ -199,7 +198,7 @@ export default function Dashboard() {
     setModuleBannerDismissed(false);
     setLoading(true); setError(''); setRawResult(null); setAnimated(false);
     try {
-      const res = await fetch(`${API}/api/${domain}/analyze`, {
+      const res = await fetch(`${API_BASE}/api/${domain}/analyze`, {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify(form)
       });

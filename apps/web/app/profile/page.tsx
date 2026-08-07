@@ -17,6 +17,7 @@ import { GeocodeConfirmDialog } from '@/components/GeocodeConfirmDialog';
 import { AppShell } from '@/components/AppShell';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { MetricCard } from '@/components/ui/MetricCard';
+import { API_BASE } from '@/lib/api-config';
 import { localeFontFamily } from '@/lib/brand-theme';
 import {
   type ChartData,
@@ -454,8 +455,6 @@ function ProfileEditor() {
     setChartData(null);
 
     try {
-      const apiBase =
-        process.env.NEXT_PUBLIC_API_BASE ?? 'https://api.metioro.com';
       const coords = chartApiCoordinatesFromResolved(resolvedLocation, selectedCity);
       const body: Record<string, unknown> = {
         birth_date: birthDate,
@@ -471,7 +470,7 @@ function ProfileEditor() {
       if (selectedCity?.country) {
         body.country = selectedCity.country;
       }
-      const res = await fetch(`${apiBase}/api/business/chart`, {
+      const res = await fetch(`${API_BASE}/api/business/chart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
