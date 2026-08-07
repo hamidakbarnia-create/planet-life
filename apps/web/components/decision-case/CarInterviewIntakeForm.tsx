@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   CAR_INTERVIEW_FORM_FIELDS,
   demoHasFirstRequiredAnswer,
@@ -21,11 +21,9 @@ export function CarInterviewIntakeForm({
   onSubmitAnswers: (answers: Partial<CarInterviewIntake>) => void | Promise<void>;
   onComplete: (answers: Partial<CarInterviewIntake>) => void | Promise<void>;
 }) {
+  // Parent remounts via `key` when case intake is loaded/updated so draft
+  // initializes from props without a props→setState effect.
   const [draft, setDraft] = useState<CarInterviewIntake>(initialIntake ?? {});
-
-  useEffect(() => {
-    setDraft(initialIntake ?? {});
-  }, [initialIntake]);
   const missingRequired = useMemo(
     () => demoMissingRequiredFields(draft),
     [draft]

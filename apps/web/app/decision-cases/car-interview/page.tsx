@@ -103,6 +103,7 @@ export default function CarInterviewIntakePage() {
 
         <div className="mio-glass mio-glass--primary !p-5">
           <CarInterviewIntakeForm
+            key={`${caseId ?? 'new'}-${caseVersion ?? 0}`}
             initialIntake={intake}
             submitting={busy}
             onSubmitAnswers={async (answers) => {
