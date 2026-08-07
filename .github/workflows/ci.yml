@@ -2,7 +2,19 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
+      - governance-foundation
+      - "feat/**"
+      - "fix/**"
+
   pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   release-gate:
@@ -16,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
 
@@ -52,5 +64,22 @@ jobs:
         working-directory: apps/web
         run: npm run test
 
+      - name: Decision engine tests
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m pytest \
+            packages/decision_engine/tests \
+            -q \
+            --disable-warnings \
+            --maxfail=1
+
       - name: API pytest
-        run: python -m pytest apps/api/tests -q
+        env:
+          PYTHONPATH: apps/api/src:.
+        run: |
+          python -m pytest \
+            apps/api/tests \
+            -q \
+            --disable-warnings \
+            --maxfail=1
