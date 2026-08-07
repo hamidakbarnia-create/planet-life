@@ -1,0 +1,379 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metioro.com/schemas/decision_evaluation_package.v1.json",
+  "title": "DecisionEvaluationPackage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "evaluation_id",
+    "evaluation_version",
+    "case_version",
+    "decision_type_id",
+    "family_id",
+    "mode",
+    "precision_level",
+    "engine_id",
+    "created_at",
+    "schema_version",
+    "recommendation",
+    "timing",
+    "confidence",
+    "evidence",
+    "drivers",
+    "tradeoffs",
+    "risks",
+    "opportunities",
+    "action_plan",
+    "counter_recommendation",
+    "explainability",
+    "improve_accuracy",
+    "next_decisions",
+    "related_decisions"
+  ],
+  "properties": {
+    "case_id": { "type": "string", "format": "uuid" },
+    "evaluation_id": { "type": "string", "format": "uuid" },
+    "evaluation_version": { "type": "integer", "minimum": 1 },
+    "case_version": { "type": "integer", "minimum": 1 },
+    "decision_type_id": { "type": "string", "minLength": 1 },
+    "family_id": { "type": "string", "minLength": 1 },
+    "mode": {
+      "type": "string",
+      "enum": ["evaluate_date", "compare_dates"]
+    },
+    "precision_level": {
+      "$ref": "#/$defs/precisionLevel"
+    },
+    "engine_id": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "schema_version": { "const": "1.0.0" },
+
+    "recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stance", "conditions", "summary"],
+      "properties": {
+        "stance": { "$ref": "#/$defs/stance" },
+        "conditions": {
+          "type": "array",
+          "maxItems": 5,
+          "items": { "type": "string" }
+        },
+        "summary": { "type": "string", "minLength": 1 }
+      }
+    },
+
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["material", "band", "score", "candidates", "notes"],
+      "properties": {
+        "material": { "type": "boolean" },
+        "band": {
+          "type": "string",
+          "enum": ["high", "moderate", "low", "na"]
+        },
+        "score": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "candidates": {
+          "type": "array",
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/timingCandidate" }
+        },
+        "notes": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "material": { "const": false } },
+            "required": ["material"]
+          },
+          "then": {
+            "properties": {
+              "band": { "const": "na" },
+              "score": { "type": "null" }
+            }
+          }
+        }
+      ]
+    },
+
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "precision_level", "penalties"],
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "precision_level": {
+          "$ref": "#/$defs/precisionLevel"
+        },
+        "penalties": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/confidencePenalty" }
+        }
+      }
+    },
+
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenceItem" }
+        }
+      }
+    },
+
+    "drivers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/driverItem" }
+        }
+      }
+    },
+
+    "tradeoffs": { "$ref": "#/$defs/limitedStringItems" },
+    "risks": { "$ref": "#/$defs/limitedStringItems" },
+    "opportunities": { "$ref": "#/$defs/limitedStringItems" },
+
+    "action_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["steps"],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 7,
+          "items": { "$ref": "#/$defs/actionStep" }
+        }
+      }
+    },
+
+    "counter_recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stance", "summary", "reason"],
+      "properties": {
+        "stance": { "$ref": "#/$defs/stance" },
+        "summary": { "type": "string" },
+        "reason": { "type": "string" }
+      }
+    },
+
+    "explainability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["why", "why_not", "assumptions", "limits"],
+      "properties": {
+        "why": { "type": "string" },
+        "why_not": { "type": "string" },
+        "assumptions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "limits": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "improve_accuracy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "maxItems": 5,
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "next_decisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/decisionLink" }
+        }
+      }
+    },
+
+    "related_decisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/decisionLink" }
+        }
+      }
+    }
+  },
+
+  "allOf": [
+    {
+      "if": {
+        "properties": { "mode": { "const": "evaluate_date" } },
+        "required": ["mode"]
+      },
+      "then": {
+        "properties": {
+          "timing": {
+            "properties": {
+              "candidates": {
+                "minItems": 1,
+                "maxItems": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "mode": { "const": "compare_dates" } },
+        "required": ["mode"]
+      },
+      "then": {
+        "properties": {
+          "timing": {
+            "properties": {
+              "candidates": {
+                "minItems": 2,
+                "maxItems": 5
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+
+  "$defs": {
+    "stance": {
+      "type": "string",
+      "enum": [
+        "proceed",
+        "proceed_with_conditions",
+        "wait",
+        "prefer_alternate",
+        "insufficient_data"
+      ]
+    },
+    "precisionLevel": {
+      "type": "string",
+      "enum": ["L1", "L2", "L3", "L4", "L5", "L6", "L7"]
+    },
+    "timingCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "rank", "score", "band"],
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "rank": { "type": "integer", "minimum": 1 },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "band": {
+          "type": "string",
+          "enum": ["high", "moderate", "low"]
+        }
+      }
+    },
+    "confidencePenalty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidenceItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["framework_id", "eligibility", "artifact_ref", "limits"],
+      "properties": {
+        "framework_id": { "type": "string", "minLength": 1 },
+        "eligibility": { "type": "string", "minLength": 1 },
+        "artifact_ref": { "type": "string", "minLength": 1 },
+        "limits": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "driverItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "score", "band", "support", "friction"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "band": { "type": "string", "minLength": 1 },
+        "support": { "type": "string" },
+        "friction": { "type": "string" }
+      }
+    },
+    "limitedStringItems": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "maxItems": 3,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "actionStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "action", "condition"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "action": { "type": "string", "minLength": 1 },
+        "condition": { "type": ["string", "null"] }
+      }
+    },
+    "decisionLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision_type_id", "label"],
+      "properties": {
+        "decision_type_id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

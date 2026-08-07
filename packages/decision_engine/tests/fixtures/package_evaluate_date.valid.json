@@ -1,0 +1,107 @@
+{
+  "case_id": "11111111-1111-4111-8111-111111111111",
+  "evaluation_id": "22222222-2222-4222-8222-222222222222",
+  "evaluation_version": 1,
+  "case_version": 1,
+  "decision_type_id": "car-interview",
+  "family_id": "visibility",
+  "mode": "evaluate_date",
+  "precision_level": "L3",
+  "engine_id": "decision-engine-v1",
+  "created_at": "2026-08-07T10:00:00Z",
+  "schema_version": "1.0.0",
+  "recommendation": {
+    "stance": "proceed_with_conditions",
+    "conditions": ["Prepare concrete examples"],
+    "summary": "Proceed, provided that preparation and practical constraints are addressed."
+  },
+  "timing": {
+    "material": true,
+    "band": "high",
+    "score": 81,
+    "candidates": [
+      {
+        "date": "2026-08-10",
+        "rank": 1,
+        "score": 81,
+        "band": "high"
+      }
+    ],
+    "notes": "The selected date has relatively supportive timing."
+  },
+  "confidence": {
+    "value": 72,
+    "precision_level": "L3",
+    "penalties": [
+      {
+        "code": "MISSING_CONTEXT",
+        "message": "Employer context is incomplete."
+      }
+    ]
+  },
+  "evidence": {
+    "items": [
+      {
+        "framework_id": "astro_timing",
+        "eligibility": "registered",
+        "artifact_ref": "evidence://timing/1",
+        "limits": ["Timing does not determine interview outcome."]
+      }
+    ]
+  },
+  "drivers": {
+    "items": [
+      {
+        "id": "visibility",
+        "label": "Visibility",
+        "score": 78,
+        "band": "high",
+        "support": "The date supports clear presentation.",
+        "friction": "Preparation quality remains decisive."
+      }
+    ]
+  },
+  "tradeoffs": {
+    "items": ["Earlier action — less preparation time"]
+  },
+  "risks": {
+    "items": ["Overconfidence may reduce preparation quality."]
+  },
+  "opportunities": {
+    "items": ["Use the date to present a clear professional narrative."]
+  },
+  "action_plan": {
+    "steps": [
+      {
+        "order": 1,
+        "action": "Prepare three evidence-based examples.",
+        "condition": null
+      }
+    ]
+  },
+  "counter_recommendation": {
+    "stance": "wait",
+    "summary": "Delay only when preparation is materially incomplete.",
+    "reason": "Preparation quality outweighs a favorable date."
+  },
+  "explainability": {
+    "why": "The available evidence moderately supports proceeding.",
+    "why_not": "The date cannot compensate for incomplete preparation.",
+    "assumptions": ["The interview date can still be changed."],
+    "limits": ["The employer's internal decision process is unknown."]
+  },
+  "improve_accuracy": {
+    "items": ["Provide role seniority and interview format."]
+  },
+  "next_decisions": {
+    "items": [
+      {
+        "decision_type_id": "car-negotiate-offer",
+        "label": "Negotiate job offer"
+      }
+    ]
+  },
+  "related_decisions": {
+    "items": []
+  }
+}
