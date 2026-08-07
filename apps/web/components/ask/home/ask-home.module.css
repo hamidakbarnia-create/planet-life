@@ -31,11 +31,23 @@
   align-items: start;
 }
 
+/* Single primary column — ask input dominates. Secondary widgets sit below. */
 @media (min-width: 1280px) {
   .layout {
-    grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.85fr);
-    gap: var(--mio-space-6);
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 52rem;
+    margin-inline: auto;
   }
+}
+
+.secondaryRail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mio-space-4);
+  margin-top: var(--mio-space-4);
+  opacity: 0.85;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: var(--mio-space-5);
 }
 
 .main {

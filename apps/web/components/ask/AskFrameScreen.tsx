@@ -2,25 +2,17 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { AskClarificationFlow } from '@/components/ask/AskClarificationFlow';
 import {
-  DecisionFramePanel,
-  OperationClarifier,
-  OperationResultRouter,
-} from '@/components/decision-frame';
-import {
-  applyOpenEndedAxis,
-  applyOperationChoice,
   buildDecisionFrame,
-  canSelectOperationRenderer,
-  framingReadyResult,
-  isFramingPersistReady,
+  getAskProductCopy,
+  isUnsupportedOperationFrame,
   loadDecisionFrame,
   loadFrameFromCase,
-  persistFrameToCase,
+  resetToExamineStep,
   saveDecisionFrame,
   type DecisionFrameV1,
-} from '@/lib/decision-frame';
-import { DecisionCaseApiError } from '@/lib/decision-case';
+} from '@/lib/ask-product';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
 import { resolveAskQuestion } from '@/lib/resolve-ask-question';
 import type { AppLang } from '@/lib/app-settings';
@@ -32,16 +24,19 @@ function resolveIntentText(lang: AppLang): string {
   return resolveAskQuestion(stored, lang).displayText.trim();
 }
 
+/**
+ * ASK clarification entry. Decision Frame is internal state only —
+ * no schema inspector, no pre-evaluation result shells.
+ */
 export function AskFrameScreen({ lang }: { lang: AppLang }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const caseIdParam = searchParams.get('caseId');
+  const copy = getAskProductCopy(lang);
   const [frame, setFrame] = useState<DecisionFrameV1 | null>(null);
   const [caseId, setCaseId] = useState<string | null>(caseIdParam);
   const [caseVersion, setCaseVersion] = useState<number | null>(null);
-  const [persistError, setPersistError] = useState('');
-  const [persisting, setPersisting] = useState(false);
-  const [persistedNotice, setPersistedNotice] = useState('');
+  const [loadError, setLoadError] = useState('');
 
   useQueuedEffect(() => {
     let cancelled = false;
@@ -54,19 +49,24 @@ export function AskFrameScreen({ lang }: { lang: AppLang }) {
             setFrame(loaded.frame);
             setCaseId(loaded.case.case_id);
             setCaseVersion(loaded.case.case_version);
-            // Convenience only — Case remains authority.
             saveDecisionFrame(loaded.frame);
             return;
           }
         } catch {
           if (cancelled) return;
-          setPersistError('Unable to load Decision Case framing');
+          setLoadError(copy.loadFrameError);
+          return;
         }
       }
 
       const existing = loadDecisionFrame();
       if (existing) {
-        setFrame(existing);
+        // Session frames that promised compare/find must not look runnable.
+        setFrame(
+          isUnsupportedOperationFrame(existing)
+            ? resetToExamineStep(existing)
+            : existing
+        );
         return;
       }
       const intent = resolveIntentText(lang);
@@ -74,138 +74,58 @@ export function AskFrameScreen({ lang }: { lang: AppLang }) {
         router.replace('/ask');
         return;
       }
+      // Preserve original text. Only structured extras the resolver already
+      // put into the intent string are used — no fabricated objective/type.
+      // Fresh ASK never offers compare/find as runnable.
       const next = buildDecisionFrame(intent);
-      saveDecisionFrame(next);
-      setFrame(next);
+      const safe = isUnsupportedOperationFrame(next)
+        ? resetToExamineStep(next)
+        : next;
+      saveDecisionFrame(safe);
+      setFrame(safe);
     })();
     return () => {
       cancelled = true;
     };
-  }, [lang, router, caseIdParam]);
+  }, [lang, router, caseIdParam, copy.loadFrameError]);
 
-  if (!frame) {
+  if (loadError) {
     return (
-      <div className="min-h-[40vh] flex items-center justify-center" aria-busy="true" />
+      <div className="mx-auto max-w-2xl px-4 py-8" dir={copy.dir}>
+        <p className="fi text-sm text-red-300" role="alert">
+          {loadError}
+        </p>
+      </div>
     );
   }
 
-  const resultModel = canSelectOperationRenderer(frame)
-    ? framingReadyResult(frame)
-    : null;
-  const canPersist = isFramingPersistReady(frame);
+  if (!frame) {
+    return (
+      <div
+        className="min-h-[40vh] flex items-center justify-center"
+        aria-busy="true"
+        data-testid="ask-understanding"
+      />
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 space-y-6" data-testid="ask-frame-screen">
-      <header className="space-y-2">
-        <p className="fi text-xs uppercase tracking-[0.16em] text-amber-400/80">
-          Decision Frame
-        </p>
-        <h1 className="fc text-2xl text-white">Structure before recommend</h1>
-        <p className="fi text-sm text-white/60">
-          METIORO frames the decision first. No implicit today. No generic coaching report.
-        </p>
-        {caseId ? (
-          <p className="fi text-xs text-white/45" data-testid="frame-case-id">
-            Case {caseId}
-            {caseVersion != null ? ` · v${caseVersion}` : ''}
-          </p>
-        ) : null}
-      </header>
-
-      <DecisionFramePanel frame={frame} />
-
-      <OperationClarifier
+    <div
+      className="mx-auto max-w-2xl px-4 py-8"
+      data-testid="ask-frame-screen"
+      dir={copy.dir}
+    >
+      <AskClarificationFlow
+        lang={lang}
         frame={frame}
-        onChooseOperation={(op) => {
-          const next = applyOperationChoice(frame, op);
-          saveDecisionFrame(next);
-          setFrame(next);
-          setPersistedNotice('');
-        }}
-        onChooseOpenEndedAxis={(axis) => {
-          const next = applyOpenEndedAxis(frame, axis);
-          saveDecisionFrame(next);
-          setFrame(next);
-          setPersistedNotice('');
+        caseId={caseId}
+        caseVersion={caseVersion}
+        onFrameChange={setFrame}
+        onCaseBound={(id, version) => {
+          setCaseId(id);
+          setCaseVersion(version);
         }}
       />
-
-      {canPersist ? (
-        <div className="space-y-2">
-          <button
-            type="button"
-            data-testid="persist-frame-to-case"
-            disabled={persisting}
-            className="fc rounded-xl px-4 py-2.5 text-sm font-medium text-[#0a0f1c] disabled:opacity-40"
-            style={{
-              background: 'linear-gradient(135deg, #f2cf75, #d4af37)',
-            }}
-            onClick={() => {
-              void (async () => {
-                setPersisting(true);
-                setPersistError('');
-                try {
-                  const result = await persistFrameToCase({
-                    frame,
-                    caseId,
-                    caseVersion,
-                  });
-                  setCaseId(result.case.case_id);
-                  setCaseVersion(result.case.case_version);
-                  setPersistedNotice(
-                    result.framing.find_runtime === 'not_implemented'
-                      ? 'FIND framing saved to Decision Case. FIND runtime is not implemented.'
-                      : 'Framing saved to Decision Case (authoritative).'
-                  );
-                  router.replace(
-                    `/ask/frame?caseId=${result.case.case_id}`
-                  );
-                } catch (err) {
-                  setPersistError(
-                    err instanceof DecisionCaseApiError
-                      ? err.message
-                      : err instanceof Error
-                        ? err.message
-                        : 'Unable to persist framing'
-                  );
-                } finally {
-                  setPersisting(false);
-                }
-              })();
-            }}
-          >
-            {caseId ? 'Update Decision Case framing' : 'Save framing to Decision Case'}
-          </button>
-          {frame.operation === 'find' ? (
-            <p className="fi text-xs text-amber-200/80" data-testid="find-framing-only-notice">
-              FIND is framing-only in this slice — no runtime search is executed.
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {persistedNotice ? (
-        <p className="fi text-sm text-emerald-300/90" data-testid="frame-persisted-notice">
-          {persistedNotice}
-        </p>
-      ) : null}
-      {persistError ? (
-        <p className="fi text-sm text-red-300" role="alert">
-          {persistError}
-        </p>
-      ) : null}
-
-      {resultModel ? (
-        <div data-testid="operation-result-region">
-          <OperationResultRouter model={resultModel} />
-        </div>
-      ) : null}
-
-      {!resultModel && !frame.pending_clarification ? (
-        <p className="fi text-sm text-white/55" data-testid="frame-waiting">
-          Frame is not ready for an operation renderer yet.
-        </p>
-      ) : null}
     </div>
   );
 }

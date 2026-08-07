@@ -4,7 +4,7 @@ import { DecisionPackageView } from './DecisionPackageView';
 import { DEMO_STUB_NOTICE, bindDemoStubPackage } from '@/lib/decision-case';
 
 describe('DecisionPackageView', () => {
-  it('shows the non-production demo notice before package content', () => {
+  it('shows the non-production demo notice for stub packages', () => {
     const pkg = bindDemoStubPackage({
       caseId: '11111111-1111-4111-8111-111111111111',
       caseVersion: 1,
@@ -20,18 +20,9 @@ describe('DecisionPackageView', () => {
     expect(screen.getByTestId('demo-evaluation-notice').textContent).toContain(
       DEMO_STUB_NOTICE
     );
-    expect(screen.getByTestId('demo-engine-id').textContent).toMatch(
-      /decision-engine-stub-v1/
-    );
-    expect(screen.getByTestId('demo-stub-penalty').textContent).toMatch(
-      /STUB_ENGINE/
-    );
-    expect(screen.getByTestId('demo-stub-penalty').textContent).toMatch(
-      /not a production evaluation/i
-    );
+    expect(screen.queryByTestId('evaluate-product-result')).toBeNull();
     expect(screen.queryByText(/81/)).toBeNull();
     expect(screen.queryByText(/72/)).toBeNull();
-    expect(screen.getByTestId('evaluate-result-view')).toBeTruthy();
     expect(screen.queryByText(/run a small experiment/i)).toBeNull();
     expect(screen.queryByText(/best case/i)).toBeNull();
   });

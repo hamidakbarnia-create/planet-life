@@ -1,7 +1,10 @@
 /**
- * Framing-complete presentation shells.
+ * Framing-complete presentation shells (internal / legacy adapter helpers).
  * Used when Frame can select a renderer but Decision Runtime has not run.
  * Values stay unknown — no invented scores, no coaching prose.
+ *
+ * Product ASK recovery must NOT mount these shells for consumers.
+ * Consumer path: AskClarificationFlow → Case evaluate → EvaluateProductResult.
  */
 
 import type { DecisionFrameV1, OperationResultViewModel } from './types';

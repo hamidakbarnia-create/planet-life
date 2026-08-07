@@ -348,7 +348,7 @@ describe('AskScreen', () => {
     });
 
     expect(
-      screen.getByRole('button', { name: 'Attend job interview' })
+      screen.getByRole('button', { name: 'Job interview' })
     ).toBeTruthy();
     expect(
       screen.getByRole('button', { name: 'Choose wedding date' })
@@ -358,9 +358,9 @@ describe('AskScreen', () => {
   it('routes car-interview popular cards into Decision Case intake', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
-    await screen.findByRole('button', { name: 'Attend job interview' });
+    await screen.findByRole('button', { name: 'Job interview' });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Attend job interview' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Job interview' }));
 
     expect(push).toHaveBeenCalledWith('/decision-cases/car-interview');
     expect(push).not.toHaveBeenCalledWith('/result');

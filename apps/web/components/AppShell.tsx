@@ -61,6 +61,11 @@ export function AppShell({
     };
   }, []);
 
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = dir;
+  }, [lang, dir]);
+
   const sessionLabel = session?.identifier
     ? session.method === 'google' || session.method === 'apple'
       ? session.method === 'google'

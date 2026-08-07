@@ -19,7 +19,7 @@ describe('DecisionPackageView runtime vs stub', () => {
     expect(pkg.engine_id).toBe(STUB_ENGINE_ID);
   });
 
-  it('hides stub banner for real runtime packages', () => {
+  it('renders consumer Evaluate result for real runtime packages without engine chrome', () => {
     const base = bindDemoStubPackage({
       caseId: '11111111-1111-4111-8111-111111111111',
       caseVersion: 1,
@@ -48,9 +48,9 @@ describe('DecisionPackageView runtime vs stub', () => {
     const { container } = render(<DecisionPackageView package={pkg} />);
     const view = within(container);
     expect(view.queryByTestId('demo-evaluation-notice')).toBeNull();
-    expect(view.getByTestId('runtime-engine-id').textContent).toContain(
-      'decision-engine-car-interview-v1'
-    );
-    expect(view.getByTestId('evaluate-result-view')).toBeTruthy();
+    expect(view.getByTestId('evaluate-product-result')).toBeTruthy();
+    expect(view.queryByTestId('runtime-engine-id')).toBeNull();
+    expect(container.textContent).not.toMatch(/decision-engine-/);
+    expect(container.textContent).not.toMatch(/\bUnknown\b/);
   });
 });
