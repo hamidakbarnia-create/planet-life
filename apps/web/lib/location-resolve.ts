@@ -13,7 +13,7 @@ export async function fetchLocationPreview(params: {
   latitude?: number | null;
   longitude?: number | null;
 }): Promise<ResolvedLocationPreview> {
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? 'https://api.metioro.com';
   const body: Record<string, unknown> = { location: params.location };
   if (params.latitude != null && params.longitude != null) {
     body.latitude = params.latitude;

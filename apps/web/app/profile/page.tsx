@@ -455,7 +455,7 @@ function ProfileEditor() {
 
     try {
       const apiBase =
-        process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
+        process.env.NEXT_PUBLIC_API_BASE ?? 'https://api.metioro.com';
       const coords = chartApiCoordinatesFromResolved(resolvedLocation, selectedCity);
       const body: Record<string, unknown> = {
         birth_date: birthDate,
