@@ -1,3 +1,4 @@
+import { API_BASE } from '@/lib/api-config';
 import type { CoordinateSource } from '@/lib/chart-types';
 
 export type ResolvedLocationPreview = {
@@ -13,13 +14,12 @@ export async function fetchLocationPreview(params: {
   latitude?: number | null;
   longitude?: number | null;
 }): Promise<ResolvedLocationPreview> {
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
   const body: Record<string, unknown> = { location: params.location };
   if (params.latitude != null && params.longitude != null) {
     body.latitude = params.latitude;
     body.longitude = params.longitude;
   }
-  const res = await fetch(`${apiBase}/api/business/location-preview`, {
+  const res = await fetch(`${API_BASE}/api/business/location-preview`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
