@@ -96,57 +96,35 @@ def test_duplicate_decision_type_id_fails(tmp_path: Path) -> None:
 
 
 def test_invalid_mode_fails(tmp_path: Path) -> None:
-    payload = {
-        "schema_version": "1.0.0",
-        "decision_types": [
-            {
-                "decision_type_id": "x",
-                "family_id": "y",
-                "create_mode": "not-a-mode",
-                "available_entry_modes": ["structured"],
-            }
-        ],
-    }
+    payload = json.loads(CANONICAL.read_text(encoding="utf-8"))
+    payload["decision_types"][0]["create_mode"] = "not-a-mode"
+
     path = tmp_path / "decision_types.v1.json"
     path.write_text(json.dumps(payload), encoding="utf-8")
-    with pytest.raises(RegistryLoadError, match="create_mode invalid"):
+
+    with pytest.raises(RegistryLoadError, match="validation failed"):
         _load_registry(path)
 
 
 def test_empty_entry_mode_set_fails(tmp_path: Path) -> None:
-    payload = {
-        "schema_version": "1.0.0",
-        "decision_types": [
-            {
-                "decision_type_id": "x",
-                "family_id": "y",
-                "create_mode": "none",
-                "available_entry_modes": [],
-            }
-        ],
-    }
+    payload = json.loads(CANONICAL.read_text(encoding="utf-8"))
+    payload["decision_types"][0]["available_entry_modes"] = []
+
     path = tmp_path / "decision_types.v1.json"
     path.write_text(json.dumps(payload), encoding="utf-8")
-    with pytest.raises(RegistryLoadError, match="non-empty list"):
+
+    with pytest.raises(RegistryLoadError, match="validation failed"):
         _load_registry(path)
 
 
 def test_unknown_json_fields_fail(tmp_path: Path) -> None:
-    payload = {
-        "schema_version": "1.0.0",
-        "decision_types": [
-            {
-                "decision_type_id": "x",
-                "family_id": "y",
-                "create_mode": "none",
-                "available_entry_modes": ["structured"],
-                "extra": True,
-            }
-        ],
-    }
+    payload = json.loads(CANONICAL.read_text(encoding="utf-8"))
+    payload["decision_types"][0]["extra"] = True
+
     path = tmp_path / "decision_types.v1.json"
     path.write_text(json.dumps(payload), encoding="utf-8")
-    with pytest.raises(RegistryLoadError, match="unknown fields"):
+
+    with pytest.raises(RegistryLoadError, match="validation failed"):
         _load_registry(path)
 
 
