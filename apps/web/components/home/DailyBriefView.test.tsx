@@ -1,7 +1,8 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { DailyBriefView } from '@/components/home/DailyBriefView';
 import type { BirthProfile } from '@/lib/birth-profile';
+import { loadTodayTiming } from '@/lib/today-timing';
 
 vi.mock('@/lib/today-timing', () => ({
   loadTodayTiming: vi.fn(() => new Promise(() => {})),
@@ -19,6 +20,8 @@ vi.mock('@/components/PeopleHomeRow', () => ({
   PeopleHomeRow: () => null,
 }));
 
+const mockedLoadTodayTiming = vi.mocked(loadTodayTiming);
+
 const profile: BirthProfile = {
   birth_date: '1990-06-15',
   birth_time: '14:30',
@@ -34,9 +37,15 @@ const profile: BirthProfile = {
   },
 };
 
+beforeEach(() => {
+  mockedLoadTodayTiming.mockReset();
+  mockedLoadTodayTiming.mockImplementation(
+    () => new Promise(() => {})
+  );
+});
+
 afterEach(() => {
   cleanup();
-  vi.clearAllMocks();
 });
 
 describe('DailyBriefView score loading', () => {
@@ -55,8 +64,7 @@ describe('DailyBriefView score loading', () => {
   });
 
   it('renders numeric score once fetch completes', async () => {
-    const { loadTodayTiming } = await import('@/lib/today-timing');
-    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+    mockedLoadTodayTiming.mockResolvedValue({
       score: 72,
       reasoning: null,
       hourly: [],
@@ -76,8 +84,7 @@ describe('DailyBriefView score loading', () => {
 
 describe('DailyBriefView Calendar timing consumer', () => {
   it('renders ScoreReasoning.summary when producer provides it', async () => {
-    const { loadTodayTiming } = await import('@/lib/today-timing');
-    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+    mockedLoadTodayTiming.mockResolvedValue({
       score: 80,
       reasoning: {
         summary: 'Producer summary for today.',
@@ -100,8 +107,7 @@ describe('DailyBriefView Calendar timing consumer', () => {
   });
 
   it('does not render Why this timing when summary is absent', async () => {
-    const { loadTodayTiming } = await import('@/lib/today-timing');
-    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+    mockedLoadTodayTiming.mockResolvedValue({
       score: 55,
       reasoning: null,
       hourly: [],
@@ -118,8 +124,7 @@ describe('DailyBriefView Calendar timing consumer', () => {
   });
 
   it('surfaces Best window and Lower-readiness window from timing data', async () => {
-    const { loadTodayTiming } = await import('@/lib/today-timing');
-    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+    mockedLoadTodayTiming.mockResolvedValue({
       score: 70,
       reasoning: null,
       hourly: [
@@ -141,8 +146,7 @@ describe('DailyBriefView Calendar timing consumer', () => {
   });
 
   it('links to Calendar for more detail', async () => {
-    const { loadTodayTiming } = await import('@/lib/today-timing');
-    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+    mockedLoadTodayTiming.mockResolvedValue({
       score: 60,
       reasoning: null,
       hourly: [],
@@ -161,8 +165,7 @@ describe('DailyBriefView Calendar timing consumer', () => {
   });
 
   it('avoids user-facing Golden wording on the Today brief', async () => {
-    const { loadTodayTiming } = await import('@/lib/today-timing');
-    vi.mocked(loadTodayTiming).mockResolvedValueOnce({
+    mockedLoadTodayTiming.mockResolvedValue({
       score: 88,
       reasoning: null,
       hourly: [{ hour: 11, time: '11:00', score: 88, band: 'green' }],
