@@ -127,6 +127,32 @@ describe('AskScreen', () => {
     ).toBeNull();
   });
 
+
+  it('routes job-interview guided selection to car-interview demo intake', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('en');
+    await screen.findByRole('tab', { name: /career & work/i });
+
+    fireEvent.click(screen.getByRole('button', { name: /^job interview$/i }));
+
+    expect(push).toHaveBeenCalledWith('/decision-cases/car-interview');
+    expect(push).not.toHaveBeenCalledWith('/result');
+  });
+
+  it('keeps unrelated guided questions on the pre-PR-1 Ask path', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('en');
+    await screen.findByRole('tab', { name: /career & work/i });
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /send a resume or job application/i })
+    );
+    expect(push).not.toHaveBeenCalledWith('/decision-cases/car-interview');
+
+    fireEvent.click(screen.getByRole('button', { name: /get guidance/i }));
+    expect(push).toHaveBeenCalledWith('/result');
+  });
+
   it('fills the textbox when a guided question is clicked', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');

@@ -101,6 +101,11 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     if (!guidedQuestion) return;
     markStarted();
     trackAskEvent('ftue.ask.question_selected', { suggestion_id: questionId });
+    // PR-1 walking skeleton: car-interview enters demo intake (not /result).
+    if (questionId === 'job-interview') {
+      router.push('/decision-cases/car-interview');
+      return;
+    }
     setSelectedSuggestionId(questionId);
   };
 
