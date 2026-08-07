@@ -1,8 +1,10 @@
-"""PR-2 car-interview intake/evaluation transport over Decision Case SoR.
+"""Car-interview intake/evaluation transport over Decision Case SoR.
 
 Completeness authority: packages.decision_engine.intake.evaluator
-Stub package authority: packages.decision_engine.evaluate.stub_package
+Runtime authority: packages.decision_engine.evaluate.car_interview_evaluate
 Persistence authority: DecisionCaseRepository only.
+
+Stub package is NOT used on the production evaluation path.
 """
 
 from __future__ import annotations
@@ -13,19 +15,36 @@ from uuid import UUID
 from decision_case.repository import DecisionCaseRepository
 from decision_case.repository.errors import IllegalTransitionError
 from decision_case.repository.models import CaseRecord, EvaluationRecord
-from packages.decision_engine.evaluate.stub_package import (
-    STUB_ENGINE_ID,
-    build_car_interview_stub_package_dict,
-)
 from decision_case.services.decision_frame import DECISION_FRAME_INTAKE_KEY
+from packages.decision_engine.evaluate.car_interview_evaluate import (
+    NATAL_EVIDENCE_INTAKE_KEY,
+    REAL_ENGINE_ID,
+    RuntimeFramingError,
+    RuntimeProviderError,
+    RuntimeUnsupportedOperationError,
+    evaluate_car_interview_dict,
+)
 from packages.decision_engine.intake.car_interview import (
     CAR_INTERVIEW_DECISION_TYPE_ID,
     merge_intake,
 )
 from packages.decision_engine.intake.evaluator import evaluate_car_interview_intake
 from packages.decision_engine.state_machine import CaseState
+from services.decision_engine import generate_decision_outcome
 
 _CAR_INTERVIEW_MODE = "evaluate_date"
+
+# Re-export for route handlers / tests.
+__all__ = [
+    "IntakeIncompleteError",
+    "UnsupportedDecisionTypeError",
+    "RuntimeFramingError",
+    "RuntimeProviderError",
+    "RuntimeUnsupportedOperationError",
+    "save_car_interview_answers",
+    "complete_car_interview_intake",
+    "evaluate_car_interview_case",
+]
 
 
 class IntakeIncompleteError(Exception):
@@ -71,12 +90,19 @@ def save_car_interview_answers(
     _require_car_interview(case)
 
     current_intake = _intake_snapshot(repo, case)
-    # Preserve authoritative Decision Frame namespace across slot merges.
+    # Preserve authoritative namespaces across slot merges.
     existing_frame = current_intake.get(DECISION_FRAME_INTAKE_KEY)
+    existing_natal = current_intake.get(NATAL_EVIDENCE_INTAKE_KEY)
     merged = merge_intake(current_intake, answers)
     intake_dict = merged.as_dict()
     if isinstance(existing_frame, dict):
         intake_dict[DECISION_FRAME_INTAKE_KEY] = existing_frame
+    if isinstance(existing_natal, dict):
+        intake_dict[NATAL_EVIDENCE_INTAKE_KEY] = existing_natal
+    # Allow callers to attach natal evidence via answers namespace.
+    natal_in_answers = answers.get(NATAL_EVIDENCE_INTAKE_KEY)
+    if isinstance(natal_in_answers, dict):
+        intake_dict[NATAL_EVIDENCE_INTAKE_KEY] = natal_in_answers
 
     # Domain draft gate: refuse empty first write with no required progress.
     evaluation = evaluate_car_interview_intake(intake_dict)
@@ -115,6 +141,8 @@ def save_car_interview_answers(
     normalized, missing, is_complete = _evaluation_status(intake_dict)
     if DECISION_FRAME_INTAKE_KEY in intake_dict:
         normalized[DECISION_FRAME_INTAKE_KEY] = intake_dict[DECISION_FRAME_INTAKE_KEY]
+    if NATAL_EVIDENCE_INTAKE_KEY in intake_dict:
+        normalized[NATAL_EVIDENCE_INTAKE_KEY] = intake_dict[NATAL_EVIDENCE_INTAKE_KEY]
     case = repo.get_case(case_id, owner_subject_id)
     return case, normalized, missing, is_complete
 
@@ -133,6 +161,8 @@ def complete_car_interview_intake(
     normalized, missing, is_complete = _evaluation_status(intake_dict)
     if DECISION_FRAME_INTAKE_KEY in intake_dict:
         normalized[DECISION_FRAME_INTAKE_KEY] = intake_dict[DECISION_FRAME_INTAKE_KEY]
+    if NATAL_EVIDENCE_INTAKE_KEY in intake_dict:
+        normalized[NATAL_EVIDENCE_INTAKE_KEY] = intake_dict[NATAL_EVIDENCE_INTAKE_KEY]
     if not is_complete:
         raise IntakeIncompleteError(tuple(missing))
 
@@ -202,19 +232,24 @@ def evaluate_car_interview_case(
     # Evaluation rows must reference an existing decision_versions snapshot.
     # State transitions may bump current_case_version without a version row.
     intake_version = repo.get_current_version(case_id, owner_subject_id)
-    package = build_car_interview_stub_package_dict(
+    package = evaluate_car_interview_dict(
         case_id=case.case_id,
         case_version=intake_version.version,
-        intake=evaluation.intake,
+        intake=intake_dict,
+        generate_outcome=generate_decision_outcome,
     )
+    stance = str((package.get("recommendation") or {}).get("stance") or "")
+    # insufficient_data is a recorded evaluation outcome, but DQ did not pass:
+    # distinguish "could not score" from a completed recommendation.
+    dq_status = "blocked" if stance == "insufficient_data" else "pass"
     return repo.append_evaluation(
         case_id,
         owner_subject_id,
         expected_case_version=expected_case_version,
         package=package,
         package_contract_version=str(package.get("schema_version") or "1.0.0"),
-        engine_id=STUB_ENGINE_ID,
-        dq_status="pass",
+        engine_id=str(package.get("engine_id") or REAL_ENGINE_ID),
+        dq_status=dq_status,
         case_version=intake_version.version,
         actor="system",
     )

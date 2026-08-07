@@ -52,6 +52,9 @@ from decision_case.schemas.cases import (
 )
 from decision_case.services.car_interview_intake import (
     IntakeIncompleteError,
+    RuntimeFramingError,
+    RuntimeProviderError,
+    RuntimeUnsupportedOperationError,
     UnsupportedDecisionTypeError,
     complete_car_interview_intake,
     evaluate_car_interview_case,
@@ -145,6 +148,9 @@ def _safe_message(code: str) -> str:
         "UNSUPPORTED_DECISION_TYPE": "Decision type is not supported for this operation",
         "FRAMING_UNRESOLVED": "Decision Frame is unresolved",
         "FRAMING_INVALID": "Decision Frame failed validation",
+        "FRAMING_REQUIRED": "Decision Frame is required for evaluation",
+        "OPERATION_NOT_IMPLEMENTED": "Requested decision operation is not implemented",
+        "PROVIDER_FAILURE": "Evidence provider failed",
         "INTERNAL_ERROR": "Internal server error",
     }.get(code, "Request failed")
 
@@ -637,6 +643,30 @@ def create_decision_case_evaluation(
             message=_safe_message("INTAKE_INCOMPLETE"),
             request_id=request_id,
             details={"missing_required": list(exc.missing_required)},
+        )
+    except RuntimeUnsupportedOperationError as exc:
+        return _error_response(
+            status_code=400,
+            code="OPERATION_NOT_IMPLEMENTED",
+            message=_safe_message("OPERATION_NOT_IMPLEMENTED"),
+            request_id=request_id,
+            details={"operation": exc.operation},
+        )
+    except RuntimeFramingError as exc:
+        return _error_response(
+            status_code=400,
+            code="FRAMING_REQUIRED",
+            message=str(exc) or _safe_message("FRAMING_REQUIRED"),
+            request_id=request_id,
+            details=exc.details,
+        )
+    except RuntimeProviderError as exc:
+        return _error_response(
+            status_code=502,
+            code="PROVIDER_FAILURE",
+            message=_safe_message("PROVIDER_FAILURE"),
+            request_id=request_id,
+            details=exc.details,
         )
     except UnsupportedDecisionTypeError as exc:
         return _error_response(

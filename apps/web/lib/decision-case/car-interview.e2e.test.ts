@@ -22,6 +22,7 @@ vi.mock('./api-client', async () => {
     getDecisionCaseHistory: vi.fn(),
     listDecisionCaseEvaluations: vi.fn(),
     getEvaluation: vi.fn(),
+    updateDecisionCaseFraming: vi.fn(),
   };
 });
 
@@ -71,25 +72,55 @@ describe('car-interview PR-2 Case API path', () => {
     });
     expect(saved.case.case_id).toBe('case-e2e');
 
-    vi.mocked(api.getDecisionCase).mockResolvedValue({
+    const evidenceReady = {
       ...saved.case,
-      state: 'evidence_ready',
+      state: 'evidence_ready' as const,
       case_version: 4,
-      intake: saved.intake,
+      intake: {
+        ...saved.intake,
+        decision_frame: {
+          operation: 'evaluate',
+          time_scope: 'specific_date',
+          date: '2026-08-10',
+        },
+      },
+    };
+    vi.mocked(api.getDecisionCase).mockResolvedValue(evidenceReady);
+    vi.mocked(api.updateDecisionCaseFraming).mockResolvedValue({
+      case: evidenceReady,
+      intake: evidenceReady.intake,
+      framing: evidenceReady.intake.decision_frame,
     });
     vi.mocked(api.listDecisionCaseEvaluations).mockResolvedValue({
       evaluations: [],
     });
+    const realPackage = {
+      ...demoFixture,
+      engine_id: 'decision-engine-car-interview-v1',
+      confidence: {
+        ...demoFixture.confidence,
+        penalties: [
+          {
+            code: 'CONFIDENCE_UNAVAILABLE',
+            message: 'Upstream scoring did not supply a reasoning confidence value.',
+          },
+        ],
+      },
+      counter_recommendation: {
+        ...demoFixture.counter_recommendation,
+        summary: '',
+      },
+    };
     vi.mocked(api.evaluateDecisionCase).mockResolvedValue({
       evaluation_id: 'eval-e2e',
       case_id: 'case-e2e',
       case_version: 3,
       evaluation_version: 1,
       package_contract_version: '1.0.0',
-      engine_id: 'decision-engine-stub-v1',
+      engine_id: 'decision-engine-car-interview-v1',
       dq_status: 'pass',
       created_at: '2026-08-07T10:00:02Z',
-      package: demoFixture as never,
+      package: realPackage as never,
     });
     vi.mocked(api.getDecisionCaseHistory).mockResolvedValue({
       events: [
@@ -121,7 +152,12 @@ describe('car-interview PR-2 Case API path', () => {
     const result = await loadCaseResult('case-e2e');
     expect(api.evaluateDecisionCase).toHaveBeenCalled();
     assertPackageRenderContract(result.evaluation.package);
-    expect(result.evaluation.package.engine_id).toBe('decision-engine-stub-v1');
+    expect(result.evaluation.package.engine_id).toBe(
+      'decision-engine-car-interview-v1'
+    );
+    expect(result.evaluation.package.engine_id).not.toBe(
+      'decision-engine-stub-v1'
+    );
     expect(result.history.map((e) => e.event)).toContain('evaluation_created');
     expect(localStorage.length).toBe(0);
   });

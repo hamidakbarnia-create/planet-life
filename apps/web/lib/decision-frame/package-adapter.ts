@@ -8,6 +8,8 @@
  * - Do not invent avoid windows from unrelated timing data.
  * - Do not manufacture Known/Inferred/Unknown evidence categories.
  * - Do not invent deciding_factor without a Package field.
+ * - insufficient_data / non-material timing → Unknown strength & confidence.
+ * - Empty counter_recommendation.summary → Unknown alternative (EVALUATE-only).
  */
 
 import type { DecisionEvaluationPackage } from '@/lib/decision-case';
@@ -24,6 +26,12 @@ import type {
   StrengthBand,
 } from './types';
 
+const UNKNOWN_CONFIDENCE_PENALTIES = new Set([
+  'MISSING_NATAL_EVIDENCE',
+  'CONFIDENCE_UNAVAILABLE',
+  'STUB_ENGINE',
+]);
+
 /**
  * Renderer selection from explicit Package.mode only.
  * Does not inspect candidate count / ranking shape.
@@ -36,6 +44,53 @@ export function selectRendererOperation(
   return 'evaluate';
 }
 
+/**
+ * Strength from Package timing using canonical scoring._rating thresholds
+ * (80 / 65 / 45) only when a real material score is present.
+ */
+function scoreToStrength(score: number | null | undefined): StrengthBand {
+  if (score == null || Number.isNaN(score)) return 'unknown';
+  if (score >= 80) return 'strong';
+  if (score >= 65) return 'favorable';
+  if (score >= 45) return 'mixed';
+  return 'unfavorable';
+}
+
+function evaluateStrength(pkg: DecisionEvaluationPackage): StrengthBand {
+  if (
+    pkg.recommendation.stance === 'insufficient_data' ||
+    !pkg.timing.material
+  ) {
+    return 'unknown';
+  }
+  const candidate = pkg.timing.candidates.find((c) => c.rank === 1);
+  if (candidate && typeof candidate.score === 'number') {
+    return scoreToStrength(candidate.score);
+  }
+  // Band-only fallback (high⊃Favorable+, moderate=Mixed, low=below Mixed).
+  const band = candidate?.band ?? pkg.timing.band;
+  if (band === 'high') return 'favorable';
+  if (band === 'moderate') return 'mixed';
+  if (band === 'low') return 'unfavorable';
+  return timingBandToStrength(band);
+}
+
+function evaluateConfidence(
+  pkg: DecisionEvaluationPackage
+): import('./types').ConfidenceBand {
+  if (
+    pkg.recommendation.stance === 'insufficient_data' ||
+    !pkg.timing.material
+  ) {
+    return 'unknown';
+  }
+  const codes = new Set(pkg.confidence.penalties.map((p) => p.code));
+  for (const code of UNKNOWN_CONFIDENCE_PENALTIES) {
+    if (codes.has(code)) return 'unknown';
+  }
+  return confidenceValueToBand(pkg.confidence.value);
+}
+
 export function packageToEvaluateView(
   pkg: DecisionEvaluationPackage
 ): EvaluateResultViewModel {
@@ -43,7 +98,6 @@ export function packageToEvaluateView(
   const subject = candidate
     ? formatDisplayDate(candidate.date)
     : 'Selected date';
-  const strength = timingBandToStrength(candidate?.band ?? pkg.timing.band);
   const why = [
     ...pkg.drivers.items.slice(0, 3).map((d) => `${d.label}: ${d.support}`),
     pkg.explainability.why,
@@ -52,17 +106,16 @@ export function packageToEvaluateView(
   return {
     operation: 'evaluate',
     subject_label: subject,
-    strength,
-    // Package gap — omit (UI: Unknown)
+    strength: evaluateStrength(pkg),
+    // Only date-level evidence today — never invent a clock window.
     best_window: undefined,
-    // Package gap — omit (UI: Unknown). Never infer from candidates/notes.
+    // Never invent avoid windows.
     avoid: undefined,
-    // Explicit Package field
+    // EVALUATE does not search alternatives; empty summary → Unknown.
     best_alternative: pkg.counter_recommendation.summary || undefined,
-    confidence: confidenceValueToBand(pkg.confidence.value),
+    confidence: evaluateConfidence(pkg),
     why,
     conditions: [...pkg.recommendation.conditions],
-    // Package has no known/inferred/unknown taxonomy — omit entirely.
     known: undefined,
     inferred: undefined,
     unknown: undefined,
@@ -82,11 +135,8 @@ export function packageToCompareView(
   return {
     operation: 'compare',
     options,
-    // Winner is Package timing rank convention (rank === 1), not invented.
     winner_label: winner ? formatDisplayDate(winner.date) : 'Unknown',
-    // Package gap — no deciding_factor_id. Omit (UI: Unknown).
     deciding_factor: undefined,
-    // Do not invent per-option advantages from unrelated driver indices.
     advantages: [],
     confidence: confidenceValueToBand(pkg.confidence.value),
     known: undefined,

@@ -95,7 +95,11 @@ export default function DecisionCaseResultPage() {
 
         {evaluation?.package ? (
           <div className="mio-glass mio-glass--primary !p-5">
-            <DecisionPackageView package={evaluation.package} />
+            <DecisionPackageView
+              package={evaluation.package}
+              dqStatus={evaluation.dq_status}
+              caseId={caseId}
+            />
           </div>
         ) : !error ? (
           <p className="fi text-sm text-white/55">Loading evaluation…</p>
@@ -116,6 +120,14 @@ export default function DecisionCaseResultPage() {
                   {event.at} · {event.event}
                   {event.from_state && event.to_state
                     ? ` (${event.from_state} → ${event.to_state})`
+                    : ''}
+                  {event.event === 'evaluation_created' &&
+                  typeof event.payload?.dq_status === 'string'
+                    ? ` · dq_status=${event.payload.dq_status}`
+                    : ''}
+                  {event.event === 'evaluation_created' &&
+                  typeof event.payload?.stance === 'string'
+                    ? ` · stance=${event.payload.stance}`
                     : ''}
                 </li>
               ))}

@@ -95,9 +95,10 @@ def test_incomplete_intake_cannot_complete_or_evaluate(
     assert blocked.status_code in {400, 409}
 
 
-def test_complete_intake_then_stub_evaluation_package(
+def test_complete_intake_then_runtime_requires_framing(
     client: TestClient,
 ) -> None:
+    """Without Case framing, evaluation must not fall back to stub."""
     created = _create_car_interview(client)
     case_id = created["case_id"]
     answers = client.post(
@@ -127,26 +128,14 @@ def test_complete_intake_then_stub_evaluation_package(
         f"{BASE}/{case_id}/evaluations",
         json={"expected_case_version": version},
     )
-    assert evaluation.status_code == 201
-    payload = evaluation.json()
-    assert payload["engine_id"] == "decision-engine-stub-v1"
-    assert payload["package"]["schema_version"] == "1.0.0"
-    assert payload["package"]["decision_type_id"] == "car-interview"
-    assert payload["package"]["engine_id"] == "decision-engine-stub-v1"
-    penalties = payload["package"]["confidence"]["penalties"]
-    assert any(p.get("code") == "STUB_ENGINE" for p in penalties)
+    assert evaluation.status_code == 400
+    assert evaluation.json()["error"]["code"] == "FRAMING_REQUIRED"
 
     detail = client.get(f"{BASE}/{case_id}")
     assert detail.status_code == 200
     assert detail.json()["intake"]["role"] == "Designer"
-    assert detail.json()["state"] == "evaluated"
-
-    history = client.get(f"{BASE}/{case_id}/history")
-    assert history.status_code == 200
-    events = {row["event"] for row in history.json()["events"]}
-    assert "case_created" in events
-    assert "intake_updated" in events
-    assert "evaluation_created" in events
+    # Still evidence_ready — no stub evaluation was created.
+    assert detail.json()["state"] == "evidence_ready"
 
 
 def test_stale_version_conflict_on_intake_answers(client: TestClient) -> None:

@@ -202,10 +202,23 @@ export function getDecisionCase(
   );
 }
 
+export type NatalEvidencePayload = {
+  birth_date: string;
+  birth_time: string;
+  location: string;
+  latitude?: number;
+  longitude?: number;
+  evaluation_location?: string;
+  evaluation_latitude?: number;
+  evaluation_longitude?: number;
+};
+
 export function saveIntakeAnswers(input: {
   caseId: string;
   expectedCaseVersion: number;
-  answers: Partial<CarInterviewIntake>;
+  answers: Partial<CarInterviewIntake> & {
+    natal_evidence?: NatalEvidencePayload;
+  };
 }): Promise<IntakeMutationResult> {
   return requestJson<IntakeMutationResult>(
     `/api/v1/decision-cases/${input.caseId}/intake/answers`,
