@@ -9,6 +9,8 @@ builder = "NIXPACKS"
 watchPatterns = [
   "apps/api/**",
   "packages/astro_engine/**",
+  # Runtime-1 and Case evaluation import packages.decision_engine; must redeploy API.
+  "packages/decision_engine/**",
   "railway.toml",
   "nixpacks.toml",
   ".python-version",
