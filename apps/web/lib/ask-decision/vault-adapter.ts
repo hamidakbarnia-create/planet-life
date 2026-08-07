@@ -72,11 +72,8 @@ export function saveAskDecisionToVault(
   if (typeof window === 'undefined') return null;
   const payload = toAskVaultSavePayload(question, result);
   try {
-    const raw = localStorage.getItem(VAULT_KEY);
-    const list: AskVaultSavePayload[] = raw
-      ? (JSON.parse(raw) as AskVaultSavePayload[])
-      : [];
-    const next = [payload, ...(Array.isArray(list) ? list : [])].slice(0, 40);
+    const list = loadAskDecisionsFromVault();
+    const next = [payload, ...list].slice(0, 40);
     localStorage.setItem(VAULT_KEY, JSON.stringify(next));
     trackAskDecisionEvent('ask_saved', {
       status: result.recommendationStatus,
@@ -85,5 +82,18 @@ export function saveAskDecisionToVault(
     return payload;
   } catch {
     return null;
+  }
+}
+
+/** Read Ask decision snapshots previously saved via `saveAskDecisionToVault`. */
+export function loadAskDecisionsFromVault(): AskVaultSavePayload[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(VAULT_KEY);
+    if (!raw) return [];
+    const list = JSON.parse(raw) as AskVaultSavePayload[];
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
   }
 }
