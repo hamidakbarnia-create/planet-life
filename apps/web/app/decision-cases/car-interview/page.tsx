@@ -1,13 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { AppShell } from '@/components/AppShell';
 import { CarInterviewIntakeForm } from '@/components/decision-case/CarInterviewIntakeForm';
+import { getAskProductCopy } from '@/lib/ask-product';
 import { localeFontFamily } from '@/lib/brand-theme';
 import {
-  CAR_INTERVIEW_DECISION_TYPE_ID,
-  CAR_INTERVIEW_LABEL,
   DecisionCaseApiError,
   completeCaseIntake,
   ensureCaseAndSaveAnswers,
@@ -27,6 +27,7 @@ export default function CarInterviewIntakePage() {
   const ready = useClientReady();
   const [lang, setLang] = useAppLang();
   const t = HOME_LANGS[lang];
+  const copy = getAskProductCopy(lang);
   const router = useRouter();
   const [caseId, setCaseId] = useState<string | null>(null);
   const [caseVersion, setCaseVersion] = useState<number | null>(null);
@@ -54,14 +55,14 @@ export default function CarInterviewIntakePage() {
         setError(
           err instanceof DecisionCaseApiError
             ? err.message
-            : 'Unable to load Decision Case'
+            : copy.intakeLoadError
         );
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [ready, caseId]);
+  }, [ready, caseId, copy.intakeLoadError]);
 
   if (!ready) {
     return (
@@ -77,22 +78,13 @@ export default function CarInterviewIntakePage() {
       navLabels={t.nav}
       fontFamily={localeFontFamily(lang)}
     >
-      <div className="mx-auto max-w-2xl px-4 py-8 space-y-6">
+      <div className="mx-auto max-w-2xl px-4 py-8 space-y-6" dir={copy.dir}>
         <header className="space-y-2">
           <p className="fi text-xs uppercase tracking-[0.16em] text-amber-400/80">
-            Decision Case · {CAR_INTERVIEW_DECISION_TYPE_ID}
+            {copy.intakeEyebrow}
           </p>
-          <h1 className="fc text-2xl text-white">{CAR_INTERVIEW_LABEL}</h1>
-          <p className="fi text-sm text-white/60">
-            Answer required intake fields. A Decision Case is created only after
-            your first meaningful required answer, via the backend Case API.
-          </p>
-          {caseId ? (
-            <p className="fi text-xs text-white/45" data-testid="active-case-id">
-              Case {caseId}
-              {caseVersion != null ? ` · v${caseVersion}` : ''}
-            </p>
-          ) : null}
+          <h1 className="fc text-2xl text-white">{copy.intakeTitle}</h1>
+          <p className="fi text-sm text-white/60">{copy.intakeBody}</p>
         </header>
 
         {error ? (
@@ -104,6 +96,7 @@ export default function CarInterviewIntakePage() {
         <div className="mio-glass mio-glass--primary !p-5">
           <CarInterviewIntakeForm
             key={`${caseId ?? 'new'}-${caseVersion ?? 0}`}
+            lang={lang}
             initialIntake={intake}
             submitting={busy}
             onSubmitAnswers={async (answers) => {
@@ -123,7 +116,7 @@ export default function CarInterviewIntakePage() {
                 );
               } catch (err) {
                 setError(
-                  err instanceof Error ? err.message : 'Save failed'
+                  err instanceof Error ? err.message : copy.intakeSaveError
                 );
               } finally {
                 setBusy(false);
@@ -143,7 +136,9 @@ export default function CarInterviewIntakePage() {
                 setIntake(saved.intake);
                 if (!saved.is_complete) {
                   setError(
-                    `Complete required fields: ${saved.missing_required.join(', ')}`
+                    copy.intakeRequiredRemaining(
+                      saved.missing_required.join(', ')
+                    )
                   );
                   return;
                 }
@@ -156,7 +151,9 @@ export default function CarInterviewIntakePage() {
                 );
               } catch (err) {
                 setError(
-                  err instanceof Error ? err.message : 'Unable to continue'
+                  err instanceof Error
+                    ? err.message
+                    : copy.intakeCompleteError
                 );
               } finally {
                 setBusy(false);
@@ -164,6 +161,13 @@ export default function CarInterviewIntakePage() {
             }}
           />
         </div>
+
+        <Link
+          href="/ask"
+          className="fi text-sm text-[#93B4FF] hover:text-white"
+        >
+          {copy.backToAsk}
+        </Link>
       </div>
     </AppShell>
   );

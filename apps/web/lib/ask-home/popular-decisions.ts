@@ -47,15 +47,32 @@ const MOCK_POPULAR_DECISIONS: readonly PopularDecision[] = [
   { id: 'buy-house', label: 'Buy House', source: 'mock' },
 ];
 
+/**
+ * Consumer labels for popular slots that bind a registry type but have no
+ * guided-question locale text. Routing IDs stay on the registry record.
+ */
+const POPULAR_LABEL_LOCALES: Partial<
+  Record<string, Record<AppLang, string>>
+> = {
+  'best-wedding-date': {
+    en: 'Choose wedding date',
+    fa: 'انتخاب تاریخ عروسی',
+    ar: 'اختيار تاريخ الزفاف',
+    ru: 'Выбрать дату свадьбы',
+  },
+};
+
 function resolveFromRegistry(
-  ref: PopularDecisionRef
+  ref: PopularDecisionRef,
+  lang: AppLang = 'en'
 ): PopularDecision | null {
   if (!ref.decisionTypeId) return null;
   const record = getDecisionType(ref.decisionTypeId);
   if (!record) return null;
+  const localized = POPULAR_LABEL_LOCALES[ref.id]?.[lang];
   return {
     id: ref.id,
-    label: record.label,
+    label: localized ?? record.label,
     decisionTypeId: record.decision_type_id,
     guidedQuestionId: ref.guidedQuestionId,
     familyId: record.family_id,
@@ -81,9 +98,9 @@ function resolveFromQuestionLibrary(
 
 /**
  * Single abstraction for Popular Decisions.
- * Prefers registry labels when a decision_type_id is bound and present;
- * otherwise resolves from the question library. Falls back to typed mocks
- * only when the registry document itself is unavailable.
+ * Prefers localized question-library labels for consumer display.
+ * Registry ids remain for routing; registry English labels are not shown
+ * when a guided question provides locale text.
  */
 export function listPopularDecisions(lang: AppLang = 'en'): PopularDecision[] {
   if (!hasDecisionTypeRegistry()) {
@@ -92,13 +109,20 @@ export function listPopularDecisions(lang: AppLang = 'en'): PopularDecision[] {
 
   const resolved: PopularDecision[] = [];
   for (const ref of POPULAR_DECISION_REFS) {
-    const fromRegistry = resolveFromRegistry(ref);
-    if (fromRegistry) {
-      resolved.push(fromRegistry);
+    const fromLibrary = resolveFromQuestionLibrary(ref, lang);
+    if (fromLibrary) {
+      // Keep registry type id when bound (routing), localized label from library.
+      const fromRegistry = resolveFromRegistry(ref, lang);
+      resolved.push({
+        ...fromLibrary,
+        decisionTypeId:
+          fromLibrary.decisionTypeId ?? fromRegistry?.decisionTypeId,
+        familyId: fromRegistry?.familyId ?? fromLibrary.familyId,
+      });
       continue;
     }
-    const fromLibrary = resolveFromQuestionLibrary(ref, lang);
-    if (fromLibrary) resolved.push(fromLibrary);
+    const fromRegistry = resolveFromRegistry(ref, lang);
+    if (fromRegistry) resolved.push(fromRegistry);
   }
   return resolved;
 }

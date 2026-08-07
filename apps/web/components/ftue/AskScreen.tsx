@@ -406,23 +406,27 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
           />
 
           <HumanAgencyBanner line1={home.agencyLine1} line2={home.agencyLine2} />
-        </div>
 
-        <aside className={askHomeStyles.rail} aria-label="Decision context">
-          <EnergyWidget
-            title={home.energyTitle}
-            description={home.energyDescription}
-            bestWindowPrefix={home.energyBestWindow}
-            seeDetailsLabel={home.energySeeDetails}
-            state={energy}
-          />
-          <TimingWidget
-            title={home.timingTitle}
-            bestWindowPrefix={home.timingBestWindow}
-            state={timing}
-          />
-          <HowItWorksWidget title={home.howTitle} steps={home.howSteps} />
-        </aside>
+          {/* Secondary discovery — never competes with primary ask. */}
+          <div
+            className={askHomeStyles.secondaryRail}
+            data-testid="ask-secondary-widgets"
+          >
+            <HowItWorksWidget title={home.howTitle} steps={home.howSteps} />
+            <EnergyWidget
+              title={home.energyTitle}
+              description={home.energyDescription}
+              bestWindowPrefix={home.energyBestWindow}
+              seeDetailsLabel={home.energySeeDetails}
+              state={energy}
+            />
+            <TimingWidget
+              title={home.timingTitle}
+              bestWindowPrefix={home.timingBestWindow}
+              state={timing}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

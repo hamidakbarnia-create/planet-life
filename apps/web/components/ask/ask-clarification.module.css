@@ -1,0 +1,141 @@
+.panel {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 40rem;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(242, 207, 117, 0.85);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.65rem;
+  color: #fff;
+}
+
+.body {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+}
+
+.intentBlock {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 12, 22, 0.55);
+}
+
+.label {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.intent {
+  margin: 0;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.45;
+}
+
+.block {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.prompt {
+  margin: 0;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.choice {
+  text-align: start;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.choice:hover:not(:disabled) {
+  border-color: rgba(242, 207, 117, 0.45);
+}
+
+.choiceDisabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.soon {
+  color: rgba(242, 207, 117, 0.85);
+  font-size: 0.85rem;
+}
+
+.dateLabel {
+  display: block;
+}
+
+.dateInput {
+  width: 100%;
+  max-width: 16rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.95rem;
+}
+
+.primaryBtn {
+  justify-self: start;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.15rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0a0f1c;
+  background: linear-gradient(135deg, #f2cf75, #d4af37);
+  cursor: pointer;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.45;
+  cursor: wait;
+}
+
+.secondaryBtn {
+  justify-self: start;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.error {
+  margin: 0;
+  color: #fca5a5;
+  font-size: 0.9rem;
+}

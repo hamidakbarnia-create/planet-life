@@ -156,3 +156,21 @@ export function canSelectOperationRenderer(frame: DecisionFrameV1): boolean {
   if (frame.operation === 'unresolved') return false;
   return true;
 }
+
+/** Set an explicit EVALUATE date — never invents today. */
+export function applyEvaluateDate(
+  frame: DecisionFrameV1,
+  isoDate: string
+): DecisionFrameV1 {
+  const date = isoDate.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return frame;
+  }
+  return buildDecisionFrame(frame.raw_intent, {
+    decision_type_id: frame.decision_type_id,
+    objective: frame.objective,
+    operation: 'evaluate',
+    time_scope: 'specific_date',
+    dates: [date],
+  });
+}
