@@ -309,7 +309,8 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
         length: text.length,
       });
     }
-    router.push('/result');
+    // New ASK path: Decision Frame first (operation/time). Legacy /result preserved.
+    router.push('/ask/frame');
   };
 
   if (!authed || !profileComplete) {
