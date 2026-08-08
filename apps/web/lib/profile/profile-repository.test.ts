@@ -72,7 +72,7 @@ describe('profile repository (local)', () => {
     expect(localStorage.getItem('planet-life-birth-place')).toContain('48.8566');
   });
 
-  it('loads legacy profiles without gender safely', () => {
+  it('loads legacy profiles without gender safely when birth coordinates exist', () => {
     localStorage.setItem(
       'planet-life-birth-profile',
       JSON.stringify({
@@ -82,10 +82,36 @@ describe('profile repository (local)', () => {
         action_type: 'business_launch',
       })
     );
+    localStorage.setItem(
+      'planet-life-birth-place',
+      JSON.stringify({
+        name: 'Paris, Île-de-France, France',
+        short: 'Paris',
+        lat: 48.8566,
+        lon: 2.3522,
+      })
+    );
     const repo = getProfileRepository();
     const loaded = repo.loadProfile();
     expect(loaded?.birth_place.short).toBe('Paris');
+    expect(loaded?.birth_place.lat).toBe(48.8566);
     expect(loaded?.gender).toBeUndefined();
+  });
+
+  it('rejects legacy profiles without authoritative birth coordinates', () => {
+    localStorage.setItem(
+      'planet-life-birth-profile',
+      JSON.stringify({
+        birth_date: '1990-06-15',
+        birth_time: '14:30',
+        location: 'Paris',
+        action_type: 'business_launch',
+      })
+    );
+
+    const repo = getProfileRepository();
+
+    expect(repo.loadProfile()).toBeNull();
   });
 
   it('preserves current_location when saving gender via repository', () => {
