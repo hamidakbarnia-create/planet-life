@@ -12,6 +12,10 @@ from datetime import datetime, timezone
 from typing import Any, Mapping, Protocol
 from uuid import UUID, uuid4
 
+from packages.decision_engine.evaluate.driver_assembly import (
+    assemble_drivers_from_outcome,
+    strategic_string_factors,
+)
 from packages.decision_engine.evaluate.runtime_common import (
     RuntimeFramingError,
     RuntimeProviderError,
@@ -184,21 +188,9 @@ def assemble_package_from_outcome(
             }
         )
 
-    drivers: list[dict[str, Any]] = []
-    for index, ref in enumerate(outcome.evidence_references[:5]):
-        label = (ref.title or ref.category or f"Evidence {index + 1}").strip()
-        ref_score = float(ref.score) if ref.score is not None else score
-        ref_score = max(0.0, min(100.0, ref_score))
-        drivers.append(
-            {
-                "id": f"evidence-{index + 1}",
-                "label": label[:80],
-                "score": ref_score,
-                "band": score_to_candidate_band(ref_score),
-                "support": (ref.detail or outcome.recommendation.summary or "")[:240],
-                "friction": "",
-            }
-        )
+    drivers = assemble_drivers_from_outcome(outcome)
+    risks = strategic_string_factors(outcome, "risk_factors")
+    opportunities = strategic_string_factors(outcome, "opportunity_factors")
 
     why = outcome.explanation.summary or outcome.recommendation.text
     why_not = ""
@@ -262,8 +254,8 @@ def assemble_package_from_outcome(
         },
         "drivers": {"items": drivers},
         "tradeoffs": {"items": []},
-        "risks": {"items": []},
-        "opportunities": {"items": []},
+        "risks": {"items": risks},
+        "opportunities": {"items": opportunities},
         "action_plan": {
             "steps": [
                 {

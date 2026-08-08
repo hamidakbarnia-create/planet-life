@@ -145,13 +145,37 @@ class EvidenceModule(ContractModel):
     items: tuple[EvidenceItem, ...]
 
 
+DriverPolarity = Literal["supportive", "cautionary", "neutral"]
+DriverImportance = Literal["low", "medium", "high", "critical"]
+
+
 class DriverItem(ContractModel):
+    """Package driver: explanatory contribution, not timing-quality score.
+
+    Canonical fields: contribution, polarity, (optional) importance.
+    Deprecated compatibility: score (abs magnitude 0..100), band (polarity
+    projection). Never derive those via score_to_candidate_band().
+    """
+
     id: str = Field(min_length=1)
     label: str = Field(min_length=1)
+    contribution: float | None = None
+    polarity: DriverPolarity | None = None
+    importance: DriverImportance | None = None
+    # DEPRECATED: magnitude-only compatibility for Package v1 required field.
     score: float = Field(ge=0, le=100)
+    # DEPRECATED: polarity projection for Package v1 required field.
     band: str = Field(min_length=1)
     support: str
     friction: str
+
+    @model_serializer(mode="wrap")
+    def _omit_null_canonical_fields(self, handler):
+        data = handler(self)
+        for key in ("contribution", "polarity", "importance"):
+            if data.get(key) is None:
+                data.pop(key, None)
+        return data
 
 
 class DriversModule(ContractModel):
