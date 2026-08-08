@@ -121,11 +121,25 @@ def build_car_interview_stub_package(
                 {
                     "id": "visibility",
                     "label": "Visibility",
-                    "score": 78.0,
+                    "contribution": 4.5,
+                    "polarity": "supportive",
+                    "importance": "high",
+                    "score": 4.5,
                     "band": "high",
                     "support": "The selected date supports clear presentation.",
+                    "friction": "",
+                },
+                {
+                    "id": "preparation",
+                    "label": "Preparation remains decisive",
+                    "contribution": -2.0,
+                    "polarity": "cautionary",
+                    "importance": "medium",
+                    "score": 2.0,
+                    "band": "low",
+                    "support": "",
                     "friction": "Preparation quality remains decisive.",
-                }
+                },
             ]
         },
         "tradeoffs": {"items": ["Attend now — less preparation buffer"]},

@@ -112,7 +112,13 @@ export interface DecisionEvaluationPackage {
     readonly items: readonly {
       readonly id: string;
       readonly label: string;
+      /** Signed explanatory contribution — not timing-quality 0..100. */
+      readonly contribution?: number;
+      readonly polarity?: 'supportive' | 'cautionary' | 'neutral';
+      readonly importance?: 'low' | 'medium' | 'high' | 'critical';
+      /** @deprecated Compatibility magnitude only; prefer contribution. */
       readonly score: number;
+      /** @deprecated Compatibility polarity projection; prefer polarity. */
       readonly band: string;
       readonly support: string;
       readonly friction: string;

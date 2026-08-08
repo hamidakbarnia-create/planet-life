@@ -432,12 +432,31 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "label": { "type": "string", "minLength": 1 },
+        "contribution": {
+          "type": "number",
+          "description": "Signed explanatory contribution. Not a 0..100 timing-quality score."
+        },
+        "polarity": {
+          "type": "string",
+          "enum": ["supportive", "cautionary", "neutral"],
+          "description": "Canonical driver polarity. Prefer over deprecated band."
+        },
+        "importance": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "description": "Explanatory magnitude metadata. Independent of polarity."
+        },
         "score": {
           "type": "number",
           "minimum": 0,
-          "maximum": 100
+          "maximum": 100,
+          "description": "DEPRECATED compatibility magnitude (abs(contribution) clamped). Not candidate timing score."
         },
-        "band": { "type": "string", "minLength": 1 },
+        "band": {
+          "type": "string",
+          "minLength": 1,
+          "description": "DEPRECATED compatibility polarity projection (supportive→high, cautionary→low, neutral→moderate). Not score_to_candidate_band."
+        },
         "support": { "type": "string" },
         "friction": { "type": "string" }
       }
