@@ -27,6 +27,7 @@ export {
 } from './states';
 export { localizeCaseApiError } from './api-errors';
 export {
+  applyCompareDates,
   applyEvaluateDate,
   applyOperationChoice,
   applyOpenEndedAxis,
@@ -38,6 +39,7 @@ export {
   resetToExamineStep,
   saveDecisionFrame,
 } from './clarify-bridge';
+export type { CompareDateDraft } from './clarify-bridge';
 export type { DecisionFrameV1 } from '@/lib/decision-frame/types';
 export {
   canEvaluateInProduction,

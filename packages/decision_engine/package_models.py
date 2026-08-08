@@ -13,7 +13,7 @@ from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
 
 
 Stance = Literal[
@@ -21,6 +21,7 @@ Stance = Literal[
     "proceed_with_conditions",
     "wait",
     "prefer_alternate",
+    "no_unique_winner",
     "insufficient_data",
 ]
 DecisionMode = Literal["evaluate_date", "compare_dates"]
@@ -44,6 +45,20 @@ class TimingCandidate(ContractModel):
     rank: int = Field(ge=1)
     score: float = Field(ge=0, le=100)
     band: CandidateBand
+    # Optional identity fields for compare_dates (evaluate_date omits these).
+    option_id: str | None = None
+    label: str | None = None
+    strengths: tuple[str, ...] | None = Field(default=None, max_length=3)
+    risks: tuple[str, ...] | None = Field(default=None, max_length=3)
+
+    @model_serializer(mode="wrap")
+    def _omit_empty_compare_fields(self, handler):
+        data = handler(self)
+        for key in ("option_id", "label", "strengths", "risks"):
+            value = data.get(key)
+            if value is None or value == [] or value == ():
+                data.pop(key, None)
+        return data
 
 
 class TimingModule(ContractModel):

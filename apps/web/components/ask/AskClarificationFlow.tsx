@@ -3,10 +3,12 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
+  applyCompareDates,
   applyEvaluateDate,
   applyOperationChoice,
   applyOpenEndedAxis,
   canEvaluateInProduction,
+  canExecuteInProduction,
   deriveClarificationState,
   getAskProductCopy,
   isEvaluateCapabilityUnavailable,
@@ -20,10 +22,35 @@ import {
 import type { AppLang } from '@/lib/app-settings';
 import styles from './ask-clarification.module.css';
 
+type CompareDraft = { id: string; label: string; date: string };
+
+function initialCompareDrafts(frame: DecisionFrameV1): CompareDraft[] {
+  const fromOptions = (frame.options ?? [])
+    .filter((o) => o.date)
+    .map((o, index) => ({
+      id: o.id || `opt-${index + 1}`,
+      label: o.label || o.date || '',
+      date: o.date || '',
+    }));
+  if (fromOptions.length >= 2) return fromOptions.slice(0, 3);
+  const dates = frame.time.dates ?? [];
+  if (dates.length >= 2) {
+    return dates.slice(0, 3).map((date, index) => ({
+      id: `opt-${index + 1}`,
+      label: date,
+      date,
+    }));
+  }
+  return [
+    { id: 'opt-1', label: '', date: '' },
+    { id: 'opt-2', label: '', date: '' },
+  ];
+}
+
 /**
  * Consumer clarification UX. Decision Frame stays internal.
- * EVALUATE is offered only when the Web UX capability hint allows it
- * (shipped Runtime mirror — not backend authority). COMPARE/FIND remain Coming soon.
+ * EVALUATE / COMPARE offered only when the Web UX capability hint allows them
+ * (shipped Runtime mirror — not backend authority). FIND remains Coming soon.
  */
 export function AskClarificationFlow({
   lang,
@@ -44,8 +71,16 @@ export function AskClarificationFlow({
   const copy = getAskProductCopy(lang);
   const state = deriveClarificationState(frame);
   const evaluateCapable = canEvaluateInProduction(frame.decision_type_id);
+  const compareCapable = canExecuteInProduction(
+    frame.decision_type_id,
+    'compare'
+  );
   const [dateInput, setDateInput] = useState(frame.time.dates?.[0] ?? '');
   const [dateError, setDateError] = useState('');
+  const [compareDrafts, setCompareDrafts] = useState<CompareDraft[]>(() =>
+    initialCompareDrafts(frame)
+  );
+  const [compareError, setCompareError] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -125,7 +160,6 @@ export function AskClarificationFlow({
     (frame.operation === 'unresolved' ||
       frame.pending_clarification === 'operation');
 
-  // Date / ready only when the Web UX evaluate hint allows it.
   const showDate =
     evaluateCapable &&
     !showExamine &&
@@ -133,18 +167,34 @@ export function AskClarificationFlow({
     frame.operation === 'evaluate' &&
     (frame.time.scope !== 'specific_date' || !frame.time.dates?.[0]);
 
-  const showReady = state === 'READY_TO_EVALUATE' && evaluateCapable;
+  const showCompareDates =
+    compareCapable &&
+    !showExamine &&
+    !showOpenEnded &&
+    frame.operation === 'compare' &&
+    state !== 'READY_TO_COMPARE';
 
-  // Free-text / unresolved type: surface capability early (examine step).
+  const showReady = state === 'READY_TO_EVALUATE' && evaluateCapable;
+  const showReadyCompare = state === 'READY_TO_COMPARE' && compareCapable;
+
   const showEarlyCapability =
     !evaluateCapable &&
+    !compareCapable &&
     !showOpenEnded &&
     (showExamine ||
       frame.operation === 'evaluate' ||
       isEvaluateCapabilityUnavailable(frame));
 
-  const runEvaluate = async (readyFrame: DecisionFrameV1) => {
-    if (!canEvaluateInProduction(readyFrame.decision_type_id)) {
+  const persistAndContinue = async (readyFrame: DecisionFrameV1) => {
+    const operation = readyFrame.operation;
+    if (
+      operation !== 'evaluate' &&
+      operation !== 'compare'
+    ) {
+      setError(copy.capabilityBody);
+      return;
+    }
+    if (!canExecuteInProduction(readyFrame.decision_type_id, operation)) {
       setError(copy.capabilityBody);
       return;
     }
@@ -163,6 +213,31 @@ export function AskClarificationFlow({
       setError(localizeCaseApiError(err, lang));
       setBusy(false);
     }
+  };
+
+  const submitCompareDrafts = () => {
+    const cleaned = compareDrafts
+      .map((item, index) => ({
+        id: item.id || `opt-${index + 1}`,
+        label: item.label.trim() || item.date.trim(),
+        date: item.date.trim(),
+      }))
+      .filter((item) => item.date);
+    if (cleaned.length < 2) {
+      setCompareError(copy.compareNeedTwo);
+      return;
+    }
+    if (cleaned.length > 3) {
+      setCompareError(copy.compareNeedTwo);
+      return;
+    }
+    const unique = new Set(cleaned.map((c) => c.date));
+    if (unique.size !== cleaned.length) {
+      setCompareError(copy.compareDuplicateDates);
+      return;
+    }
+    setCompareError('');
+    update(applyCompareDates(frame, cleaned));
   };
 
   return (
@@ -218,7 +293,13 @@ export function AskClarificationFlow({
         </div>
       ) : null}
 
-      {showExamine || (!evaluateCapable && !showOpenEnded && !showDate && !showReady) ? (
+      {showExamine ||
+      (!evaluateCapable &&
+        !compareCapable &&
+        !showOpenEnded &&
+        !showDate &&
+        !showReady &&
+        !showReadyCompare) ? (
         <div className={styles.block}>
           <p className={`fi ${styles.prompt}`}>{copy.examinePrompt}</p>
           <div className={styles.choices} data-testid="examine-choices">
@@ -246,16 +327,27 @@ export function AskClarificationFlow({
                 </span>
               </button>
             )}
-            <button
-              type="button"
-              className={`${styles.choice} ${styles.choiceDisabled}`}
-              data-testid="examine-compare"
-              disabled
-              aria-disabled="true"
-            >
-              {copy.examineCompare}
-              <span className={styles.soon}> — {copy.comingSoon}</span>
-            </button>
+            {compareCapable ? (
+              <button
+                type="button"
+                className={styles.choice}
+                data-testid="examine-compare"
+                onClick={() => update(applyOperationChoice(frame, 'compare'))}
+              >
+                {copy.examineCompare}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={`${styles.choice} ${styles.choiceDisabled}`}
+                data-testid="examine-compare"
+                disabled
+                aria-disabled="true"
+              >
+                {copy.examineCompare}
+                <span className={styles.soon}> — {copy.comingSoon}</span>
+              </button>
+            )}
             <button
               type="button"
               className={`${styles.choice} ${styles.choiceDisabled}`}
@@ -267,7 +359,7 @@ export function AskClarificationFlow({
               <span className={styles.soon}> — {copy.comingSoon}</span>
             </button>
           </div>
-          {!evaluateCapable ? (
+          {!evaluateCapable && !compareCapable ? (
             <div className={styles.actionsRow}>
               <button
                 type="button"
@@ -328,6 +420,110 @@ export function AskClarificationFlow({
         </div>
       ) : null}
 
+      {showCompareDates ? (
+        <div className={styles.block} data-testid="ask-compare-dates-step">
+          <p className={`fi ${styles.prompt}`}>{copy.compareDatesPrompt}</p>
+          <p className={`fi ${styles.hint}`}>{copy.compareDatesHint}</p>
+          <div className={styles.choices}>
+            {compareDrafts.map((draft, index) => (
+              <div
+                key={draft.id}
+                className={styles.intentBlock}
+                data-testid={`compare-option-row-${index}`}
+              >
+                <label className={styles.dateLabel}>
+                  <span className={`fi ${styles.label}`}>
+                    {copy.compareOptionLabel}
+                  </span>
+                  <input
+                    className={styles.dateInput}
+                    value={draft.label}
+                    data-testid={`compare-option-label-${index}`}
+                    onChange={(e) => {
+                      setCompareDrafts((prev) =>
+                        prev.map((item, i) =>
+                          i === index
+                            ? { ...item, label: e.target.value }
+                            : item
+                        )
+                      );
+                      setCompareError('');
+                    }}
+                  />
+                </label>
+                <label className={styles.dateLabel}>
+                  <span className={`fi ${styles.label}`}>
+                    {copy.compareOptionDate}
+                  </span>
+                  <input
+                    type="date"
+                    className={styles.dateInput}
+                    value={draft.date}
+                    data-testid={`compare-option-date-${index}`}
+                    onChange={(e) => {
+                      setCompareDrafts((prev) =>
+                        prev.map((item, i) =>
+                          i === index
+                            ? { ...item, date: e.target.value }
+                            : item
+                        )
+                      );
+                      setCompareError('');
+                    }}
+                  />
+                </label>
+                {compareDrafts.length > 2 ? (
+                  <button
+                    type="button"
+                    className={styles.secondaryBtn}
+                    data-testid={`compare-option-remove-${index}`}
+                    onClick={() =>
+                      setCompareDrafts((prev) =>
+                        prev.filter((_, i) => i !== index)
+                      )
+                    }
+                  >
+                    {copy.compareRemoveOption}
+                  </button>
+                ) : null}
+              </div>
+            ))}
+          </div>
+          {compareDrafts.length < 3 ? (
+            <button
+              type="button"
+              className={styles.secondaryBtn}
+              data-testid="compare-add-option"
+              onClick={() =>
+                setCompareDrafts((prev) => [
+                  ...prev,
+                  {
+                    id: `opt-${prev.length + 1}`,
+                    label: '',
+                    date: '',
+                  },
+                ])
+              }
+            >
+              {copy.compareAddOption}
+            </button>
+          ) : null}
+          {compareError ? (
+            <p className={`fi ${styles.error}`} role="alert">
+              {compareError}
+            </p>
+          ) : null}
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            data-testid="ask-compare-dates-continue"
+            onClick={submitCompareDrafts}
+          >
+            {copy.dateContinue}
+          </button>
+        </div>
+      ) : null}
+
       {showReady ? (
         <div className={styles.block} data-testid="ask-ready-evaluate">
           <button
@@ -335,9 +531,23 @@ export function AskClarificationFlow({
             className={styles.primaryBtn}
             disabled={busy}
             data-testid="ask-persist-evaluate"
-            onClick={() => void runEvaluate(frame)}
+            onClick={() => void persistAndContinue(frame)}
           >
             {busy ? copy.evaluating : copy.persistAndEvaluate}
+          </button>
+        </div>
+      ) : null}
+
+      {showReadyCompare ? (
+        <div className={styles.block} data-testid="ask-ready-compare">
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            disabled={busy}
+            data-testid="ask-persist-compare"
+            onClick={() => void persistAndContinue(frame)}
+          >
+            {busy ? copy.comparing : copy.persistAndCompare}
           </button>
         </div>
       ) : null}

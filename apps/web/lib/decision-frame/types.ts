@@ -106,16 +106,25 @@ export type EvaluateResultViewModel = {
 export type CompareResultViewModel = {
   operation: 'compare';
   options: Array<{
+    option_id?: string;
     label: string;
+    date?: string;
+    rank?: number;
+    score?: number;
     strength: StrengthBand;
+    strengths?: string[];
+    risks?: string[];
   }>;
   winner_label: string;
+  unique_winner: boolean;
+  relative_explanation?: string;
   deciding_factor?: string;
   advantages: Array<{
     option_label: string;
     advantage: string;
   }>;
   confidence: ConfidenceBand;
+  limitations?: string[];
   known?: string[];
   inferred?: string[];
   unknown?: string[];

@@ -15,10 +15,13 @@ vi.mock('./api-client', async () => {
     saveIntakeAnswers: vi.fn(),
     completeIntake: vi.fn(),
     evaluateDecisionCase: vi.fn(),
+    compareDecisionCase: vi.fn(),
     getDecisionCase: vi.fn(),
     getDecisionCaseHistory: vi.fn(),
     listDecisionCaseEvaluations: vi.fn(),
+    listDecisionCaseComparisons: vi.fn(),
     getEvaluation: vi.fn(),
+    getComparison: vi.fn(),
     updateDecisionCaseFraming: vi.fn(),
   };
 });
@@ -367,5 +370,131 @@ describe('car-interview Decision Case session (PR-2)', () => {
       code: 'INTAKE_INCOMPLETE',
     });
     expect(api.evaluateDecisionCase).not.toHaveBeenCalled();
+  });
+
+  it('loadCaseResult preserves compare framing and loads via /comparisons', async () => {
+    const compareFrame = {
+      operation: 'compare',
+      time_scope: 'multiple_dates',
+      dates: ['2026-09-10', '2026-09-18'],
+      options: [
+        { id: 'opt-1', label: 'Early weekend', date: '2026-09-10' },
+        { id: 'opt-2', label: 'Late weekend', date: '2026-09-18' },
+      ],
+    };
+    vi.mocked(api.getDecisionCase).mockResolvedValue({
+      case_id: 'case-wed-compare',
+      owner_subject_id: 'e5-dev-owner',
+      decision_type_id: 'mar-wedding-date',
+      family_id: 'timing_opt',
+      title: 'Choose wedding date',
+      state: 'evidence_ready',
+      activation_phase: 'evidence_ready',
+      mode: 'compare_dates',
+      precision_level: 'L1',
+      case_version: 3,
+      created_at: '2026-08-08T10:00:00Z',
+      updated_at: '2026-08-08T10:00:00Z',
+      intake: {
+        ceremony_type: 'civil',
+        decision_frame: compareFrame,
+      },
+    });
+    vi.mocked(api.listDecisionCaseComparisons).mockResolvedValue({
+      comparisons: [],
+    });
+    vi.mocked(api.compareDecisionCase).mockResolvedValue({
+      comparison_id: 'cmp-1',
+      case_id: 'case-wed-compare',
+      case_version: 3,
+      evaluation_id: 'eval-compare',
+      created_at: '2026-08-08T10:00:05Z',
+      ranking: [],
+      package: {
+        schema_version: '1.0.0',
+        mode: 'compare_dates',
+        engine_id: 'decision-engine-wedding-date-v1',
+        recommendation: {
+          stance: 'proceed_with_conditions',
+          conditions: [],
+          summary: 'Prefer Late weekend',
+        },
+      } as never,
+    });
+    vi.mocked(api.getDecisionCaseHistory).mockResolvedValue({ events: [] });
+
+    const loaded = await loadCaseResult('case-wed-compare');
+    expect(api.updateDecisionCaseFraming).not.toHaveBeenCalled();
+    expect(api.compareDecisionCase).toHaveBeenCalled();
+    expect(api.evaluateDecisionCase).not.toHaveBeenCalled();
+    expect(api.listDecisionCaseEvaluations).not.toHaveBeenCalled();
+    expect(loaded.evaluation.dq_status).toBe('pass');
+    expect(loaded.evaluation.package.mode).toBe('compare_dates');
+  });
+
+  it('loadCaseResult reads existing comparison resource for compared cases', async () => {
+    vi.mocked(api.getDecisionCase).mockResolvedValue({
+      case_id: 'case-wed-compared',
+      owner_subject_id: 'e5-dev-owner',
+      decision_type_id: 'mar-wedding-date',
+      family_id: 'timing_opt',
+      title: 'Choose wedding date',
+      state: 'compared',
+      activation_phase: 'compared',
+      mode: 'compare_dates',
+      precision_level: 'L1',
+      case_version: 6,
+      created_at: '2026-08-08T10:00:00Z',
+      updated_at: '2026-08-08T10:00:00Z',
+      intake: {
+        ceremony_type: 'civil',
+        decision_frame: {
+          operation: 'compare',
+          time_scope: 'multiple_dates',
+          dates: ['2026-09-10', '2026-09-18'],
+        },
+      },
+    });
+    vi.mocked(api.listDecisionCaseComparisons).mockResolvedValue({
+      comparisons: [
+        {
+          comparison_id: 'cmp-existing',
+          case_id: 'case-wed-compared',
+          case_version: 4,
+          evaluation_id: 'eval-existing',
+          created_at: '2026-08-08T10:00:05Z',
+        },
+      ],
+    });
+    vi.mocked(api.getComparison).mockResolvedValue({
+      comparison_id: 'cmp-existing',
+      case_id: 'case-wed-compared',
+      case_version: 4,
+      evaluation_id: 'eval-existing',
+      created_at: '2026-08-08T10:00:05Z',
+      ranking: [],
+      package: {
+        schema_version: '1.0.0',
+        mode: 'compare_dates',
+        engine_id: 'decision-engine-wedding-date-v1',
+        recommendation: {
+          stance: 'no_unique_winner',
+          conditions: [],
+          summary: 'No unique winner among the compared dates.',
+        },
+      } as never,
+    });
+    vi.mocked(api.getDecisionCaseHistory).mockResolvedValue({ events: [] });
+
+    const loaded = await loadCaseResult('case-wed-compared');
+    expect(api.getComparison).toHaveBeenCalledWith({
+      caseId: 'case-wed-compared',
+      comparisonId: 'cmp-existing',
+    });
+    expect(api.compareDecisionCase).not.toHaveBeenCalled();
+    expect(api.evaluateDecisionCase).not.toHaveBeenCalled();
+    expect(loaded.evaluation.package.recommendation.stance).toBe(
+      'no_unique_winner'
+    );
   });
 });

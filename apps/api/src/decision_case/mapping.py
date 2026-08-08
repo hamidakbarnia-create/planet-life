@@ -9,11 +9,14 @@ from packages.decision_engine.state_machine import NO_ACTIVE_PHASE, activation_p
 
 from decision_case.repository.models import (
     CaseRecord,
+    ComparisonRecord,
     EvaluationRecord,
     HistoryEventRecord,
 )
 from decision_case.schemas.cases import (
     DecisionCaseResource,
+    DecisionComparisonListItem,
+    DecisionComparisonResource,
     DecisionEvaluationListItem,
     DecisionEvaluationResource,
     DecisionHistoryEventResource,
@@ -74,6 +77,28 @@ def to_evaluation_resource(record: EvaluationRecord) -> DecisionEvaluationResour
     return DecisionEvaluationResource(
         **base.model_dump(),
         package=dict(record.package) if record.package is not None else {},
+    )
+
+
+def to_comparison_list_item(record: ComparisonRecord) -> DecisionComparisonListItem:
+    return DecisionComparisonListItem(
+        comparison_id=record.comparison_id,
+        case_id=record.case_id,
+        case_version=record.case_version,
+        evaluation_id=record.evaluation_id,
+        created_at=format_utc_z(record.created_at),
+    )
+
+
+def to_comparison_resource(
+    record: ComparisonRecord,
+    evaluation: EvaluationRecord,
+) -> DecisionComparisonResource:
+    base = to_comparison_list_item(record)
+    return DecisionComparisonResource(
+        **base.model_dump(),
+        ranking=list(record.ranking or []),
+        package=dict(evaluation.package) if evaluation.package is not None else {},
     )
 
 

@@ -21,6 +21,7 @@ export type DecisionStance =
   | "proceed_with_conditions"
   | "wait"
   | "prefer_alternate"
+  | "no_unique_winner"
   | "insufficient_data";
 
 export type TimingBand = "high" | "moderate" | "low" | "na";
@@ -31,6 +32,10 @@ export interface TimingCandidate {
   readonly rank: number;
   readonly score: number;
   readonly band: CandidateBand;
+  readonly option_id?: string;
+  readonly label?: string;
+  readonly strengths?: readonly string[];
+  readonly risks?: readonly string[];
 }
 
 export interface DecisionEvaluationPackage {

@@ -119,7 +119,7 @@ class WeddingDateTimingOptSemantics:
             "Best clock-time window was not computed (date-level evidence only).",
             "Avoid windows were not computed.",
             "Alternative dates were not searched.",
-            "COMPARE mode is not implemented for this Decision Type in this release.",
+            "This EVALUATE package assesses one date only; use COMPARE to rank candidates.",
         ]
 
     def scored_improve_accuracy(self) -> list[str]:
@@ -138,6 +138,213 @@ class WeddingDateTimingOptSemantics:
             "Upstream scoring did not supply a reasoning confidence value. "
             "Package confidence.value=0 is a schema placeholder, not a measured score."
         )
+
+
+@dataclass(frozen=True, slots=True)
+class WeddingDateTimingOptCompareSemantics:
+    """COMPARE Package wording for mar-wedding-date."""
+
+    def insufficient_summary(self, answers: Any, option_labels: list[str]) -> str:
+        ceremony = getattr(answers, "ceremony_type", None) or "wedding"
+        labels = ", ".join(option_labels) if option_labels else "the candidate dates"
+        return (
+            f"Cannot compare {ceremony} dates ({labels}) without natal evidence."
+        )
+
+    def insufficient_action(self) -> str:
+        return (
+            "Provide natal evidence (birth date, time, location) "
+            "on the Case, then re-compare."
+        )
+
+    def insufficient_counter_reason(self) -> str:
+        return (
+            "Comparison did not run. Without natal evidence, candidate dates "
+            "cannot be ranked."
+        )
+
+    def insufficient_limits(self) -> list[str]:
+        return [
+            "Ceremony timing comparison only — not relationship quality or wedding success.",
+            "No clock-time window, avoid window, or FIND search was performed.",
+        ]
+
+    def insufficient_timing_notes(self) -> str:
+        return (
+            "Timing not compared: natal evidence unavailable. "
+            "Candidate score/band are Package v1 placeholders, not ratings."
+        )
+
+    def insufficient_confidence_message(self) -> str:
+        return (
+            "Birth date/time/location evidence is required for "
+            "timing comparison."
+        )
+
+    def scored_summary(
+        self,
+        answers: Any,
+        *,
+        unique_winner: bool,
+        winner_label: str | None,
+        tied_labels: list[str],
+    ) -> str:
+        ceremony = getattr(answers, "ceremony_type", None) or "wedding"
+        if unique_winner and winner_label:
+            return (
+                f"Prefer {winner_label} for this {ceremony} based on relative "
+                "ceremony-day timing scores."
+            )
+        tied = " and ".join(tied_labels) if tied_labels else "the top candidates"
+        return (
+            f"No unique winner for this {ceremony}: {tied} are effectively tied "
+            "on ceremony-day timing."
+        )
+
+    def scored_conditions(self, answers: Any) -> list[str]:
+        conditions: list[str] = []
+        if not getattr(answers, "partner_name", None):
+            conditions.append(
+                "Partner name was not used in scoring (missing on Case; label-only)"
+            )
+        if not getattr(answers, "venue", None):
+            conditions.append(
+                "Venue was not used in scoring (missing on Case; label-only)"
+            )
+        return conditions
+
+    def scored_evidence_limits(self) -> list[str]:
+        return [
+            "Canonical activity profile: wedding_date (union/ceremony timing).",
+            "Scores are relative ceremony-day timing signals, not wedding outcomes.",
+            "ceremony_type, partner_name, and venue did not enter the scoring function.",
+            "Same natal evidence was used for every candidate date.",
+        ]
+
+    def scored_timing_notes(self, *, unique_winner: bool) -> str:
+        if unique_winner:
+            return (
+                "Candidates ranked by wedding_date ceremony timing score "
+                "(score desc, then date asc, then option_id). "
+                "No clock-time window was computed."
+            )
+        return (
+            "Candidates ranked deterministically, but the top scores are within "
+            "the tie threshold — no unique preferred date is claimed."
+        )
+
+    def scored_action_step(
+        self,
+        *,
+        unique_winner: bool,
+        winner_label: str | None,
+        tied_labels: list[str],
+    ) -> str:
+        if unique_winner and winner_label:
+            return (
+                f"Confirm logistics for {winner_label}, then decide whether to "
+                "keep that ceremony date."
+            )
+        tied = " / ".join(tied_labels) if tied_labels else "the tied dates"
+        return (
+            f"Treat {tied} as effectively equal on timing; choose using "
+            "non-timing constraints (venue, guests, travel)."
+        )
+
+    def scored_assumptions(self, *, event_location_supplied: bool) -> list[str]:
+        return [
+            "Comparison used Case-persisted candidate dates from decision_frame.options.",
+            "Transit timing used noon local default when no ceremony clock time was supplied.",
+            "Canonical wedding_date activity profile was used for each option score.",
+            "Identical natal evidence bindings were applied to every option.",
+            (
+                "Ceremony/event location was supplied separately from birth place."
+                if event_location_supplied
+                else (
+                    "Ceremony/event location was not supplied on the Case; "
+                    "scoring pipeline may default transit location to birth place."
+                )
+            ),
+        ]
+
+    def scored_limits(self) -> list[str]:
+        return [
+            "Ceremony timing comparison only — not relationship quality, wedding success, "
+            "legal advice, venue quality, budget success, or guaranteed outcome.",
+            "ceremony_type, partner_name, and venue did not affect the numeric scores.",
+            "Best clock-time windows were not computed (date-level evidence only).",
+            "Avoid windows were not computed.",
+            "FIND / Window / Scan are not part of this comparison.",
+        ]
+
+    def scored_improve_accuracy(self) -> list[str]:
+        return [
+            "Provide ceremony clock time to enable hourly window analysis (future).",
+        ]
+
+    def scored_counter_reason(self, *, unique_winner: bool) -> str:
+        if unique_winner:
+            return (
+                "A lower-ranked date may still be preferable when logistics "
+                "outweigh a modest timing gap."
+            )
+        return (
+            "Timing does not separate the top candidates; non-timing constraints "
+            "should decide."
+        )
+
+    def scored_confidence_unavailable_message(self) -> str:
+        return (
+            "Upstream scoring did not supply a reasoning confidence value. "
+            "Package confidence.value=0 is a schema placeholder, not a measured score."
+        )
+
+    def relative_explanation(
+        self,
+        *,
+        unique_winner: bool,
+        ranked_labels: list[str],
+        ranked_scores: list[float],
+        tied_labels: list[str],
+    ) -> tuple[str, str]:
+        if unique_winner and len(ranked_labels) >= 2:
+            top = ranked_labels[0]
+            rest = ", ".join(
+                f"{label} ({score:.1f})"
+                for label, score in zip(ranked_labels[1:], ranked_scores[1:])
+            )
+            why = (
+                f"{top} ranks first with score {ranked_scores[0]:.1f} versus {rest}."
+            )
+            why_not = (
+                "Lower-ranked dates have weaker combined wedding_date timing scores "
+                "under identical natal evidence."
+            )
+            return why, why_not
+        tied = ", ".join(tied_labels) if tied_labels else "top candidates"
+        why = (
+            f"{tied} are within the compare tie threshold and share the strongest "
+            "timing band under identical natal evidence."
+        )
+        why_not = (
+            "No unique preferred date is claimed because the score gap is not material."
+        )
+        return why, why_not
+
+    def option_strengths(
+        self, *, score: float, band: str, rating: str
+    ) -> tuple[str, ...]:
+        label = rating or band
+        return (f"Ceremony-day timing {label.lower()} (score {score:.1f}).",)
+
+    def option_risks(
+        self, *, score: float, band: str, rating: str
+    ) -> tuple[str, ...]:
+        if band == "high":
+            return ("Logistics or availability may still override timing preference.",)
+        if band == "moderate":
+            return ("Mixed ceremony-day signals — confirm non-timing constraints.",)
+        return ("Weaker ceremony-day timing relative to higher-ranked options.",)
 
 
 @dataclass(frozen=True, slots=True)

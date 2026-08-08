@@ -18,6 +18,8 @@ from decision_case.deps import (
 from decision_case.mapping import (
     sort_cases_for_list,
     to_case_resource,
+    to_comparison_list_item,
+    to_comparison_resource,
     to_evaluation_list_item,
     to_evaluation_resource,
     to_history_event,
@@ -34,6 +36,7 @@ from decision_case.repository.errors import (
 from decision_case.schemas.cases import (
     CaseVersionCommandRequest,
     CreateCaseFromFramingRequest,
+    CreateComparisonRequest,
     CreateDecisionCaseRequest,
     CreateEvaluationRequest,
     DecisionApiErrorBody,
@@ -41,6 +44,8 @@ from decision_case.schemas.cases import (
     DecisionCaseDetailResource,
     DecisionCaseListEnvelope,
     DecisionCaseResource,
+    DecisionComparisonListEnvelope,
+    DecisionComparisonResource,
     DecisionEvaluationListEnvelope,
     DecisionEvaluationResource,
     DecisionHistoryEnvelope,
@@ -59,6 +64,11 @@ from decision_case.services.car_interview_intake import (
     complete_car_interview_intake,
     evaluate_car_interview_case,
     save_car_interview_answers,
+)
+from decision_case.services.compare_runtime import (
+    CompareIntakeIncompleteError,
+    UnsupportedCompareDecisionTypeError,
+    compare_decision_case,
 )
 from decision_case.services.evaluate_runtime import (
     EvaluateIntakeIncompleteError,
@@ -86,11 +96,7 @@ router = APIRouter()
 
 CASE_API_PATH_PREFIX = "/api/v1/decision-cases"
 
-_RESERVED_OPENAPI_PATHS: frozenset[str] = frozenset(
-    {
-        "/api/v1/decision-cases/{case_id}/comparisons",
-    }
-)
+_RESERVED_OPENAPI_PATHS: frozenset[str] = frozenset()
 
 _ERROR_RESPONSES: dict[int | str, dict[str, Any]] = {
     400: {
@@ -150,6 +156,7 @@ def _safe_message(code: str) -> str:
         "ENTRY_MODE_UNAVAILABLE": "entry_mode is not available",
         "CASE_NOT_FOUND": "Decision case not found",
         "EVALUATION_NOT_FOUND": "Evaluation not found",
+        "COMPARISON_NOT_FOUND": "Comparison not found",
         "VERSION_CONFLICT": "Case version conflict",
         "ILLEGAL_TRANSITION": "Illegal case lifecycle transition",
         "DUPLICATE_CASE": "Duplicate decision case",
@@ -697,6 +704,147 @@ def create_decision_case_evaluation(
 
 
 @router.post(
+    "/{case_id}/comparisons",
+    response_model=DecisionComparisonResource,
+    status_code=201,
+    responses=_ERROR_RESPONSES,
+)
+def create_decision_case_comparison(
+    case_id: UUID,
+    body: CreateComparisonRequest,
+    request: Request,
+    repo: DecisionCaseRepository = Depends(get_decision_case_repository),
+    owner_subject_id: str = Depends(get_e5_owner_subject_id),
+) -> DecisionComparisonResource | JSONResponse:
+    request_id = get_request_id(request)
+    try:
+        result = compare_decision_case(
+            repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
+        )
+        return to_comparison_resource(result.comparison, result.evaluation)
+    except CompareIntakeIncompleteError as exc:
+        return _error_response(
+            status_code=400,
+            code="INTAKE_INCOMPLETE",
+            message=_safe_message("INTAKE_INCOMPLETE"),
+            request_id=request_id,
+            details={"missing_required": list(exc.missing_required)},
+        )
+    except UnsupportedCompareDecisionTypeError as exc:
+        return _error_response(
+            status_code=400,
+            code="OPERATION_NOT_IMPLEMENTED",
+            message=_safe_message("OPERATION_NOT_IMPLEMENTED"),
+            request_id=request_id,
+            details={
+                "operation": "compare",
+                "decision_type_id": exc.decision_type_id,
+            },
+        )
+    except RuntimeFramingError as exc:
+        return _error_response(
+            status_code=400,
+            code="FRAMING_REQUIRED",
+            message=str(exc) or _safe_message("FRAMING_REQUIRED"),
+            request_id=request_id,
+            details=exc.details,
+        )
+    except RuntimeProviderError as exc:
+        return _error_response(
+            status_code=502,
+            code="PROVIDER_FAILURE",
+            message=_safe_message("PROVIDER_FAILURE"),
+            request_id=request_id,
+            details=exc.details,
+        )
+    except Exception as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
+        )
+
+
+@router.get(
+    "/{case_id}/comparisons",
+    response_model=DecisionComparisonListEnvelope,
+    responses=_ERROR_RESPONSES,
+)
+def list_decision_case_comparisons(
+    case_id: UUID,
+    request: Request,
+    repo: DecisionCaseRepository = Depends(get_decision_case_repository),
+    owner_subject_id: str = Depends(get_e5_owner_subject_id),
+) -> DecisionComparisonListEnvelope | JSONResponse:
+    request_id = get_request_id(request)
+    try:
+        comparisons = repo.list_comparisons(case_id, owner_subject_id)
+        return DecisionComparisonListEnvelope(
+            comparisons=[to_comparison_list_item(c) for c in comparisons]
+        )
+    except Exception as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+        )
+
+
+@router.get(
+    "/{case_id}/comparisons/{comparison_id}",
+    response_model=DecisionComparisonResource,
+    responses=_ERROR_RESPONSES,
+)
+def get_decision_case_comparison(
+    case_id: UUID,
+    comparison_id: UUID,
+    request: Request,
+    repo: DecisionCaseRepository = Depends(get_decision_case_repository),
+    owner_subject_id: str = Depends(get_e5_owner_subject_id),
+) -> DecisionComparisonResource | JSONResponse:
+    request_id = get_request_id(request)
+    try:
+        comparison = repo.get_comparison(
+            case_id, comparison_id, owner_subject_id
+        )
+        evaluation = repo.get_evaluation(
+            case_id, comparison.evaluation_id, owner_subject_id
+        )
+        return to_comparison_resource(comparison, evaluation)
+    except CaseNotFoundError as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+        )
+    except MissingRelationError:
+        return _error_response(
+            status_code=404,
+            code="COMPARISON_NOT_FOUND",
+            message=_safe_message("COMPARISON_NOT_FOUND"),
+            request_id=request_id,
+        )
+    except Exception as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+        )
+
+
+@router.post(
     "/{case_id}/complete",
     response_model=DecisionCaseResource,
     responses=_ERROR_RESPONSES,
@@ -797,8 +945,14 @@ def list_decision_case_evaluations(
     request_id = get_request_id(request)
     try:
         evaluations = repo.list_evaluations(case_id, owner_subject_id)
+        # COMPARE packages are listed under /comparisons, not Evaluate history.
+        evaluate_only = [
+            e
+            for e in evaluations
+            if (e.package or {}).get("mode") != "compare_dates"
+        ]
         return DecisionEvaluationListEnvelope(
-            evaluations=[to_evaluation_list_item(e) for e in evaluations]
+            evaluations=[to_evaluation_list_item(e) for e in evaluate_only]
         )
     except Exception as exc:
         return _map_repository_error(

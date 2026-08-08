@@ -174,3 +174,49 @@ export function applyEvaluateDate(
     dates: [date],
   });
 }
+
+export type CompareDateDraft = {
+  id: string;
+  label: string;
+  date: string;
+};
+
+/** Set 2–3 labeled COMPARE dates — never invents today or collapses to target_date. */
+export function applyCompareDates(
+  frame: DecisionFrameV1,
+  drafts: CompareDateDraft[]
+): DecisionFrameV1 {
+  const cleaned = drafts
+    .map((item, index) => ({
+      id: (item.id || `opt-${index + 1}`).trim() || `opt-${index + 1}`,
+      label: item.label.trim() || item.date.trim(),
+      date: item.date.trim(),
+    }))
+    .filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(item.date));
+
+  if (cleaned.length < 2 || cleaned.length > 3) {
+    return {
+      ...frame,
+      operation: 'compare',
+      time: { scope: 'multiple_dates', dates: cleaned.map((c) => c.date) },
+      options: cleaned,
+      pending_clarification: 'time',
+    };
+  }
+
+  const dates = cleaned.map((c) => c.date);
+  const next = buildDecisionFrame(frame.raw_intent, {
+    decision_type_id: frame.decision_type_id,
+    objective: frame.objective,
+    operation: 'compare',
+    time_scope: 'multiple_dates',
+    dates,
+  });
+  return {
+    ...next,
+    operation: 'compare',
+    options: cleaned,
+    pending_clarification: null,
+    unknowns: next.unknowns.filter((u) => u !== 'Dates to compare'),
+  };
+}

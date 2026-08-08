@@ -81,11 +81,42 @@ describe('package adapter absent-data honesty', () => {
       },
     };
     const compare = packageToCompareView(comparePkg);
-    expect(compare.deciding_factor).toBeUndefined();
-    expect(compare.advantages).toEqual([]);
+    // Relative why may come from Package explainability; never invent Known buckets.
+    expect(compare.deciding_factor).toBe(
+      comparePkg.explainability.why || undefined
+    );
+    expect(compare.unique_winner).toBe(true);
+    expect(compare.winner_label).toBeTruthy();
     expect(compare.known).toBeUndefined();
     expect(compare.inferred).toBeUndefined();
     expect(compare.unknown).toBeUndefined();
+  });
+
+  it('tie stance no_unique_winner implies no preferred winner', () => {
+    const pkg = bindDemoStubPackage({
+      caseId: '11111111-1111-4111-8111-111111111111',
+      caseVersion: 1,
+      intake: { target_date: '2026-08-18', role: 'Engineer' },
+    });
+    const tied = {
+      ...pkg,
+      mode: 'compare_dates' as const,
+      recommendation: {
+        ...pkg.recommendation,
+        stance: 'no_unique_winner' as const,
+        summary: 'No unique winner among the compared dates.',
+      },
+      timing: {
+        ...pkg.timing,
+        candidates: [
+          { date: '2026-08-14', rank: 1, score: 71, band: 'moderate' as const },
+          { date: '2026-08-18', rank: 2, score: 70, band: 'moderate' as const },
+        ],
+      },
+    };
+    const compare = packageToCompareView(tied);
+    expect(compare.unique_winner).toBe(false);
+    expect(compare.winner_label).toBe('No unique winner');
   });
 
   it('selects renderer from Package.mode only, not candidate count', () => {

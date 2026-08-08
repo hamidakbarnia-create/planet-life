@@ -28,6 +28,34 @@ def test_required_slots_gate_completeness():
     assert complete.missing_required == ()
 
 
+def test_compare_mode_does_not_require_target_date():
+    incomplete = evaluate_wedding_date_intake(
+        {
+            "decision_frame": {
+                "operation": "compare",
+                "time_scope": "multiple_dates",
+                "dates": ["2026-09-10", "2026-09-12"],
+            }
+        }
+    )
+    assert incomplete.is_complete is False
+    assert incomplete.missing_required == ("ceremony_type",)
+
+    complete = evaluate_wedding_date_intake(
+        {
+            "ceremony_type": "civil",
+            "decision_frame": {
+                "operation": "compare",
+                "time_scope": "multiple_dates",
+                "dates": ["2026-09-10", "2026-09-12"],
+            },
+        }
+    )
+    assert complete.is_complete is True
+    assert complete.missing_required == ()
+    assert "target_date" not in complete.missing_required
+
+
 def test_merge_does_not_invent_ceremony_type():
     merged = merge_wedding_date_intake(
         {"target_date": "2026-09-01"},

@@ -126,19 +126,43 @@ export function packageToCompareView(
   pkg: DecisionEvaluationPackage
 ): CompareResultViewModel {
   const ranked = [...pkg.timing.candidates].sort((a, b) => a.rank - b.rank);
+  // Prefer stance no_unique_winner; keep summary regex for older packages.
+  const uniqueWinner =
+    pkg.recommendation.stance !== 'no_unique_winner' &&
+    !/no unique winner/i.test(pkg.recommendation.summary || '');
   const options = ranked.map((c) => ({
-    label: formatDisplayDate(c.date),
+    option_id: c.option_id,
+    label: c.label?.trim() || formatDisplayDate(c.date),
+    date: c.date,
+    rank: c.rank,
+    score: c.score,
     strength: timingBandToStrength(c.band) as StrengthBand,
+    strengths: c.strengths ? [...c.strengths] : undefined,
+    risks: c.risks ? [...c.risks] : undefined,
   }));
   const winner = ranked[0];
+  const winnerLabel = uniqueWinner
+    ? winner?.label?.trim() ||
+      (winner ? formatDisplayDate(winner.date) : 'Unknown')
+    : 'No unique winner';
+
+  const advantages = ranked.flatMap((c) =>
+    (c.strengths ?? []).slice(0, 1).map((advantage) => ({
+      option_label: c.label?.trim() || formatDisplayDate(c.date),
+      advantage,
+    }))
+  );
 
   return {
     operation: 'compare',
     options,
-    winner_label: winner ? formatDisplayDate(winner.date) : 'Unknown',
-    deciding_factor: undefined,
-    advantages: [],
+    winner_label: winnerLabel,
+    unique_winner: uniqueWinner,
+    relative_explanation: pkg.explainability.why || undefined,
+    deciding_factor: pkg.explainability.why || undefined,
+    advantages,
     confidence: confidenceValueToBand(pkg.confidence.value),
+    limitations: [...pkg.explainability.limits].slice(0, 3),
     known: undefined,
     inferred: undefined,
     unknown: undefined,

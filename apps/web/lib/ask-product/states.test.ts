@@ -16,7 +16,7 @@ describe('ask-product consumer states', () => {
     expect(deriveClarificationState(frame)).toBe('NEEDS_CLARIFICATION');
   });
 
-  it('marks compare/find as UNSUPPORTED_OPERATION', () => {
+  it('marks untyped compare and find as UNSUPPORTED_OPERATION', () => {
     const compare = buildDecisionFrame('14 or 18 August?', {
       reference_year: 2026,
       operation: 'compare',
@@ -25,6 +25,27 @@ describe('ask-product consumer states', () => {
     });
     expect(isUnsupportedOperationFrame(compare)).toBe(true);
     expect(deriveClarificationState(compare)).toBe('UNSUPPORTED_OPERATION');
+
+    const find = buildDecisionFrame('Find a good wedding date in September', {
+      decision_type_id: 'mar-wedding-date',
+      operation: 'find',
+      time_scope: 'date_range',
+      range_start: '2026-09-01',
+      range_end: '2026-09-30',
+    });
+    expect(isUnsupportedOperationFrame(find)).toBe(true);
+  });
+
+  it('READY_TO_COMPARE for wedding with labeled candidate dates', () => {
+    const ready = buildDecisionFrame('14 or 18 August wedding?', {
+      decision_type_id: 'mar-wedding-date',
+      reference_year: 2026,
+      operation: 'compare',
+      time_scope: 'multiple_dates',
+      dates: ['2026-08-14', '2026-08-18'],
+    });
+    expect(isUnsupportedOperationFrame(ready)).toBe(false);
+    expect(deriveClarificationState(ready)).toBe('READY_TO_COMPARE');
   });
 
   it('resetToExamineStep clears compare without fabricating evaluate result', () => {

@@ -55,6 +55,21 @@ describe('intake-prefill', () => {
     ).toBeNull();
   });
 
+  it('does not collapse compare options into target_date', () => {
+    const next = prefillTargetDateFromFrame({
+      decision_frame: {
+        operation: 'compare',
+        time_scope: 'multiple_dates',
+        dates: ['2026-09-10', '2026-09-12'],
+        options: [
+          { id: 'a', label: 'A', date: '2026-09-10' },
+          { id: 'b', label: 'B', date: '2026-09-12' },
+        ],
+      },
+    });
+    expect(next.target_date).toBeUndefined();
+  });
+
   it('supports car-interview, investor, and wedding intake only', () => {
     expect(isSupportedIntakeDecisionType('car-interview')).toBe(true);
     expect(isSupportedIntakeDecisionType('bus-investor-meeting')).toBe(true);
