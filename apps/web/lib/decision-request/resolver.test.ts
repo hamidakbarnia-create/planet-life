@@ -181,9 +181,6 @@ describe('resolveDecisionRequest', () => {
     expect(request.execution.unresolvedReason).toBeUndefined();
   });
 });
-import { describe, expect, it } from 'vitest';
-import { resolveDecisionRequest } from './resolver';
-
 describe('decision request resolver', () => {
   it('binds investor meeting action type to its decision type', () => {
     const result = resolveDecisionRequest({

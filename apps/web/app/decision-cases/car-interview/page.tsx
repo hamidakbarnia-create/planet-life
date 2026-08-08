@@ -12,6 +12,7 @@ import {
   completeCaseIntake,
   ensureCaseAndSaveAnswers,
   type CarInterviewIntake,
+    type DecisionCaseIntake,
 } from '@/lib/decision-case';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
@@ -20,6 +21,21 @@ import { useQueuedEffect } from '@/lib/use-queued-effect';
 function readCaseIdFromQuery(): string | null {
   if (typeof window === 'undefined') return null;
   return new URLSearchParams(window.location.search).get('caseId');
+}
+
+function carInterviewIntakeFromCase(
+  intake: DecisionCaseIntake
+): CarInterviewIntake {
+  return {
+    target_date:
+      typeof intake.target_date === 'string' ? intake.target_date : undefined,
+    role: typeof intake.role === 'string' ? intake.role : undefined,
+    company: typeof intake.company === 'string' ? intake.company : undefined,
+    interview_type:
+      typeof intake.interview_type === 'string'
+        ? intake.interview_type
+        : undefined,
+  };
 }
 
 /**
@@ -86,7 +102,7 @@ export default function CarInterviewIntakePage() {
               setError('');
               try {
                 const result = await ensureCaseAndSaveAnswers({ answers });
-                setIntake(result.intake);
+                setIntake(carInterviewIntakeFromCase(result.intake));
                 router.replace(
                   `/decision-cases/${result.case.case_id}/intake`
                 );
@@ -103,7 +119,7 @@ export default function CarInterviewIntakePage() {
               setError('');
               try {
                 const saved = await ensureCaseAndSaveAnswers({ answers });
-                setIntake(saved.intake);
+                setIntake(carInterviewIntakeFromCase(saved.intake));
                 if (!saved.is_complete) {
                   setError(
                     copy.intakeRequiredRemaining(
