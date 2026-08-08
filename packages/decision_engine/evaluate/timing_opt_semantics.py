@@ -76,8 +76,8 @@ class WeddingDateTimingOptSemantics:
 
     def scored_evidence_limits(self) -> list[str]:
         return [
-            "Canonical activity mapping: wedding_date → negotiation profile.",
-            "Score reflects partnership/communication timing signals, not wedding outcome.",
+            "Canonical activity profile: wedding_date (union/ceremony timing).",
+            "Score reflects ceremony-day union timing signals, not wedding outcome.",
             "ceremony_type, partner_name, and venue did not enter the scoring function.",
             "Astrological timing does not determine wedding success.",
         ]
@@ -85,7 +85,7 @@ class WeddingDateTimingOptSemantics:
     def scored_timing_notes(self, *, rating: str) -> str:
         return (
             f"Date-level score from decision-engine facade "
-            f"(action=wedding_date → negotiation profile, rating={rating}). "
+            f"(action=wedding_date ceremony profile, rating={rating}). "
             "No clock-time window was computed. "
             "ceremony_type/partner_name/venue are Case labels only."
         )
@@ -100,7 +100,7 @@ class WeddingDateTimingOptSemantics:
         return [
             "Evaluation used Case-persisted wedding date from decision_frame.date.",
             "Transit timing used noon local default when no ceremony clock time was supplied.",
-            "Canonical alias wedding_date→negotiation was used for scoring.",
+            "Canonical wedding_date activity profile was used for scoring.",
             (
                 "Ceremony/event location was supplied separately from birth place."
                 if event_location_supplied
@@ -113,7 +113,7 @@ class WeddingDateTimingOptSemantics:
 
     def scored_limits(self) -> list[str]:
         return [
-            "This is partnership/communication timing evidence, not full wedding intelligence.",
+            "This is ceremony-day union timing evidence, not full wedding intelligence.",
             "ceremony_type, partner_name, and venue did not affect the numeric score.",
             "Birth location and ceremony location are distinct concepts.",
             "Best clock-time window was not computed (date-level evidence only).",

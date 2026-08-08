@@ -26,7 +26,7 @@ def _outcome() -> DecisionOutcome:
         recommendation=Recommendation(
             score=68,
             rating="Favorable",
-            activity="negotiation",
+            activity="Wedding Date",
             summary="Supportive wedding timing.",
             text="Good conditions.",
         ),

@@ -168,6 +168,14 @@ ACTIVITY_PROFILES: Final[dict[str, ActivityProfile]] = {
         supportive_houses=(5, 7, 8),
         executive_focus="chemistry, desire, and magnetic presence",
     ),
+    # Ceremony / union date selection — not deal negotiation.
+    "wedding_date": ActivityProfile(
+        label="Wedding Date",
+        primary_planets=("venus", "moon", "jupiter"),
+        secondary_planets=("sun", "saturn"),
+        supportive_houses=(7, 5, 4, 9),
+        executive_focus="union harmony, family blessing, and ceremonial continuity",
+    ),
 }
 
 DEFAULT_ACTIVITY: Final[str] = "negotiation"
@@ -234,6 +242,12 @@ TRANSIT_HOUSE_RULES: Final[dict[str, dict[str, tuple[int, ...]]]] = {
         "positive": (2, 8, 10, 11),
         "caution": (12, 6),
         "positive_planets": ("venus", "jupiter", "saturn", "mercury", "sun"),
+        "caution_planets": ("mars", "neptune", "pluto", "uranus"),
+    },
+    "wedding_date": {
+        "positive": (7, 5, 4, 9, 1),
+        "caution": (12, 8, 6),
+        "positive_planets": ("venus", "moon", "jupiter", "sun"),
         "caution_planets": ("mars", "neptune", "pluto", "uranus"),
     },
     "default": {
@@ -468,6 +482,7 @@ def _transit_house_rules_key(activity_type: str) -> str:
         "networking",
         "creative_work",
         "finance_transaction",
+        "wedding_date",
     ):
         return key
     if key in ("contract", "sign", "lease_signing"):
@@ -705,7 +720,6 @@ def _resolve_profile(activity_type: str) -> ActivityProfile:
         "difficult_conversation": "negotiation",
         "first_meeting": "networking",
         "marriage_proposal": "negotiation",
-        "wedding_date": "negotiation",
         "relationship_ending": "negotiation",
 
         # Oracle: Travel & Place
