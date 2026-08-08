@@ -59,7 +59,7 @@ class LocalProfileRepository implements ProfileRepository {
       const legacy = JSON.parse(raw) as BirthProfile;
       if (!legacy.birth_date || !legacy.birth_time || !legacy.location) return null;
 
-      let birth_place = placeRaw
+      const birth_place = placeRaw
         ? (JSON.parse(placeRaw) as ProfileRecord['birth_place'])
         : null;
 
