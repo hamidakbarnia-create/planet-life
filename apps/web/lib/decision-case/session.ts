@@ -16,16 +16,20 @@ import {
 } from './car-interview-form';
 import {
   DecisionCaseApiError,
+  compareDecisionCase,
   completeIntake,
   createDecisionCase,
   evaluateDecisionCase,
+  getComparison,
   getDecisionCase,
   getDecisionCaseHistory,
   getEvaluation,
+  listDecisionCaseComparisons,
   listDecisionCaseEvaluations,
   saveIntakeAnswers,
   updateDecisionCaseFraming,
   type DecisionCaseResource,
+  type DecisionComparisonResource,
   type DecisionEvaluationResource,
   type DecisionHistoryEvent,
   type IntakeMutationResult,
@@ -78,6 +82,39 @@ function evaluateFramingFromIntake(
     date: target,
     objective: 'Evaluate selected date',
     raw_intent: `Evaluate date ${target}`,
+  };
+}
+
+function isCompareCase(caseRecord: DecisionCaseResource): boolean {
+  if (caseRecord.mode === 'compare_dates' || caseRecord.state === 'compared') {
+    return true;
+  }
+  const frame = caseRecord.intake?.decision_frame;
+  return (
+    !!frame &&
+    typeof frame === 'object' &&
+    (frame as { operation?: string }).operation === 'compare'
+  );
+}
+
+function comparisonToEvaluationResource(
+  comparison: DecisionComparisonResource
+): DecisionEvaluationResource {
+  return {
+    evaluation_id: comparison.evaluation_id,
+    case_id: comparison.case_id,
+    case_version: comparison.case_version,
+    evaluation_version: 0,
+    package_contract_version: String(
+      comparison.package?.schema_version || '1.0.0'
+    ),
+    engine_id: String(comparison.package?.engine_id || ''),
+    dq_status:
+      comparison.package?.recommendation?.stance === 'insufficient_data'
+        ? 'blocked'
+        : 'pass',
+    created_at: comparison.created_at,
+    package: comparison.package,
   };
 }
 
@@ -226,7 +263,8 @@ export async function requestCaseEvaluation(input: {
 
 /**
  * Resolve package for result route from backend authority.
- * Creates a real Runtime evaluation through the API only when none exists yet.
+ * COMPARE loads /comparisons; EVALUATE loads /evaluations.
+ * Creates a real Runtime execution through the API only when none exists yet.
  */
 export async function loadCaseResult(caseId: string): Promise<{
   caseRecord: DecisionCaseResource;
@@ -234,6 +272,69 @@ export async function loadCaseResult(caseId: string): Promise<{
   history: DecisionHistoryEvent[];
 }> {
   let caseRecord = await getDecisionCase(caseId);
+
+  if (isCompareCase(caseRecord)) {
+    const listed = await listDecisionCaseComparisons(caseId);
+    if (listed.comparisons.length > 0) {
+      const latest = listed.comparisons.reduce((a, b) =>
+        a.created_at >= b.created_at ? a : b
+      );
+      const comparison = await getComparison({
+        caseId,
+        comparisonId: latest.comparison_id,
+      });
+      const history = (await getDecisionCaseHistory(caseId)).events;
+      return {
+        caseRecord,
+        evaluation: comparisonToEvaluationResource(comparison),
+        history,
+      };
+    }
+
+    if (caseRecord.state === 'intake' || caseRecord.state === 'draft') {
+      const completed = await completeIntake({
+        caseId,
+        expectedCaseVersion: caseRecord.case_version,
+      });
+      caseRecord = { ...completed.case, intake: completed.intake };
+    }
+
+    if (
+      caseRecord.state !== 'evidence_ready' &&
+      caseRecord.state !== 'evaluated' &&
+      caseRecord.state !== 'compared'
+    ) {
+      throw new DecisionCaseApiError({
+        status: 409,
+        code: 'ILLEGAL_TRANSITION',
+        message: `Cannot compare case in state ${caseRecord.state}`,
+        details: { state: caseRecord.state },
+      });
+    }
+
+    caseRecord = await ensureEvaluateFramingOnCase({
+      caseId,
+      caseVersion: caseRecord.case_version,
+      intake: caseRecord.intake as Record<string, unknown> | undefined,
+    });
+    caseRecord = await ensureNatalEvidenceOnCase({
+      caseId,
+      caseVersion: caseRecord.case_version,
+      intake: caseRecord.intake as Record<string, unknown> | undefined,
+    });
+
+    const comparison = await compareDecisionCase({
+      caseId,
+      expectedCaseVersion: caseRecord.case_version,
+    });
+    caseRecord = await getDecisionCase(caseId);
+    const history = (await getDecisionCaseHistory(caseId)).events;
+    return {
+      caseRecord,
+      evaluation: comparisonToEvaluationResource(comparison),
+      history,
+    };
+  }
 
   const listed = await listDecisionCaseEvaluations(caseId);
   if (listed.evaluations.length > 0) {

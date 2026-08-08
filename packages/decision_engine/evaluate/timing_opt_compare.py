@@ -208,10 +208,11 @@ def assemble_compare_package(
         outcomes,
         unavailable_message=sem.scored_confidence_unavailable_message(),
     )
+    # Tie must not imply either candidate is preferred (prefer_alternate would).
     stance = (
         "proceed_with_conditions"
         if ranking.unique_winner
-        else "prefer_alternate"
+        else "no_unique_winner"
     )
     candidates = [
         {

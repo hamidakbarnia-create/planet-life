@@ -35,11 +35,11 @@ ACTIVE_PATHS = {
     "/api/v1/decision-cases/{case_id}/intake/complete": {"post"},
     "/api/v1/decision-cases/{case_id}/evaluations": {"get", "post"},
     "/api/v1/decision-cases/{case_id}/evaluations/{evaluation_id}": {"get"},
+    "/api/v1/decision-cases/{case_id}/comparisons": {"get", "post"},
+    "/api/v1/decision-cases/{case_id}/comparisons/{comparison_id}": {"get"},
 }
 
-RESERVED_PATHS = {
-    "/api/v1/decision-cases/{case_id}/comparisons",
-}
+RESERVED_PATHS: set[str] = set()
 
 
 def test_openapi_contains_all_and_only_active_e5_routes() -> None:

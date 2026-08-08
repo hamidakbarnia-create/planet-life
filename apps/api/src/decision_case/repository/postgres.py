@@ -562,33 +562,70 @@ class DecisionCaseRepository:
                     raise MissingRelationError(
                         f"case_version {eval_case_version} missing"
                     )
-                if case.state == CaseState.EVIDENCE_READY.value:
+                package_mode = (
+                    package.get("mode") if isinstance(package, dict) else None
+                )
+                # COMPARE re-run: persist a new package while remaining compared.
+                # Final compared identity is established by save_comparison.
+                if (
+                    case.state == CaseState.COMPARED.value
+                    and package_mode == "compare_dates"
+                ):
+                    new_token = self._cas(
+                        cur,
+                        case_id,
+                        expected_case_version,
+                        state=CaseState.COMPARED.value,
+                        mode="compare_dates",
+                        paused_prior_state=None,
+                    )
+                    next_state = CaseState.COMPARED.value
+                    emit_eval_transition = False
+                elif case.state == CaseState.EVIDENCE_READY.value:
                     tr = apply_transition(
                         case.state,
                         CaseState.EVALUATED.value,
                         "create_evaluation",
                         evaluation_accepted=True,
                     )
+                    if not tr.ok:
+                        raise IllegalTransitionError(
+                            tr.reason or "illegal_transition"
+                        )
+                    new_token = self._cas(
+                        cur,
+                        case_id,
+                        expected_case_version,
+                        state=CaseState.EVALUATED.value,
+                        mode=case.mode,
+                        paused_prior_state=None,
+                    )
+                    next_state = CaseState.EVALUATED.value
+                    emit_eval_transition = True
                 elif case.state == CaseState.EVALUATED.value:
                     tr = apply_transition(
                         case.state,
                         CaseState.EVALUATED.value,
                         "re_evaluate",
                     )
+                    if not tr.ok:
+                        raise IllegalTransitionError(
+                            tr.reason or "illegal_transition"
+                        )
+                    new_token = self._cas(
+                        cur,
+                        case_id,
+                        expected_case_version,
+                        state=CaseState.EVALUATED.value,
+                        mode=case.mode,
+                        paused_prior_state=None,
+                    )
+                    next_state = CaseState.EVALUATED.value
+                    emit_eval_transition = False
                 else:
                     raise IllegalTransitionError(
                         f"cannot evaluate from state {case.state}"
                     )
-                if not tr.ok:
-                    raise IllegalTransitionError(tr.reason or "illegal_transition")
-                new_token = self._cas(
-                    cur,
-                    case_id,
-                    expected_case_version,
-                    state=CaseState.EVALUATED.value,
-                    mode=case.mode,
-                    paused_prior_state=None,
-                )
                 cur.execute(
                     """
                     SELECT COALESCE(MAX(evaluation_version), 0) + 1 AS next
@@ -619,7 +656,7 @@ class DecisionCaseRepository:
                 )
                 row = cur.fetchone()
                 assert row is not None
-                if case.state != CaseState.EVALUATED.value:
+                if emit_eval_transition and case.state != next_state:
                     self._insert_history(
                         cur,
                         case_id=case_id,
@@ -627,7 +664,7 @@ class DecisionCaseRepository:
                         event="state_transition",
                         payload={"trigger": "create_evaluation"},
                         from_state=case.state,
-                        to_state=CaseState.EVALUATED.value,
+                        to_state=next_state,
                         case_version=new_token,
                     )
                 recommendation = package.get("recommendation")
@@ -647,6 +684,7 @@ class DecisionCaseRepository:
                         "dq_status": dq_status,
                         "stance": stance,
                         "engine_id": engine_id,
+                        "package_mode": package_mode,
                     },
                     case_version=new_token,
                 )
@@ -980,6 +1018,41 @@ class DecisionCaseRepository:
             created_at=crow["created_at"],
         )
 
+    def list_comparisons(
+        self, case_id: UUID, owner_subject_id: str
+    ) -> list[ComparisonRecord]:
+        self.get_case(case_id, owner_subject_id)
+        with self._conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                SELECT * FROM decision_comparisons
+                WHERE case_id = %s
+                ORDER BY created_at DESC, comparison_id DESC
+                """,
+                (case_id,),
+            )
+            return [self._comparison_from_row(r) for r in cur.fetchall()]
+
+    def get_comparison(
+        self,
+        case_id: UUID,
+        comparison_id: UUID,
+        owner_subject_id: str,
+    ) -> ComparisonRecord:
+        self.get_case(case_id, owner_subject_id)
+        with self._conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                SELECT * FROM decision_comparisons
+                WHERE case_id = %s AND comparison_id = %s
+                """,
+                (case_id, comparison_id),
+            )
+            row = cur.fetchone()
+        if row is None:
+            raise MissingRelationError(f"comparison not found: {comparison_id}")
+        return self._comparison_from_row(row)
+
     # --------------------------------------------------------------- helpers
 
     def _run_composite(
@@ -1162,6 +1235,31 @@ class DecisionCaseRepository:
             package=package,
             engine_id=row["engine_id"],
             dq_status=row["dq_status"],
+            created_at=row["created_at"],
+        )
+
+    @staticmethod
+    def _comparison_from_row(row: dict[str, Any]) -> ComparisonRecord:
+        ranking = row["ranking"]
+        if isinstance(ranking, str):
+            ranking = json.loads(ranking)
+        ranking_list = list(ranking or [])
+        ranks = tuple(
+            ComparisonRank(
+                candidate_date_id=UUID(str(item["candidate_date_id"])),
+                rank=int(item["rank"]),
+                score=float(item["score"]),
+                band=str(item["band"]),
+            )
+            for item in ranking_list
+        )
+        return ComparisonRecord(
+            comparison_id=row["comparison_id"],
+            case_id=row["case_id"],
+            case_version=row["case_version"],
+            evaluation_id=row["evaluation_id"],
+            ranking=ranking_list,
+            ranks=ranks,
             created_at=row["created_at"],
         )
 

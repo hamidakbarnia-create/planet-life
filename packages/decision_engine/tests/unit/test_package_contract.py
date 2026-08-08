@@ -171,3 +171,20 @@ def test_envelope_and_confidence_precision_must_match() -> None:
 
     with pytest.raises(PydanticValidationError):
         DecisionEvaluationPackage.model_validate(payload)
+
+
+def test_no_unique_winner_stance_is_valid_and_prefer_alternate_remains(
+    validator: Draft202012Validator,
+) -> None:
+    """Minimal stance extension for honest COMPARE ties; prefer_alternate stays."""
+    payload = _load_json(FIXTURES / "package_compare_dates.valid.json")
+    assert payload["recommendation"]["stance"] == "prefer_alternate"
+    validator.validate(payload)
+    DecisionEvaluationPackage.model_validate(payload)
+
+    tied = copy.deepcopy(payload)
+    tied["recommendation"]["stance"] = "no_unique_winner"
+    tied["recommendation"]["summary"] = "No unique winner among the compared dates."
+    validator.validate(tied)
+    model = DecisionEvaluationPackage.model_validate(tied)
+    assert model.recommendation.stance == "no_unique_winner"

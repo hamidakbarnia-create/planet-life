@@ -85,6 +85,19 @@ export type DecisionEvaluationResource = {
   package: DecisionEvaluationPackage;
 };
 
+export type DecisionComparisonListItem = {
+  comparison_id: string;
+  case_id: string;
+  case_version: number;
+  evaluation_id: string;
+  created_at: string;
+};
+
+export type DecisionComparisonResource = DecisionComparisonListItem & {
+  ranking: Array<Record<string, unknown>>;
+  package: DecisionEvaluationPackage;
+};
+
 export class DecisionCaseApiError extends Error {
   readonly status: number;
   readonly code: string;
@@ -266,10 +279,31 @@ export function evaluateDecisionCase(input: {
   );
 }
 
+export function compareDecisionCase(input: {
+  caseId: string;
+  expectedCaseVersion: number;
+}): Promise<DecisionComparisonResource> {
+  return requestJson<DecisionComparisonResource>(
+    `/api/v1/decision-cases/${input.caseId}/comparisons`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        expected_case_version: input.expectedCaseVersion,
+      }),
+    }
+  );
+}
+
 export function listDecisionCaseEvaluations(
   caseId: string
 ): Promise<{ evaluations: Omit<DecisionEvaluationResource, 'package'>[] }> {
   return requestJson(`/api/v1/decision-cases/${caseId}/evaluations`);
+}
+
+export function listDecisionCaseComparisons(
+  caseId: string
+): Promise<{ comparisons: DecisionComparisonListItem[] }> {
+  return requestJson(`/api/v1/decision-cases/${caseId}/comparisons`);
 }
 
 export function getEvaluation(input: {
@@ -278,6 +312,15 @@ export function getEvaluation(input: {
 }): Promise<DecisionEvaluationResource> {
   return requestJson(
     `/api/v1/decision-cases/${input.caseId}/evaluations/${input.evaluationId}`
+  );
+}
+
+export function getComparison(input: {
+  caseId: string;
+  comparisonId: string;
+}): Promise<DecisionComparisonResource> {
+  return requestJson(
+    `/api/v1/decision-cases/${input.caseId}/comparisons/${input.comparisonId}`
   );
 }
 

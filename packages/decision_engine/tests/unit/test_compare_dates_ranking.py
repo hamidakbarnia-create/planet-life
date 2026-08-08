@@ -27,3 +27,22 @@ def test_tie_rejects_unique_winner():
     assert set(result.tied_option_ids) == {"a", "b"}
     # Deterministic rank still assigned.
     assert result.ranked[0].option_id == "b"
+
+
+def test_deterministic_ordering_unchanged_across_shuffle():
+    options = [
+        ScoredCompareOption("z", "Z", "2026-09-20", 55.0, "low"),
+        ScoredCompareOption("m", "M", "2026-09-11", 88.0, "high"),
+        ScoredCompareOption("a", "A", "2026-09-11", 88.0, "high"),
+    ]
+    shuffled = list(reversed(options))
+    assert [i.option_id for i in rank_compare_options(options).ranked] == [
+        "a",
+        "m",
+        "z",
+    ]
+    assert [i.option_id for i in rank_compare_options(shuffled).ranked] == [
+        "a",
+        "m",
+        "z",
+    ]

@@ -100,34 +100,13 @@ def evaluate_decision_case(
     intake_version = repo.get_current_version(case_id, owner_subject_id)
     intake = dict(intake_version.intake or {})
 
-    # COMPARE uses a dedicated runtime/contract — never EvaluateRuntimeContract.
+    # COMPARE is canonical on POST /comparisons — never via /evaluations.
     if _intake_requests_compare(intake, case.mode):
-        from decision_case.services.compare_runtime import (
-            CompareIntakeIncompleteError,
-            UnsupportedCompareDecisionTypeError,
-            compare_decision_case,
-        )
-        from decision_case.services.compare_runtime_registry import (
-            get_compare_runtime,
-        )
         from packages.decision_engine.evaluate.runtime_common import (
             RuntimeUnsupportedOperationError,
         )
 
-        if get_compare_runtime(case.decision_type_id) is None:
-            raise RuntimeUnsupportedOperationError("compare")
-
-        try:
-            return compare_decision_case(
-                repo,
-                case_id=case_id,
-                owner_subject_id=owner_subject_id,
-                expected_case_version=expected_case_version,
-            )
-        except CompareIntakeIncompleteError as exc:
-            raise EvaluateIntakeIncompleteError(exc.missing_required) from exc
-        except UnsupportedCompareDecisionTypeError:
-            raise RuntimeUnsupportedOperationError("compare")
+        raise RuntimeUnsupportedOperationError("compare")
 
     runtime = get_evaluate_runtime(case.decision_type_id)
     if runtime is None:

@@ -3,12 +3,19 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import date
 from typing import Any
 from uuid import UUID
 
 from decision_case.repository import DecisionCaseRepository
 from decision_case.repository.errors import IllegalTransitionError
-from decision_case.repository.models import CaseRecord, EvaluationRecord
+from decision_case.repository.models import (
+    CaseRecord,
+    ComparisonRank,
+    ComparisonRecord,
+    EvaluationRecord,
+)
 from decision_case.services.compare_runtime_registry import get_compare_runtime
 from packages.decision_engine.evaluate.compare_contract import CompareRuntimeContract
 from packages.decision_engine.state_machine import CaseState
@@ -27,6 +34,45 @@ class UnsupportedCompareDecisionTypeError(Exception):
         super().__init__(f"unsupported compare decision_type_id: {decision_type_id}")
 
 
+@dataclass(frozen=True, slots=True)
+class ComparisonPersistResult:
+    """Comparison SoR row plus the linked immutable Package evaluation."""
+
+    comparison: ComparisonRecord
+    evaluation: EvaluationRecord
+
+
+def _ranks_from_package_and_candidates(
+    package: dict[str, Any],
+    candidate_rows: list[Any],
+) -> list[ComparisonRank]:
+    timing = package.get("timing") if isinstance(package.get("timing"), dict) else {}
+    candidates = timing.get("candidates") if isinstance(timing, dict) else None
+    if not isinstance(candidates, list) or len(candidates) < 2:
+        raise IllegalTransitionError(
+            "compare package must include at least two timing candidates"
+        )
+    ordered = sorted(
+        [c for c in candidates if isinstance(c, dict)],
+        key=lambda item: int(item.get("rank") or 0),
+    )
+    if len(ordered) != len(candidate_rows):
+        raise IllegalTransitionError(
+            "compare candidate persistence count mismatch"
+        )
+    ranks: list[ComparisonRank] = []
+    for item, row in zip(ordered, candidate_rows, strict=True):
+        ranks.append(
+            ComparisonRank(
+                candidate_date_id=row["candidate_date_id"],
+                rank=int(item["rank"]),
+                score=float(item["score"]),
+                band=str(item["band"]),
+            )
+        )
+    return ranks
+
+
 def execute_compare_runtime(
     repo: DecisionCaseRepository,
     *,
@@ -36,8 +82,8 @@ def execute_compare_runtime(
     intake: dict[str, Any],
     runtime: CompareRuntimeContract,
     generate_outcome: Callable[..., Any],
-) -> EvaluationRecord:
-    """Execute a validated COMPARE runtime and persist its Package."""
+) -> ComparisonPersistResult:
+    """Execute COMPARE, persist Package, then complete comparison lifecycle."""
 
     intake_version = repo.get_current_version(
         case.case_id,
@@ -61,7 +107,7 @@ def execute_compare_runtime(
         else "pass"
     )
 
-    return repo.append_evaluation(
+    evaluation = repo.append_evaluation(
         case.case_id,
         owner_subject_id,
         expected_case_version=expected_case_version,
@@ -77,6 +123,50 @@ def execute_compare_runtime(
         actor="system",
     )
 
+    case_after_eval = repo.get_case(case.case_id, owner_subject_id)
+    timing = package.get("timing") if isinstance(package.get("timing"), dict) else {}
+    candidates_raw = timing.get("candidates") if isinstance(timing, dict) else None
+    if not isinstance(candidates_raw, list) or len(candidates_raw) < 2:
+        raise IllegalTransitionError(
+            "compare package must include at least two timing candidates"
+        )
+    ordered = sorted(
+        [c for c in candidates_raw if isinstance(c, dict)],
+        key=lambda item: int(item.get("rank") or 0),
+    )
+    candidate_tuples: list[tuple[date, str | None]] = []
+    for item in ordered:
+        candidate_tuples.append(
+            (
+                date.fromisoformat(str(item["date"])),
+                str(item["label"]) if item.get("label") is not None else None,
+            )
+        )
+
+    candidate_rows = repo.append_candidate_dates(
+        case.case_id,
+        owner_subject_id,
+        expected_case_version=case_after_eval.current_case_version,
+        candidates=candidate_tuples,
+        case_version=intake_version.version,
+        actor="system",
+    )
+    ranks = _ranks_from_package_and_candidates(package, candidate_rows)
+
+    case_after_candidates = repo.get_case(case.case_id, owner_subject_id)
+    comparison = repo.save_comparison(
+        case.case_id,
+        owner_subject_id,
+        expected_case_version=case_after_candidates.current_case_version,
+        evaluation_id=evaluation.evaluation_id,
+        ranks=ranks,
+        actor="system",
+    )
+    return ComparisonPersistResult(
+        comparison=comparison,
+        evaluation=evaluation,
+    )
+
 
 def compare_decision_case(
     repo: DecisionCaseRepository,
@@ -84,7 +174,7 @@ def compare_decision_case(
     case_id: UUID,
     owner_subject_id: str,
     expected_case_version: int,
-) -> EvaluationRecord:
+) -> ComparisonPersistResult:
     case = repo.get_case(case_id, owner_subject_id)
 
     runtime = get_compare_runtime(case.decision_type_id)

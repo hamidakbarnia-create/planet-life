@@ -21,6 +21,7 @@ Stance = Literal[
     "proceed_with_conditions",
     "wait",
     "prefer_alternate",
+    "no_unique_winner",
     "insufficient_data",
 ]
 DecisionMode = Literal["evaluate_date", "compare_dates"]

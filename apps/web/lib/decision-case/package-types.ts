@@ -21,6 +21,7 @@ export type DecisionStance =
   | "proceed_with_conditions"
   | "wait"
   | "prefer_alternate"
+  | "no_unique_winner"
   | "insufficient_data";
 
 export type TimingBand = "high" | "moderate" | "low" | "na";

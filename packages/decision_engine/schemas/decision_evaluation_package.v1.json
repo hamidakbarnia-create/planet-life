@@ -279,6 +279,7 @@
         "proceed_with_conditions",
         "wait",
         "prefer_alternate",
+        "no_unique_winner",
         "insufficient_data"
       ]
     },

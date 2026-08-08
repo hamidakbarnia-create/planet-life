@@ -179,6 +179,14 @@ class CreateEvaluationRequest(BaseModel):
     expected_case_version: int = Field(..., ge=1)
 
 
+class CreateComparisonRequest(BaseModel):
+    """Request a comparison via the Case comparison boundary (→ compared)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    expected_case_version: int = Field(..., ge=1)
+
+
 class DecisionCaseResource(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -249,6 +257,27 @@ class DecisionEvaluationListEnvelope(BaseModel):
 
 
 class DecisionEvaluationResource(DecisionEvaluationListItem):
+    package: dict[str, Any]
+
+
+class DecisionComparisonListItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    comparison_id: UUID
+    case_id: UUID
+    case_version: int
+    evaluation_id: UUID
+    created_at: str
+
+
+class DecisionComparisonListEnvelope(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    comparisons: list[DecisionComparisonListItem]
+
+
+class DecisionComparisonResource(DecisionComparisonListItem):
+    ranking: list[dict[str, Any]]
     package: dict[str, Any]
 
 

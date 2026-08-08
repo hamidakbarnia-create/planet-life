@@ -141,7 +141,7 @@ def test_compare_three_options_and_tie_behavior():
         generate_outcome=generate,
     )
     assert len(pkg.timing.candidates) == 3
-    assert pkg.recommendation.stance == "prefer_alternate"
+    assert pkg.recommendation.stance == "no_unique_winner"
     assert "No unique winner" in pkg.recommendation.summary
     assert "tied" in pkg.explainability.why.lower() or "threshold" in pkg.explainability.why.lower()
 

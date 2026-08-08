@@ -126,8 +126,9 @@ export function packageToCompareView(
   pkg: DecisionEvaluationPackage
 ): CompareResultViewModel {
   const ranked = [...pkg.timing.candidates].sort((a, b) => a.rank - b.rank);
+  // Prefer stance no_unique_winner; keep summary regex for older packages.
   const uniqueWinner =
-    pkg.recommendation.stance !== 'prefer_alternate' &&
+    pkg.recommendation.stance !== 'no_unique_winner' &&
     !/no unique winner/i.test(pkg.recommendation.summary || '');
   const options = ranked.map((c) => ({
     option_id: c.option_id,
