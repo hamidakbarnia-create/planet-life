@@ -40,6 +40,19 @@
         "compare_dates"
       ],
       "output_profile": "decision_evaluation_package.v1"
+    },
+    {
+      "decision_type_id": "bus-investor-meeting",
+      "family_id": "visibility",
+      "label": "Meet an investor or pitch for funding",
+      "create_mode": "none",
+      "available_entry_modes": [
+        "structured"
+      ],
+      "allowed_modes": [
+        "evaluate_date"
+      ],
+      "output_profile": "decision_evaluation_package.v1"
     }
   ]
 }

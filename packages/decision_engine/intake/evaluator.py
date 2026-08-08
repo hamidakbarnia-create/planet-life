@@ -74,3 +74,65 @@ def evaluate_car_interview_intake(
 
 def required_slot_ids() -> frozenset[str]:
     return REQUIRED_SLOT_IDS
+
+
+from packages.decision_engine.intake.investor_meeting import (
+    INVESTOR_MEETING_SLOTS,
+    InvestorMeetingIntake,
+    merge_investor_meeting_intake,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class InvestorMeetingIntakeEvaluation:
+    intake: InvestorMeetingIntake
+    missing_required: tuple[str, ...]
+    answered_required: tuple[str, ...]
+    is_complete: bool
+    has_first_required_answer: bool
+
+
+def evaluate_investor_meeting_intake(
+    intake: Mapping[str, Any] | InvestorMeetingIntake | None = None,
+    *,
+    answers: Mapping[str, Any] | None = None,
+) -> InvestorMeetingIntakeEvaluation:
+    if isinstance(intake, InvestorMeetingIntake) and not answers:
+        normalized = intake
+    else:
+        current = (
+            intake.as_dict()
+            if isinstance(intake, InvestorMeetingIntake)
+            else intake
+        )
+        normalized = merge_investor_meeting_intake(
+            current,
+            answers or {},
+        )
+
+    values = {
+        "target_date": normalized.target_date,
+        "meeting_goal": normalized.meeting_goal,
+        "investor_name": normalized.investor_name,
+        "meeting_type": normalized.meeting_type,
+    }
+
+    missing = tuple(
+        slot.slot_id
+        for slot in INVESTOR_MEETING_SLOTS
+        if slot.required and not values[slot.slot_id]
+    )
+
+    answered = tuple(
+        key
+        for key in ("target_date", "meeting_goal")
+        if values[key]
+    )
+
+    return InvestorMeetingIntakeEvaluation(
+        intake=normalized,
+        missing_required=missing,
+        answered_required=answered,
+        is_complete=not missing,
+        has_first_required_answer=bool(answered),
+    )

@@ -11,8 +11,8 @@ import {
   DecisionCaseApiError,
   completeCaseIntake,
   ensureCaseAndSaveAnswers,
-  getDecisionCase,
   type CarInterviewIntake,
+    type DecisionCaseIntake,
 } from '@/lib/decision-case';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
@@ -23,48 +23,46 @@ function readCaseIdFromQuery(): string | null {
   return new URLSearchParams(window.location.search).get('caseId');
 }
 
+function carInterviewIntakeFromCase(
+  intake: DecisionCaseIntake
+): CarInterviewIntake {
+  return {
+    target_date:
+      typeof intake.target_date === 'string' ? intake.target_date : undefined,
+    role: typeof intake.role === 'string' ? intake.role : undefined,
+    company: typeof intake.company === 'string' ? intake.company : undefined,
+    interview_type:
+      typeof intake.interview_type === 'string'
+        ? intake.interview_type
+        : undefined,
+  };
+}
+
+/**
+ * Compatibility entry for popular-card car-interview starts.
+ * Existing Cases redirect to the generic type-driven intake route.
+ * New Cases create on first answer, then hand off to that same route.
+ */
 export default function CarInterviewIntakePage() {
   const ready = useClientReady();
   const [lang, setLang] = useAppLang();
   const t = HOME_LANGS[lang];
   const copy = getAskProductCopy(lang);
   const router = useRouter();
-  const [caseId, setCaseId] = useState<string | null>(null);
-  const [caseVersion, setCaseVersion] = useState<number | null>(null);
   const [intake, setIntake] = useState<CarInterviewIntake>({});
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   useQueuedEffect(() => {
     if (!ready) return;
     const fromQuery = readCaseIdFromQuery();
-    if (fromQuery && fromQuery !== caseId) {
-      setCaseId(fromQuery);
-      return;
-    }
-    if (!caseId) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const current = await getDecisionCase(caseId);
-        if (cancelled) return;
-        setCaseVersion(current.case_version);
-        setIntake(current.intake ?? {});
-      } catch (err) {
-        if (cancelled) return;
-        setError(
-          err instanceof DecisionCaseApiError
-            ? err.message
-            : copy.intakeLoadError
-        );
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [ready, caseId, copy.intakeLoadError]);
+    if (!fromQuery) return;
+    setRedirecting(true);
+    router.replace(`/decision-cases/${fromQuery}/intake`);
+  }, [ready, router]);
 
-  if (!ready) {
+  if (!ready || redirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center" aria-busy="true" />
     );
@@ -95,7 +93,7 @@ export default function CarInterviewIntakePage() {
 
         <div className="mio-glass mio-glass--primary !p-5">
           <CarInterviewIntakeForm
-            key={`${caseId ?? 'new'}-${caseVersion ?? 0}`}
+            key="new-car-interview"
             lang={lang}
             initialIntake={intake}
             submitting={busy}
@@ -103,16 +101,10 @@ export default function CarInterviewIntakePage() {
               setBusy(true);
               setError('');
               try {
-                const result = await ensureCaseAndSaveAnswers({
-                  caseId,
-                  caseVersion,
-                  answers,
-                });
-                setCaseId(result.case.case_id);
-                setCaseVersion(result.case.case_version);
-                setIntake(result.intake);
+                const result = await ensureCaseAndSaveAnswers({ answers });
+                setIntake(carInterviewIntakeFromCase(result.intake));
                 router.replace(
-                  `/decision-cases/car-interview?caseId=${result.case.case_id}`
+                  `/decision-cases/${result.case.case_id}/intake`
                 );
               } catch (err) {
                 setError(
@@ -126,19 +118,17 @@ export default function CarInterviewIntakePage() {
               setBusy(true);
               setError('');
               try {
-                const saved = await ensureCaseAndSaveAnswers({
-                  caseId,
-                  caseVersion,
-                  answers,
-                });
-                setCaseId(saved.case.case_id);
-                setCaseVersion(saved.case.case_version);
-                setIntake(saved.intake);
+                const saved = await ensureCaseAndSaveAnswers({ answers });
+                setIntake(carInterviewIntakeFromCase(saved.intake));
                 if (!saved.is_complete) {
                   setError(
                     copy.intakeRequiredRemaining(
                       saved.missing_required.join(', ')
                     )
+                  );
+                  // Hand incomplete Cases to the generic intake path.
+                  router.replace(
+                    `/decision-cases/${saved.case.case_id}/intake`
                   );
                   return;
                 }
@@ -151,7 +141,7 @@ export default function CarInterviewIntakePage() {
                 );
               } catch (err) {
                 setError(
-                  err instanceof Error
+                  err instanceof DecisionCaseApiError || err instanceof Error
                     ? err.message
                     : copy.intakeCompleteError
                 );

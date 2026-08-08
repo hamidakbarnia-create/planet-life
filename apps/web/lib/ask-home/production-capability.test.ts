@@ -8,10 +8,13 @@ import {
 } from './production-capability';
 
 describe('ASK Web UX capability hint (not backend authority)', () => {
-  it('offers only car-interview + evaluate in the current shipped UX matrix', () => {
+  it('offers shipped evaluate runtimes in the current UX matrix', () => {
     expect(canEvaluateInProduction('car-interview')).toBe(true);
     expect(canExecuteInProduction('car-interview', 'evaluate')).toBe(true);
-    expect(listProductionEvaluateDecisionTypeIds()).toEqual(['car-interview']);
+    expect(listProductionEvaluateDecisionTypeIds()).toEqual([
+      'car-interview',
+      'bus-investor-meeting',
+    ]);
   });
 
   it('hides unresolved / unknown / registry-only types for evaluate', () => {

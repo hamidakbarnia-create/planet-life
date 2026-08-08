@@ -60,6 +60,15 @@ from decision_case.services.car_interview_intake import (
     evaluate_car_interview_case,
     save_car_interview_answers,
 )
+from decision_case.services.evaluate_runtime import (
+    EvaluateIntakeIncompleteError,
+    UnsupportedEvaluateDecisionTypeError,
+    evaluate_decision_case,
+)
+from decision_case.services.intake_runtime import (
+    complete_intake,
+    save_intake_answers,
+)
 from decision_case.services.decision_frame import (
     FramingUnresolvedError,
     FramingValidationError,
@@ -521,7 +530,7 @@ def post_intake_answers(
 ) -> IntakeMutationResponse | JSONResponse:
     request_id = get_request_id(request)
     try:
-        case, intake, missing, is_complete = save_car_interview_answers(
+        case, intake, missing, is_complete = save_intake_answers(
             repo,
             case_id=case_id,
             owner_subject_id=owner_subject_id,
@@ -575,7 +584,7 @@ def post_intake_complete(
 ) -> IntakeMutationResponse | JSONResponse:
     request_id = get_request_id(request)
     try:
-        case, intake, missing, is_complete = complete_car_interview_intake(
+        case, intake, missing, is_complete = complete_intake(
             repo,
             case_id=case_id,
             owner_subject_id=owner_subject_id,
@@ -629,14 +638,14 @@ def create_decision_case_evaluation(
 ) -> DecisionEvaluationResource | JSONResponse:
     request_id = get_request_id(request)
     try:
-        record = evaluate_car_interview_case(
+        record = evaluate_decision_case(
             repo,
             case_id=case_id,
             owner_subject_id=owner_subject_id,
             expected_case_version=body.expected_case_version,
         )
         return to_evaluation_resource(record)
-    except IntakeIncompleteError as exc:
+    except EvaluateIntakeIncompleteError as exc:
         return _error_response(
             status_code=400,
             code="INTAKE_INCOMPLETE",
@@ -668,7 +677,7 @@ def create_decision_case_evaluation(
             request_id=request_id,
             details=exc.details,
         )
-    except UnsupportedDecisionTypeError as exc:
+    except UnsupportedEvaluateDecisionTypeError as exc:
         return _error_response(
             status_code=400,
             code="UNSUPPORTED_DECISION_TYPE",

@@ -59,17 +59,21 @@ class LocalProfileRepository implements ProfileRepository {
       const legacy = JSON.parse(raw) as BirthProfile;
       if (!legacy.birth_date || !legacy.birth_time || !legacy.location) return null;
 
-      let birth_place = placeRaw
+      const birth_place = placeRaw
         ? (JSON.parse(placeRaw) as ProfileRecord['birth_place'])
         : null;
 
-      if (!birth_place) {
-        birth_place = {
-          name: legacy.location,
-          short: legacy.location,
-          lat: 0,
-          lon: 0,
-        };
+      // Legacy profile blobs contain only a city label, not authoritative
+      // coordinates. Do not turn unknown coordinates into 0,0: callers must
+      // fail closed until the user selects a real birth place.
+      if (
+        !birth_place ||
+        !birth_place.name?.trim() ||
+        !birth_place.short?.trim() ||
+        !Number.isFinite(birth_place.lat) ||
+        !Number.isFinite(birth_place.lon)
+      ) {
+        return null;
       }
 
       const name = localStorage.getItem(NAME_KEY) || undefined;

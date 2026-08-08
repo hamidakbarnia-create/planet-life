@@ -158,7 +158,7 @@ export function AskClarificationFlow({
         decisionTypeId: readyFrame.decision_type_id,
       });
       onCaseBound(result.case.case_id, result.case.case_version);
-      router.push(`/decision-cases/${result.case.case_id}/result`);
+      router.push(`/decision-cases/${result.case.case_id}/intake`);
     } catch (err) {
       setError(localizeCaseApiError(err, lang));
       setBusy(false);

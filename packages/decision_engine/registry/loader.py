@@ -89,9 +89,11 @@ def _validate_authority(registry: DecisionTypeRegistry) -> None:
     records = registry.decision_types
     ids = {record.decision_type_id for record in records}
 
-    if len(records) != 3:
+    expected_count = len(EXPECTED_TYPE_IDS)
+    if len(records) != expected_count:
         raise RegistryLoadError(
-            f"EPIC-001 registry requires exactly 3 decision types; got {len(records)}"
+            f"EPIC-001 registry requires exactly {expected_count} decision types; "
+            f"got {len(records)}"
         )
 
     if ids != EXPECTED_TYPE_IDS:

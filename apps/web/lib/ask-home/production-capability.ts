@@ -30,6 +30,7 @@ const SHIPPED_RUNTIME_MODE_HINT: Readonly<
   Record<string, readonly ('evaluate_date' | 'compare_dates')[]>
 > = {
   'car-interview': ['evaluate_date'],
+  'bus-investor-meeting': ['evaluate_date'],
 };
 
 export type ProductionCaseMode = 'evaluate_date' | 'compare_dates';
