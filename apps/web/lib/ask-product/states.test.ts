@@ -16,7 +16,7 @@ describe('ask-product consumer states', () => {
     expect(deriveClarificationState(frame)).toBe('NEEDS_CLARIFICATION');
   });
 
-  it('marks untyped compare and find as UNSUPPORTED_OPERATION', () => {
+  it('marks untyped compare and wedding find as UNSUPPORTED_OPERATION', () => {
     const compare = buildDecisionFrame('14 or 18 August?', {
       reference_year: 2026,
       operation: 'compare',
@@ -34,6 +34,18 @@ describe('ask-product consumer states', () => {
       range_end: '2026-09-30',
     });
     expect(isUnsupportedOperationFrame(find)).toBe(true);
+  });
+
+  it('READY_TO_FIND for product launch with inclusive range', () => {
+    const ready = buildDecisionFrame('Find launch windows in November', {
+      decision_type_id: 'bus-product-launch',
+      operation: 'find',
+      time_scope: 'date_range',
+      range_start: '2026-11-01',
+      range_end: '2026-11-30',
+    });
+    expect(isUnsupportedOperationFrame(ready)).toBe(false);
+    expect(deriveClarificationState(ready)).toBe('READY_TO_FIND');
   });
 
   it('READY_TO_COMPARE for wedding with labeled candidate dates', () => {

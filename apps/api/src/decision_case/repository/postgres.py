@@ -39,6 +39,7 @@ from .models import (
     ComparisonRecord,
     EvaluationRecord,
     EvidenceBindingRecord,
+    FindingRecord,
     HistoryEventRecord,
     ParticipantRecord,
     TimelineEntry,
@@ -49,7 +50,7 @@ _ELIGIBILITY = frozenset(
 )
 _PARTICIPANT_ROLES = frozenset({"subject", "partner", "counterparty", "other"})
 _VERSION_REASONS = frozenset({"create", "intake_update", "mode_change"})
-_MODES = frozenset({"none", "evaluate_date", "compare_dates"})
+_MODES = frozenset({"none", "evaluate_date", "compare_dates", "find_dates"})
 _PRECISION = frozenset({f"L{i}" for i in range(1, 8)})
 
 
@@ -1053,6 +1054,196 @@ class DecisionCaseRepository:
             raise MissingRelationError(f"comparison not found: {comparison_id}")
         return self._comparison_from_row(row)
 
+    def append_finding(
+        self,
+        case_id: UUID,
+        owner_subject_id: str,
+        *,
+        expected_case_version: int,
+        package: dict[str, Any],
+        package_contract_version: str,
+        engine_id: str,
+        dq_status: str,
+        case_version: int | None = None,
+        actor: str = "system",
+        finding_id: UUID | None = None,
+    ) -> FindingRecord:
+        """Persist FIND package and transition Case to found (not evaluated/compared)."""
+        if dq_status not in {"pass", "blocked"}:
+            raise InvalidStateError(f"invalid dq_status: {dq_status}")
+        package_mode = package.get("mode") if isinstance(package, dict) else None
+        if package_mode != "find_dates":
+            raise IllegalTransitionError(
+                "append_finding requires package.mode=find_dates"
+            )
+        try:
+            with self._conn.cursor(row_factory=dict_row) as cur:
+                case = self._lock_case(cur, case_id, owner_subject_id)
+                find_case_version = case_version
+                if find_case_version is None:
+                    cur.execute(
+                        """
+                        SELECT MAX(version) AS v FROM decision_versions
+                        WHERE case_id = %s
+                        """,
+                        (case_id,),
+                    )
+                    find_case_version = int(cur.fetchone()["v"])
+                cur.execute(
+                    """
+                    SELECT 1 FROM decision_versions
+                    WHERE case_id = %s AND version = %s
+                    """,
+                    (case_id, find_case_version),
+                )
+                if cur.fetchone() is None:
+                    raise MissingRelationError(
+                        f"case_version {find_case_version} missing"
+                    )
+
+                if case.state == CaseState.FOUND.value:
+                    tr = apply_transition(
+                        case.state,
+                        CaseState.FOUND.value,
+                        "re_find",
+                    )
+                    emit_transition = False
+                elif case.state == CaseState.EVIDENCE_READY.value:
+                    tr = apply_transition(
+                        case.state,
+                        CaseState.FOUND.value,
+                        "save_finding",
+                        finding_saved=True,
+                    )
+                    emit_transition = True
+                else:
+                    raise IllegalTransitionError(
+                        f"cannot find from state {case.state}"
+                    )
+                if not tr.ok:
+                    raise IllegalTransitionError(tr.reason or "illegal_transition")
+
+                new_token = self._cas(
+                    cur,
+                    case_id,
+                    expected_case_version,
+                    state=CaseState.FOUND.value,
+                    mode="find_dates",
+                    paused_prior_state=None,
+                )
+                cur.execute(
+                    """
+                    SELECT COALESCE(MAX(finding_version), 0) + 1 AS next
+                    FROM decision_findings WHERE case_id = %s
+                    """,
+                    (case_id,),
+                )
+                next_finding = int(cur.fetchone()["next"])
+                fid = finding_id or uuid4()
+                # Keep package identity aligned with finding artifact id/version.
+                package_to_store = dict(package)
+                package_to_store["evaluation_id"] = str(fid)
+                package_to_store["evaluation_version"] = next_finding
+                cur.execute(
+                    """
+                    INSERT INTO decision_findings (
+                        finding_id, case_id, case_version, finding_version,
+                        package_contract_version, package, engine_id, dq_status
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING *
+                    """,
+                    (
+                        fid,
+                        case_id,
+                        find_case_version,
+                        next_finding,
+                        package_contract_version,
+                        Jsonb(package_to_store),
+                        engine_id,
+                        dq_status,
+                    ),
+                )
+                row = cur.fetchone()
+                assert row is not None
+                if emit_transition:
+                    self._insert_history(
+                        cur,
+                        case_id=case_id,
+                        actor=actor,
+                        event="state_transition",
+                        payload={"trigger": "save_finding"},
+                        from_state=case.state,
+                        to_state=CaseState.FOUND.value,
+                        case_version=new_token,
+                    )
+                self._insert_history(
+                    cur,
+                    case_id=case_id,
+                    actor=actor,
+                    event="finding_saved",
+                    payload={"finding_id": str(fid)},
+                    case_version=new_token,
+                )
+            self._conn.commit()
+        except (
+            StaleVersionError,
+            IllegalTransitionError,
+            CaseNotFoundError,
+            MissingRelationError,
+            InvalidStateError,
+        ):
+            self._conn.rollback()
+            raise
+        except Exception:
+            self._conn.rollback()
+            raise
+        return FindingRecord(
+            finding_id=row["finding_id"],
+            case_id=row["case_id"],
+            case_version=row["case_version"],
+            finding_version=row["finding_version"],
+            package_contract_version=row["package_contract_version"],
+            package=package_to_store,
+            engine_id=row["engine_id"],
+            dq_status=row["dq_status"],
+            created_at=row["created_at"],
+        )
+
+    def list_findings(
+        self, case_id: UUID, owner_subject_id: str
+    ) -> list[FindingRecord]:
+        self.get_case(case_id, owner_subject_id)
+        with self._conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                SELECT * FROM decision_findings
+                WHERE case_id = %s
+                ORDER BY finding_version DESC, created_at DESC
+                """,
+                (case_id,),
+            )
+            return [self._finding_from_row(r) for r in cur.fetchall()]
+
+    def get_finding(
+        self,
+        case_id: UUID,
+        finding_id: UUID,
+        owner_subject_id: str,
+    ) -> FindingRecord:
+        self.get_case(case_id, owner_subject_id)
+        with self._conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                SELECT * FROM decision_findings
+                WHERE case_id = %s AND finding_id = %s
+                """,
+                (case_id, finding_id),
+            )
+            row = cur.fetchone()
+        if row is None:
+            raise MissingRelationError(f"finding not found: {finding_id}")
+        return self._finding_from_row(row)
+
     # --------------------------------------------------------------- helpers
 
     def _run_composite(
@@ -1260,6 +1451,23 @@ class DecisionCaseRepository:
             evaluation_id=row["evaluation_id"],
             ranking=ranking_list,
             ranks=ranks,
+            created_at=row["created_at"],
+        )
+
+    @staticmethod
+    def _finding_from_row(row: dict[str, Any]) -> FindingRecord:
+        package = row["package"]
+        if isinstance(package, str):
+            package = json.loads(package)
+        return FindingRecord(
+            finding_id=row["finding_id"],
+            case_id=row["case_id"],
+            case_version=row["case_version"],
+            finding_version=row["finding_version"],
+            package_contract_version=row["package_contract_version"],
+            package=package,
+            engine_id=row["engine_id"],
+            dq_status=row["dq_status"],
             created_at=row["created_at"],
         )
 

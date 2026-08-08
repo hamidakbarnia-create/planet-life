@@ -22,6 +22,8 @@ from decision_case.mapping import (
     to_comparison_resource,
     to_evaluation_list_item,
     to_evaluation_resource,
+    to_finding_list_item,
+    to_finding_resource,
     to_history_event,
 )
 from decision_case.repository import DecisionCaseRepository
@@ -39,6 +41,7 @@ from decision_case.schemas.cases import (
     CreateComparisonRequest,
     CreateDecisionCaseRequest,
     CreateEvaluationRequest,
+    CreateFindingRequest,
     DecisionApiErrorBody,
     DecisionApiErrorResponse,
     DecisionCaseDetailResource,
@@ -48,6 +51,8 @@ from decision_case.schemas.cases import (
     DecisionComparisonResource,
     DecisionEvaluationListEnvelope,
     DecisionEvaluationResource,
+    DecisionFindingListEnvelope,
+    DecisionFindingResource,
     DecisionHistoryEnvelope,
     FramingMutationResponse,
     IntakeAnswersRequest,
@@ -74,6 +79,11 @@ from decision_case.services.evaluate_runtime import (
     EvaluateIntakeIncompleteError,
     UnsupportedEvaluateDecisionTypeError,
     evaluate_decision_case,
+)
+from decision_case.services.find_runtime import (
+    FindIntakeIncompleteError,
+    UnsupportedFindDecisionTypeError,
+    find_decision_case,
 )
 from decision_case.services.intake_runtime import (
     complete_intake,
@@ -157,6 +167,7 @@ def _safe_message(code: str) -> str:
         "CASE_NOT_FOUND": "Decision case not found",
         "EVALUATION_NOT_FOUND": "Evaluation not found",
         "COMPARISON_NOT_FOUND": "Comparison not found",
+        "FINDING_NOT_FOUND": "Finding not found",
         "VERSION_CONFLICT": "Case version conflict",
         "ILLEGAL_TRANSITION": "Illegal case lifecycle transition",
         "DUPLICATE_CASE": "Duplicate decision case",
@@ -903,6 +914,142 @@ def archive_decision_case(
             case_id=case_id,
             owner_subject_id=owner_subject_id,
             expected_case_version=body.expected_case_version,
+        )
+
+
+@router.post(
+    "/{case_id}/findings",
+    response_model=DecisionFindingResource,
+    status_code=201,
+    responses=_ERROR_RESPONSES,
+)
+def create_decision_case_finding(
+    case_id: UUID,
+    body: CreateFindingRequest,
+    request: Request,
+    repo: DecisionCaseRepository = Depends(get_decision_case_repository),
+    owner_subject_id: str = Depends(get_e5_owner_subject_id),
+) -> DecisionFindingResource | JSONResponse:
+    request_id = get_request_id(request)
+    try:
+        finding = find_decision_case(
+            repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
+        )
+        return to_finding_resource(finding)
+    except FindIntakeIncompleteError as exc:
+        return _error_response(
+            status_code=400,
+            code="INTAKE_INCOMPLETE",
+            message=_safe_message("INTAKE_INCOMPLETE"),
+            request_id=request_id,
+            details={"missing_required": list(exc.missing_required)},
+        )
+    except UnsupportedFindDecisionTypeError as exc:
+        return _error_response(
+            status_code=400,
+            code="OPERATION_NOT_IMPLEMENTED",
+            message=_safe_message("OPERATION_NOT_IMPLEMENTED"),
+            request_id=request_id,
+            details={
+                "operation": "find",
+                "decision_type_id": exc.decision_type_id,
+            },
+        )
+    except RuntimeFramingError as exc:
+        return _error_response(
+            status_code=400,
+            code="FRAMING_REQUIRED",
+            message=str(exc) or _safe_message("FRAMING_REQUIRED"),
+            request_id=request_id,
+            details=exc.details,
+        )
+    except RuntimeProviderError as exc:
+        return _error_response(
+            status_code=502,
+            code="PROVIDER_FAILURE",
+            message=_safe_message("PROVIDER_FAILURE"),
+            request_id=request_id,
+            details=exc.details,
+        )
+    except Exception as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=body.expected_case_version,
+        )
+
+
+@router.get(
+    "/{case_id}/findings",
+    response_model=DecisionFindingListEnvelope,
+    responses=_ERROR_RESPONSES,
+)
+def list_decision_case_findings(
+    case_id: UUID,
+    request: Request,
+    repo: DecisionCaseRepository = Depends(get_decision_case_repository),
+    owner_subject_id: str = Depends(get_e5_owner_subject_id),
+) -> DecisionFindingListEnvelope | JSONResponse:
+    request_id = get_request_id(request)
+    try:
+        findings = repo.list_findings(case_id, owner_subject_id)
+        return DecisionFindingListEnvelope(
+            findings=[to_finding_list_item(f) for f in findings]
+        )
+    except Exception as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+        )
+
+
+@router.get(
+    "/{case_id}/findings/{finding_id}",
+    response_model=DecisionFindingResource,
+    responses=_ERROR_RESPONSES,
+)
+def get_decision_case_finding(
+    case_id: UUID,
+    finding_id: UUID,
+    request: Request,
+    repo: DecisionCaseRepository = Depends(get_decision_case_repository),
+    owner_subject_id: str = Depends(get_e5_owner_subject_id),
+) -> DecisionFindingResource | JSONResponse:
+    request_id = get_request_id(request)
+    try:
+        finding = repo.get_finding(case_id, finding_id, owner_subject_id)
+        return to_finding_resource(finding)
+    except CaseNotFoundError as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+        )
+    except MissingRelationError:
+        return _error_response(
+            status_code=404,
+            code="FINDING_NOT_FOUND",
+            message=_safe_message("FINDING_NOT_FOUND"),
+            request_id=request_id,
+        )
+    except Exception as exc:
+        return _map_repository_error(
+            exc,
+            request_id=request_id,
+            repo=repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
         )
 
 

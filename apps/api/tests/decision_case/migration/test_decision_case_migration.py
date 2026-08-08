@@ -1,4 +1,4 @@
-"""Migration Foundation tests for 0009__decision_cases.sql."""
+"""Migration Foundation tests for decision-case SQL migrations."""
 
 from __future__ import annotations
 
@@ -14,12 +14,14 @@ from identity_domain.harness import connect_identity_database, drop_identity_sch
 pytestmark = pytest.mark.identity_db
 
 MIGRATION_NAME = "0009__decision_cases.sql"
+FINDINGS_MIGRATION_NAME = "0010__decision_findings.sql"
 
 
 def test_decision_case_migration_present() -> None:
     names = [m.filename for m in discover_migrations(default_migrations_dir())]
     assert MIGRATION_NAME in names
-    assert names[-1] == MIGRATION_NAME
+    assert FINDINGS_MIGRATION_NAME in names
+    assert names[-1] == FINDINGS_MIGRATION_NAME
 
 
 def test_fresh_apply_status_verify_idempotent(identity_database_url: str) -> None:
@@ -32,10 +34,12 @@ def test_fresh_apply_status_verify_idempotent(identity_database_url: str) -> Non
     directory = default_migrations_dir()
     first = apply_migrations(identity_database_url, directory)
     assert any(m.filename == MIGRATION_NAME for m in first.applied_now)
+    assert any(m.filename == FINDINGS_MIGRATION_NAME for m in first.applied_now)
 
     status = status_migrations(identity_database_url, directory)
     assert status.pending == []
     assert any(a.filename == MIGRATION_NAME for a in status.applied)
+    assert any(a.filename == FINDINGS_MIGRATION_NAME for a in status.applied)
 
     second = apply_migrations(identity_database_url, directory)
     assert second.applied_now == []
@@ -59,12 +63,13 @@ def test_fresh_apply_status_verify_idempotent(identity_database_url: str) -> Non
         assert "decision_evaluations" in tables
         assert "decision_history_events" in tables
         assert "decision_comparison_ranks" in tables
+        assert "decision_findings" in tables
     finally:
         conn.close()
 
 
 def test_forward_apply_on_existing_identity_schema(identity_database_url: str) -> None:
-    """Apply through 0008, then ensure 0009 is pending then applied."""
+    """Apply all migrations; latest decision-case migration is findings."""
     conn = connect_identity_database(identity_database_url)
     try:
         drop_identity_schema_objects(conn)
@@ -72,10 +77,9 @@ def test_forward_apply_on_existing_identity_schema(identity_database_url: str) -
         conn.close()
 
     directory = default_migrations_dir()
-    # Apply all — already includes 0009; simulate forward by verifying 0009 exists after reset
     apply_migrations(identity_database_url, directory)
     status = status_migrations(identity_database_url, directory)
-    assert [a.filename for a in status.applied][-1] == MIGRATION_NAME
+    assert [a.filename for a in status.applied][-1] == FINDINGS_MIGRATION_NAME
 
 
 def test_checksum_mismatch_fails(identity_database_url: str, tmp_path: Path) -> None:

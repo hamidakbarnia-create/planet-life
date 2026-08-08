@@ -288,6 +288,7 @@ def extract_natal_evidence(
     for key in (
         "latitude",
         "longitude",
+        "timezone",
         "evaluation_location",
         "evaluation_latitude",
         "evaluation_longitude",
@@ -296,6 +297,96 @@ def extract_natal_evidence(
             evidence[key] = raw[key]
 
     return evidence
+
+
+@dataclass(frozen=True, slots=True)
+class FindFrameRange:
+    start: str
+    end: str
+
+
+def extract_find_range_from_framing(intake: Mapping[str, Any]) -> FindFrameRange:
+    """Extract inclusive FIND date range from Case decision_frame."""
+    from datetime import date as date_cls
+
+    from packages.decision_engine.find_windows import validate_find_range
+
+    raw = intake.get(DECISION_FRAME_INTAKE_KEY)
+    if not isinstance(raw, dict):
+        raise RuntimeFramingError(
+            "decision_frame required for find",
+            details={"missing": [DECISION_FRAME_INTAKE_KEY]},
+        )
+
+    operation = raw.get("operation")
+    if operation == "evaluate":
+        raise RuntimeUnsupportedOperationError("evaluate")
+    if operation == "compare":
+        raise RuntimeUnsupportedOperationError("compare")
+    if operation != "find":
+        raise RuntimeFramingError(
+            "find operation required",
+            details={"operation": operation},
+        )
+
+    time_scope = raw.get("time_scope")
+    if time_scope != "date_range":
+        raise RuntimeFramingError(
+            "find requires time_scope=date_range",
+            details={"time_scope": time_scope},
+        )
+
+    start = str(raw.get("start") or "").strip()
+    end = str(raw.get("end") or "").strip()
+    if not start or not end:
+        raise RuntimeFramingError(
+            "find requires start and end",
+            details={"start": start or None, "end": end or None},
+        )
+
+    try:
+        start_d = date_cls.fromisoformat(start)
+        end_d = date_cls.fromisoformat(end)
+    except ValueError as exc:
+        raise RuntimeFramingError(
+            "find start/end must be ISO calendar dates",
+            details={"start": start, "end": end},
+        ) from exc
+
+    try:
+        validate_find_range(start_d, end_d)
+    except ValueError as exc:
+        raise RuntimeFramingError(str(exc), details={"start": start, "end": end}) from exc
+
+    if raw.get("date") is not None:
+        raise RuntimeFramingError(
+            "find framing must not include singular date",
+            details={"date": raw.get("date")},
+        )
+    if raw.get("dates"):
+        raise RuntimeFramingError(
+            "find framing must not include dates[]",
+            details={"dates": raw.get("dates")},
+        )
+    if raw.get("options"):
+        raise RuntimeFramingError(
+            "find framing must not include options",
+            details={"options": raw.get("options")},
+        )
+
+    return FindFrameRange(start=start, end=end)
+
+
+def resolve_find_timezone(natal: Mapping[str, Any] | None) -> str:
+    """Single scan timezone label for the FIND range.
+
+    Prefer explicit natal timezone; otherwise event_local documents the
+    shared noon-local location policy used for every scored day.
+    """
+    if natal is None:
+        return "event_local"
+    tz = str(natal.get("timezone") or "").strip()
+    return tz or "event_local"
 
 
 def build_evaluate_base_envelope(
@@ -345,6 +436,33 @@ def build_compare_base_envelope(
         "decision_type_id": record.decision_type_id,
         "family_id": record.family_id,
         "mode": "compare_dates",
+        "precision_level": "L3",
+        "engine_id": engine_id,
+        "created_at": created_at,
+        "schema_version": "1.0.0",
+    }
+
+
+def build_find_base_envelope(
+    *,
+    case_id,
+    case_version: int,
+    evaluation_id,
+    created_at: str,
+    decision_type_id: str,
+    engine_id: str,
+) -> dict[str, Any]:
+    from packages.decision_engine.registry import get_decision_type
+
+    record = get_decision_type(decision_type_id)
+    return {
+        "case_id": str(case_id),
+        "evaluation_id": str(evaluation_id),
+        "evaluation_version": 1,
+        "case_version": case_version,
+        "decision_type_id": record.decision_type_id,
+        "family_id": record.family_id,
+        "mode": "find_dates",
         "precision_level": "L3",
         "engine_id": engine_id,
         "created_at": created_at,

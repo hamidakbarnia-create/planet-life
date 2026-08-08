@@ -21,7 +21,7 @@ DecisionTypeId = Literal[
     "bus-product-launch",
 ]
 FamilyId = Literal["timing_opt", "visibility"]
-DecisionMode = Literal["evaluate_date", "compare_dates"]
+DecisionMode = Literal["evaluate_date", "compare_dates", "find_dates"]
 EntryMode = Literal["structured"]
 OutputProfile = Literal["decision_evaluation_package.v1"]
 
@@ -71,7 +71,7 @@ EXPECTED_RECORDS: dict[str, tuple[str, tuple[str, ...]]] = {
     ),
     "bus-product-launch": (
         "timing_opt",
-        ("evaluate_date",),
+        ("evaluate_date", "find_dates"),
     ),
 }
 

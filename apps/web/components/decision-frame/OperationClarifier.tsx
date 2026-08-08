@@ -86,7 +86,7 @@ export function OperationClarifier({
             data-testid="clarify-find"
             onClick={() => onChooseOperation('find')}
           >
-            Find the best date
+            Find stronger timing windows
           </button>
         </div>
       </section>

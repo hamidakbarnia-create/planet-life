@@ -32,6 +32,7 @@ from uuid import UUID
 
 from decision_case.repository import DecisionCaseRepository
 from decision_case.repository.models import CaseRecord
+from packages.decision_engine.find_windows import validate_find_range
 from packages.decision_engine.registry import get_decision_type, resolve_decision_type
 from packages.decision_engine.state_machine import CaseState
 
@@ -77,9 +78,11 @@ def case_mode_for_operation(operation: str, time_scope: str) -> str:
     """Map Frame operation → Case date-intelligence mode (not a second operation field)."""
     if operation == "compare":
         return "compare_dates"
+    if operation == "find" and time_scope == "date_range":
+        return "find_dates"
     if operation == "evaluate" and time_scope == "specific_date":
         return "evaluate_date"
-    # FIND has no Case mode yet — keep none. EVALUATE+none stays none.
+    # EVALUATE+none stays none.
     return "none"
 
 
@@ -289,14 +292,16 @@ def normalize_persisted_framing(raw: dict[str, Any]) -> dict[str, Any]:
             )
         start_d = _parse_iso_date(start)
         end_d = _parse_iso_date(end)
-        if start_d > end_d:
+        try:
+            validate_find_range(start_d, end_d)
+        except ValueError as exc:
             raise FramingValidationError(
-                "start must be <= end",
+                str(exc),
                 details={"start": start, "end": end},
-            )
+            ) from exc
         normalized["start"] = start
         normalized["end"] = end
-        normalized["find_runtime"] = "not_implemented"
+        normalized["find_runtime"] = "timing_opt_find"
 
     if options:
         normalized["options"] = options

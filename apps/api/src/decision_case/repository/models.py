@@ -100,6 +100,19 @@ class ComparisonRecord:
 
 
 @dataclass(frozen=True, slots=True)
+class FindingRecord:
+    finding_id: UUID
+    case_id: UUID
+    case_version: int
+    finding_version: int
+    package_contract_version: str
+    package: dict[str, Any]
+    engine_id: str
+    dq_status: str
+    created_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
 class HistoryEventRecord:
     history_id: UUID
     case_id: UUID

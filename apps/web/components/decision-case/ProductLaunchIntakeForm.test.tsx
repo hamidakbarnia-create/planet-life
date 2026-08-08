@@ -37,4 +37,23 @@ describe('ProductLaunchIntakeForm', () => {
       (screen.getByTestId('intake-complete') as HTMLButtonElement).disabled
     ).toBe(false);
   });
+
+  it('hides target_date for find_dates and completes with launch_object only', () => {
+    render(
+      <ProductLaunchIntakeForm
+        lang="en"
+        caseMode="find_dates"
+        initialIntake={{ launch_object: 'mobile app v2' }}
+        onSubmitAnswers={vi.fn()}
+        onComplete={vi.fn()}
+      />
+    );
+    expect(screen.queryByTestId('intake-target_date')).toBeNull();
+    expect(
+      (screen.getByTestId('intake-complete') as HTMLButtonElement).disabled
+    ).toBe(false);
+    expect(screen.getByTestId('product-launch-intake-form').getAttribute('data-mode')).toBe(
+      'find_dates'
+    );
+  });
 });

@@ -89,4 +89,7 @@ export function assertPackageRenderContract(
   if (pkg.mode === 'evaluate_date' && pkg.timing.candidates.length !== 1) {
     throw new Error('evaluate_date requires exactly one timing candidate');
   }
+  if (pkg.mode === 'find_dates' && !pkg.find) {
+    throw new Error('find_dates requires find module');
+  }
 }

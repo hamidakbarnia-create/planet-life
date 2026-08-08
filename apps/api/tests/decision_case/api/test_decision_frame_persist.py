@@ -179,7 +179,7 @@ def test_find_canonical_persist_and_readback_no_runtime(client: TestClient) -> N
     assert framing["end"] == RANGE_END
     _assert_no_legacy_aliases(framing)
     assert framing["runtime_executed"] is False
-    assert framing["find_runtime"] == "not_implemented"
+    assert framing["find_runtime"] == "timing_opt_find"
     # Metadata only — no evaluation / score package created.
     case_id = response.json()["case"]["case_id"]
     evals = client.get(f"{BASE}/{case_id}/evaluations")

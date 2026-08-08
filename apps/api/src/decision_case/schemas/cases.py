@@ -8,7 +8,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 EntryMode = Literal["structured", "natural_language"]
-CaseMode = Literal["none", "evaluate_date", "compare_dates"]
+CaseMode = Literal["none", "evaluate_date", "compare_dates", "find_dates"]
 PrecisionLevel = Literal["L1", "L2", "L3", "L4", "L5", "L6", "L7"]
 DqStatus = Literal["pass", "blocked"]
 ActivationPhaseWire = Literal[
@@ -17,6 +17,7 @@ ActivationPhaseWire = Literal[
     "evidence_ready",
     "evaluated",
     "compared",
+    "found",
     "completed",
     "archived",
 ]
@@ -187,6 +188,14 @@ class CreateComparisonRequest(BaseModel):
     expected_case_version: int = Field(..., ge=1)
 
 
+class CreateFindingRequest(BaseModel):
+    """Request a FIND via the Case findings boundary (→ found)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    expected_case_version: int = Field(..., ge=1)
+
+
 class DecisionCaseResource(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -278,6 +287,29 @@ class DecisionComparisonListEnvelope(BaseModel):
 
 class DecisionComparisonResource(DecisionComparisonListItem):
     ranking: list[dict[str, Any]]
+    package: dict[str, Any]
+
+
+class DecisionFindingListItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    finding_id: UUID
+    case_id: UUID
+    case_version: int
+    finding_version: int
+    package_contract_version: str
+    engine_id: str
+    dq_status: DqStatus
+    created_at: str
+
+
+class DecisionFindingListEnvelope(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    findings: list[DecisionFindingListItem]
+
+
+class DecisionFindingResource(DecisionFindingListItem):
     package: dict[str, Any]
 
 

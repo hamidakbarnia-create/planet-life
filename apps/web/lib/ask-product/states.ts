@@ -15,6 +15,7 @@ export type AskConsumerState =
   | 'NEEDS_CLARIFICATION'
   | 'READY_TO_EVALUATE'
   | 'READY_TO_COMPARE'
+  | 'READY_TO_FIND'
   | 'EVALUATING'
   | 'RESULT'
   | 'BLOCKED_MISSING_EVIDENCE'
@@ -22,9 +23,14 @@ export type AskConsumerState =
   | 'CAPABILITY_UNAVAILABLE'
   | 'ERROR';
 
-/** FIND remains unsupported. COMPARE is unsupported unless production hint ships it. */
+/**
+ * FIND / COMPARE unsupported unless the production UX hint ships them.
+ * Product-launch FIND is offered when capability ships; wedding FIND stays closed.
+ */
 export function isUnsupportedOperationFrame(frame: DecisionFrameV1): boolean {
-  if (frame.operation === 'find') return true;
+  if (frame.operation === 'find') {
+    return !canExecuteInProduction(frame.decision_type_id, 'find');
+  }
   if (frame.operation === 'compare') {
     return !canExecuteInProduction(frame.decision_type_id, 'compare');
   }
@@ -74,9 +80,22 @@ export function deriveClarificationState(
     frame.pending_clarification === 'operation' ||
     frame.pending_clarification === 'open_ended_axis' ||
     frame.pending_clarification === 'time' ||
-    frame.time.scope === 'none' ||
-    !frame.time.dates?.length
+    frame.time.scope === 'none'
   ) {
+    return 'NEEDS_CLARIFICATION';
+  }
+
+  if (
+    frame.operation === 'find' &&
+    (frame.time.scope !== 'date_range' ||
+      !frame.time.range_start ||
+      !frame.time.range_end)
+  ) {
+    return 'NEEDS_CLARIFICATION';
+  }
+
+  // scope=none already returned above; evaluate/compare still need dates[].
+  if (frame.operation !== 'find' && !frame.time.dates?.length) {
     return 'NEEDS_CLARIFICATION';
   }
 
@@ -99,6 +118,17 @@ export function deriveClarificationState(
     canExecuteInProduction(frame.decision_type_id, 'compare')
   ) {
     return 'READY_TO_COMPARE';
+  }
+
+  if (
+    frame.operation === 'find' &&
+    isFramingPersistReady(frame) &&
+    frame.time.scope === 'date_range' &&
+    Boolean(frame.time.range_start) &&
+    Boolean(frame.time.range_end) &&
+    canExecuteInProduction(frame.decision_type_id, 'find')
+  ) {
+    return 'READY_TO_FIND';
   }
 
   return 'NEEDS_CLARIFICATION';

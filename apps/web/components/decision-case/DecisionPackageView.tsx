@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { EvaluateProductResult } from '@/components/decision-case/EvaluateProductResult';
 import { CompareResultView } from '@/components/decision-frame/CompareResultView';
+import { FindResultView } from '@/components/decision-frame/FindResultView';
 import type { DecisionEvaluationPackage } from '@/lib/decision-case';
 import {
   DEMO_STUB_NOTICE,
@@ -14,7 +15,10 @@ import {
   buildEvaluatePresentation,
   getAskProductCopy,
 } from '@/lib/ask-product';
-import { packageToCompareView } from '@/lib/decision-frame/package-adapter';
+import {
+  packageToCompareView,
+  packageToFindView,
+} from '@/lib/decision-frame/package-adapter';
 import { useAppLang } from '@/lib/use-app-lang';
 
 /**
@@ -41,10 +45,20 @@ export function DecisionPackageView({
   const copy = getAskProductCopy(lang);
 
   const isStub = pkg.engine_id === STUB_ENGINE_ID;
+  // FIND may set timing.material=false when no strong window exists — that is a
+  // real FIND outcome, not a natal evidence block.
   const isBlocked =
     dqStatus === 'blocked' ||
     pkg.recommendation.stance === 'insufficient_data' ||
-    !pkg.timing.material;
+    (pkg.mode !== 'find_dates' && !pkg.timing.material);
+
+  if (pkg.mode === 'find_dates' && pkg.find && !isBlocked && !isStub) {
+    return (
+      <div data-testid="decision-package-view" data-mode="find_dates">
+        <FindResultView model={packageToFindView(pkg)} />
+      </div>
+    );
+  }
 
   if (isBlocked && !isStub) {
     return (

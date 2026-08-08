@@ -374,6 +374,7 @@ export function DecisionCaseIntakeScreen({
             key={`${caseId}-${caseVersion ?? 0}`}
             lang={lang}
             initialIntake={intakeAsProductLaunch(intake)}
+            caseMode={caseRecord?.mode}
             submitting={busy}
             onSubmitAnswers={async (answers) => {
               setBusy(true);

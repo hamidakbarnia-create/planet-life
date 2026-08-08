@@ -16,12 +16,15 @@ vi.mock('./api-client', async () => {
     completeIntake: vi.fn(),
     evaluateDecisionCase: vi.fn(),
     compareDecisionCase: vi.fn(),
+    findDecisionCase: vi.fn(),
     getDecisionCase: vi.fn(),
     getDecisionCaseHistory: vi.fn(),
     listDecisionCaseEvaluations: vi.fn(),
     listDecisionCaseComparisons: vi.fn(),
+    listDecisionCaseFindings: vi.fn(),
     getEvaluation: vi.fn(),
     getComparison: vi.fn(),
+    getFinding: vi.fn(),
     updateDecisionCaseFraming: vi.fn(),
   };
 });
@@ -496,5 +499,71 @@ describe('car-interview Decision Case session (PR-2)', () => {
     expect(loaded.evaluation.package.recommendation.stance).toBe(
       'no_unique_winner'
     );
+  });
+
+  it('loadCaseResult preserves find framing and loads via /findings', async () => {
+    const findFrame = {
+      operation: 'find',
+      time_scope: 'date_range',
+      start: '2026-11-01',
+      end: '2026-11-30',
+    };
+    vi.mocked(api.getDecisionCase).mockResolvedValue({
+      case_id: 'case-launch-find',
+      owner_subject_id: 'e5-dev-owner',
+      decision_type_id: 'bus-product-launch',
+      family_id: 'timing_opt',
+      title: 'Launch a project or product',
+      state: 'evidence_ready',
+      activation_phase: 'evidence_ready',
+      mode: 'find_dates',
+      precision_level: 'L1',
+      case_version: 3,
+      created_at: '2026-08-08T10:00:00Z',
+      updated_at: '2026-08-08T10:00:00Z',
+      intake: {
+        launch_object: 'mobile app',
+        decision_frame: findFrame,
+      },
+    });
+    vi.mocked(api.listDecisionCaseFindings).mockResolvedValue({
+      findings: [],
+    });
+    vi.mocked(api.findDecisionCase).mockResolvedValue({
+      finding_id: 'find-1',
+      case_id: 'case-launch-find',
+      case_version: 3,
+      finding_version: 1,
+      package_contract_version: '1.0.0',
+      engine_id: 'decision-engine-product-launch-find-v1',
+      dq_status: 'pass',
+      created_at: '2026-08-08T10:00:05Z',
+      package: {
+        schema_version: '1.0.0',
+        mode: 'find_dates',
+        engine_id: 'decision-engine-product-launch-find-v1',
+        find: {
+          range_start: '2026-11-01',
+          range_end: '2026-11-30',
+          timezone: 'UTC',
+          unique_dominant: false,
+          windows: [],
+        },
+        recommendation: {
+          stance: 'wait',
+          conditions: [],
+          summary: 'No clearly dominant window.',
+        },
+      } as never,
+    });
+    vi.mocked(api.getDecisionCaseHistory).mockResolvedValue({ events: [] });
+
+    const loaded = await loadCaseResult('case-launch-find');
+    expect(api.updateDecisionCaseFraming).not.toHaveBeenCalled();
+    expect(api.findDecisionCase).toHaveBeenCalled();
+    expect(api.evaluateDecisionCase).not.toHaveBeenCalled();
+    expect(api.compareDecisionCase).not.toHaveBeenCalled();
+    expect(api.listDecisionCaseEvaluations).not.toHaveBeenCalled();
+    expect(loaded.evaluation.package.mode).toBe('find_dates');
   });
 });

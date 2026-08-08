@@ -35,6 +35,25 @@ REQUIRED_SLOT_IDS: Final[frozenset[str]] = frozenset(
     slot.slot_id for slot in PRODUCT_LAUNCH_SLOTS if slot.required
 )
 
+# FIND dates live on decision_frame start/end — target_date is not required.
+FIND_REQUIRED_SLOT_IDS: Final[frozenset[str]] = frozenset({"launch_object"})
+
+
+def required_slot_ids_for_mode(mode: str | None) -> frozenset[str]:
+    if mode == "find_dates":
+        return FIND_REQUIRED_SLOT_IDS
+    return REQUIRED_SLOT_IDS
+
+
+def intake_mode_from_mapping(intake: Mapping[str, Any] | None) -> str:
+    """Infer Case mode from persisted decision_frame when present."""
+    if not isinstance(intake, Mapping):
+        return "evaluate_date"
+    frame = intake.get("decision_frame")
+    if isinstance(frame, dict) and frame.get("operation") == "find":
+        return "find_dates"
+    return "evaluate_date"
+
 
 @dataclass(frozen=True, slots=True)
 class ProductLaunchIntake:
@@ -60,6 +79,8 @@ def assert_product_launch_registered() -> None:
     record = get_decision_type(PRODUCT_LAUNCH_DECISION_TYPE_ID)
     if "evaluate_date" not in record.allowed_modes:
         raise RuntimeError("bus-product-launch must allow evaluate_date")
+    if "find_dates" not in record.allowed_modes:
+        raise RuntimeError("bus-product-launch must allow find_dates")
     if record.family_id != "timing_opt":
         raise RuntimeError("bus-product-launch must belong to timing_opt")
 

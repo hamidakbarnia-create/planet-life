@@ -10,6 +10,7 @@
  * - Do not invent deciding_factor without a Package field.
  * - insufficient_data / non-material timing → Unknown strength & confidence.
  * - Empty counter_recommendation.summary → Unknown alternative (EVALUATE-only).
+ * - FIND never fabricates a unique dominant window when unique_dominant=false.
  */
 
 import type { DecisionEvaluationPackage } from '@/lib/decision-case';
@@ -35,12 +36,12 @@ const UNKNOWN_CONFIDENCE_PENALTIES = new Set([
 /**
  * Renderer selection from explicit Package.mode only.
  * Does not inspect candidate count / ranking shape.
- * FIND is unavailable until Package/Case exposes an explicit find mode.
  */
 export function selectRendererOperation(
   pkg: DecisionEvaluationPackage
-): 'evaluate' | 'compare' {
+): 'evaluate' | 'compare' | 'find' {
   if (pkg.mode === 'compare_dates') return 'compare';
+  if (pkg.mode === 'find_dates') return 'find';
   return 'evaluate';
 }
 
@@ -169,35 +170,70 @@ export function packageToCompareView(
   };
 }
 
+function findHeadline(input: {
+  uniqueDominant: boolean;
+  windowCount: number;
+  insufficient: boolean;
+}): string {
+  if (input.insufficient || input.windowCount === 0) {
+    return 'No clearly dominant window';
+  }
+  if (input.uniqueDominant) {
+    return 'Stronger timing window';
+  }
+  return 'Comparable windows';
+}
+
 /**
- * FIND presentation only when caller passes preferred='find'.
- * Package v1 has no find mode — never auto-selected from Package.mode.
+ * FIND presentation from Package.mode=find_dates + find.windows.
+ * Never fabricates a unique winner when unique_dominant is false.
  */
 export function packageToFindView(
   pkg: DecisionEvaluationPackage
 ): FindResultViewModel {
-  const ranked = [...pkg.timing.candidates].sort((a, b) => a.rank - b.rank);
-  const best = ranked[0];
-  const alt = ranked[1];
+  const find = pkg.find;
+  const ranked = [...(find?.windows ?? [])].sort((a, b) => a.rank - b.rank);
+  const uniqueDominant = Boolean(find?.unique_dominant) && ranked.length > 0;
+  const insufficient =
+    pkg.recommendation.stance === 'insufficient_data' || !pkg.timing.material;
+
+  const windows = ranked.map((window) => ({
+    window_id: window.window_id,
+    start_label: formatDisplayDate(window.start_date),
+    end_label: formatDisplayDate(window.end_date),
+    peak_labels: window.peak_dates.map((d) => formatDisplayDate(d)),
+    strength: timingBandToStrength(window.band),
+    band: window.band,
+    peak_score: window.peak_score,
+  }));
+
+  const rangeContext =
+    find?.range_start && find?.range_end
+      ? `${formatDisplayDate(find.range_start)} – ${formatDisplayDate(find.range_end)}`
+      : pkg.timing.notes || undefined;
+
+  const unknown: string[] = [];
+  if (insufficient) {
+    unknown.push(...pkg.recommendation.conditions.slice(0, 3));
+  }
 
   return {
     operation: 'find',
-    best_date_label: best ? formatDisplayDate(best.date) : 'Unknown',
-    strength: timingBandToStrength(best?.band ?? pkg.timing.band),
-    best_window: undefined,
-    alternative: alt
-      ? formatDisplayDate(alt.date)
-      : pkg.counter_recommendation.summary || undefined,
-    avoid: undefined,
-    range_context: pkg.timing.notes || undefined,
-    timeline: ranked.map((c) => ({
-      label: formatDisplayDate(c.date),
-      strength: timingBandToStrength(c.band),
-    })),
-    confidence: confidenceValueToBand(pkg.confidence.value),
+    headline: findHeadline({
+      uniqueDominant,
+      windowCount: windows.length,
+      insufficient,
+    }),
+    unique_dominant: uniqueDominant,
+    windows,
+    range_context: rangeContext,
+    confidence: insufficient
+      ? 'unknown'
+      : confidenceValueToBand(pkg.confidence.value),
+    limitations: [...pkg.explainability.limits].slice(0, 4),
     known: undefined,
     inferred: undefined,
-    unknown: undefined,
+    unknown: unknown.length ? unknown : undefined,
   };
 }
 
@@ -217,6 +253,6 @@ export const PACKAGE_V1_CONTRACT_GAPS = [
   'No avoid window / avoid candidate role',
   'No first-class comparison.winner (winner is rank===1 convention)',
   'No deciding_factor_id',
-  'No FIND / date_range mode (only evaluate_date | compare_dates)',
+  'FIND has no avoid-window role (windows are Favorable+ eligibility only)',
   'No known/inferred/unknown evidence taxonomy (ACR eligibility only)',
 ] as const;

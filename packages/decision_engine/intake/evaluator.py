@@ -231,15 +231,32 @@ def evaluate_product_launch_intake(
     *,
     answers: Mapping[str, Any] | None = None,
 ) -> ProductLaunchIntakeEvaluation:
+    from packages.decision_engine.intake.product_launch import (
+        intake_mode_from_mapping,
+        required_slot_ids_for_mode,
+    )
+
+    raw_mapping: Mapping[str, Any] | None
     if isinstance(intake, ProductLaunchIntake) and not answers:
         normalized = intake
+        raw_mapping = None
     else:
         current = (
             intake.as_dict()
             if isinstance(intake, ProductLaunchIntake)
             else intake
         )
+        raw_mapping = current if isinstance(current, Mapping) else None
         normalized = merge_product_launch_intake(current, answers or {})
+
+    mode = intake_mode_from_mapping(
+        intake if isinstance(intake, Mapping) else raw_mapping
+    )
+    # Preserve decision_frame when present on the raw intake for mode inference.
+    if isinstance(intake, Mapping):
+        mode = intake_mode_from_mapping(intake)
+
+    required_ids = required_slot_ids_for_mode(mode)
 
     values = {
         "target_date": normalized.target_date,
@@ -249,14 +266,14 @@ def evaluate_product_launch_intake(
     }
 
     missing = tuple(
-        slot.slot_id
-        for slot in PRODUCT_LAUNCH_SLOTS
-        if slot.required and not values[slot.slot_id]
+        slot_id for slot_id in sorted(required_ids) if not values.get(slot_id)
     )
 
     answered = tuple(
         key for key in ("target_date", "launch_object") if values[key]
     )
+    if mode == "find_dates":
+        answered = tuple(key for key in ("launch_object",) if values[key])
 
     return ProductLaunchIntakeEvaluation(
         intake=normalized,

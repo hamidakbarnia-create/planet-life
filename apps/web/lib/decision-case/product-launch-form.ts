@@ -20,6 +20,11 @@ export const CANONICAL_PRODUCT_LAUNCH_REQUIRED_FIELD_IDS = [
   'launch_object',
 ] as const;
 
+/** FIND range lives on framing start/end — target_date is not required. */
+export const FIND_PRODUCT_LAUNCH_REQUIRED_FIELD_IDS = [
+  'launch_object',
+] as const;
+
 export type ProductLaunchSlotId =
   (typeof CANONICAL_PRODUCT_LAUNCH_FIELD_IDS)[number];
 
@@ -29,6 +34,15 @@ export type ProductLaunchIntake = {
   launch_channel?: string;
   brand_or_company?: string;
 };
+
+export function productLaunchRequiredFieldIdsForMode(
+  mode?: string | null
+): readonly ProductLaunchSlotId[] {
+  if (mode === 'find_dates') {
+    return FIND_PRODUCT_LAUNCH_REQUIRED_FIELD_IDS;
+  }
+  return CANONICAL_PRODUCT_LAUNCH_REQUIRED_FIELD_IDS;
+}
 
 export function normalizeProductLaunchAnswer(
   value: unknown
@@ -55,25 +69,28 @@ export function mergeProductLaunchFormAnswers(
 }
 
 export function productLaunchRequiredFieldsPresent(
-  intake: ProductLaunchIntake
+  intake: ProductLaunchIntake,
+  mode?: string | null
 ): boolean {
-  return CANONICAL_PRODUCT_LAUNCH_REQUIRED_FIELD_IDS.every((id) =>
+  return productLaunchRequiredFieldIdsForMode(mode).every((id) =>
     Boolean(normalizeProductLaunchAnswer(intake[id]))
   );
 }
 
 export function productLaunchHasFirstRequiredAnswer(
-  intake: ProductLaunchIntake
+  intake: ProductLaunchIntake,
+  mode?: string | null
 ): boolean {
-  return CANONICAL_PRODUCT_LAUNCH_REQUIRED_FIELD_IDS.some((id) =>
+  return productLaunchRequiredFieldIdsForMode(mode).some((id) =>
     Boolean(normalizeProductLaunchAnswer(intake[id]))
   );
 }
 
 export function productLaunchMissingRequiredFields(
-  intake: ProductLaunchIntake
+  intake: ProductLaunchIntake,
+  mode?: string | null
 ): ProductLaunchSlotId[] {
-  return CANONICAL_PRODUCT_LAUNCH_REQUIRED_FIELD_IDS.filter(
+  return productLaunchRequiredFieldIdsForMode(mode).filter(
     (id) => !normalizeProductLaunchAnswer(intake[id])
-  );
+  ) as ProductLaunchSlotId[];
 }
