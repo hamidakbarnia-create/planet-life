@@ -17,12 +17,11 @@ from decision_case.repository.errors import IllegalTransitionError
 from decision_case.repository.models import CaseRecord, EvaluationRecord
 from decision_case.services.decision_frame import DECISION_FRAME_INTAKE_KEY
 from packages.decision_engine.evaluate.car_interview_evaluate import (
+    CAR_INTERVIEW_EVALUATE_RUNTIME,
     NATAL_EVIDENCE_INTAKE_KEY,
-    REAL_ENGINE_ID,
     RuntimeFramingError,
     RuntimeProviderError,
     RuntimeUnsupportedOperationError,
-    evaluate_car_interview_dict,
 )
 from packages.decision_engine.intake.car_interview import (
     CAR_INTERVIEW_DECISION_TYPE_ID,
@@ -31,6 +30,7 @@ from packages.decision_engine.intake.car_interview import (
 from packages.decision_engine.intake.evaluator import evaluate_car_interview_intake
 from packages.decision_engine.state_machine import CaseState
 from services.decision_engine import generate_decision_outcome
+from decision_case.services.evaluate_runtime import execute_evaluate_runtime
 
 _CAR_INTERVIEW_MODE = "evaluate_date"
 
@@ -229,27 +229,12 @@ def evaluate_car_interview_case(
             f"cannot evaluate from state {case.state}"
         )
 
-    # Evaluation rows must reference an existing decision_versions snapshot.
-    # State transitions may bump current_case_version without a version row.
-    intake_version = repo.get_current_version(case_id, owner_subject_id)
-    package = evaluate_car_interview_dict(
-        case_id=case.case_id,
-        case_version=intake_version.version,
-        intake=intake_dict,
-        generate_outcome=generate_decision_outcome,
-    )
-    stance = str((package.get("recommendation") or {}).get("stance") or "")
-    # insufficient_data is a recorded evaluation outcome, but DQ did not pass:
-    # distinguish "could not score" from a completed recommendation.
-    dq_status = "blocked" if stance == "insufficient_data" else "pass"
-    return repo.append_evaluation(
-        case_id,
-        owner_subject_id,
+    return execute_evaluate_runtime(
+        repo,
+        case=case,
+        owner_subject_id=owner_subject_id,
         expected_case_version=expected_case_version,
-        package=package,
-        package_contract_version=str(package.get("schema_version") or "1.0.0"),
-        engine_id=str(package.get("engine_id") or REAL_ENGINE_ID),
-        dq_status=dq_status,
-        case_version=intake_version.version,
-        actor="system",
+        intake=intake_dict,
+        runtime=CAR_INTERVIEW_EVALUATE_RUNTIME,
+        generate_outcome=generate_decision_outcome,
     )
