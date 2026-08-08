@@ -55,10 +55,11 @@ describe('intake-prefill', () => {
     ).toBeNull();
   });
 
-  it('supports only car-interview and bus-investor-meeting intake', () => {
+  it('supports car-interview, investor, and wedding intake only', () => {
     expect(isSupportedIntakeDecisionType('car-interview')).toBe(true);
     expect(isSupportedIntakeDecisionType('bus-investor-meeting')).toBe(true);
-    expect(isSupportedIntakeDecisionType('mar-wedding-date')).toBe(false);
+    expect(isSupportedIntakeDecisionType('mar-wedding-date')).toBe(true);
+    expect(isSupportedIntakeDecisionType('tim-compare-three')).toBe(false);
     expect(isSupportedIntakeDecisionType('unknown')).toBe(false);
   });
 });

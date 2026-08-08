@@ -195,4 +195,15 @@ describe('decision request resolver', () => {
 
     expect(result.execution.decisionTypeId).toBe('bus-investor-meeting');
   });
+
+  it('binds explicit typed wedding decision type without inventing ceremony details', () => {
+    const result = resolveDecisionRequest({
+      source: 'typed',
+      displayText: 'Choose wedding date',
+      decisionTypeId: 'mar-wedding-date',
+    });
+
+    expect(result.execution.decisionTypeId).toBe('mar-wedding-date');
+    expect(result.execution.unresolvedReason).toBeUndefined();
+  });
 });

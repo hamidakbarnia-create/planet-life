@@ -58,9 +58,32 @@ describe('persistFrameToCase capability gate', () => {
     );
   });
 
-  it('surfaces DecisionCaseApiError (not generic Error) for unsupported type', async () => {
+  it('creates Case for wedding evaluate when ready', async () => {
+    createDecisionCaseFromFraming.mockResolvedValue({
+      case: {
+        case_id: 'w1',
+        case_version: 1,
+        decision_type_id: 'mar-wedding-date',
+      },
+      framing: {},
+      intake: {},
+    });
     const frame = buildDecisionFrame('Wedding date?', {
       decision_type_id: 'mar-wedding-date',
+      operation: 'evaluate',
+      time_scope: 'specific_date',
+      dates: ['2026-10-10'],
+    });
+    const result = await persistFrameToCase({ frame });
+    expect(result.case.case_id).toBe('w1');
+    expect(createDecisionCaseFromFraming).toHaveBeenCalledWith(
+      expect.objectContaining({ decisionTypeId: 'mar-wedding-date' })
+    );
+  });
+
+  it('surfaces DecisionCaseApiError (not generic Error) for unsupported type', async () => {
+    const frame = buildDecisionFrame('Compare three dates?', {
+      decision_type_id: 'tim-compare-three',
       operation: 'evaluate',
       time_scope: 'specific_date',
       dates: ['2026-09-01'],

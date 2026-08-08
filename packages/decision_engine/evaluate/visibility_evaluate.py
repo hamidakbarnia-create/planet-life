@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime, timezone
-from typing import Any, Mapping
+from typing import Any, Mapping, Protocol
 from uuid import UUID, uuid4
 
 from packages.decision_engine.evaluate.runtime_common import (
@@ -29,12 +29,23 @@ from packages.decision_engine.package_models import DecisionEvaluationPackage
 GenerateOutcomeFn = Callable[[DecisionRequest], DecisionOutcome]
 
 
+class PackageAssembleConfig(Protocol):
+    """Structural config surface used by Package assembly helpers.
+
+    Visibility and Timing Opt type configs both provide these fields.
+    """
+
+    decision_type_id: str
+    engine_id: str
+    semantics: Any
+
+
 def _iso_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def build_insufficient_natal_package(
-    config: TypeEvaluateConfig,
+    config: PackageAssembleConfig,
     *,
     case_id: UUID | str,
     case_version: int,
@@ -138,7 +149,7 @@ def build_insufficient_natal_package(
 
 def assemble_package_from_outcome(
     outcome: DecisionOutcome,
-    config: TypeEvaluateConfig,
+    config: PackageAssembleConfig,
     *,
     case_id: UUID | str,
     case_version: int,

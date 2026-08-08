@@ -109,13 +109,49 @@ describe('DecisionCaseIntakeScreen', () => {
     expect(goal.value).toBe('');
   });
 
+  it('renders wedding required fields for mar-wedding-date', async () => {
+    vi.mocked(api.getDecisionCase).mockResolvedValue({
+      case_id: 'case-wed',
+      owner_subject_id: 'owner',
+      decision_type_id: 'mar-wedding-date',
+      family_id: 'timing_opt',
+      title: 'Choose wedding date',
+      state: 'intake',
+      activation_phase: 'intake',
+      mode: 'evaluate_date',
+      precision_level: 'L1',
+      case_version: 2,
+      created_at: '2026-08-07T10:00:00Z',
+      updated_at: '2026-08-07T10:00:00Z',
+      intake: {
+        decision_frame: {
+          operation: 'evaluate',
+          time_scope: 'specific_date',
+          date: '2026-10-10',
+        },
+      },
+    });
+
+    render(<DecisionCaseIntakeScreen lang="en" caseId="case-wed" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('wedding-date-intake-form')).toBeTruthy();
+    });
+    const date = screen.getByTestId('intake-target_date') as HTMLInputElement;
+    expect(date.value).toBe('2026-10-10');
+    expect(screen.getByTestId('intake-ceremony_type')).toBeTruthy();
+    expect(
+      (screen.getByTestId('intake-ceremony_type') as HTMLSelectElement).value
+    ).toBe('');
+  });
+
   it('fails closed for unknown decision types', async () => {
     vi.mocked(api.getDecisionCase).mockResolvedValue({
       case_id: 'case-x',
       owner_subject_id: 'owner',
-      decision_type_id: 'mar-wedding-date',
+      decision_type_id: 'tim-compare-three',
       family_id: 'timing_opt',
-      title: 'Wedding',
+      title: 'Compare',
       state: 'intake',
       activation_phase: 'intake',
       mode: 'none',
@@ -133,6 +169,7 @@ describe('DecisionCaseIntakeScreen', () => {
     });
     expect(screen.queryByTestId('car-interview-intake-form')).toBeNull();
     expect(screen.queryByTestId('investor-meeting-intake-form')).toBeNull();
+    expect(screen.queryByTestId('wedding-date-intake-form')).toBeNull();
   });
 
   it('investor save → complete → result navigation', async () => {

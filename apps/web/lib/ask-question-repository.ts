@@ -7,6 +7,11 @@ export interface FtueAskQuestion {
   text?: string;
   /** Stable locale-independent id for suggested questions. */
   suggestion_id?: AskSuggestionId;
+  /**
+   * Optional registry Decision Type binding (e.g. popular wedding card).
+   * Never invent for free-text; only set from explicit registry-backed entry.
+   */
+  decision_type_id?: string;
 }
 
 export interface AskQuestionRepository {

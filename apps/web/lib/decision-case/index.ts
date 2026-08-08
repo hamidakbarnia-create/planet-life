@@ -54,6 +54,19 @@ export {
   type InvestorMeetingSlotId,
 } from './investor-meeting-form';
 export {
+  CANONICAL_WEDDING_DATE_FIELD_IDS,
+  CANONICAL_WEDDING_DATE_REQUIRED_FIELD_IDS,
+  WEDDING_DATE_DECISION_TYPE_ID,
+  WEDDING_DATE_FAMILY_ID,
+  WEDDING_DATE_LABEL,
+  mergeWeddingDateFormAnswers,
+  weddingHasFirstRequiredAnswer,
+  weddingMissingRequiredFields,
+  weddingRequiredFieldsPresent,
+  type WeddingDateIntake,
+  type WeddingDateSlotId,
+} from './wedding-date-form';
+export {
   evaluateDateFromDecisionFrame,
   isSupportedIntakeDecisionType,
   prefillTargetDateFromFrame,

@@ -26,6 +26,8 @@ export interface ResolvedAskQuestion {
   displayText: string;
   guidedQuestion?: GuidedQuestion;
   typedText?: string;
+  /** Explicit registry Decision Type when provided by a structured entry. */
+  decisionTypeId?: string;
   executionMetadata?: AskExecutionMetadata;
   executionUnresolvedReason?: AskUnresolvedReason;
 }
@@ -42,13 +44,18 @@ export function resolveAskQuestion(
 ): ResolvedAskQuestion {
   if (question.source === 'typed') {
     const typedText = question.text?.trim() ?? '';
+    const decisionTypeId = question.decision_type_id?.trim() || undefined;
     return {
       source: 'typed',
       displayText: typedText,
       typedText,
-      executionUnresolvedReason: typedText
-        ? 'typed_question_unresolved'
-        : 'missing_question_text',
+      decisionTypeId,
+      // Explicit registry binding resolves execution; free-text stays unresolved.
+      executionUnresolvedReason: decisionTypeId
+        ? undefined
+        : typedText
+          ? 'typed_question_unresolved'
+          : 'missing_question_text',
     };
   }
 

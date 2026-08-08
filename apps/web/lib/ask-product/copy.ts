@@ -53,12 +53,15 @@ export type AskProductCopy = {
   evidenceNeutral: string;
   topicCarInterview: string;
   topicInvestorMeeting: string;
+  topicWeddingDate: string;
   topicGeneric: string;
   intakeEyebrow: string;
   intakeTitle: string;
   intakeBody: string;
   intakeTitleInvestorMeeting: string;
   intakeBodyInvestorMeeting: string;
+  intakeTitleWeddingDate: string;
+  intakeBodyWeddingDate: string;
   intakeOptional: string;
   intakeSelect: string;
   intakeSave: string;
@@ -73,6 +76,10 @@ export type AskProductCopy = {
   intakeFieldMeetingGoal: string;
   intakeFieldInvestorName: string;
   intakeFieldMeetingType: string;
+  intakeFieldWeddingDate: string;
+  intakeFieldCeremonyType: string;
+  intakeFieldPartnerName: string;
+  intakeFieldVenue: string;
   intakeUnsupportedType: string;
   intakeLoadError: string;
   intakeSaveError: string;
@@ -164,6 +171,7 @@ const EN: AskProductCopy = {
   evidenceNeutral: 'Timing signal',
   topicCarInterview: 'Attend job interview',
   topicInvestorMeeting: 'Meet an investor',
+  topicWeddingDate: 'Choose wedding date',
   topicGeneric: 'Your decision',
   intakeEyebrow: 'Interview timing',
   intakeTitle: 'Attend job interview',
@@ -172,6 +180,9 @@ const EN: AskProductCopy = {
   intakeTitleInvestorMeeting: 'Meet an investor',
   intakeBodyInvestorMeeting:
     'Share the meeting details. We’ll evaluate the timing for the date you provide.',
+  intakeTitleWeddingDate: 'Choose wedding date',
+  intakeBodyWeddingDate:
+    'Share the ceremony details. We’ll evaluate the timing for the date you provide.',
   intakeOptional: 'optional',
   intakeSelect: 'Select…',
   intakeSave: 'Save answers',
@@ -186,6 +197,10 @@ const EN: AskProductCopy = {
   intakeFieldMeetingGoal: 'Meeting goal',
   intakeFieldInvestorName: 'Investor name',
   intakeFieldMeetingType: 'Meeting type',
+  intakeFieldWeddingDate: 'Wedding date',
+  intakeFieldCeremonyType: 'Ceremony type',
+  intakeFieldPartnerName: 'Partner name',
+  intakeFieldVenue: 'Venue',
   intakeUnsupportedType: 'This decision type is not available for intake yet.',
   intakeLoadError: 'Unable to load this decision.',
   intakeSaveError: 'Could not save answers.',
@@ -282,6 +297,7 @@ const FA: AskProductCopy = {
   evidenceNeutral: 'سیگنال زمان‌بندی',
   topicCarInterview: 'مصاحبه کاری',
   topicInvestorMeeting: 'جلسه با سرمایه‌گذار',
+  topicWeddingDate: 'انتخاب تاریخ عروسی',
   topicGeneric: 'تصمیم شما',
   intakeEyebrow: 'زمان‌بندی مصاحبه',
   intakeTitle: 'مصاحبه کاری',
@@ -290,6 +306,9 @@ const FA: AskProductCopy = {
   intakeTitleInvestorMeeting: 'جلسه با سرمایه‌گذار',
   intakeBodyInvestorMeeting:
     'جزئیات جلسه را وارد کنید. زمان‌بندی را برای تاریخی که می‌دهید ارزیابی می‌کنیم.',
+  intakeTitleWeddingDate: 'انتخاب تاریخ عروسی',
+  intakeBodyWeddingDate:
+    'جزئیات مراسم را وارد کنید. زمان‌بندی را برای تاریخی که می‌دهید ارزیابی می‌کنیم.',
   intakeOptional: 'اختیاری',
   intakeSelect: 'انتخاب…',
   intakeSave: 'ذخیره پاسخ‌ها',
@@ -304,6 +323,10 @@ const FA: AskProductCopy = {
   intakeFieldMeetingGoal: 'هدف جلسه',
   intakeFieldInvestorName: 'نام سرمایه‌گذار',
   intakeFieldMeetingType: 'نوع جلسه',
+  intakeFieldWeddingDate: 'تاریخ عروسی',
+  intakeFieldCeremonyType: 'نوع مراسم',
+  intakeFieldPartnerName: 'نام شریک',
+  intakeFieldVenue: 'محل برگزاری',
   intakeUnsupportedType: 'این نوع تصمیم هنوز برای ورود جزئیات در دسترس نیست.',
   intakeLoadError: 'بارگذاری این تصمیم ممکن نشد.',
   intakeSaveError: 'ذخیره پاسخ‌ها ممکن نشد.',
@@ -399,6 +422,7 @@ const AR: AskProductCopy = {
   evidenceNeutral: 'إشارة توقيت',
   topicCarInterview: 'مقابلة عمل',
   topicInvestorMeeting: 'لقاء مع مستثمر',
+  topicWeddingDate: 'اختيار تاريخ الزواج',
   topicGeneric: 'قرارك',
   intakeEyebrow: 'توقيت المقابلة',
   intakeTitle: 'مقابلة عمل',
@@ -407,6 +431,9 @@ const AR: AskProductCopy = {
   intakeTitleInvestorMeeting: 'لقاء مع مستثمر',
   intakeBodyInvestorMeeting:
     'شارك تفاصيل اللقاء. سنقيّم التوقيت للتاريخ الذي تقدّمه.',
+  intakeTitleWeddingDate: 'اختيار تاريخ الزواج',
+  intakeBodyWeddingDate:
+    'شارك تفاصيل الحفل. سنقيّم التوقيت للتاريخ الذي تقدّمه.',
   intakeOptional: 'اختياري',
   intakeSelect: 'اختر…',
   intakeSave: 'حفظ الإجابات',
@@ -421,6 +448,10 @@ const AR: AskProductCopy = {
   intakeFieldMeetingGoal: 'هدف اللقاء',
   intakeFieldInvestorName: 'اسم المستثمر',
   intakeFieldMeetingType: 'نوع اللقاء',
+  intakeFieldWeddingDate: 'تاريخ الزواج',
+  intakeFieldCeremonyType: 'نوع الحفل',
+  intakeFieldPartnerName: 'اسم الشريك',
+  intakeFieldVenue: 'مكان الحفل',
   intakeUnsupportedType: 'نوع القرار هذا غير متاح لإدخال التفاصيل بعد.',
   intakeLoadError: 'تعذّر تحميل هذا القرار.',
   intakeSaveError: 'تعذّر حفظ الإجابات.',
@@ -514,6 +545,7 @@ const RU: AskProductCopy = {
   evidenceNeutral: 'Сигнал тайминга',
   topicCarInterview: 'Собеседование',
   topicInvestorMeeting: 'Встреча с инвестором',
+  topicWeddingDate: 'Выбор даты свадьбы',
   topicGeneric: 'Ваше решение',
   intakeEyebrow: 'Тайминг собеседования',
   intakeTitle: 'Собеседование',
@@ -522,6 +554,9 @@ const RU: AskProductCopy = {
   intakeTitleInvestorMeeting: 'Встреча с инвестором',
   intakeBodyInvestorMeeting:
     'Укажите детали встречи. Мы оценим тайминг для указанной даты.',
+  intakeTitleWeddingDate: 'Выбор даты свадьбы',
+  intakeBodyWeddingDate:
+    'Укажите детали церемонии. Мы оценим тайминг для указанной даты.',
   intakeOptional: 'необязательно',
   intakeSelect: 'Выберите…',
   intakeSave: 'Сохранить ответы',
@@ -536,6 +571,10 @@ const RU: AskProductCopy = {
   intakeFieldMeetingGoal: 'Цель встречи',
   intakeFieldInvestorName: 'Имя инвестора',
   intakeFieldMeetingType: 'Тип встречи',
+  intakeFieldWeddingDate: 'Дата свадьбы',
+  intakeFieldCeremonyType: 'Тип церемонии',
+  intakeFieldPartnerName: 'Имя партнёра',
+  intakeFieldVenue: 'Место проведения',
   intakeUnsupportedType: 'Этот тип решения пока недоступен для ввода деталей.',
   intakeLoadError: 'Не удалось загрузить это решение.',
   intakeSaveError: 'Не удалось сохранить ответы.',

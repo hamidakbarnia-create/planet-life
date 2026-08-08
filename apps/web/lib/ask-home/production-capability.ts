@@ -13,10 +13,10 @@
  *
  * Sources consulted (hints only, no competing registry):
  * 1. Decision Type Registry — known type + allowed_modes
- * 2. Shipped-runtime mirror — car-interview evaluate_date only today
+ * 2. Shipped-runtime mirror — currently shipped evaluate_date types
  *
- * Registry allowed_modes alone is insufficient for UX: mar-wedding-date lists
- * evaluate_date but has no shipped Runtime on this client.
+ * Registry allowed_modes alone is insufficient for UX: a type may list
+ * evaluate_date without a shipped Runtime on this client.
  */
 
 import type { DecisionOperation } from '@/lib/decision-frame/types';
@@ -31,6 +31,7 @@ const SHIPPED_RUNTIME_MODE_HINT: Readonly<
 > = {
   'car-interview': ['evaluate_date'],
   'bus-investor-meeting': ['evaluate_date'],
+  'mar-wedding-date': ['evaluate_date'],
 };
 
 export type ProductionCaseMode = 'evaluate_date' | 'compare_dates';
