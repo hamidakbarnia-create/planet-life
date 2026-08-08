@@ -20,9 +20,12 @@ export {
 } from './evidence';
 export {
   deriveClarificationState,
+  isCapabilityUnavailableEvaluateFrame,
+  isEvaluateCapabilityUnavailable,
   isUnsupportedOperationFrame,
   type AskConsumerState,
 } from './states';
+export { localizeCaseApiError } from './api-errors';
 export {
   applyEvaluateDate,
   applyOperationChoice,
@@ -36,3 +39,7 @@ export {
   saveDecisionFrame,
 } from './clarify-bridge';
 export type { DecisionFrameV1 } from '@/lib/decision-frame/types';
+export {
+  canEvaluateInProduction,
+  canExecuteInProduction,
+} from '@/lib/ask-home';

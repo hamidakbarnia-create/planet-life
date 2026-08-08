@@ -234,7 +234,16 @@
   border-radius: 4px;
 }
 
-/* ── Popular grid ─────────────────────────────────────────────────────────── */
+/* ── Popular grid (secondary; must not compete with hero) ─────────────────── */
+
+.popularSection .sectionTitle {
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.12em;
+}
+
+.popularSection .sectionAction {
+  opacity: 0.75;
+}
 
 .popularGrid {
   list-style: none;
@@ -267,23 +276,24 @@
   justify-content: space-between;
   gap: var(--mio-space-2);
   width: 100%;
-  min-height: 3.6rem;
-  padding: 0.9rem 1rem;
+  min-height: 3.1rem;
+  padding: 0.7rem 0.85rem;
   text-align: start;
   border-radius: var(--mio-radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.85rem;
   line-height: 1.35;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+  opacity: 0.88;
+  transition: border-color 0.2s ease, background 0.2s ease, opacity 0.15s ease;
 }
 
 .popularCard:hover {
-  border-color: rgba(212, 175, 55, 0.28);
-  background: linear-gradient(145deg, rgba(48, 92, 222, 0.14), rgba(255, 255, 255, 0.03));
-  transform: translateY(-1px);
+  border-color: rgba(212, 175, 55, 0.22);
+  background: rgba(255, 255, 255, 0.035);
+  opacity: 1;
 }
 
 .popularCard:focus-visible {

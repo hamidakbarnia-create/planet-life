@@ -135,6 +135,39 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
       !!profile.location &&
       hasConfirmedCurrentLocation(profile);
 
+    // Always re-bind locale-sensitive chrome immediately on lang change
+    // so Energy/Timing never keep a previous locale's strings (incl. hour labels).
+    let reboundBestLabel: string | null = null;
+    setTiming((prev) => {
+      const bestPoint = prev.points.find((p) => p.isBest);
+      const points = prev.points.map((p) => ({
+        ...p,
+        label: formatHourLabel(p.hour, lang),
+      }));
+      const nextBest =
+        points.length === 0
+          ? home.energyUnavailable
+          : bestPoint
+            ? formatHourLabel(bestPoint.hour, lang)
+            : prev.bestWindowLabel;
+      reboundBestLabel = nextBest;
+      return {
+        ...prev,
+        points,
+        emptyLabel: home.timingEmpty,
+        bestWindowLabel: nextBest,
+      };
+    });
+    setEnergy((prev) => ({
+      ...prev,
+      description: home.energyDescription,
+      bestWindowLabel:
+        prev.score == null
+          ? home.energyUnavailable
+          : reboundBestLabel ?? prev.bestWindowLabel,
+      detailsHref: '/home',
+    }));
+
     if (!profileReady || !profile) {
       setEnergy({
         score: null,
@@ -153,7 +186,11 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     }
 
     let cancelled = false;
-    setEnergy((prev) => ({ ...prev, loading: true }));
+    setEnergy((prev) => ({
+      ...prev,
+      loading: true,
+      description: home.energyDescription,
+    }));
     setTiming((prev) => ({
       ...prev,
       loading: true,
@@ -166,13 +203,6 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
         const bestLabel = bundle.bestHour
           ? formatHourLabel(bundle.bestHour.hour, lang)
           : home.energyUnavailable;
-        setEnergy({
-          score: bundle.score,
-          loading: false,
-          description: home.energyDescription,
-          bestWindowLabel: bestLabel,
-          detailsHref: '/home',
-        });
         setTiming({
           loading: false,
           points: bundle.hourly.map((hour) => ({
@@ -184,21 +214,28 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
           bestWindowLabel: bestLabel,
           emptyLabel: home.timingEmpty,
         });
+        setEnergy({
+          score: bundle.score,
+          loading: false,
+          description: home.energyDescription,
+          bestWindowLabel: bestLabel,
+          detailsHref: '/home',
+        });
       })
       .catch(() => {
         if (cancelled) return;
+        setTiming({
+          loading: false,
+          points: [],
+          bestWindowLabel: home.energyUnavailable,
+          emptyLabel: home.timingEmpty,
+        });
         setEnergy({
           score: null,
           loading: false,
           description: home.energyDescription,
           bestWindowLabel: home.energyUnavailable,
           detailsHref: '/home',
-        });
-        setTiming({
-          loading: false,
-          points: [],
-          bestWindowLabel: home.energyUnavailable,
-          emptyLabel: home.timingEmpty,
         });
       });
 
@@ -211,6 +248,7 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     lang,
     home.energyDescription,
     home.energyUnavailable,
+    home.energyLoading,
     home.timingEmpty,
     home.timingLoading,
   ]);
@@ -344,14 +382,6 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
             </AskHero>
           </div>
 
-          <PopularDecisionGrid
-            title={home.popularTitle}
-            items={popularItems}
-            seeAllLabel={home.seeAllDecisions}
-            onSeeAll={() => handleEntrySelect('help-me-decide')}
-            onSelect={handlePopularSelect}
-          />
-
           <div>
             <DecisionEntryCards
               title={home.entryTitle}
@@ -397,6 +427,15 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
               </div>
             ) : null}
           </div>
+
+          {/* Demoted below entry controls — must not compete with hero. */}
+          <PopularDecisionGrid
+            title={home.popularTitle}
+            items={popularItems}
+            seeAllLabel={home.seeAllDecisions}
+            onSeeAll={() => handleEntrySelect('help-me-decide')}
+            onSelect={handlePopularSelect}
+          />
 
           <RecentDecisionList
             title={home.recentTitle}
