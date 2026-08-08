@@ -15,13 +15,24 @@ import {
 } from '@/lib/ask-product';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
 import { resolveAskQuestion } from '@/lib/resolve-ask-question';
+import { resolveDecisionRequest } from '@/lib/decision-request/resolver';
 import type { AppLang } from '@/lib/app-settings';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 
-function resolveIntentText(lang: AppLang): string {
+function resolveIntent(lang: AppLang): {
+  text: string;
+  decisionTypeId?: string;
+} {
   const stored = getAskQuestionRepository().loadQuestion();
-  if (!stored) return '';
-  return resolveAskQuestion(stored, lang).displayText.trim();
+  if (!stored) return { text: '' };
+
+  const resolved = resolveAskQuestion(stored, lang);
+  const request = resolveDecisionRequest(resolved);
+
+  return {
+    text: request.displayText.trim(),
+    decisionTypeId: request.execution.decisionTypeId,
+  };
 }
 
 /**
@@ -77,7 +88,9 @@ export function AskFrameScreen({ lang }: { lang: AppLang }) {
       // Preserve original text. Only structured extras the resolver already
       // put into the intent string are used — no fabricated objective/type.
       // Fresh ASK never offers compare/find as runnable.
-      const next = buildDecisionFrame(intent);
+      const next = buildDecisionFrame(intent.text, {
+    decision_type_id: intent.decisionTypeId,
+  });
       const safe = isUnsupportedOperationFrame(next)
         ? resetToExamineStep(next)
         : next;

@@ -149,3 +149,30 @@ def extract_natal_evidence(
             evidence[key] = raw[key]
 
     return evidence
+
+
+def build_evaluate_base_envelope(
+    *,
+    case_id,
+    case_version: int,
+    evaluation_id,
+    created_at: str,
+    decision_type_id: str,
+    engine_id: str,
+) -> dict[str, Any]:
+    from packages.decision_engine.registry import get_decision_type
+
+    record = get_decision_type(decision_type_id)
+    return {
+        "case_id": str(case_id),
+        "evaluation_id": str(evaluation_id),
+        "evaluation_version": 1,
+        "case_version": case_version,
+        "decision_type_id": record.decision_type_id,
+        "family_id": record.family_id,
+        "mode": "evaluate_date",
+        "precision_level": "L3",
+        "engine_id": engine_id,
+        "created_at": created_at,
+        "schema_version": "1.0.0",
+    }

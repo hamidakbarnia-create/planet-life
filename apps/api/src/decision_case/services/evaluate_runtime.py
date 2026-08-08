@@ -59,3 +59,67 @@ def execute_evaluate_runtime(
         case_version=intake_version.version,
         actor="system",
     )
+
+
+from uuid import UUID
+
+from decision_case.repository.errors import IllegalTransitionError
+from decision_case.services.evaluate_runtime_registry import get_evaluate_runtime
+from packages.decision_engine.state_machine import CaseState
+from services.decision_engine import generate_decision_outcome
+
+
+class EvaluateIntakeIncompleteError(Exception):
+    def __init__(self, missing_required):
+        self.missing_required = tuple(missing_required)
+        super().__init__("intake incomplete")
+
+
+class UnsupportedEvaluateDecisionTypeError(Exception):
+    def __init__(self, decision_type_id: str):
+        self.decision_type_id = decision_type_id
+        super().__init__(f"unsupported decision_type_id: {decision_type_id}")
+
+
+def evaluate_decision_case(
+    repo: DecisionCaseRepository,
+    *,
+    case_id: UUID,
+    owner_subject_id: str,
+    expected_case_version: int,
+) -> EvaluationRecord:
+    case = repo.get_case(case_id, owner_subject_id)
+
+    runtime = get_evaluate_runtime(case.decision_type_id)
+    if runtime is None:
+        raise UnsupportedEvaluateDecisionTypeError(case.decision_type_id)
+
+    intake_version = repo.get_current_version(case_id, owner_subject_id)
+    intake = dict(intake_version.intake or {})
+
+    evaluation = runtime.evaluate_intake(intake)
+    if not evaluation.is_complete:
+        raise EvaluateIntakeIncompleteError(evaluation.missing_required)
+
+    if case.state == CaseState.INTAKE.value:
+        raise IllegalTransitionError(
+            "cannot evaluate before intake is complete"
+        )
+
+    if case.state not in {
+        CaseState.EVIDENCE_READY.value,
+        CaseState.EVALUATED.value,
+    }:
+        raise IllegalTransitionError(
+            f"cannot evaluate from state {case.state}"
+        )
+
+    return execute_evaluate_runtime(
+        repo,
+        case=case,
+        owner_subject_id=owner_subject_id,
+        expected_case_version=expected_case_version,
+        intake=intake,
+        runtime=runtime,
+        generate_outcome=generate_decision_outcome,
+    )

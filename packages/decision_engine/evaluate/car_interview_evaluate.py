@@ -34,6 +34,7 @@ from packages.decision_engine.evaluate.runtime_common import (
     RuntimeUnsupportedOperationError,
     extract_evaluate_date_from_framing,
     extract_natal_evidence,
+    build_evaluate_base_envelope,
     rating_to_candidate_band,
     rating_to_stance,
     score_to_candidate_band,
@@ -54,21 +55,14 @@ def _base_envelope(
     evaluation_id: UUID | str,
     created_at: str,
 ) -> dict[str, Any]:
-    record = get_decision_type(CAR_INTERVIEW_DECISION_TYPE_ID)
-    return {
-        "case_id": str(case_id),
-        "evaluation_id": str(evaluation_id),
-        "evaluation_version": 1,
-        "case_version": case_version,
-        "decision_type_id": record.decision_type_id,
-        "family_id": record.family_id,
-        "mode": "evaluate_date",
-        "precision_level": "L3",
-        "engine_id": REAL_ENGINE_ID,
-        "created_at": created_at,
-        "schema_version": "1.0.0",
-    }
-
+    return build_evaluate_base_envelope(
+        case_id=case_id,
+        case_version=case_version,
+        evaluation_id=evaluation_id,
+        created_at=created_at,
+        decision_type_id=CAR_INTERVIEW_DECISION_TYPE_ID,
+        engine_id=REAL_ENGINE_ID,
+    )
 
 def build_insufficient_natal_package(
     *,

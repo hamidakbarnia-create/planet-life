@@ -138,7 +138,7 @@ def test_real_runtime_reads_framing_date_and_skips_stub(client: TestClient) -> N
     case_id, version = _ready_case(client)
 
     with patch(
-        "decision_case.services.car_interview_intake.generate_decision_outcome",
+        "decision_case.services.evaluate_runtime.generate_decision_outcome",
         return_value=_outcome(70),
     ) as mocked:
         evaluation = client.post(
@@ -243,7 +243,7 @@ def test_missing_natal_returns_blocked_insufficient_not_stub(
     version = completed.json()["case"]["case_version"]
 
     with patch(
-        "decision_case.services.car_interview_intake.generate_decision_outcome"
+        "decision_case.services.evaluate_runtime.generate_decision_outcome"
     ) as mocked:
         evaluation = client.post(
             f"{BASE}/{case_id}/evaluations",
@@ -322,7 +322,7 @@ def test_reevaluate_after_natal_evidence_becomes_available(
     assert natal.status_code == 200
     version = natal.json()["case"]["case_version"]
     with patch(
-        "decision_case.services.car_interview_intake.generate_decision_outcome",
+        "decision_case.services.evaluate_runtime.generate_decision_outcome",
         return_value=_outcome(70),
     ):
         second = client.post(
@@ -353,7 +353,7 @@ def test_provider_failure_is_not_success(client: TestClient) -> None:
     case_id, version = _ready_case(client)
 
     with patch(
-        "decision_case.services.car_interview_intake.generate_decision_outcome",
+        "decision_case.services.evaluate_runtime.generate_decision_outcome",
         side_effect=RuntimeError("provider down"),
     ):
         evaluation = client.post(
@@ -368,7 +368,7 @@ def test_stale_version_and_owner_isolation(client: TestClient) -> None:
     case_id, version = _ready_case(client)
 
     with patch(
-        "decision_case.services.car_interview_intake.generate_decision_outcome",
+        "decision_case.services.evaluate_runtime.generate_decision_outcome",
         return_value=_outcome(70),
     ):
         stale = client.post(
@@ -392,7 +392,7 @@ def test_stale_version_and_owner_isolation(client: TestClient) -> None:
 def test_repeated_evaluation_versions(client: TestClient) -> None:
     case_id, version = _ready_case(client)
     with patch(
-        "decision_case.services.car_interview_intake.generate_decision_outcome",
+        "decision_case.services.evaluate_runtime.generate_decision_outcome",
         return_value=_outcome(70),
     ):
         first = client.post(
