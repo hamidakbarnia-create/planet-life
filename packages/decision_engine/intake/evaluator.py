@@ -141,7 +141,9 @@ def evaluate_investor_meeting_intake(
 from packages.decision_engine.intake.wedding_date import (
     WEDDING_DATE_SLOTS,
     WeddingDateIntake,
+    intake_mode_from_mapping,
     merge_wedding_date_intake,
+    required_slot_ids_for_mode,
 )
 
 
@@ -158,16 +160,30 @@ def evaluate_wedding_date_intake(
     intake: Mapping[str, Any] | WeddingDateIntake | None = None,
     *,
     answers: Mapping[str, Any] | None = None,
+    mode: str | None = None,
 ) -> WeddingDateIntakeEvaluation:
     if isinstance(intake, WeddingDateIntake) and not answers:
         normalized = intake
+        mode_resolved = mode or "evaluate_date"
     else:
         current = (
             intake.as_dict()
             if isinstance(intake, WeddingDateIntake)
             else intake
         )
+        # Preserve decision_frame sibling for mode inference when mapping.
+        mapping_for_mode: Mapping[str, Any] | None
+        if isinstance(intake, WeddingDateIntake):
+            mapping_for_mode = None
+        else:
+            mapping_for_mode = intake if isinstance(intake, Mapping) else None
+            if answers and isinstance(answers, Mapping):
+                # Prefer answers overlay only for slots; frame stays on current.
+                pass
         normalized = merge_wedding_date_intake(current, answers or {})
+        mode_resolved = mode or intake_mode_from_mapping(
+            mapping_for_mode if mapping_for_mode is not None else current
+        )
 
     values = {
         "target_date": normalized.target_date,
@@ -176,15 +192,14 @@ def evaluate_wedding_date_intake(
         "venue": normalized.venue,
     }
 
+    required_ids = required_slot_ids_for_mode(mode_resolved)
     missing = tuple(
         slot.slot_id
         for slot in WEDDING_DATE_SLOTS
-        if slot.required and not values[slot.slot_id]
+        if slot.slot_id in required_ids and not values[slot.slot_id]
     )
 
-    answered = tuple(
-        key for key in ("target_date", "ceremony_type") if values[key]
-    )
+    answered = tuple(slot_id for slot_id in required_ids if values[slot_id])
 
     return WeddingDateIntakeEvaluation(
         intake=normalized,

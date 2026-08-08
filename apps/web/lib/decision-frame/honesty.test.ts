@@ -81,8 +81,12 @@ describe('package adapter absent-data honesty', () => {
       },
     };
     const compare = packageToCompareView(comparePkg);
-    expect(compare.deciding_factor).toBeUndefined();
-    expect(compare.advantages).toEqual([]);
+    // Relative why may come from Package explainability; never invent Known buckets.
+    expect(compare.deciding_factor).toBe(
+      comparePkg.explainability.why || undefined
+    );
+    expect(compare.unique_winner).toBe(true);
+    expect(compare.winner_label).toBeTruthy();
     expect(compare.known).toBeUndefined();
     expect(compare.inferred).toBeUndefined();
     expect(compare.unknown).toBeUndefined();

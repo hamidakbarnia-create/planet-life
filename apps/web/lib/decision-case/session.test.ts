@@ -368,4 +368,58 @@ describe('car-interview Decision Case session (PR-2)', () => {
     });
     expect(api.evaluateDecisionCase).not.toHaveBeenCalled();
   });
+
+  it('loadCaseResult preserves compare framing and does not overwrite with evaluate', async () => {
+    const compareFrame = {
+      operation: 'compare',
+      time_scope: 'multiple_dates',
+      dates: ['2026-09-10', '2026-09-18'],
+      options: [
+        { id: 'opt-1', label: 'Early weekend', date: '2026-09-10' },
+        { id: 'opt-2', label: 'Late weekend', date: '2026-09-18' },
+      ],
+    };
+    vi.mocked(api.getDecisionCase).mockResolvedValue({
+      case_id: 'case-wed-compare',
+      owner_subject_id: 'e5-dev-owner',
+      decision_type_id: 'mar-wedding-date',
+      family_id: 'timing_opt',
+      title: 'Choose wedding date',
+      state: 'evidence_ready',
+      activation_phase: 'evidence_ready',
+      mode: 'compare_dates',
+      precision_level: 'L1',
+      case_version: 3,
+      created_at: '2026-08-08T10:00:00Z',
+      updated_at: '2026-08-08T10:00:00Z',
+      intake: {
+        ceremony_type: 'civil',
+        decision_frame: compareFrame,
+      },
+    });
+    vi.mocked(api.listDecisionCaseEvaluations).mockResolvedValue({
+      evaluations: [],
+    });
+    vi.mocked(api.evaluateDecisionCase).mockResolvedValue({
+      evaluation_id: 'eval-compare',
+      case_id: 'case-wed-compare',
+      case_version: 3,
+      evaluation_version: 1,
+      package_contract_version: '1.0.0',
+      engine_id: 'decision-engine-wedding-date-v1',
+      dq_status: 'pass',
+      created_at: '2026-08-08T10:00:05Z',
+      package: {
+        schema_version: '1.0.0',
+        mode: 'compare_dates',
+        engine_id: 'decision-engine-wedding-date-v1',
+      } as never,
+    });
+    vi.mocked(api.getDecisionCaseHistory).mockResolvedValue({ events: [] });
+
+    const loaded = await loadCaseResult('case-wed-compare');
+    expect(api.updateDecisionCaseFraming).not.toHaveBeenCalled();
+    expect(api.evaluateDecisionCase).toHaveBeenCalled();
+    expect(loaded.evaluation.dq_status).toBe('pass');
+  });
 });

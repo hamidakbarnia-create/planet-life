@@ -29,14 +29,13 @@ describe('ASK Web UX capability hint (not backend authority)', () => {
     expect(canEvaluateInProduction('not-a-type')).toBe(false);
   });
 
-  it('COMPARE and FIND stay unavailable in UX', () => {
+  it('COMPARE ships only for wedding; FIND stays unavailable', () => {
     expect(canExecuteInProduction('car-interview', 'compare')).toBe(false);
-    expect(canExecuteInProduction('mar-wedding-date', 'compare')).toBe(false);
+    expect(canExecuteInProduction('mar-wedding-date', 'compare')).toBe(true);
+    expect(canExecuteInProduction('tim-compare-three', 'compare')).toBe(false);
     expect(canExecuteInProduction('car-interview', 'find')).toBe(false);
     expect(frameOperationToCaseMode('find')).toBeNull();
     expect(hasProductionRuntime('car-interview', 'compare_dates')).toBe(false);
-    expect(hasProductionRuntime('mar-wedding-date', 'compare_dates')).toBe(
-      false
-    );
+    expect(hasProductionRuntime('mar-wedding-date', 'compare_dates')).toBe(true);
   });
 });

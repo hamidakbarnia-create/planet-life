@@ -45,7 +45,7 @@ describe('AskClarificationFlow product recovery', () => {
     }
   );
 
-  it('renders unsupported recovery for persisted compare frames', () => {
+  it('renders unsupported recovery for untyped compare frames', () => {
     const frame = buildDecisionFrame('14 or 18 August?', {
       reference_year: 2026,
       operation: 'compare',
@@ -65,6 +65,31 @@ describe('AskClarificationFlow product recovery', () => {
     expect(screen.getByTestId('ask-unsupported-operation')).toBeTruthy();
     expect(screen.getByText(getAskProductCopy('fa').unsupportedTitle)).toBeTruthy();
     expect(screen.queryByTestId('examine-choices')).toBeNull();
+  });
+
+  it('enables compare for wedding and shows ready persist CTA', () => {
+    const frame = buildDecisionFrame('14 or 18 August wedding?', {
+      decision_type_id: 'mar-wedding-date',
+      reference_year: 2026,
+      operation: 'compare',
+      time_scope: 'multiple_dates',
+      dates: ['2026-08-14', '2026-08-18'],
+    });
+    render(
+      <AskClarificationFlow
+        lang="en"
+        frame={frame}
+        caseId={null}
+        caseVersion={null}
+        onFrameChange={vi.fn()}
+        onCaseBound={vi.fn()}
+      />
+    );
+    expect(screen.queryByTestId('ask-unsupported-operation')).toBeNull();
+    expect(screen.getByTestId('ask-ready-compare')).toBeTruthy();
+    expect(screen.getByTestId('ask-persist-compare').textContent).toContain(
+      getAskProductCopy('en').persistAndCompare
+    );
   });
 
   it('does not invent a date when continuing without input', () => {

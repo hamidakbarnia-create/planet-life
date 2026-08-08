@@ -81,6 +81,13 @@ class UnsupportedEvaluateDecisionTypeError(Exception):
         super().__init__(f"unsupported decision_type_id: {decision_type_id}")
 
 
+def _intake_requests_compare(intake: dict[str, Any], case_mode: str) -> bool:
+    frame = intake.get("decision_frame")
+    if isinstance(frame, dict) and frame.get("operation") == "compare":
+        return True
+    return case_mode == "compare_dates"
+
+
 def evaluate_decision_case(
     repo: DecisionCaseRepository,
     *,
@@ -90,12 +97,41 @@ def evaluate_decision_case(
 ) -> EvaluationRecord:
     case = repo.get_case(case_id, owner_subject_id)
 
+    intake_version = repo.get_current_version(case_id, owner_subject_id)
+    intake = dict(intake_version.intake or {})
+
+    # COMPARE uses a dedicated runtime/contract — never EvaluateRuntimeContract.
+    if _intake_requests_compare(intake, case.mode):
+        from decision_case.services.compare_runtime import (
+            CompareIntakeIncompleteError,
+            UnsupportedCompareDecisionTypeError,
+            compare_decision_case,
+        )
+        from decision_case.services.compare_runtime_registry import (
+            get_compare_runtime,
+        )
+        from packages.decision_engine.evaluate.runtime_common import (
+            RuntimeUnsupportedOperationError,
+        )
+
+        if get_compare_runtime(case.decision_type_id) is None:
+            raise RuntimeUnsupportedOperationError("compare")
+
+        try:
+            return compare_decision_case(
+                repo,
+                case_id=case_id,
+                owner_subject_id=owner_subject_id,
+                expected_case_version=expected_case_version,
+            )
+        except CompareIntakeIncompleteError as exc:
+            raise EvaluateIntakeIncompleteError(exc.missing_required) from exc
+        except UnsupportedCompareDecisionTypeError:
+            raise RuntimeUnsupportedOperationError("compare")
+
     runtime = get_evaluate_runtime(case.decision_type_id)
     if runtime is None:
         raise UnsupportedEvaluateDecisionTypeError(case.decision_type_id)
-
-    intake_version = repo.get_current_version(case_id, owner_subject_id)
-    intake = dict(intake_version.intake or {})
 
     evaluation = runtime.evaluate_intake(intake)
     if not evaluation.is_complete:

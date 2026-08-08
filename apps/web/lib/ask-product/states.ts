@@ -2,7 +2,10 @@
  * Consumer ASK states — map Frame/Case/runtime signals without exposing jargon.
  */
 
-import { canEvaluateInProduction } from '@/lib/ask-home';
+import {
+  canEvaluateInProduction,
+  canExecuteInProduction,
+} from '@/lib/ask-home';
 import type { DecisionFrameV1 } from '@/lib/decision-frame/types';
 import { isFramingPersistReady } from '@/lib/decision-frame';
 
@@ -11,6 +14,7 @@ export type AskConsumerState =
   | 'UNDERSTANDING'
   | 'NEEDS_CLARIFICATION'
   | 'READY_TO_EVALUATE'
+  | 'READY_TO_COMPARE'
   | 'EVALUATING'
   | 'RESULT'
   | 'BLOCKED_MISSING_EVIDENCE'
@@ -18,9 +22,13 @@ export type AskConsumerState =
   | 'CAPABILITY_UNAVAILABLE'
   | 'ERROR';
 
-/** Persisted compare/find frames reached via history/direct load. */
+/** FIND remains unsupported. COMPARE is unsupported unless production hint ships it. */
 export function isUnsupportedOperationFrame(frame: DecisionFrameV1): boolean {
-  return frame.operation === 'compare' || frame.operation === 'find';
+  if (frame.operation === 'find') return true;
+  if (frame.operation === 'compare') {
+    return !canExecuteInProduction(frame.decision_type_id, 'compare');
+  }
+  return false;
 }
 
 /** Web UX hint: evaluate is not offered for this Decision Type. */
@@ -80,6 +88,17 @@ export function deriveClarificationState(
     canEvaluateInProduction(frame.decision_type_id)
   ) {
     return 'READY_TO_EVALUATE';
+  }
+
+  if (
+    frame.operation === 'compare' &&
+    isFramingPersistReady(frame) &&
+    frame.time.scope === 'multiple_dates' &&
+    (frame.time.dates?.length ?? 0) >= 2 &&
+    (frame.time.dates?.length ?? 0) <= 3 &&
+    canExecuteInProduction(frame.decision_type_id, 'compare')
+  ) {
+    return 'READY_TO_COMPARE';
   }
 
   return 'NEEDS_CLARIFICATION';

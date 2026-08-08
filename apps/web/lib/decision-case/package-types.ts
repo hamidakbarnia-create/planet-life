@@ -31,6 +31,10 @@ export interface TimingCandidate {
   readonly rank: number;
   readonly score: number;
   readonly band: CandidateBand;
+  readonly option_id?: string;
+  readonly label?: string;
+  readonly strengths?: readonly string[];
+  readonly risks?: readonly string[];
 }
 
 export interface DecisionEvaluationPackage {

@@ -19,6 +19,11 @@ export const CANONICAL_WEDDING_DATE_REQUIRED_FIELD_IDS = [
   'ceremony_type',
 ] as const;
 
+/** COMPARE dates live on framing options — target_date is not required. */
+export const COMPARE_WEDDING_DATE_REQUIRED_FIELD_IDS = [
+  'ceremony_type',
+] as const;
+
 export type WeddingDateSlotId =
   (typeof CANONICAL_WEDDING_DATE_FIELD_IDS)[number];
 
@@ -28,6 +33,15 @@ export type WeddingDateIntake = {
   partner_name?: string;
   venue?: string;
 };
+
+export function weddingRequiredFieldIdsForMode(
+  mode?: string | null
+): readonly WeddingDateSlotId[] {
+  if (mode === 'compare_dates') {
+    return COMPARE_WEDDING_DATE_REQUIRED_FIELD_IDS;
+  }
+  return CANONICAL_WEDDING_DATE_REQUIRED_FIELD_IDS;
+}
 
 export function normalizeWeddingAnswer(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
@@ -52,25 +66,28 @@ export function mergeWeddingDateFormAnswers(
 }
 
 export function weddingRequiredFieldsPresent(
-  intake: WeddingDateIntake
+  intake: WeddingDateIntake,
+  mode?: string | null
 ): boolean {
-  return CANONICAL_WEDDING_DATE_REQUIRED_FIELD_IDS.every((id) =>
+  return weddingRequiredFieldIdsForMode(mode).every((id) =>
     Boolean(normalizeWeddingAnswer(intake[id]))
   );
 }
 
 export function weddingHasFirstRequiredAnswer(
-  intake: WeddingDateIntake
+  intake: WeddingDateIntake,
+  mode?: string | null
 ): boolean {
-  return CANONICAL_WEDDING_DATE_REQUIRED_FIELD_IDS.some((id) =>
+  return weddingRequiredFieldIdsForMode(mode).some((id) =>
     Boolean(normalizeWeddingAnswer(intake[id]))
   );
 }
 
 export function weddingMissingRequiredFields(
-  intake: WeddingDateIntake
+  intake: WeddingDateIntake,
+  mode?: string | null
 ): WeddingDateSlotId[] {
-  return CANONICAL_WEDDING_DATE_REQUIRED_FIELD_IDS.filter(
+  return weddingRequiredFieldIdsForMode(mode).filter(
     (id) => !normalizeWeddingAnswer(intake[id])
-  );
+  ) as WeddingDateSlotId[];
 }

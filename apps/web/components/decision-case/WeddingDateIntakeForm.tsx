@@ -5,9 +5,9 @@ import type { AppLang } from '@/lib/app-settings';
 import { getAskProductCopy } from '@/lib/ask-product';
 import {
   CANONICAL_WEDDING_DATE_FIELD_IDS,
-  CANONICAL_WEDDING_DATE_REQUIRED_FIELD_IDS,
   weddingHasFirstRequiredAnswer,
   weddingMissingRequiredFields,
+  weddingRequiredFieldIdsForMode,
   weddingRequiredFieldsPresent,
   type WeddingDateIntake,
   type WeddingDateSlotId,
@@ -37,12 +37,15 @@ const CEREMONY_TYPE_OPTIONS = [
 export function WeddingDateIntakeForm({
   lang,
   initialIntake,
+  caseMode,
   submitting,
   onSubmitAnswers,
   onComplete,
 }: {
   lang: AppLang;
   initialIntake?: WeddingDateIntake;
+  /** Case mode — compare_dates hides target_date requirement. */
+  caseMode?: string | null;
   submitting?: boolean;
   onSubmitAnswers: (
     answers: Partial<WeddingDateIntake>
@@ -51,26 +54,34 @@ export function WeddingDateIntakeForm({
 }) {
   const copy = getAskProductCopy(lang);
   const [draft, setDraft] = useState<WeddingDateIntake>(initialIntake ?? {});
+  const isCompare = caseMode === 'compare_dates';
   const missingRequired = useMemo(
-    () => weddingMissingRequiredFields(draft),
-    [draft]
+    () => weddingMissingRequiredFields(draft, caseMode),
+    [draft, caseMode]
   );
   const requiredPresent = useMemo(
-    () => weddingRequiredFieldsPresent(draft),
-    [draft]
+    () => weddingRequiredFieldsPresent(draft, caseMode),
+    [draft, caseMode]
   );
-  const canSave = useMemo(() => weddingHasFirstRequiredAnswer(draft), [draft]);
+  const canSave = useMemo(
+    () => weddingHasFirstRequiredAnswer(draft, caseMode),
+    [draft, caseMode]
+  );
 
   const setField = (slotId: WeddingDateSlotId, value: string) => {
     setDraft((prev) => ({ ...prev, [slotId]: value }));
   };
 
-  const requiredSet = new Set<string>(CANONICAL_WEDDING_DATE_REQUIRED_FIELD_IDS);
+  const requiredSet = new Set<string>(weddingRequiredFieldIdsForMode(caseMode));
+  const visibleFields = CANONICAL_WEDDING_DATE_FIELD_IDS.filter(
+    (slotId) => !(isCompare && slotId === 'target_date')
+  );
 
   return (
     <form
       className="space-y-5"
       data-testid="wedding-date-intake-form"
+      data-mode={caseMode ?? 'evaluate_date'}
       dir={copy.dir}
       onSubmit={(event) => {
         event.preventDefault();
@@ -78,7 +89,7 @@ export function WeddingDateIntakeForm({
       }}
     >
       <div className="space-y-4">
-        {CANONICAL_WEDDING_DATE_FIELD_IDS.map((slotId) => {
+        {visibleFields.map((slotId) => {
           const value = draft[slotId] ?? '';
           const missing = missingRequired.includes(slotId);
           const required = requiredSet.has(slotId);

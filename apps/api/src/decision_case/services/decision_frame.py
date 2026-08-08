@@ -241,10 +241,38 @@ def normalize_persisted_framing(raw: dict[str, Any]) -> dict[str, Any]:
                 "compare requires time_scope multiple_dates",
                 details={"time_scope": time_scope},
             )
+        # Prefer option dates when options carry temporal identity.
+        option_dates = [
+            str(opt["date"])
+            for opt in options
+            if isinstance(opt, dict) and opt.get("date")
+        ]
+        if option_dates:
+            if len(option_dates) != len(set(option_dates)):
+                raise FramingValidationError(
+                    "compare options must have unique dates",
+                    details={"option_dates": option_dates},
+                )
+            if dates and sorted(set(dates)) != sorted(set(option_dates)):
+                raise FramingValidationError(
+                    "compare dates and options disagree",
+                    details={"dates": dates, "option_dates": option_dates},
+                )
+            dates = sorted(set(option_dates))
         if len(dates) < 2:
             raise FramingValidationError(
                 "compare requires at least two dates",
                 details={"dates": dates},
+            )
+        if len(dates) > 5:
+            raise FramingValidationError(
+                "compare allows at most five dates",
+                details={"dates": dates},
+            )
+        if "date" in raw and raw.get("date") is not None:
+            raise FramingValidationError(
+                "compare framing must not include singular date",
+                details={"date": raw.get("date")},
             )
         normalized["dates"] = dates
 

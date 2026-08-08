@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { EvaluateProductResult } from '@/components/decision-case/EvaluateProductResult';
+import { CompareResultView } from '@/components/decision-frame/CompareResultView';
 import type { DecisionEvaluationPackage } from '@/lib/decision-case';
 import {
   DEMO_STUB_NOTICE,
@@ -13,6 +14,7 @@ import {
   buildEvaluatePresentation,
   getAskProductCopy,
 } from '@/lib/ask-product';
+import { packageToCompareView } from '@/lib/decision-frame/package-adapter';
 import { useAppLang } from '@/lib/use-app-lang';
 
 /**
@@ -93,6 +95,14 @@ export function DecisionPackageView({
     );
   }
 
+  if (pkg.mode === 'compare_dates') {
+    return (
+      <div data-testid="decision-package-view" data-mode="compare_dates">
+        <CompareResultView lang={lang} model={packageToCompareView(pkg)} />
+      </div>
+    );
+  }
+
   const model = buildEvaluatePresentation(pkg, lang, { topic });
   if (!model) {
     return (
@@ -103,7 +113,7 @@ export function DecisionPackageView({
   }
 
   return (
-    <div data-testid="decision-package-view">
+    <div data-testid="decision-package-view" data-mode="evaluate_date">
       <EvaluateProductResult lang={lang} model={model} />
     </div>
   );

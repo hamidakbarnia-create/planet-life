@@ -21,16 +21,19 @@ from packages.decision_engine.intake.evaluator import (
 )
 from packages.decision_engine.intake.wedding_date import (
     WEDDING_DATE_DECISION_TYPE_ID,
+    intake_mode_from_mapping,
     merge_wedding_date_intake,
 )
 from packages.decision_engine.state_machine import CaseState
-
-_WEDDING_DATE_MODE = "evaluate_date"
 
 
 def _require_wedding_date(case: CaseRecord) -> None:
     if case.decision_type_id != WEDDING_DATE_DECISION_TYPE_ID:
         raise UnsupportedDecisionTypeError(case.decision_type_id)
+
+
+def _case_mode_for_intake(intake: dict[str, Any]) -> str:
+    return intake_mode_from_mapping(intake)
 
 
 def _intake_snapshot(
@@ -80,7 +83,7 @@ def save_wedding_date_answers(
         owner_subject_id,
         expected_case_version=expected_case_version,
         intake=intake,
-        mode=_WEDDING_DATE_MODE,
+        mode=_case_mode_for_intake(intake),
         reason="intake_update",
         actor="user",
     )

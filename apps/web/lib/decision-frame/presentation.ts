@@ -31,6 +31,7 @@ export function framingReadyResult(
               { label: 'Option B', strength: 'unknown' },
             ],
       winner_label: 'Unknown',
+      unique_winner: false,
       deciding_factor: undefined,
       advantages: [],
       confidence: 'unknown',

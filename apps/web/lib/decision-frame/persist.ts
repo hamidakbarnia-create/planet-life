@@ -36,9 +36,9 @@ export function isFramingPersistReady(frame: DecisionFrameV1): boolean {
     return frame.time.scope === 'none';
   }
   if (frame.operation === 'compare') {
+    const count = frame.time.dates?.length ?? 0;
     return (
-      frame.time.scope === 'multiple_dates' &&
-      (frame.time.dates?.length ?? 0) >= 2
+      frame.time.scope === 'multiple_dates' && count >= 2 && count <= 3
     );
   }
   if (frame.operation === 'find') {

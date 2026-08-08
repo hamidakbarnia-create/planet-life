@@ -5,11 +5,13 @@
 import type { DecisionFrameV1 } from '@/lib/decision-frame/types';
 
 export {
+  applyCompareDates,
   applyEvaluateDate,
   applyOperationChoice,
   applyOpenEndedAxis,
   buildDecisionFrame,
 } from '@/lib/decision-frame/frame';
+export type { CompareDateDraft } from '@/lib/decision-frame/frame';
 export {
   isFramingPersistReady,
   loadDecisionFrame,

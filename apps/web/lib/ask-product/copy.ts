@@ -20,11 +20,25 @@ export type AskProductCopy = {
   dateHint: string;
   dateContinue: string;
   dateMissing: string;
+  compareDatesPrompt: string;
+  compareDatesHint: string;
+  compareOptionLabel: string;
+  compareOptionDate: string;
+  compareAddOption: string;
+  compareRemoveOption: string;
+  compareNeedTwo: string;
+  compareDuplicateDates: string;
   persistAndEvaluate: string;
+  persistAndCompare: string;
   evaluating: string;
+  comparing: string;
   unsupportedTitle: string;
   unsupportedBody: string;
   unsupportedBack: string;
+  compareResultTitle: string;
+  compareWinnerLabel: string;
+  compareTiedLabel: string;
+  compareRelativeWhy: string;
   blockedEyebrow: string;
   blockedTitle: string;
   blockedBody: string;
@@ -130,12 +144,27 @@ const EN: AskProductCopy = {
   dateHint: 'Enter an explicit calendar date. METIORO never assumes today.',
   dateContinue: 'Continue',
   dateMissing: 'Please enter a date.',
+  compareDatesPrompt: 'Which dates should we compare?',
+  compareDatesHint:
+    'Add 2 or 3 labeled candidate dates. METIORO never assumes today.',
+  compareOptionLabel: 'Label',
+  compareOptionDate: 'Date',
+  compareAddOption: 'Add another date',
+  compareRemoveOption: 'Remove',
+  compareNeedTwo: 'Enter at least two different dates.',
+  compareDuplicateDates: 'Each candidate needs a unique date.',
   persistAndEvaluate: 'Evaluate this date',
+  persistAndCompare: 'Compare these dates',
   evaluating: 'Evaluating timing…',
+  comparing: 'Comparing dates…',
   unsupportedTitle: 'This analysis is not available yet',
   unsupportedBody:
-    'Comparing dates and finding the best date are not available in this release. You can evaluate one specific date.',
+    'Finding the best date is not available in this release. You can evaluate one date or compare a few candidates when offered.',
   unsupportedBack: 'Choose a different option',
+  compareResultTitle: 'Date comparison',
+  compareWinnerLabel: 'Preferred date',
+  compareTiedLabel: 'No unique winner',
+  compareRelativeWhy: 'Why this ranking',
   blockedEyebrow: 'More information needed',
   blockedTitle: 'More information is needed before METIORO can evaluate this date.',
   blockedBody: 'Birth evidence is required for timing evaluation.',
@@ -265,12 +294,27 @@ const FA: AskProductCopy = {
   dateHint: 'یک تاریخ مشخص وارد کنید. METIORO هرگز «امروز» را فرض نمی‌کند.',
   dateContinue: 'ادامه',
   dateMissing: 'لطفاً یک تاریخ وارد کنید.',
+  compareDatesPrompt: 'کدام تاریخ‌ها را مقایسه کنیم؟',
+  compareDatesHint:
+    '۲ یا ۳ تاریخ با برچسب اضافه کنید. METIORO هرگز «امروز» را فرض نمی‌کند.',
+  compareOptionLabel: 'برچسب',
+  compareOptionDate: 'تاریخ',
+  compareAddOption: 'افزودن تاریخ دیگر',
+  compareRemoveOption: 'حذف',
+  compareNeedTwo: 'حداقل دو تاریخ متفاوت وارد کنید.',
+  compareDuplicateDates: 'هر گزینه باید تاریخ یکتا داشته باشد.',
   persistAndEvaluate: 'ارزیابی این تاریخ',
+  persistAndCompare: 'مقایسه این تاریخ‌ها',
   evaluating: 'در حال ارزیابی زمان‌بندی…',
+  comparing: 'در حال مقایسه تاریخ‌ها…',
   unsupportedTitle: 'این تحلیل هنوز در دسترس نیست',
   unsupportedBody:
-    'مقایسه تاریخ‌ها و پیدا کردن بهترین تاریخ در این نسخه فعال نیست. می‌توانید یک تاریخ مشخص را ارزیابی کنید.',
+    'پیدا کردن بهترین تاریخ در این نسخه فعال نیست. می‌توانید یک تاریخ را ارزیابی کنید یا چند گزینه را مقایسه کنید وقتی پیشنهاد می‌شود.',
   unsupportedBack: 'انتخاب گزینه دیگر',
+  compareResultTitle: 'مقایسه تاریخ',
+  compareWinnerLabel: 'تاریخ ترجیحی',
+  compareTiedLabel: 'برنده یکتا نیست',
+  compareRelativeWhy: 'دلیل این رتبه‌بندی',
   blockedEyebrow: 'اطلاعات بیشتری لازم است',
   blockedTitle: 'قبل از ارزیابی این تاریخ، اطلاعات بیشتری لازم است.',
   blockedBody: 'برای ارزیابی زمان‌بندی، شواهد تولد لازم است.',
@@ -399,12 +443,27 @@ const AR: AskProductCopy = {
   dateHint: 'أدخل تاريخاً صريحاً. لا تفترض METIORO «اليوم».',
   dateContinue: 'متابعة',
   dateMissing: 'يرجى إدخال تاريخ.',
+  compareDatesPrompt: 'أي تواريخ نقارن؟',
+  compareDatesHint:
+    'أضف تاريخين أو ثلاثة بتسميات. لا تفترض METIORO «اليوم».',
+  compareOptionLabel: 'التسمية',
+  compareOptionDate: 'التاريخ',
+  compareAddOption: 'إضافة تاريخ آخر',
+  compareRemoveOption: 'إزالة',
+  compareNeedTwo: 'أدخل تاريخين مختلفين على الأقل.',
+  compareDuplicateDates: 'يجب أن يكون لكل خيار تاريخ فريد.',
   persistAndEvaluate: 'تقييم هذا التاريخ',
+  persistAndCompare: 'مقارنة هذه التواريخ',
   evaluating: 'جارٍ تقييم التوقيت…',
+  comparing: 'جارٍ مقارنة التواريخ…',
   unsupportedTitle: 'هذا التحليل غير متاح بعد',
   unsupportedBody:
-    'مقارنة التواريخ وإيجاد أفضل تاريخ غير متاحين في هذا الإصدار. يمكنك تقييم تاريخ واحد محدد.',
+    'إيجاد أفضل تاريخ غير متاح في هذا الإصدار. يمكنك تقييم تاريخ واحد أو مقارنة مرشحين عند توفر ذلك.',
   unsupportedBack: 'اختر خياراً آخر',
+  compareResultTitle: 'مقارنة التواريخ',
+  compareWinnerLabel: 'التاريخ المفضّل',
+  compareTiedLabel: 'لا فائز وحيد',
+  compareRelativeWhy: 'سبب هذا الترتيب',
   blockedEyebrow: 'يلزم مزيد من المعلومات',
   blockedTitle: 'يلزم مزيد من المعلومات قبل أن تقيّم METIORO هذا التاريخ.',
   blockedBody: 'أدلة الميلاد مطلوبة لتقييم التوقيت.',
@@ -531,12 +590,27 @@ const RU: AskProductCopy = {
   dateHint: 'Укажите явную дату. METIORO никогда не подставляет «сегодня».',
   dateContinue: 'Продолжить',
   dateMissing: 'Пожалуйста, укажите дату.',
+  compareDatesPrompt: 'Какие даты сравнить?',
+  compareDatesHint:
+    'Добавьте 2 или 3 даты с подписями. METIORO никогда не подставляет «сегодня».',
+  compareOptionLabel: 'Подпись',
+  compareOptionDate: 'Дата',
+  compareAddOption: 'Добавить ещё дату',
+  compareRemoveOption: 'Удалить',
+  compareNeedTwo: 'Укажите как минимум две разные даты.',
+  compareDuplicateDates: 'У каждого варианта должна быть уникальная дата.',
   persistAndEvaluate: 'Оценить эту дату',
+  persistAndCompare: 'Сравнить эти даты',
   evaluating: 'Оценка тайминга…',
+  comparing: 'Сравнение дат…',
   unsupportedTitle: 'Этот анализ пока недоступен',
   unsupportedBody:
-    'Сравнение дат и поиск лучшей даты в этом релизе недоступны. Можно оценить одну конкретную дату.',
+    'Поиск лучшей даты в этом релизе недоступен. Можно оценить одну дату или сравнить несколько кандидатов, когда это предложено.',
   unsupportedBack: 'Выбрать другой вариант',
+  compareResultTitle: 'Сравнение дат',
+  compareWinnerLabel: 'Предпочтительная дата',
+  compareTiedLabel: 'Нет единственного победителя',
+  compareRelativeWhy: 'Почему такой рейтинг',
   blockedEyebrow: 'Нужно больше данных',
   blockedTitle: 'Нужно больше данных, прежде чем METIORO сможет оценить эту дату.',
   blockedBody: 'Для оценки тайминга нужны данные рождения.',

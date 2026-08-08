@@ -81,22 +81,38 @@ function evaluateFramingFromIntake(
   };
 }
 
-/** Ensure Case has authoritative Evaluate framing before Runtime executes. */
+/** Ensure Case has authoritative Evaluate framing before Runtime executes.
+ * COMPARE framing is already authoritative — never collapse it to evaluate.
+ */
 async function ensureEvaluateFramingOnCase(input: {
   caseId: string;
   caseVersion: number;
   intake: Record<string, unknown> | undefined;
 }): Promise<DecisionCaseResource> {
   const existing = input.intake?.decision_frame;
-  if (
-    existing &&
-    typeof existing === 'object' &&
-    (existing as { operation?: string }).operation === 'evaluate' &&
-    (existing as { time_scope?: string }).time_scope === 'specific_date' &&
-    typeof (existing as { date?: string }).date === 'string'
-  ) {
-    const current = await getDecisionCase(input.caseId);
-    return current;
+  if (existing && typeof existing === 'object') {
+    const frame = existing as {
+      operation?: string;
+      time_scope?: string;
+      date?: string;
+      dates?: unknown;
+      options?: unknown;
+    };
+    if (
+      frame.operation === 'evaluate' &&
+      frame.time_scope === 'specific_date' &&
+      typeof frame.date === 'string'
+    ) {
+      return getDecisionCase(input.caseId);
+    }
+    if (
+      frame.operation === 'compare' &&
+      frame.time_scope === 'multiple_dates' &&
+      Array.isArray(frame.dates) &&
+      frame.dates.length >= 2
+    ) {
+      return getDecisionCase(input.caseId);
+    }
   }
   const framing = evaluateFramingFromIntake(input.intake);
   if (!framing) {
