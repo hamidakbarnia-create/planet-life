@@ -181,3 +181,21 @@ describe('resolveDecisionRequest', () => {
     expect(request.execution.unresolvedReason).toBeUndefined();
   });
 });
+import { describe, expect, it } from 'vitest';
+import { resolveDecisionRequest } from './resolver';
+
+describe('decision request resolver', () => {
+  it('binds investor meeting action type to its decision type', () => {
+    const result = resolveDecisionRequest({
+      source: 'suggestion',
+      displayText: 'Meet an investor or pitch for funding',
+      executionMetadata: {
+        actionType: 'investor_meeting',
+        categoryId: 'money-business',
+        needsTime: true,
+      },
+    });
+
+    expect(result.execution.decisionTypeId).toBe('bus-investor-meeting');
+  });
+});

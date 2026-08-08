@@ -15,6 +15,9 @@ function mapExecution(resolved: ResolvedAskQuestion): DecisionExecution {
   }
 
   if (resolved.executionMetadata) {
+    if (resolved.executionMetadata.actionType === 'investor_meeting') {
+      execution.decisionTypeId = 'bus-investor-meeting';
+    }
     execution.actionType = resolved.executionMetadata.actionType;
     execution.categoryId = resolved.executionMetadata.categoryId;
     execution.needsTime = resolved.executionMetadata.needsTime;
