@@ -37,6 +37,7 @@ export const SUPPORTED_INTAKE_DECISION_TYPE_IDS = [
   'car-interview',
   'bus-investor-meeting',
   'mar-wedding-date',
+  'bus-product-launch',
 ] as const;
 
 export type SupportedIntakeDecisionTypeId =
@@ -48,6 +49,7 @@ export function isSupportedIntakeDecisionType(
   return (
     decisionTypeId === 'car-interview' ||
     decisionTypeId === 'bus-investor-meeting' ||
-    decisionTypeId === 'mar-wedding-date'
+    decisionTypeId === 'mar-wedding-date' ||
+    decisionTypeId === 'bus-product-launch'
   );
 }

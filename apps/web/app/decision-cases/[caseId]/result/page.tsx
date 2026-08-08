@@ -62,7 +62,9 @@ export default function DecisionCaseResultPage() {
         ? copy.topicInvestorMeeting
         : caseRecord?.decision_type_id === 'mar-wedding-date'
           ? copy.topicWeddingDate
-          : caseRecord?.title;
+          : caseRecord?.decision_type_id === 'bus-product-launch'
+            ? copy.topicProductLaunch
+            : caseRecord?.title;
 
   return (
     <AppShell

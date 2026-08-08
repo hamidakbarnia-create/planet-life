@@ -303,8 +303,11 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
       router.push('/decision-cases/car-interview');
       return;
     }
-    // Wedding popular card binds registry Decision Type then enters ASK frame.
-    if (item.decisionTypeId === 'mar-wedding-date') {
+    // Typed popular cards bind registry Decision Type then enter ASK frame.
+    if (
+      item.decisionTypeId === 'mar-wedding-date' ||
+      item.decisionTypeId === 'bus-product-launch'
+    ) {
       trackAskEvent('ftue.ask.question_selected', {
         suggestion_id: item.decisionTypeId,
       });
@@ -312,7 +315,7 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
         submitted_at: askSubmittedAt(),
         source: 'typed',
         text: item.label,
-        decision_type_id: 'mar-wedding-date',
+        decision_type_id: item.decisionTypeId,
       });
       router.push('/ask/frame');
       return;

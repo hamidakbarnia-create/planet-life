@@ -367,6 +367,25 @@ describe('AskScreen', () => {
     expect(push).not.toHaveBeenCalledWith('/ask/frame');
   });
 
+  it('routes launch-business popular cards into ASK frame with Decision Type', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('en');
+    await screen.findByRole('button', {
+      name: 'Best time to launch a new project or product',
+    });
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Best time to launch a new project or product',
+      })
+    );
+
+    expect(push).toHaveBeenCalledWith('/ask/frame');
+    expect(push).not.toHaveBeenCalledWith('/decision-cases/car-interview');
+    const stored = getAskQuestionRepository().loadQuestion();
+    expect(stored?.decision_type_id).toBe('bus-product-launch');
+  });
+
   it('routes job-interview guided chips into Decision Case intake', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');

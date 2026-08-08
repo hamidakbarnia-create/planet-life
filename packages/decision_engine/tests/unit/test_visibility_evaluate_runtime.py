@@ -15,6 +15,7 @@ from packages.decision_engine.evaluate.investor_meeting_evaluate import (
     INVESTOR_MEETING_TYPE_CONFIG,
     evaluate_investor_meeting,
 )
+from packages.decision_engine.evaluate import product_launch_evaluate as _product_launch  # noqa: F401
 from packages.decision_engine.evaluate.type_evaluate_config import (
     TypeEvaluateConfig,
     get_type_evaluate_config,
@@ -213,6 +214,19 @@ def test_mar_wedding_date_is_not_visibility_config() -> None:
     assert wedding.family_id == "timing_opt"
     assert "evaluate_date" in wedding.allowed_modes
     assert get_timing_opt_type_evaluate_config("mar-wedding-date") is not None
+
+
+def test_bus_product_launch_is_not_visibility_config() -> None:
+    assert get_type_evaluate_config("bus-product-launch") is None
+    from packages.decision_engine.evaluate.type_timing_opt_evaluate_config import (
+        get_timing_opt_type_evaluate_config,
+    )
+    from packages.decision_engine.registry import get_decision_type
+
+    launch = get_decision_type("bus-product-launch")
+    assert launch.family_id == "timing_opt"
+    assert "evaluate_date" in launch.allowed_modes
+    assert get_timing_opt_type_evaluate_config("bus-product-launch") is not None
 
 
 def test_wrong_family_config_fails_closed() -> None:

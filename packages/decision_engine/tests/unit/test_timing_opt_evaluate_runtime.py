@@ -13,6 +13,9 @@ from packages.decision_engine.evaluate.type_timing_opt_evaluate_config import (
     get_timing_opt_type_evaluate_config,
     register_timing_opt_type_evaluate_config,
 )
+from packages.decision_engine.evaluate.product_launch_evaluate import (
+    PRODUCT_LAUNCH_TYPE_CONFIG,
+)
 from packages.decision_engine.evaluate.wedding_date_evaluate import (
     WEDDING_DATE_TYPE_CONFIG,
 )
@@ -23,6 +26,13 @@ def test_wedding_is_registered_as_timing_opt_config() -> None:
     cfg = get_timing_opt_type_evaluate_config("mar-wedding-date")
     assert cfg is WEDDING_DATE_TYPE_CONFIG
     assert cfg.family_id == "timing_opt"
+
+
+def test_product_launch_is_registered_as_timing_opt_config() -> None:
+    cfg = get_timing_opt_type_evaluate_config("bus-product-launch")
+    assert cfg is PRODUCT_LAUNCH_TYPE_CONFIG
+    assert cfg.family_id == "timing_opt"
+    assert cfg.action_type == "business_launch"
 
 
 def test_visibility_types_are_not_in_timing_opt_allowlist() -> None:

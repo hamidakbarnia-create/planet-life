@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { CarInterviewIntakeForm } from '@/components/decision-case/CarInterviewIntakeForm';
 import { InvestorMeetingIntakeForm } from '@/components/decision-case/InvestorMeetingIntakeForm';
+import { ProductLaunchIntakeForm } from '@/components/decision-case/ProductLaunchIntakeForm';
 import { WeddingDateIntakeForm } from '@/components/decision-case/WeddingDateIntakeForm';
 import { getAskProductCopy } from '@/lib/ask-product';
 import type { AppLang } from '@/lib/app-settings';
@@ -19,6 +20,7 @@ import {
   type DecisionCaseIntake,
   type DecisionCaseResource,
   type InvestorMeetingIntake,
+  type ProductLaunchIntake,
   type WeddingDateIntake,
 } from '@/lib/decision-case';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
@@ -62,6 +64,25 @@ function intakeAsWedding(intake: DecisionCaseIntake): WeddingDateIntake {
     partner_name:
       typeof intake.partner_name === 'string' ? intake.partner_name : undefined,
     venue: typeof intake.venue === 'string' ? intake.venue : undefined,
+  };
+}
+
+function intakeAsProductLaunch(intake: DecisionCaseIntake): ProductLaunchIntake {
+  return {
+    target_date:
+      typeof intake.target_date === 'string' ? intake.target_date : undefined,
+    launch_object:
+      typeof intake.launch_object === 'string'
+        ? intake.launch_object
+        : undefined,
+    launch_channel:
+      typeof intake.launch_channel === 'string'
+        ? intake.launch_channel
+        : undefined,
+    brand_or_company:
+      typeof intake.brand_or_company === 'string'
+        ? intake.brand_or_company
+        : undefined,
   };
 }
 
@@ -125,13 +146,17 @@ export function DecisionCaseIntakeScreen({
       ? copy.intakeTitleInvestorMeeting
       : caseRecord?.decision_type_id === 'mar-wedding-date'
         ? copy.intakeTitleWeddingDate
-        : copy.intakeTitle;
+        : caseRecord?.decision_type_id === 'bus-product-launch'
+          ? copy.intakeTitleProductLaunch
+          : copy.intakeTitle;
   const body =
     caseRecord?.decision_type_id === 'bus-investor-meeting'
       ? copy.intakeBodyInvestorMeeting
       : caseRecord?.decision_type_id === 'mar-wedding-date'
         ? copy.intakeBodyWeddingDate
-        : copy.intakeBody;
+        : caseRecord?.decision_type_id === 'bus-product-launch'
+          ? copy.intakeBodyProductLaunch
+          : copy.intakeBody;
 
   const persistAnswers = async (answers: Record<string, unknown>) => {
     if (caseVersion == null) {
@@ -160,7 +185,9 @@ export function DecisionCaseIntakeScreen({
     >
       <header className="space-y-2">
         <p className="fi text-xs uppercase tracking-[0.16em] text-amber-400/80">
-          {copy.intakeEyebrow}
+          {caseRecord?.decision_type_id === 'bus-product-launch'
+            ? copy.intakeEyebrowProductLaunch
+            : copy.intakeEyebrow}
         </p>
         <h1 className="fc text-2xl text-white">{title}</h1>
         <p className="fi text-sm text-white/60">{body}</p>
@@ -291,6 +318,61 @@ export function DecisionCaseIntakeScreen({
             key={`${caseId}-${caseVersion ?? 0}`}
             lang={lang}
             initialIntake={intakeAsWedding(intake)}
+            submitting={busy}
+            onSubmitAnswers={async (answers) => {
+              setBusy(true);
+              setError('');
+              try {
+                await persistAnswers(answers);
+              } catch (err) {
+                setError(
+                  err instanceof Error ? err.message : copy.intakeSaveError
+                );
+              } finally {
+                setBusy(false);
+              }
+            }}
+            onComplete={async (answers) => {
+              setBusy(true);
+              setError('');
+              try {
+                const saved = await persistAnswers(answers);
+                if (!saved.is_complete) {
+                  setError(
+                    copy.intakeRequiredRemaining(
+                      saved.missing_required.join(', ')
+                    )
+                  );
+                  return;
+                }
+                const completed = await completeCaseIntake({
+                  caseId: saved.case.case_id,
+                  caseVersion: saved.case.case_version,
+                });
+                router.push(
+                  `/decision-cases/${completed.case.case_id}/result`
+                );
+              } catch (err) {
+                setError(
+                  err instanceof Error
+                    ? err.message
+                    : copy.intakeCompleteError
+                );
+              } finally {
+                setBusy(false);
+              }
+            }}
+          />
+        </div>
+      ) : null}
+
+      {!unsupported &&
+      caseRecord?.decision_type_id === 'bus-product-launch' ? (
+        <div className="mio-glass mio-glass--primary !p-5">
+          <ProductLaunchIntakeForm
+            key={`${caseId}-${caseVersion ?? 0}`}
+            lang={lang}
+            initialIntake={intakeAsProductLaunch(intake)}
             submitting={busy}
             onSubmitAnswers={async (answers) => {
               setBusy(true);

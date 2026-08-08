@@ -37,10 +37,10 @@ def _write(tmp_path: Path, payload: Any) -> Path:
     return path
 
 
-def test_canonical_registry_contains_exactly_four_authorized_types() -> None:
+def test_canonical_registry_contains_exactly_five_authorized_types() -> None:
     records = list_decision_types()
 
-    assert len(records) == 4
+    assert len(records) == 5
     assert {record.decision_type_id for record in records} == EXPECTED_TYPE_IDS
 
 
@@ -67,13 +67,13 @@ def test_registry_mapping_is_read_only() -> None:
         records["new-type"] = get_decision_type("car-interview")  # type: ignore[index]
 
 
-def test_fourth_type_is_rejected(tmp_path: Path) -> None:
+def test_extra_type_is_rejected(tmp_path: Path) -> None:
     payload = _canonical_payload()
-    fourth = copy.deepcopy(payload["decision_types"][0])
-    fourth["decision_type_id"] = "tim-fourth"
-    payload["decision_types"].append(fourth)
+    extra = copy.deepcopy(payload["decision_types"][0])
+    extra["decision_type_id"] = "tim-extra"
+    payload["decision_types"].append(extra)
 
-    with pytest.raises(RegistryLoadError, match="validation failed|exactly 4"):
+    with pytest.raises(RegistryLoadError, match="validation failed|exactly 5"):
         _load_registry(_write(tmp_path, payload))
 
 
@@ -81,7 +81,7 @@ def test_missing_authorized_type_is_rejected(tmp_path: Path) -> None:
     payload = _canonical_payload()
     payload["decision_types"] = payload["decision_types"][:2]
 
-    with pytest.raises(RegistryLoadError, match="validation failed|exactly 4"):
+    with pytest.raises(RegistryLoadError, match="validation failed|exactly 5"):
         _load_registry(_write(tmp_path, payload))
 
 

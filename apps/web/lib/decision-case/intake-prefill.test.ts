@@ -59,6 +59,7 @@ describe('intake-prefill', () => {
     expect(isSupportedIntakeDecisionType('car-interview')).toBe(true);
     expect(isSupportedIntakeDecisionType('bus-investor-meeting')).toBe(true);
     expect(isSupportedIntakeDecisionType('mar-wedding-date')).toBe(true);
+    expect(isSupportedIntakeDecisionType('bus-product-launch')).toBe(true);
     expect(isSupportedIntakeDecisionType('tim-compare-three')).toBe(false);
     expect(isSupportedIntakeDecisionType('unknown')).toBe(false);
   });

@@ -18,6 +18,7 @@ DecisionTypeId = Literal[
     "car-interview",
     "mar-wedding-date",
     "bus-investor-meeting",
+    "bus-product-launch",
 ]
 FamilyId = Literal["timing_opt", "visibility"]
 DecisionMode = Literal["evaluate_date", "compare_dates"]
@@ -42,8 +43,8 @@ class DecisionTypeRecord(RegistryModel):
 class DecisionTypeRegistry(RegistryModel):
     schema_version: RegistrySchemaVersion
     decision_types: tuple[DecisionTypeRecord, ...] = Field(
-        min_length=4,
-        max_length=4,
+        min_length=5,
+        max_length=5,
     )
 
 
@@ -53,6 +54,7 @@ EXPECTED_TYPE_IDS: frozenset[str] = frozenset(
         "car-interview",
         "mar-wedding-date",
         "bus-investor-meeting",
+        "bus-product-launch",
     }
 )
 
@@ -65,6 +67,10 @@ EXPECTED_RECORDS: dict[str, tuple[str, tuple[str, ...]]] = {
     ),
     "bus-investor-meeting": (
         "visibility",
+        ("evaluate_date",),
+    ),
+    "bus-product-launch": (
+        "timing_opt",
         ("evaluate_date",),
     ),
 }

@@ -132,7 +132,13 @@ def test_json_is_only_canonical_record_source() -> None:
     assert CANONICAL.is_file()
     data = json.loads(CANONICAL.read_text(encoding="utf-8"))
     ids = {row["decision_type_id"] for row in data["decision_types"]}
-    assert ids == {"tim-compare-three", "car-interview", "mar-wedding-date", "bus-investor-meeting"}
+    assert ids == {
+        "tim-compare-three",
+        "car-interview",
+        "mar-wedding-date",
+        "bus-investor-meeting",
+        "bus-product-launch",
+    }
     loaded = _registry()
     assert set(loaded) == ids
     # Loader module must not embed a parallel decision-type allowlist table.
