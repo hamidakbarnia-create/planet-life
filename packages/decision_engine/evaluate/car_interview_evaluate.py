@@ -24,6 +24,7 @@ from packages.decision_engine.intake.car_interview import (
 from packages.decision_engine.intake.evaluator import evaluate_car_interview_intake
 from packages.decision_engine.models import DecisionOutcome, DecisionRequest
 from packages.decision_engine.package_models import DecisionEvaluationPackage
+from packages.decision_engine.evaluate.contract import EvaluateRuntimeContract
 from packages.decision_engine.registry import get_decision_type
 from packages.decision_engine.evaluate.runtime_common import (
     DECISION_FRAME_INTAKE_KEY,
@@ -478,3 +479,12 @@ def evaluate_car_interview(
 def evaluate_car_interview_dict(**kwargs: Any) -> dict[str, Any]:
     package = evaluate_car_interview(**kwargs)
     return package.model_dump(mode="json")
+
+
+CAR_INTERVIEW_EVALUATE_RUNTIME = EvaluateRuntimeContract(
+    decision_type_id=CAR_INTERVIEW_DECISION_TYPE_ID,
+    mode="evaluate_date",
+    engine_id=REAL_ENGINE_ID,
+    evaluate_intake=evaluate_car_interview_intake,
+    evaluate_package=evaluate_car_interview,
+)
