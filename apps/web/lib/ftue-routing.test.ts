@@ -51,6 +51,16 @@ describe('ftue-routing', () => {
         action_type: 'business_launch',
       })
     );
+    // Gender may be absent, but authoritative birth coordinates are required.
+    localStorage.setItem(
+      'planet-life-birth-place',
+      JSON.stringify({
+        name: 'New York, New York, United States',
+        short: 'New York',
+        lat: 40.7128,
+        lon: -74.006,
+      })
+    );
     expect(hasLocalBirthProfile()).toBe(true);
     expect(resolvePostAuthPath()).toBe('/onboarding/preparing');
   });
