@@ -80,7 +80,7 @@ export function AskFrameScreen({ lang }: { lang: AppLang }) {
         );
         return;
       }
-      const intent = resolveIntentText(lang);
+      const intent = resolveIntent(lang);
       if (!intent) {
         router.replace('/ask');
         return;
