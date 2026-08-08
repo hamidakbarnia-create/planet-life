@@ -201,14 +201,18 @@ def test_unconfigured_visibility_type_cannot_execute() -> None:
     assert get_type_evaluate_config("not-a-configured-type") is None
 
 
-def test_mar_wedding_date_remains_unsupported() -> None:
-    # Registry allows evaluate_date for mar-wedding-date, but no TypeEvaluateConfig.
+def test_mar_wedding_date_is_not_visibility_config() -> None:
+    # Wedding is timing_opt — must not register on the Visibility allowlist.
     assert get_type_evaluate_config("mar-wedding-date") is None
+    from packages.decision_engine.evaluate.type_timing_opt_evaluate_config import (
+        get_timing_opt_type_evaluate_config,
+    )
     from packages.decision_engine.registry import get_decision_type
 
     wedding = get_decision_type("mar-wedding-date")
     assert wedding.family_id == "timing_opt"
     assert "evaluate_date" in wedding.allowed_modes
+    assert get_timing_opt_type_evaluate_config("mar-wedding-date") is not None
 
 
 def test_wrong_family_config_fails_closed() -> None:

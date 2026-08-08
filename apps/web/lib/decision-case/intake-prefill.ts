@@ -36,6 +36,7 @@ export function prefillTargetDateFromFrame(
 export const SUPPORTED_INTAKE_DECISION_TYPE_IDS = [
   'car-interview',
   'bus-investor-meeting',
+  'mar-wedding-date',
 ] as const;
 
 export type SupportedIntakeDecisionTypeId =
@@ -46,6 +47,7 @@ export function isSupportedIntakeDecisionType(
 ): decisionTypeId is SupportedIntakeDecisionTypeId {
   return (
     decisionTypeId === 'car-interview' ||
-    decisionTypeId === 'bus-investor-meeting'
+    decisionTypeId === 'bus-investor-meeting' ||
+    decisionTypeId === 'mar-wedding-date'
   );
 }

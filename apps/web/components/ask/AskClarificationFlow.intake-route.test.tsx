@@ -89,4 +89,34 @@ describe('AskClarificationFlow evaluate routes to intake', () => {
       );
     });
   });
+
+  it('routes wedding ASK evaluate to intake, not result', async () => {
+    persistFrameToCase.mockResolvedValue({
+      case: { case_id: 'case-wed', case_version: 2 },
+    });
+    const frame = buildDecisionFrame('Is October 10 a good wedding date?', {
+      decision_type_id: 'mar-wedding-date',
+      operation: 'evaluate',
+      time_scope: 'specific_date',
+      dates: ['2026-10-10'],
+    });
+    render(
+      <AskClarificationFlow
+        lang="en"
+        frame={frame}
+        caseId={null}
+        caseVersion={null}
+        onFrameChange={vi.fn()}
+        onCaseBound={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByTestId('ask-persist-evaluate'));
+    await waitFor(() => {
+      expect(persistFrameToCase).toHaveBeenCalled();
+      expect(push).toHaveBeenCalledWith('/decision-cases/case-wed/intake');
+      expect(push).not.toHaveBeenCalledWith(
+        '/decision-cases/case-wed/result'
+      );
+    });
+  });
 });

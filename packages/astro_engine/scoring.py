@@ -705,6 +705,7 @@ def _resolve_profile(activity_type: str) -> ActivityProfile:
         "difficult_conversation": "negotiation",
         "first_meeting": "networking",
         "marriage_proposal": "negotiation",
+        "wedding_date": "negotiation",
         "relationship_ending": "negotiation",
 
         # Oracle: Travel & Place

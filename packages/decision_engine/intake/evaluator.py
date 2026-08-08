@@ -136,3 +136,60 @@ def evaluate_investor_meeting_intake(
         is_complete=not missing,
         has_first_required_answer=bool(answered),
     )
+
+
+from packages.decision_engine.intake.wedding_date import (
+    WEDDING_DATE_SLOTS,
+    WeddingDateIntake,
+    merge_wedding_date_intake,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class WeddingDateIntakeEvaluation:
+    intake: WeddingDateIntake
+    missing_required: tuple[str, ...]
+    answered_required: tuple[str, ...]
+    is_complete: bool
+    has_first_required_answer: bool
+
+
+def evaluate_wedding_date_intake(
+    intake: Mapping[str, Any] | WeddingDateIntake | None = None,
+    *,
+    answers: Mapping[str, Any] | None = None,
+) -> WeddingDateIntakeEvaluation:
+    if isinstance(intake, WeddingDateIntake) and not answers:
+        normalized = intake
+    else:
+        current = (
+            intake.as_dict()
+            if isinstance(intake, WeddingDateIntake)
+            else intake
+        )
+        normalized = merge_wedding_date_intake(current, answers or {})
+
+    values = {
+        "target_date": normalized.target_date,
+        "ceremony_type": normalized.ceremony_type,
+        "partner_name": normalized.partner_name,
+        "venue": normalized.venue,
+    }
+
+    missing = tuple(
+        slot.slot_id
+        for slot in WEDDING_DATE_SLOTS
+        if slot.required and not values[slot.slot_id]
+    )
+
+    answered = tuple(
+        key for key in ("target_date", "ceremony_type") if values[key]
+    )
+
+    return WeddingDateIntakeEvaluation(
+        intake=normalized,
+        missing_required=missing,
+        answered_required=answered,
+        is_complete=not missing,
+        has_first_required_answer=bool(answered),
+    )

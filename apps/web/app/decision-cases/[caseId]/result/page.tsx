@@ -60,7 +60,9 @@ export default function DecisionCaseResultPage() {
       ? copy.topicCarInterview
       : caseRecord?.decision_type_id === 'bus-investor-meeting'
         ? copy.topicInvestorMeeting
-        : caseRecord?.title;
+        : caseRecord?.decision_type_id === 'mar-wedding-date'
+          ? copy.topicWeddingDate
+          : caseRecord?.title;
 
   return (
     <AppShell

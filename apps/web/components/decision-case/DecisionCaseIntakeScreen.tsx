@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { CarInterviewIntakeForm } from '@/components/decision-case/CarInterviewIntakeForm';
 import { InvestorMeetingIntakeForm } from '@/components/decision-case/InvestorMeetingIntakeForm';
+import { WeddingDateIntakeForm } from '@/components/decision-case/WeddingDateIntakeForm';
 import { getAskProductCopy } from '@/lib/ask-product';
 import type { AppLang } from '@/lib/app-settings';
 import {
@@ -18,6 +19,7 @@ import {
   type DecisionCaseIntake,
   type DecisionCaseResource,
   type InvestorMeetingIntake,
+  type WeddingDateIntake,
 } from '@/lib/decision-case';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 
@@ -46,6 +48,20 @@ function intakeAsInvestor(intake: DecisionCaseIntake): InvestorMeetingIntake {
         : undefined,
     meeting_type:
       typeof intake.meeting_type === 'string' ? intake.meeting_type : undefined,
+  };
+}
+
+function intakeAsWedding(intake: DecisionCaseIntake): WeddingDateIntake {
+  return {
+    target_date:
+      typeof intake.target_date === 'string' ? intake.target_date : undefined,
+    ceremony_type:
+      typeof intake.ceremony_type === 'string'
+        ? intake.ceremony_type
+        : undefined,
+    partner_name:
+      typeof intake.partner_name === 'string' ? intake.partner_name : undefined,
+    venue: typeof intake.venue === 'string' ? intake.venue : undefined,
   };
 }
 
@@ -107,11 +123,15 @@ export function DecisionCaseIntakeScreen({
   const title =
     caseRecord?.decision_type_id === 'bus-investor-meeting'
       ? copy.intakeTitleInvestorMeeting
-      : copy.intakeTitle;
+      : caseRecord?.decision_type_id === 'mar-wedding-date'
+        ? copy.intakeTitleWeddingDate
+        : copy.intakeTitle;
   const body =
     caseRecord?.decision_type_id === 'bus-investor-meeting'
       ? copy.intakeBodyInvestorMeeting
-      : copy.intakeBody;
+      : caseRecord?.decision_type_id === 'mar-wedding-date'
+        ? copy.intakeBodyWeddingDate
+        : copy.intakeBody;
 
   const persistAnswers = async (answers: Record<string, unknown>) => {
     if (caseVersion == null) {
@@ -217,6 +237,60 @@ export function DecisionCaseIntakeScreen({
             key={`${caseId}-${caseVersion ?? 0}`}
             lang={lang}
             initialIntake={intakeAsInvestor(intake)}
+            submitting={busy}
+            onSubmitAnswers={async (answers) => {
+              setBusy(true);
+              setError('');
+              try {
+                await persistAnswers(answers);
+              } catch (err) {
+                setError(
+                  err instanceof Error ? err.message : copy.intakeSaveError
+                );
+              } finally {
+                setBusy(false);
+              }
+            }}
+            onComplete={async (answers) => {
+              setBusy(true);
+              setError('');
+              try {
+                const saved = await persistAnswers(answers);
+                if (!saved.is_complete) {
+                  setError(
+                    copy.intakeRequiredRemaining(
+                      saved.missing_required.join(', ')
+                    )
+                  );
+                  return;
+                }
+                const completed = await completeCaseIntake({
+                  caseId: saved.case.case_id,
+                  caseVersion: saved.case.case_version,
+                });
+                router.push(
+                  `/decision-cases/${completed.case.case_id}/result`
+                );
+              } catch (err) {
+                setError(
+                  err instanceof Error
+                    ? err.message
+                    : copy.intakeCompleteError
+                );
+              } finally {
+                setBusy(false);
+              }
+            }}
+          />
+        </div>
+      ) : null}
+
+      {!unsupported && caseRecord?.decision_type_id === 'mar-wedding-date' ? (
+        <div className="mio-glass mio-glass--primary !p-5">
+          <WeddingDateIntakeForm
+            key={`${caseId}-${caseVersion ?? 0}`}
+            lang={lang}
+            initialIntake={intakeAsWedding(intake)}
             submitting={busy}
             onSubmitAnswers={async (answers) => {
               setBusy(true);

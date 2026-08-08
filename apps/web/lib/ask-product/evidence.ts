@@ -141,6 +141,10 @@ function topicFromPackage(
   copy: AskProductCopy
 ): string {
   if (pkg.decision_type_id === 'car-interview') return copy.topicCarInterview;
+  if (pkg.decision_type_id === 'bus-investor-meeting') {
+    return copy.topicInvestorMeeting;
+  }
+  if (pkg.decision_type_id === 'mar-wedding-date') return copy.topicWeddingDate;
   return copy.topicGeneric;
 }
 

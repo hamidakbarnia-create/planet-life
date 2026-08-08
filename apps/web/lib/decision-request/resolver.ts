@@ -3,12 +3,21 @@ import type { DecisionExecution, DecisionRequest } from './types';
 
 function mapExecution(resolved: ResolvedAskQuestion): DecisionExecution {
   if (resolved.source === 'typed') {
-    return resolved.executionUnresolvedReason
-      ? { unresolvedReason: resolved.executionUnresolvedReason }
-      : {};
+    if (resolved.executionUnresolvedReason) {
+      return { unresolvedReason: resolved.executionUnresolvedReason };
+    }
+    const execution: DecisionExecution = {};
+    if (resolved.decisionTypeId) {
+      execution.decisionTypeId = resolved.decisionTypeId;
+    }
+    return execution;
   }
 
   const execution: DecisionExecution = {};
+
+  if (resolved.decisionTypeId) {
+    execution.decisionTypeId = resolved.decisionTypeId;
+  }
 
   if (resolved.guidedQuestion) {
     execution.guidedQuestionId = resolved.guidedQuestion.id;
