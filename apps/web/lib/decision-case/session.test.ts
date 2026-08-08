@@ -225,4 +225,147 @@ describe('car-interview Decision Case session (PR-2)', () => {
     expect(loaded.history[0]?.event).toBe('case_created');
     expect(api.getDecisionCaseHistory).toHaveBeenCalledWith('case-3');
   });
+
+  it('loadCaseResult creates evaluation only after complete intake', async () => {
+    vi.mocked(api.getDecisionCase)
+      .mockResolvedValueOnce({
+        case_id: 'case-inv',
+        owner_subject_id: 'e5-dev-owner',
+        decision_type_id: 'bus-investor-meeting',
+        family_id: 'visibility',
+        title: 'Meet an investor',
+        state: 'intake',
+        activation_phase: 'intake',
+        mode: 'evaluate_date',
+        precision_level: 'L1',
+        case_version: 2,
+        created_at: '2026-08-07T10:00:00Z',
+        updated_at: '2026-08-07T10:00:00Z',
+        intake: {
+          target_date: '2026-08-20',
+          meeting_goal: 'Raise seed',
+          decision_frame: {
+            operation: 'evaluate',
+            time_scope: 'specific_date',
+            date: '2026-08-20',
+          },
+        },
+      })
+      .mockResolvedValue({
+        case_id: 'case-inv',
+        owner_subject_id: 'e5-dev-owner',
+        decision_type_id: 'bus-investor-meeting',
+        family_id: 'visibility',
+        title: 'Meet an investor',
+        state: 'evaluated',
+        activation_phase: 'evaluated',
+        mode: 'evaluate_date',
+        precision_level: 'L3',
+        case_version: 4,
+        created_at: '2026-08-07T10:00:00Z',
+        updated_at: '2026-08-07T10:00:05Z',
+        intake: {
+          target_date: '2026-08-20',
+          meeting_goal: 'Raise seed',
+          decision_frame: {
+            operation: 'evaluate',
+            time_scope: 'specific_date',
+            date: '2026-08-20',
+          },
+        },
+      });
+    vi.mocked(api.listDecisionCaseEvaluations).mockResolvedValue({
+      evaluations: [],
+    });
+    vi.mocked(api.completeIntake).mockResolvedValue({
+      case: {
+        case_id: 'case-inv',
+        owner_subject_id: 'e5-dev-owner',
+        decision_type_id: 'bus-investor-meeting',
+        family_id: 'visibility',
+        title: 'Meet an investor',
+        state: 'evidence_ready',
+        activation_phase: 'evidence_ready',
+        mode: 'evaluate_date',
+        precision_level: 'L1',
+        case_version: 3,
+        created_at: '2026-08-07T10:00:00Z',
+        updated_at: '2026-08-07T10:00:02Z',
+      },
+      intake: {
+        target_date: '2026-08-20',
+        meeting_goal: 'Raise seed',
+        decision_frame: {
+          operation: 'evaluate',
+          time_scope: 'specific_date',
+          date: '2026-08-20',
+        },
+      },
+      missing_required: [],
+      is_complete: true,
+    });
+    vi.mocked(api.evaluateDecisionCase).mockResolvedValue({
+      evaluation_id: 'eval-inv',
+      case_id: 'case-inv',
+      case_version: 3,
+      evaluation_version: 1,
+      package_contract_version: '1.0.0',
+      engine_id: 'decision-engine-investor-meeting-v1',
+      dq_status: 'pass',
+      created_at: '2026-08-07T10:00:05Z',
+      package: {
+        schema_version: '1.0.0',
+        engine_id: 'decision-engine-investor-meeting-v1',
+      } as never,
+    });
+    vi.mocked(api.getDecisionCaseHistory).mockResolvedValue({ events: [] });
+
+    const loaded = await loadCaseResult('case-inv');
+    expect(api.completeIntake).toHaveBeenCalledWith({
+      caseId: 'case-inv',
+      expectedCaseVersion: 2,
+    });
+    expect(api.evaluateDecisionCase).toHaveBeenCalled();
+    expect(loaded.evaluation.evaluation_id).toBe('eval-inv');
+  });
+
+  it('loadCaseResult rejects incomplete investor intake without evaluating', async () => {
+    vi.mocked(api.getDecisionCase).mockResolvedValue({
+      case_id: 'case-inv-incomplete',
+      owner_subject_id: 'e5-dev-owner',
+      decision_type_id: 'bus-investor-meeting',
+      family_id: 'visibility',
+      title: 'Meet an investor',
+      state: 'intake',
+      activation_phase: 'intake',
+      mode: 'evaluate_date',
+      precision_level: 'L1',
+      case_version: 2,
+      created_at: '2026-08-07T10:00:00Z',
+      updated_at: '2026-08-07T10:00:00Z',
+      intake: {
+        decision_frame: {
+          operation: 'evaluate',
+          time_scope: 'specific_date',
+          date: '2026-08-20',
+        },
+      },
+    });
+    vi.mocked(api.listDecisionCaseEvaluations).mockResolvedValue({
+      evaluations: [],
+    });
+    vi.mocked(api.completeIntake).mockRejectedValue(
+      new api.DecisionCaseApiError({
+        status: 400,
+        code: 'INTAKE_INCOMPLETE',
+        message: 'Required intake fields are missing',
+        details: { missing_required: ['meeting_goal'] },
+      })
+    );
+
+    await expect(loadCaseResult('case-inv-incomplete')).rejects.toMatchObject({
+      code: 'INTAKE_INCOMPLETE',
+    });
+    expect(api.evaluateDecisionCase).not.toHaveBeenCalled();
+  });
 });

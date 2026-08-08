@@ -1,14 +1,18 @@
 /**
- * Thin Decision Case API client for the car-interview PR-2 transport path.
+ * Thin Decision Case API client for Decision Case transport.
  * Uses centralized API_BASE — never hardcodes API hosts.
  */
 
 import { API_BASE } from '@/lib/api-config';
 import type { DecisionEvaluationPackage } from './package-types';
-import type { CarInterviewIntake } from './car-interview-form';
 
-export type DecisionCaseIntake = CarInterviewIntake & {
+/**
+ * Generic Case intake record. Type-specific slots (role, meeting_goal, …)
+ * live as string fields; decision_frame / natal_evidence are shared.
+ */
+export type DecisionCaseIntake = {
   decision_frame?: Record<string, unknown>;
+  natal_evidence?: Record<string, unknown>;
   [key: string]: unknown;
 };
 
@@ -216,7 +220,7 @@ export type NatalEvidencePayload = {
 export function saveIntakeAnswers(input: {
   caseId: string;
   expectedCaseVersion: number;
-  answers: Partial<CarInterviewIntake> & {
+  answers: Partial<DecisionCaseIntake> & {
     natal_evidence?: NatalEvidencePayload;
   };
 }): Promise<IntakeMutationResult> {

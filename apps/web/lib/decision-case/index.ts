@@ -32,6 +32,7 @@ export {
   listDecisionCaseEvaluations,
   saveIntakeAnswers,
   updateDecisionCaseFraming,
+  type DecisionCaseIntake,
   type DecisionCaseResource,
   type DecisionEvaluationResource,
   type DecisionHistoryEvent,
@@ -39,6 +40,25 @@ export {
   type IntakeMutationResult,
   type PersistedDecisionFraming,
 } from './api-client';
+export {
+  CANONICAL_INVESTOR_MEETING_FIELD_IDS,
+  CANONICAL_INVESTOR_MEETING_REQUIRED_FIELD_IDS,
+  INVESTOR_MEETING_DECISION_TYPE_ID,
+  INVESTOR_MEETING_FAMILY_ID,
+  INVESTOR_MEETING_LABEL,
+  investorHasFirstRequiredAnswer,
+  investorMissingRequiredFields,
+  investorRequiredFieldsPresent,
+  mergeInvestorMeetingFormAnswers,
+  type InvestorMeetingIntake,
+  type InvestorMeetingSlotId,
+} from './investor-meeting-form';
+export {
+  evaluateDateFromDecisionFrame,
+  isSupportedIntakeDecisionType,
+  prefillTargetDateFromFrame,
+  SUPPORTED_INTAKE_DECISION_TYPE_IDS,
+} from './intake-prefill';
 export {
   completeCaseIntake,
   ensureCaseAndSaveAnswers,

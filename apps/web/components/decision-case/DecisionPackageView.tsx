@@ -70,7 +70,7 @@ export function DecisionPackageView({
         <p className="fi text-xs text-white/50">{copy.blockedNoVerdict}</p>
         {caseId ? (
           <Link
-            href={`/decision-cases/car-interview?caseId=${caseId}`}
+            href={`/decision-cases/${caseId}/intake`}
             className="fi text-sm text-[#93B4FF] hover:text-white inline-block"
             data-testid="blocked-add-evidence-link"
           >

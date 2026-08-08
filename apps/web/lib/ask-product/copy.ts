@@ -52,10 +52,13 @@ export type AskProductCopy = {
   evidenceCaution: string;
   evidenceNeutral: string;
   topicCarInterview: string;
+  topicInvestorMeeting: string;
   topicGeneric: string;
   intakeEyebrow: string;
   intakeTitle: string;
   intakeBody: string;
+  intakeTitleInvestorMeeting: string;
+  intakeBodyInvestorMeeting: string;
   intakeOptional: string;
   intakeSelect: string;
   intakeSave: string;
@@ -66,6 +69,11 @@ export type AskProductCopy = {
   intakeFieldRole: string;
   intakeFieldCompany: string;
   intakeFieldInterviewType: string;
+  intakeFieldMeetingDate: string;
+  intakeFieldMeetingGoal: string;
+  intakeFieldInvestorName: string;
+  intakeFieldMeetingType: string;
+  intakeUnsupportedType: string;
   intakeLoadError: string;
   intakeSaveError: string;
   intakeCompleteError: string;
@@ -155,11 +163,15 @@ const EN: AskProductCopy = {
   evidenceCaution: 'Cautionary timing signal',
   evidenceNeutral: 'Timing signal',
   topicCarInterview: 'Attend job interview',
+  topicInvestorMeeting: 'Meet an investor',
   topicGeneric: 'Your decision',
   intakeEyebrow: 'Interview timing',
   intakeTitle: 'Attend job interview',
   intakeBody:
     'Share the interview details. We’ll evaluate the timing for the date you provide.',
+  intakeTitleInvestorMeeting: 'Meet an investor',
+  intakeBodyInvestorMeeting:
+    'Share the meeting details. We’ll evaluate the timing for the date you provide.',
   intakeOptional: 'optional',
   intakeSelect: 'Select…',
   intakeSave: 'Save answers',
@@ -170,6 +182,11 @@ const EN: AskProductCopy = {
   intakeFieldRole: 'Role',
   intakeFieldCompany: 'Company',
   intakeFieldInterviewType: 'Interview type',
+  intakeFieldMeetingDate: 'Meeting date',
+  intakeFieldMeetingGoal: 'Meeting goal',
+  intakeFieldInvestorName: 'Investor name',
+  intakeFieldMeetingType: 'Meeting type',
+  intakeUnsupportedType: 'This decision type is not available for intake yet.',
   intakeLoadError: 'Unable to load this decision.',
   intakeSaveError: 'Could not save answers.',
   intakeCompleteError: 'Unable to continue.',
@@ -264,11 +281,15 @@ const FA: AskProductCopy = {
   evidenceCaution: 'سیگنال زمان‌بندی احتیاطی',
   evidenceNeutral: 'سیگنال زمان‌بندی',
   topicCarInterview: 'مصاحبه کاری',
+  topicInvestorMeeting: 'جلسه با سرمایه‌گذار',
   topicGeneric: 'تصمیم شما',
   intakeEyebrow: 'زمان‌بندی مصاحبه',
   intakeTitle: 'مصاحبه کاری',
   intakeBody:
     'جزئیات مصاحبه را وارد کنید. زمان‌بندی را برای تاریخی که می‌دهید ارزیابی می‌کنیم.',
+  intakeTitleInvestorMeeting: 'جلسه با سرمایه‌گذار',
+  intakeBodyInvestorMeeting:
+    'جزئیات جلسه را وارد کنید. زمان‌بندی را برای تاریخی که می‌دهید ارزیابی می‌کنیم.',
   intakeOptional: 'اختیاری',
   intakeSelect: 'انتخاب…',
   intakeSave: 'ذخیره پاسخ‌ها',
@@ -279,6 +300,11 @@ const FA: AskProductCopy = {
   intakeFieldRole: 'نقش',
   intakeFieldCompany: 'شرکت',
   intakeFieldInterviewType: 'نوع مصاحبه',
+  intakeFieldMeetingDate: 'تاریخ جلسه',
+  intakeFieldMeetingGoal: 'هدف جلسه',
+  intakeFieldInvestorName: 'نام سرمایه‌گذار',
+  intakeFieldMeetingType: 'نوع جلسه',
+  intakeUnsupportedType: 'این نوع تصمیم هنوز برای ورود جزئیات در دسترس نیست.',
   intakeLoadError: 'بارگذاری این تصمیم ممکن نشد.',
   intakeSaveError: 'ذخیره پاسخ‌ها ممکن نشد.',
   intakeCompleteError: 'ادامه ممکن نیست.',
@@ -372,11 +398,15 @@ const AR: AskProductCopy = {
   evidenceCaution: 'إشارة توقيت تحذيرية',
   evidenceNeutral: 'إشارة توقيت',
   topicCarInterview: 'مقابلة عمل',
+  topicInvestorMeeting: 'لقاء مع مستثمر',
   topicGeneric: 'قرارك',
   intakeEyebrow: 'توقيت المقابلة',
   intakeTitle: 'مقابلة عمل',
   intakeBody:
     'شارك تفاصيل المقابلة. سنقيّم التوقيت للتاريخ الذي تقدّمه.',
+  intakeTitleInvestorMeeting: 'لقاء مع مستثمر',
+  intakeBodyInvestorMeeting:
+    'شارك تفاصيل اللقاء. سنقيّم التوقيت للتاريخ الذي تقدّمه.',
   intakeOptional: 'اختياري',
   intakeSelect: 'اختر…',
   intakeSave: 'حفظ الإجابات',
@@ -387,6 +417,11 @@ const AR: AskProductCopy = {
   intakeFieldRole: 'الدور',
   intakeFieldCompany: 'الشركة',
   intakeFieldInterviewType: 'نوع المقابلة',
+  intakeFieldMeetingDate: 'تاريخ اللقاء',
+  intakeFieldMeetingGoal: 'هدف اللقاء',
+  intakeFieldInvestorName: 'اسم المستثمر',
+  intakeFieldMeetingType: 'نوع اللقاء',
+  intakeUnsupportedType: 'نوع القرار هذا غير متاح لإدخال التفاصيل بعد.',
   intakeLoadError: 'تعذّر تحميل هذا القرار.',
   intakeSaveError: 'تعذّر حفظ الإجابات.',
   intakeCompleteError: 'تعذّرت المتابعة.',
@@ -478,11 +513,15 @@ const RU: AskProductCopy = {
   evidenceCaution: 'Предупреждающий сигнал тайминга',
   evidenceNeutral: 'Сигнал тайминга',
   topicCarInterview: 'Собеседование',
+  topicInvestorMeeting: 'Встреча с инвестором',
   topicGeneric: 'Ваше решение',
   intakeEyebrow: 'Тайминг собеседования',
   intakeTitle: 'Собеседование',
   intakeBody:
     'Укажите детали собеседования. Мы оценим тайминг для указанной даты.',
+  intakeTitleInvestorMeeting: 'Встреча с инвестором',
+  intakeBodyInvestorMeeting:
+    'Укажите детали встречи. Мы оценим тайминг для указанной даты.',
   intakeOptional: 'необязательно',
   intakeSelect: 'Выберите…',
   intakeSave: 'Сохранить ответы',
@@ -493,6 +532,11 @@ const RU: AskProductCopy = {
   intakeFieldRole: 'Роль',
   intakeFieldCompany: 'Компания',
   intakeFieldInterviewType: 'Тип собеседования',
+  intakeFieldMeetingDate: 'Дата встречи',
+  intakeFieldMeetingGoal: 'Цель встречи',
+  intakeFieldInvestorName: 'Имя инвестора',
+  intakeFieldMeetingType: 'Тип встречи',
+  intakeUnsupportedType: 'Этот тип решения пока недоступен для ввода деталей.',
   intakeLoadError: 'Не удалось загрузить это решение.',
   intakeSaveError: 'Не удалось сохранить ответы.',
   intakeCompleteError: 'Не удалось продолжить.',

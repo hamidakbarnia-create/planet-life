@@ -58,7 +58,9 @@ export default function DecisionCaseResultPage() {
   const topic =
     caseRecord?.decision_type_id === 'car-interview'
       ? copy.topicCarInterview
-      : caseRecord?.title;
+      : caseRecord?.decision_type_id === 'bus-investor-meeting'
+        ? copy.topicInvestorMeeting
+        : caseRecord?.title;
 
   return (
     <AppShell

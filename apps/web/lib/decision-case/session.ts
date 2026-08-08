@@ -1,7 +1,11 @@
 /**
- * Car-interview session orchestration over Decision Case API.
+ * Decision Case session orchestration over Case API.
  * Browser carries backend case_id only — no client Case SoR / local history.
  * Runtime authority is Case intake (decision_frame + natal_evidence), not sessionStorage.
+ *
+ * `ensureCaseAndSaveAnswers` remains the car-interview create-on-first-answer
+ * helper for the popular-card entry path. Generic ASK intake uses an existing
+ * Case id and `saveIntakeAnswers` / `completeCaseIntake` directly.
  */
 
 import {
@@ -72,8 +76,8 @@ function evaluateFramingFromIntake(
     operation: 'evaluate',
     time_scope: 'specific_date',
     date: target,
-    objective: 'Evaluate interview date',
-    raw_intent: `Evaluate interview on ${target}`,
+    objective: 'Evaluate selected date',
+    raw_intent: `Evaluate date ${target}`,
   };
 }
 
@@ -99,7 +103,7 @@ async function ensureEvaluateFramingOnCase(input: {
     throw new DecisionCaseApiError({
       status: 400,
       code: 'FRAMING_REQUIRED',
-      message: 'Interview date is required before evaluation',
+      message: 'Target date is required before evaluation',
       details: { missing: ['decision_frame.date'] },
     });
   }
