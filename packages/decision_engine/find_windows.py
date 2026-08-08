@@ -1,8 +1,13 @@
 """Deterministic FIND window generation for date-range scans.
 
-Eligibility uses existing candidate-band semantics (Favorable+ / score ≥ 65 →
-band ``high``). Contiguous eligible days become windows. Strength is the
-window peak score — not an average. Ordering and ties are explicit.
+Eligibility consumes the existing package candidate band ``high``, which is
+already the canonical mapping for Favorable / Highly Favorable ratings from
+``astro_engine.scoring._rating`` (≥65 Favorable, ≥80 Highly Favorable) via
+``score_to_candidate_band`` / ``rating_to_candidate_band``.
+
+FIND does not invent a numeric cutoff. Contiguous eligible days become
+windows. Strength is the window peak score — not an average. Ordering and
+ties are explicit. Empty results are honest when no Favorable+ days exist.
 """
 
 from __future__ import annotations
@@ -11,12 +16,16 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Sequence
 
+from packages.decision_engine.evaluate.runtime_common import (
+    score_to_candidate_band,
+)
+
 # Same absolute score gap philosophy as COMPARE: tiny deltas are not winners.
 FIND_TIE_EPSILON = 2.0
 FIND_MIN_RANGE_DAYS = 7
 FIND_MAX_RANGE_DAYS = 90
 FIND_MAX_WINDOWS = 5
-# Existing score_to_candidate_band: ≥65 → high (Favorable / Highly Favorable).
+# Canonical package band for Favorable / Highly Favorable (pre-FIND).
 FIND_ELIGIBLE_BAND = "high"
 
 
@@ -75,8 +84,18 @@ def iter_inclusive_dates(range_start: date, range_end: date):
         current += timedelta(days=1)
 
 
+def is_find_eligible_band(band: str) -> bool:
+    """True only for the canonical Favorable+ package band."""
+    return band == FIND_ELIGIBLE_BAND
+
+
+def is_find_eligible_score(score: float) -> bool:
+    """Eligibility via existing ``score_to_candidate_band`` — not a FIND cutoff."""
+    return score_to_candidate_band(score) == FIND_ELIGIBLE_BAND
+
+
 def _is_eligible(day: ScoredFindDay) -> bool:
-    return day.band == FIND_ELIGIBLE_BAND
+    return is_find_eligible_band(day.band)
 
 
 def _window_id(start: date, end: date) -> str:
@@ -212,6 +231,8 @@ __all__ = [
     "build_find_windows",
     "group_contiguous_windows",
     "inclusive_day_count",
+    "is_find_eligible_band",
+    "is_find_eligible_score",
     "iter_inclusive_dates",
     "rank_find_windows",
     "validate_find_range",

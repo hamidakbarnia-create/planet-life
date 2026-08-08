@@ -168,7 +168,7 @@ export function ProductLaunchIntakeForm({
           className="fc rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white/85 disabled:cursor-not-allowed disabled:opacity-40"
           data-testid="intake-complete"
         >
-          {copy.intakeComplete}
+          {isFind ? copy.intakeCompleteFind : copy.intakeComplete}
         </button>
       </div>
     </form>

@@ -88,10 +88,14 @@ export type AskProductCopy = {
   intakeBodyWeddingDate: string;
   intakeTitleProductLaunch: string;
   intakeBodyProductLaunch: string;
+  /** FIND intake body — range scan, not single-date evaluate. */
+  intakeBodyProductLaunchFind: string;
   intakeOptional: string;
   intakeSelect: string;
   intakeSave: string;
   intakeComplete: string;
+  /** FIND CTA — must not say “evaluation” / single date. */
+  intakeCompleteFind: string;
   intakeRequiredFilled: string;
   intakeRequiredRemaining: (fields: string) => string;
   intakeFieldTargetDate: string;
@@ -170,7 +174,7 @@ const EN: AskProductCopy = {
   findRangeInvalid: 'End date must be on or after the start date.',
   persistAndEvaluate: 'Evaluate this date',
   persistAndCompare: 'Compare these dates',
-  persistAndFind: 'Find timing windows',
+  persistAndFind: 'Find stronger timing windows',
   evaluating: 'Evaluating timing…',
   comparing: 'Comparing dates…',
   finding: 'Scanning timing windows…',
@@ -242,10 +246,13 @@ const EN: AskProductCopy = {
   intakeTitleProductLaunch: 'Launch a project or product',
   intakeBodyProductLaunch:
     'Share what you are launching. We’ll evaluate launch-day timing for the date you provide — not market fit, revenue, or business success.',
+  intakeBodyProductLaunchFind:
+    'Share what you are launching. We’ll scan the selected range for stronger timing windows within this range — not market fit, revenue, or business success.',
   intakeOptional: 'optional',
   intakeSelect: 'Select…',
   intakeSave: 'Save answers',
   intakeComplete: 'Continue to evaluation',
+  intakeCompleteFind: 'Continue to find timing windows',
   intakeRequiredFilled: 'Required details are ready.',
   intakeRequiredRemaining: (fields) => `Still needed: ${fields}`,
   intakeFieldTargetDate: 'Interview date',
@@ -329,7 +336,7 @@ const FA: AskProductCopy = {
   findRangeInvalid: 'تاریخ پایان باید بعد از شروع یا برابر آن باشد.',
   persistAndEvaluate: 'ارزیابی این تاریخ',
   persistAndCompare: 'مقایسه این تاریخ‌ها',
-  persistAndFind: 'یافتن پنجره‌های زمان‌بندی',
+  persistAndFind: 'یافتن پنجره‌های زمان‌بندی قوی‌تر',
   evaluating: 'در حال ارزیابی زمان‌بندی…',
   comparing: 'در حال مقایسه تاریخ‌ها…',
   finding: 'در حال اسکن پنجره‌های زمان‌بندی…',
@@ -401,10 +408,13 @@ const FA: AskProductCopy = {
   intakeTitleProductLaunch: 'لانچ پروژه یا محصول',
   intakeBodyProductLaunch:
     'آنچه لانچ می‌کنید را مشخص کنید. فقط زمان‌بندی روز لانچ را ارزیابی می‌کنیم — نه تناسب بازار، درآمد یا موفقیت کسب‌وکار.',
+  intakeBodyProductLaunchFind:
+    'آنچه لانچ می‌کنید را مشخص کنید. بازهٔ انتخاب‌شده را برای یافتن پنجره‌های زمان‌بندی قوی‌تر در همین بازه اسکن می‌کنیم — نه تناسب بازار، درآمد یا موفقیت کسب‌وکار.',
   intakeOptional: 'اختیاری',
   intakeSelect: 'انتخاب…',
   intakeSave: 'ذخیره پاسخ‌ها',
   intakeComplete: 'ادامه به ارزیابی',
+  intakeCompleteFind: 'ادامه برای یافتن پنجره‌های زمان‌بندی',
   intakeRequiredFilled: 'اطلاعات لازم آماده است.',
   intakeRequiredRemaining: (fields) => `هنوز لازم است: ${fields}`,
   intakeFieldTargetDate: 'تاریخ مصاحبه',
@@ -487,7 +497,7 @@ const AR: AskProductCopy = {
   findRangeInvalid: 'يجب أن يكون تاريخ النهاية في يوم البداية أو بعده.',
   persistAndEvaluate: 'تقييم هذا التاريخ',
   persistAndCompare: 'مقارنة هذه التواريخ',
-  persistAndFind: 'البحث عن نوافذ التوقيت',
+  persistAndFind: 'البحث عن نوافذ توقيت أقوى',
   evaluating: 'جارٍ تقييم التوقيت…',
   comparing: 'جارٍ مقارنة التواريخ…',
   finding: 'جارٍ مسح نوافذ التوقيت…',
@@ -559,10 +569,13 @@ const AR: AskProductCopy = {
   intakeTitleProductLaunch: 'إطلاق مشروع أو منتج',
   intakeBodyProductLaunch:
     'حدّد ما الذي تُطلقه. نقيّم توقيت يوم الإطلاق فقط — لا ملاءمة السوق أو الإيرادات أو نجاح العمل.',
+  intakeBodyProductLaunchFind:
+    'حدّد ما الذي تُطلقه. سنمسح النطاق المحدد بحثًا عن نوافذ توقيت أقوى داخل هذا النطاق — لا ملاءمة السوق أو الإيرادات أو نجاح العمل.',
   intakeOptional: 'اختياري',
   intakeSelect: 'اختر…',
   intakeSave: 'حفظ الإجابات',
   intakeComplete: 'المتابعة إلى التقييم',
+  intakeCompleteFind: 'المتابعة لإيجاد نوافذ التوقيت',
   intakeRequiredFilled: 'التفاصيل المطلوبة جاهزة.',
   intakeRequiredRemaining: (fields) => `ما زال مطلوبًا: ${fields}`,
   intakeFieldTargetDate: 'تاريخ المقابلة',
@@ -643,7 +656,7 @@ const RU: AskProductCopy = {
   findRangeInvalid: 'Дата окончания должна быть не раньше начала.',
   persistAndEvaluate: 'Оценить эту дату',
   persistAndCompare: 'Сравнить эти даты',
-  persistAndFind: 'Найти окна тайминга',
+  persistAndFind: 'Найти более сильные окна тайминга',
   evaluating: 'Оценка тайминга…',
   comparing: 'Сравнение дат…',
   finding: 'Сканирование окон тайминга…',
@@ -715,10 +728,13 @@ const RU: AskProductCopy = {
   intakeTitleProductLaunch: 'Запуск проекта или продукта',
   intakeBodyProductLaunch:
     'Укажите, что запускаете. Мы оценим только тайминг дня запуска — не соответствие рынку, выручку или успех бизнеса.',
+  intakeBodyProductLaunchFind:
+    'Укажите, что запускаете. Мы просканируем выбранный диапазон, чтобы найти более сильные окна тайминга внутри этого диапазона — не соответствие рынку, выручку или успех бизнеса.',
   intakeOptional: 'необязательно',
   intakeSelect: 'Выберите…',
   intakeSave: 'Сохранить ответы',
   intakeComplete: 'Перейти к оценке',
+  intakeCompleteFind: 'Продолжить к поиску окон тайминга',
   intakeRequiredFilled: 'Обязательные поля заполнены.',
   intakeRequiredRemaining: (fields) => `Ещё нужно: ${fields}`,
   intakeFieldTargetDate: 'Дата собеседования',

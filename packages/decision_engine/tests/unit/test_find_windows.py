@@ -6,7 +6,13 @@ from datetime import date, timedelta
 
 import pytest
 
+from packages.astro_engine.scoring import _rating
+from packages.decision_engine.evaluate.runtime_common import (
+    rating_to_candidate_band,
+    score_to_candidate_band,
+)
 from packages.decision_engine.find_windows import (
+    FIND_ELIGIBLE_BAND,
     FIND_MAX_WINDOWS,
     FIND_MIN_RANGE_DAYS,
     FIND_TIE_EPSILON,
@@ -14,6 +20,8 @@ from packages.decision_engine.find_windows import (
     build_find_windows,
     group_contiguous_windows,
     inclusive_day_count,
+    is_find_eligible_band,
+    is_find_eligible_score,
     iter_inclusive_dates,
     rank_find_windows,
     validate_find_range,
@@ -103,6 +111,43 @@ def test_no_qualifying_window_empty() -> None:
     result = build_find_windows(days)
     assert result.windows == ()
     assert result.unique_dominant is False
+
+
+def test_eligibility_consumes_canonical_favorable_plus_band() -> None:
+    """65 is astro_engine Favorable floor; FIND only consumes band=high."""
+    assert _rating(65) == "Favorable"
+    assert _rating(64).startswith("Mixed")
+    assert rating_to_candidate_band("Favorable") == FIND_ELIGIBLE_BAND
+    assert rating_to_candidate_band("Highly Favorable") == FIND_ELIGIBLE_BAND
+    assert score_to_candidate_band(65) == FIND_ELIGIBLE_BAND
+    assert score_to_candidate_band(64.9) == "moderate"
+    assert is_find_eligible_score(65) is True
+    assert is_find_eligible_score(64.9) is False
+    assert is_find_eligible_band("high") is True
+    assert is_find_eligible_band("moderate") is False
+
+
+def test_never_lowers_threshold_to_force_windows() -> None:
+    base = date(2026, 9, 1)
+    # Best day is Mixed / moderate — must stay empty, not promote to a window.
+    days = [
+        _day(base + timedelta(days=i), score, band=score_to_candidate_band(score))
+        for i, score in enumerate([64, 60, 55, 50, 45, 40, 30])
+    ]
+    result = build_find_windows(days)
+    assert result.windows == ()
+    assert max(d.score for d in days) == 64
+    assert is_find_eligible_score(64) is False
+
+
+def test_tiny_within_band_deltas_do_not_claim_unique_winner() -> None:
+    a = date(2026, 9, 1)
+    b = date(2026, 9, 3)
+    # 78 vs 77 — both Favorable+/high; must not invent a unique winner.
+    result = build_find_windows([_day(a, 78), _day(b, 77)])
+    assert len(result.windows) == 2
+    assert result.unique_dominant is False
+    assert set(result.tied_window_ids) == {w.window_id for w in result.windows}
 
 
 def test_rank_tie_break_by_start_date() -> None:
