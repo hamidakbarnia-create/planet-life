@@ -2,5 +2,8 @@
 pytest
 httpx
 psycopg[binary]>=3.2,<4
+# Embedded Postgres for identity/decision-case pytest fixtures and
+# scripts/dev/run-local-api-with-pgserver.py (LOCAL DEVELOPMENT ONLY).
+pgserver>=0.1.4,<1
 
 jsonschema>=4.23,<5
