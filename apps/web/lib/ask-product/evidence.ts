@@ -24,19 +24,26 @@ const UNKNOWN_CONFIDENCE = new Set([
   'STUB_ENGINE',
 ]);
 
+export type DriverPolarity = 'supportive' | 'cautionary' | 'neutral';
+
 export type AskEvidenceLine = {
-  /** Localized restrained category from Package driver.band */
+  id: string;
+  /** Localized restrained category from driver.polarity (not deprecated band). */
   title: string;
   /**
-   * EN-only Package label/support passthrough.
-   * Never machine-translated for FA/AR/RU (would fabricate meaning).
+   * Package label/support/friction passthrough when useful for distinct identity.
+   * Never machine-translated for FA/AR/RU.
    */
   detail?: string;
-  source: 'drivers.band' | 'drivers.label_support';
-  /** Trace fields for tests / honesty audits */
+  source: 'drivers.polarity' | 'drivers.label_support';
+  polarity: DriverPolarity;
   driverLabel?: string;
-  driverBand?: string;
   driverSupport?: string;
+  driverFriction?: string;
+  /** @deprecated Trace only — not used for primary titles. */
+  driverBand?: string;
+  contribution?: number;
+  importance?: string;
 };
 
 export type AskEvaluatePresentation = {
@@ -45,11 +52,19 @@ export type AskEvaluatePresentation = {
   verdict: string;
   score: number | null;
   scoreLabel: string | null;
+  scoreHonestyNote: string;
   meaning: string;
   meaningSource: 'timing.score_band' | 'timing.band';
+  recommendation: string;
+  recommendationDetail?: string;
   evidence: AskEvidenceLine[];
+  supportiveEvidence: AskEvidenceLine[];
+  cautionaryEvidence: AskEvidenceLine[];
+  contextEvidence: AskEvidenceLine[];
   scope: string;
   scopeSource: 'car-interview-contract' | 'generic-timing';
+  packageLimits: string[];
+  nextSteps: string[];
   confidence: string | null;
   agencyLine: string;
 };
@@ -96,43 +111,134 @@ export function packageConfidence(
   return confidenceValueToBand(pkg.confidence.value);
 }
 
-function bandEvidenceTitle(
-  band: string | undefined,
+export function resolveDriverPolarity(driver: {
+  polarity?: string;
+  contribution?: number;
+  band?: string;
+}): DriverPolarity {
+  if (
+    driver.polarity === 'supportive' ||
+    driver.polarity === 'cautionary' ||
+    driver.polarity === 'neutral'
+  ) {
+    return driver.polarity;
+  }
+  if (typeof driver.contribution === 'number') {
+    if (driver.contribution > 0) return 'supportive';
+    if (driver.contribution < 0) return 'cautionary';
+    return 'neutral';
+  }
+  // Deprecated band is polarity projection only (PR-A compat), not timing quality.
+  if (driver.band === 'high') return 'supportive';
+  if (driver.band === 'low') return 'cautionary';
+  return 'neutral';
+}
+
+function polarityCategoryTitle(
+  polarity: DriverPolarity,
   copy: AskProductCopy
 ): string {
-  if (band === 'high') return copy.evidenceSupportive;
-  if (band === 'low') return copy.evidenceCaution;
+  if (polarity === 'supportive') return copy.evidenceSupportive;
+  if (polarity === 'cautionary') return copy.evidenceCaution;
   return copy.evidenceNeutral;
 }
 
+function evidenceTitle(
+  driver: {
+    polarity?: string;
+    contribution?: number;
+    band?: string;
+    importance?: string;
+    label?: string;
+  },
+  polarity: DriverPolarity,
+  copy: AskProductCopy,
+  lang: AppLang,
+  ordinal: number
+): string {
+  const category = polarityCategoryTitle(polarity, copy);
+  const importance =
+    driver.importance && driver.importance in copy.importance
+      ? copy.importance[driver.importance as keyof typeof copy.importance]
+      : null;
+
+  // EN can lead with the Package label when present (human-authored English).
+  if (lang === 'en' && driver.label?.trim()) {
+    return driver.label.trim();
+  }
+
+  // Structured category + importance + ordinal keeps FA/AR/RU items distinct
+  // without machine-translating free-form astro labels.
+  const parts = [category];
+  if (importance) parts.push(importance);
+  const ordinalLabel =
+    lang === 'fa'
+      ? String(ordinal).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]!)
+      : lang === 'ar'
+        ? String(ordinal).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]!)
+        : String(ordinal);
+  parts.push(ordinalLabel);
+  return parts.join(' · ');
+}
+
 /**
- * Map up to 3 Package drivers.
- * Band → restrained localized category (presentation label only).
- * Free-form English label/support only on EN (Package language).
- * FA/AR/RU intentionally omit English prose rather than inventing translations.
+ * Map Package drivers using polarity/contribution as primary semantics.
+ * Preserves distinct evidence identity — does not dedupe similar titles.
  */
 export function mapPackageEvidence(
   pkg: DecisionEvaluationPackage,
   lang: AppLang
 ): AskEvidenceLine[] {
   const copy = getAskProductCopy(lang);
-  return pkg.drivers.items.slice(0, 3).map((driver) => {
-    const title = bandEvidenceTitle(driver.band, copy);
-    const base = {
-      title,
-      driverLabel: driver.label,
-      driverBand: driver.band,
-      driverSupport: driver.support,
-    };
-    if (lang === 'en' && (driver.label || driver.support)) {
-      const detail = [driver.label, driver.support].filter(Boolean).join(': ');
-      return {
-        ...base,
-        detail: detail || undefined,
-        source: 'drivers.label_support' as const,
-      };
+  const polarityCounts: Record<DriverPolarity, number> = {
+    supportive: 0,
+    cautionary: 0,
+    neutral: 0,
+  };
+
+  // Prefer 2–4 items; keep up to 4 to preserve distinct reasons.
+  return pkg.drivers.items.slice(0, 4).map((driver, index) => {
+    const polarity = resolveDriverPolarity(driver);
+    polarityCounts[polarity] += 1;
+    const ordinal = polarityCounts[polarity];
+    const title = evidenceTitle(driver, polarity, copy, lang, ordinal);
+
+    // EN: passthrough Package label/support/friction (Package language).
+    // FA/AR/RU: structured polarity+importance(+ordinal) titles only —
+    // never machine-translate free-form English astro labels; ordinal keeps
+    // distinct evidence identity without collapsing identical generic lines.
+    let detail: string | undefined;
+    if (lang === 'en') {
+      const support = driver.support?.trim();
+      const friction = driver.friction?.trim();
+      const parts: string[] = [];
+      if (polarity === 'cautionary') {
+        if (friction) parts.push(friction);
+        else if (support) parts.push(support);
+      } else if (support) {
+        parts.push(support);
+      } else if (friction) {
+        parts.push(friction);
+      }
+      detail = parts.filter(Boolean).join(': ') || undefined;
     }
-    return { ...base, source: 'drivers.band' as const };
+
+    return {
+      id: driver.id || `driver-${index + 1}`,
+      title,
+      detail,
+      source:
+        lang === 'en' && detail
+          ? ('drivers.label_support' as const)
+          : ('drivers.polarity' as const),
+      polarity,
+      driverLabel: driver.label,
+      driverSupport: driver.support,
+      driverFriction: driver.friction,
+      driverBand: driver.band,
+      contribution: driver.contribution,
+      importance: driver.importance,
+    };
   });
 }
 
@@ -155,8 +261,6 @@ function scopeForPackage(
   pkg: DecisionEvaluationPackage,
   copy: AskProductCopy
 ): { scope: string; scopeSource: AskEvaluatePresentation['scopeSource'] } {
-  // Interview scope mirrors Runtime-1 evidence.limits (negotiation profile).
-  // Never apply interview negotiation claims to other decision types.
   if (pkg.decision_type_id === 'car-interview') {
     return {
       scope: copy.scopeInterviewTiming,
@@ -169,13 +273,21 @@ function scopeForPackage(
   };
 }
 
+function stanceRecommendation(
+  pkg: DecisionEvaluationPackage,
+  copy: AskProductCopy
+): string {
+  const stance = pkg.recommendation.stance;
+  if (stance === 'insufficient_data') return copy.blockedNoVerdict;
+  if (stance in copy.stance) {
+    return copy.stance[stance as keyof typeof copy.stance];
+  }
+  return copy.meaningByStrength.mixed;
+}
+
 /**
  * Build Evaluate first-viewport model from supported Package semantics only.
  * Omits best_window / alternative / avoid / Unknown filler rows.
- *
- * Meaning is a restrained presentation of timing strength band only —
- * never invents negotiation/communication/employer claims from the band,
- * and never surfaces English recommendation.summary on FA/AR/RU.
  */
 export function buildEvaluatePresentation(
   pkg: DecisionEvaluationPackage,
@@ -214,18 +326,49 @@ export function buildEvaluatePresentation(
       : 'timing.band';
 
   const { scope, scopeSource } = scopeForPackage(pkg, copy);
+  const evidence = mapPackageEvidence(pkg, lang);
+  const supportiveEvidence = evidence.filter((e) => e.polarity === 'supportive');
+  const cautionaryEvidence = evidence.filter((e) => e.polarity === 'cautionary');
+  const contextEvidence = evidence.filter((e) => e.polarity === 'neutral');
+
+  const packageLimits = [...pkg.explainability.limits].filter(Boolean).slice(0, 4);
+
+  // Free-form English action steps only on EN — no MT for other locales.
+  const nextSteps =
+    lang === 'en'
+      ? pkg.action_plan.steps
+          .slice()
+          .sort((a, b) => a.order - b.order)
+          .map((s) => s.action.trim())
+          .filter(Boolean)
+          .slice(0, 3)
+      : [];
+
+  const recommendation = stanceRecommendation(pkg, copy);
+  const recommendationDetail =
+    lang === 'en' && pkg.recommendation.summary.trim()
+      ? pkg.recommendation.summary.trim()
+      : undefined;
 
   return {
     topic: options?.topic?.trim() || topicFromPackage(pkg, copy),
     date: formatAskDatePair(lang, iso),
     verdict,
     score,
-    scoreLabel: score != null ? copy.resultScoreOf(score) : null,
+    scoreLabel: score != null ? copy.timingScoreOf(score) : null,
+    scoreHonestyNote: copy.scoreHonestyNote,
     meaning: copy.meaningByStrength[strength],
     meaningSource,
-    evidence: mapPackageEvidence(pkg, lang),
+    recommendation,
+    recommendationDetail,
+    evidence,
+    supportiveEvidence,
+    cautionaryEvidence,
+    contextEvidence,
     scope,
     scopeSource,
+    packageLimits,
+    nextSteps,
     confidence: localizeConfidence(lang, confidence),
     agencyLine: copy.agencyLine,
   };

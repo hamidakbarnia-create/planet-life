@@ -1,7 +1,19 @@
-import { getAskProductCopy } from '@/lib/ask-product';
+import {
+  AgencyLine,
+  ConfidenceIndicator,
+  LimitsBlock,
+  ResultHeader,
+  ResultMetricsRow,
+  ResultShell,
+  resultShellStyles as styles,
+} from '@/components/decision-result/ResultShell';
+import {
+  getAskProductCopy,
+  localizeConfidence,
+  localizeStrength,
+} from '@/lib/ask-product';
 import type { CompareResultViewModel } from '@/lib/decision-frame';
 import { useAppLang } from '@/lib/use-app-lang';
-import styles from './decision-frame.module.css';
 
 export function CompareResultView({
   model,
@@ -13,59 +25,78 @@ export function CompareResultView({
   const [hookLang] = useAppLang();
   const lang = langProp ?? hookLang;
   const copy = getAskProductCopy(lang);
+  const confidenceLabel =
+    localizeConfidence(lang, model.confidence) ?? copy.confidence.medium;
 
   return (
-    <article
-      className={styles.result}
-      data-testid="compare-result-view"
-      data-operation="compare"
-      aria-label={copy.compareResultTitle}
+    <ResultShell
+      testId="compare-result-view"
+      mode="compare_dates"
       dir={copy.dir}
+      ariaLabel={copy.compareResultTitle}
     >
-      <header className={styles.hero}>
-        <p className={`fi ${styles.heroLabel}`}>
-          {model.unique_winner
+      <ResultHeader
+        eyebrow={
+          model.unique_winner
             ? copy.compareWinnerLabel
-            : copy.compareTiedLabel}
-        </p>
-        <h2 className={`fc ${styles.heroValue}`} data-testid="compare-winner">
-          {model.unique_winner ? model.winner_label : copy.compareTiedLabel}
-        </h2>
-      </header>
+            : copy.compareTiedLabel
+        }
+        topic={
+          model.unique_winner ? model.winner_label : copy.compareTiedLabel
+        }
+        topicTestId="compare-winner"
+      />
 
-      <div className={styles.compareCols} data-testid="compare-options">
-        {model.options.map((option) => (
-          <div
-            key={option.option_id ?? option.label}
-            className={styles.compareCard}
-            data-testid="compare-option"
-            data-option-id={option.option_id}
-            data-rank={option.rank}
-          >
-            <p className={`fi ${styles.label}`}>
-              {option.rank != null ? `#${option.rank}` : ''}
-            </p>
-            <p className={`fc ${styles.heroValue}`} style={{ fontSize: '1.2rem' }}>
-              {option.label}
-            </p>
-            {option.date ? (
-              <p className={`fi ${styles.value}`}>{option.date}</p>
-            ) : null}
-            <p className={`fi ${styles.value}`}>{option.strength}</p>
-            {option.score != null ? (
-              <p className={`fi ${styles.value}`}>
-                {copy.resultScoreOf(option.score)}
-              </p>
-            ) : null}
-          </div>
-        ))}
-      </div>
+      <section aria-label={copy.compareOptionsLabel}>
+        <p className={`fi ${styles.sectionLabel}`}>{copy.compareOptionsLabel}</p>
+        <div className={styles.compareRankRow} data-testid="compare-options">
+          {model.options.map((option) => {
+            const isLead =
+              model.unique_winner &&
+              option.rank === 1 &&
+              option.label === model.winner_label;
+            return (
+              <div
+                key={option.option_id ?? option.label}
+                className={`${styles.compareOption} ${
+                  isLead
+                    ? styles.compareOptionLead
+                    : !model.unique_winner
+                      ? styles.compareOptionTied
+                      : ''
+                }`}
+                data-testid="compare-option"
+                data-option-id={option.option_id}
+                data-rank={option.rank}
+              >
+                <p className={`fi ${styles.rank}`}>
+                  {option.rank != null ? copy.compareRankOf(option.rank) : ''}
+                </p>
+                <p className={`fc ${styles.optionLabel}`}>{option.label}</p>
+                {option.date ? (
+                  <p className={`fi ${styles.datePrimary}`}>{option.date}</p>
+                ) : null}
+                <p className={`fi ${styles.meaning}`}>
+                  {localizeStrength(lang, option.strength) ?? option.strength}
+                </p>
+                {option.score != null ? (
+                  <p className={`fi ${styles.score}`}>
+                    {copy.timingScoreOf(option.score)}
+                  </p>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       {model.relative_explanation ? (
-        <div className={styles.metaRow} data-testid="compare-relative-why">
-          <p className={`fi ${styles.label}`}>{copy.compareRelativeWhy}</p>
-          <p className={`fi ${styles.value}`}>{model.relative_explanation}</p>
-        </div>
+        <section data-testid="compare-relative-why">
+          <p className={`fi ${styles.sectionLabel}`}>{copy.compareRelativeWhy}</p>
+          <p className={`fi ${styles.recommendationDetail}`}>
+            {model.relative_explanation}
+          </p>
+        </section>
       ) : null}
 
       {model.advantages.length > 0 ? (
@@ -75,30 +106,25 @@ export function CompareResultView({
               key={`${item.option_label}-${item.advantage}`}
               className={styles.metaRow}
             >
-              <p className={`fi ${styles.label}`}>{item.option_label}</p>
-              <p className={`fi ${styles.value}`}>{item.advantage}</p>
+              <p className={`fi ${styles.sectionLabel}`}>{item.option_label}</p>
+              <p className={`fi ${styles.recommendationDetail}`}>
+                {item.advantage}
+              </p>
             </div>
           ))}
         </div>
       ) : null}
 
-      <div className={styles.metaRow}>
-        <p className={`fi ${styles.label}`}>{copy.resultConfidence}</p>
-        <p className={`fi ${styles.value}`}>{model.confidence}</p>
-      </div>
+      <ResultMetricsRow>
+        <ConfidenceIndicator
+          label={copy.resultConfidence}
+          value={confidenceLabel}
+        />
+      </ResultMetricsRow>
 
-      {model.limitations && model.limitations.length > 0 ? (
-        <section className={styles.belowFold} aria-label={copy.resultScope}>
-          <p className={`fi ${styles.label}`}>{copy.resultScope}</p>
-          <ul className={`fi ${styles.value}`}>
-            {model.limitations.map((limit) => (
-              <li key={limit}>{limit}</li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      <LimitsBlock label={copy.limitsLabel} limits={model.limitations} />
 
-      <p className={`fi ${styles.notice}`}>{copy.agencyLine}</p>
-    </article>
+      <AgencyLine text={copy.agencyLine} />
+    </ResultShell>
   );
 }

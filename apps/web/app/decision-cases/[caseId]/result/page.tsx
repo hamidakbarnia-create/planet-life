@@ -16,6 +16,20 @@ import { HOME_LANGS } from '@/lib/home-i18n';
 import { useAppLang, useClientReady } from '@/lib/use-app-lang';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 
+function loadingCopyForCase(
+  caseRecord: DecisionCaseResource | null,
+  copy: ReturnType<typeof getAskProductCopy>
+): string {
+  if (!caseRecord) return copy.evaluating;
+  if (caseRecord.mode === 'compare_dates' || caseRecord.state === 'compared') {
+    return copy.comparing;
+  }
+  if (caseRecord.mode === 'find_dates' || caseRecord.state === 'found') {
+    return copy.finding;
+  }
+  return copy.evaluating;
+}
+
 export default function DecisionCaseResultPage() {
   const ready = useClientReady();
   const [lang, setLang] = useAppLang();
@@ -74,7 +88,10 @@ export default function DecisionCaseResultPage() {
       navLabels={t.nav}
       fontFamily={localeFontFamily(lang)}
     >
-      <div className="mx-auto max-w-3xl px-4 py-8 space-y-6" dir={copy.dir}>
+      <div
+        className="mx-auto w-full max-w-5xl px-4 py-8 space-y-6 sm:px-6 lg:max-w-6xl"
+        dir={copy.dir}
+      >
         {error ? (
           <p className="fi text-sm text-red-300" role="alert">
             {error}
@@ -82,17 +99,18 @@ export default function DecisionCaseResultPage() {
         ) : null}
 
         {evaluation?.package ? (
-          <div className="mio-glass mio-glass--primary !p-5">
+          <div className="mio-glass mio-glass--primary !p-5 sm:!p-7">
             <DecisionPackageView
               package={evaluation.package}
               dqStatus={evaluation.dq_status}
               caseId={caseId}
               topic={topic}
+              lang={lang}
             />
           </div>
         ) : !error ? (
           <p className="fi text-sm text-white/55" data-testid="result-evaluating">
-            {copy.evaluating}
+            {loadingCopyForCase(caseRecord, copy)}
           </p>
         ) : null}
 

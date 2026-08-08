@@ -7,7 +7,7 @@ import { getAskProductCopy } from '@/lib/ask-product';
 
 afterEach(() => cleanup());
 
-function runtimePkg() {
+function runtimePkg(score = 81) {
   const base = bindDemoStubPackage({
     caseId: '11111111-1111-4111-8111-111111111111',
     caseVersion: 1,
@@ -16,6 +16,13 @@ function runtimePkg() {
   return {
     ...base,
     engine_id: 'decision-engine-car-interview-v1',
+    timing: {
+      ...base.timing,
+      score,
+      candidates: base.timing.candidates.map((c, i) =>
+        i === 0 ? { ...c, score, date: '2026-08-18' } : c
+      ),
+    },
     confidence: { value: 70, precision_level: 'L3' as const, penalties: [] },
   };
 }
@@ -42,6 +49,9 @@ describe('EvaluateProductResult first viewport', () => {
       expect(screen.getByTestId('result-meaning').textContent).toBe(
         model!.meaning
       );
+      expect(screen.getByTestId('result-confidence')).toBeTruthy();
+      expect(screen.getByTestId('result-recommendation')).toBeTruthy();
+      expect(screen.getByTestId('result-limits')).toBeTruthy();
 
       const html = container.innerHTML;
       const topicAt = html.indexOf(model!.topic);
@@ -54,4 +64,29 @@ describe('EvaluateProductResult first viewport', () => {
       expect(meaningAt).toBeGreaterThan(verdictAt);
     }
   );
+
+  it('labels 100 as timing score with separate confidence and honesty note', () => {
+    const model = buildEvaluatePresentation(runtimePkg(100), 'en');
+    render(<EvaluateProductResult lang="en" model={model!} />);
+    expect(screen.getByTestId('result-score').textContent).toBe(
+      'Timing score: 100 / 100'
+    );
+    expect(screen.getByTestId('result-score-honesty').textContent).toMatch(
+      /not probability|certainty/i
+    );
+    expect(screen.getByTestId('result-confidence').textContent).not.toBe(
+      screen.getByTestId('result-score').textContent
+    );
+  });
+
+  it('splits supportive and cautionary driver sections', () => {
+    const model = buildEvaluatePresentation(runtimePkg(), 'fa');
+    render(<EvaluateProductResult lang="fa" model={model!} />);
+    expect(screen.getByTestId('result-evidence-support')).toBeTruthy();
+    expect(screen.getByTestId('result-evidence-caution')).toBeTruthy();
+    const cautionTitles = screen
+      .getAllByTestId('result-caution-item')
+      .map((el) => el.textContent ?? '');
+    expect(new Set(cautionTitles).size).toBe(cautionTitles.length);
+  });
 });

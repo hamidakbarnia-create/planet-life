@@ -4,12 +4,14 @@ import {
   buildEvaluatePresentation,
   mapPackageEvidence,
   packageStrength,
+  resolveDriverPolarity,
 } from './evidence';
 import { getAskProductCopy } from './copy';
 
 function runtimePackage(overrides?: {
   decision_type_id?: string;
   score?: number;
+  drivers?: ReturnType<typeof bindDemoStubPackage>['drivers'];
 }) {
   const base = bindDemoStubPackage({
     caseId: '11111111-1111-4111-8111-111111111111',
@@ -33,6 +35,7 @@ function runtimePackage(overrides?: {
       precision_level: 'L3' as const,
       penalties: [],
     },
+    drivers: overrides?.drivers ?? base.drivers,
   };
 }
 
@@ -71,23 +74,80 @@ describe('ask-product evidence mapping honesty', () => {
     expect(model?.scope).toMatch(/interview negotiation/i);
   });
 
-  it('maps drivers with full traceability', () => {
+  it('maps drivers by polarity with full traceability', () => {
     const pkg = runtimePackage();
     const en = mapPackageEvidence(pkg, 'en');
     expect(en[0]).toMatchObject({
       driverLabel: 'Visibility',
-      driverBand: 'high',
+      polarity: 'supportive',
       driverSupport: 'The selected date supports clear presentation.',
       source: 'drivers.label_support',
-      title: getAskProductCopy('en').evidenceSupportive,
-      detail: 'Visibility: The selected date supports clear presentation.',
+      title: 'Visibility',
+      detail: 'The selected date supports clear presentation.',
     });
+    expect(en.some((e) => e.polarity === 'cautionary')).toBe(true);
 
     const fa = mapPackageEvidence(pkg, 'fa');
-    expect(fa[0]?.source).toBe('drivers.band');
-    expect(fa[0]?.title).toBe(getAskProductCopy('fa').evidenceSupportive);
+    expect(fa[0]?.source).toBe('drivers.polarity');
+    expect(fa[0]?.polarity).toBe('supportive');
+    expect(fa[0]?.title).toContain(getAskProductCopy('fa').evidenceSupportive);
     expect(fa[0]?.detail).toBeUndefined();
     expect(fa[0]?.driverLabel).toBe('Visibility');
+  });
+
+  it('keeps distinct FA caution lines when polarity differs from collapsed band titles', () => {
+    const pkg = runtimePackage({
+      drivers: {
+        items: [
+          {
+            id: 'a',
+            label: 'Mercury square',
+            contribution: -1.2,
+            polarity: 'cautionary',
+            importance: 'medium',
+            score: 1.2,
+            band: 'low',
+            support: '',
+            friction: 'Communication friction rises.',
+          },
+          {
+            id: 'b',
+            label: 'Mars hard aspect',
+            contribution: -2.4,
+            polarity: 'cautionary',
+            importance: 'high',
+            score: 2.4,
+            band: 'low',
+            support: '',
+            friction: 'Pace pressure increases.',
+          },
+          {
+            id: 'c',
+            label: 'Saturn load',
+            contribution: -0.8,
+            polarity: 'cautionary',
+            importance: 'low',
+            score: 0.8,
+            band: 'low',
+            support: '',
+            friction: 'Extra structure needed.',
+          },
+        ],
+      },
+    });
+    const fa = mapPackageEvidence(pkg, 'fa');
+    expect(fa).toHaveLength(3);
+    const titles = fa.map((e) => e.title);
+    expect(new Set(titles).size).toBe(3);
+    expect(titles.every((t) => t.includes(getAskProductCopy('fa').evidenceCaution))).toBe(
+      true
+    );
+  });
+
+  it('resolves polarity from contribution when polarity omitted', () => {
+    expect(resolveDriverPolarity({ contribution: 2 })).toBe('supportive');
+    expect(resolveDriverPolarity({ contribution: -1 })).toBe('cautionary');
+    expect(resolveDriverPolarity({ contribution: 0 })).toBe('neutral');
   });
 
   it.each(['fa', 'ar', 'ru'] as const)(
@@ -99,6 +159,7 @@ describe('ask-product evidence mapping honesty', () => {
       );
       expect(model?.meaning).not.toMatch(/[A-Za-z]{4,}/);
       expect(model?.evidence.every((e) => !e.detail)).toBe(true);
+      expect(model?.recommendationDetail).toBeUndefined();
     }
   );
 
@@ -115,16 +176,65 @@ describe('ask-product evidence mapping honesty', () => {
     expect(buildEvaluatePresentation(blocked, 'en')).toBeNull();
   });
 
-  it('first-viewport field order is topic→date→verdict→score→meaning→evidence→scope→confidence', () => {
+  it('shows 100 timing score honestly with separate confidence', () => {
+    const model = buildEvaluatePresentation(runtimePackage({ score: 100 }), 'en');
+    expect(model?.score).toBe(100);
+    expect(model?.scoreLabel).toBe('Timing score: 100 / 100');
+    expect(model?.scoreHonestyNote).toMatch(/not probability|certainty/i);
+    expect(model?.confidence).toBeTruthy();
+    expect(model?.scoreLabel).not.toEqual(model?.confidence);
+  });
+
+  it('investor evaluate presentation avoids probability/success claims', () => {
+    const model = buildEvaluatePresentation(
+      runtimePackage({ decision_type_id: 'bus-investor-meeting', score: 100 }),
+      'en',
+      { topic: 'Meet an investor' }
+    );
+    const blob = [
+      model?.recommendation,
+      model?.recommendationDetail,
+      model?.meaning,
+      model?.scope,
+    ].join(' ');
+    expect(blob).not.toMatch(
+      /will invest|fundraising probability|meeting success|guaranteed investment/i
+    );
+    expect(model?.scoreLabel).toMatch(/Timing score/);
+    expect(model?.packageLimits.length).toBeGreaterThanOrEqual(0);
+    expect(model?.recommendation).toBeTruthy();
+  });
+
+  it('separates supportive and cautionary evidence by polarity', () => {
+    const model = buildEvaluatePresentation(runtimePackage(), 'en');
+    expect(model?.supportiveEvidence.length).toBeGreaterThan(0);
+    expect(model?.cautionaryEvidence.length).toBeGreaterThan(0);
+    expect(
+      model?.supportiveEvidence.every((e) => e.polarity === 'supportive')
+    ).toBe(true);
+    expect(
+      model?.cautionaryEvidence.every((e) => e.polarity === 'cautionary')
+    ).toBe(true);
+  });
+
+  it('surfaces limits and recommendation from package data', () => {
+    const model = buildEvaluatePresentation(runtimePackage(), 'en');
+    expect(model?.recommendation).toBeTruthy();
+    expect(model?.packageLimits.length).toBeGreaterThan(0);
+    expect(model?.scope).toBeTruthy();
+  });
+
+  it('first-viewport field order keeps topic→date→verdict before evidence/confidence', () => {
     const model = buildEvaluatePresentation(runtimePackage(), 'en');
     expect(model).not.toBeNull();
     const keys = Object.keys(model!);
     expect(keys.indexOf('topic')).toBeLessThan(keys.indexOf('date'));
     expect(keys.indexOf('date')).toBeLessThan(keys.indexOf('verdict'));
-    expect(keys.indexOf('verdict')).toBeLessThan(keys.indexOf('meaning'));
-    expect(keys.indexOf('meaning')).toBeLessThan(keys.indexOf('evidence'));
-    expect(keys.indexOf('evidence')).toBeLessThan(keys.indexOf('scope'));
-    expect(keys.indexOf('scope')).toBeLessThan(keys.indexOf('confidence'));
+    expect(keys.indexOf('verdict')).toBeLessThan(keys.indexOf('scoreLabel'));
+    expect(keys.indexOf('recommendation')).toBeLessThan(
+      keys.indexOf('supportiveEvidence')
+    );
+    expect(keys.indexOf('supportiveEvidence')).toBeLessThan(keys.indexOf('scope'));
     expect(JSON.stringify(model)).not.toMatch(/\bUnknown\b/);
     expect(JSON.stringify(model)).not.toMatch(/best_window|avoid|deciding_factor/);
   });

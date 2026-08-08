@@ -59,6 +59,40 @@ export type AskProductCopy = {
   resultScope: string;
   resultConfidence: string;
   resultScoreOf: (score: number) => string;
+  /** Explicit timing-score chrome — not probability. */
+  timingScoreLabel: string;
+  timingScoreOf: (score: number) => string;
+  scoreHonestyNote: string;
+  evidenceSupportSection: string;
+  evidenceCautionSection: string;
+  evidenceContextSection: string;
+  importance: Record<'low' | 'medium' | 'high' | 'critical', string>;
+  limitsLabel: string;
+  nextStepsLabel: string;
+  stance: {
+    proceed: string;
+    proceed_with_conditions: string;
+    wait: string;
+    prefer_alternate: string;
+    no_unique_winner: string;
+  };
+  findResultTitle: string;
+  findHeadlineDominant: string;
+  findHeadlineComparable: string;
+  findHeadlineNone: string;
+  findHonestyDominant: string;
+  findHonestyComparable: string;
+  findHonestyNone: string;
+  findWindowsLabel: string;
+  findWindowsEmpty: string;
+  findRangeLabel: string;
+  findPeakLabel: string;
+  compareRankOf: (rank: number) => string;
+  compareOptionsLabel: string;
+  blockedTitleCompare: string;
+  blockedBodyCompare: string;
+  blockedTitleFind: string;
+  blockedBodyFind: string;
   agencyLine: string;
   errorGeneric: string;
   loadFrameError: string;
@@ -199,6 +233,51 @@ const EN: AskProductCopy = {
   resultScope: 'Important limit',
   resultConfidence: 'Confidence',
   resultScoreOf: (score) => `${Math.round(score)} / 100`,
+  timingScoreLabel: 'Timing score',
+  timingScoreOf: (score) => `Timing score: ${Math.round(score)} / 100`,
+  scoreHonestyNote:
+    'This timing score reflects relative timing conditions — not probability, certainty, or a guaranteed outcome.',
+  evidenceSupportSection: 'Supporting evidence',
+  evidenceCautionSection: 'Watch-outs',
+  evidenceContextSection: 'Additional context',
+  importance: {
+    low: 'lower weight',
+    medium: 'moderate weight',
+    high: 'higher weight',
+    critical: 'critical weight',
+  },
+  limitsLabel: 'Limits',
+  nextStepsLabel: 'Suggested next steps',
+  stance: {
+    proceed: 'Timing conditions support moving forward on this date.',
+    proceed_with_conditions:
+      'Timing conditions are workable if preparation and constraints are handled.',
+    wait: 'Timing conditions suggest waiting if the date can still change.',
+    prefer_alternate: 'Timing conditions favor considering another date.',
+    no_unique_winner: 'No uniquely preferred date emerges from this comparison.',
+  },
+  findResultTitle: 'Timing windows',
+  findHeadlineDominant: 'Stronger timing window',
+  findHeadlineComparable: 'Comparable windows',
+  findHeadlineNone: 'No strong window in range',
+  findHonestyDominant:
+    'One stronger timing window stands out inside the scanned range.',
+  findHonestyComparable:
+    'These are comparable windows — no clearly dominant window is claimed.',
+  findHonestyNone:
+    'No sufficiently strong timing window was found in the scanned range.',
+  findWindowsLabel: 'Windows that deserve attention',
+  findWindowsEmpty: 'No strong window in range',
+  findRangeLabel: 'Scanned range',
+  findPeakLabel: 'Peak',
+  compareRankOf: (rank) => `Rank ${rank}`,
+  compareOptionsLabel: 'Compared dates',
+  blockedTitleCompare:
+    'More information is needed before METIORO can compare these dates.',
+  blockedBodyCompare: 'Birth evidence is required for timing comparison.',
+  blockedTitleFind:
+    'More information is needed before METIORO can scan for timing windows.',
+  blockedBodyFind: 'Birth evidence is required for a timing-window scan.',
   agencyLine: 'METIORO never decides. The human always decides.',
   errorGeneric: 'Something went wrong. Please try again.',
   loadFrameError: 'Unable to load this decision. Return to Ask and try again.',
@@ -360,7 +439,54 @@ const FA: AskProductCopy = {
   resultWhy: 'چرا؟',
   resultScope: 'محدودیت مهم',
   resultConfidence: 'اعتماد تحلیل',
-  resultScoreOf: (score) => `${Math.round(score)} / ۱۰۰`,
+  resultScoreOf: (score) => `${String(Math.round(score)).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])} / ۱۰۰`,
+  timingScoreLabel: 'امتیاز زمان‌بندی',
+  timingScoreOf: (score) =>
+    `امتیاز زمان‌بندی: ${String(Math.round(score)).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])} / ۱۰۰`,
+  scoreHonestyNote:
+    'این امتیاز کیفیت نسبی شرایط زمان‌بندی را نشان می‌دهد — نه احتمال، قطعیت یا نتیجهٔ تضمینی.',
+  evidenceSupportSection: 'شواهد حمایت‌کننده',
+  evidenceCautionSection: 'نکات احتیاطی',
+  evidenceContextSection: 'زمینهٔ تکمیلی',
+  importance: {
+    low: 'وزن کمتر',
+    medium: 'وزن متوسط',
+    high: 'وزن بیشتر',
+    critical: 'وزن حیاتی',
+  },
+  limitsLabel: 'محدودیت‌ها',
+  nextStepsLabel: 'گام‌های پیشنهادی بعدی',
+  stance: {
+    proceed: 'شرایط زمان‌بندی از پیش رفتن در این تاریخ پشتیبانی می‌کند.',
+    proceed_with_conditions:
+      'شرایط زمان‌بندی قابل‌قبول است اگر آمادگی و محدودیت‌ها مدیریت شوند.',
+    wait: 'اگر تاریخ هنوز قابل تغییر است، شرایط زمان‌بندی انتظار را پیشنهاد می‌کند.',
+    prefer_alternate: 'شرایط زمان‌بندی بررسی تاریخ دیگری را ترجیح می‌دهد.',
+    no_unique_winner: 'از این مقایسه تاریخ منحصربه‌فردی به‌عنوان ترجیح بیرون نمی‌آید.',
+  },
+  findResultTitle: 'پنجره‌های زمان‌بندی',
+  findHeadlineDominant: 'پنجرهٔ زمان‌بندی قوی‌تر',
+  findHeadlineComparable: 'پنجره‌های قابل‌مقایسه',
+  findHeadlineNone: 'پنجرهٔ قوی در این بازه یافت نشد',
+  findHonestyDominant:
+    'یک پنجرهٔ زمان‌بندی قوی‌تر در بازهٔ اسکن‌شده برجسته است.',
+  findHonestyComparable:
+    'این‌ها پنجره‌های قابل‌مقایسه‌اند — پنجرهٔ مسلط ادعا نمی‌شود.',
+  findHonestyNone:
+    'در بازهٔ اسکن‌شده پنجرهٔ زمان‌بندی به‌قدر کافی قوی یافت نشد.',
+  findWindowsLabel: 'پنجره‌هایی که ارزش توجه دارند',
+  findWindowsEmpty: 'پنجرهٔ قوی در این بازه نیست',
+  findRangeLabel: 'بازهٔ اسکن‌شده',
+  findPeakLabel: 'اوج',
+  compareRankOf: (rank) =>
+    `رتبه ${String(rank).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])}`,
+  compareOptionsLabel: 'تاریخ‌های مقایسه‌شده',
+  blockedTitleCompare:
+    'قبل از مقایسهٔ این تاریخ‌ها، اطلاعات بیشتری لازم است.',
+  blockedBodyCompare: 'برای مقایسهٔ زمان‌بندی، شواهد تولد لازم است.',
+  blockedTitleFind:
+    'قبل از اسکن پنجره‌های زمان‌بندی، اطلاعات بیشتری لازم است.',
+  blockedBodyFind: 'برای اسکن پنجره‌های زمان‌بندی، شواهد تولد لازم است.',
   agencyLine: 'METIORO هرگز تصمیم نمی‌گیرد. تصمیم همیشه با انسان است.',
   errorGeneric: 'مشکلی پیش آمد. دوباره تلاش کنید.',
   loadFrameError: 'بارگذاری این تصمیم ممکن نشد. به ASK برگردید.',
@@ -377,18 +503,18 @@ const FA: AskProductCopy = {
     low: 'پایین',
   },
   meaningByStrength: {
-    strong: 'سیگنال زمان‌بندی به‌طور قوی حمایت‌کننده است.',
-    favorable: 'سیگنال زمان‌بندی حمایت‌کننده است.',
-    mixed: 'سیگنال زمان‌بندی مختلط است.',
-    unfavorable: 'سیگنال زمان‌بندی چالش‌برانگیز است.',
+    strong: 'شرایط زمان‌بندی در این تاریخ به‌طور چشمگیر حمایت‌کننده‌اند.',
+    favorable: 'شرایط زمان‌بندی در این تاریخ حمایت‌کننده‌اند.',
+    mixed: 'شرایط زمان‌بندی در این تاریخ آمیخته‌اند.',
+    unfavorable: 'شرایط زمان‌بندی در این تاریخ دشوارترند.',
   },
   scopeTimingGeneric:
     'این تحلیل فقط زمان‌بندی تاریخ درخواست‌شده را پوشش می‌دهد و فراتر از آن نتیجه‌ای را ارزیابی نمی‌کند.',
   scopeInterviewTiming:
     'این تحلیل زمان‌بندی مذاکره و ارتباط مصاحبه را برای تاریخ درخواست‌شده بررسی می‌کند. تناسب کارفرما، نقش، حقوق یا نتیجهٔ مصاحبه را ارزیابی نمی‌کند.',
-  evidenceSupportive: 'سیگنال زمان‌بندی حمایت‌کننده',
-  evidenceCaution: 'سیگنال زمان‌بندی احتیاطی',
-  evidenceNeutral: 'سیگنال زمان‌بندی',
+  evidenceSupportive: 'عامل حمایت‌کننده',
+  evidenceCaution: 'عامل احتیاطی',
+  evidenceNeutral: 'عامل زمینه',
   topicCarInterview: 'مصاحبه کاری',
   topicInvestorMeeting: 'جلسه با سرمایه‌گذار',
   topicWeddingDate: 'انتخاب تاریخ عروسی',
@@ -521,7 +647,54 @@ const AR: AskProductCopy = {
   resultWhy: 'لماذا؟',
   resultScope: 'حد مهم',
   resultConfidence: 'ثقة التحليل',
-  resultScoreOf: (score) => `${Math.round(score)} / 100`,
+  resultScoreOf: (score) => `${String(Math.round(score)).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])} / ١٠٠`,
+  timingScoreLabel: 'درجة التوقيت',
+  timingScoreOf: (score) =>
+    `درجة التوقيت: ${String(Math.round(score)).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])} / ١٠٠`,
+  scoreHonestyNote:
+    'تعكس درجة التوقيت جودة الظروف النسبية — وليس احتمالاً أو يقيناً أو نتيجة مضمونة.',
+  evidenceSupportSection: 'أدلة داعمة',
+  evidenceCautionSection: 'تحذيرات',
+  evidenceContextSection: 'سياق إضافي',
+  importance: {
+    low: 'وزن أقل',
+    medium: 'وزن متوسط',
+    high: 'وزن أعلى',
+    critical: 'وزن حرج',
+  },
+  limitsLabel: 'الحدود',
+  nextStepsLabel: 'خطوات تالية مقترحة',
+  stance: {
+    proceed: 'ظروف التوقيت تدعم المضي قدماً في هذا التاريخ.',
+    proceed_with_conditions:
+      'ظروف التوقيت قابلة للعمل إذا أُحسنت الاستعدادات والقيود.',
+    wait: 'إذا كان التاريخ لا يزال قابلاً للتغيير، تشير ظروف التوقيت إلى الانتظار.',
+    prefer_alternate: 'ظروف التوقيت تفضّل النظر في تاريخ آخر.',
+    no_unique_winner: 'لا يظهر تاريخ مفضّل وحيد من هذه المقارنة.',
+  },
+  findResultTitle: 'نوافذ التوقيت',
+  findHeadlineDominant: 'نافذة توقيت أقوى',
+  findHeadlineComparable: 'نوافذ قابلة للمقارنة',
+  findHeadlineNone: 'لا نافذة قوية في النطاق',
+  findHonestyDominant:
+    'تبرز نافذة توقيت أقوى داخل النطاق الممسوح.',
+  findHonestyComparable:
+    'هذه نوافذ قابلة للمقارنة — دون ادعاء نافذة مهيمنة بوضوح.',
+  findHonestyNone:
+    'لم يُعثر على نافذة توقيت قوية بما يكفي في النطاق الممسوح.',
+  findWindowsLabel: 'نوافذ تستحق الانتباه',
+  findWindowsEmpty: 'لا نافذة قوية في النطاق',
+  findRangeLabel: 'النطاق الممسوح',
+  findPeakLabel: 'الذروة',
+  compareRankOf: (rank) =>
+    `الترتيب ${String(rank).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])}`,
+  compareOptionsLabel: 'التواريخ المقارنة',
+  blockedTitleCompare:
+    'يلزم مزيد من المعلومات قبل أن تقارن METIORO هذه التواريخ.',
+  blockedBodyCompare: 'أدلة الميلاد مطلوبة لمقارنة التوقيت.',
+  blockedTitleFind:
+    'يلزم مزيد من المعلومات قبل أن تمسح METIORO نوافذ التوقيت.',
+  blockedBodyFind: 'أدلة الميلاد مطلوبة لمسح نوافذ التوقيت.',
   agencyLine: 'METIORO لا تقرر أبداً. القرار دائماً للإنسان.',
   errorGeneric: 'حدث خطأ. حاول مرة أخرى.',
   loadFrameError: 'تعذّر تحميل هذا القرار. عد إلى ASK.',
@@ -681,6 +854,51 @@ const RU: AskProductCopy = {
   resultScope: 'Важное ограничение',
   resultConfidence: 'Уверенность анализа',
   resultScoreOf: (score) => `${Math.round(score)} / 100`,
+  timingScoreLabel: 'Оценка тайминга',
+  timingScoreOf: (score) => `Оценка тайминга: ${Math.round(score)} / 100`,
+  scoreHonestyNote:
+    'Оценка тайминга отражает относительное качество условий — не вероятность, не гарантированный исход.',
+  evidenceSupportSection: 'Поддерживающие сигналы',
+  evidenceCautionSection: 'Осторожности',
+  evidenceContextSection: 'Дополнительный контекст',
+  importance: {
+    low: 'меньший вес',
+    medium: 'средний вес',
+    high: 'больший вес',
+    critical: 'критический вес',
+  },
+  limitsLabel: 'Ограничения',
+  nextStepsLabel: 'Предлагаемые следующие шаги',
+  stance: {
+    proceed: 'Условия тайминга поддерживают движение вперёд на эту дату.',
+    proceed_with_conditions:
+      'Условия тайминга приемлемы, если учесть подготовку и ограничения.',
+    wait: 'Если дату ещё можно сменить, условия тайминга предлагают подождать.',
+    prefer_alternate: 'Условия тайминга склоняют рассмотреть другую дату.',
+    no_unique_winner: 'Уникально предпочтительная дата из этого сравнения не выделяется.',
+  },
+  findResultTitle: 'Окна тайминга',
+  findHeadlineDominant: 'Более сильное окно тайминга',
+  findHeadlineComparable: 'Сопоставимые окна',
+  findHeadlineNone: 'Сильного окна в диапазоне нет',
+  findHonestyDominant:
+    'В просканированном диапазоне выделяется более сильное окно тайминга.',
+  findHonestyComparable:
+    'Это сопоставимые окна — явно доминирующее окно не утверждается.',
+  findHonestyNone:
+    'В просканированном диапазоне достаточно сильного окна тайминга не найдено.',
+  findWindowsLabel: 'Окна, заслуживающие внимания',
+  findWindowsEmpty: 'Сильного окна в диапазоне нет',
+  findRangeLabel: 'Просканированный диапазон',
+  findPeakLabel: 'Пик',
+  compareRankOf: (rank) => `Ранг ${rank}`,
+  compareOptionsLabel: 'Сравниваемые даты',
+  blockedTitleCompare:
+    'Нужно больше данных, прежде чем METIORO сможет сравнить эти даты.',
+  blockedBodyCompare: 'Для сравнения тайминга нужны данные рождения.',
+  blockedTitleFind:
+    'Нужно больше данных, прежде чем METIORO сможет искать окна тайминга.',
+  blockedBodyFind: 'Для сканирования окон тайминга нужны данные рождения.',
   agencyLine: 'METIORO никогда не решает. Решение всегда за человеком.',
   errorGeneric: 'Что-то пошло не так. Попробуйте снова.',
   loadFrameError: 'Не удалось загрузить решение. Вернитесь в ASK.',
