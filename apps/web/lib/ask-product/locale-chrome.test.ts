@@ -41,4 +41,22 @@ describe('ask-product consumer chrome locales', () => {
     expect(fa.examineCompare).toContain('مقایسه');
     expect(fa.comingSoon).toBe('به‌زودی');
   });
+
+  it('FA capability copy matches product contract (consumer language only)', () => {
+    const fa = getAskProductCopy('fa');
+    expect(fa.capabilityTitle).toContain('فعال نشده');
+    expect(fa.capabilitySecondary).toContain('METIORO');
+    expect(fa.evaluateUnavailableForType).toContain('در دسترس نیست');
+    expect(fa.capabilityBack).toBe('بازگشت');
+    expect(fa.capabilityEdit).toBe('ویرایش تصمیم');
+    const chrome = [
+      fa.capabilityTitle,
+      fa.capabilityBody,
+      fa.capabilitySecondary,
+      fa.evaluateUnavailableForType,
+      ...Object.values(fa.apiErrors),
+    ].join(' | ');
+    expect(chrome).not.toMatch(ENGINEERING);
+    expect(chrome).not.toMatch(/UNSUPPORTED_DECISION_TYPE|runtime|registry/i);
+  });
 });

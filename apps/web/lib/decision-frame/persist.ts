@@ -8,8 +8,10 @@
  * FIND     → operation, time_scope=date_range, start, end
  */
 
+import { canExecuteInProduction } from '@/lib/ask-home';
 import {
   createDecisionCaseFromFraming,
+  DecisionCaseApiError,
   getDecisionCase,
   updateDecisionCaseFraming,
   type DecisionCaseResource,
@@ -18,7 +20,11 @@ import {
 import type { DecisionFrameV1 } from './types';
 import { canSelectOperationRenderer } from './frame';
 
-/** Default temporal type when Frame has no decision_type_id. */
+/**
+ * @deprecated Do not use for evaluation Case create.
+ * Free-text must not invent a Decision Type to force Case creation.
+ * Kept only for non-evaluate legacy callers / tests that still reference it.
+ */
 export const DEFAULT_FRAMING_DECISION_TYPE_ID = 'mar-wedding-date';
 
 export function isFramingPersistReady(frame: DecisionFrameV1): boolean {
@@ -181,9 +187,27 @@ export async function persistFrameToCase(input: {
   }
   const framing = toPersistedFraming(input.frame);
   const decisionTypeId =
-    input.decisionTypeId ||
-    input.frame.decision_type_id ||
-    DEFAULT_FRAMING_DECISION_TYPE_ID;
+    input.decisionTypeId || input.frame.decision_type_id || undefined;
+
+  // Client UX gate: avoid creating Cases for flows the shipped web matrix
+  // does not offer. Backend Decision Case validation remains authoritative
+  // and may still reject even when this hint passes.
+  // Never invent mar-wedding-date (or any other type) for free-text.
+  if (
+    !decisionTypeId ||
+    !canExecuteInProduction(decisionTypeId, input.frame.operation)
+  ) {
+    throw new DecisionCaseApiError({
+      status: 400,
+      code: 'UNSUPPORTED_DECISION_TYPE',
+      message: 'Decision type is not supported for this operation',
+      details: {
+        decision_type_id: decisionTypeId ?? null,
+        operation: input.frame.operation,
+      },
+    });
+  }
+
   const title =
     input.title ||
     input.frame.objective ||

@@ -12,7 +12,7 @@ afterEach(() => cleanup());
 
 describe('AskClarificationFlow product recovery', () => {
   it.each(['en', 'fa', 'ar', 'ru'] as const)(
-    'shows evaluate enabled and compare/find coming soon for %s',
+    'shows evaluate disabled for untyped free-text and compare/find coming soon for %s',
     (lang) => {
       const copy = getAskProductCopy(lang);
       const frame = buildDecisionFrame("I'm meeting an investor.");
@@ -27,9 +27,10 @@ describe('AskClarificationFlow product recovery', () => {
         />
       );
 
-      expect(screen.getByTestId('examine-evaluate').textContent).toContain(
-        copy.examineEvaluate
-      );
+      const evaluate = screen.getByTestId('examine-evaluate');
+      expect(evaluate.textContent).toContain(copy.examineEvaluate);
+      expect(evaluate.hasAttribute('disabled')).toBe(true);
+      expect(evaluate.textContent).toContain(copy.evaluateUnavailableForType);
       const compare = screen.getByTestId('examine-compare');
       const find = screen.getByTestId('examine-find');
       expect(compare.hasAttribute('disabled')).toBe(true);
@@ -68,6 +69,7 @@ describe('AskClarificationFlow product recovery', () => {
 
   it('does not invent a date when continuing without input', () => {
     const frame = buildDecisionFrame('Is my interview timing good?', {
+      decision_type_id: 'car-interview',
       operation: 'evaluate',
       time_scope: 'none',
     });

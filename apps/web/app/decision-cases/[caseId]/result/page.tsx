@@ -5,10 +5,9 @@ import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { AppShell } from '@/components/AppShell';
 import { DecisionPackageView } from '@/components/decision-case/DecisionPackageView';
-import { getAskProductCopy } from '@/lib/ask-product';
+import { getAskProductCopy, localizeCaseApiError } from '@/lib/ask-product';
 import { localeFontFamily } from '@/lib/brand-theme';
 import {
-  DecisionCaseApiError,
   loadCaseResult,
   type DecisionCaseResource,
   type DecisionEvaluationResource,
@@ -42,19 +41,13 @@ export default function DecisionCaseResultPage() {
         setEvaluation(loaded.evaluation);
       } catch (err) {
         if (cancelled) return;
-        if (err instanceof DecisionCaseApiError) {
-          setError(err.message);
-        } else {
-          setError(
-            err instanceof Error ? err.message : copy.errorGeneric
-          );
-        }
+        setError(localizeCaseApiError(err, lang));
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [ready, caseId, copy.errorGeneric]);
+  }, [ready, caseId, lang]);
 
   if (!ready) {
     return (

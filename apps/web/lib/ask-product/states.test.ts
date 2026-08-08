@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildDecisionFrame } from '@/lib/decision-frame';
 import {
   deriveClarificationState,
+  isCapabilityUnavailableEvaluateFrame,
   isUnsupportedOperationFrame,
 } from './states';
 import { resetToExamineStep } from './clarify-bridge';
@@ -11,6 +12,7 @@ describe('ask-product consumer states', () => {
     const frame = buildDecisionFrame('جلسه با سرمایه‌گذار برای جذب سرمایه');
     expect(frame.raw_intent).toBe('جلسه با سرمایه‌گذار برای جذب سرمایه');
     expect(frame.operation).toBe('unresolved');
+    expect(frame.decision_type_id).toBeUndefined();
     expect(deriveClarificationState(frame)).toBe('NEEDS_CLARIFICATION');
   });
 
@@ -37,8 +39,18 @@ describe('ask-product consumer states', () => {
     expect(deriveClarificationState(next)).toBe('NEEDS_CLARIFICATION');
   });
 
-  it('READY_TO_EVALUATE only with explicit evaluate date', () => {
+  it('READY_TO_EVALUATE only for car-interview with explicit evaluate date', () => {
+    const untyped = buildDecisionFrame('Is August 18 good?', {
+      reference_year: 2026,
+      operation: 'evaluate',
+      time_scope: 'specific_date',
+      dates: ['2026-08-18'],
+    });
+    expect(deriveClarificationState(untyped)).toBe('CAPABILITY_UNAVAILABLE');
+    expect(isCapabilityUnavailableEvaluateFrame(untyped)).toBe(true);
+
     const ready = buildDecisionFrame('Is August 18 good?', {
+      decision_type_id: 'car-interview',
       reference_year: 2026,
       operation: 'evaluate',
       time_scope: 'specific_date',

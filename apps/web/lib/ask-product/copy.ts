@@ -70,6 +70,27 @@ export type AskProductCopy = {
   intakeSaveError: string;
   intakeCompleteError: string;
   backToAsk: string;
+  /** Evaluate disabled when Decision Type has no production runtime. */
+  evaluateUnavailableForType: string;
+  capabilityTitle: string;
+  capabilityBody: string;
+  capabilitySecondary: string;
+  capabilityBack: string;
+  capabilityEdit: string;
+  apiErrors: {
+    UNSUPPORTED_DECISION_TYPE: string;
+    OPERATION_NOT_IMPLEMENTED: string;
+    FRAMING_REQUIRED: string;
+    FRAMING_UNRESOLVED: string;
+    INTAKE_INCOMPLETE: string;
+    VERSION_CONFLICT: string;
+    PROVIDER_FAILURE: string;
+    CASE_NOT_FOUND: string;
+    UNKNOWN_DECISION_TYPE: string;
+    ENTRY_MODE_UNAVAILABLE: string;
+    VALIDATION_ERROR: string;
+    ILLEGAL_TRANSITION: string;
+  };
 };
 
 const EN: AskProductCopy = {
@@ -153,6 +174,32 @@ const EN: AskProductCopy = {
   intakeSaveError: 'Could not save answers.',
   intakeCompleteError: 'Unable to continue.',
   backToAsk: 'Back to Ask',
+  evaluateUnavailableForType:
+    'Not available for this decision type yet',
+  capabilityTitle: 'Timing analysis is not available for this decision yet',
+  capabilityBody:
+    'This kind of decision is not enabled for timing evaluation in this release.',
+  capabilitySecondary:
+    'Your decision is kept, but METIORO cannot produce a reliable evaluation for it yet.',
+  capabilityBack: 'Back',
+  capabilityEdit: 'Edit decision',
+  apiErrors: {
+    UNSUPPORTED_DECISION_TYPE:
+      'Timing analysis is not available for this decision yet.',
+    OPERATION_NOT_IMPLEMENTED:
+      'That analysis option is not available in this release.',
+    FRAMING_REQUIRED: 'A few more details are needed before evaluation.',
+    FRAMING_UNRESOLVED: 'Please clarify what you want to examine first.',
+    INTAKE_INCOMPLETE: 'Please complete the required details to continue.',
+    VERSION_CONFLICT: 'This decision was updated elsewhere. Please reload.',
+    PROVIDER_FAILURE: 'Timing analysis is temporarily unavailable. Try again.',
+    CASE_NOT_FOUND: 'This decision could not be found.',
+    UNKNOWN_DECISION_TYPE:
+      'Timing analysis is not available for this decision yet.',
+    ENTRY_MODE_UNAVAILABLE: 'This way of starting the decision is unavailable.',
+    VALIDATION_ERROR: 'Some details could not be accepted. Please check and try again.',
+    ILLEGAL_TRANSITION: 'This step is not available right now.',
+  },
 };
 
 const FA: AskProductCopy = {
@@ -236,6 +283,31 @@ const FA: AskProductCopy = {
   intakeSaveError: 'ذخیره پاسخ‌ها ممکن نشد.',
   intakeCompleteError: 'ادامه ممکن نیست.',
   backToAsk: 'بازگشت به ASK',
+  evaluateUnavailableForType: 'برای این نوع تصمیم هنوز در دسترس نیست',
+  capabilityTitle: 'این نوع تصمیم هنوز برای تحلیل زمان‌بندی فعال نشده است.',
+  capabilityBody:
+    'این نوع تصمیم هنوز برای تحلیل زمان‌بندی فعال نشده است.',
+  capabilitySecondary:
+    'تصمیم شما ذخیره می‌شود، اما METIORO هنوز نمی‌تواند برای آن ارزیابی قابل اتکا تولید کند.',
+  capabilityBack: 'بازگشت',
+  capabilityEdit: 'ویرایش تصمیم',
+  apiErrors: {
+    UNSUPPORTED_DECISION_TYPE:
+      'این نوع تصمیم هنوز برای تحلیل زمان‌بندی فعال نشده است.',
+    OPERATION_NOT_IMPLEMENTED:
+      'این گزینهٔ تحلیل در این نسخه در دسترس نیست.',
+    FRAMING_REQUIRED: 'قبل از ارزیابی، چند جزئیات دیگر لازم است.',
+    FRAMING_UNRESOLVED: 'لطفاً ابتدا مشخص کنید چه چیزی را بررسی کنیم.',
+    INTAKE_INCOMPLETE: 'برای ادامه، جزئیات لازم را کامل کنید.',
+    VERSION_CONFLICT: 'این تصمیم جای دیگری به‌روز شده. لطفاً دوباره بارگذاری کنید.',
+    PROVIDER_FAILURE: 'تحلیل زمان‌بندی موقتاً در دسترس نیست. دوباره تلاش کنید.',
+    CASE_NOT_FOUND: 'این تصمیم پیدا نشد.',
+    UNKNOWN_DECISION_TYPE:
+      'این نوع تصمیم هنوز برای تحلیل زمان‌بندی فعال نشده است.',
+    ENTRY_MODE_UNAVAILABLE: 'این روش شروع تصمیم در دسترس نیست.',
+    VALIDATION_ERROR: 'برخی جزئیات پذیرفته نشد. بررسی کنید و دوباره تلاش کنید.',
+    ILLEGAL_TRANSITION: 'این مرحله اکنون در دسترس نیست.',
+  },
 };
 
 const AR: AskProductCopy = {
@@ -319,6 +391,29 @@ const AR: AskProductCopy = {
   intakeSaveError: 'تعذّر حفظ الإجابات.',
   intakeCompleteError: 'تعذّرت المتابعة.',
   backToAsk: 'العودة إلى ASK',
+  evaluateUnavailableForType: 'غير متاح لهذا النوع من القرار بعد',
+  capabilityTitle: 'تحليل التوقيت غير مفعّل لهذا القرار بعد.',
+  capabilityBody: 'تحليل التوقيت غير مفعّل لهذا النوع من القرار في هذا الإصدار.',
+  capabilitySecondary:
+    'يُحتفظ بقرارك، لكن METIORO لا تستطيع بعد إنتاج تقييم موثوق له.',
+  capabilityBack: 'رجوع',
+  capabilityEdit: 'تعديل القرار',
+  apiErrors: {
+    UNSUPPORTED_DECISION_TYPE:
+      'تحليل التوقيت غير مفعّل لهذا النوع من القرار بعد.',
+    OPERATION_NOT_IMPLEMENTED: 'خيار التحليل هذا غير متاح في هذا الإصدار.',
+    FRAMING_REQUIRED: 'يلزم مزيد من التفاصيل قبل التقييم.',
+    FRAMING_UNRESOLVED: 'يرجى توضيح ما تريد فحصه أولاً.',
+    INTAKE_INCOMPLETE: 'أكمل التفاصيل المطلوبة للمتابعة.',
+    VERSION_CONFLICT: 'تم تحديث هذا القرار في مكان آخر. أعد التحميل.',
+    PROVIDER_FAILURE: 'تحليل التوقيت غير متاح مؤقتاً. حاول مرة أخرى.',
+    CASE_NOT_FOUND: 'تعذّر العثور على هذا القرار.',
+    UNKNOWN_DECISION_TYPE:
+      'تحليل التوقيت غير مفعّل لهذا النوع من القرار بعد.',
+    ENTRY_MODE_UNAVAILABLE: 'طريقة بدء القرار هذه غير متاحة.',
+    VALIDATION_ERROR: 'بعض التفاصيل لم تُقبل. راجعها وحاول مرة أخرى.',
+    ILLEGAL_TRANSITION: 'هذه الخطوة غير متاحة الآن.',
+  },
 };
 
 const RU: AskProductCopy = {
@@ -402,6 +497,31 @@ const RU: AskProductCopy = {
   intakeSaveError: 'Не удалось сохранить ответы.',
   intakeCompleteError: 'Не удалось продолжить.',
   backToAsk: 'Назад в Ask',
+  evaluateUnavailableForType: 'Пока недоступно для этого типа решения',
+  capabilityTitle: 'Анализ тайминга для этого решения ещё не включён.',
+  capabilityBody:
+    'Этот тип решения пока не включён для оценки тайминга в этом релизе.',
+  capabilitySecondary:
+    'Ваше решение сохраняется, но METIORO пока не может дать для него надёжную оценку.',
+  capabilityBack: 'Назад',
+  capabilityEdit: 'Изменить решение',
+  apiErrors: {
+    UNSUPPORTED_DECISION_TYPE:
+      'Анализ тайминга для этого типа решения ещё не включён.',
+    OPERATION_NOT_IMPLEMENTED:
+      'Этот вариант анализа недоступен в этом релизе.',
+    FRAMING_REQUIRED: 'Перед оценкой нужны ещё несколько деталей.',
+    FRAMING_UNRESOLVED: 'Сначала уточните, что нужно проверить.',
+    INTAKE_INCOMPLETE: 'Заполните обязательные поля, чтобы продолжить.',
+    VERSION_CONFLICT: 'Решение обновлено в другом месте. Перезагрузите.',
+    PROVIDER_FAILURE: 'Анализ тайминга временно недоступен. Попробуйте снова.',
+    CASE_NOT_FOUND: 'Это решение не найдено.',
+    UNKNOWN_DECISION_TYPE:
+      'Анализ тайминга для этого типа решения ещё не включён.',
+    ENTRY_MODE_UNAVAILABLE: 'Этот способ начать решение недоступен.',
+    VALIDATION_ERROR: 'Часть данных не принята. Проверьте и попробуйте снова.',
+    ILLEGAL_TRANSITION: 'Этот шаг сейчас недоступен.',
+  },
 };
 
 export const ASK_PRODUCT_COPY: Record<AppLang, AskProductCopy> = {

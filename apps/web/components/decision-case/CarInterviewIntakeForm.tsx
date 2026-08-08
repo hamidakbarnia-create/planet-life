@@ -121,7 +121,10 @@ export function CarInterviewIntakeForm({
         {requiredPresent
           ? copy.intakeRequiredFilled
           : copy.intakeRequiredRemaining(
-              missingRequired.join(', ') || '—'
+              missingRequired
+                .map((id) => copy[FIELD_COPY_KEY[id as CarInterviewSlotId]])
+                .filter(Boolean)
+                .join(', ') || '—'
             )}
       </p>
 

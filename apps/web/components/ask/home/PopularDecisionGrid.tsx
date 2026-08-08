@@ -15,7 +15,11 @@ export function PopularDecisionGrid({
   onSelect: (item: PopularDecision) => void;
 }) {
   return (
-    <section className={styles.section} aria-labelledby="ask-popular-title">
+    <section
+      className={`${styles.section} ${styles.popularSection}`}
+      aria-labelledby="ask-popular-title"
+      data-testid="ask-popular-decisions"
+    >
       <div className={styles.sectionHead}>
         <h2 id="ask-popular-title" className={`fc ${styles.sectionTitle}`}>
           {title}

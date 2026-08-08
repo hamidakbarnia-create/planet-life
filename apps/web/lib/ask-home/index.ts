@@ -6,6 +6,13 @@ export {
   registryById,
 } from './decision-type-registry';
 export {
+  canEvaluateInProduction,
+  canExecuteInProduction,
+  frameOperationToCaseMode,
+  hasProductionRuntime,
+  listProductionEvaluateDecisionTypeIds,
+} from './production-capability';
+export {
   listAllDecisionTypesAsPopular,
   listPopularDecisions,
 } from './popular-decisions';
