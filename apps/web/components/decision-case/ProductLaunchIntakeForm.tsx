@@ -5,9 +5,9 @@ import type { AppLang } from '@/lib/app-settings';
 import { getAskProductCopy } from '@/lib/ask-product';
 import {
   CANONICAL_PRODUCT_LAUNCH_FIELD_IDS,
-  CANONICAL_PRODUCT_LAUNCH_REQUIRED_FIELD_IDS,
   productLaunchHasFirstRequiredAnswer,
   productLaunchMissingRequiredFields,
+  productLaunchRequiredFieldIdsForMode,
   productLaunchRequiredFieldsPresent,
   type ProductLaunchIntake,
   type ProductLaunchSlotId,
@@ -37,12 +37,15 @@ const LAUNCH_CHANNEL_OPTIONS = [
 export function ProductLaunchIntakeForm({
   lang,
   initialIntake,
+  caseMode,
   submitting,
   onSubmitAnswers,
   onComplete,
 }: {
   lang: AppLang;
   initialIntake?: ProductLaunchIntake;
+  /** Case mode — find_dates hides target_date (range lives on framing). */
+  caseMode?: string | null;
   submitting?: boolean;
   onSubmitAnswers: (
     answers: Partial<ProductLaunchIntake>
@@ -51,17 +54,18 @@ export function ProductLaunchIntakeForm({
 }) {
   const copy = getAskProductCopy(lang);
   const [draft, setDraft] = useState<ProductLaunchIntake>(initialIntake ?? {});
+  const isFind = caseMode === 'find_dates';
   const missingRequired = useMemo(
-    () => productLaunchMissingRequiredFields(draft),
-    [draft]
+    () => productLaunchMissingRequiredFields(draft, caseMode),
+    [draft, caseMode]
   );
   const requiredPresent = useMemo(
-    () => productLaunchRequiredFieldsPresent(draft),
-    [draft]
+    () => productLaunchRequiredFieldsPresent(draft, caseMode),
+    [draft, caseMode]
   );
   const canSave = useMemo(
-    () => productLaunchHasFirstRequiredAnswer(draft),
-    [draft]
+    () => productLaunchHasFirstRequiredAnswer(draft, caseMode),
+    [draft, caseMode]
   );
 
   const setField = (slotId: ProductLaunchSlotId, value: string) => {
@@ -69,13 +73,17 @@ export function ProductLaunchIntakeForm({
   };
 
   const requiredSet = new Set<string>(
-    CANONICAL_PRODUCT_LAUNCH_REQUIRED_FIELD_IDS
+    productLaunchRequiredFieldIdsForMode(caseMode)
+  );
+  const visibleFields = CANONICAL_PRODUCT_LAUNCH_FIELD_IDS.filter(
+    (slotId) => !(isFind && slotId === 'target_date')
   );
 
   return (
     <form
       className="space-y-5"
       data-testid="product-launch-intake-form"
+      data-mode={caseMode ?? 'evaluate_date'}
       dir={copy.dir}
       onSubmit={(event) => {
         event.preventDefault();
@@ -83,7 +91,7 @@ export function ProductLaunchIntakeForm({
       }}
     >
       <div className="space-y-4">
-        {CANONICAL_PRODUCT_LAUNCH_FIELD_IDS.map((slotId) => {
+        {visibleFields.map((slotId) => {
           const value = draft[slotId] ?? '';
           const missing = missingRequired.includes(slotId);
           const required = requiredSet.has(slotId);
@@ -160,7 +168,7 @@ export function ProductLaunchIntakeForm({
           className="fc rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white/85 disabled:cursor-not-allowed disabled:opacity-40"
           data-testid="intake-complete"
         >
-          {copy.intakeComplete}
+          {isFind ? copy.intakeCompleteFind : copy.intakeComplete}
         </button>
       </div>
     </form>

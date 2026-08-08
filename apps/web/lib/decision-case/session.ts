@@ -20,17 +20,21 @@ import {
   completeIntake,
   createDecisionCase,
   evaluateDecisionCase,
+  findDecisionCase,
   getComparison,
   getDecisionCase,
   getDecisionCaseHistory,
   getEvaluation,
+  getFinding,
   listDecisionCaseComparisons,
   listDecisionCaseEvaluations,
+  listDecisionCaseFindings,
   saveIntakeAnswers,
   updateDecisionCaseFraming,
   type DecisionCaseResource,
   type DecisionComparisonResource,
   type DecisionEvaluationResource,
+  type DecisionFindingResource,
   type DecisionHistoryEvent,
   type IntakeMutationResult,
   type NatalEvidencePayload,
@@ -97,6 +101,19 @@ function isCompareCase(caseRecord: DecisionCaseResource): boolean {
   );
 }
 
+/** True when Case mode or framing indicates FIND (find_dates). */
+export function isFindCase(caseRecord: DecisionCaseResource): boolean {
+  if (caseRecord.mode === 'find_dates' || caseRecord.state === 'found') {
+    return true;
+  }
+  const frame = caseRecord.intake?.decision_frame;
+  return (
+    !!frame &&
+    typeof frame === 'object' &&
+    (frame as { operation?: string }).operation === 'find'
+  );
+}
+
 function comparisonToEvaluationResource(
   comparison: DecisionComparisonResource
 ): DecisionEvaluationResource {
@@ -118,6 +135,22 @@ function comparisonToEvaluationResource(
   };
 }
 
+function findingToEvaluationResource(
+  finding: DecisionFindingResource
+): DecisionEvaluationResource {
+  return {
+    evaluation_id: finding.finding_id,
+    case_id: finding.case_id,
+    case_version: finding.case_version,
+    evaluation_version: finding.finding_version,
+    package_contract_version: finding.package_contract_version,
+    engine_id: finding.engine_id,
+    dq_status: finding.dq_status,
+    created_at: finding.created_at,
+    package: finding.package,
+  };
+}
+
 /** Ensure Case has authoritative Evaluate framing before Runtime executes.
  * COMPARE framing is already authoritative — never collapse it to evaluate.
  */
@@ -134,6 +167,8 @@ async function ensureEvaluateFramingOnCase(input: {
       date?: string;
       dates?: unknown;
       options?: unknown;
+      start?: string;
+      end?: string;
     };
     if (
       frame.operation === 'evaluate' &&
@@ -147,6 +182,14 @@ async function ensureEvaluateFramingOnCase(input: {
       frame.time_scope === 'multiple_dates' &&
       Array.isArray(frame.dates) &&
       frame.dates.length >= 2
+    ) {
+      return getDecisionCase(input.caseId);
+    }
+    if (
+      frame.operation === 'find' &&
+      frame.time_scope === 'date_range' &&
+      typeof frame.start === 'string' &&
+      typeof frame.end === 'string'
     ) {
       return getDecisionCase(input.caseId);
     }
@@ -263,7 +306,7 @@ export async function requestCaseEvaluation(input: {
 
 /**
  * Resolve package for result route from backend authority.
- * COMPARE loads /comparisons; EVALUATE loads /evaluations.
+ * FIND loads /findings; COMPARE loads /comparisons; EVALUATE loads /evaluations.
  * Creates a real Runtime execution through the API only when none exists yet.
  */
 export async function loadCaseResult(caseId: string): Promise<{
@@ -272,6 +315,69 @@ export async function loadCaseResult(caseId: string): Promise<{
   history: DecisionHistoryEvent[];
 }> {
   let caseRecord = await getDecisionCase(caseId);
+
+  if (isFindCase(caseRecord)) {
+    const listed = await listDecisionCaseFindings(caseId);
+    if (listed.findings.length > 0) {
+      const latest = listed.findings.reduce((a, b) =>
+        a.finding_version >= b.finding_version ? a : b
+      );
+      const finding = await getFinding({
+        caseId,
+        findingId: latest.finding_id,
+      });
+      const history = (await getDecisionCaseHistory(caseId)).events;
+      return {
+        caseRecord,
+        evaluation: findingToEvaluationResource(finding),
+        history,
+      };
+    }
+
+    if (caseRecord.state === 'intake' || caseRecord.state === 'draft') {
+      const completed = await completeIntake({
+        caseId,
+        expectedCaseVersion: caseRecord.case_version,
+      });
+      caseRecord = { ...completed.case, intake: completed.intake };
+    }
+
+    if (
+      caseRecord.state !== 'evidence_ready' &&
+      caseRecord.state !== 'evaluated' &&
+      caseRecord.state !== 'found'
+    ) {
+      throw new DecisionCaseApiError({
+        status: 409,
+        code: 'ILLEGAL_TRANSITION',
+        message: `Cannot find case in state ${caseRecord.state}`,
+        details: { state: caseRecord.state },
+      });
+    }
+
+    caseRecord = await ensureEvaluateFramingOnCase({
+      caseId,
+      caseVersion: caseRecord.case_version,
+      intake: caseRecord.intake as Record<string, unknown> | undefined,
+    });
+    caseRecord = await ensureNatalEvidenceOnCase({
+      caseId,
+      caseVersion: caseRecord.case_version,
+      intake: caseRecord.intake as Record<string, unknown> | undefined,
+    });
+
+    const finding = await findDecisionCase({
+      caseId,
+      expectedCaseVersion: caseRecord.case_version,
+    });
+    caseRecord = await getDecisionCase(caseId);
+    const history = (await getDecisionCaseHistory(caseId)).events;
+    return {
+      caseRecord,
+      evaluation: findingToEvaluationResource(finding),
+      history,
+    };
+  }
 
   if (isCompareCase(caseRecord)) {
     const listed = await listDecisionCaseComparisons(caseId);

@@ -21,6 +21,7 @@ from packages.decision_engine.state_machine import (
         (CaseState.EVIDENCE_READY, ActivationPhase.EVIDENCE_READY),
         (CaseState.EVALUATED, ActivationPhase.EVALUATED),
         (CaseState.COMPARED, ActivationPhase.COMPARED),
+        (CaseState.FOUND, ActivationPhase.FOUND),
         (CaseState.COMPLETED, ActivationPhase.COMPLETED),
         (CaseState.REFLECTED, ActivationPhase.COMPLETED),
         (CaseState.ARCHIVED, ActivationPhase.ARCHIVED),
@@ -42,6 +43,7 @@ def test_plan_region_uses_mode(state: CaseState) -> None:
     assert activation_phase(state, mode="none") == ActivationPhase.EVALUATED
     assert activation_phase(state, mode="evaluate_date") == ActivationPhase.EVALUATED
     assert activation_phase(state, mode="compare_dates") == ActivationPhase.COMPARED
+    assert activation_phase(state, mode="find_dates") == ActivationPhase.FOUND
 
 
 def test_paused_derives_from_prior_active_state() -> None:

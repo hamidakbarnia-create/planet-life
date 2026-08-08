@@ -4,6 +4,7 @@ import {
   buildDecisionFrame,
   packageToCompareView,
   packageToEvaluateView,
+  packageToFindView,
   packageToOperationResult,
   selectRendererOperation,
 } from '@/lib/decision-frame';
@@ -143,6 +144,33 @@ describe('package adapter absent-data honesty', () => {
     const compareMode = { ...multi, mode: 'compare_dates' as const };
     expect(selectRendererOperation(compareMode)).toBe('compare');
     expect(packageToOperationResult(compareMode).operation).toBe('compare');
+
+    const findMode = {
+      ...pkg,
+      mode: 'find_dates' as const,
+      find: {
+        range_start: '2026-11-01',
+        range_end: '2026-11-30',
+        timezone: 'UTC',
+        unique_dominant: true,
+        windows: [
+          {
+            window_id: 'w1',
+            start_date: '2026-11-03',
+            end_date: '2026-11-05',
+            peak_dates: ['2026-11-04'],
+            peak_score: 82,
+            band: 'high' as const,
+            rank: 1,
+          },
+        ],
+      },
+    };
+    expect(selectRendererOperation(findMode)).toBe('find');
+    const findView = packageToFindView(findMode);
+    expect(findView.unique_dominant).toBe(true);
+    expect(findView.headline).toBe('Stronger timing window');
+    expect(JSON.stringify(findView).toLowerCase()).not.toContain('best date');
   });
 
   it('renders safely when optional Package presentation fields are empty', () => {

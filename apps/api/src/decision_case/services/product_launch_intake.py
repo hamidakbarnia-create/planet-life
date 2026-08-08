@@ -21,11 +21,14 @@ from packages.decision_engine.intake.evaluator import (
 )
 from packages.decision_engine.intake.product_launch import (
     PRODUCT_LAUNCH_DECISION_TYPE_ID,
+    intake_mode_from_mapping,
     merge_product_launch_intake,
 )
 from packages.decision_engine.state_machine import CaseState
 
-_PRODUCT_LAUNCH_MODE = "evaluate_date"
+
+def _product_launch_mode(intake: dict[str, Any]) -> str:
+    return intake_mode_from_mapping(intake)
 
 
 def _require_product_launch(case: CaseRecord) -> None:
@@ -80,7 +83,7 @@ def save_product_launch_answers(
         owner_subject_id,
         expected_case_version=expected_case_version,
         intake=intake,
-        mode=_PRODUCT_LAUNCH_MODE,
+        mode=_product_launch_mode(intake),
         reason="intake_update",
         actor="user",
     )
@@ -153,6 +156,7 @@ def complete_product_launch_intake(
     elif case.state not in {
         CaseState.EVIDENCE_READY.value,
         CaseState.EVALUATED.value,
+        CaseState.FOUND.value,
     }:
         raise IllegalTransitionError(
             f"cannot complete intake from state {case.state}"

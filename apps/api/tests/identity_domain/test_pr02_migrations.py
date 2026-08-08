@@ -36,6 +36,7 @@ EXPECTED_MIGRATIONS = [
     "0007__guest_claim_conflicts.sql",
     "0008__guest_claim_audit.sql",
     "0009__decision_cases.sql",
+    "0010__decision_findings.sql",
 ]
 
 

@@ -28,10 +28,18 @@ export type AskProductCopy = {
   compareRemoveOption: string;
   compareNeedTwo: string;
   compareDuplicateDates: string;
+  findRangePrompt: string;
+  findRangeHint: string;
+  findRangeStart: string;
+  findRangeEnd: string;
+  findRangeMissing: string;
+  findRangeInvalid: string;
   persistAndEvaluate: string;
   persistAndCompare: string;
+  persistAndFind: string;
   evaluating: string;
   comparing: string;
+  finding: string;
   unsupportedTitle: string;
   unsupportedBody: string;
   unsupportedBack: string;
@@ -80,10 +88,14 @@ export type AskProductCopy = {
   intakeBodyWeddingDate: string;
   intakeTitleProductLaunch: string;
   intakeBodyProductLaunch: string;
+  /** FIND intake body — range scan, not single-date evaluate. */
+  intakeBodyProductLaunchFind: string;
   intakeOptional: string;
   intakeSelect: string;
   intakeSave: string;
   intakeComplete: string;
+  /** FIND CTA — must not say “evaluation” / single date. */
+  intakeCompleteFind: string;
   intakeRequiredFilled: string;
   intakeRequiredRemaining: (fields: string) => string;
   intakeFieldTargetDate: string;
@@ -138,7 +150,7 @@ const EN: AskProductCopy = {
   examinePrompt: 'What would you like to examine?',
   examineEvaluate: 'Check a specific date',
   examineCompare: 'Compare several dates',
-  examineFind: 'Find the best date',
+  examineFind: 'Find stronger timing windows',
   comingSoon: 'Coming soon',
   datePrompt: 'Which date should we evaluate?',
   dateHint: 'Enter an explicit calendar date. METIORO never assumes today.',
@@ -153,13 +165,22 @@ const EN: AskProductCopy = {
   compareRemoveOption: 'Remove',
   compareNeedTwo: 'Enter at least two different dates.',
   compareDuplicateDates: 'Each candidate needs a unique date.',
+  findRangePrompt: 'What date range should we scan?',
+  findRangeHint:
+    'Enter an inclusive start and end. METIORO never assumes today or invents a single best date.',
+  findRangeStart: 'Start',
+  findRangeEnd: 'End',
+  findRangeMissing: 'Please enter both start and end dates.',
+  findRangeInvalid: 'End date must be on or after the start date.',
   persistAndEvaluate: 'Evaluate this date',
   persistAndCompare: 'Compare these dates',
+  persistAndFind: 'Find stronger timing windows',
   evaluating: 'Evaluating timing…',
   comparing: 'Comparing dates…',
+  finding: 'Scanning timing windows…',
   unsupportedTitle: 'This analysis is not available yet',
   unsupportedBody:
-    'Finding the best date is not available in this release. You can evaluate one date or compare a few candidates when offered.',
+    'Finding timing windows is not available for this decision yet. You can evaluate one date or compare a few candidates when offered.',
   unsupportedBack: 'Choose a different option',
   compareResultTitle: 'Date comparison',
   compareWinnerLabel: 'Preferred date',
@@ -225,10 +246,13 @@ const EN: AskProductCopy = {
   intakeTitleProductLaunch: 'Launch a project or product',
   intakeBodyProductLaunch:
     'Share what you are launching. We’ll evaluate launch-day timing for the date you provide — not market fit, revenue, or business success.',
+  intakeBodyProductLaunchFind:
+    'Share what you are launching. We’ll scan the selected range for stronger timing windows within this range — not market fit, revenue, or business success.',
   intakeOptional: 'optional',
   intakeSelect: 'Select…',
   intakeSave: 'Save answers',
   intakeComplete: 'Continue to evaluation',
+  intakeCompleteFind: 'Continue to find timing windows',
   intakeRequiredFilled: 'Required details are ready.',
   intakeRequiredRemaining: (fields) => `Still needed: ${fields}`,
   intakeFieldTargetDate: 'Interview date',
@@ -288,7 +312,7 @@ const FA: AskProductCopy = {
   examinePrompt: 'چه چیزی را می‌خواهید بررسی کنیم؟',
   examineEvaluate: 'بررسی یک تاریخ مشخص',
   examineCompare: 'مقایسه چند تاریخ',
-  examineFind: 'پیدا کردن بهترین تاریخ',
+  examineFind: 'یافتن پنجره‌های زمان‌بندی قوی‌تر',
   comingSoon: 'به‌زودی',
   datePrompt: 'کدام تاریخ را ارزیابی کنیم؟',
   dateHint: 'یک تاریخ مشخص وارد کنید. METIORO هرگز «امروز» را فرض نمی‌کند.',
@@ -303,13 +327,22 @@ const FA: AskProductCopy = {
   compareRemoveOption: 'حذف',
   compareNeedTwo: 'حداقل دو تاریخ متفاوت وارد کنید.',
   compareDuplicateDates: 'هر گزینه باید تاریخ یکتا داشته باشد.',
+  findRangePrompt: 'کدام بازهٔ زمانی را جستجو کنیم؟',
+  findRangeHint:
+    'شروع و پایان را وارد کنید. METIORO هرگز «امروز» یا یک تاریخ برتر ساختگی فرض نمی‌کند.',
+  findRangeStart: 'شروع',
+  findRangeEnd: 'پایان',
+  findRangeMissing: 'لطفاً هر دو تاریخ شروع و پایان را وارد کنید.',
+  findRangeInvalid: 'تاریخ پایان باید بعد از شروع یا برابر آن باشد.',
   persistAndEvaluate: 'ارزیابی این تاریخ',
   persistAndCompare: 'مقایسه این تاریخ‌ها',
+  persistAndFind: 'یافتن پنجره‌های زمان‌بندی قوی‌تر',
   evaluating: 'در حال ارزیابی زمان‌بندی…',
   comparing: 'در حال مقایسه تاریخ‌ها…',
+  finding: 'در حال اسکن پنجره‌های زمان‌بندی…',
   unsupportedTitle: 'این تحلیل هنوز در دسترس نیست',
   unsupportedBody:
-    'پیدا کردن بهترین تاریخ در این نسخه فعال نیست. می‌توانید یک تاریخ را ارزیابی کنید یا چند گزینه را مقایسه کنید وقتی پیشنهاد می‌شود.',
+    'یافتن پنجره‌های زمان‌بندی برای این تصمیم هنوز فعال نیست. می‌توانید یک تاریخ را ارزیابی کنید یا چند گزینه را مقایسه کنید وقتی پیشنهاد می‌شود.',
   unsupportedBack: 'انتخاب گزینه دیگر',
   compareResultTitle: 'مقایسه تاریخ',
   compareWinnerLabel: 'تاریخ ترجیحی',
@@ -375,10 +408,13 @@ const FA: AskProductCopy = {
   intakeTitleProductLaunch: 'لانچ پروژه یا محصول',
   intakeBodyProductLaunch:
     'آنچه لانچ می‌کنید را مشخص کنید. فقط زمان‌بندی روز لانچ را ارزیابی می‌کنیم — نه تناسب بازار، درآمد یا موفقیت کسب‌وکار.',
+  intakeBodyProductLaunchFind:
+    'آنچه لانچ می‌کنید را مشخص کنید. بازهٔ انتخاب‌شده را برای یافتن پنجره‌های زمان‌بندی قوی‌تر در همین بازه اسکن می‌کنیم — نه تناسب بازار، درآمد یا موفقیت کسب‌وکار.',
   intakeOptional: 'اختیاری',
   intakeSelect: 'انتخاب…',
   intakeSave: 'ذخیره پاسخ‌ها',
   intakeComplete: 'ادامه به ارزیابی',
+  intakeCompleteFind: 'ادامه برای یافتن پنجره‌های زمان‌بندی',
   intakeRequiredFilled: 'اطلاعات لازم آماده است.',
   intakeRequiredRemaining: (fields) => `هنوز لازم است: ${fields}`,
   intakeFieldTargetDate: 'تاریخ مصاحبه',
@@ -437,7 +473,7 @@ const AR: AskProductCopy = {
   examinePrompt: 'ماذا تريد أن نفحص؟',
   examineEvaluate: 'فحص تاريخ محدد',
   examineCompare: 'مقارنة عدة تواريخ',
-  examineFind: 'إيجاد أفضل تاريخ',
+  examineFind: 'البحث عن نوافذ توقيت أقوى',
   comingSoon: 'قريباً',
   datePrompt: 'أي تاريخ نقيّم؟',
   dateHint: 'أدخل تاريخاً صريحاً. لا تفترض METIORO «اليوم».',
@@ -452,13 +488,22 @@ const AR: AskProductCopy = {
   compareRemoveOption: 'إزالة',
   compareNeedTwo: 'أدخل تاريخين مختلفين على الأقل.',
   compareDuplicateDates: 'يجب أن يكون لكل خيار تاريخ فريد.',
+  findRangePrompt: 'ما النطاق الزمني الذي نمسحه؟',
+  findRangeHint:
+    'أدخل بداية ونهاية شاملتين. لا تفترض METIORO «اليوم» ولا تختلق تاريخاً أفضل وحيداً.',
+  findRangeStart: 'البداية',
+  findRangeEnd: 'النهاية',
+  findRangeMissing: 'يرجى إدخال تاريخي البداية والنهاية.',
+  findRangeInvalid: 'يجب أن يكون تاريخ النهاية في يوم البداية أو بعده.',
   persistAndEvaluate: 'تقييم هذا التاريخ',
   persistAndCompare: 'مقارنة هذه التواريخ',
+  persistAndFind: 'البحث عن نوافذ توقيت أقوى',
   evaluating: 'جارٍ تقييم التوقيت…',
   comparing: 'جارٍ مقارنة التواريخ…',
+  finding: 'جارٍ مسح نوافذ التوقيت…',
   unsupportedTitle: 'هذا التحليل غير متاح بعد',
   unsupportedBody:
-    'إيجاد أفضل تاريخ غير متاح في هذا الإصدار. يمكنك تقييم تاريخ واحد أو مقارنة مرشحين عند توفر ذلك.',
+    'البحث عن نوافذ التوقيت غير متاح لهذا القرار بعد. يمكنك تقييم تاريخ واحد أو مقارنة مرشحين عند توفر ذلك.',
   unsupportedBack: 'اختر خياراً آخر',
   compareResultTitle: 'مقارنة التواريخ',
   compareWinnerLabel: 'التاريخ المفضّل',
@@ -524,10 +569,13 @@ const AR: AskProductCopy = {
   intakeTitleProductLaunch: 'إطلاق مشروع أو منتج',
   intakeBodyProductLaunch:
     'حدّد ما الذي تُطلقه. نقيّم توقيت يوم الإطلاق فقط — لا ملاءمة السوق أو الإيرادات أو نجاح العمل.',
+  intakeBodyProductLaunchFind:
+    'حدّد ما الذي تُطلقه. سنمسح النطاق المحدد بحثًا عن نوافذ توقيت أقوى داخل هذا النطاق — لا ملاءمة السوق أو الإيرادات أو نجاح العمل.',
   intakeOptional: 'اختياري',
   intakeSelect: 'اختر…',
   intakeSave: 'حفظ الإجابات',
   intakeComplete: 'المتابعة إلى التقييم',
+  intakeCompleteFind: 'المتابعة لإيجاد نوافذ التوقيت',
   intakeRequiredFilled: 'التفاصيل المطلوبة جاهزة.',
   intakeRequiredRemaining: (fields) => `ما زال مطلوبًا: ${fields}`,
   intakeFieldTargetDate: 'تاريخ المقابلة',
@@ -584,7 +632,7 @@ const RU: AskProductCopy = {
   examinePrompt: 'Что вы хотите проверить?',
   examineEvaluate: 'Проверить конкретную дату',
   examineCompare: 'Сравнить несколько дат',
-  examineFind: 'Найти лучшую дату',
+  examineFind: 'Найти более сильные окна тайминга',
   comingSoon: 'Скоро',
   datePrompt: 'Какую дату оценить?',
   dateHint: 'Укажите явную дату. METIORO никогда не подставляет «сегодня».',
@@ -599,13 +647,22 @@ const RU: AskProductCopy = {
   compareRemoveOption: 'Удалить',
   compareNeedTwo: 'Укажите как минимум две разные даты.',
   compareDuplicateDates: 'У каждого варианта должна быть уникальная дата.',
+  findRangePrompt: 'Какой диапазон дат просканировать?',
+  findRangeHint:
+    'Укажите включительные начало и конец. METIORO не подставляет «сегодня» и не выдумывает единственную лучшую дату.',
+  findRangeStart: 'Начало',
+  findRangeEnd: 'Конец',
+  findRangeMissing: 'Укажите и начальную, и конечную дату.',
+  findRangeInvalid: 'Дата окончания должна быть не раньше начала.',
   persistAndEvaluate: 'Оценить эту дату',
   persistAndCompare: 'Сравнить эти даты',
+  persistAndFind: 'Найти более сильные окна тайминга',
   evaluating: 'Оценка тайминга…',
   comparing: 'Сравнение дат…',
+  finding: 'Сканирование окон тайминга…',
   unsupportedTitle: 'Этот анализ пока недоступен',
   unsupportedBody:
-    'Поиск лучшей даты в этом релизе недоступен. Можно оценить одну дату или сравнить несколько кандидатов, когда это предложено.',
+    'Поиск окон тайминга для этого решения пока недоступен. Можно оценить одну дату или сравнить несколько кандидатов, когда это предложено.',
   unsupportedBack: 'Выбрать другой вариант',
   compareResultTitle: 'Сравнение дат',
   compareWinnerLabel: 'Предпочтительная дата',
@@ -671,10 +728,13 @@ const RU: AskProductCopy = {
   intakeTitleProductLaunch: 'Запуск проекта или продукта',
   intakeBodyProductLaunch:
     'Укажите, что запускаете. Мы оценим только тайминг дня запуска — не соответствие рынку, выручку или успех бизнеса.',
+  intakeBodyProductLaunchFind:
+    'Укажите, что запускаете. Мы просканируем выбранный диапазон, чтобы найти более сильные окна тайминга внутри этого диапазона — не соответствие рынку, выручку или успех бизнеса.',
   intakeOptional: 'необязательно',
   intakeSelect: 'Выберите…',
   intakeSave: 'Сохранить ответы',
   intakeComplete: 'Перейти к оценке',
+  intakeCompleteFind: 'Продолжить к поиску окон тайминга',
   intakeRequiredFilled: 'Обязательные поля заполнены.',
   intakeRequiredRemaining: (fields) => `Ещё нужно: ${fields}`,
   intakeFieldTargetDate: 'Дата собеседования',

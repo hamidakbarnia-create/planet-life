@@ -155,7 +155,9 @@ export function DecisionCaseIntakeScreen({
       : caseRecord?.decision_type_id === 'mar-wedding-date'
         ? copy.intakeBodyWeddingDate
         : caseRecord?.decision_type_id === 'bus-product-launch'
-          ? copy.intakeBodyProductLaunch
+          ? caseRecord.mode === 'find_dates'
+            ? copy.intakeBodyProductLaunchFind
+            : copy.intakeBodyProductLaunch
           : copy.intakeBody;
 
   const persistAnswers = async (answers: Record<string, unknown>) => {
@@ -374,6 +376,7 @@ export function DecisionCaseIntakeScreen({
             key={`${caseId}-${caseVersion ?? 0}`}
             lang={lang}
             initialIntake={intakeAsProductLaunch(intake)}
+            caseMode={caseRecord?.mode}
             submitting={busy}
             onSubmitAnswers={async (answers) => {
               setBusy(true);

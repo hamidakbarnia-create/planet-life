@@ -7,6 +7,7 @@ import type { DecisionFrameV1 } from '@/lib/decision-frame/types';
 export {
   applyCompareDates,
   applyEvaluateDate,
+  applyFindDateRange,
   applyOperationChoice,
   applyOpenEndedAxis,
   buildDecisionFrame,

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import {
   applyCompareDates,
   applyEvaluateDate,
+  applyFindDateRange,
   applyOperationChoice,
   applyOpenEndedAxis,
   canEvaluateInProduction,
@@ -49,8 +50,8 @@ function initialCompareDrafts(frame: DecisionFrameV1): CompareDraft[] {
 
 /**
  * Consumer clarification UX. Decision Frame stays internal.
- * EVALUATE / COMPARE offered only when the Web UX capability hint allows them
- * (shipped Runtime mirror — not backend authority). FIND remains Coming soon.
+ * EVALUATE / COMPARE / FIND offered only when the Web UX capability hint
+ * allows them (shipped Runtime mirror — not backend authority).
  */
 export function AskClarificationFlow({
   lang,
@@ -75,12 +76,16 @@ export function AskClarificationFlow({
     frame.decision_type_id,
     'compare'
   );
+  const findCapable = canExecuteInProduction(frame.decision_type_id, 'find');
   const [dateInput, setDateInput] = useState(frame.time.dates?.[0] ?? '');
   const [dateError, setDateError] = useState('');
   const [compareDrafts, setCompareDrafts] = useState<CompareDraft[]>(() =>
     initialCompareDrafts(frame)
   );
   const [compareError, setCompareError] = useState('');
+  const [rangeStart, setRangeStart] = useState(frame.time.range_start ?? '');
+  const [rangeEnd, setRangeEnd] = useState(frame.time.range_end ?? '');
+  const [rangeError, setRangeError] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -174,12 +179,21 @@ export function AskClarificationFlow({
     frame.operation === 'compare' &&
     state !== 'READY_TO_COMPARE';
 
+  const showFindRange =
+    findCapable &&
+    !showExamine &&
+    !showOpenEnded &&
+    frame.operation === 'find' &&
+    state !== 'READY_TO_FIND';
+
   const showReady = state === 'READY_TO_EVALUATE' && evaluateCapable;
   const showReadyCompare = state === 'READY_TO_COMPARE' && compareCapable;
+  const showReadyFind = state === 'READY_TO_FIND' && findCapable;
 
   const showEarlyCapability =
     !evaluateCapable &&
     !compareCapable &&
+    !findCapable &&
     !showOpenEnded &&
     (showExamine ||
       frame.operation === 'evaluate' ||
@@ -189,7 +203,8 @@ export function AskClarificationFlow({
     const operation = readyFrame.operation;
     if (
       operation !== 'evaluate' &&
-      operation !== 'compare'
+      operation !== 'compare' &&
+      operation !== 'find'
     ) {
       setError(copy.capabilityBody);
       return;
@@ -296,10 +311,12 @@ export function AskClarificationFlow({
       {showExamine ||
       (!evaluateCapable &&
         !compareCapable &&
+        !findCapable &&
         !showOpenEnded &&
         !showDate &&
         !showReady &&
-        !showReadyCompare) ? (
+        !showReadyCompare &&
+        !showReadyFind) ? (
         <div className={styles.block}>
           <p className={`fi ${styles.prompt}`}>{copy.examinePrompt}</p>
           <div className={styles.choices} data-testid="examine-choices">
@@ -348,18 +365,29 @@ export function AskClarificationFlow({
                 <span className={styles.soon}> — {copy.comingSoon}</span>
               </button>
             )}
-            <button
-              type="button"
-              className={`${styles.choice} ${styles.choiceDisabled}`}
-              data-testid="examine-find"
-              disabled
-              aria-disabled="true"
-            >
-              {copy.examineFind}
-              <span className={styles.soon}> — {copy.comingSoon}</span>
-            </button>
+            {findCapable ? (
+              <button
+                type="button"
+                className={styles.choice}
+                data-testid="examine-find"
+                onClick={() => update(applyOperationChoice(frame, 'find'))}
+              >
+                {copy.examineFind}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={`${styles.choice} ${styles.choiceDisabled}`}
+                data-testid="examine-find"
+                disabled
+                aria-disabled="true"
+              >
+                {copy.examineFind}
+                <span className={styles.soon}> — {copy.comingSoon}</span>
+              </button>
+            )}
           </div>
-          {!evaluateCapable && !compareCapable ? (
+          {!evaluateCapable && !compareCapable && !findCapable ? (
             <div className={styles.actionsRow}>
               <button
                 type="button"
@@ -548,6 +576,77 @@ export function AskClarificationFlow({
             onClick={() => void persistAndContinue(frame)}
           >
             {busy ? copy.comparing : copy.persistAndCompare}
+          </button>
+        </div>
+      ) : null}
+
+      {showFindRange ? (
+        <div className={styles.block} data-testid="ask-find-range-step">
+          <p className={`fi ${styles.prompt}`}>{copy.findRangePrompt}</p>
+          <p className={`fi ${styles.hint}`}>{copy.findRangeHint}</p>
+          <label className={styles.dateLabel}>
+            <span className={`fi ${styles.label}`}>{copy.findRangeStart}</span>
+            <input
+              type="date"
+              className={styles.dateInput}
+              value={rangeStart}
+              data-testid="ask-find-range-start"
+              onChange={(e) => {
+                setRangeStart(e.target.value);
+                setRangeError('');
+              }}
+            />
+          </label>
+          <label className={styles.dateLabel}>
+            <span className={`fi ${styles.label}`}>{copy.findRangeEnd}</span>
+            <input
+              type="date"
+              className={styles.dateInput}
+              value={rangeEnd}
+              data-testid="ask-find-range-end"
+              onChange={(e) => {
+                setRangeEnd(e.target.value);
+                setRangeError('');
+              }}
+            />
+          </label>
+          {rangeError ? (
+            <p className={`fi ${styles.error}`} role="alert">
+              {rangeError}
+            </p>
+          ) : null}
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            data-testid="ask-find-range-continue"
+            onClick={() => {
+              if (!rangeStart || !rangeEnd) {
+                setRangeError(copy.findRangeMissing);
+                return;
+              }
+              if (rangeStart > rangeEnd) {
+                setRangeError(copy.findRangeInvalid);
+                return;
+              }
+              setRangeError('');
+              update(applyFindDateRange(frame, rangeStart, rangeEnd));
+            }}
+          >
+            {copy.dateContinue}
+          </button>
+        </div>
+      ) : null}
+
+      {showReadyFind ? (
+        <div className={styles.block} data-testid="ask-ready-find">
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            disabled={busy}
+            data-testid="ask-persist-find"
+            onClick={() => void persistAndContinue(frame)}
+          >
+            {busy ? copy.finding : copy.persistAndFind}
           </button>
         </div>
       ) : null}

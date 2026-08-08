@@ -13,7 +13,7 @@
  *
  * Sources consulted (hints only, no competing registry):
  * 1. Decision Type Registry — known type + allowed_modes
- * 2. Shipped-runtime mirror — currently shipped evaluate_date types
+ * 2. Shipped-runtime mirror — currently shipped evaluate/compare/find types
  *
  * Registry allowed_modes alone is insufficient for UX: a type may list
  * evaluate_date without a shipped Runtime on this client.
@@ -27,25 +27,31 @@ import { getDecisionType } from './decision-type-registry';
  * Not authoritative — backend may reject even when listed here.
  */
 const SHIPPED_RUNTIME_MODE_HINT: Readonly<
-  Record<string, readonly ('evaluate_date' | 'compare_dates')[]>
+  Record<
+    string,
+    readonly ('evaluate_date' | 'compare_dates' | 'find_dates')[]
+  >
 > = {
   'car-interview': ['evaluate_date'],
   'bus-investor-meeting': ['evaluate_date'],
   'mar-wedding-date': ['evaluate_date', 'compare_dates'],
-  'bus-product-launch': ['evaluate_date'],
+  'bus-product-launch': ['evaluate_date', 'find_dates'],
 };
 
-export type ProductionCaseMode = 'evaluate_date' | 'compare_dates';
+export type ProductionCaseMode =
+  | 'evaluate_date'
+  | 'compare_dates'
+  | 'find_dates';
 
 /**
  * Map Frame operation → Case mode used by registry allowed_modes.
- * FIND has no Case mode in Package v1 — never offered as executable UX.
  */
 export function frameOperationToCaseMode(
   operation: DecisionOperation
 ): ProductionCaseMode | null {
   if (operation === 'evaluate') return 'evaluate_date';
   if (operation === 'compare') return 'compare_dates';
+  if (operation === 'find') return 'find_dates';
   return null;
 }
 

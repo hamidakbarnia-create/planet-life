@@ -42,16 +42,13 @@ export function framingReadyResult(
   if (frame.operation === 'find') {
     return {
       operation: 'find',
-      best_date_label: 'Unknown',
-      strength: 'unknown',
-      best_window: undefined,
-      alternative: undefined,
-      avoid: undefined,
+      headline: 'No clearly dominant window',
+      unique_dominant: false,
+      windows: [],
       range_context:
         frame.time.range_start && frame.time.range_end
           ? `${formatDisplayDate(frame.time.range_start)} – ${formatDisplayDate(frame.time.range_end)}`
           : 'Date range stated — bounds may still be unknown',
-      timeline: [],
       confidence: 'unknown',
       unknown: [...frame.unknowns, 'Decision Runtime has not evaluated this frame'],
     };

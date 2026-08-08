@@ -130,19 +130,25 @@ export type CompareResultViewModel = {
   unknown?: string[];
 };
 
+export type FindWindowViewModel = {
+  window_id: string;
+  start_label: string;
+  end_label: string;
+  peak_labels: string[];
+  strength: StrengthBand;
+  band: string;
+  peak_score?: number;
+};
+
 export type FindResultViewModel = {
   operation: 'find';
-  best_date_label: string;
-  strength: StrengthBand;
-  best_window?: string;
-  alternative?: string;
-  avoid?: string;
+  /** Stronger timing window / comparable windows / no clearly dominant window */
+  headline: string;
+  unique_dominant: boolean;
+  windows: FindWindowViewModel[];
   range_context?: string;
-  timeline?: Array<{
-    label: string;
-    strength: StrengthBand;
-  }>;
   confidence: ConfidenceBand;
+  limitations?: string[];
   known?: string[];
   inferred?: string[];
   unknown?: string[];

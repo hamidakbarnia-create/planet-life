@@ -165,6 +165,7 @@ def drop_identity_schema_objects(conn: Connection) -> None:
             # EPIC-001 Decision Case tables (must drop before schema_migrations reset)
             cur.execute("DROP TABLE IF EXISTS decision_comparison_ranks CASCADE")
             cur.execute("DROP TABLE IF EXISTS decision_comparisons CASCADE")
+            cur.execute("DROP TABLE IF EXISTS decision_findings CASCADE")
             cur.execute("DROP TABLE IF EXISTS decision_candidate_dates CASCADE")
             cur.execute("DROP TABLE IF EXISTS decision_history_events CASCADE")
             cur.execute("DROP TABLE IF EXISTS decision_participants CASCADE")

@@ -24,7 +24,7 @@ Stance = Literal[
     "no_unique_winner",
     "insufficient_data",
 ]
-DecisionMode = Literal["evaluate_date", "compare_dates"]
+DecisionMode = Literal["evaluate_date", "compare_dates", "find_dates"]
 PrecisionLevel = Literal["L1", "L2", "L3", "L4", "L5", "L6", "L7"]
 TimingBand = Literal["high", "moderate", "low", "na"]
 CandidateBand = Literal["high", "moderate", "low"]
@@ -77,6 +77,49 @@ class TimingModule(ContractModel):
                 raise ValueError("non-material timing requires score=null")
         elif self.band == "na":
             raise ValueError("material timing cannot use band='na'")
+        return self
+
+
+class FindWindowCandidate(ContractModel):
+    window_id: str = Field(min_length=1)
+    start_date: date
+    end_date: date
+    peak_dates: tuple[date, ...] = Field(min_length=1, max_length=5)
+    peak_score: float = Field(ge=0, le=100)
+    band: CandidateBand
+    rank: int = Field(ge=1)
+    strengths: tuple[str, ...] = Field(default=(), max_length=3)
+    risks: tuple[str, ...] = Field(default=(), max_length=3)
+
+    @model_validator(mode="after")
+    def validate_window_bounds(self) -> "FindWindowCandidate":
+        if self.start_date > self.end_date:
+            raise ValueError("window start_date must be <= end_date")
+        for peak in self.peak_dates:
+            if peak < self.start_date or peak > self.end_date:
+                raise ValueError("peak_dates must lie within the window")
+        return self
+
+
+class FindModule(ContractModel):
+    range_start: date
+    range_end: date
+    timezone: str = Field(min_length=1)
+    windows: tuple[FindWindowCandidate, ...] = Field(max_length=5)
+    unique_dominant: bool
+
+    @model_validator(mode="after")
+    def validate_range(self) -> "FindModule":
+        if self.range_start > self.range_end:
+            raise ValueError("find range_start must be <= range_end")
+        ranks = [window.rank for window in self.windows]
+        if len(ranks) != len(set(ranks)):
+            raise ValueError("find window ranks must be unique")
+        ids = [window.window_id for window in self.windows]
+        if len(ids) != len(set(ids)):
+            raise ValueError("find window_id values must be unique")
+        if self.unique_dominant and len(self.windows) == 0:
+            raise ValueError("unique_dominant requires at least one window")
         return self
 
 
@@ -174,6 +217,7 @@ class DecisionEvaluationPackage(ContractModel):
 
     recommendation: RecommendationModule
     timing: TimingModule
+    find: FindModule | None = None
     confidence: ConfidenceModule
     evidence: EvidenceModule
     drivers: DriversModule
@@ -187,6 +231,13 @@ class DecisionEvaluationPackage(ContractModel):
     next_decisions: NextDecisionsModule
     related_decisions: RelatedDecisionsModule
 
+    @model_serializer(mode="wrap")
+    def _omit_empty_find(self, handler):
+        data = handler(self)
+        if data.get("find") is None:
+            data.pop("find", None)
+        return data
+
     @model_validator(mode="after")
     def validate_mode_specific_timing(self) -> "DecisionEvaluationPackage":
         count = len(self.timing.candidates)
@@ -196,6 +247,22 @@ class DecisionEvaluationPackage(ContractModel):
 
         if self.mode == "compare_dates" and not 2 <= count <= 5:
             raise ValueError("compare_dates requires between 2 and 5 candidates")
+
+        if self.mode == "find_dates":
+            if self.find is None:
+                raise ValueError("find_dates requires find module")
+            if count > 5:
+                raise ValueError("find_dates allows at most 5 timing candidates")
+            if self.find.windows and count != len(self.find.windows):
+                raise ValueError(
+                    "find_dates timing candidates must mirror find windows"
+                )
+            if not self.find.windows and count != 0:
+                raise ValueError(
+                    "find_dates with no windows requires zero timing candidates"
+                )
+        elif self.find is not None:
+            raise ValueError("find module is only valid for find_dates mode")
 
         if self.precision_level != self.confidence.precision_level:
             raise ValueError(
@@ -221,6 +288,8 @@ __all__ = [
     "DriversModule",
     "EvidenceModule",
     "ExplainabilityModule",
+    "FindModule",
+    "FindWindowCandidate",
     "ImproveAccuracyModule",
     "NextDecisionsModule",
     "PrecisionLevel",

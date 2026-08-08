@@ -37,6 +37,8 @@ ACTIVE_PATHS = {
     "/api/v1/decision-cases/{case_id}/evaluations/{evaluation_id}": {"get"},
     "/api/v1/decision-cases/{case_id}/comparisons": {"get", "post"},
     "/api/v1/decision-cases/{case_id}/comparisons/{comparison_id}": {"get"},
+    "/api/v1/decision-cases/{case_id}/findings": {"get", "post"},
+    "/api/v1/decision-cases/{case_id}/findings/{finding_id}": {"get"},
 }
 
 RESERVED_PATHS: set[str] = set()

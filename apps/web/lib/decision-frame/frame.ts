@@ -181,6 +181,47 @@ export type CompareDateDraft = {
   date: string;
 };
 
+/** Set inclusive FIND date range — never invents today. */
+export function applyFindDateRange(
+  frame: DecisionFrameV1,
+  rangeStart: string,
+  rangeEnd: string
+): DecisionFrameV1 {
+  const start = rangeStart.trim();
+  const end = rangeEnd.trim();
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(start) ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(end) ||
+    start > end
+  ) {
+    return {
+      ...frame,
+      operation: 'find',
+      time: {
+        scope: 'date_range',
+        range_start: /^\d{4}-\d{2}-\d{2}$/.test(start) ? start : undefined,
+        range_end: /^\d{4}-\d{2}-\d{2}$/.test(end) ? end : undefined,
+      },
+      pending_clarification: 'time',
+    };
+  }
+
+  const next = buildDecisionFrame(frame.raw_intent, {
+    decision_type_id: frame.decision_type_id,
+    objective: frame.objective,
+    operation: 'find',
+    time_scope: 'date_range',
+    range_start: start,
+    range_end: end,
+  });
+  return {
+    ...next,
+    operation: 'find',
+    pending_clarification: null,
+    unknowns: next.unknowns.filter((u) => u !== 'Date range bounds'),
+  };
+}
+
 /** Set 2–3 labeled COMPARE dates — never invents today or collapses to target_date. */
 export function applyCompareDates(
   frame: DecisionFrameV1,

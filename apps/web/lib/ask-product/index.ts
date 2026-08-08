@@ -29,6 +29,7 @@ export { localizeCaseApiError } from './api-errors';
 export {
   applyCompareDates,
   applyEvaluateDate,
+  applyFindDateRange,
   applyOperationChoice,
   applyOpenEndedAxis,
   buildDecisionFrame,

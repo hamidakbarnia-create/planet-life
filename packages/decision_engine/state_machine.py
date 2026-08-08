@@ -23,6 +23,7 @@ class CaseState(StrEnum):
     EVIDENCE_READY = "evidence_ready"
     EVALUATED = "evaluated"
     COMPARED = "compared"
+    FOUND = "found"
     PLANNED = "planned"
     SCHEDULED = "scheduled"
     EXECUTING = "executing"
@@ -42,6 +43,7 @@ class ActivationPhase(StrEnum):
     EVIDENCE_READY = "evidence_ready"
     EVALUATED = "evaluated"
     COMPARED = "compared"
+    FOUND = "found"
     COMPLETED = "completed"
     ARCHIVED = "archived"
 
@@ -57,6 +59,7 @@ _PAUSE_SOURCES: Final[frozenset[CaseState]] = frozenset(
         CaseState.EVIDENCE_READY,
         CaseState.EVALUATED,
         CaseState.COMPARED,
+        CaseState.FOUND,
         CaseState.PLANNED,
         CaseState.SCHEDULED,
         CaseState.EXECUTING,
@@ -85,6 +88,8 @@ _CREATE_EVALUATION = "create_evaluation"
 _RE_EVALUATE = "re_evaluate"
 _SAVE_COMPARISON = "save_comparison"
 _RE_COMPARE = "re_compare"
+_SAVE_FINDING = "save_finding"
+_RE_FIND = "re_find"
 _COMMIT_PLAN = "commit_plan"
 _SCHEDULE = "schedule"
 _START_EXECUTION = "start_execution"
@@ -105,6 +110,8 @@ _ALL_TRIGGERS: Final[frozenset[str]] = frozenset(
         _RE_EVALUATE,
         _SAVE_COMPARISON,
         _RE_COMPARE,
+        _SAVE_FINDING,
+        _RE_FIND,
         _COMMIT_PLAN,
         _SCHEDULE,
         _START_EXECUTION,
@@ -133,8 +140,11 @@ _MAIN_EDGES: Final[dict[tuple[CaseState, CaseState, str], str | None]] = {
     (CaseState.EVALUATED, CaseState.EVALUATED, _RE_EVALUATE): None,
     (CaseState.EVALUATED, CaseState.COMPARED, _SAVE_COMPARISON): "comparison_saved",
     (CaseState.COMPARED, CaseState.COMPARED, _RE_COMPARE): None,
+    (CaseState.EVIDENCE_READY, CaseState.FOUND, _SAVE_FINDING): "finding_saved",
+    (CaseState.FOUND, CaseState.FOUND, _RE_FIND): None,
     (CaseState.EVALUATED, CaseState.PLANNED, _COMMIT_PLAN): "plan_committed",
     (CaseState.COMPARED, CaseState.PLANNED, _COMMIT_PLAN): "plan_committed",
+    (CaseState.FOUND, CaseState.PLANNED, _COMMIT_PLAN): "plan_committed",
     (CaseState.PLANNED, CaseState.SCHEDULED, _SCHEDULE): "time_bound_set",
     (CaseState.PLANNED, CaseState.EXECUTING, _START_EXECUTION): "execution_started",
     (CaseState.SCHEDULED, CaseState.EXECUTING, _START_EXECUTION): "execution_started",
@@ -284,7 +294,11 @@ def complete_case_composite(state: CaseState | str) -> CompositePlan:
             final_state=None,
             reason="unknown_state",
         )
-    if current not in {CaseState.EVALUATED, CaseState.COMPARED}:
+    if current not in {
+        CaseState.EVALUATED,
+        CaseState.COMPARED,
+        CaseState.FOUND,
+    }:
         return CompositePlan(
             ok=False,
             steps=(),
@@ -341,6 +355,7 @@ def activation_phase(
         CaseState.EVIDENCE_READY,
         CaseState.EVALUATED,
         CaseState.COMPARED,
+        CaseState.FOUND,
     }:
         return ActivationPhase(current.value)
 
@@ -351,6 +366,8 @@ def activation_phase(
     }:
         if mode == "compare_dates":
             return ActivationPhase.COMPARED
+        if mode == "find_dates":
+            return ActivationPhase.FOUND
         return ActivationPhase.EVALUATED
 
     if current in {CaseState.COMPLETED, CaseState.REFLECTED}:

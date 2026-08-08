@@ -5,7 +5,7 @@
  * packages/decision_engine/schemas/decision_evaluation_package.v1.json
  */
 
-export type DecisionMode = "evaluate_date" | "compare_dates";
+export type DecisionMode = "evaluate_date" | "compare_dates" | "find_dates";
 
 export type PrecisionLevel =
   | "L1"
@@ -38,6 +38,28 @@ export interface TimingCandidate {
   readonly risks?: readonly string[];
 }
 
+/** Mirror of Package find.findWindow / FindWindowCandidate. */
+export interface FindWindow {
+  readonly window_id: string;
+  readonly start_date: string;
+  readonly end_date: string;
+  readonly peak_dates: readonly string[];
+  readonly peak_score: number;
+  readonly band: CandidateBand;
+  readonly rank: number;
+  readonly strengths?: readonly string[];
+  readonly risks?: readonly string[];
+}
+
+/** Mirror of Package find module (required when mode=find_dates). */
+export interface FindModule {
+  readonly range_start: string;
+  readonly range_end: string;
+  readonly timezone: string;
+  readonly windows: readonly FindWindow[];
+  readonly unique_dominant: boolean;
+}
+
 export interface DecisionEvaluationPackage {
   readonly case_id: string;
   readonly evaluation_id: string;
@@ -64,6 +86,9 @@ export interface DecisionEvaluationPackage {
     readonly candidates: readonly TimingCandidate[];
     readonly notes: string;
   };
+
+  /** Present only for find_dates packages. */
+  readonly find?: FindModule;
 
   readonly confidence: {
     readonly value: number;

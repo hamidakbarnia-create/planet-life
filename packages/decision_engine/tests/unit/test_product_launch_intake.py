@@ -35,3 +35,32 @@ def test_merge_does_not_invent_launch_object():
     )
     assert merged.launch_object is None
     assert merged.brand_or_company == "Acme"
+
+
+def test_find_mode_does_not_require_target_date():
+    complete = evaluate_product_launch_intake(
+        {
+            "decision_frame": {
+                "operation": "find",
+                "time_scope": "date_range",
+                "start": "2026-09-01",
+                "end": "2026-09-14",
+            },
+            "launch_object": "mobile app v2",
+        }
+    )
+    assert complete.is_complete is True
+    assert complete.missing_required == ()
+
+    incomplete = evaluate_product_launch_intake(
+        {
+            "decision_frame": {
+                "operation": "find",
+                "time_scope": "date_range",
+                "start": "2026-09-01",
+                "end": "2026-09-14",
+            }
+        }
+    )
+    assert incomplete.is_complete is False
+    assert incomplete.missing_required == ("launch_object",)

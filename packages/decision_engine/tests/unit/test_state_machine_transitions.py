@@ -22,6 +22,7 @@ MAIN_STATES = {
     CaseState.EVIDENCE_READY,
     CaseState.EVALUATED,
     CaseState.COMPARED,
+    CaseState.FOUND,
     CaseState.PLANNED,
     CaseState.SCHEDULED,
     CaseState.EXECUTING,
@@ -55,8 +56,13 @@ GUARD_BY_EDGE: dict[tuple[CaseState, CaseState, str], dict[str, bool]] = {
         "comparison_saved": True
     },
     (CaseState.COMPARED, CaseState.COMPARED, "re_compare"): {},
+    (CaseState.EVIDENCE_READY, CaseState.FOUND, "save_finding"): {
+        "finding_saved": True
+    },
+    (CaseState.FOUND, CaseState.FOUND, "re_find"): {},
     (CaseState.EVALUATED, CaseState.PLANNED, "commit_plan"): {"plan_committed": True},
     (CaseState.COMPARED, CaseState.PLANNED, "commit_plan"): {"plan_committed": True},
+    (CaseState.FOUND, CaseState.PLANNED, "commit_plan"): {"plan_committed": True},
     (CaseState.PLANNED, CaseState.SCHEDULED, "schedule"): {"time_bound_set": True},
     (CaseState.PLANNED, CaseState.EXECUTING, "start_execution"): {
         "execution_started": True
@@ -76,7 +82,7 @@ GUARD_BY_EDGE: dict[tuple[CaseState, CaseState, str], dict[str, bool]] = {
 
 def test_exact_canonical_main_and_side_states() -> None:
     assert MAIN_STATES | SIDE_STATES == ALL_STATES
-    assert len(ALL_STATES) == 14
+    assert len(ALL_STATES) == 15
     assert SIDE_STATES <= ALL_STATES
     assert ActivationPhase.DRAFT.value in {s.value for s in CaseState}
     # activation_phase values are not additional Case states

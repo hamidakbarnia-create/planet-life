@@ -98,6 +98,21 @@ export type DecisionComparisonResource = DecisionComparisonListItem & {
   package: DecisionEvaluationPackage;
 };
 
+export type DecisionFindingListItem = {
+  finding_id: string;
+  case_id: string;
+  case_version: number;
+  finding_version: number;
+  package_contract_version: string;
+  engine_id: string;
+  dq_status: string;
+  created_at: string;
+};
+
+export type DecisionFindingResource = DecisionFindingListItem & {
+  package: DecisionEvaluationPackage;
+};
+
 export class DecisionCaseApiError extends Error {
   readonly status: number;
   readonly code: string;
@@ -321,6 +336,36 @@ export function getComparison(input: {
 }): Promise<DecisionComparisonResource> {
   return requestJson(
     `/api/v1/decision-cases/${input.caseId}/comparisons/${input.comparisonId}`
+  );
+}
+
+export function findDecisionCase(input: {
+  caseId: string;
+  expectedCaseVersion: number;
+}): Promise<DecisionFindingResource> {
+  return requestJson<DecisionFindingResource>(
+    `/api/v1/decision-cases/${input.caseId}/findings`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        expected_case_version: input.expectedCaseVersion,
+      }),
+    }
+  );
+}
+
+export function listDecisionCaseFindings(
+  caseId: string
+): Promise<{ findings: DecisionFindingListItem[] }> {
+  return requestJson(`/api/v1/decision-cases/${caseId}/findings`);
+}
+
+export function getFinding(input: {
+  caseId: string;
+  findingId: string;
+}): Promise<DecisionFindingResource> {
+  return requestJson(
+    `/api/v1/decision-cases/${input.caseId}/findings/${input.findingId}`
   );
 }
 

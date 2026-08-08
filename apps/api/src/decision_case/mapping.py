@@ -11,6 +11,7 @@ from decision_case.repository.models import (
     CaseRecord,
     ComparisonRecord,
     EvaluationRecord,
+    FindingRecord,
     HistoryEventRecord,
 )
 from decision_case.schemas.cases import (
@@ -19,6 +20,8 @@ from decision_case.schemas.cases import (
     DecisionComparisonResource,
     DecisionEvaluationListItem,
     DecisionEvaluationResource,
+    DecisionFindingListItem,
+    DecisionFindingResource,
     DecisionHistoryEventResource,
 )
 
@@ -99,6 +102,27 @@ def to_comparison_resource(
         **base.model_dump(),
         ranking=list(record.ranking or []),
         package=dict(evaluation.package) if evaluation.package is not None else {},
+    )
+
+
+def to_finding_list_item(record: FindingRecord) -> DecisionFindingListItem:
+    return DecisionFindingListItem(
+        finding_id=record.finding_id,
+        case_id=record.case_id,
+        case_version=record.case_version,
+        finding_version=record.finding_version,
+        package_contract_version=record.package_contract_version,
+        engine_id=record.engine_id,
+        dq_status=record.dq_status,  # type: ignore[arg-type]
+        created_at=format_utc_z(record.created_at),
+    )
+
+
+def to_finding_resource(record: FindingRecord) -> DecisionFindingResource:
+    base = to_finding_list_item(record)
+    return DecisionFindingResource(
+        **base.model_dump(),
+        package=dict(record.package) if record.package is not None else {},
     )
 
 
