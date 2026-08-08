@@ -24,6 +24,10 @@ describe('ask-home popular decisions provider', () => {
     const wedding = items.find((item) => item.id === 'best-wedding-date');
     expect(wedding?.source).toBe('registry');
     expect(wedding?.decisionTypeId).toBe('mar-wedding-date');
+
+    const launch = items.find((item) => item.id === 'launch-business');
+    expect(launch?.decisionTypeId).toBe('bus-product-launch');
+    expect(launch?.guidedQuestionId).toBe('launch-project');
   });
 
   it('prefers localized question-library labels for FA popular cards', () => {

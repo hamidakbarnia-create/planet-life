@@ -16,6 +16,10 @@ from decision_case.services.investor_meeting_intake import (
     complete_investor_meeting_intake,
     save_investor_meeting_answers,
 )
+from decision_case.services.product_launch_intake import (
+    complete_product_launch_intake,
+    save_product_launch_answers,
+)
 from decision_case.services.wedding_date_intake import (
     complete_wedding_date_intake,
     save_wedding_date_answers,
@@ -59,6 +63,15 @@ def save_intake_answers(
             answers=answers,
         )
 
+    if case.decision_type_id == "bus-product-launch":
+        return save_product_launch_answers(
+            repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=expected_case_version,
+            answers=answers,
+        )
+
     raise UnsupportedDecisionTypeError(case.decision_type_id)
 
 
@@ -89,6 +102,14 @@ def complete_intake(
 
     if case.decision_type_id == "mar-wedding-date":
         return complete_wedding_date_intake(
+            repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=expected_case_version,
+        )
+
+    if case.decision_type_id == "bus-product-launch":
+        return complete_product_launch_intake(
             repo,
             case_id=case_id,
             owner_subject_id=owner_subject_id,

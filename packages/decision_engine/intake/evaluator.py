@@ -193,3 +193,60 @@ def evaluate_wedding_date_intake(
         is_complete=not missing,
         has_first_required_answer=bool(answered),
     )
+
+
+from packages.decision_engine.intake.product_launch import (
+    PRODUCT_LAUNCH_SLOTS,
+    ProductLaunchIntake,
+    merge_product_launch_intake,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class ProductLaunchIntakeEvaluation:
+    intake: ProductLaunchIntake
+    missing_required: tuple[str, ...]
+    answered_required: tuple[str, ...]
+    is_complete: bool
+    has_first_required_answer: bool
+
+
+def evaluate_product_launch_intake(
+    intake: Mapping[str, Any] | ProductLaunchIntake | None = None,
+    *,
+    answers: Mapping[str, Any] | None = None,
+) -> ProductLaunchIntakeEvaluation:
+    if isinstance(intake, ProductLaunchIntake) and not answers:
+        normalized = intake
+    else:
+        current = (
+            intake.as_dict()
+            if isinstance(intake, ProductLaunchIntake)
+            else intake
+        )
+        normalized = merge_product_launch_intake(current, answers or {})
+
+    values = {
+        "target_date": normalized.target_date,
+        "launch_object": normalized.launch_object,
+        "launch_channel": normalized.launch_channel,
+        "brand_or_company": normalized.brand_or_company,
+    }
+
+    missing = tuple(
+        slot.slot_id
+        for slot in PRODUCT_LAUNCH_SLOTS
+        if slot.required and not values[slot.slot_id]
+    )
+
+    answered = tuple(
+        key for key in ("target_date", "launch_object") if values[key]
+    )
+
+    return ProductLaunchIntakeEvaluation(
+        intake=normalized,
+        missing_required=missing,
+        answered_required=answered,
+        is_complete=not missing,
+        has_first_required_answer=bool(answered),
+    )

@@ -9,6 +9,9 @@ from packages.decision_engine.evaluate.car_interview_evaluate import (
 from packages.decision_engine.evaluate.investor_meeting_evaluate import (
     INVESTOR_MEETING_EVALUATE_RUNTIME,
 )
+from packages.decision_engine.evaluate.product_launch_evaluate import (
+    PRODUCT_LAUNCH_EVALUATE_RUNTIME,
+)
 from packages.decision_engine.evaluate.wedding_date_evaluate import (
     WEDDING_DATE_EVALUATE_RUNTIME,
 )
@@ -21,6 +24,7 @@ def test_allowlisted_types_resolve() -> None:
         is INVESTOR_MEETING_EVALUATE_RUNTIME
     )
     assert get_evaluate_runtime("mar-wedding-date") is WEDDING_DATE_EVALUATE_RUNTIME
+    assert get_evaluate_runtime("bus-product-launch") is PRODUCT_LAUNCH_EVALUATE_RUNTIME
 
 
 def test_mar_wedding_date_has_timing_opt_runtime() -> None:
@@ -28,6 +32,14 @@ def test_mar_wedding_date_has_timing_opt_runtime() -> None:
     assert runtime is not None
     assert runtime.decision_type_id == "mar-wedding-date"
     assert runtime.engine_id == "decision-engine-wedding-date-v1"
+    assert runtime.mode == "evaluate_date"
+
+
+def test_bus_product_launch_has_timing_opt_runtime() -> None:
+    runtime = get_evaluate_runtime("bus-product-launch")
+    assert runtime is not None
+    assert runtime.decision_type_id == "bus-product-launch"
+    assert runtime.engine_id == "decision-engine-product-launch-v1"
     assert runtime.mode == "evaluate_date"
 
 

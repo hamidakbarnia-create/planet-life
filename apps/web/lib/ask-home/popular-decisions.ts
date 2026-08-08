@@ -25,7 +25,11 @@ const POPULAR_DECISION_REFS: readonly PopularDecisionRef[] = [
   { id: 'career-change', guidedQuestionId: 'change-career-path' },
   { id: 'promotion', guidedQuestionId: 'ask-promotion' },
   { id: 'salary-negotiation', guidedQuestionId: 'ask-raise' },
-  { id: 'launch-business', guidedQuestionId: 'launch-project' },
+  {
+    id: 'launch-business',
+    decisionTypeId: 'bus-product-launch',
+    guidedQuestionId: 'launch-project',
+  },
   { id: 'invest-money', guidedQuestionId: 'buy-sell-asset' },
   { id: 'partnership', guidedQuestionId: 'close-deal' },
   { id: 'move-abroad', guidedQuestionId: 'relocate-city' },

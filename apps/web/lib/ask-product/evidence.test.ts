@@ -58,6 +58,13 @@ describe('ask-product evidence mapping honesty', () => {
     expect(model?.scope).not.toMatch(/interview|employer|salary/i);
   });
 
+  it('uses generic timing scope for product launch packages', () => {
+    const pkg = runtimePackage({ decision_type_id: 'bus-product-launch' });
+    const model = buildEvaluatePresentation(pkg, 'en', { topic: 'Launch' });
+    expect(model?.scopeSource).toBe('generic-timing');
+    expect(model?.scope).not.toMatch(/interview|employer|salary|market fit/i);
+  });
+
   it('car-interview scope uses Runtime-1 negotiation contract only for that type', () => {
     const model = buildEvaluatePresentation(runtimePackage(), 'en');
     expect(model?.scopeSource).toBe('car-interview-contract');

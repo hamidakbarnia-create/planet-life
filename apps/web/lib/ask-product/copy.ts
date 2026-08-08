@@ -54,14 +54,18 @@ export type AskProductCopy = {
   topicCarInterview: string;
   topicInvestorMeeting: string;
   topicWeddingDate: string;
+  topicProductLaunch: string;
   topicGeneric: string;
   intakeEyebrow: string;
+  intakeEyebrowProductLaunch: string;
   intakeTitle: string;
   intakeBody: string;
   intakeTitleInvestorMeeting: string;
   intakeBodyInvestorMeeting: string;
   intakeTitleWeddingDate: string;
   intakeBodyWeddingDate: string;
+  intakeTitleProductLaunch: string;
+  intakeBodyProductLaunch: string;
   intakeOptional: string;
   intakeSelect: string;
   intakeSave: string;
@@ -80,6 +84,10 @@ export type AskProductCopy = {
   intakeFieldCeremonyType: string;
   intakeFieldPartnerName: string;
   intakeFieldVenue: string;
+  intakeFieldLaunchDate: string;
+  intakeFieldLaunchObject: string;
+  intakeFieldLaunchChannel: string;
+  intakeFieldBrandOrCompany: string;
   intakeUnsupportedType: string;
   intakeLoadError: string;
   intakeSaveError: string;
@@ -172,8 +180,10 @@ const EN: AskProductCopy = {
   topicCarInterview: 'Attend job interview',
   topicInvestorMeeting: 'Meet an investor',
   topicWeddingDate: 'Choose wedding date',
+  topicProductLaunch: 'Launch a project or product',
   topicGeneric: 'Your decision',
   intakeEyebrow: 'Interview timing',
+  intakeEyebrowProductLaunch: 'Launch timing',
   intakeTitle: 'Attend job interview',
   intakeBody:
     'Share the interview details. We’ll evaluate the timing for the date you provide.',
@@ -183,6 +193,9 @@ const EN: AskProductCopy = {
   intakeTitleWeddingDate: 'Choose wedding date',
   intakeBodyWeddingDate:
     'Share the ceremony details. We’ll evaluate the timing for the date you provide.',
+  intakeTitleProductLaunch: 'Launch a project or product',
+  intakeBodyProductLaunch:
+    'Share what you are launching. We’ll evaluate launch-day timing for the date you provide — not market fit, revenue, or business success.',
   intakeOptional: 'optional',
   intakeSelect: 'Select…',
   intakeSave: 'Save answers',
@@ -201,6 +214,10 @@ const EN: AskProductCopy = {
   intakeFieldCeremonyType: 'Ceremony type',
   intakeFieldPartnerName: 'Partner name',
   intakeFieldVenue: 'Venue',
+  intakeFieldLaunchDate: 'Launch date',
+  intakeFieldLaunchObject: 'What launches',
+  intakeFieldLaunchChannel: 'Launch channel',
+  intakeFieldBrandOrCompany: 'Brand or company',
   intakeUnsupportedType: 'This decision type is not available for intake yet.',
   intakeLoadError: 'Unable to load this decision.',
   intakeSaveError: 'Could not save answers.',
@@ -298,8 +315,10 @@ const FA: AskProductCopy = {
   topicCarInterview: 'مصاحبه کاری',
   topicInvestorMeeting: 'جلسه با سرمایه‌گذار',
   topicWeddingDate: 'انتخاب تاریخ عروسی',
+  topicProductLaunch: 'لانچ پروژه یا محصول',
   topicGeneric: 'تصمیم شما',
   intakeEyebrow: 'زمان‌بندی مصاحبه',
+  intakeEyebrowProductLaunch: 'زمان‌بندی لانچ',
   intakeTitle: 'مصاحبه کاری',
   intakeBody:
     'جزئیات مصاحبه را وارد کنید. زمان‌بندی را برای تاریخی که می‌دهید ارزیابی می‌کنیم.',
@@ -309,6 +328,9 @@ const FA: AskProductCopy = {
   intakeTitleWeddingDate: 'انتخاب تاریخ عروسی',
   intakeBodyWeddingDate:
     'جزئیات مراسم را وارد کنید. زمان‌بندی را برای تاریخی که می‌دهید ارزیابی می‌کنیم.',
+  intakeTitleProductLaunch: 'لانچ پروژه یا محصول',
+  intakeBodyProductLaunch:
+    'آنچه لانچ می‌کنید را مشخص کنید. فقط زمان‌بندی روز لانچ را ارزیابی می‌کنیم — نه تناسب بازار، درآمد یا موفقیت کسب‌وکار.',
   intakeOptional: 'اختیاری',
   intakeSelect: 'انتخاب…',
   intakeSave: 'ذخیره پاسخ‌ها',
@@ -327,6 +349,10 @@ const FA: AskProductCopy = {
   intakeFieldCeremonyType: 'نوع مراسم',
   intakeFieldPartnerName: 'نام شریک',
   intakeFieldVenue: 'محل برگزاری',
+  intakeFieldLaunchDate: 'تاریخ لانچ',
+  intakeFieldLaunchObject: 'چه چیزی لانچ می‌شود',
+  intakeFieldLaunchChannel: 'کانال لانچ',
+  intakeFieldBrandOrCompany: 'برند یا شرکت',
   intakeUnsupportedType: 'این نوع تصمیم هنوز برای ورود جزئیات در دسترس نیست.',
   intakeLoadError: 'بارگذاری این تصمیم ممکن نشد.',
   intakeSaveError: 'ذخیره پاسخ‌ها ممکن نشد.',
@@ -423,8 +449,10 @@ const AR: AskProductCopy = {
   topicCarInterview: 'مقابلة عمل',
   topicInvestorMeeting: 'لقاء مع مستثمر',
   topicWeddingDate: 'اختيار تاريخ الزواج',
+  topicProductLaunch: 'إطلاق مشروع أو منتج',
   topicGeneric: 'قرارك',
   intakeEyebrow: 'توقيت المقابلة',
+  intakeEyebrowProductLaunch: 'توقيت الإطلاق',
   intakeTitle: 'مقابلة عمل',
   intakeBody:
     'شارك تفاصيل المقابلة. سنقيّم التوقيت للتاريخ الذي تقدّمه.',
@@ -434,6 +462,9 @@ const AR: AskProductCopy = {
   intakeTitleWeddingDate: 'اختيار تاريخ الزواج',
   intakeBodyWeddingDate:
     'شارك تفاصيل الحفل. سنقيّم التوقيت للتاريخ الذي تقدّمه.',
+  intakeTitleProductLaunch: 'إطلاق مشروع أو منتج',
+  intakeBodyProductLaunch:
+    'حدّد ما الذي تُطلقه. نقيّم توقيت يوم الإطلاق فقط — لا ملاءمة السوق أو الإيرادات أو نجاح العمل.',
   intakeOptional: 'اختياري',
   intakeSelect: 'اختر…',
   intakeSave: 'حفظ الإجابات',
@@ -452,6 +483,10 @@ const AR: AskProductCopy = {
   intakeFieldCeremonyType: 'نوع الحفل',
   intakeFieldPartnerName: 'اسم الشريك',
   intakeFieldVenue: 'مكان الحفل',
+  intakeFieldLaunchDate: 'تاريخ الإطلاق',
+  intakeFieldLaunchObject: 'ما الذي يُطلق',
+  intakeFieldLaunchChannel: 'قناة الإطلاق',
+  intakeFieldBrandOrCompany: 'العلامة أو الشركة',
   intakeUnsupportedType: 'نوع القرار هذا غير متاح لإدخال التفاصيل بعد.',
   intakeLoadError: 'تعذّر تحميل هذا القرار.',
   intakeSaveError: 'تعذّر حفظ الإجابات.',
@@ -546,8 +581,10 @@ const RU: AskProductCopy = {
   topicCarInterview: 'Собеседование',
   topicInvestorMeeting: 'Встреча с инвестором',
   topicWeddingDate: 'Выбор даты свадьбы',
+  topicProductLaunch: 'Запуск проекта или продукта',
   topicGeneric: 'Ваше решение',
   intakeEyebrow: 'Тайминг собеседования',
+  intakeEyebrowProductLaunch: 'Тайминг запуска',
   intakeTitle: 'Собеседование',
   intakeBody:
     'Укажите детали собеседования. Мы оценим тайминг для указанной даты.',
@@ -557,6 +594,9 @@ const RU: AskProductCopy = {
   intakeTitleWeddingDate: 'Выбор даты свадьбы',
   intakeBodyWeddingDate:
     'Укажите детали церемонии. Мы оценим тайминг для указанной даты.',
+  intakeTitleProductLaunch: 'Запуск проекта или продукта',
+  intakeBodyProductLaunch:
+    'Укажите, что запускаете. Мы оценим только тайминг дня запуска — не соответствие рынку, выручку или успех бизнеса.',
   intakeOptional: 'необязательно',
   intakeSelect: 'Выберите…',
   intakeSave: 'Сохранить ответы',
@@ -575,6 +615,10 @@ const RU: AskProductCopy = {
   intakeFieldCeremonyType: 'Тип церемонии',
   intakeFieldPartnerName: 'Имя партнёра',
   intakeFieldVenue: 'Место проведения',
+  intakeFieldLaunchDate: 'Дата запуска',
+  intakeFieldLaunchObject: 'Что запускается',
+  intakeFieldLaunchChannel: 'Канал запуска',
+  intakeFieldBrandOrCompany: 'Бренд или компания',
   intakeUnsupportedType: 'Этот тип решения пока недоступен для ввода деталей.',
   intakeLoadError: 'Не удалось загрузить это решение.',
   intakeSaveError: 'Не удалось сохранить ответы.',

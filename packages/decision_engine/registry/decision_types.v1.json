@@ -53,6 +53,19 @@
         "evaluate_date"
       ],
       "output_profile": "decision_evaluation_package.v1"
+    },
+    {
+      "decision_type_id": "bus-product-launch",
+      "family_id": "timing_opt",
+      "label": "Launch a project or product",
+      "create_mode": "none",
+      "available_entry_modes": [
+        "structured"
+      ],
+      "allowed_modes": [
+        "evaluate_date"
+      ],
+      "output_profile": "decision_evaluation_package.v1"
     }
   ]
 }

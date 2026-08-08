@@ -12,11 +12,13 @@ describe('ASK Web UX capability hint (not backend authority)', () => {
     expect(canEvaluateInProduction('car-interview')).toBe(true);
     expect(canEvaluateInProduction('bus-investor-meeting')).toBe(true);
     expect(canEvaluateInProduction('mar-wedding-date')).toBe(true);
+    expect(canEvaluateInProduction('bus-product-launch')).toBe(true);
     expect(canExecuteInProduction('car-interview', 'evaluate')).toBe(true);
     expect(listProductionEvaluateDecisionTypeIds()).toEqual([
       'car-interview',
       'bus-investor-meeting',
       'mar-wedding-date',
+      'bus-product-launch',
     ]);
   });
 

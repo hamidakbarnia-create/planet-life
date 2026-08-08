@@ -145,6 +145,9 @@ function topicFromPackage(
     return copy.topicInvestorMeeting;
   }
   if (pkg.decision_type_id === 'mar-wedding-date') return copy.topicWeddingDate;
+  if (pkg.decision_type_id === 'bus-product-launch') {
+    return copy.topicProductLaunch;
+  }
   return copy.topicGeneric;
 }
 

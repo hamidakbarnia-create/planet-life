@@ -119,4 +119,37 @@ describe('AskClarificationFlow evaluate routes to intake', () => {
       );
     });
   });
+
+  it('routes product launch ASK evaluate to intake, not result', async () => {
+    persistFrameToCase.mockResolvedValue({
+      case: { case_id: 'case-launch', case_version: 2 },
+    });
+    const frame = buildDecisionFrame(
+      'Is November 5 a good launch date for my product?',
+      {
+        decision_type_id: 'bus-product-launch',
+        operation: 'evaluate',
+        time_scope: 'specific_date',
+        dates: ['2026-11-05'],
+      }
+    );
+    render(
+      <AskClarificationFlow
+        lang="en"
+        frame={frame}
+        caseId={null}
+        caseVersion={null}
+        onFrameChange={vi.fn()}
+        onCaseBound={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByTestId('ask-persist-evaluate'));
+    await waitFor(() => {
+      expect(persistFrameToCase).toHaveBeenCalled();
+      expect(push).toHaveBeenCalledWith('/decision-cases/case-launch/intake');
+      expect(push).not.toHaveBeenCalledWith(
+        '/decision-cases/case-launch/result'
+      );
+    });
+  });
 });
