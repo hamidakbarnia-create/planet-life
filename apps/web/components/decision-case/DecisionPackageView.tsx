@@ -55,25 +55,38 @@ export function DecisionPackageView({
   if (pkg.mode === 'find_dates' && pkg.find && !isBlocked && !isStub) {
     return (
       <div data-testid="decision-package-view" data-mode="find_dates">
-        <FindResultView model={packageToFindView(pkg)} />
+        <FindResultView lang={lang} model={packageToFindView(pkg)} />
       </div>
     );
   }
 
   if (isBlocked && !isStub) {
+    const blockedTitle =
+      pkg.mode === 'compare_dates'
+        ? copy.blockedTitleCompare
+        : pkg.mode === 'find_dates'
+          ? copy.blockedTitleFind
+          : copy.blockedTitle;
+    const blockedBody =
+      pkg.mode === 'compare_dates'
+        ? copy.blockedBodyCompare
+        : pkg.mode === 'find_dates'
+          ? copy.blockedBodyFind
+          : copy.blockedBody;
+
     return (
       <article
         className="space-y-4"
         data-testid="decision-package-blocked"
         dir={copy.dir}
-        aria-label={copy.blockedTitle}
+        aria-label={blockedTitle}
       >
         <header className="space-y-2">
           <p className="fi text-xs uppercase tracking-[0.14em] text-amber-300/90">
             {copy.blockedEyebrow}
           </p>
-          <h2 className="fc text-xl text-white">{copy.blockedTitle}</h2>
-          <p className="fi text-sm text-white/65">{copy.blockedBody}</p>
+          <h2 className="fc text-xl text-white">{blockedTitle}</h2>
+          <p className="fi text-sm text-white/65">{blockedBody}</p>
         </header>
         <section aria-label={copy.blockedRequired}>
           <p className="fi text-xs uppercase tracking-[0.12em] text-white/45">

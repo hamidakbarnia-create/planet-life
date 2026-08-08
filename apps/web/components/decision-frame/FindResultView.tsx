@@ -1,103 +1,135 @@
+import {
+  AgencyLine,
+  ConfidenceIndicator,
+  LimitsBlock,
+  ResultHeader,
+  ResultMetricsRow,
+  ResultShell,
+  resultShellStyles as styles,
+} from '@/components/decision-result/ResultShell';
+import {
+  getAskProductCopy,
+  localizeConfidence,
+  localizeStrength,
+} from '@/lib/ask-product';
 import type { FindResultViewModel } from '@/lib/decision-frame';
-import styles from './decision-frame.module.css';
+import type { AppLang } from '@/lib/app-settings';
+import { useAppLang } from '@/lib/use-app-lang';
 
-export function FindResultView({ model }: { model: FindResultViewModel }) {
-  const honestyNote = model.unique_dominant
-    ? 'One stronger timing window stands out inside the scanned range.'
+export function FindResultView({
+  model,
+  lang: langProp,
+}: {
+  model: FindResultViewModel;
+  lang?: AppLang;
+}) {
+  const [hookLang] = useAppLang();
+  const lang = langProp ?? hookLang;
+  const copy = getAskProductCopy(lang);
+
+  const headline = model.unique_dominant
+    ? copy.findHeadlineDominant
     : model.windows.length > 0
-      ? 'These are comparable windows — no clearly dominant window is claimed.'
-      : 'No sufficiently strong timing window was found in the scanned range.';
+      ? copy.findHeadlineComparable
+      : copy.findHeadlineNone;
+
+  const honestyNote = model.unique_dominant
+    ? copy.findHonestyDominant
+    : model.windows.length > 0
+      ? copy.findHonestyComparable
+      : copy.findHonestyNone;
+
+  const confidenceLabel =
+    localizeConfidence(lang, model.confidence) ?? copy.confidence.medium;
 
   return (
-    <article
-      className={styles.result}
-      data-testid="find-result-view"
-      data-operation="find"
-      data-unique-dominant={model.unique_dominant ? 'true' : 'false'}
-      aria-label="Find result"
+    <ResultShell
+      testId="find-result-view"
+      mode="find_dates"
+      dir={copy.dir}
+      ariaLabel={copy.findResultTitle}
     >
-      <header className={styles.hero}>
-        <p className={`fi ${styles.heroLabel}`}>Timing windows</p>
-        <h2 className={`fc ${styles.heroValue}`} data-testid="find-headline">
-          {model.headline}
-        </h2>
-        <p className={`fi ${styles.value}`} data-testid="find-honesty">
-          {honestyNote}
-        </p>
-      </header>
+      <ResultHeader
+        eyebrow={copy.findResultTitle}
+        topic={headline}
+        topicTestId="find-headline"
+      />
+      <p className={`fi ${styles.scoreHint}`} data-testid="find-honesty">
+        {honestyNote}
+      </p>
 
       {model.windows.length > 0 ? (
-        <section className={styles.belowFold} aria-label="Windows">
-          <p className={`fi ${styles.label}`}>Windows that deserve attention</p>
-          <ul className={`fi ${styles.value}`} data-testid="find-windows">
+        <section aria-label={copy.findWindowsLabel}>
+          <p className={`fi ${styles.sectionLabel}`}>{copy.findWindowsLabel}</p>
+          <ul className={styles.findWindows} data-testid="find-windows">
             {model.windows.map((window) => (
               <li
                 key={window.window_id}
+                className={styles.findWindow}
                 data-testid="find-window"
                 data-window-id={window.window_id}
                 data-band={window.band}
               >
-                <span>
+                <p className={`fc ${styles.optionLabel}`}>
                   {window.start_label} – {window.end_label}
-                </span>
-                <span>
-                  {' '}
-                  · peak{' '}
+                </p>
+                <p className={`fi ${styles.recommendationDetail}`}>
+                  {copy.findPeakLabel}:{' '}
                   {window.peak_labels.length
                     ? window.peak_labels.join(', ')
-                    : 'Unknown'}
-                </span>
-                <span>
-                  {' '}
-                  · {window.band}/{window.strength}
-                </span>
+                    : '—'}
+                </p>
+                <p className={`fi ${styles.meaning}`}>
+                  {localizeStrength(lang, window.strength) ?? window.strength}
+                  {window.peak_score != null
+                    ? ` · ${copy.timingScoreOf(window.peak_score)}`
+                    : ''}
+                </p>
               </li>
             ))}
           </ul>
         </section>
       ) : (
-        <section className={styles.belowFold} aria-label="Windows">
-          <p className={`fi ${styles.label}`}>Windows</p>
-          <p className={`fi ${styles.value}`} data-testid="find-windows-empty">
-            No strong window in range
+        <section aria-label={copy.findWindowsLabel}>
+          <p className={`fi ${styles.sectionLabel}`}>{copy.findWindowsLabel}</p>
+          <p className={`fi ${styles.meaning}`} data-testid="find-windows-empty">
+            {copy.findWindowsEmpty}
           </p>
         </section>
       )}
 
       <div className={styles.metaGrid}>
         <div className={styles.metaRow}>
-          <p className={`fi ${styles.label}`}>Range</p>
-          <p className={`fi ${styles.value}`} data-testid="find-range">
-            {model.range_context ?? 'Unknown'}
+          <p className={`fi ${styles.sectionLabel}`}>{copy.findRangeLabel}</p>
+          <p className={`fi ${styles.datePrimary}`} data-testid="find-range">
+            {model.range_context ?? '—'}
           </p>
         </div>
-        <div className={styles.metaRow}>
-          <p className={`fi ${styles.label}`}>Confidence</p>
-          <p className={`fi ${styles.value}`}>{model.confidence}</p>
-        </div>
+        <ResultMetricsRow>
+          <ConfidenceIndicator
+            label={copy.resultConfidence}
+            value={confidenceLabel}
+          />
+        </ResultMetricsRow>
       </div>
 
-      {model.limitations && model.limitations.length > 0 ? (
-        <section className={styles.belowFold} aria-label="Limits">
-          <p className={`fi ${styles.label}`}>Limits</p>
-          <ul className={`fi ${styles.value}`} data-testid="find-limits">
-            {model.limitations.map((limit) => (
-              <li key={limit}>{limit}</li>
+      <LimitsBlock
+        label={copy.limitsLabel}
+        limits={model.limitations}
+        listTestId="find-limits"
+      />
+
+      {model.unknown && model.unknown.length > 0 ? (
+        <section aria-label={copy.limitsLabel}>
+          <ul className={`fi ${styles.limitsList}`} data-testid="find-unknown">
+            {model.unknown.map((item) => (
+              <li key={item}>{item}</li>
             ))}
           </ul>
         </section>
       ) : null}
 
-      <section className={styles.belowFold} aria-label="Unknown">
-        <p className={`fi ${styles.label}`}>Unknown</p>
-        <p className={`fi ${styles.value} ${styles.unknown}`}>
-          {(model.unknown ?? []).join(' · ') || '—'}
-        </p>
-      </section>
-
-      <p className={`fi ${styles.notice}`}>
-        METIORO never decides. The human always decides.
-      </p>
-    </article>
+      <AgencyLine text={copy.agencyLine} />
+    </ResultShell>
   );
 }
