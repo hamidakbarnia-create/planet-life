@@ -108,7 +108,10 @@ export type CompareResultViewModel = {
   options: Array<{
     option_id?: string;
     label: string;
+    /** Canonical Gregorian ISO date (ordering / honesty). */
     date?: string;
+    /** Locale-aware display label for the consumer-facing date. */
+    date_label?: string;
     rank?: number;
     score?: number;
     strength: StrengthBand;
@@ -132,8 +135,15 @@ export type CompareResultViewModel = {
 
 export type FindWindowViewModel = {
   window_id: string;
+  /** Canonical Gregorian ISO start (ordering / honesty). */
+  start_date: string;
+  /** Canonical Gregorian ISO end (ordering / honesty). */
+  end_date: string;
+  /** Atomic locale-aware range label for display (not separate RTL fragments). */
+  range_label: string;
   start_label: string;
   end_label: string;
+  peak_dates: string[];
   peak_labels: string[];
   strength: StrengthBand;
   band: string;
@@ -146,6 +156,10 @@ export type FindResultViewModel = {
   headline: string;
   unique_dominant: boolean;
   windows: FindWindowViewModel[];
+  /** Canonical Gregorian ISO scanned-range start when present. */
+  range_start?: string;
+  /** Canonical Gregorian ISO scanned-range end when present. */
+  range_end?: string;
   range_context?: string;
   confidence: ConfidenceBand;
   limitations?: string[];

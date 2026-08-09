@@ -13,10 +13,15 @@
  * - FIND never fabricates a unique dominant window when unique_dominant=false.
  */
 
+import type { AppLang } from '@/lib/app-settings';
 import type { DecisionEvaluationPackage } from '@/lib/decision-case';
 import {
+  formatAskDateLabel,
+  formatAskDateRange,
+} from '@/lib/ask-product/dates';
+import { localizePackageLimits } from '@/lib/ask-product/package-limits';
+import {
   confidenceValueToBand,
-  formatDisplayDate,
   timingBandToStrength,
 } from './resolve';
 import type {
@@ -93,11 +98,12 @@ function evaluateConfidence(
 }
 
 export function packageToEvaluateView(
-  pkg: DecisionEvaluationPackage
+  pkg: DecisionEvaluationPackage,
+  lang: AppLang = 'en'
 ): EvaluateResultViewModel {
   const candidate = pkg.timing.candidates.find((c) => c.rank === 1);
   const subject = candidate
-    ? formatDisplayDate(candidate.date)
+    ? formatAskDateLabel(lang, candidate.date)
     : 'Selected date';
   const why = [
     ...pkg.drivers.items.slice(0, 3).map((d) => `${d.label}: ${d.support}`),
@@ -124,7 +130,8 @@ export function packageToEvaluateView(
 }
 
 export function packageToCompareView(
-  pkg: DecisionEvaluationPackage
+  pkg: DecisionEvaluationPackage,
+  lang: AppLang = 'en'
 ): CompareResultViewModel {
   const ranked = [...pkg.timing.candidates].sort((a, b) => a.rank - b.rank);
   // Prefer stance no_unique_winner; keep summary regex for older packages.
@@ -133,8 +140,9 @@ export function packageToCompareView(
     !/no unique winner/i.test(pkg.recommendation.summary || '');
   const options = ranked.map((c) => ({
     option_id: c.option_id,
-    label: c.label?.trim() || formatDisplayDate(c.date),
+    label: c.label?.trim() || formatAskDateLabel(lang, c.date),
     date: c.date,
+    date_label: formatAskDateLabel(lang, c.date),
     rank: c.rank,
     score: c.score,
     strength: timingBandToStrength(c.band) as StrengthBand,
@@ -144,12 +152,12 @@ export function packageToCompareView(
   const winner = ranked[0];
   const winnerLabel = uniqueWinner
     ? winner?.label?.trim() ||
-      (winner ? formatDisplayDate(winner.date) : 'Unknown')
+      (winner ? formatAskDateLabel(lang, winner.date) : 'Unknown')
     : 'No unique winner';
 
   const advantages = ranked.flatMap((c) =>
     (c.strengths ?? []).slice(0, 1).map((advantage) => ({
-      option_label: c.label?.trim() || formatDisplayDate(c.date),
+      option_label: c.label?.trim() || formatAskDateLabel(lang, c.date),
       advantage,
     }))
   );
@@ -163,7 +171,7 @@ export function packageToCompareView(
     deciding_factor: pkg.explainability.why || undefined,
     advantages,
     confidence: confidenceValueToBand(pkg.confidence.value),
-    limitations: [...pkg.explainability.limits].slice(0, 3),
+    limitations: localizePackageLimits(lang, pkg.explainability.limits, 3),
     known: undefined,
     inferred: undefined,
     unknown: undefined,
@@ -189,7 +197,8 @@ function findHeadline(input: {
  * Never fabricates a unique winner when unique_dominant is false.
  */
 export function packageToFindView(
-  pkg: DecisionEvaluationPackage
+  pkg: DecisionEvaluationPackage,
+  lang: AppLang = 'en'
 ): FindResultViewModel {
   const find = pkg.find;
   const ranked = [...(find?.windows ?? [])].sort((a, b) => a.rank - b.rank);
@@ -197,19 +206,31 @@ export function packageToFindView(
   const insufficient =
     pkg.recommendation.stance === 'insufficient_data' || !pkg.timing.material;
 
-  const windows = ranked.map((window) => ({
-    window_id: window.window_id,
-    start_label: formatDisplayDate(window.start_date),
-    end_label: formatDisplayDate(window.end_date),
-    peak_labels: window.peak_dates.map((d) => formatDisplayDate(d)),
-    strength: timingBandToStrength(window.band),
-    band: window.band,
-    peak_score: window.peak_score,
-  }));
+  const windows = ranked.map((window) => {
+    const startLabel = formatAskDateLabel(lang, window.start_date);
+    const endLabel = formatAskDateLabel(lang, window.end_date);
+    return {
+      window_id: window.window_id,
+      start_date: window.start_date,
+      end_date: window.end_date,
+      range_label: formatAskDateRange(
+        lang,
+        window.start_date,
+        window.end_date
+      ),
+      start_label: startLabel,
+      end_label: endLabel,
+      peak_dates: [...window.peak_dates],
+      peak_labels: window.peak_dates.map((d) => formatAskDateLabel(lang, d)),
+      strength: timingBandToStrength(window.band),
+      band: window.band,
+      peak_score: window.peak_score,
+    };
+  });
 
   const rangeContext =
     find?.range_start && find?.range_end
-      ? `${formatDisplayDate(find.range_start)} – ${formatDisplayDate(find.range_end)}`
+      ? formatAskDateRange(lang, find.range_start, find.range_end)
       : pkg.timing.notes || undefined;
 
   const unknown: string[] = [];
@@ -226,11 +247,13 @@ export function packageToFindView(
     }),
     unique_dominant: uniqueDominant,
     windows,
+    range_start: find?.range_start,
+    range_end: find?.range_end,
     range_context: rangeContext,
     confidence: insufficient
       ? 'unknown'
       : confidenceValueToBand(pkg.confidence.value),
-    limitations: [...pkg.explainability.limits].slice(0, 4),
+    limitations: localizePackageLimits(lang, pkg.explainability.limits, 4),
     known: undefined,
     inferred: undefined,
     unknown: unknown.length ? unknown : undefined,
@@ -239,12 +262,13 @@ export function packageToFindView(
 
 export function packageToOperationResult(
   pkg: DecisionEvaluationPackage,
-  preferred?: 'evaluate' | 'compare' | 'find'
+  preferred?: 'evaluate' | 'compare' | 'find',
+  lang: AppLang = 'en'
 ): OperationResultViewModel {
   const op = preferred ?? selectRendererOperation(pkg);
-  if (op === 'compare') return packageToCompareView(pkg);
-  if (op === 'find') return packageToFindView(pkg);
-  return packageToEvaluateView(pkg);
+  if (op === 'compare') return packageToCompareView(pkg, lang);
+  if (op === 'find') return packageToFindView(pkg, lang);
+  return packageToEvaluateView(pkg, lang);
 }
 
 /** Exact Package v1 gaps for product first-viewport fields. */

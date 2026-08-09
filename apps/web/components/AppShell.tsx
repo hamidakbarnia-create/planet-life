@@ -175,7 +175,7 @@ export function AppShell({
 
       <main dir={dir} lang={lang} className="metioro-main">
         {children}
-        <SiteFooter />
+        <SiteFooter lang={lang} />
       </main>
       <MobileTabBar labels={navLabels} dir={dir} />
     </div>

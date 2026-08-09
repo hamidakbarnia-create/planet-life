@@ -62,13 +62,33 @@ export function formatDisplayDate(
   });
 }
 
+/**
+ * Single atomic range label for a Gregorian ISO start/end pair.
+ * Prefers Intl.formatRange so locale + calendar tokens are not separately
+ * bidi-reordered when concatenated in RTL.
+ */
 export function formatDisplayDateRange(
   lang: AppLang,
   start: string,
   end: string,
   calendar: CalendarSystem = 'gregorian'
 ): string {
-  return `${formatDisplayDate(lang, start, calendar)} - ${formatDisplayDate(lang, end, calendar)}`;
+  const startDate = utcDateFromIso(start);
+  const endDate = utcDateFromIso(end);
+  if (!startDate || !endDate) {
+    return `${start} – ${end}`;
+  }
+  const options: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  };
+  const fmt = new Intl.DateTimeFormat(displayLocale(lang, calendar), options);
+  if (typeof fmt.formatRange === 'function') {
+    return fmt.formatRange(startDate, endDate);
+  }
+  return `${fmt.format(startDate)} – ${fmt.format(endDate)}`;
 }
 
 /** Day-of-month numeral for a Gregorian ISO date in the chosen calendar system. */

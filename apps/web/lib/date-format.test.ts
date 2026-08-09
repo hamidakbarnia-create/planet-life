@@ -33,11 +33,30 @@ describe('formatDisplayDate', () => {
 });
 
 describe('formatDisplayDateRange', () => {
-  it('joins start and end with the shared formatter', () => {
-    const range = formatDisplayDateRange('en', '2026-07-01', '2026-07-28', 'gregorian');
-    expect(range).toContain(' - ');
-    expect(range.startsWith(formatDisplayDate('en', '2026-07-01', 'gregorian'))).toBe(true);
-    expect(range.endsWith(formatDisplayDate('en', '2026-07-28', 'gregorian'))).toBe(true);
+  it('formats an atomic locale-aware range', () => {
+    const range = formatDisplayDateRange(
+      'en',
+      '2026-07-01',
+      '2026-07-28',
+      'gregorian'
+    );
+    expect(range).toMatch(/Jul/);
+    expect(range).toMatch(/1/);
+    expect(range).toMatch(/28/);
+    expect(range).toMatch(/2026/);
+    // Must be a single string, not independently reorderable fragments.
+    expect(range.includes('\n')).toBe(false);
+  });
+
+  it('does not emit fragmented English month tokens for FA ranges', () => {
+    const range = formatDisplayDateRange(
+      'fa',
+      '2026-09-01',
+      '2026-09-04',
+      'gregorian'
+    );
+    expect(range).not.toMatch(/Sep\s*–\s*\d+\s*Sep/i);
+    expect(range).not.toMatch(/^Sep/i);
   });
 });
 

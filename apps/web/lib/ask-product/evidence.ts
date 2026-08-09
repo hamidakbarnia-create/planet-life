@@ -17,6 +17,7 @@ import {
   localizeStrength,
   type AskProductCopy,
 } from './copy';
+import { localizePackageLimits } from './package-limits';
 
 const UNKNOWN_CONFIDENCE = new Set([
   'MISSING_NATAL_EVIDENCE',
@@ -331,7 +332,11 @@ export function buildEvaluatePresentation(
   const cautionaryEvidence = evidence.filter((e) => e.polarity === 'cautionary');
   const contextEvidence = evidence.filter((e) => e.polarity === 'neutral');
 
-  const packageLimits = [...pkg.explainability.limits].filter(Boolean).slice(0, 4);
+  const packageLimits = localizePackageLimits(
+    lang,
+    pkg.explainability.limits,
+    4
+  );
 
   // Free-form English action steps only on EN — no MT for other locales.
   const nextSteps =

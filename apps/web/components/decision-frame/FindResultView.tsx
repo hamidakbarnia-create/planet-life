@@ -7,6 +7,7 @@ import {
   ResultShell,
   resultShellStyles as styles,
 } from '@/components/decision-result/ResultShell';
+import { LtrIsolate } from '@/components/ui/LtrIsolate';
 import {
   getAskProductCopy,
   localizeConfidence,
@@ -70,14 +71,19 @@ export function FindResultView({
                 data-window-id={window.window_id}
                 data-band={window.band}
               >
-                <p className={`fc ${styles.optionLabel}`}>
-                  {window.start_label} – {window.end_label}
+                <p
+                  className={`fc ${styles.optionLabel}`}
+                  data-testid="find-window-range"
+                >
+                  <LtrIsolate>{window.range_label}</LtrIsolate>
                 </p>
                 <p className={`fi ${styles.recommendationDetail}`}>
                   {copy.findPeakLabel}:{' '}
-                  {window.peak_labels.length
-                    ? window.peak_labels.join(', ')
-                    : '—'}
+                  {window.peak_labels.length ? (
+                    <LtrIsolate>{window.peak_labels.join(', ')}</LtrIsolate>
+                  ) : (
+                    '—'
+                  )}
                 </p>
                 <p className={`fi ${styles.meaning}`}>
                   {localizeStrength(lang, window.strength) ?? window.strength}
@@ -102,7 +108,11 @@ export function FindResultView({
         <div className={styles.metaRow}>
           <p className={`fi ${styles.sectionLabel}`}>{copy.findRangeLabel}</p>
           <p className={`fi ${styles.datePrimary}`} data-testid="find-range">
-            {model.range_context ?? '—'}
+            {model.range_context ? (
+              <LtrIsolate>{model.range_context}</LtrIsolate>
+            ) : (
+              '—'
+            )}
           </p>
         </div>
         <ResultMetricsRow>
