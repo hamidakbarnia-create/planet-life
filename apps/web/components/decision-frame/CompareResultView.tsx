@@ -7,6 +7,7 @@ import {
   ResultShell,
   resultShellStyles as styles,
 } from '@/components/decision-result/ResultShell';
+import { LtrIsolate } from '@/components/ui/LtrIsolate';
 import {
   getAskProductCopy,
   localizeConfidence,
@@ -73,8 +74,14 @@ export function CompareResultView({
                   {option.rank != null ? copy.compareRankOf(option.rank) : ''}
                 </p>
                 <p className={`fc ${styles.optionLabel}`}>{option.label}</p>
-                {option.date ? (
-                  <p className={`fi ${styles.datePrimary}`}>{option.date}</p>
+                {option.date_label ? (
+                  <p
+                    className={`fi ${styles.datePrimary}`}
+                    data-testid="compare-option-date"
+                    data-date-iso={option.date}
+                  >
+                    <LtrIsolate>{option.date_label}</LtrIsolate>
+                  </p>
                 ) : null}
                 <p className={`fi ${styles.meaning}`}>
                   {localizeStrength(lang, option.strength) ?? option.strength}

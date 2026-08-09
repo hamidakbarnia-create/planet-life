@@ -55,7 +55,7 @@ export function DecisionPackageView({
   if (pkg.mode === 'find_dates' && pkg.find && !isBlocked && !isStub) {
     return (
       <div data-testid="decision-package-view" data-mode="find_dates">
-        <FindResultView lang={lang} model={packageToFindView(pkg)} />
+        <FindResultView lang={lang} model={packageToFindView(pkg, lang)} />
       </div>
     );
   }
@@ -125,7 +125,7 @@ export function DecisionPackageView({
   if (pkg.mode === 'compare_dates') {
     return (
       <div data-testid="decision-package-view" data-mode="compare_dates">
-        <CompareResultView lang={lang} model={packageToCompareView(pkg)} />
+        <CompareResultView lang={lang} model={packageToCompareView(pkg, lang)} />
       </div>
     );
   }

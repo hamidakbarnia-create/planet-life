@@ -11,7 +11,7 @@ import {
 import { BrandLogo } from '@/components/BrandLogo';
 import type { BrandLang } from '@/lib/brand';
 import { localeFcFiCss, localeFontFamily } from '@/lib/brand-theme';
-import { LEGAL_NAV_LINKS } from '@/lib/legal-nav';
+import { getLegalNavAriaLabel, getLegalNavLinks } from '@/lib/legal-nav';
 import Link from 'next/link';
 
 export function DisclaimerOnboarding({
@@ -113,10 +113,10 @@ export function DisclaimerOnboarding({
         </div>
 
         <nav
-          aria-label="Legal"
+          aria-label={getLegalNavAriaLabel(lang)}
           className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-6"
         >
-          {LEGAL_NAV_LINKS.map((link) => (
+          {getLegalNavLinks(lang).map((link) => (
             <Link
               key={link.href}
               href={link.href}

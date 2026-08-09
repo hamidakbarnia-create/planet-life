@@ -70,6 +70,7 @@ function comparePackage(tied = false): DecisionEvaluationPackage {
       assumptions: [],
       limits: [
         'Ceremony timing comparison only — not relationship quality or wedding success.',
+        'No clock-time window, avoid window, or FIND search was performed.',
       ],
     },
     improve_accuracy: { items: [] },
@@ -99,11 +100,32 @@ describe('DecisionPackageView COMPARE localization', () => {
       expect(root.textContent).toContain(copy.compareOptionsLabel);
       expect(root.textContent).toContain(copy.resultConfidence);
       expect(root.textContent).toContain(copy.timingScoreLabel);
-      if (lang !== 'en') {
+      if (lang === 'en') {
+        expect(root.textContent).toContain(
+          'Ceremony timing comparison only — not relationship quality or wedding success.'
+        );
+      } else {
         expect(root.textContent).not.toMatch(
           /Compared dates|Preferred date|Timing score:/i
         );
+        expect(root.textContent).not.toContain(
+          'Ceremony timing comparison only — not relationship quality or wedding success.'
+        );
+        expect(root.textContent).not.toContain(
+          'No clock-time window, avoid window, or FIND search was performed.'
+        );
       }
+      const dateEls = screen.getAllByTestId('compare-option-date');
+      expect(dateEls).toHaveLength(2);
+      for (const el of dateEls) {
+        const iso = el.getAttribute('data-date-iso');
+        expect(iso).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        // Consumer-facing text is the localized label, not raw ISO.
+        expect(el.textContent).not.toBe(iso);
+        expect(el.textContent).not.toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      }
+      expect(dateEls[0]?.getAttribute('data-date-iso')).toBe('2026-09-18');
+      expect(dateEls[1]?.getAttribute('data-date-iso')).toBe('2026-09-10');
     }
   );
 

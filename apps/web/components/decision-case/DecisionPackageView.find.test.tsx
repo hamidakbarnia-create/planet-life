@@ -77,7 +77,9 @@ function findPackage(overrides?: {
       why_not: 'No uniquely dominant window.',
       assumptions: [],
       limits: [
-        'Launch timing windows only — not market demand, revenue, Product Hunt rank, or launch success.',
+        'Relative symbolic launch-day timing only — not business or market intelligence.',
+        'Does not predict launch success, revenue, adoption, Product Hunt rank, market demand, PR performance, or team readiness.',
+        'Hourly clock-time windows were not computed.',
       ],
     },
     improve_accuracy: { items: [] },
@@ -108,9 +110,16 @@ describe('DecisionPackageView FIND rendering', () => {
       expect(text).not.toMatch(/perfect date|destined day|guaranteed best/i);
       expect(text).toContain(copy.findRangeLabel);
       expect(text).toContain(copy.findWindowsLabel);
+      const rangeText = screen.getAllByTestId('find-window-range')
+        .map((el) => el.textContent ?? '')
+        .join(' | ');
+      expect(rangeText).not.toMatch(/Sep\s*[–-]\s*\d+\s*Sep/i);
       if (lang === 'en') {
         expect(screen.getByTestId('find-headline').textContent).toBe(
           'Comparable windows'
+        );
+        expect(text).toContain(
+          'Relative symbolic launch-day timing only — not business or market intelligence.'
         );
       } else {
         expect(screen.getByTestId('find-headline').textContent).not.toBe(
@@ -119,6 +128,10 @@ describe('DecisionPackageView FIND rendering', () => {
         expect(screen.getByTestId('find-headline').textContent).not.toMatch(
           /[A-Za-z]{4,}/
         );
+        expect(text).not.toContain(
+          'Relative symbolic launch-day timing only — not business or market intelligence.'
+        );
+        expect(text).not.toContain('Hourly clock-time windows were not computed.');
       }
     }
   );

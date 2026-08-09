@@ -14,8 +14,12 @@ describe('FindResultView honesty', () => {
       windows: [
         {
           window_id: 'w1',
+          start_date: '2026-11-03',
+          end_date: '2026-11-05',
+          range_label: 'Nov 3 – 5, 2026',
           start_label: 'Nov 3, 2026',
           end_label: 'Nov 5, 2026',
+          peak_dates: ['2026-11-04'],
           peak_labels: ['Nov 4, 2026'],
           strength: 'strong',
           band: 'high',
@@ -23,15 +27,19 @@ describe('FindResultView honesty', () => {
         },
         {
           window_id: 'w2',
+          start_date: '2026-11-12',
+          end_date: '2026-11-14',
+          range_label: 'Nov 12 – 14, 2026',
           start_label: 'Nov 12, 2026',
           end_label: 'Nov 14, 2026',
+          peak_dates: ['2026-11-13'],
           peak_labels: ['Nov 13, 2026'],
           strength: 'strong',
           band: 'high',
           peak_score: 76,
         },
       ],
-      range_context: 'Nov 1, 2026 – Nov 30, 2026',
+      range_context: 'Nov 1 – 30, 2026',
       confidence: 'medium',
       limitations: ['Does not assess market fit or revenue.'],
     };
@@ -57,7 +65,7 @@ describe('FindResultView honesty', () => {
       headline: 'No clearly dominant window',
       unique_dominant: false,
       windows: [],
-      range_context: 'Nov 1, 2026 – Nov 30, 2026',
+      range_context: 'Nov 1 – 30, 2026',
       confidence: 'medium',
     };
     render(<FindResultView model={model} />);
