@@ -8,47 +8,135 @@ import {
   hasDecisionTypeRegistry,
   listDecisionTypes,
 } from './decision-type-registry';
-import type { PopularDecision, PopularDecisionRef } from './types';
+import { isShippedExecutableDecisionType } from './production-capability';
+import type {
+  PopularCapability,
+  PopularDecision,
+  PopularDecisionRef,
+} from './types';
 
 /**
  * Curated presentation order for Ask Home Popular Decisions.
  * Labels are never stored here — resolved from registry or question-library.
+ *
+ * Capability honesty:
+ * - Bind `decisionTypeId` only when a shipped runtime exists (or will exist).
+ * - Unbound guided-only slots remain browseable as `unavailable`.
  */
 const POPULAR_DECISION_REFS: readonly PopularDecisionRef[] = [
-  { id: 'accept-job-offer', guidedQuestionId: 'negotiate-offer' },
-  { id: 'best-wedding-date', decisionTypeId: 'mar-wedding-date' },
   {
     id: 'job-interview',
     decisionTypeId: 'car-interview',
     guidedQuestionId: 'job-interview',
   },
-  { id: 'career-change', guidedQuestionId: 'change-career-path' },
-  { id: 'promotion', guidedQuestionId: 'ask-promotion' },
-  { id: 'salary-negotiation', guidedQuestionId: 'ask-raise' },
+  { id: 'best-wedding-date', decisionTypeId: 'mar-wedding-date' },
   {
     id: 'launch-business',
     decisionTypeId: 'bus-product-launch',
     guidedQuestionId: 'launch-project',
   },
+  {
+    id: 'meet-investor',
+    decisionTypeId: 'bus-investor-meeting',
+    guidedQuestionId: 'meet-investor',
+  },
+  // Browseable but not Case-executable yet — shown as unavailable.
+  { id: 'accept-job-offer', guidedQuestionId: 'negotiate-offer' },
+  { id: 'career-change', guidedQuestionId: 'change-career-path' },
+  { id: 'promotion', guidedQuestionId: 'ask-promotion' },
+  { id: 'salary-negotiation', guidedQuestionId: 'ask-raise' },
   { id: 'invest-money', guidedQuestionId: 'buy-sell-asset' },
   { id: 'partnership', guidedQuestionId: 'close-deal' },
   { id: 'move-abroad', guidedQuestionId: 'relocate-city' },
   { id: 'buy-house', guidedQuestionId: 'buy-sell-property' },
 ];
 
+function capabilityForDecisionType(
+  decisionTypeId: string | undefined
+): PopularCapability {
+  return isShippedExecutableDecisionType(decisionTypeId)
+    ? 'available'
+    : 'unavailable';
+}
+
 /** Typed mock catalog used only when the registry document is unavailable. */
 const MOCK_POPULAR_DECISIONS: readonly PopularDecision[] = [
-  { id: 'accept-job-offer', label: 'Accept Job Offer', source: 'mock' },
-  { id: 'best-wedding-date', label: 'Best Wedding Date', source: 'mock' },
-  { id: 'job-interview', label: 'Job Interview', source: 'mock' },
-  { id: 'career-change', label: 'Career Change', source: 'mock' },
-  { id: 'promotion', label: 'Promotion', source: 'mock' },
-  { id: 'salary-negotiation', label: 'Salary Negotiation', source: 'mock' },
-  { id: 'launch-business', label: 'Launch Business', source: 'mock' },
-  { id: 'invest-money', label: 'Invest Money', source: 'mock' },
-  { id: 'partnership', label: 'Partnership', source: 'mock' },
-  { id: 'move-abroad', label: 'Move Abroad', source: 'mock' },
-  { id: 'buy-house', label: 'Buy House', source: 'mock' },
+  {
+    id: 'job-interview',
+    label: 'Job Interview',
+    decisionTypeId: 'car-interview',
+    source: 'mock',
+    capability: 'available',
+  },
+  {
+    id: 'best-wedding-date',
+    label: 'Best Wedding Date',
+    decisionTypeId: 'mar-wedding-date',
+    source: 'mock',
+    capability: 'available',
+  },
+  {
+    id: 'launch-business',
+    label: 'Launch Business',
+    decisionTypeId: 'bus-product-launch',
+    source: 'mock',
+    capability: 'available',
+  },
+  {
+    id: 'meet-investor',
+    label: 'Meet an investor',
+    decisionTypeId: 'bus-investor-meeting',
+    source: 'mock',
+    capability: 'available',
+  },
+  {
+    id: 'accept-job-offer',
+    label: 'Accept Job Offer',
+    source: 'mock',
+    capability: 'unavailable',
+  },
+  {
+    id: 'career-change',
+    label: 'Career Change',
+    source: 'mock',
+    capability: 'unavailable',
+  },
+  {
+    id: 'promotion',
+    label: 'Promotion',
+    source: 'mock',
+    capability: 'unavailable',
+  },
+  {
+    id: 'salary-negotiation',
+    label: 'Salary Negotiation',
+    source: 'mock',
+    capability: 'unavailable',
+  },
+  {
+    id: 'invest-money',
+    label: 'Invest Money',
+    source: 'mock',
+    capability: 'unavailable',
+  },
+  {
+    id: 'partnership',
+    label: 'Partnership',
+    source: 'mock',
+    capability: 'unavailable',
+  },
+  {
+    id: 'move-abroad',
+    label: 'Move Abroad',
+    source: 'mock',
+    capability: 'unavailable',
+  },
+  {
+    id: 'buy-house',
+    label: 'Buy House',
+    source: 'mock',
+    capability: 'unavailable',
+  },
 ];
 
 /**
@@ -81,6 +169,7 @@ function resolveFromRegistry(
     guidedQuestionId: ref.guidedQuestionId,
     familyId: record.family_id,
     source: 'registry',
+    capability: capabilityForDecisionType(record.decision_type_id),
   };
 }
 
@@ -97,6 +186,7 @@ function resolveFromQuestionLibrary(
     decisionTypeId: ref.decisionTypeId,
     guidedQuestionId: guided.id,
     source: 'question-library',
+    capability: capabilityForDecisionType(ref.decisionTypeId),
   };
 }
 
@@ -117,11 +207,13 @@ export function listPopularDecisions(lang: AppLang = 'en'): PopularDecision[] {
     if (fromLibrary) {
       // Keep registry type id when bound (routing), localized label from library.
       const fromRegistry = resolveFromRegistry(ref, lang);
+      const decisionTypeId =
+        fromLibrary.decisionTypeId ?? fromRegistry?.decisionTypeId;
       resolved.push({
         ...fromLibrary,
-        decisionTypeId:
-          fromLibrary.decisionTypeId ?? fromRegistry?.decisionTypeId,
+        decisionTypeId,
         familyId: fromRegistry?.familyId ?? fromLibrary.familyId,
+        capability: capabilityForDecisionType(decisionTypeId),
       });
       continue;
     }
@@ -131,7 +223,7 @@ export function listPopularDecisions(lang: AppLang = 'en'): PopularDecision[] {
   return resolved;
 }
 
-/** Full registry listing for “See All Decisions”. */
+/** Full registry listing for “See All Decisions” with honesty classification. */
 export function listAllDecisionTypesAsPopular(): PopularDecision[] {
   if (!hasDecisionTypeRegistry()) {
     return [...MOCK_POPULAR_DECISIONS];
@@ -142,5 +234,19 @@ export function listAllDecisionTypesAsPopular(): PopularDecision[] {
     decisionTypeId: row.decision_type_id,
     familyId: row.family_id,
     source: 'registry' as const,
+    capability: capabilityForDecisionType(row.decision_type_id),
+  }));
+}
+
+/** Exported for tests — curated Popular refs with honesty classification. */
+export function classifyPopularDecisionRefs(): ReadonlyArray<{
+  id: string;
+  decisionTypeId?: string;
+  capability: PopularCapability;
+}> {
+  return POPULAR_DECISION_REFS.map((ref) => ({
+    id: ref.id,
+    decisionTypeId: ref.decisionTypeId,
+    capability: capabilityForDecisionType(ref.decisionTypeId),
   }));
 }

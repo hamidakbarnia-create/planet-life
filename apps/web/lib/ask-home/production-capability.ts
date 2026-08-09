@@ -84,7 +84,11 @@ export function canExecuteInProduction(
   return hasProductionRuntime(decisionTypeId, mode);
 }
 
-/** UX hint: EVALUATE offered only for car-interview in the current shipped matrix. */
+/**
+ * UX hint: EVALUATE offered for Decision Types with a shipped evaluate runtime.
+ * Current matrix: car-interview, bus-investor-meeting, mar-wedding-date,
+ * bus-product-launch.
+ */
 export function canEvaluateInProduction(
   decisionTypeId: string | undefined
 ): boolean {
@@ -95,4 +99,17 @@ export function listProductionEvaluateDecisionTypeIds(): string[] {
   return Object.entries(SHIPPED_RUNTIME_MODE_HINT)
     .filter(([, modes]) => modes.includes('evaluate_date'))
     .map(([id]) => id);
+}
+
+/** True when any Case mode (evaluate/compare/find) is shipped for this type. */
+export function isShippedExecutableDecisionType(
+  decisionTypeId: string | undefined
+): boolean {
+  if (!decisionTypeId) return false;
+  const modes = SHIPPED_RUNTIME_MODE_HINT[decisionTypeId];
+  return Boolean(modes && modes.length > 0);
+}
+
+export function listShippedExecutableDecisionTypeIds(): string[] {
+  return Object.keys(SHIPPED_RUNTIME_MODE_HINT);
 }

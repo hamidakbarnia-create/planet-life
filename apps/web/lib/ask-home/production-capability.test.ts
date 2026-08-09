@@ -4,7 +4,9 @@ import {
   canExecuteInProduction,
   frameOperationToCaseMode,
   hasProductionRuntime,
+  isShippedExecutableDecisionType,
   listProductionEvaluateDecisionTypeIds,
+  listShippedExecutableDecisionTypeIds,
 } from './production-capability';
 
 describe('ASK Web UX capability hint (not backend authority)', () => {
@@ -20,6 +22,14 @@ describe('ASK Web UX capability hint (not backend authority)', () => {
       'mar-wedding-date',
       'bus-product-launch',
     ]);
+    expect(listShippedExecutableDecisionTypeIds().sort()).toEqual([
+      'bus-investor-meeting',
+      'bus-product-launch',
+      'car-interview',
+      'mar-wedding-date',
+    ]);
+    expect(isShippedExecutableDecisionType('car-interview')).toBe(true);
+    expect(isShippedExecutableDecisionType('tim-compare-three')).toBe(false);
   });
 
   it('hides unresolved / unknown types for evaluate', () => {

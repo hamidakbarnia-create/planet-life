@@ -22,6 +22,13 @@ export type PopularDecisionRef = {
   guidedQuestionId?: GuidedQuestionId;
 };
 
+/**
+ * Consumer honesty classification for Popular / See All surfaces.
+ * `available` = binds a Decision Type with at least one shipped runtime mode.
+ * `unavailable` = browseable but not currently executable as a Case.
+ */
+export type PopularCapability = 'available' | 'unavailable';
+
 export type PopularDecision = {
   id: string;
   label: string;
@@ -29,6 +36,8 @@ export type PopularDecision = {
   guidedQuestionId?: GuidedQuestionId;
   familyId?: string;
   source: 'registry' | 'question-library' | 'mock';
+  /** Whether this card may start a real Decision Case journey today. */
+  capability: PopularCapability;
 };
 
 export type DecisionEntryModeId = 'help-me-decide' | 'ask-anything';
