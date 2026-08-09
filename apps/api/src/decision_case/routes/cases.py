@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -9,6 +10,8 @@ from fastapi import APIRouter, Depends, Request, Response
 from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+
+logger = logging.getLogger(__name__)
 
 from decision_case.deps import (
     get_decision_case_repository,
@@ -268,12 +271,20 @@ def _map_repository_error(
             request_id=request_id,
         )
     if isinstance(exc, RepositoryError):
+        logger.exception(
+            "decision_case repository error request_id=%s", request_id
+        )
         return _error_response(
             status_code=500,
             code="INTERNAL_ERROR",
             message=_safe_message("INTERNAL_ERROR"),
             request_id=request_id,
         )
+    # Keep genuine DB/server failures as 500 (e.g. CheckViolation when schema
+    # lags code). Do not collapse them into validation 4xx.
+    logger.exception(
+        "decision_case unhandled error request_id=%s", request_id
+    )
     return _error_response(
         status_code=500,
         code="INTERNAL_ERROR",
