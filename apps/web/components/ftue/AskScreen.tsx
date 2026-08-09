@@ -277,7 +277,10 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
   };
 
   const focusSearch = () => {
-    searchRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const node = searchRef.current;
+    if (node && typeof node.scrollIntoView === 'function') {
+      node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
     window.requestAnimationFrame(() => {
       document.getElementById(inputId)?.focus();
     });
@@ -292,22 +295,21 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
 
   const handlePopularSelect = (item: PopularDecision) => {
     markStarted();
-    // PR-1/PR-2: Interview popular card enters Decision Case API flow.
-    if (
-      item.decisionTypeId === 'car-interview' ||
-      item.guidedQuestionId === 'job-interview'
-    ) {
-      trackAskEvent('ftue.ask.question_selected', {
-        suggestion_id: item.decisionTypeId ?? item.guidedQuestionId,
-      });
-      router.push('/decision-cases/car-interview');
-      return;
-    }
-    // Typed popular cards bind registry Decision Type then enter ASK frame.
-    if (
-      item.decisionTypeId === 'mar-wedding-date' ||
-      item.decisionTypeId === 'bus-product-launch'
-    ) {
+
+    // Runnable Popular cards only — requires shipped Decision Type capability.
+    if (item.capability === 'available' && item.decisionTypeId) {
+      // Interview keeps the dedicated Case intake entry (existing journey).
+      if (
+        item.decisionTypeId === 'car-interview' ||
+        item.guidedQuestionId === 'job-interview'
+      ) {
+        trackAskEvent('ftue.ask.question_selected', {
+          suggestion_id: item.decisionTypeId,
+        });
+        router.push('/decision-cases/car-interview');
+        return;
+      }
+
       trackAskEvent('ftue.ask.question_selected', {
         suggestion_id: item.decisionTypeId,
       });
@@ -320,11 +322,12 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
       router.push('/ask/frame');
       return;
     }
-    if (item.guidedQuestionId) {
-      handleGuidedQuestion(item.guidedQuestionId);
-      setEntryMode('help-me-decide');
-      return;
-    }
+
+    // Unavailable / browseable: fill Ask Anything without inventing a DT.
+    trackAskEvent('ftue.ask.question_selected', {
+      suggestion_id: item.id,
+      capability: 'unavailable',
+    });
     setSelectedSuggestionId(null);
     setTypedQuestion(item.label);
     setEntryMode('ask-anything');
@@ -450,6 +453,8 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
             title={home.popularTitle}
             items={popularItems}
             seeAllLabel={home.seeAllDecisions}
+            availableBadge={home.popularAvailableBadge}
+            unavailableBadge={home.popularUnavailableBadge}
             onSeeAll={() => handleEntrySelect('help-me-decide')}
             onSelect={handlePopularSelect}
           />

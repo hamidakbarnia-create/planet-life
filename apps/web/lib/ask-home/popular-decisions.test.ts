@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { hasDecisionTypeRegistry, listDecisionTypes } from './decision-type-registry';
 import {
+  classifyPopularDecisionRefs,
   listAllDecisionTypesAsPopular,
   listPopularDecisions,
 } from './popular-decisions';
+import { isShippedExecutableDecisionType } from './production-capability';
 
 describe('ask-home popular decisions provider', () => {
   it('reads the decision type registry', () => {
@@ -15,6 +17,49 @@ describe('ask-home popular decisions provider', () => {
     );
   });
 
+  it('classifies every Popular ref as available or unavailable', () => {
+    const classified = classifyPopularDecisionRefs();
+    expect(classified.length).toBeGreaterThanOrEqual(4);
+    for (const row of classified) {
+      expect(['available', 'unavailable']).toContain(row.capability);
+      if (row.capability === 'available') {
+        expect(row.decisionTypeId).toBeTruthy();
+        expect(isShippedExecutableDecisionType(row.decisionTypeId)).toBe(true);
+      } else {
+        expect(isShippedExecutableDecisionType(row.decisionTypeId)).toBe(false);
+      }
+    }
+  });
+
+  it('binds runnable Popular cards to shipped Decision Types only', () => {
+    const items = listPopularDecisions('en');
+    const available = items.filter((item) => item.capability === 'available');
+    expect(available.map((item) => item.decisionTypeId).sort()).toEqual([
+      'bus-investor-meeting',
+      'bus-product-launch',
+      'car-interview',
+      'mar-wedding-date',
+    ]);
+    expect(
+      available.every((item) => isShippedExecutableDecisionType(item.decisionTypeId))
+    ).toBe(true);
+  });
+
+  it('keeps unsupported Popular cards browseable without Decision Type binding', () => {
+    const items = listPopularDecisions('en');
+    const unavailable = items.filter((item) => item.capability === 'unavailable');
+    expect(unavailable.length).toBeGreaterThan(0);
+    expect(
+      unavailable.every(
+        (item) =>
+          !item.decisionTypeId ||
+          !isShippedExecutableDecisionType(item.decisionTypeId)
+      )
+    ).toBe(true);
+    expect(unavailable.some((item) => item.id === 'career-change')).toBe(true);
+    expect(unavailable.some((item) => item.id === 'accept-job-offer')).toBe(true);
+  });
+
   it('resolves popular cards without embedding labels in the UI layer', () => {
     const items = listPopularDecisions('en');
     expect(items.length).toBeGreaterThanOrEqual(3);
@@ -24,10 +69,12 @@ describe('ask-home popular decisions provider', () => {
     const wedding = items.find((item) => item.id === 'best-wedding-date');
     expect(wedding?.source).toBe('registry');
     expect(wedding?.decisionTypeId).toBe('mar-wedding-date');
+    expect(wedding?.capability).toBe('available');
 
     const launch = items.find((item) => item.id === 'launch-business');
     expect(launch?.decisionTypeId).toBe('bus-product-launch');
     expect(launch?.guidedQuestionId).toBe('launch-project');
+    expect(launch?.capability).toBe('available');
   });
 
   it('prefers localized question-library labels for FA popular cards', () => {
@@ -56,11 +103,21 @@ describe('ask-home popular decisions provider', () => {
     }
   );
 
-  it('lists registry types for See All', () => {
+  it('lists registry types for See All with honesty classification', () => {
     const all = listAllDecisionTypesAsPopular();
     expect(all.every((item) => item.source === 'registry')).toBe(true);
     expect(all.map((item) => item.decisionTypeId)).toEqual(
       listDecisionTypes().map((row) => row.decision_type_id)
     );
+    const compareOnly = all.find((item) => item.id === 'tim-compare-three');
+    expect(compareOnly?.capability).toBe('unavailable');
+    expect(
+      all.filter((item) => item.capability === 'available').map((i) => i.id).sort()
+    ).toEqual([
+      'bus-investor-meeting',
+      'bus-product-launch',
+      'car-interview',
+      'mar-wedding-date',
+    ]);
   });
 });

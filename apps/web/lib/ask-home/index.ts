@@ -10,9 +10,12 @@ export {
   canExecuteInProduction,
   frameOperationToCaseMode,
   hasProductionRuntime,
+  isShippedExecutableDecisionType,
   listProductionEvaluateDecisionTypeIds,
+  listShippedExecutableDecisionTypeIds,
 } from './production-capability';
 export {
+  classifyPopularDecisionRefs,
   listAllDecisionTypesAsPopular,
   listPopularDecisions,
 } from './popular-decisions';
@@ -26,6 +29,7 @@ export type {
   DecisionTypeRecord,
   HowItWorksStep,
   HowItWorksStepId,
+  PopularCapability,
   PopularDecision,
   RecentDecisionRow,
 } from './types';

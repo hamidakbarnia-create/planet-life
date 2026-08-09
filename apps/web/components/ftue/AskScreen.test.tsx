@@ -386,6 +386,49 @@ describe('AskScreen', () => {
     expect(stored?.decision_type_id).toBe('bus-product-launch');
   });
 
+  it('routes investor popular cards into ASK frame with Decision Type', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('en');
+    await screen.findByTestId('ask-popular-meet-investor');
+
+    fireEvent.click(screen.getByTestId('ask-popular-meet-investor'));
+
+    expect(push).toHaveBeenCalledWith('/ask/frame');
+    const stored = getAskQuestionRepository().loadQuestion();
+    expect(stored?.decision_type_id).toBe('bus-investor-meeting');
+  });
+
+  it('does not create Case binding for unavailable Popular cards', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('en');
+    await screen.findByTestId('ask-popular-career-change');
+
+    expect(
+      screen.getByTestId('ask-popular-career-change').getAttribute('data-capability')
+    ).toBe('unavailable');
+
+    fireEvent.click(screen.getByTestId('ask-popular-career-change'));
+
+    expect(push).not.toHaveBeenCalledWith('/ask/frame');
+    expect(push).not.toHaveBeenCalledWith('/decision-cases/car-interview');
+    expect(getAskQuestionRepository().loadQuestion()).toBeNull();
+    const input = screen.getByLabelText(getAskHomeCopy('en').searchAriaLabel);
+    expect((input as HTMLTextAreaElement | HTMLInputElement).value).toMatch(
+      /career/i
+    );
+  });
+
+  it('does not claim Ask Anything converts every decision', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    renderAsk('en');
+    const home = getAskHomeCopy('en');
+    const askAnything = home.entryModes.find((m) => m.id === 'ask-anything');
+    expect(askAnything?.description).toMatch(/supported decision types/i);
+    expect(askAnything?.description).not.toMatch(
+      /will convert it into a structured decision/i
+    );
+  });
+
   it('routes job-interview guided chips into Decision Case intake', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');

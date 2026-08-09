@@ -10,6 +10,10 @@ export type AskHomeCopy = {
   popularTitle: string;
   seeAllDecisions: string;
   showPopularOnly: string;
+  /** Badge for Popular cards that can start a real Case journey. */
+  popularAvailableBadge: string;
+  /** Badge for browseable Popular cards without a shipped runtime. */
+  popularUnavailableBadge: string;
   entryTitle: string;
   entryModes: readonly DecisionEntryMode[];
   recentTitle: string;
@@ -46,13 +50,13 @@ const ENTRY_EN: readonly DecisionEntryMode[] = [
     id: 'help-me-decide',
     title: 'Help me Decide',
     description:
-      'Answer a few questions and we’ll suggest the correct decision type.',
+      'Browse decision topics. Supported timing decisions can start analysis; others stay unavailable until shipped.',
   },
   {
     id: 'ask-anything',
     title: 'Ask Anything',
     description:
-      'Free-text question. The system will convert it into a structured decision.',
+      'Describe a decision in your own words. Only supported decision types can run analysis today.',
   },
 ];
 
@@ -84,6 +88,8 @@ const ASK_HOME_EN: AskHomeCopy = {
   popularTitle: 'Popular Decisions',
   seeAllDecisions: 'See All Decisions',
   showPopularOnly: 'Show popular',
+  popularAvailableBadge: 'Available',
+  popularUnavailableBadge: 'Coming soon',
   entryTitle: 'Decision Entry',
   entryModes: ENTRY_EN,
   recentTitle: 'Recent Decisions',
@@ -126,19 +132,21 @@ const ASK_HOME_RU: AskHomeCopy = {
   popularTitle: 'Популярные решения',
   seeAllDecisions: 'Все решения',
   showPopularOnly: 'Популярные',
+  popularAvailableBadge: 'Доступно',
+  popularUnavailableBadge: 'Скоро',
   entryTitle: 'Точка входа',
   entryModes: [
     {
       id: 'help-me-decide',
       title: 'Помогите решить',
       description:
-        'Ответьте на несколько вопросов — мы предложим подходящий тип решения.',
+        'Просмотрите темы решений. Поддерживаемые тайминг-решения можно анализировать; остальные пока недоступны.',
     },
     {
       id: 'ask-anything',
       title: 'Спросите что угодно',
       description:
-        'Свободный вопрос. Система превратит его в структурированное решение.',
+        'Опишите решение своими словами. Сегодня анализ доступен только для поддерживаемых типов решений.',
     },
   ],
   recentTitle: 'Недавние решения',
@@ -196,19 +204,21 @@ const ASK_HOME_FA: AskHomeCopy = {
   popularTitle: 'تصمیم‌های پرتکرار',
   seeAllDecisions: 'همه تصمیم‌ها',
   showPopularOnly: 'پرتکرارها',
+  popularAvailableBadge: 'فعال',
+  popularUnavailableBadge: 'به‌زودی',
   entryTitle: 'ورود به تصمیم',
   entryModes: [
     {
       id: 'help-me-decide',
       title: 'کمکم کن تصمیم بگیرم',
       description:
-        'به چند سؤال پاسخ دهید تا نوع تصمیم مناسب پیشنهاد شود.',
+        'موضوع‌های تصمیم را مرور کنید. تصمیم‌های زمان‌بندی پشتیبانی‌شده قابل تحلیل‌اند؛ بقیه فعلاً در دسترس نیستند.',
     },
     {
       id: 'ask-anything',
       title: 'هر چیزی بپرس',
       description:
-        'سؤال آزاد. سیستم آن را به یک تصمیم ساخت‌یافته تبدیل می‌کند.',
+        'تصمیم را با کلمات خودتان بنویسید. امروز فقط انواع تصمیم پشتیبانی‌شده تحلیل می‌شوند.',
     },
   ],
   recentTitle: 'تصمیم‌های اخیر',
@@ -265,17 +275,21 @@ const ASK_HOME_AR: AskHomeCopy = {
   popularTitle: 'قرارات شائعة',
   seeAllDecisions: 'كل القرارات',
   showPopularOnly: 'الشائعة',
+  popularAvailableBadge: 'متاح',
+  popularUnavailableBadge: 'قريباً',
   entryTitle: 'مدخل القرار',
   entryModes: [
     {
       id: 'help-me-decide',
       title: 'ساعدني لأقرّر',
-      description: 'أجب عن أسئلة قليلة وسنقترح نوع القرار المناسب.',
+      description:
+        'تصفّح موضوعات القرار. قرارات التوقيت المدعومة يمكن تحليلها؛ الباقي غير متاح بعد.',
     },
     {
       id: 'ask-anything',
       title: 'اسأل أي شيء',
-      description: 'سؤال حر. يحوّله النظام إلى قرار منظّم.',
+      description:
+        'صف قرارك بكلماتك. التحليل متاح اليوم لأنواع القرار المدعومة فقط.',
     },
   ],
   recentTitle: 'قرارات حديثة',
