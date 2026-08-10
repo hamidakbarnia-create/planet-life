@@ -17,6 +17,10 @@ import {
   localizeStrength,
   type AskProductCopy,
 } from './copy';
+import {
+  localizeEvidenceFactor,
+  tryLocalizeFactorKey,
+} from './evidence-factor-localize';
 import { localizePackageLimits } from './package-limits';
 
 const UNKNOWN_CONFIDENCE = new Set([
@@ -36,7 +40,7 @@ export type AskEvidenceLine = {
    * Never machine-translated for FA/AR/RU.
    */
   detail?: string;
-  source: 'drivers.polarity' | 'drivers.label_support';
+  source: 'drivers.factor_key' | 'drivers.polarity' | 'drivers.label_support';
   polarity: DriverPolarity;
   driverLabel?: string;
   driverSupport?: string;
@@ -45,6 +49,7 @@ export type AskEvidenceLine = {
   driverBand?: string;
   contribution?: number;
   importance?: string;
+  factorKey?: string;
 };
 
 export type AskEvaluatePresentation = {
@@ -135,15 +140,6 @@ export function resolveDriverPolarity(driver: {
   return 'neutral';
 }
 
-function polarityCategoryTitle(
-  polarity: DriverPolarity,
-  copy: AskProductCopy
-): string {
-  if (polarity === 'supportive') return copy.evidenceSupportive;
-  if (polarity === 'cautionary') return copy.evidenceCaution;
-  return copy.evidenceNeutral;
-}
-
 function evidenceTitle(
   driver: {
     polarity?: string;
@@ -151,35 +147,38 @@ function evidenceTitle(
     band?: string;
     importance?: string;
     label?: string;
+    factor_key?: string;
   },
   polarity: DriverPolarity,
-  copy: AskProductCopy,
-  lang: AppLang,
-  ordinal: number
-): string {
-  const category = polarityCategoryTitle(polarity, copy);
-  const importance =
-    driver.importance && driver.importance in copy.importance
-      ? copy.importance[driver.importance as keyof typeof copy.importance]
-      : null;
-
-  // EN can lead with the Package label when present (human-authored English).
-  if (lang === 'en' && driver.label?.trim()) {
-    return driver.label.trim();
+  lang: AppLang
+): { title: string; detail?: string; source: AskEvidenceLine['source'] } {
+  const fromCatalog = tryLocalizeFactorKey(lang, driver.factor_key);
+  if (fromCatalog) {
+    return {
+      title: fromCatalog.title,
+      detail: fromCatalog.detail,
+      source: 'drivers.factor_key',
+    };
   }
 
-  // Structured category + importance + ordinal keeps FA/AR/RU items distinct
-  // without machine-translating free-form astro labels.
-  const parts = [category];
-  if (importance) parts.push(importance);
-  const ordinalLabel =
-    lang === 'fa'
-      ? String(ordinal).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]!)
-      : lang === 'ar'
-        ? String(ordinal).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]!)
-        : String(ordinal);
-  parts.push(ordinalLabel);
-  return parts.join(' · ');
+  const localized = localizeEvidenceFactor(lang, driver.factor_key, {
+    polarity,
+    label: driver.label,
+    importance: driver.importance,
+  });
+
+  // Unknown / missing key: EN may use Package label; FA/AR/RU honest fallback.
+  if (lang === 'en' && driver.label?.trim()) {
+    return {
+      title: driver.label.trim(),
+      source: 'drivers.label_support',
+    };
+  }
+
+  return {
+    title: localized.title,
+    source: 'drivers.polarity',
+  };
 }
 
 /**
@@ -190,25 +189,14 @@ export function mapPackageEvidence(
   pkg: DecisionEvaluationPackage,
   lang: AppLang
 ): AskEvidenceLine[] {
-  const copy = getAskProductCopy(lang);
-  const polarityCounts: Record<DriverPolarity, number> = {
-    supportive: 0,
-    cautionary: 0,
-    neutral: 0,
-  };
-
   // Prefer 2–4 items; keep up to 4 to preserve distinct reasons.
   return pkg.drivers.items.slice(0, 4).map((driver, index) => {
     const polarity = resolveDriverPolarity(driver);
-    polarityCounts[polarity] += 1;
-    const ordinal = polarityCounts[polarity];
-    const title = evidenceTitle(driver, polarity, copy, lang, ordinal);
+    const titled = evidenceTitle(driver, polarity, lang);
 
-    // EN: passthrough Package label/support/friction (Package language).
-    // FA/AR/RU: structured polarity+importance(+ordinal) titles only —
-    // never machine-translate free-form English astro labels; ordinal keeps
-    // distinct evidence identity without collapsing identical generic lines.
-    let detail: string | undefined;
+    // EN: passthrough Package support/friction (Package language).
+    // FA/AR/RU: never machine-translate free-form English astro labels.
+    let detail = titled.detail;
     if (lang === 'en') {
       const support = driver.support?.trim();
       const friction = driver.friction?.trim();
@@ -221,17 +209,15 @@ export function mapPackageEvidence(
       } else if (friction) {
         parts.push(friction);
       }
-      detail = parts.filter(Boolean).join(': ') || undefined;
+      const enDetail = parts.filter(Boolean).join(': ') || undefined;
+      detail = titled.detail ?? enDetail;
     }
 
     return {
       id: driver.id || `driver-${index + 1}`,
-      title,
+      title: titled.title,
       detail,
-      source:
-        lang === 'en' && detail
-          ? ('drivers.label_support' as const)
-          : ('drivers.polarity' as const),
+      source: titled.source,
       polarity,
       driverLabel: driver.label,
       driverSupport: driver.support,
@@ -239,6 +225,7 @@ export function mapPackageEvidence(
       driverBand: driver.band,
       contribution: driver.contribution,
       importance: driver.importance,
+      factorKey: driver.factor_key,
     };
   });
 }

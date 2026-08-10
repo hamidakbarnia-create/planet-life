@@ -116,6 +116,8 @@ export interface DecisionEvaluationPackage {
       readonly contribution?: number;
       readonly polarity?: 'supportive' | 'cautionary' | 'neutral';
       readonly importance?: 'low' | 'medium' | 'high' | 'critical';
+      /** Optional deterministic semantic key for localization. */
+      readonly factor_key?: string;
       /** @deprecated Compatibility magnitude only; prefer contribution. */
       readonly score: number;
       /** @deprecated Compatibility polarity projection; prefer polarity. */

@@ -162,6 +162,8 @@ class DriverItem(ContractModel):
     contribution: float | None = None
     polarity: DriverPolarity | None = None
     importance: DriverImportance | None = None
+    # Optional stable localization key from structured reason evidence.
+    factor_key: str | None = None
     # DEPRECATED: magnitude-only compatibility for Package v1 required field.
     score: float = Field(ge=0, le=100)
     # DEPRECATED: polarity projection for Package v1 required field.
@@ -172,7 +174,7 @@ class DriverItem(ContractModel):
     @model_serializer(mode="wrap")
     def _omit_null_canonical_fields(self, handler):
         data = handler(self)
-        for key in ("contribution", "polarity", "importance"):
+        for key in ("contribution", "polarity", "importance", "factor_key"):
             if data.get(key) is None:
                 data.pop(key, None)
         return data

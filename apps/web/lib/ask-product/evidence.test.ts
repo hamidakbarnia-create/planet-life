@@ -90,12 +90,70 @@ describe('ask-product evidence mapping honesty', () => {
     const fa = mapPackageEvidence(pkg, 'fa');
     expect(fa[0]?.source).toBe('drivers.polarity');
     expect(fa[0]?.polarity).toBe('supportive');
-    expect(fa[0]?.title).toContain(getAskProductCopy('fa').evidenceSupportive);
+    expect(fa[0]?.title).toBe(getAskProductCopy('fa').evidenceDetailUnavailable);
     expect(fa[0]?.detail).toBeUndefined();
     expect(fa[0]?.driverLabel).toBe('Visibility');
+    expect(fa[0]?.title).not.toMatch(/Visibility|Supporting factor/i);
   });
 
-  it('keeps distinct FA caution lines when polarity differs from collapsed band titles', () => {
+  it('localizes known factor_key for EN/FA/AR/RU without ordinal placeholders', () => {
+    const pkg = runtimePackage({
+      drivers: {
+        items: [
+          {
+            id: 'aspect-1',
+            label: 'Transit Mercury square natal Saturn',
+            contribution: -3.5,
+            polarity: 'cautionary',
+            importance: 'high',
+            factor_key: 'aspect.mercury.square.saturn',
+            score: 3.5,
+            band: 'low',
+            support: '',
+            friction: 'Communication friction rises.',
+          },
+          {
+            id: 'house-1',
+            label: 'Natal Mercury in 10th house',
+            contribution: 1.5,
+            polarity: 'supportive',
+            importance: 'medium',
+            factor_key: 'house.natal.mercury.10',
+            score: 1.5,
+            band: 'high',
+            support: 'Career house support.',
+            friction: '',
+          },
+        ],
+      },
+    });
+
+    const en = mapPackageEvidence(pkg, 'en');
+    expect(en[0]).toMatchObject({
+      source: 'drivers.factor_key',
+      polarity: 'cautionary',
+      title: 'Transit Mercury square natal Saturn',
+      factorKey: 'aspect.mercury.square.saturn',
+    });
+    expect(en[1]?.title).toBe('Natal Mercury in 10th house');
+
+    const fa = mapPackageEvidence(pkg, 'fa');
+    expect(fa[0]?.source).toBe('drivers.factor_key');
+    expect(fa[0]?.title).toContain('عطارد');
+    expect(fa[0]?.title).toContain('زحل');
+    expect(fa[0]?.title).not.toMatch(/Supporting factor|higher weight|\d/);
+    expect(fa[0]?.detail).toBeUndefined();
+
+    const ar = mapPackageEvidence(pkg, 'ar');
+    expect(ar[0]?.title).toContain('عطارد');
+    expect(ar[0]?.title).toContain('زحل');
+
+    const ru = mapPackageEvidence(pkg, 'ru');
+    expect(ru[0]?.title).toMatch(/Меркурия|Меркурий/);
+    expect(ru[0]?.title).toContain('Сатурн');
+  });
+
+  it('old packages without factor_key keep polarity grouping and honest FA/AR/RU fallback', () => {
     const pkg = runtimePackage({
       drivers: {
         items: [
@@ -113,35 +171,101 @@ describe('ask-product evidence mapping honesty', () => {
           {
             id: 'b',
             label: 'Mars hard aspect',
-            contribution: -2.4,
-            polarity: 'cautionary',
+            contribution: 2.4,
+            polarity: 'supportive',
             importance: 'high',
             score: 2.4,
-            band: 'low',
-            support: '',
-            friction: 'Pace pressure increases.',
-          },
-          {
-            id: 'c',
-            label: 'Saturn load',
-            contribution: -0.8,
-            polarity: 'cautionary',
-            importance: 'low',
-            score: 0.8,
-            band: 'low',
-            support: '',
-            friction: 'Extra structure needed.',
+            band: 'high',
+            support: 'Momentum available.',
+            friction: '',
           },
         ],
       },
     });
     const fa = mapPackageEvidence(pkg, 'fa');
-    expect(fa).toHaveLength(3);
-    const titles = fa.map((e) => e.title);
-    expect(new Set(titles).size).toBe(3);
-    expect(titles.every((t) => t.includes(getAskProductCopy('fa').evidenceCaution))).toBe(
+    expect(fa).toHaveLength(2);
+    expect(fa[0]?.polarity).toBe('cautionary');
+    expect(fa[1]?.polarity).toBe('supportive');
+    expect(fa.every((e) => e.title === getAskProductCopy('fa').evidenceDetailUnavailable)).toBe(
       true
     );
+    expect(fa.every((e) => !e.detail)).toBe(true);
+    // Consumer-facing title/detail must not dump English Package prose.
+    expect(fa.map((e) => `${e.title}\n${e.detail ?? ''}`).join('\n')).not.toMatch(
+      /Mercury|Mars|Communication|Momentum/
+    );
+
+    const en = mapPackageEvidence(pkg, 'en');
+    expect(en[0]?.title).toBe('Mercury square');
+    expect(en[1]?.title).toBe('Mars hard aspect');
+  });
+
+  it('does not invent factors beyond package drivers', () => {
+    const pkg = runtimePackage({
+      drivers: {
+        items: [
+          {
+            id: 'only',
+            label: 'Visibility',
+            contribution: 2,
+            polarity: 'supportive',
+            factor_key: 'aspect.mercury.trine.jupiter',
+            score: 2,
+            band: 'high',
+            support: 'ok',
+            friction: '',
+          },
+        ],
+      },
+    });
+    const evidence = mapPackageEvidence(pkg, 'fa');
+    expect(evidence).toHaveLength(1);
+    expect(evidence[0]?.factorKey).toBe('aspect.mercury.trine.jupiter');
+  });
+
+  it('maps contribution polarity invariants for displayed evidence', () => {
+    const pkg = runtimePackage({
+      drivers: {
+        items: [
+          {
+            id: 'pos',
+            label: 'A',
+            contribution: 2,
+            polarity: 'supportive',
+            factor_key: 'retrograde.mercury',
+            score: 2,
+            band: 'high',
+            support: '',
+            friction: '',
+          },
+          {
+            id: 'neg',
+            label: 'B',
+            contribution: -2,
+            polarity: 'cautionary',
+            factor_key: 'angular.mars.mc',
+            score: 2,
+            band: 'low',
+            support: '',
+            friction: '',
+          },
+          {
+            id: 'zero',
+            label: 'C',
+            contribution: 0,
+            polarity: 'neutral',
+            score: 0,
+            band: 'moderate',
+            support: '',
+            friction: '',
+          },
+        ],
+      },
+    });
+    const lines = mapPackageEvidence(pkg, 'en');
+    expect(lines.find((e) => e.contribution! > 0)?.polarity).toBe('supportive');
+    expect(lines.find((e) => e.contribution! < 0)?.polarity).toBe('cautionary');
+    expect(lines.find((e) => e.contribution === 0)?.polarity).toBe('neutral');
   });
 
   it('resolves polarity from contribution when polarity omitted', () => {

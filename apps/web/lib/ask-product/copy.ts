@@ -152,6 +152,8 @@ export type AskProductCopy = {
   intakeRequiredRemaining: (fields: string) => string;
   /** Shown under a prefilled date understood from Ask/Frame. */
   intakeKnownFromAsk: string;
+  /** Honest fallback when factor_key has no localized catalog entry. */
+  evidenceDetailUnavailable: string;
   intakeFieldTargetDate: string;
   intakeFieldRole: string;
   intakeFieldCompany: string;
@@ -372,6 +374,8 @@ const EN: AskProductCopy = {
   intakeRequiredFilled: 'Required details are ready.',
   intakeRequiredRemaining: (fields) => `Still needed: ${fields}`,
   intakeKnownFromAsk: 'Understood from your question',
+  evidenceDetailUnavailable:
+    'Evidence detail is not available in this language yet.',
   intakeFieldTargetDate: 'Interview date',
   intakeFieldRole: 'Role',
   intakeFieldCompany: 'Company',
@@ -599,6 +603,8 @@ const FA: AskProductCopy = {
   intakeRequiredFilled: 'اطلاعات لازم آماده است.',
   intakeRequiredRemaining: (fields) => `هنوز لازم است: ${fields}`,
   intakeKnownFromAsk: 'از پرسش شما فهمیده شد',
+  evidenceDetailUnavailable:
+    'جزئیات این عامل در این زبان هنوز در دسترس نیست.',
   intakeFieldTargetDate: 'تاریخ مصاحبه',
   intakeFieldRole: 'نقش',
   intakeFieldCompany: 'شرکت',
@@ -825,6 +831,8 @@ const AR: AskProductCopy = {
   intakeRequiredFilled: 'التفاصيل المطلوبة جاهزة.',
   intakeRequiredRemaining: (fields) => `ما زال مطلوبًا: ${fields}`,
   intakeKnownFromAsk: 'مفهومة من سؤالك',
+  evidenceDetailUnavailable:
+    'تفاصيل هذا العامل غير متاحة بعد بهذه اللغة.',
   intakeFieldTargetDate: 'تاريخ المقابلة',
   intakeFieldRole: 'الدور',
   intakeFieldCompany: 'الشركة',
@@ -1047,6 +1055,8 @@ const RU: AskProductCopy = {
   intakeRequiredFilled: 'Обязательные поля заполнены.',
   intakeRequiredRemaining: (fields) => `Ещё нужно: ${fields}`,
   intakeKnownFromAsk: 'Понято из вашего вопроса',
+  evidenceDetailUnavailable:
+    'Подробности этого фактора пока недоступны на этом языке.',
   intakeFieldTargetDate: 'Дата собеседования',
   intakeFieldRole: 'Роль',
   intakeFieldCompany: 'Компания',
