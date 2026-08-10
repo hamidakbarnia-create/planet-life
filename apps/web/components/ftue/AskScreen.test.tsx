@@ -9,6 +9,11 @@ import {
 } from '@testing-library/react';
 import { AskScreen } from '@/components/ftue/AskScreen';
 import {
+  buildDecisionFrame,
+  loadDecisionFrame,
+  saveDecisionFrame,
+} from '@/lib/ask-product';
+import {
   getAskQuestionRepository,
   resetAskQuestionRepositoryForTests,
 } from '@/lib/ask-question-repository';
@@ -78,6 +83,7 @@ describe('AskScreen', () => {
 
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     resetProfileRepositoryForTests();
     resetAskQuestionRepositoryForTests();
     replace.mockClear();
@@ -91,6 +97,7 @@ describe('AskScreen', () => {
     vi.restoreAllMocks();
     resetProfileRepositoryForTests();
     resetAskQuestionRepositoryForTests();
+    sessionStorage.clear();
   });
 
   it('renders the Ask Home decision-start surface', async () => {
@@ -244,6 +251,76 @@ describe('AskScreen', () => {
     const stored = getAskQuestionRepository().loadQuestion();
     expect(stored?.text).toBe('What should I do today?');
     expect(stored?.source).toBe('typed');
+    expect(push).toHaveBeenCalledWith('/ask/frame');
+  });
+
+  it('clears prior DecisionFrame before typed Ask submit navigates to frame', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    saveDecisionFrame(
+      buildDecisionFrame('Choose wedding date', {
+        decision_type_id: 'mar-wedding-date',
+        operation: 'compare',
+        time_scope: 'multiple_dates',
+        dates: ['2026-08-14', '2026-09-20'],
+      })
+    );
+    expect(loadDecisionFrame()).not.toBeNull();
+
+    renderAsk('en');
+    const home = getAskHomeCopy('en');
+    const input = await screen.findByLabelText(home.searchAriaLabel);
+    fireEvent.change(input, {
+      target: { value: 'Close an important business deal' },
+    });
+    fireEvent.click(
+      screen.getByRole('button', { name: home.searchSubmitAria })
+    );
+
+    expect(loadDecisionFrame()).toBeNull();
+    expect(getAskQuestionRepository().loadQuestion()?.text).toBe(
+      'Close an important business deal'
+    );
+    expect(push).toHaveBeenCalledWith('/ask/frame');
+    expect(push).not.toHaveBeenCalledWith(
+      expect.stringContaining('caseId=')
+    );
+  });
+
+  it('clears prior DecisionFrame on Popular Decision → frame entry', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    saveDecisionFrame(
+      buildDecisionFrame('Prior investor frame', {
+        decision_type_id: 'bus-investor-meeting',
+      })
+    );
+    expect(loadDecisionFrame()).not.toBeNull();
+
+    renderAsk('en');
+    await screen.findByRole('button', { name: 'Choose wedding date' });
+    fireEvent.click(screen.getByRole('button', { name: 'Choose wedding date' }));
+
+    expect(loadDecisionFrame()).toBeNull();
+    const stored = getAskQuestionRepository().loadQuestion();
+    expect(stored?.decision_type_id).toBe('mar-wedding-date');
+    expect(stored?.text).toBe('Choose wedding date');
+    expect(push).toHaveBeenCalledWith('/ask/frame');
+  });
+
+  it('clears prior DecisionFrame on suggestion submit to frame', async () => {
+    getProfileRepository().saveProfile(sampleProfile);
+    saveDecisionFrame(buildDecisionFrame('Stale frame'));
+    expect(loadDecisionFrame()).not.toBeNull();
+
+    renderAsk('en');
+    const home = getAskHomeCopy('en');
+    await screen.findByRole('heading', { name: home.heroTitle });
+    openHelpMeDecide('en');
+    clickCareerFocusQuestion();
+    fireEvent.click(
+      screen.getByRole('button', { name: home.searchSubmitAria })
+    );
+
+    expect(loadDecisionFrame()).toBeNull();
     expect(push).toHaveBeenCalledWith('/ask/frame');
   });
 

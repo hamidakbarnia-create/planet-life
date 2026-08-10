@@ -5,12 +5,14 @@ import { useState } from 'react';
 import { AskClarificationFlow } from '@/components/ask/AskClarificationFlow';
 import {
   buildDecisionFrame,
+  clearDecisionFrame,
   getAskProductCopy,
   isUnsupportedOperationFrame,
   loadDecisionFrame,
   loadFrameFromCase,
   resetToExamineStep,
   saveDecisionFrame,
+  sessionFrameBelongsToCurrentQuestion,
   type DecisionFrameV1,
 } from '@/lib/ask-product';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
@@ -70,9 +72,18 @@ export function AskFrameScreen({ lang }: { lang: AppLang }) {
         }
       }
 
+      const intent = resolveIntent(lang);
+      if (!intent.text) {
+        router.replace('/ask');
+        return;
+      }
+
       const existing = loadDecisionFrame();
-      if (existing) {
-        // Session frames that promised compare/find must not look runnable.
+      if (
+        existing &&
+        sessionFrameBelongsToCurrentQuestion(existing, intent)
+      ) {
+        // Same current draft (refresh / clarify). Keep session frame.
         setFrame(
           isUnsupportedOperationFrame(existing)
             ? resetToExamineStep(existing)
@@ -80,17 +91,18 @@ export function AskFrameScreen({ lang }: { lang: AppLang }) {
         );
         return;
       }
-      const intent = resolveIntent(lang);
-      if (!intent) {
-        router.replace('/ask');
-        return;
+
+      // Stale session frame for a different question — discard and rebuild.
+      if (existing) {
+        clearDecisionFrame();
       }
+
       // Preserve original text. Only structured extras the resolver already
       // put into the intent string are used — no fabricated objective/type.
       // Fresh ASK never offers compare/find as runnable.
       const next = buildDecisionFrame(intent.text, {
-    decision_type_id: intent.decisionTypeId,
-  });
+        decision_type_id: intent.decisionTypeId,
+      });
       const safe = isUnsupportedOperationFrame(next)
         ? resetToExamineStep(next)
         : next;

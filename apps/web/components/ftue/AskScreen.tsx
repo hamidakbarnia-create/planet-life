@@ -26,6 +26,7 @@ import {
   type DecisionEntryModeId,
   type PopularDecision,
 } from '@/lib/ask-home';
+import { clearDecisionFrame } from '@/lib/ask-product';
 import { getAskQuestionRepository } from '@/lib/ask-question-repository';
 import { loadBirthProfile } from '@/lib/birth-profile';
 import { formatHourLabel } from '@/lib/calendar-scores';
@@ -56,11 +57,18 @@ function askSubmittedAt(): number {
   return Date.now();
 }
 
+/** New Ask = new pre-Case draft. Clear prior DecisionFrame before saving the question. */
+function beginNewAskDraft(
+  question: Parameters<ReturnType<typeof getAskQuestionRepository>['saveQuestion']>[0]
+): void {
+  clearDecisionFrame();
+  getAskQuestionRepository().saveQuestion(question);
+}
+
 export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
   const router = useRouter();
   const authed = useRequireAuth();
   const repo = getProfileRepository();
-  const askRepo = getAskQuestionRepository();
   const home = getAskHomeCopy(lang);
   const formId = useId();
   const inputId = `${formId}-question`;
@@ -313,7 +321,7 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
       trackAskEvent('ftue.ask.question_selected', {
         suggestion_id: item.decisionTypeId,
       });
-      askRepo.saveQuestion({
+      beginNewAskDraft({
         submitted_at: askSubmittedAt(),
         source: 'typed',
         text: item.label,
@@ -347,7 +355,7 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     }
 
     if (selectedSuggestionId && selectedGuidedQuestion) {
-      askRepo.saveQuestion({
+      beginNewAskDraft({
         submitted_at: askSubmittedAt(),
         source: 'suggestion',
         suggestion_id: selectedSuggestionId,
@@ -357,7 +365,7 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
         length: text.length,
       });
     } else {
-      askRepo.saveQuestion({
+      beginNewAskDraft({
         submitted_at: askSubmittedAt(),
         source: 'typed',
         text,

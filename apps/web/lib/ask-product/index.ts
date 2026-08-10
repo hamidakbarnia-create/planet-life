@@ -42,12 +42,14 @@ export {
   applyOperationChoice,
   applyOpenEndedAxis,
   buildDecisionFrame,
+  clearDecisionFrame,
   isFramingPersistReady,
   loadDecisionFrame,
   loadFrameFromCase,
   persistFrameToCase,
   resetToExamineStep,
   saveDecisionFrame,
+  sessionFrameBelongsToCurrentQuestion,
 } from './clarify-bridge';
 export type { CompareDateDraft } from './clarify-bridge';
 export type { DecisionFrameV1 } from '@/lib/decision-frame/types';
