@@ -5,9 +5,9 @@ import type { AppLang } from '@/lib/app-settings';
 import { getAskProductCopy } from '@/lib/ask-product';
 import {
   CANONICAL_INVESTOR_MEETING_FIELD_IDS,
-  CANONICAL_INVESTOR_MEETING_REQUIRED_FIELD_IDS,
   investorHasFirstRequiredAnswer,
   investorMissingRequiredFields,
+  investorRequiredFieldIdsForMode,
   investorRequiredFieldsPresent,
   type InvestorMeetingIntake,
   type InvestorMeetingSlotId,
@@ -31,12 +31,15 @@ const MEETING_TYPE_OPTIONS = ['intro', 'pitch', 'follow_up', 'other'] as const;
 export function InvestorMeetingIntakeForm({
   lang,
   initialIntake,
+  caseMode,
   submitting,
   onSubmitAnswers,
   onComplete,
 }: {
   lang: AppLang;
   initialIntake?: InvestorMeetingIntake;
+  /** Case mode — compare_dates hides target_date requirement. */
+  caseMode?: string | null;
   submitting?: boolean;
   onSubmitAnswers: (
     answers: Partial<InvestorMeetingIntake>
@@ -45,17 +48,18 @@ export function InvestorMeetingIntakeForm({
 }) {
   const copy = getAskProductCopy(lang);
   const [draft, setDraft] = useState<InvestorMeetingIntake>(initialIntake ?? {});
+  const isCompare = caseMode === 'compare_dates';
   const missingRequired = useMemo(
-    () => investorMissingRequiredFields(draft),
-    [draft]
+    () => investorMissingRequiredFields(draft, caseMode),
+    [draft, caseMode]
   );
   const requiredPresent = useMemo(
-    () => investorRequiredFieldsPresent(draft),
-    [draft]
+    () => investorRequiredFieldsPresent(draft, caseMode),
+    [draft, caseMode]
   );
   const canSave = useMemo(
-    () => investorHasFirstRequiredAnswer(draft),
-    [draft]
+    () => investorHasFirstRequiredAnswer(draft, caseMode),
+    [draft, caseMode]
   );
 
   const setField = (slotId: InvestorMeetingSlotId, value: string) => {
@@ -63,13 +67,17 @@ export function InvestorMeetingIntakeForm({
   };
 
   const requiredSet = new Set<string>(
-    CANONICAL_INVESTOR_MEETING_REQUIRED_FIELD_IDS
+    investorRequiredFieldIdsForMode(caseMode)
+  );
+  const visibleFields = CANONICAL_INVESTOR_MEETING_FIELD_IDS.filter(
+    (slotId) => !(isCompare && slotId === 'target_date')
   );
 
   return (
     <form
       className="space-y-5"
       data-testid="investor-meeting-intake-form"
+      data-mode={caseMode ?? 'evaluate_date'}
       dir={copy.dir}
       onSubmit={(event) => {
         event.preventDefault();
@@ -77,7 +85,7 @@ export function InvestorMeetingIntakeForm({
       }}
     >
       <div className="space-y-4">
-        {CANONICAL_INVESTOR_MEETING_FIELD_IDS.map((slotId) => {
+        {visibleFields.map((slotId) => {
           const value = draft[slotId] ?? '';
           const missing = missingRequired.includes(slotId);
           const required = requiredSet.has(slotId);

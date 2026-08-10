@@ -92,7 +92,9 @@ def required_slot_ids() -> frozenset[str]:
 from packages.decision_engine.intake.investor_meeting import (
     INVESTOR_MEETING_SLOTS,
     InvestorMeetingIntake,
+    intake_mode_from_mapping as investor_meeting_intake_mode_from_mapping,
     merge_investor_meeting_intake,
+    required_slot_ids_for_mode as investor_meeting_required_slot_ids_for_mode,
 )
 
 
@@ -109,18 +111,33 @@ def evaluate_investor_meeting_intake(
     intake: Mapping[str, Any] | InvestorMeetingIntake | None = None,
     *,
     answers: Mapping[str, Any] | None = None,
+    mode: str | None = None,
 ) -> InvestorMeetingIntakeEvaluation:
+    """Evaluate completeness for bus-investor-meeting intake.
+
+    COMPARE does not require target_date (dates live on decision_frame.options).
+    EVALUATE requirements remain target_date + meeting_goal.
+    """
     if isinstance(intake, InvestorMeetingIntake) and not answers:
         normalized = intake
+        mode_resolved = mode or "evaluate_date"
     else:
         current = (
             intake.as_dict()
             if isinstance(intake, InvestorMeetingIntake)
             else intake
         )
+        mapping_for_mode: Mapping[str, Any] | None
+        if isinstance(intake, InvestorMeetingIntake):
+            mapping_for_mode = None
+        else:
+            mapping_for_mode = intake if isinstance(intake, Mapping) else None
         normalized = merge_investor_meeting_intake(
             current,
             answers or {},
+        )
+        mode_resolved = mode or investor_meeting_intake_mode_from_mapping(
+            mapping_for_mode if mapping_for_mode is not None else current
         )
 
     values = {
@@ -130,16 +147,14 @@ def evaluate_investor_meeting_intake(
         "meeting_type": normalized.meeting_type,
     }
 
+    required_ids = investor_meeting_required_slot_ids_for_mode(mode_resolved)
     missing = tuple(
         slot.slot_id
         for slot in INVESTOR_MEETING_SLOTS
-        if slot.required and not values[slot.slot_id]
+        if slot.slot_id in required_ids and not values.get(slot.slot_id)
     )
-
     answered = tuple(
-        key
-        for key in ("target_date", "meeting_goal")
-        if values[key]
+        slot_id for slot_id in required_ids if values.get(slot_id)
     )
 
     return InvestorMeetingIntakeEvaluation(

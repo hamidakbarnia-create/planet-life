@@ -67,7 +67,7 @@ EXPECTED_RECORDS: dict[str, tuple[str, tuple[str, ...]]] = {
     ),
     "bus-investor-meeting": (
         "visibility",
-        ("evaluate_date",),
+        ("evaluate_date", "compare_dates"),
     ),
     "bus-product-launch": (
         "timing_opt",

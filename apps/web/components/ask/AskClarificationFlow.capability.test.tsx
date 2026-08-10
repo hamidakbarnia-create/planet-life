@@ -164,6 +164,35 @@ describe('AskClarificationFlow capability gating', () => {
     );
   });
 
+  it('COMPARE ships for bus-investor-meeting; FIND remains coming soon', () => {
+    const frame = buildDecisionFrame('Investor meeting timing?', {
+      decision_type_id: 'bus-investor-meeting',
+    });
+    const copy = getAskProductCopy('en');
+    render(
+      <AskClarificationFlow
+        lang="en"
+        frame={frame}
+        caseId={null}
+        caseVersion={null}
+        onFrameChange={vi.fn()}
+        onCaseBound={vi.fn()}
+      />
+    );
+    expect(screen.getByTestId('examine-evaluate').hasAttribute('disabled')).toBe(
+      false
+    );
+    expect(screen.getByTestId('examine-compare').hasAttribute('disabled')).toBe(
+      false
+    );
+    expect(screen.getByTestId('examine-find').hasAttribute('disabled')).toBe(
+      true
+    );
+    expect(screen.getByTestId('examine-find').textContent).toContain(
+      copy.comingSoon
+    );
+  });
+
   it.each(['en', 'fa', 'ar', 'ru'] as const)(
     'localizes capability messages for %s',
     (lang) => {
