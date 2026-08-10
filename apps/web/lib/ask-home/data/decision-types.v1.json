@@ -51,7 +51,8 @@
         "structured"
       ],
       "allowed_modes": [
-        "evaluate_date"
+        "evaluate_date",
+        "compare_dates"
       ],
       "output_profile": "decision_evaluation_package.v1"
     },

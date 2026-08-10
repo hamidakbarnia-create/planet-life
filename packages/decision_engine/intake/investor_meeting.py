@@ -31,6 +31,29 @@ INVESTOR_MEETING_SLOTS: Final[tuple[IntakeSlot, ...]] = (
     IntakeSlot("meeting_type", False, "Meeting type"),
 )
 
+REQUIRED_SLOT_IDS: Final[frozenset[str]] = frozenset(
+    slot.slot_id for slot in INVESTOR_MEETING_SLOTS if slot.required
+)
+
+# COMPARE dates live on decision_frame.options — target_date is not required.
+COMPARE_REQUIRED_SLOT_IDS: Final[frozenset[str]] = frozenset({"meeting_goal"})
+
+
+def required_slot_ids_for_mode(mode: str | None) -> frozenset[str]:
+    if mode == "compare_dates":
+        return COMPARE_REQUIRED_SLOT_IDS
+    return REQUIRED_SLOT_IDS
+
+
+def intake_mode_from_mapping(intake: Mapping[str, Any] | None) -> str:
+    """Infer Case mode from persisted decision_frame when present."""
+    if not isinstance(intake, Mapping):
+        return "evaluate_date"
+    frame = intake.get("decision_frame")
+    if isinstance(frame, dict) and frame.get("operation") == "compare":
+        return "compare_dates"
+    return "evaluate_date"
+
 
 @dataclass(frozen=True, slots=True)
 class InvestorMeetingIntake:
@@ -56,6 +79,10 @@ def assert_investor_meeting_registered() -> None:
     record = get_decision_type(INVESTOR_MEETING_DECISION_TYPE_ID)
     if "evaluate_date" not in record.allowed_modes:
         raise RuntimeError("bus-investor-meeting must allow evaluate_date")
+    if "compare_dates" not in record.allowed_modes:
+        raise RuntimeError("bus-investor-meeting must allow compare_dates")
+    if record.family_id != "visibility":
+        raise RuntimeError("bus-investor-meeting must belong to visibility")
 
 
 def _normalize(value: Any) -> str | None:

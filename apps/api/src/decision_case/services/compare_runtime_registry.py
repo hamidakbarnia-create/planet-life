@@ -7,11 +7,20 @@ insufficient.
 
 from __future__ import annotations
 
+from packages.decision_engine.evaluate import (  # noqa: F401
+    car_interview_compare as _car,
+)
+from packages.decision_engine.evaluate import (  # noqa: F401
+    investor_meeting_compare as _investor,
+)
 from packages.decision_engine.evaluate import wedding_date_compare as _wedding  # noqa: F401
 from packages.decision_engine.evaluate.car_interview_compare import (
     CAR_INTERVIEW_COMPARE_RUNTIME,
 )
 from packages.decision_engine.evaluate.compare_contract import CompareRuntimeContract
+from packages.decision_engine.evaluate.investor_meeting_compare import (
+    INVESTOR_MEETING_COMPARE_RUNTIME,
+)
 from packages.decision_engine.evaluate.type_timing_opt_compare_config import (
     get_timing_opt_type_compare_config,
 )
@@ -25,6 +34,7 @@ from packages.decision_engine.evaluate.wedding_date_compare import (
 _RUNTIMES: dict[str, CompareRuntimeContract] = {
     WEDDING_DATE_COMPARE_RUNTIME.decision_type_id: WEDDING_DATE_COMPARE_RUNTIME,
     CAR_INTERVIEW_COMPARE_RUNTIME.decision_type_id: CAR_INTERVIEW_COMPARE_RUNTIME,
+    INVESTOR_MEETING_COMPARE_RUNTIME.decision_type_id: INVESTOR_MEETING_COMPARE_RUNTIME,
 }
 
 

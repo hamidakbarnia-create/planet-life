@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CANONICAL_INVESTOR_MEETING_REQUIRED_FIELD_IDS,
+  COMPARE_INVESTOR_MEETING_REQUIRED_FIELD_IDS,
   investorMissingRequiredFields,
   investorRequiredFieldsPresent,
   mergeInvestorMeetingFormAnswers,
@@ -20,6 +21,21 @@ describe('investor-meeting-form helpers', () => {
     ).toBe(true);
     expect(
       investorMissingRequiredFields({ target_date: '2026-08-18' })
+    ).toEqual(['meeting_goal']);
+  });
+
+  it('compare mode drops target_date requirement', () => {
+    expect(COMPARE_INVESTOR_MEETING_REQUIRED_FIELD_IDS).toEqual([
+      'meeting_goal',
+    ]);
+    expect(
+      investorRequiredFieldsPresent(
+        { meeting_goal: 'Raise seed' },
+        'compare_dates'
+      )
+    ).toBe(true);
+    expect(
+      investorMissingRequiredFields({}, 'compare_dates')
     ).toEqual(['meeting_goal']);
   });
 

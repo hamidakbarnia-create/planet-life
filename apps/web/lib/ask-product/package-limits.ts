@@ -287,6 +287,29 @@ const CANONICAL_PACKAGE_LIMITS: Record<string, LimitLocales> = {
     ar: 'لم تُبحث تواريخ بديلة.',
     ru: 'Альтернативные даты не искались.',
   },
+
+  // bus-investor-meeting COMPARE
+  'Investor-meeting communication/negotiation timing comparison only — not investment outcome or funding success.':
+    {
+      en: 'Investor-meeting communication/negotiation timing comparison only — not investment outcome or funding success.',
+      fa: 'فقط مقایسهٔ زمان‌بندی ارتباط/مذاکره برای جلسه با سرمایه‌گذار — نه نتیجهٔ سرمایه‌گذاری یا موفقیت جذب سرمایه.',
+      ar: 'مقارنة توقيت التواصل/التفاوض لاجتماع المستثمر فقط — وليست نتيجة استثمار أو نجاح تمويل.',
+      ru: 'Только сравнение тайминга коммуникации/переговоров для встречи с инвестором — не исход инвестиции или успех привлечения капитала.',
+    },
+  'Investor-meeting communication/negotiation timing comparison only — not investment outcome, funding success, investor commitment, term sheet probability, amount raised, valuation, investor interest certainty, pitch performance certainty, business success, market demand, financial return, or fundraising success.':
+    {
+      en: 'Investor-meeting communication/negotiation timing comparison only — not investment outcome, funding success, investor commitment, term sheet probability, amount raised, valuation, investor interest certainty, pitch performance certainty, business success, market demand, financial return, or fundraising success.',
+      fa: 'فقط مقایسهٔ زمان‌بندی ارتباط/مذاکره برای جلسه با سرمایه‌گذار — نه نتیجهٔ سرمایه‌گذاری، موفقیت جذب سرمایه، تعهد سرمایه‌گذار، احتمال ترم‌شیت، مبلغ جذب‌شده، ارزش‌گذاری، قطعیت علاقهٔ سرمایه‌گذار، قطعیت عملکرد پیچ، موفقیت کسب‌وکار، تقاضای بازار، بازده مالی یا موفقیت جذب سرمایه.',
+      ar: 'مقارنة توقيت التواصل/التفاوض لاجتماع المستثمر فقط — وليست نتيجة استثمار أو نجاح تمويل أو التزام مستثمر أو احتمال ورقة شروط أو مبلغ مجمّع أو تقييم أو يقين اهتمام المستثمر أو يقين أداء العرض أو نجاح الأعمال أو طلب السوق أو عائد مالي أو نجاح جمع التمويل.',
+      ru: 'Только сравнение тайминга коммуникации/переговоров для встречи с инвестором — не исход инвестиции, успех финансирования, обязательство инвестора, вероятность term sheet, сумма раунда, оценка, уверенность в интересе инвестора, уверенность в питче, успех бизнеса, спрос рынка, финансовая доходность или успех фандрайзинга.',
+    },
+  'meeting_goal, investor_name, and meeting_type did not affect the numeric scores.':
+    {
+      en: 'meeting_goal, investor_name, and meeting_type did not affect the numeric scores.',
+      fa: 'هدف جلسه، نام سرمایه‌گذار و نوع جلسه بر امتیازهای عددی اثر نگذاشتند.',
+      ar: 'هدف الاجتماع واسم المستثمر ونوع الاجتماع لم تؤثر على الدرجات الرقمية.',
+      ru: 'Цель встречи, имя инвестора и тип встречи не влияли на числовые оценки.',
+    },
 };
 
 /** True when `text` is an exact known canonical package limit (trim-only). */

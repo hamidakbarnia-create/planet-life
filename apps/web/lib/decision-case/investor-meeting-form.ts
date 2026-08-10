@@ -20,6 +20,11 @@ export const CANONICAL_INVESTOR_MEETING_REQUIRED_FIELD_IDS = [
   'meeting_goal',
 ] as const;
 
+/** COMPARE dates live on framing options — target_date is not required. */
+export const COMPARE_INVESTOR_MEETING_REQUIRED_FIELD_IDS = [
+  'meeting_goal',
+] as const;
+
 export type InvestorMeetingSlotId =
   (typeof CANONICAL_INVESTOR_MEETING_FIELD_IDS)[number];
 
@@ -29,6 +34,15 @@ export type InvestorMeetingIntake = {
   investor_name?: string;
   meeting_type?: string;
 };
+
+export function investorRequiredFieldIdsForMode(
+  mode?: string | null
+): readonly InvestorMeetingSlotId[] {
+  if (mode === 'compare_dates') {
+    return COMPARE_INVESTOR_MEETING_REQUIRED_FIELD_IDS;
+  }
+  return CANONICAL_INVESTOR_MEETING_REQUIRED_FIELD_IDS;
+}
 
 export function normalizeInvestorAnswer(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
@@ -53,25 +67,28 @@ export function mergeInvestorMeetingFormAnswers(
 }
 
 export function investorRequiredFieldsPresent(
-  intake: InvestorMeetingIntake
+  intake: InvestorMeetingIntake,
+  mode?: string | null
 ): boolean {
-  return CANONICAL_INVESTOR_MEETING_REQUIRED_FIELD_IDS.every(
-    (id) => Boolean(normalizeInvestorAnswer(intake[id]))
+  return investorRequiredFieldIdsForMode(mode).every((id) =>
+    Boolean(normalizeInvestorAnswer(intake[id]))
   );
 }
 
 export function investorHasFirstRequiredAnswer(
-  intake: InvestorMeetingIntake
+  intake: InvestorMeetingIntake,
+  mode?: string | null
 ): boolean {
-  return CANONICAL_INVESTOR_MEETING_REQUIRED_FIELD_IDS.some((id) =>
+  return investorRequiredFieldIdsForMode(mode).some((id) =>
     Boolean(normalizeInvestorAnswer(intake[id]))
   );
 }
 
 export function investorMissingRequiredFields(
-  intake: InvestorMeetingIntake
+  intake: InvestorMeetingIntake,
+  mode?: string | null
 ): InvestorMeetingSlotId[] {
-  return CANONICAL_INVESTOR_MEETING_REQUIRED_FIELD_IDS.filter(
+  return investorRequiredFieldIdsForMode(mode).filter(
     (id) => !normalizeInvestorAnswer(intake[id])
-  );
+  ) as InvestorMeetingSlotId[];
 }

@@ -53,11 +53,13 @@ export {
 export {
   CANONICAL_INVESTOR_MEETING_FIELD_IDS,
   CANONICAL_INVESTOR_MEETING_REQUIRED_FIELD_IDS,
+  COMPARE_INVESTOR_MEETING_REQUIRED_FIELD_IDS,
   INVESTOR_MEETING_DECISION_TYPE_ID,
   INVESTOR_MEETING_FAMILY_ID,
   INVESTOR_MEETING_LABEL,
   investorHasFirstRequiredAnswer,
   investorMissingRequiredFields,
+  investorRequiredFieldIdsForMode,
   investorRequiredFieldsPresent,
   mergeInvestorMeetingFormAnswers,
   type InvestorMeetingIntake,

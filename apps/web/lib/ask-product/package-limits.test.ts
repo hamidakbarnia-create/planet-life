@@ -24,6 +24,9 @@ const COMPARE_CANONICAL =
 const INTERVIEW_COMPARE_CANONICAL =
   'Interview-date communication/visibility timing comparison only — not hiring outcome, job offer, salary, interview performance certainty, employer decision, or career success.';
 
+const INVESTOR_COMPARE_CANONICAL =
+  'Investor-meeting communication/negotiation timing comparison only — not investment outcome or funding success.';
+
 describe('package limit semantic localization', () => {
   it('maps exact FIND canonical limits for EN/FA/AR/RU', () => {
     for (const limit of FIND_CANONICAL) {
@@ -41,7 +44,7 @@ describe('package limit semantic localization', () => {
     }
   });
 
-  it('maps investor EVALUATE and wedding/interview COMPARE limits', () => {
+  it('maps investor EVALUATE and wedding/interview/investor COMPARE limits', () => {
     for (const limit of INVESTOR_CANONICAL) {
       expect(localizePackageLimit('fa', limit)).toBeTruthy();
       expect(localizePackageLimit('fa', limit)).not.toBe(limit);
@@ -57,6 +60,17 @@ describe('package limit semantic localization', () => {
     expect(localizePackageLimit('ar', INTERVIEW_COMPARE_CANONICAL)).toBeTruthy();
     expect(localizePackageLimit('ru', INTERVIEW_COMPARE_CANONICAL)).not.toBe(
       INTERVIEW_COMPARE_CANONICAL
+    );
+    expect(localizePackageLimit('fa', INVESTOR_COMPARE_CANONICAL)).toBeTruthy();
+    expect(localizePackageLimit('fa', INVESTOR_COMPARE_CANONICAL)).not.toBe(
+      INVESTOR_COMPARE_CANONICAL
+    );
+    expect(localizePackageLimit('ar', INVESTOR_COMPARE_CANONICAL)).toBeTruthy();
+    expect(localizePackageLimit('ru', INVESTOR_COMPARE_CANONICAL)).not.toBe(
+      INVESTOR_COMPARE_CANONICAL
+    );
+    expect(localizePackageLimit('fa', INVESTOR_COMPARE_CANONICAL)).not.toMatch(
+      /meeting_goal|investor_name|term_sheet/
     );
   });
 
