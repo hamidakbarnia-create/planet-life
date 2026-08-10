@@ -7,7 +7,6 @@ insufficient.
 
 from __future__ import annotations
 
-from packages.decision_engine.evaluate import car_interview_compare as _car  # noqa: F401
 from packages.decision_engine.evaluate import wedding_date_compare as _wedding  # noqa: F401
 from packages.decision_engine.evaluate.car_interview_compare import (
     CAR_INTERVIEW_COMPARE_RUNTIME,
