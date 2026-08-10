@@ -355,6 +355,267 @@ class CarInterviewVisibilityCompareSemantics:
 
 
 @dataclass(frozen=True, slots=True)
+class CarInterviewVisibilityFindSemantics:
+    """FIND Package wording for car-interview (visibility family)."""
+
+    def insufficient_summary(
+        self, answers: Any, *, range_start: str, range_end: str
+    ) -> str:
+        role = getattr(answers, "role", None) or "interview"
+        return (
+            f"Cannot scan interview timing windows for this {role} "
+            f"between {range_start} and {range_end} without natal evidence."
+        )
+
+    def insufficient_action(self) -> str:
+        return (
+            "Provide natal evidence (birth date, time, location) "
+            "on the Case, then re-run FIND."
+        )
+
+    def insufficient_counter_reason(self) -> str:
+        return (
+            "FIND did not run. Without natal evidence, interview timing windows "
+            "cannot be scanned."
+        )
+
+    def insufficient_limits(self) -> list[str]:
+        return [
+            "Interview-date communication/visibility timing scan only — not hiring outcome or job offer.",
+            "No windows were generated because natal evidence was unavailable.",
+        ]
+
+    def insufficient_timing_notes(self) -> str:
+        return (
+            "Timing not scanned: natal evidence unavailable. "
+            "No favorable windows are claimed."
+        )
+
+    def insufficient_confidence_message(self) -> str:
+        return (
+            "Birth date/time/location evidence is required for "
+            "timing FIND scans."
+        )
+
+    def insufficient_why_not(self) -> str:
+        return (
+            "Without natal inputs, interview timing windows cannot be scanned."
+        )
+
+    def scored_summary(
+        self,
+        answers: Any,
+        *,
+        unique_dominant: bool,
+        window_labels: list[str],
+        tied_labels: list[str],
+        no_strong_window: bool,
+    ) -> str:
+        role = getattr(answers, "role", None) or "interview"
+        if no_strong_window:
+            return (
+                f"No sufficiently strong interview timing window found for this "
+                f"{role} inside the selected range."
+            )
+        if unique_dominant and window_labels:
+            return (
+                f"Stronger interview timing window {window_labels[0]} for this "
+                f"{role} within the scanned range."
+            )
+        tied = " and ".join(tied_labels) if tied_labels else "several windows"
+        return (
+            f"Comparable interview timing windows for this {role}: "
+            f"{tied}. No clearly dominant window."
+        )
+
+    def scored_conditions(self, answers: Any) -> list[str]:
+        conditions: list[str] = []
+        if not getattr(answers, "company", None):
+            conditions.append(
+                "Company was not used in scoring (missing on Case; label-only context)"
+            )
+        if not getattr(answers, "interview_type", None):
+            conditions.append(
+                "Interview type was not used in scoring (missing on Case; label-only context)"
+            )
+        return conditions
+
+    def scored_evidence_limits(self) -> list[str]:
+        return [
+            "These windows show relatively stronger communication and visibility timing within the supplied interview-date range.",
+            "Does not assess hiring outcome, job offer probability, employer decision, salary, or career success.",
+            "Role, company, and interview type did not enter scoring.",
+            "Same natal evidence was used for every scanned date.",
+        ]
+
+    def scored_timing_notes(
+        self, *, unique_dominant: bool, no_strong_window: bool
+    ) -> str:
+        if no_strong_window:
+            return (
+                "No contiguous Favorable+ (band=high) interview-day windows were found "
+                "in the scanned range."
+            )
+        if unique_dominant:
+            return (
+                "Windows built from contiguous Favorable+ days; ordered by peak score, "
+                "then start date. Scores shown as whole numbers."
+            )
+        return (
+            "Windows built from contiguous Favorable+ days. Top windows are within "
+            "the tie threshold — no unique dominant window is claimed."
+        )
+
+    def scored_action_step(
+        self,
+        *,
+        unique_dominant: bool,
+        window_labels: list[str],
+        tied_labels: list[str],
+        no_strong_window: bool,
+    ) -> str:
+        if no_strong_window:
+            return (
+                "Widen or shift the date range, or evaluate a specific constrained "
+                "interview date separately."
+            )
+        if unique_dominant and window_labels:
+            return (
+                f"Review logistics inside {window_labels[0]}, then decide whether "
+                "that window fits non-timing constraints."
+            )
+        tied = " / ".join(tied_labels) if tied_labels else "the comparable windows"
+        return (
+            f"Treat {tied} as comparable on timing; choose using non-timing "
+            "constraints (travel, interviewer availability, prep)."
+        )
+
+    def scored_assumptions(
+        self, *, event_location_supplied: bool, timezone: str
+    ) -> list[str]:
+        return [
+            "FIND used Case-persisted inclusive date range from the decision frame.",
+            f"One scan timezone/context applied to every day: {timezone}.",
+            "Transit timing used noon local default when no interview clock time was supplied.",
+            "Canonical interview activity profile was used for each day score.",
+            "Identical natal evidence bindings were applied to every scanned date.",
+            (
+                "Interview/event location was supplied separately from birth place."
+                if event_location_supplied
+                else (
+                    "Interview/event location was not supplied on the Case; "
+                    "scoring pipeline may default transit location to birth place."
+                )
+            ),
+        ]
+
+    def scored_limits(self) -> list[str]:
+        return [
+            "Interview-date communication/visibility timing scan only — not hiring outcome, job offer, salary, interview performance certainty, employer decision, or career success.",
+            "Role, company, and interview type did not affect the numeric scores.",
+            "Birth location and interview/event location are distinct; birth was not treated as interview city in Case evidence.",
+            "Hourly clock-time windows were not computed.",
+            "Avoid windows were not computed as a primary product.",
+            "Tiny score gaps within the tie threshold do not create a unique winner.",
+            "Results are relative within the selected range only.",
+        ]
+
+    def scored_improve_accuracy(self) -> list[str]:
+        return [
+            "Provide interview clock time later for hourly analysis (not part of FIND v1).",
+        ]
+
+    def scored_counter_reason(
+        self, *, unique_dominant: bool, no_strong_window: bool
+    ) -> str:
+        if no_strong_window:
+            return (
+                "Absence of a Favorable+ window is not a prohibition — it means "
+                "no strong timing cluster met the eligibility rule in this range."
+            )
+        if unique_dominant:
+            return (
+                "A lower-ranked window may still be preferable when logistics "
+                "outweigh a modest timing gap."
+            )
+        return (
+            "Timing does not separate the top windows; non-timing constraints "
+            "should decide."
+        )
+
+    def scored_confidence_unavailable_message(self) -> str:
+        return (
+            "Upstream scoring did not supply a reasoning confidence value. "
+            "Package confidence.value=0 is a schema placeholder, not a measured score."
+        )
+
+    def scored_opportunities(self, *, has_windows: bool) -> list[str]:
+        if has_windows:
+            return [
+                "Review logistics inside the surfaced windows before committing.",
+            ]
+        return [
+            "Try a different range or evaluate a constrained interview date.",
+        ]
+
+    def relative_explanation(
+        self,
+        *,
+        unique_dominant: bool,
+        no_strong_window: bool,
+        window_labels: list[str],
+        peak_scores: list[float],
+        tied_labels: list[str],
+    ) -> tuple[str, str]:
+        if no_strong_window:
+            return (
+                "No contiguous Favorable+ interview-day window was identified in range.",
+                "FIND does not invent candidates when eligibility is unmet.",
+            )
+        if unique_dominant and window_labels and peak_scores:
+            why = (
+                f"{window_labels[0]} is the stronger interview timing window "
+                f"(peak {peak_scores[0]:.0f}) under identical natal evidence."
+            )
+            why_not = (
+                "Other days/windows are weaker or outside the Favorable+ eligibility "
+                "band used for window construction."
+            )
+            return why, why_not
+        tied = ", ".join(tied_labels) if tied_labels else "top windows"
+        why = (
+            f"{tied} are within the FIND tie threshold and share favorable "
+            "interview-day communication timing under identical natal evidence."
+        )
+        why_not = (
+            "No clearly dominant window is claimed because the peak-score gap "
+            "is not material."
+        )
+        return why, why_not
+
+    def option_strengths(
+        self, *, score: float, band: str, rating: str
+    ) -> tuple[str, ...]:
+        label = rating or band
+        return (
+            f"Interview-day communication timing {label.lower()} (score {score:.0f}).",
+        )
+
+    def option_risks(
+        self, *, score: float, band: str, rating: str
+    ) -> tuple[str, ...]:
+        if band == "high":
+            return (
+                "Non-timing constraints (travel, interviewer availability) may still override.",
+            )
+        if band == "moderate":
+            return (
+                "Mixed interview-day signals — confirm non-timing constraints.",
+            )
+        return ("Weaker interview-day timing relative to stronger windows.",)
+
+
+@dataclass(frozen=True, slots=True)
 class InvestorMeetingVisibilitySemantics:
     def insufficient_summary(self, answers: Any, target_date: str) -> str:
         return "Cannot evaluate the investor meeting date without natal evidence."

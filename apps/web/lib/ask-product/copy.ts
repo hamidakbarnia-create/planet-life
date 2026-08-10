@@ -88,6 +88,16 @@ export type AskProductCopy = {
   findWindowsEmpty: string;
   findRangeLabel: string;
   findPeakLabel: string;
+  /** car-interview FIND presentation (type-specific; generic FIND keys stay for Product Launch). */
+  findInterviewResultTitle: string;
+  findInterviewHeadlineDominant: string;
+  findInterviewHeadlineComparable: string;
+  findInterviewHeadlineNone: string;
+  findInterviewHonestyDominant: string;
+  findInterviewHonestyComparable: string;
+  findInterviewHonestyNone: string;
+  findInterviewWindowsLabel: string;
+  findInterviewWindowsEmpty: string;
   compareRankOf: (rank: number) => string;
   compareOptionsLabel: string;
   blockedTitleCompare: string;
@@ -272,6 +282,18 @@ const EN: AskProductCopy = {
   findWindowsEmpty: 'No strong window in range',
   findRangeLabel: 'Scanned range',
   findPeakLabel: 'Peak',
+  findInterviewResultTitle: 'Interview timing windows',
+  findInterviewHeadlineDominant: 'Strongest interview window',
+  findInterviewHeadlineComparable: 'Comparable interview windows',
+  findInterviewHeadlineNone: 'No strong interview window in range',
+  findInterviewHonestyDominant:
+    'These windows show relatively stronger communication and visibility timing within the supplied interview-date range.',
+  findInterviewHonestyComparable:
+    'These interview windows are comparable on communication and visibility timing — no clearly dominant window is claimed.',
+  findInterviewHonestyNone:
+    'No sufficiently strong interview communication/visibility window was found in the scanned range.',
+  findInterviewWindowsLabel: 'Interview windows that deserve attention',
+  findInterviewWindowsEmpty: 'No strong interview window in range',
   compareRankOf: (rank) => `Rank ${rank}`,
   compareOptionsLabel: 'Compared dates',
   blockedTitleCompare:
@@ -477,6 +499,18 @@ const FA: AskProductCopy = {
     'این‌ها پنجره‌های قابل‌مقایسه‌اند — پنجرهٔ مسلط ادعا نمی‌شود.',
   findHonestyNone:
     'در بازهٔ اسکن‌شده پنجرهٔ زمان‌بندی به‌قدر کافی قوی یافت نشد.',
+  findInterviewResultTitle: 'پنجره‌های زمان‌بندی مصاحبه',
+  findInterviewHeadlineDominant: 'قوی‌ترین پنجرهٔ مصاحبه',
+  findInterviewHeadlineComparable: 'پنجره‌های مصاحبهٔ قابل‌مقایسه',
+  findInterviewHeadlineNone: 'پنجرهٔ مصاحبهٔ قوی در این بازه یافت نشد',
+  findInterviewHonestyDominant:
+    'این پنجره‌ها زمان‌بندی نسبتاً قوی‌تر ارتباط و دیده‌شدن را در بازهٔ مصاحبهٔ داده‌شده نشان می‌دهند.',
+  findInterviewHonestyComparable:
+    'این پنجره‌های مصاحبه از نظر زمان‌بندی ارتباط و دیده‌شدن قابل‌مقایسه‌اند — پنجرهٔ مسلط ادعا نمی‌شود.',
+  findInterviewHonestyNone:
+    'در بازهٔ اسکن‌شده پنجرهٔ ارتباط/دیده‌شدن مصاحبه به‌قدر کافی قوی یافت نشد.',
+  findInterviewWindowsLabel: 'پنجره‌های مصاحبهٔ شایان توجه',
+  findInterviewWindowsEmpty: 'پنجرهٔ مصاحبهٔ قوی در این بازه یافت نشد',
   findWindowsLabel: 'پنجره‌هایی که ارزش توجه دارند',
   findWindowsEmpty: 'پنجرهٔ قوی در این بازه نیست',
   findRangeLabel: 'بازهٔ اسکن‌شده',
@@ -686,6 +720,18 @@ const AR: AskProductCopy = {
     'هذه نوافذ قابلة للمقارنة — دون ادعاء نافذة مهيمنة بوضوح.',
   findHonestyNone:
     'لم يُعثر على نافذة توقيت قوية بما يكفي في النطاق الممسوح.',
+  findInterviewResultTitle: 'نوافذ توقيت المقابلة',
+  findInterviewHeadlineDominant: 'أقوى نافذة مقابلة',
+  findInterviewHeadlineComparable: 'نوافذ مقابلة قابلة للمقارنة',
+  findInterviewHeadlineNone: 'لا نافذة مقابلة قوية في النطاق',
+  findInterviewHonestyDominant:
+    'تُظهر هذه النوافذ توقيت تواصل وظهور أقوى نسبيًا ضمن نطاق تواريخ المقابلة المحدد.',
+  findInterviewHonestyComparable:
+    'نوافذ المقابلة هذه متقاربة في توقيت التواصل والظهور — دون ادعاء نافذة مهيمنة بوضوح.',
+  findInterviewHonestyNone:
+    'لم يُعثر على نافذة تواصل/ظهور للمقابلة قوية بما يكفي في النطاق الممسوح.',
+  findInterviewWindowsLabel: 'نوافذ مقابلة تستحق الانتباه',
+  findInterviewWindowsEmpty: 'لا نافذة مقابلة قوية في النطاق',
   findWindowsLabel: 'نوافذ تستحق الانتباه',
   findWindowsEmpty: 'لا نافذة قوية في النطاق',
   findRangeLabel: 'النطاق الممسوح',
@@ -892,6 +938,18 @@ const RU: AskProductCopy = {
     'Это сопоставимые окна — явно доминирующее окно не утверждается.',
   findHonestyNone:
     'В просканированном диапазоне достаточно сильного окна тайминга не найдено.',
+  findInterviewResultTitle: 'Окна тайминга интервью',
+  findInterviewHeadlineDominant: 'Самое сильное окно интервью',
+  findInterviewHeadlineComparable: 'Сопоставимые окна интервью',
+  findInterviewHeadlineNone: 'Сильного окна интервью в диапазоне нет',
+  findInterviewHonestyDominant:
+    'Эти окна показывают относительно более сильный тайминг коммуникации и видимости в заданном диапазоне дат интервью.',
+  findInterviewHonestyComparable:
+    'Эти окна интервью сопоставимы по таймингу коммуникации и видимости — явно доминирующее окно не утверждается.',
+  findInterviewHonestyNone:
+    'В просканированном диапазоне достаточно сильного окна коммуникации/видимости для интервью не найдено.',
+  findInterviewWindowsLabel: 'Окна интервью, заслуживающие внимания',
+  findInterviewWindowsEmpty: 'Сильного окна интервью в диапазоне нет',
   findWindowsLabel: 'Окна, заслуживающие внимания',
   findWindowsEmpty: 'Сильного окна в диапазоне нет',
   findRangeLabel: 'Просканированный диапазон',

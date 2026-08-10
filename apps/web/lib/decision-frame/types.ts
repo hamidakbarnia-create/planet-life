@@ -161,6 +161,10 @@ export type FindResultViewModel = {
   /** Canonical Gregorian ISO scanned-range end when present. */
   range_end?: string;
   range_context?: string;
+  /** Decision type for type-specific FIND chrome (e.g. car-interview). */
+  decision_type_id?: string;
+  /** Localized primary window range for unique-dominant answers. */
+  primary_window_label?: string;
   confidence: ConfidenceBand;
   limitations?: string[];
   known?: string[];

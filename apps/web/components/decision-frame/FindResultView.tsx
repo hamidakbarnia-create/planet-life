@@ -3,7 +3,6 @@ import {
   ConfidenceIndicator,
   LimitsBlock,
   ResultHeader,
-  ResultMetricsRow,
   ResultShell,
   resultShellStyles as styles,
 } from '@/components/decision-result/ResultShell';
@@ -17,6 +16,10 @@ import type { FindResultViewModel } from '@/lib/decision-frame';
 import type { AppLang } from '@/lib/app-settings';
 import { useAppLang } from '@/lib/use-app-lang';
 
+function isInterviewFind(model: FindResultViewModel): boolean {
+  return model.decision_type_id === 'car-interview';
+}
+
 export function FindResultView({
   model,
   lang: langProp,
@@ -27,18 +30,41 @@ export function FindResultView({
   const [hookLang] = useAppLang();
   const lang = langProp ?? hookLang;
   const copy = getAskProductCopy(lang);
+  const interview = isInterviewFind(model);
 
-  const headline = model.unique_dominant
-    ? copy.findHeadlineDominant
-    : model.windows.length > 0
-      ? copy.findHeadlineComparable
-      : copy.findHeadlineNone;
+  const resultTitle = interview
+    ? copy.findInterviewResultTitle
+    : copy.findResultTitle;
+  const headline = interview
+    ? model.unique_dominant
+      ? copy.findInterviewHeadlineDominant
+      : model.windows.length > 0
+        ? copy.findInterviewHeadlineComparable
+        : copy.findInterviewHeadlineNone
+    : model.unique_dominant
+      ? copy.findHeadlineDominant
+      : model.windows.length > 0
+        ? copy.findHeadlineComparable
+        : copy.findHeadlineNone;
 
-  const honestyNote = model.unique_dominant
-    ? copy.findHonestyDominant
-    : model.windows.length > 0
-      ? copy.findHonestyComparable
-      : copy.findHonestyNone;
+  const whyNote = interview
+    ? model.unique_dominant
+      ? copy.findInterviewHonestyDominant
+      : model.windows.length > 0
+        ? copy.findInterviewHonestyComparable
+        : copy.findInterviewHonestyNone
+    : model.unique_dominant
+      ? copy.findHonestyDominant
+      : model.windows.length > 0
+        ? copy.findHonestyComparable
+        : copy.findHonestyNone;
+
+  const windowsLabel = interview
+    ? copy.findInterviewWindowsLabel
+    : copy.findWindowsLabel;
+  const windowsEmpty = interview
+    ? copy.findInterviewWindowsEmpty
+    : copy.findWindowsEmpty;
 
   const confidenceLabel =
     localizeConfidence(lang, model.confidence) ?? copy.confidence.medium;
@@ -48,20 +74,24 @@ export function FindResultView({
       testId="find-result-view"
       mode="find_dates"
       dir={copy.dir}
-      ariaLabel={copy.findResultTitle}
+      ariaLabel={resultTitle}
     >
+      {/* 1. Recommendation */}
       <ResultHeader
-        eyebrow={copy.findResultTitle}
+        eyebrow={resultTitle}
         topic={headline}
         topicTestId="find-headline"
+        datePrimary={
+          model.unique_dominant && model.primary_window_label
+            ? model.primary_window_label
+            : undefined
+        }
       />
-      <p className={`fi ${styles.scoreHint}`} data-testid="find-honesty">
-        {honestyNote}
-      </p>
 
+      {/* 2. Best window(s) */}
       {model.windows.length > 0 ? (
-        <section aria-label={copy.findWindowsLabel}>
-          <p className={`fi ${styles.sectionLabel}`}>{copy.findWindowsLabel}</p>
+        <section aria-label={windowsLabel}>
+          <p className={`fi ${styles.sectionLabel}`}>{windowsLabel}</p>
           <ul className={styles.findWindows} data-testid="find-windows">
             {model.windows.map((window) => (
               <li
@@ -87,23 +117,37 @@ export function FindResultView({
                 </p>
                 <p className={`fi ${styles.meaning}`}>
                   {localizeStrength(lang, window.strength) ?? window.strength}
-                  {window.peak_score != null
-                    ? ` · ${copy.timingScoreOf(window.peak_score)}`
-                    : ''}
                 </p>
+                {window.peak_score != null ? (
+                  <p
+                    className={`fi ${styles.scoreHint}`}
+                    data-testid="find-window-score"
+                  >
+                    {copy.timingScoreOf(window.peak_score)}
+                  </p>
+                ) : null}
               </li>
             ))}
           </ul>
         </section>
       ) : (
-        <section aria-label={copy.findWindowsLabel}>
-          <p className={`fi ${styles.sectionLabel}`}>{copy.findWindowsLabel}</p>
+        <section aria-label={windowsLabel}>
+          <p className={`fi ${styles.sectionLabel}`}>{windowsLabel}</p>
           <p className={`fi ${styles.meaning}`} data-testid="find-windows-empty">
-            {copy.findWindowsEmpty}
+            {windowsEmpty}
           </p>
         </section>
       )}
 
+      {/* 3. Why */}
+      <section aria-label={copy.resultWhy}>
+        <p className={`fi ${styles.sectionLabel}`}>{copy.resultWhy}</p>
+        <p className={`fi ${styles.meaning}`} data-testid="find-honesty">
+          {whyNote}
+        </p>
+      </section>
+
+      {/* 4. Confidence + scanned range (secondary; must not dominate recommendation) */}
       <div className={styles.metaGrid}>
         <div className={styles.metaRow}>
           <p className={`fi ${styles.sectionLabel}`}>{copy.findRangeLabel}</p>
@@ -115,14 +159,13 @@ export function FindResultView({
             )}
           </p>
         </div>
-        <ResultMetricsRow>
-          <ConfidenceIndicator
-            label={copy.resultConfidence}
-            value={confidenceLabel}
-          />
-        </ResultMetricsRow>
+        <ConfidenceIndicator
+          label={copy.resultConfidence}
+          value={confidenceLabel}
+        />
       </div>
 
+      {/* 5. Limits */}
       <LimitsBlock
         label={copy.limitsLabel}
         limits={model.limitations}

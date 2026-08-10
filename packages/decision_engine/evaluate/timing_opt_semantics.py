@@ -523,6 +523,9 @@ class ProductLaunchTimingOptFindSemantics:
             "timing FIND scans."
         )
 
+    def insufficient_why_not(self) -> str:
+        return "Without natal inputs, launch timing windows cannot be scanned."
+
     def scored_summary(
         self,
         answers: Any,
@@ -671,6 +674,15 @@ class ProductLaunchTimingOptFindSemantics:
             "Upstream scoring did not supply a reasoning confidence value. "
             "Package confidence.value=0 is a schema placeholder, not a measured score."
         )
+
+    def scored_opportunities(self, *, has_windows: bool) -> list[str]:
+        if has_windows:
+            return [
+                "Review logistics inside the surfaced windows before committing.",
+            ]
+        return [
+            "Try a different range or evaluate a constrained launch date.",
+        ]
 
     def relative_explanation(
         self,

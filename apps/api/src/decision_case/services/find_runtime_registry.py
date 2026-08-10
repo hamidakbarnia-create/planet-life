@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from packages.decision_engine.evaluate.car_interview_find import (
+    CAR_INTERVIEW_FIND_RUNTIME,
+)
 from packages.decision_engine.evaluate.find_contract import FindRuntimeContract
 from packages.decision_engine.evaluate.product_launch_find import (
     PRODUCT_LAUNCH_FIND_RUNTIME,
@@ -9,6 +12,7 @@ from packages.decision_engine.evaluate.product_launch_find import (
 
 _FIND_RUNTIMES: dict[str, FindRuntimeContract] = {
     PRODUCT_LAUNCH_FIND_RUNTIME.decision_type_id: PRODUCT_LAUNCH_FIND_RUNTIME,
+    CAR_INTERVIEW_FIND_RUNTIME.decision_type_id: CAR_INTERVIEW_FIND_RUNTIME,
 }
 
 

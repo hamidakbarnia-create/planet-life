@@ -30,6 +30,9 @@ export const CANONICAL_CAR_INTERVIEW_REQUIRED_FIELD_IDS = [
 /** COMPARE dates live on framing options — target_date is not required. */
 export const COMPARE_CAR_INTERVIEW_REQUIRED_FIELD_IDS = ['role'] as const;
 
+/** FIND range lives on framing start/end — target_date is not required. */
+export const FIND_CAR_INTERVIEW_REQUIRED_FIELD_IDS = ['role'] as const;
+
 export type CarInterviewSlotId =
   (typeof CANONICAL_CAR_INTERVIEW_FIELD_IDS)[number];
 
@@ -82,6 +85,9 @@ export function carInterviewRequiredFieldIdsForMode(
 ): readonly CarInterviewSlotId[] {
   if (mode === 'compare_dates') {
     return COMPARE_CAR_INTERVIEW_REQUIRED_FIELD_IDS;
+  }
+  if (mode === 'find_dates') {
+    return FIND_CAR_INTERVIEW_REQUIRED_FIELD_IDS;
   }
   return CANONICAL_CAR_INTERVIEW_REQUIRED_FIELD_IDS;
 }

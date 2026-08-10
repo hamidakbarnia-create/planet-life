@@ -38,7 +38,7 @@ export function CarInterviewIntakeForm({
 }: {
   lang: AppLang;
   initialIntake?: CarInterviewIntake;
-  /** Case mode — compare_dates hides target_date requirement. */
+  /** Case mode — compare_dates / find_dates hide target_date requirement. */
   caseMode?: string | null;
   submitting?: boolean;
   onSubmitAnswers: (answers: Partial<CarInterviewIntake>) => void | Promise<void>;
@@ -48,7 +48,8 @@ export function CarInterviewIntakeForm({
   // Parent remounts via `key` when case intake is loaded/updated so draft
   // initializes from props without a props→setState effect.
   const [draft, setDraft] = useState<CarInterviewIntake>(initialIntake ?? {});
-  const isCompare = caseMode === 'compare_dates';
+  const hidesTargetDate =
+    caseMode === 'compare_dates' || caseMode === 'find_dates';
   const missingRequired = useMemo(
     () => demoMissingRequiredFields(draft, caseMode),
     [draft, caseMode]
@@ -70,7 +71,7 @@ export function CarInterviewIntakeForm({
     carInterviewRequiredFieldIdsForMode(caseMode)
   );
   const visibleFields = CANONICAL_CAR_INTERVIEW_FIELD_IDS.filter(
-    (slotId) => !(isCompare && slotId === 'target_date')
+    (slotId) => !(hidesTargetDate && slotId === 'target_date')
   );
 
   return (
@@ -162,7 +163,7 @@ export function CarInterviewIntakeForm({
           className="fc rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white/85 disabled:cursor-not-allowed disabled:opacity-40"
           data-testid="intake-complete"
         >
-          {copy.intakeComplete}
+          {caseMode === 'find_dates' ? copy.intakeCompleteFind : copy.intakeComplete}
         </button>
       </div>
     </form>

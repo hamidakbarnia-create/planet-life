@@ -24,6 +24,9 @@ const COMPARE_CANONICAL =
 const INTERVIEW_COMPARE_CANONICAL =
   'Interview-date communication/visibility timing comparison only — not hiring outcome, job offer, salary, interview performance certainty, employer decision, or career success.';
 
+const INTERVIEW_FIND_CANONICAL =
+  'Interview-date communication/visibility timing scan only — not hiring outcome, job offer, salary, interview performance certainty, employer decision, or career success.';
+
 const INVESTOR_COMPARE_CANONICAL =
   'Investor-meeting communication/negotiation timing comparison only — not investment outcome or funding success.';
 
@@ -60,6 +63,16 @@ describe('package limit semantic localization', () => {
     expect(localizePackageLimit('ar', INTERVIEW_COMPARE_CANONICAL)).toBeTruthy();
     expect(localizePackageLimit('ru', INTERVIEW_COMPARE_CANONICAL)).not.toBe(
       INTERVIEW_COMPARE_CANONICAL
+    );
+    expect(localizePackageLimit('fa', INTERVIEW_FIND_CANONICAL)).toBeTruthy();
+    expect(localizePackageLimit('fa', INTERVIEW_FIND_CANONICAL)).not.toBe(
+      INTERVIEW_FIND_CANONICAL
+    );
+    expect(localizePackageLimit('ru', INTERVIEW_FIND_CANONICAL)).not.toBe(
+      INTERVIEW_FIND_CANONICAL
+    );
+    expect(localizePackageLimit('fa', INTERVIEW_FIND_CANONICAL)).not.toMatch(
+      /interview_type|job_interview|find_dates|natal_evidence/
     );
     expect(localizePackageLimit('fa', INVESTOR_COMPARE_CANONICAL)).toBeTruthy();
     expect(localizePackageLimit('fa', INVESTOR_COMPARE_CANONICAL)).not.toBe(

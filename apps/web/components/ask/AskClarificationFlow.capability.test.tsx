@@ -135,11 +135,10 @@ describe('AskClarificationFlow capability gating', () => {
     expect(persistFrameToCase).not.toHaveBeenCalled();
   });
 
-  it('COMPARE ships for car-interview; FIND remains coming soon', () => {
+  it('EVALUATE + COMPARE + FIND ship for car-interview', () => {
     const frame = buildDecisionFrame('Interview timing?', {
       decision_type_id: 'car-interview',
     });
-    const copy = getAskProductCopy('en');
     render(
       <AskClarificationFlow
         lang="en"
@@ -157,11 +156,34 @@ describe('AskClarificationFlow capability gating', () => {
       false
     );
     expect(screen.getByTestId('examine-find').hasAttribute('disabled')).toBe(
-      true
+      false
     );
-    expect(screen.getByTestId('examine-find').textContent).toContain(
-      copy.comingSoon
+  });
+
+  it('car-interview FIND can create a date_range frame path', () => {
+    persistFrameToCase.mockResolvedValue({
+      case: { case_id: 'case-ci-find', case_version: 2 },
+    });
+    const frame = buildDecisionFrame('When should I interview?', {
+      decision_type_id: 'car-interview',
+      operation: 'find',
+      time_scope: 'date_range',
+      range_start: '2026-09-01',
+      range_end: '2026-09-14',
+    });
+    render(
+      <AskClarificationFlow
+        lang="en"
+        frame={frame}
+        caseId={null}
+        caseVersion={null}
+        onFrameChange={vi.fn()}
+        onCaseBound={vi.fn()}
+      />
     );
+    expect(screen.getByTestId('ask-ready-find')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('ask-persist-find'));
+    expect(persistFrameToCase).toHaveBeenCalled();
   });
 
   it('COMPARE ships for bus-investor-meeting; FIND remains coming soon', () => {

@@ -20,6 +20,37 @@ def test_car_interview_is_registered() -> None:
     assert record.family_id == "visibility"
     assert "evaluate_date" in record.allowed_modes
     assert "compare_dates" in record.allowed_modes
+    assert "find_dates" in record.allowed_modes
+
+
+def test_find_mode_requires_role_not_target_date() -> None:
+    incomplete = evaluate_car_interview_intake(
+        {
+            "decision_frame": {
+                "operation": "find",
+                "time_scope": "date_range",
+                "start": "2026-09-01",
+                "end": "2026-09-14",
+            }
+        }
+    )
+    assert incomplete.is_complete is False
+    assert set(incomplete.missing_required) == {"role"}
+
+    complete = evaluate_car_interview_intake(
+        {
+            "role": "Engineer",
+            "decision_frame": {
+                "operation": "find",
+                "time_scope": "date_range",
+                "start": "2026-09-01",
+                "end": "2026-09-14",
+            },
+        }
+    )
+    assert complete.is_complete is True
+    assert complete.missing_required == ()
+    assert complete.intake.target_date is None
 
 
 def test_compare_mode_requires_role_not_target_date() -> None:

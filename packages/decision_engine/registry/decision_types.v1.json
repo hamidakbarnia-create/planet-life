@@ -24,7 +24,8 @@
       ],
       "allowed_modes": [
         "evaluate_date",
-        "compare_dates"
+        "compare_dates",
+        "find_dates"
       ],
       "output_profile": "decision_evaluation_package.v1"
     },

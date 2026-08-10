@@ -44,4 +44,15 @@ describe('car-interview form contract (web presentation)', () => {
     ).toBe(true);
     expect(demoMissingRequiredFields({ role: 'PM' })).toEqual(['target_date']);
   });
+
+  it('find_dates requires role only (no target_date)', () => {
+    expect(demoMissingRequiredFields({}, 'find_dates')).toEqual(['role']);
+    expect(demoRequiredFieldsPresent({ role: 'PM' }, 'find_dates')).toBe(true);
+    expect(
+      demoRequiredFieldsPresent(
+        { target_date: '2026-08-10', role: 'PM' },
+        'find_dates'
+      )
+    ).toBe(true);
+  });
 });
