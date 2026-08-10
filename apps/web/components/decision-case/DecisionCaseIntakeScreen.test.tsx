@@ -72,6 +72,45 @@ describe('DecisionCaseIntakeScreen', () => {
     expect(screen.getByTestId('intake-role')).toBeTruthy();
     const date = screen.getByTestId('intake-target_date') as HTMLInputElement;
     expect(date.value).toBe('2026-08-18');
+    expect(screen.getByTestId('intake-known-hint')).toBeTruthy();
+    expect(
+      screen.getByTestId('intake-role').closest('label')?.getAttribute('data-focus-missing')
+    ).toBe('true');
+  });
+
+  it('hydrates target_date from authoritative Case intake without session Frame', async () => {
+    vi.mocked(api.getDecisionCase).mockResolvedValue({
+      case_id: 'case-seeded',
+      owner_subject_id: 'owner',
+      decision_type_id: 'car-interview',
+      family_id: 'visibility',
+      title: 'Attend job interview',
+      state: 'intake',
+      activation_phase: 'intake',
+      mode: 'evaluate_date',
+      precision_level: 'L1',
+      case_version: 2,
+      created_at: '2026-08-07T10:00:00Z',
+      updated_at: '2026-08-07T10:00:00Z',
+      intake: {
+        target_date: '2026-09-12',
+        decision_frame: {
+          operation: 'evaluate',
+          time_scope: 'specific_date',
+          date: '2026-09-12',
+        },
+      },
+    });
+
+    render(<DecisionCaseIntakeScreen lang="en" caseId="case-seeded" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('car-interview-intake-form')).toBeTruthy();
+    });
+    expect(
+      (screen.getByTestId('intake-target_date') as HTMLInputElement).value
+    ).toBe('2026-09-12');
+    expect(screen.getByTestId('intake-status').textContent).toMatch(/Role/i);
   });
 
   it('renders investor required fields and prefills date only', async () => {

@@ -150,6 +150,8 @@ export type AskProductCopy = {
   intakeCompleteFind: string;
   intakeRequiredFilled: string;
   intakeRequiredRemaining: (fields: string) => string;
+  /** Shown under a prefilled date understood from Ask/Frame. */
+  intakeKnownFromAsk: string;
   intakeFieldTargetDate: string;
   intakeFieldRole: string;
   intakeFieldCompany: string;
@@ -369,6 +371,7 @@ const EN: AskProductCopy = {
   intakeCompleteFind: 'Continue to find timing windows',
   intakeRequiredFilled: 'Required details are ready.',
   intakeRequiredRemaining: (fields) => `Still needed: ${fields}`,
+  intakeKnownFromAsk: 'Understood from your question',
   intakeFieldTargetDate: 'Interview date',
   intakeFieldRole: 'Role',
   intakeFieldCompany: 'Company',
@@ -595,6 +598,7 @@ const FA: AskProductCopy = {
   intakeCompleteFind: 'ادامه برای یافتن پنجره‌های زمان‌بندی',
   intakeRequiredFilled: 'اطلاعات لازم آماده است.',
   intakeRequiredRemaining: (fields) => `هنوز لازم است: ${fields}`,
+  intakeKnownFromAsk: 'از پرسش شما فهمیده شد',
   intakeFieldTargetDate: 'تاریخ مصاحبه',
   intakeFieldRole: 'نقش',
   intakeFieldCompany: 'شرکت',
@@ -820,6 +824,7 @@ const AR: AskProductCopy = {
   intakeCompleteFind: 'المتابعة لإيجاد نوافذ التوقيت',
   intakeRequiredFilled: 'التفاصيل المطلوبة جاهزة.',
   intakeRequiredRemaining: (fields) => `ما زال مطلوبًا: ${fields}`,
+  intakeKnownFromAsk: 'مفهومة من سؤالك',
   intakeFieldTargetDate: 'تاريخ المقابلة',
   intakeFieldRole: 'الدور',
   intakeFieldCompany: 'الشركة',
@@ -1041,6 +1046,7 @@ const RU: AskProductCopy = {
   intakeCompleteFind: 'Продолжить к поиску окон тайминга',
   intakeRequiredFilled: 'Обязательные поля заполнены.',
   intakeRequiredRemaining: (fields) => `Ещё нужно: ${fields}`,
+  intakeKnownFromAsk: 'Понято из вашего вопроса',
   intakeFieldTargetDate: 'Дата собеседования',
   intakeFieldRole: 'Роль',
   intakeFieldCompany: 'Компания',
