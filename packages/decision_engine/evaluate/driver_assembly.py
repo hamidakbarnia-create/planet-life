@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from typing import Any, Literal, Mapping
 
+from packages.decision_engine.evaluate.factor_keys import build_factor_key
 from packages.decision_engine.models import DecisionOutcome, EvidenceReference
 
 DriverPolarity = Literal["supportive", "cautionary", "neutral"]
@@ -103,6 +104,12 @@ def map_evidence_reference_to_driver(
     }
     if importance is not None:
         item["importance"] = importance
+    factor_key = build_factor_key(
+        ref.evidence if isinstance(ref.evidence, dict) else None,
+        ref.category,
+    )
+    if factor_key:
+        item["factor_key"] = factor_key
     return item
 
 
@@ -140,6 +147,7 @@ def strategic_string_factors(
 __all__ = [
     "DriverPolarity",
     "assemble_drivers_from_outcome",
+    "build_factor_key",
     "driver_id_for_reference",
     "legacy_band_from_polarity",
     "legacy_score_from_contribution",

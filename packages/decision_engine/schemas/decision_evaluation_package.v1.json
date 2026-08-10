@@ -446,6 +446,11 @@
           "enum": ["low", "medium", "high", "critical"],
           "description": "Explanatory magnitude metadata. Independent of polarity."
         },
+        "factor_key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional deterministic semantic key for localization (e.g. aspect.mercury.square.saturn). Not a display string."
+        },
         "score": {
           "type": "number",
           "minimum": 0,

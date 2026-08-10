@@ -28,6 +28,13 @@ export {
   type AskEvidenceLine,
 } from './evidence';
 export {
+  formatEvidenceContribution,
+  formatUnavailableFactorDetail,
+  localizeEvidenceFactor,
+  tryLocalizeFactorKey,
+  type LocalizedEvidenceFactor,
+} from './evidence-factor-localize';
+export {
   deriveClarificationState,
   isCapabilityUnavailableEvaluateFrame,
   isEvaluateCapabilityUnavailable,

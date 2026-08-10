@@ -82,6 +82,40 @@ def test_golden_fixtures_validate_against_python_models(
     assert model.schema_version == "1.0.0"
 
 
+def test_optional_factor_key_round_trip_and_legacy_without_key(
+    validator: Draft202012Validator,
+) -> None:
+    legacy = _load_json(FIXTURES / "package_evaluate_date.valid.json")
+    assert "factor_key" not in legacy["drivers"]["items"][0]
+    validator.validate(legacy)
+    legacy_model = DecisionEvaluationPackage.model_validate(legacy)
+    assert legacy_model.drivers.items[0].factor_key is None
+
+    with_key = copy.deepcopy(legacy)
+    with_key["drivers"]["items"][0]["factor_key"] = "aspect.mercury.square.saturn"
+    with_key["drivers"]["items"][0]["contribution"] = -3.5
+    with_key["drivers"]["items"][0]["polarity"] = "cautionary"
+    validator.validate(with_key)
+    model = DecisionEvaluationPackage.model_validate(with_key)
+    assert model.drivers.items[0].factor_key == "aspect.mercury.square.saturn"
+    dumped = model.model_dump(mode="json")
+    assert dumped["drivers"]["items"][0]["factor_key"] == "aspect.mercury.square.saturn"
+    # Omitted when null
+    cleared = model.model_copy(
+        update={
+            "drivers": model.drivers.model_copy(
+                update={
+                    "items": (
+                        model.drivers.items[0].model_copy(update={"factor_key": None}),
+                    )
+                }
+            )
+        }
+    )
+    cleared_dump = cleared.model_dump(mode="json")
+    assert "factor_key" not in cleared_dump["drivers"]["items"][0]
+
+
 def test_schema_requires_exact_canonical_module_set(
     schema: dict[str, Any],
 ) -> None:
