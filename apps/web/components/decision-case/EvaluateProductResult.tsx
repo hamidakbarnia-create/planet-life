@@ -13,7 +13,6 @@ import {
   RecommendationCard,
   ResultEvidenceGrid,
   ResultHeader,
-  ResultMetricsRow,
   ResultShell,
   VerdictCard,
 } from '@/components/decision-result/ResultShell';
@@ -34,6 +33,7 @@ export function EvaluateProductResult({
       dir={copy.dir}
       ariaLabel={copy.resultRecommendation}
     >
+      {/* 1–2. Recommendation / answer + primary date */}
       <ResultHeader
         eyebrow={copy.resultRecommendation}
         topic={model.topic}
@@ -41,27 +41,20 @@ export function EvaluateProductResult({
         dateSecondary={model.date.secondary}
       />
 
-      <ResultMetricsRow>
-        <VerdictCard
-          verdict={model.verdict}
-          scoreLabel={model.scoreLabel}
-          scoreHint={model.scoreHonestyNote}
-          meaning={model.meaning}
-        />
-        {model.confidence ? (
-          <ConfidenceIndicator
-            label={copy.resultConfidence}
-            value={model.confidence}
-          />
-        ) : null}
-      </ResultMetricsRow>
-
       <RecommendationCard
         label={copy.resultRecommendation}
         body={model.recommendation}
         detail={model.recommendationDetail}
       />
 
+      <VerdictCard
+        verdict={model.verdict}
+        scoreLabel={model.scoreLabel}
+        scoreHint={model.scoreHonestyNote}
+        meaning={model.meaning}
+      />
+
+      {/* 3. Why / evidence */}
       <ResultEvidenceGrid>
         <EvidenceDrivers
           label={copy.evidenceSupportSection}
@@ -94,6 +87,15 @@ export function EvaluateProductResult({
 
       <NextStepsBlock label={copy.nextStepsLabel} steps={model.nextSteps} />
 
+      {/* 4. Confidence (secondary; must not dominate the answer) */}
+      {model.confidence ? (
+        <ConfidenceIndicator
+          label={copy.resultConfidence}
+          value={model.confidence}
+        />
+      ) : null}
+
+      {/* 5. Limits */}
       <LimitsBlock
         label={copy.limitsLabel}
         scope={model.scope}

@@ -13,6 +13,7 @@ export {
   type AskDateDisplay,
 } from './dates';
 export {
+  containsInternalIdentifier,
   isCanonicalPackageLimit,
   localizePackageLimit,
   localizePackageLimits,

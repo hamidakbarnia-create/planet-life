@@ -36,7 +36,7 @@ const CANONICAL_PACKAGE_LIMITS: Record<string, LimitLocales> = {
     },
   'launch_object, launch_channel, and brand_or_company did not affect scores.':
     {
-      en: 'launch_object, launch_channel, and brand_or_company did not affect scores.',
+      en: 'Launch details such as the product, channel, and brand/company did not affect the timing scores.',
       fa: 'نوع محصول، کانال انتشار و برند یا شرکت بر امتیازها اثر نگذاشتند.',
       ar: 'نوع المنتج وقناة الإطلاق والعلامة التجارية أو الشركة لم تؤثر على الدرجات.',
       ru: 'Тип продукта, канал запуска и бренд или компания не влияли на оценки.',
@@ -94,7 +94,7 @@ const CANONICAL_PACKAGE_LIMITS: Record<string, LimitLocales> = {
   },
   'launch_object, launch_channel, and brand_or_company did not affect the numeric score.':
     {
-      en: 'launch_object, launch_channel, and brand_or_company did not affect the numeric score.',
+      en: 'Launch details such as the product, channel, and brand/company did not affect the numeric timing score.',
       fa: 'نوع محصول، کانال انتشار و برند یا شرکت بر امتیاز عددی اثر نگذاشتند.',
       ar: 'نوع المنتج وقناة الإطلاق والعلامة التجارية أو الشركة لم تؤثر على الدرجة الرقمية.',
       ru: 'Тип продукта, канал запуска и бренд или компания не влияли на числовую оценку.',
@@ -152,7 +152,7 @@ const CANONICAL_PACKAGE_LIMITS: Record<string, LimitLocales> = {
     ru: 'Это доказательство тайминга союза в день церемонии, не полная аналитика свадьбы.',
   },
   'ceremony_type, partner_name, and venue did not affect the numeric score.': {
-    en: 'ceremony_type, partner_name, and venue did not affect the numeric score.',
+    en: 'Ceremony details such as ceremony type, partner name, and venue did not affect the numeric timing score.',
     fa: 'نوع مراسم، نام شریک و محل برگزاری بر امتیاز عددی اثر نگذاشتند.',
     ar: 'نوع الحفل واسم الشريك ومكان الحفل لم تؤثر على الدرجة الرقمية.',
     ru: 'Тип церемонии, имя партнёра и площадка не влияли на числовую оценку.',
@@ -199,7 +199,7 @@ const CANONICAL_PACKAGE_LIMITS: Record<string, LimitLocales> = {
       ru: 'Только сравнение тайминга церемонии — не качество отношений, успех свадьбы, юрсовет, площадка, бюджет или гарантия исхода.',
     },
   'ceremony_type, partner_name, and venue did not affect the numeric scores.': {
-    en: 'ceremony_type, partner_name, and venue did not affect the numeric scores.',
+    en: 'Ceremony details such as ceremony type, partner name, and venue did not affect the numeric timing scores.',
     fa: 'نوع مراسم، نام شریک و محل برگزاری بر امتیازهای عددی اثر نگذاشتند.',
     ar: 'نوع الحفل واسم الشريك ومكان الحفل لم تؤثر على الدرجات الرقمية.',
     ru: 'Тип церемонии, имя партнёра и площадка не влияли на числовые оценки.',
@@ -226,7 +226,7 @@ const CANONICAL_PACKAGE_LIMITS: Record<string, LimitLocales> = {
       ru: 'Это доказательство тайминга переговоров/коммуникации, не полная аналитика интервью.',
     },
   'role, company, and interview_type did not affect the numeric score.': {
-    en: 'role, company, and interview_type did not affect the numeric score.',
+    en: 'Role, company, and interview type did not affect the numeric timing score.',
     fa: 'نقش شغلی، شرکت و نوع مصاحبه بر امتیاز عددی اثر نگذاشتند.',
     ar: 'الدور الوظيفي والشركة ونوع المقابلة لم تؤثر على الدرجة الرقمية.',
     ru: 'Роль, компания и тип интервью не влияли на числовую оценку.',
@@ -255,7 +255,7 @@ const CANONICAL_PACKAGE_LIMITS: Record<string, LimitLocales> = {
       ru: 'Только сравнение тайминга коммуникации/видимости на дату интервью — не исход найма, оффер, зарплата, уверенность в результате интервью, решение работодателя или карьерный успех.',
     },
   'role, company, and interview_type did not affect the numeric scores.': {
-    en: 'role, company, and interview_type did not affect the numeric scores.',
+    en: 'Role, company, and interview type did not affect the numeric timing scores.',
     fa: 'نقش شغلی، شرکت و نوع مصاحبه بر امتیازهای عددی اثر نگذاشتند.',
     ar: 'الدور الوظيفي والشركة ونوع المقابلة لم تؤثر على الدرجات الرقمية.',
     ru: 'Роль, компания и тип интервью не влияли на числовые оценки.',
@@ -327,12 +327,41 @@ const CANONICAL_PACKAGE_LIMITS: Record<string, LimitLocales> = {
     },
   'meeting_goal, investor_name, and meeting_type did not affect the numeric scores.':
     {
-      en: 'meeting_goal, investor_name, and meeting_type did not affect the numeric scores.',
+      en: 'Meeting details such as goal, investor name, and meeting type did not affect the numeric timing scores.',
       fa: 'هدف جلسه، نام سرمایه‌گذار و نوع جلسه بر امتیازهای عددی اثر نگذاشتند.',
       ar: 'هدف الاجتماع واسم المستثمر ونوع الاجتماع لم تؤثر على الدرجات الرقمية.',
       ru: 'Цель встречи, имя инвестора и тип встречи не влияли на числовые оценки.',
     },
 };
+
+/** Snake_case / known schema tokens that must never reach consumer Result copy. */
+const SCHEMA_ID_PATTERN = /\b[a-z]+(?:_[a-z0-9]+)+\b/;
+const KNOWN_INTERNAL_IDENTIFIERS = [
+  'launch_object',
+  'launch_channel',
+  'brand_or_company',
+  'ceremony_type',
+  'partner_name',
+  'interview_type',
+  'meeting_goal',
+  'investor_name',
+  'meeting_type',
+  'job_interview',
+  'decision_frame',
+  'find_dates',
+  'compare_dates',
+  'natal_evidence',
+  'option_id',
+] as const;
+
+/** True when consumer text would expose internal/schema identifiers. */
+export function containsInternalIdentifier(text: string): boolean {
+  const value = text.trim();
+  if (!value) return false;
+  if (SCHEMA_ID_PATTERN.test(value)) return true;
+  const lower = value.toLowerCase();
+  return KNOWN_INTERNAL_IDENTIFIERS.some((token) => lower.includes(token));
+}
 
 /** True when `text` is an exact known canonical package limit (trim-only). */
 export function isCanonicalPackageLimit(text: string): boolean {
@@ -341,8 +370,9 @@ export function isCanonicalPackageLimit(text: string): boolean {
 
 /**
  * Localize one package limit body.
- * - Known canonical (exact match after trim) → locale copy
- * - Unknown + EN → original English (honest passthrough)
+ * - Known canonical (exact match after trim) → locale display copy (EN humanized)
+ * - Unknown + contains internal/schema IDs → `null` (hide in every language)
+ * - Unknown + EN + no IDs → original English (honest passthrough)
  * - Unknown + FA/AR/RU → `null` (omit; do not pretend it was localized)
  */
 export function localizePackageLimit(
@@ -352,7 +382,11 @@ export function localizePackageLimit(
   const key = text.trim();
   if (!key) return null;
   const mapped = CANONICAL_PACKAGE_LIMITS[key];
-  if (mapped) return mapped[lang] ?? mapped.en;
+  if (mapped) {
+    const display = mapped[lang] ?? mapped.en;
+    return containsInternalIdentifier(display) ? null : display;
+  }
+  if (containsInternalIdentifier(key)) return null;
   if (lang === 'en') return key;
   return null;
 }

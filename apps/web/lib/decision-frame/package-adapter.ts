@@ -19,7 +19,14 @@ import {
   formatAskDateLabel,
   formatAskDateRange,
 } from '@/lib/ask-product/dates';
-import { localizePackageLimits } from '@/lib/ask-product/package-limits';
+import {
+  getAskProductCopy,
+  localizeStrength,
+} from '@/lib/ask-product/copy';
+import {
+  containsInternalIdentifier,
+  localizePackageLimits,
+} from '@/lib/ask-product/package-limits';
 import {
   confidenceValueToBand,
   timingBandToStrength,
@@ -129,10 +136,54 @@ export function packageToEvaluateView(
   };
 }
 
+function consumerSafeProse(text: string | undefined): string | undefined {
+  const value = text?.trim();
+  if (!value) return undefined;
+  if (containsInternalIdentifier(value)) return undefined;
+  return value;
+}
+
+function buildCompareRelativeExplanation(
+  lang: AppLang,
+  input: {
+    uniqueWinner: boolean;
+    options: CompareResultViewModel['options'];
+    rawWhy: string | undefined;
+  }
+): string | undefined {
+  const copy = getAskProductCopy(lang);
+  const labels = input.options.map((o) => o.label).filter(Boolean);
+  if (!input.uniqueWinner) {
+    return copy.compareWhyTied(labels.join(' · ') || '—');
+  }
+  const winner = input.options[0];
+  if (!winner) return undefined;
+  const score =
+    typeof winner.score === 'number' && !Number.isNaN(winner.score)
+      ? winner.score
+      : null;
+  const strengthLabel =
+    localizeStrength(lang, winner.strength) ?? winner.strength;
+  if (score == null) {
+    return copy.compareWhyTied(labels.join(' · ') || winner.label);
+  }
+  const structured = copy.compareWhyWinner(
+    winner.label,
+    score,
+    strengthLabel
+  );
+  // EN may keep richer engine why when it is consumer-safe; FA/AR/RU always structured.
+  if (lang === 'en') {
+    return consumerSafeProse(input.rawWhy) ?? structured;
+  }
+  return structured;
+}
+
 export function packageToCompareView(
   pkg: DecisionEvaluationPackage,
   lang: AppLang = 'en'
 ): CompareResultViewModel {
+  const copy = getAskProductCopy(lang);
   const ranked = [...pkg.timing.candidates].sort((a, b) => a.rank - b.rank);
   // Prefer stance no_unique_winner; keep summary regex for older packages.
   const uniqueWinner =
@@ -152,23 +203,37 @@ export function packageToCompareView(
   const winner = ranked[0];
   const winnerLabel = uniqueWinner
     ? winner?.label?.trim() ||
-      (winner ? formatAskDateLabel(lang, winner.date) : 'Unknown')
-    : 'No unique winner';
+      (winner ? formatAskDateLabel(lang, winner.date) : copy.compareTiedLabel)
+    : copy.compareTiedLabel;
 
-  const advantages = ranked.flatMap((c) =>
-    (c.strengths ?? []).slice(0, 1).map((advantage) => ({
-      option_label: c.label?.trim() || formatAskDateLabel(lang, c.date),
-      advantage,
-    }))
-  );
+  // FA/AR/RU never surface raw engine strengths; EN only when consumer-safe.
+  const advantages =
+    lang === 'en'
+      ? ranked.flatMap((c) =>
+          (c.strengths ?? [])
+            .slice(0, 1)
+            .map((advantage) => consumerSafeProse(advantage))
+            .filter((advantage): advantage is string => Boolean(advantage))
+            .map((advantage) => ({
+              option_label: c.label?.trim() || formatAskDateLabel(lang, c.date),
+              advantage,
+            }))
+        )
+      : [];
+
+  const relativeExplanation = buildCompareRelativeExplanation(lang, {
+    uniqueWinner,
+    options,
+    rawWhy: pkg.explainability.why,
+  });
 
   return {
     operation: 'compare',
     options,
     winner_label: winnerLabel,
     unique_winner: uniqueWinner,
-    relative_explanation: pkg.explainability.why || undefined,
-    deciding_factor: pkg.explainability.why || undefined,
+    relative_explanation: relativeExplanation,
+    deciding_factor: relativeExplanation,
     advantages,
     confidence: confidenceValueToBand(pkg.confidence.value),
     limitations: localizePackageLimits(lang, pkg.explainability.limits, 3),

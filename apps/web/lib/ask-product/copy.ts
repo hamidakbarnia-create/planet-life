@@ -48,6 +48,13 @@ export type AskProductCopy = {
   compareWinnerLabel: string;
   compareTiedLabel: string;
   compareRelativeWhy: string;
+  /** Structured COMPARE why from rank/score/band — not engine prose. */
+  compareWhyWinner: (
+    winnerLabel: string,
+    score: number,
+    strengthLabel: string
+  ) => string;
+  compareWhyTied: (optionLabels: string) => string;
   blockedEyebrow: string;
   blockedTitle: string;
   blockedBody: string;
@@ -232,6 +239,10 @@ const EN: AskProductCopy = {
   compareWinnerLabel: 'Preferred date',
   compareTiedLabel: 'No unique winner',
   compareRelativeWhy: 'Why this ranking',
+  compareWhyWinner: (winnerLabel, score, strengthLabel) =>
+    `${winnerLabel} ranks first with timing score ${Math.round(score)} / 100 (${strengthLabel}).`,
+  compareWhyTied: (optionLabels) =>
+    `These dates are comparable on timing (${optionLabels}) — no unique preferred date is claimed.`,
   blockedEyebrow: 'More information needed',
   blockedTitle: 'More information is needed before METIORO can evaluate this date.',
   blockedBody: 'Birth evidence is required for timing evaluation.',
@@ -452,6 +463,10 @@ const FA: AskProductCopy = {
   compareWinnerLabel: 'تاریخ ترجیحی',
   compareTiedLabel: 'برنده یکتا نیست',
   compareRelativeWhy: 'دلیل این رتبه‌بندی',
+  compareWhyWinner: (winnerLabel, score, strengthLabel) =>
+    `${winnerLabel} با امتیاز زمان‌بندی ${Math.round(score)} / ۱۰۰ (${strengthLabel}) در رتبهٔ اول است.`,
+  compareWhyTied: (optionLabels) =>
+    `این تاریخ‌ها از نظر زمان‌بندی قابل‌مقایسه‌اند (${optionLabels}) — تاریخ ترجیحی یکتا ادعا نمی‌شود.`,
   blockedEyebrow: 'اطلاعات بیشتری لازم است',
   blockedTitle: 'قبل از ارزیابی این تاریخ، اطلاعات بیشتری لازم است.',
   blockedBody: 'برای ارزیابی زمان‌بندی، شواهد تولد لازم است.',
@@ -673,6 +688,10 @@ const AR: AskProductCopy = {
   compareWinnerLabel: 'التاريخ المفضّل',
   compareTiedLabel: 'لا فائز وحيد',
   compareRelativeWhy: 'سبب هذا الترتيب',
+  compareWhyWinner: (winnerLabel, score, strengthLabel) =>
+    `${winnerLabel} يأتي أولًا بدرجة توقيت ${Math.round(score)} / 100 (${strengthLabel}).`,
+  compareWhyTied: (optionLabels) =>
+    `هذه التواريخ متقاربة في التوقيت (${optionLabels}) — لا يُدّعى تاريخ مفضّل وحيد.`,
   blockedEyebrow: 'يلزم مزيد من المعلومات',
   blockedTitle: 'يلزم مزيد من المعلومات قبل أن تقيّم METIORO هذا التاريخ.',
   blockedBody: 'أدلة الميلاد مطلوبة لتقييم التوقيت.',
@@ -892,6 +911,10 @@ const RU: AskProductCopy = {
   compareWinnerLabel: 'Предпочтительная дата',
   compareTiedLabel: 'Нет единственного победителя',
   compareRelativeWhy: 'Почему такой рейтинг',
+  compareWhyWinner: (winnerLabel, score, strengthLabel) =>
+    `${winnerLabel} занимает первое место с тайминг-оценкой ${Math.round(score)} / 100 (${strengthLabel}).`,
+  compareWhyTied: (optionLabels) =>
+    `Эти даты сопоставимы по таймингу (${optionLabels}) — единственная предпочтительная дата не утверждается.`,
   blockedEyebrow: 'Нужно больше данных',
   blockedTitle: 'Нужно больше данных, прежде чем METIORO сможет оценить эту дату.',
   blockedBody: 'Для оценки тайминга нужны данные рождения.',

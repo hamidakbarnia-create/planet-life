@@ -56,14 +56,29 @@ describe('EvaluateProductResult first viewport', () => {
       const html = container.innerHTML;
       const topicAt = html.indexOf(model!.topic);
       const dateAt = html.indexOf(model!.date.primary);
+      const recommendationAt = html.indexOf('data-testid="result-recommendation"');
       const verdictAt = html.indexOf(model!.verdict);
       const meaningAt = html.indexOf(model!.meaning);
+      const confidenceAt = html.indexOf('data-testid="result-confidence-card"');
       expect(topicAt).toBeGreaterThanOrEqual(0);
       expect(dateAt).toBeGreaterThan(topicAt);
-      expect(verdictAt).toBeGreaterThan(dateAt);
+      expect(recommendationAt).toBeGreaterThan(dateAt);
+      expect(verdictAt).toBeGreaterThan(recommendationAt);
       expect(meaningAt).toBeGreaterThan(verdictAt);
+      expect(confidenceAt).toBeGreaterThan(meaningAt);
     }
   );
+
+  it('places recommendation before confidence in the DOM', () => {
+    const model = buildEvaluatePresentation(runtimePkg(), 'en');
+    const { container } = render(
+      <EvaluateProductResult lang="en" model={model!} />
+    );
+    const html = container.innerHTML;
+    expect(html.indexOf('data-testid="result-recommendation"')).toBeLessThan(
+      html.indexOf('data-testid="result-confidence-card"')
+    );
+  });
 
   it('labels 100 as timing score with separate confidence and honesty note', () => {
     const model = buildEvaluatePresentation(runtimePkg(100), 'en');
