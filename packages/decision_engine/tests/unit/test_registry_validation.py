@@ -49,7 +49,11 @@ def test_canonical_type_metadata_is_available() -> None:
 
     assert interview.label == "Attend job interview"
     assert interview.family_id == "visibility"
-    assert interview.allowed_modes == ("evaluate_date", "compare_dates")
+    assert interview.allowed_modes == (
+        "evaluate_date",
+        "compare_dates",
+        "find_dates",
+    )
     assert interview.output_profile == "decision_evaluation_package.v1"
 
 

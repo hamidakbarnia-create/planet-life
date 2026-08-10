@@ -261,6 +261,28 @@ const CANONICAL_PACKAGE_LIMITS: Record<string, LimitLocales> = {
     ru: 'Роль, компания и тип интервью не влияли на числовые оценки.',
   },
 
+  // car-interview FIND — CarInterviewVisibilityFindSemantics
+  'Interview-date communication/visibility timing scan only — not hiring outcome, job offer, salary, interview performance certainty, employer decision, or career success.':
+    {
+      en: 'Interview-date communication/visibility timing scan only — not hiring outcome, job offer, salary, interview performance certainty, employer decision, or career success.',
+      fa: 'فقط پایش زمان‌بندی ارتباط/دیده‌شدن در بازهٔ مصاحبه — نه نتیجهٔ استخدام، پیشنهاد شغلی، حقوق، قطعیت عملکرد مصاحبه، تصمیم کارفرما یا موفقیت شغلی.',
+      ar: 'مسح توقيت التواصل/الظهور لفترة المقابلة فقط — وليست نتيجة توظيف أو عرض عمل أو راتب أو يقين أداء المقابلة أو قرار صاحب العمل أو نجاح مهني.',
+      ru: 'Только сканирование тайминга коммуникации/видимости для интервью — не исход найма, оффер, зарплата, уверенность в результате интервью, решение работодателя или карьерный успех.',
+    },
+  'Interview-date communication/visibility timing scan only — not hiring outcome or job offer.':
+    {
+      en: 'Interview-date communication/visibility timing scan only — not hiring outcome or job offer.',
+      fa: 'فقط پایش زمان‌بندی ارتباط/دیده‌شدن در بازهٔ مصاحبه — نه نتیجهٔ استخدام یا پیشنهاد شغلی.',
+      ar: 'مسح توقيت التواصل/الظهور لفترة المقابلة فقط — وليست نتيجة توظيف أو عرض عمل.',
+      ru: 'Только сканирование тайминга коммуникации/видимости для интервью — не исход найма или оффер.',
+    },
+  'Role, company, and interview type did not affect the numeric scores.': {
+    en: 'Role, company, and interview type did not affect the numeric scores.',
+    fa: 'نقش شغلی، شرکت و نوع مصاحبه بر امتیازهای عددی اثر نگذاشتند.',
+    ar: 'الدور الوظيفي والشركة ونوع المقابلة لم تؤثر على الدرجات الرقمية.',
+    ru: 'Роль, компания и тип интервью не влияли на числовые оценки.',
+  },
+
   // bus-investor-meeting EVALUATE
   'This is negotiation/communication timing evidence, not investment-outcome prediction.':
     {

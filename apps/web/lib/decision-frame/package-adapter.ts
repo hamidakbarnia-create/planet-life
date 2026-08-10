@@ -250,13 +250,17 @@ export function packageToFindView(
     range_start: find?.range_start,
     range_end: find?.range_end,
     range_context: rangeContext,
+    decision_type_id: pkg.decision_type_id,
+    primary_window_label:
+      uniqueDominant && windows[0] ? windows[0].range_label : undefined,
     confidence: insufficient
       ? 'unknown'
       : confidenceValueToBand(pkg.confidence.value),
     limitations: localizePackageLimits(lang, pkg.explainability.limits, 4),
     known: undefined,
     inferred: undefined,
-    unknown: unknown.length ? unknown : undefined,
+    // Never surface raw English recommendation.conditions into localized UI.
+    unknown: lang === 'en' && unknown.length ? unknown : undefined,
   };
 }
 

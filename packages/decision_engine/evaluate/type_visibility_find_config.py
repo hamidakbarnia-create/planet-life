@@ -1,7 +1,9 @@
-"""Explicit Timing Opt TypeFindConfig allowlist for FIND runtimes.
+"""Explicit Visibility TypeFindConfig allowlist for FIND runtimes.
 
 Family runtime alone never activates a Decision Type. Only types registered
-here may execute timing_opt FIND.
+here may execute visibility FIND. This is intentionally NOT
+"every type with family_id=visibility" and NOT every type that allows
+find_dates in the registry.
 """
 
 from __future__ import annotations
@@ -16,11 +18,11 @@ from packages.decision_engine.evaluate.find_contract import (
 from packages.decision_engine.models import DecisionRequest
 from packages.decision_engine.package_models import DecisionEvaluationPackage
 
-TimingOptFamilyId = Literal["timing_opt"]
+VisibilityFamilyId = Literal["visibility"]
 
 
-class TimingOptFindSemantics(Protocol):
-    """Type-specific Package wording for Timing Opt FIND."""
+class VisibilityFindSemantics(Protocol):
+    """Type-specific Package wording for Visibility FIND."""
 
     def insufficient_summary(
         self, answers: Any, *, range_start: str, range_end: str
@@ -107,25 +109,25 @@ BuildRequestFn = Callable[
 
 
 @dataclass(frozen=True)
-class TimingOptTypeFindConfig:
-    """Allowlisted Decision Type configuration for Timing Opt FIND."""
+class VisibilityTypeFindConfig:
+    """Allowlisted Decision Type configuration for Visibility FIND."""
 
     decision_type_id: str
-    family_id: TimingOptFamilyId
+    family_id: VisibilityFamilyId
     engine_id: str
     action_type: str
     decision_intent: str
     evaluate_intake: IntakeCompletenessFn
     build_request: BuildRequestFn
-    semantics: TimingOptFindSemantics
+    semantics: VisibilityFindSemantics
     incomplete_error_message: str
     incomplete_details_key: str
 
     def __post_init__(self) -> None:
-        if self.family_id != "timing_opt":
+        if self.family_id != "visibility":
             raise ValueError(
-                "TimingOptTypeFindConfig requires "
-                f"family_id='timing_opt'; got {self.family_id!r}"
+                "VisibilityTypeFindConfig requires "
+                f"family_id='visibility'; got {self.family_id!r}"
             )
         if not self.decision_type_id.strip():
             raise ValueError("decision_type_id required")
@@ -135,38 +137,38 @@ class TimingOptTypeFindConfig:
             raise ValueError("action_type required")
 
 
-_TIMING_OPT_TYPE_FIND_CONFIGS: dict[str, TimingOptTypeFindConfig] = {}
+_VISIBILITY_TYPE_FIND_CONFIGS: dict[str, VisibilityTypeFindConfig] = {}
 
 
-def register_timing_opt_type_find_config(
-    config: TimingOptTypeFindConfig,
-) -> TimingOptTypeFindConfig:
-    if config.family_id != "timing_opt":
+def register_visibility_type_find_config(
+    config: VisibilityTypeFindConfig,
+) -> VisibilityTypeFindConfig:
+    if config.family_id != "visibility":
         raise ValueError(
             f"cannot register {config.decision_type_id}: "
-            f"family_id must be 'timing_opt', got {config.family_id!r}"
+            f"family_id must be 'visibility', got {config.family_id!r}"
         )
-    existing = _TIMING_OPT_TYPE_FIND_CONFIGS.get(config.decision_type_id)
+    existing = _VISIBILITY_TYPE_FIND_CONFIGS.get(config.decision_type_id)
     if existing is not None and existing is not config:
         raise ValueError(
-            f"duplicate TimingOptTypeFindConfig for {config.decision_type_id}"
+            f"duplicate VisibilityTypeFindConfig for {config.decision_type_id}"
         )
-    _TIMING_OPT_TYPE_FIND_CONFIGS[config.decision_type_id] = config
+    _VISIBILITY_TYPE_FIND_CONFIGS[config.decision_type_id] = config
     return config
 
 
-def get_timing_opt_type_find_config(
+def get_visibility_type_find_config(
     decision_type_id: str,
-) -> TimingOptTypeFindConfig | None:
-    return _TIMING_OPT_TYPE_FIND_CONFIGS.get(decision_type_id)
+) -> VisibilityTypeFindConfig | None:
+    return _VISIBILITY_TYPE_FIND_CONFIGS.get(decision_type_id)
 
 
-def clear_timing_opt_type_find_configs_for_tests() -> None:
-    _TIMING_OPT_TYPE_FIND_CONFIGS.clear()
+def clear_visibility_type_find_configs_for_tests() -> None:
+    _VISIBILITY_TYPE_FIND_CONFIGS.clear()
 
 
-def bind_timing_opt_find_runtime(
-    config: TimingOptTypeFindConfig,
+def bind_visibility_find_runtime(
+    config: VisibilityTypeFindConfig,
     find_package: Callable[..., DecisionEvaluationPackage],
 ) -> FindRuntimeContract:
     return FindRuntimeContract(
@@ -179,11 +181,11 @@ def bind_timing_opt_find_runtime(
 
 
 __all__ = [
-    "TimingOptFamilyId",
-    "TimingOptFindSemantics",
-    "TimingOptTypeFindConfig",
-    "bind_timing_opt_find_runtime",
-    "clear_timing_opt_type_find_configs_for_tests",
-    "get_timing_opt_type_find_config",
-    "register_timing_opt_type_find_config",
+    "VisibilityFamilyId",
+    "VisibilityFindSemantics",
+    "VisibilityTypeFindConfig",
+    "bind_visibility_find_runtime",
+    "clear_visibility_type_find_configs_for_tests",
+    "get_visibility_type_find_config",
+    "register_visibility_type_find_config",
 ]
