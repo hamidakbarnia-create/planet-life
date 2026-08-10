@@ -1,5 +1,9 @@
 import type { AppLang } from './app-settings';
 import type { FtueAskQuestion } from './ask-question-repository';
+import {
+  resolveTypedDecisionType,
+  type TypedDecisionResolution,
+} from './decision-request/typed-resolver';
 import { getAskCopy, type AskSuggestionId } from './ftue-i18n';
 import {
   findGuidedQuestion,
@@ -7,6 +11,8 @@ import {
   type GuidedQuestion,
   type QuestionCategoryId,
 } from './question-library';
+
+export type { TypedDecisionResolution };
 
 export interface AskExecutionMetadata {
   actionType: string;
@@ -19,7 +25,9 @@ export type AskUnresolvedReason =
   | 'missing_suggestion_id'
   | 'legacy_suggestion_id'
   | 'unknown_suggestion_id'
-  | 'typed_question_unresolved';
+  | 'typed_question_unresolved'
+  | 'typed_decision_ambiguous'
+  | 'typed_decision_unsupported';
 
 export interface ResolvedAskQuestion {
   source: 'typed' | 'suggestion';
@@ -30,11 +38,39 @@ export interface ResolvedAskQuestion {
   decisionTypeId?: string;
   executionMetadata?: AskExecutionMetadata;
   executionUnresolvedReason?: AskUnresolvedReason;
+  /** Structured typed free-text resolution (absent when explicit DT wins). */
+  typedResolution?: TypedDecisionResolution;
 }
 
 function getLegacySuggestionText(lang: AppLang, id: AskSuggestionId): string | null {
   const match = getAskCopy(lang).suggestions.find((suggestion) => suggestion.id === id);
   return match?.text ?? null;
+}
+
+function applyTypedResolution(
+  typedText: string,
+  lang: AppLang
+): Pick<
+  ResolvedAskQuestion,
+  'decisionTypeId' | 'executionUnresolvedReason' | 'typedResolution'
+> {
+  const typedResolution = resolveTypedDecisionType(typedText, lang);
+  if (typedResolution.status === 'exact') {
+    return {
+      decisionTypeId: typedResolution.decisionTypeId,
+      typedResolution,
+    };
+  }
+  if (typedResolution.status === 'ambiguous') {
+    return {
+      executionUnresolvedReason: 'typed_decision_ambiguous',
+      typedResolution,
+    };
+  }
+  return {
+    executionUnresolvedReason: 'typed_decision_unsupported',
+    typedResolution,
+  };
 }
 
 /** Single authoritative interpretation of a stored Ask question. */
@@ -44,18 +80,33 @@ export function resolveAskQuestion(
 ): ResolvedAskQuestion {
   if (question.source === 'typed') {
     const typedText = question.text?.trim() ?? '';
-    const decisionTypeId = question.decision_type_id?.trim() || undefined;
+    const explicitDecisionTypeId = question.decision_type_id?.trim() || undefined;
+
+    if (!typedText) {
+      return {
+        source: 'typed',
+        displayText: typedText,
+        typedText,
+        executionUnresolvedReason: 'missing_question_text',
+      };
+    }
+
+    // Explicit registry binding always wins over typed semantic resolution.
+    if (explicitDecisionTypeId) {
+      return {
+        source: 'typed',
+        displayText: typedText,
+        typedText,
+        decisionTypeId: explicitDecisionTypeId,
+      };
+    }
+
+    const resolved = applyTypedResolution(typedText, lang);
     return {
       source: 'typed',
       displayText: typedText,
       typedText,
-      decisionTypeId,
-      // Explicit registry binding resolves execution; free-text stays unresolved.
-      executionUnresolvedReason: decisionTypeId
-        ? undefined
-        : typedText
-          ? 'typed_question_unresolved'
-          : 'missing_question_text',
+      ...resolved,
     };
   }
 

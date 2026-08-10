@@ -27,22 +27,52 @@ describe('resolveDecisionRequest', () => {
     });
   });
 
-  it('maps typed questions without execution metadata', () => {
+  it('maps unsupported typed questions without inventing a Decision Type', () => {
     const request = fromStored({
       submitted_at: Date.now(),
       source: 'typed',
       text: 'My custom question',
     });
 
-    expect(request).toEqual({
-      displayText: 'My custom question',
-      question: { source: 'typed' },
-      execution: {
-        unresolvedReason: 'typed_question_unresolved',
-      },
+    expect(request.displayText).toBe('My custom question');
+    expect(request.question).toEqual({ source: 'typed' });
+    expect(request.execution.decisionTypeId).toBeUndefined();
+    expect(request.execution.unresolvedReason).toBe(
+      'typed_decision_unsupported'
+    );
+    expect(request.execution.typedResolution).toEqual({
+      status: 'unsupported',
     });
     expect(request.execution.actionType).toBeUndefined();
     expect(request.execution.guidedQuestionId).toBeUndefined();
+  });
+
+  it('preserves typed exact Decision Type and resolution status', () => {
+    const request = fromStored({
+      submitted_at: Date.now(),
+      source: 'typed',
+      text: 'When should I meet an investor?',
+    });
+
+    expect(request.execution.decisionTypeId).toBe('bus-investor-meeting');
+    expect(request.execution.unresolvedReason).toBeUndefined();
+    expect(request.execution.typedResolution).toEqual({
+      status: 'exact',
+      decisionTypeId: 'bus-investor-meeting',
+      domain: 'business',
+    });
+  });
+
+  it('preserves typed ambiguous status without Decision Type', () => {
+    const request = fromStored({
+      submitted_at: Date.now(),
+      source: 'typed',
+      text: 'Important meeting next week',
+    });
+
+    expect(request.execution.decisionTypeId).toBeUndefined();
+    expect(request.execution.unresolvedReason).toBe('typed_decision_ambiguous');
+    expect(request.execution.typedResolution?.status).toBe('ambiguous');
   });
 
   it('maps legacy suggestion ids as unresolved guided questions', () => {

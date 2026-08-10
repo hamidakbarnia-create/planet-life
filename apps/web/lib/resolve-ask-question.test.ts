@@ -29,7 +29,7 @@ describe('resolveAskQuestion', () => {
     expect(resolved.typedText).toBeUndefined();
   });
 
-  it('resolves typed questions with text only and no execution metadata', () => {
+  it('resolves unsupported typed questions without inventing a Decision Type', () => {
     const question: FtueAskQuestion = {
       submitted_at: Date.now(),
       source: 'typed',
@@ -43,7 +43,81 @@ describe('resolveAskQuestion', () => {
     expect(resolved.typedText).toBe('My custom question');
     expect(resolved.guidedQuestion).toBeUndefined();
     expect(resolved.executionMetadata).toBeUndefined();
-    expect(resolved.executionUnresolvedReason).toBe('typed_question_unresolved');
+    expect(resolved.decisionTypeId).toBeUndefined();
+    expect(resolved.executionUnresolvedReason).toBe(
+      'typed_decision_unsupported'
+    );
+    expect(resolved.typedResolution).toEqual({ status: 'unsupported' });
+  });
+
+  it('binds typed exact questions to a shipped Decision Type', () => {
+    const resolved = resolveAskQuestion(
+      {
+        submitted_at: Date.now(),
+        source: 'typed',
+        text: 'Is September 12 good for my job interview?',
+      },
+      'en'
+    );
+
+    expect(resolved.decisionTypeId).toBe('car-interview');
+    expect(resolved.executionUnresolvedReason).toBeUndefined();
+    expect(resolved.typedResolution).toEqual({
+      status: 'exact',
+      decisionTypeId: 'car-interview',
+      domain: 'career',
+    });
+  });
+
+  it('lets explicit decision_type_id win over typed resolver', () => {
+    const resolved = resolveAskQuestion(
+      {
+        submitted_at: Date.now(),
+        source: 'typed',
+        text: 'Is September 12 good for my job interview?',
+        decision_type_id: 'mar-wedding-date',
+      },
+      'en'
+    );
+
+    expect(resolved.decisionTypeId).toBe('mar-wedding-date');
+    expect(resolved.typedResolution).toBeUndefined();
+    expect(resolved.executionUnresolvedReason).toBeUndefined();
+  });
+
+  it('returns typed_decision_ambiguous without a Decision Type', () => {
+    const resolved = resolveAskQuestion(
+      {
+        submitted_at: Date.now(),
+        source: 'typed',
+        text: 'Close an important business deal',
+      },
+      'en'
+    );
+
+    expect(resolved.decisionTypeId).toBeUndefined();
+    expect(resolved.executionUnresolvedReason).toBe('typed_decision_ambiguous');
+    expect(resolved.typedResolution?.status).toBe('ambiguous');
+  });
+
+  it('returns typed_decision_unsupported without a Decision Type', () => {
+    const resolved = resolveAskQuestion(
+      {
+        submitted_at: Date.now(),
+        source: 'typed',
+        text: 'Should I relocate to Spain?',
+      },
+      'en'
+    );
+
+    expect(resolved.decisionTypeId).toBeUndefined();
+    expect(resolved.executionUnresolvedReason).toBe(
+      'typed_decision_unsupported'
+    );
+    expect(resolved.typedResolution).toEqual({
+      status: 'unsupported',
+      domain: 'relocation',
+    });
   });
 
   it('resolves legacy suggestion ids for display without execution metadata', () => {
