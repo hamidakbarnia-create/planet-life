@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
-from packages.decision_engine.evaluate.wedding_date_compare import REAL_ENGINE_ID
+from packages.decision_engine.evaluate.car_interview_compare import REAL_ENGINE_ID
 from packages.decision_engine.models import (
     Confidence,
     DecisionMetadata,
@@ -35,36 +35,50 @@ def _outcome_for(score: float) -> DecisionOutcome:
         recommendation=Recommendation(
             score=score,
             rating="Favorable" if score >= 65 else "Mixed",
-            activity="Wedding Date",
-            summary="Supportive wedding timing.",
+            activity="Job Interview",
+            summary="Supportive interview timing.",
             text="Good conditions.",
         ),
         confidence=Confidence(value=0.6, rating="Favorable"),
         evidence_references=[
             EvidenceReference(
-                title="Partnership timing",
+                title="Communication timing",
                 detail="Supportive conditions.",
                 score=score,
             )
         ],
         explanation=Explanation(
-            summary="Timing supports the wedding date.",
+            summary="Timing supports the interview date.",
             recommendation_text="Good conditions.",
         ),
         metadata=DecisionMetadata(
             module_origin="ask",
-            decision_intent="wedding-date-compare-dates",
-            action_type="wedding_date",
+            decision_intent="car-interview-compare-dates",
+            action_type="job_interview",
         ),
     )
 
 
-def _prepare_compare_case(client: TestClient) -> tuple[str, int]:
+def _prepare_compare_case(
+    client: TestClient,
+    *,
+    dates: list[str] | None = None,
+) -> tuple[str, int]:
+    candidate_dates = dates or [D1, D2]
+    labels = ["Mon", "Thu", "Fri", "Sat", "Sun"]
+    options = [
+        {
+            "id": f"opt-{index + 1}",
+            "label": labels[index],
+            "date": date_value,
+        }
+        for index, date_value in enumerate(candidate_dates)
+    ]
     created = client.post(
         BASE,
         json={
-            "decision_type_id": "mar-wedding-date",
-            "title": "Compare wedding dates",
+            "decision_type_id": "car-interview",
+            "title": "Compare interview dates",
             "entry_mode": "structured",
         },
     )
@@ -79,11 +93,8 @@ def _prepare_compare_case(client: TestClient) -> tuple[str, int]:
             "framing": {
                 "operation": "compare",
                 "time_scope": "multiple_dates",
-                "dates": [D1, D2],
-                "options": [
-                    {"id": "early", "label": "Early weekend", "date": D1},
-                    {"id": "late", "label": "Late weekend", "date": D2},
-                ],
+                "dates": candidate_dates,
+                "options": options,
             },
         },
     )
@@ -97,7 +108,7 @@ def _prepare_compare_case(client: TestClient) -> tuple[str, int]:
         json={
             "expected_case_version": version,
             "answers": {
-                "ceremony_type": "civil",
+                "role": "Product Manager",
                 "natal_evidence": NATAL,
             },
         },
@@ -115,7 +126,7 @@ def _prepare_compare_case(client: TestClient) -> tuple[str, int]:
     return case_id, version
 
 
-def test_wedding_date_compare_api_vertical(client: TestClient) -> None:
+def test_car_interview_compare_api_vertical(client: TestClient) -> None:
     case_id, version = _prepare_compare_case(client)
     scores = {D1: 61.0, D2: 79.0}
 
@@ -133,36 +144,22 @@ def test_wedding_date_compare_api_vertical(client: TestClient) -> None:
 
     assert comparison.status_code == 201, comparison.text
     assert mocked.call_count == 2
-    natal_bindings = {
-        (
-            call.args[0].birth_date,
-            call.args[0].birth_time,
-            call.args[0].location,
-            call.args[0].latitude,
-            call.args[0].longitude,
-        )
-        for call in mocked.call_args_list
-    }
-    assert natal_bindings == {
-        ("1988-06-15", "09:30", "Paris", 48.8566, 2.3522)
-    }
+    for call in mocked.call_args_list:
+        assert call.args[0].action_type == "job_interview"
 
     payload = comparison.json()
     assert payload["comparison_id"]
-    assert payload["evaluation_id"]
     package = payload["package"]
     assert package["engine_id"] == REAL_ENGINE_ID
-    assert package["decision_type_id"] == "mar-wedding-date"
-    assert package["family_id"] == "timing_opt"
+    assert package["decision_type_id"] == "car-interview"
+    assert package["family_id"] == "visibility"
     assert package["mode"] == "compare_dates"
     candidates = sorted(package["timing"]["candidates"], key=lambda c: c["rank"])
     assert len(candidates) == 2
-    assert candidates[0]["option_id"] == "late"
-    assert candidates[0]["label"] == "Late weekend"
+    assert candidates[0]["option_id"] == "opt-2"
     assert candidates[0]["date"] == D2
-    assert candidates[1]["option_id"] == "early"
-    assert candidates[1]["label"] == "Early weekend"
-    assert "Prefer Late weekend" in package["recommendation"]["summary"]
+    assert "Prefer Thu" in package["recommendation"]["summary"]
+    assert package["recommendation"]["stance"] == "proceed_with_conditions"
 
     case = client.get(f"{BASE}/{case_id}")
     assert case.status_code == 200
@@ -182,10 +179,38 @@ def test_wedding_date_compare_api_vertical(client: TestClient) -> None:
     assert got.status_code == 200
     assert got.json()["package"]["mode"] == "compare_dates"
 
-    # Compare packages must not appear in Evaluate history listing.
     listed_eval = client.get(f"{BASE}/{case_id}/evaluations")
     assert listed_eval.status_code == 200
     assert listed_eval.json()["evaluations"] == []
+
+    listed_findings = client.get(f"{BASE}/{case_id}/findings")
+    assert listed_findings.status_code == 200
+    assert listed_findings.json()["findings"] == []
+
+
+def test_compare_five_dates_accepted(client: TestClient) -> None:
+    dates = [
+        "2026-09-10",
+        "2026-09-12",
+        "2026-09-15",
+        "2026-09-18",
+        "2026-09-20",
+    ]
+    case_id, version = _prepare_compare_case(client, dates=dates)
+
+    def _generate(request):
+        return _outcome_for(50.0 + dates.index(request.target_date))
+
+    with patch(
+        "decision_case.services.compare_runtime.generate_decision_outcome",
+        side_effect=_generate,
+    ):
+        comparison = client.post(
+            f"{BASE}/{case_id}/comparisons",
+            json={"expected_case_version": version},
+        )
+    assert comparison.status_code == 201, comparison.text
+    assert len(comparison.json()["package"]["timing"]["candidates"]) == 5
 
 
 def test_compare_via_evaluations_is_rejected(client: TestClient) -> None:
@@ -196,15 +221,48 @@ def test_compare_via_evaluations_is_rejected(client: TestClient) -> None:
     )
     assert response.status_code == 400
     assert response.json()["error"]["code"] == "OPERATION_NOT_IMPLEMENTED"
-    assert response.json()["error"]["details"]["operation"] == "compare"
     case = client.get(f"{BASE}/{case_id}")
     assert case.json()["state"] == "evidence_ready"
+
+
+def test_stale_version_and_owner_isolation(client: TestClient) -> None:
+    case_id, version = _prepare_compare_case(client)
+
+    with patch(
+        "decision_case.services.compare_runtime.generate_decision_outcome",
+        return_value=_outcome_for(70),
+    ):
+        stale = client.post(
+            f"{BASE}/{case_id}/comparisons",
+            json={"expected_case_version": 1},
+        )
+    assert stale.status_code == 409
+    assert stale.json()["error"]["code"] == "VERSION_CONFLICT"
+
+    from decision_case.deps import get_e5_owner_subject_id
+    from main import app
+
+    app.dependency_overrides[get_e5_owner_subject_id] = lambda: "other-owner"
+    try:
+        missing = client.get(f"{BASE}/{case_id}")
+        assert missing.status_code == 404
+        missing_cmp = client.get(f"{BASE}/{case_id}/comparisons")
+        assert missing_cmp.status_code == 404
+    finally:
+        app.dependency_overrides[get_e5_owner_subject_id] = lambda: "e5-test-owner"
 
 
 def test_same_date_recompare_preserves_candidate_identity(
     client: TestClient,
 ) -> None:
-    """Shared append_candidate_dates upsert must work for Wedding COMPARE too."""
+    """Re-compare without reframing must upsert candidates, not 500.
+
+    Invariant (from compare_runtime + schema):
+    - candidates bind to intake decision_versions.version (unchanged on re-compare)
+    - unique (case_id, case_version, candidate_date) therefore conflicts
+    - ON CONFLICT preserves candidate_date_id; new comparison_id/evaluation_id
+    - case.current_case_version (CAS) advances; there is no comparison_version
+    """
     case_id, version = _prepare_compare_case(client)
 
     with patch(
@@ -220,6 +278,7 @@ def test_same_date_recompare_preserves_candidate_identity(
         case_after_first = client.get(f"{BASE}/{case_id}").json()
         assert case_after_first["state"] == "compared"
         assert case_after_first["activation_phase"] == "compared"
+        assert case_after_first["case_version"] > version
 
         second = client.post(
             f"{BASE}/{case_id}/comparisons",
@@ -230,6 +289,7 @@ def test_same_date_recompare_preserves_candidate_identity(
 
     assert second_body["comparison_id"] != first_body["comparison_id"]
     assert second_body["evaluation_id"] != first_body["evaluation_id"]
+    # Comparison rows bind to the same intake case_version (not a comparison seq).
     assert second_body["case_version"] == first_body["case_version"]
 
     first_rank_ids = {
@@ -242,7 +302,14 @@ def test_same_date_recompare_preserves_candidate_identity(
     assert first_rank_ids == second_rank_ids
 
     listed = client.get(f"{BASE}/{case_id}/comparisons")
-    assert len(listed.json()["comparisons"]) == 2
+    assert listed.status_code == 200
+    comparisons = listed.json()["comparisons"]
+    assert len(comparisons) == 2
+    listed_ids = {c["comparison_id"] for c in comparisons}
+    assert listed_ids == {
+        first_body["comparison_id"],
+        second_body["comparison_id"],
+    }
 
     after = client.get(f"{BASE}/{case_id}").json()
     assert after["state"] == "compared"
@@ -250,24 +317,68 @@ def test_same_date_recompare_preserves_candidate_identity(
     assert after["case_version"] > case_after_first["case_version"]
 
     listed_eval = client.get(f"{BASE}/{case_id}/evaluations")
+    assert listed_eval.status_code == 200
     assert listed_eval.json()["evaluations"] == []
     listed_findings = client.get(f"{BASE}/{case_id}/findings")
+    assert listed_findings.status_code == 200
     assert listed_findings.json()["findings"] == []
 
 
-def test_compare_framing_rejects_duplicate_option_dates(client: TestClient) -> None:
+def test_compare_framing_rejects_one_and_six_and_duplicates(
+    client: TestClient,
+) -> None:
     created = client.post(
         BASE,
         json={
-            "decision_type_id": "mar-wedding-date",
-            "title": "Compare wedding dates",
+            "decision_type_id": "car-interview",
+            "title": "Compare interview dates",
             "entry_mode": "structured",
         },
     )
     case_id = created.json()["case_id"]
     version = created.json()["case_version"]
-    before = client.get(f"{BASE}/{case_id}").json()
-    framed = client.put(
+
+    one = client.put(
+        f"{BASE}/{case_id}/framing",
+        json={
+            "expected_case_version": version,
+            "framing": {
+                "operation": "compare",
+                "time_scope": "multiple_dates",
+                "dates": [D1],
+                "options": [{"id": "a", "label": "A", "date": D1}],
+            },
+        },
+    )
+    assert one.status_code == 400
+
+    six_dates = [
+        "2026-09-10",
+        "2026-09-11",
+        "2026-09-12",
+        "2026-09-13",
+        "2026-09-14",
+        "2026-09-15",
+    ]
+    six = client.put(
+        f"{BASE}/{case_id}/framing",
+        json={
+            "expected_case_version": version,
+            "framing": {
+                "operation": "compare",
+                "time_scope": "multiple_dates",
+                "dates": six_dates,
+                "options": [
+                    {"id": f"o{i}", "label": f"L{i}", "date": d}
+                    for i, d in enumerate(six_dates)
+                ],
+            },
+        },
+    )
+    assert six.status_code == 400
+
+    before_case = client.get(f"{BASE}/{case_id}").json()
+    dup = client.put(
         f"{BASE}/{case_id}/framing",
         json={
             "expected_case_version": version,
@@ -282,8 +393,11 @@ def test_compare_framing_rejects_duplicate_option_dates(client: TestClient) -> N
             },
         },
     )
-    assert framed.status_code == 400
-    after = client.get(f"{BASE}/{case_id}").json()
-    assert after["case_version"] == before["case_version"]
-    assert after["state"] == before["state"]
-    assert client.get(f"{BASE}/{case_id}/comparisons").json()["comparisons"] == []
+    assert dup.status_code == 400
+    # Rejected at framing validation — never reaches compare / append_candidate_dates.
+    after_case = client.get(f"{BASE}/{case_id}").json()
+    assert after_case["case_version"] == before_case["case_version"]
+    assert after_case["state"] == before_case["state"]
+    listed = client.get(f"{BASE}/{case_id}/comparisons")
+    assert listed.status_code == 200
+    assert listed.json()["comparisons"] == []

@@ -32,7 +32,7 @@ const SHIPPED_RUNTIME_MODE_HINT: Readonly<
     readonly ('evaluate_date' | 'compare_dates' | 'find_dates')[]
   >
 > = {
-  'car-interview': ['evaluate_date'],
+  'car-interview': ['evaluate_date', 'compare_dates'],
   'bus-investor-meeting': ['evaluate_date'],
   'mar-wedding-date': ['evaluate_date', 'compare_dates'],
   'bus-product-launch': ['evaluate_date', 'find_dates'],

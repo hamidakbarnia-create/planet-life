@@ -211,6 +211,7 @@ export function DecisionCaseIntakeScreen({
             key={`${caseId}-${caseVersion ?? 0}`}
             lang={lang}
             initialIntake={intakeAsCar(intake)}
+            caseMode={caseRecord?.mode}
             submitting={busy}
             onSubmitAnswers={async (answers) => {
               setBusy(true);

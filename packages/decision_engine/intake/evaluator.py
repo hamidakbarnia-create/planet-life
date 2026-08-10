@@ -13,7 +13,9 @@ from packages.decision_engine.intake.car_interview import (
     CAR_INTERVIEW_SLOTS,
     REQUIRED_SLOT_IDS,
     CarInterviewIntake,
+    intake_mode_from_mapping as car_interview_intake_mode_from_mapping,
     merge_intake,
+    required_slot_ids_for_mode as car_interview_required_slot_ids_for_mode,
 )
 
 
@@ -35,17 +37,27 @@ def evaluate_car_interview_intake(
     intake: Mapping[str, Any] | CarInterviewIntake | None = None,
     *,
     answers: Mapping[str, Any] | None = None,
+    mode: str | None = None,
 ) -> IntakeEvaluation:
     """Evaluate completeness for `car-interview` intake.
 
-    Completeness = every required slot has a non-empty value.
-    Optional slots never block completeness.
+    Completeness = every mode-required slot has a non-empty value.
+    Optional slots never block completeness. COMPARE does not require target_date.
     """
     if isinstance(intake, CarInterviewIntake) and not answers:
         normalized = intake
+        mode_resolved = mode or "evaluate_date"
     else:
         current = intake.as_dict() if isinstance(intake, CarInterviewIntake) else intake
+        mapping_for_mode: Mapping[str, Any] | None
+        if isinstance(intake, CarInterviewIntake):
+            mapping_for_mode = None
+        else:
+            mapping_for_mode = intake if isinstance(intake, Mapping) else None
         normalized = merge_intake(current, answers or {})
+        mode_resolved = mode or car_interview_intake_mode_from_mapping(
+            mapping_for_mode if mapping_for_mode is not None else current
+        )
 
     values = {
         "target_date": normalized.target_date,
@@ -54,13 +66,14 @@ def evaluate_car_interview_intake(
         "interview_type": normalized.interview_type,
     }
 
+    required_ids = car_interview_required_slot_ids_for_mode(mode_resolved)
     missing = tuple(
         slot.slot_id
         for slot in CAR_INTERVIEW_SLOTS
-        if slot.required and not values[slot.slot_id]
+        if slot.slot_id in required_ids and not values.get(slot.slot_id)
     )
     answered_required = tuple(
-        slot_id for slot_id in ("target_date", "role") if values[slot_id]
+        slot_id for slot_id in required_ids if values.get(slot_id)
     )
 
     return IntakeEvaluation(

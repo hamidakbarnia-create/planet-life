@@ -21,6 +21,9 @@ const INVESTOR_CANONICAL = [
 const COMPARE_CANONICAL =
   'Ceremony timing comparison only — not relationship quality or wedding success.';
 
+const INTERVIEW_COMPARE_CANONICAL =
+  'Interview-date communication/visibility timing comparison only — not hiring outcome, job offer, salary, interview performance certainty, employer decision, or career success.';
+
 describe('package limit semantic localization', () => {
   it('maps exact FIND canonical limits for EN/FA/AR/RU', () => {
     for (const limit of FIND_CANONICAL) {
@@ -38,7 +41,7 @@ describe('package limit semantic localization', () => {
     }
   });
 
-  it('maps investor EVALUATE and wedding COMPARE limits', () => {
+  it('maps investor EVALUATE and wedding/interview COMPARE limits', () => {
     for (const limit of INVESTOR_CANONICAL) {
       expect(localizePackageLimit('fa', limit)).toBeTruthy();
       expect(localizePackageLimit('fa', limit)).not.toBe(limit);
@@ -46,6 +49,14 @@ describe('package limit semantic localization', () => {
     expect(localizePackageLimit('ar', COMPARE_CANONICAL)).toBeTruthy();
     expect(localizePackageLimit('ru', COMPARE_CANONICAL)).not.toBe(
       COMPARE_CANONICAL
+    );
+    expect(localizePackageLimit('fa', INTERVIEW_COMPARE_CANONICAL)).toBeTruthy();
+    expect(localizePackageLimit('fa', INTERVIEW_COMPARE_CANONICAL)).not.toBe(
+      INTERVIEW_COMPARE_CANONICAL
+    );
+    expect(localizePackageLimit('ar', INTERVIEW_COMPARE_CANONICAL)).toBeTruthy();
+    expect(localizePackageLimit('ru', INTERVIEW_COMPARE_CANONICAL)).not.toBe(
+      INTERVIEW_COMPARE_CANONICAL
     );
   });
 

@@ -27,6 +27,9 @@ export const CANONICAL_CAR_INTERVIEW_REQUIRED_FIELD_IDS = [
   'role',
 ] as const;
 
+/** COMPARE dates live on framing options — target_date is not required. */
+export const COMPARE_CAR_INTERVIEW_REQUIRED_FIELD_IDS = ['role'] as const;
+
 export type CarInterviewSlotId =
   (typeof CANONICAL_CAR_INTERVIEW_FIELD_IDS)[number];
 
@@ -74,6 +77,15 @@ export const CAR_INTERVIEW_FORM_FIELDS: readonly CarInterviewFormField[] = [
   },
 ] as const;
 
+export function carInterviewRequiredFieldIdsForMode(
+  mode?: string | null
+): readonly CarInterviewSlotId[] {
+  if (mode === 'compare_dates') {
+    return COMPARE_CAR_INTERVIEW_REQUIRED_FIELD_IDS;
+  }
+  return CANONICAL_CAR_INTERVIEW_REQUIRED_FIELD_IDS;
+}
+
 export function normalizeFormAnswer(value: unknown): string | undefined {
   if (value == null) return undefined;
   const text = String(value).trim();
@@ -101,23 +113,30 @@ export function mergeCarInterviewFormAnswers(
  * UI-only gate for the walking-skeleton form controls.
  * Not the domain completeness evaluator — do not treat as Case intake SoT.
  */
-export function demoRequiredFieldsPresent(intake: CarInterviewIntake): boolean {
-  return CANONICAL_CAR_INTERVIEW_REQUIRED_FIELD_IDS.every((slotId) =>
+export function demoRequiredFieldsPresent(
+  intake: CarInterviewIntake,
+  mode?: string | null
+): boolean {
+  return carInterviewRequiredFieldIdsForMode(mode).every((slotId) =>
     Boolean(normalizeFormAnswer(intake[slotId]))
   );
 }
 
 /** UI-only: enable "save draft answers" after any required field is filled. */
-export function demoHasFirstRequiredAnswer(intake: CarInterviewIntake): boolean {
-  return CANONICAL_CAR_INTERVIEW_REQUIRED_FIELD_IDS.some((slotId) =>
+export function demoHasFirstRequiredAnswer(
+  intake: CarInterviewIntake,
+  mode?: string | null
+): boolean {
+  return carInterviewRequiredFieldIdsForMode(mode).some((slotId) =>
     Boolean(normalizeFormAnswer(intake[slotId]))
   );
 }
 
 export function demoMissingRequiredFields(
-  intake: CarInterviewIntake
+  intake: CarInterviewIntake,
+  mode?: string | null
 ): CarInterviewSlotId[] {
-  return CANONICAL_CAR_INTERVIEW_REQUIRED_FIELD_IDS.filter(
+  return carInterviewRequiredFieldIdsForMode(mode).filter(
     (slotId) => !normalizeFormAnswer(intake[slotId])
-  );
+  ) as CarInterviewSlotId[];
 }

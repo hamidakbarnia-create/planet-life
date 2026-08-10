@@ -242,8 +242,8 @@ export function AskClarificationFlow({
       setCompareError(copy.compareNeedTwo);
       return;
     }
-    if (cleaned.length > 3) {
-      setCompareError(copy.compareNeedTwo);
+    if (cleaned.length > 5) {
+      setCompareError(copy.compareTooMany);
       return;
     }
     const unique = new Set(cleaned.map((c) => c.date));
@@ -517,7 +517,7 @@ export function AskClarificationFlow({
               </div>
             ))}
           </div>
-          {compareDrafts.length < 3 ? (
+          {compareDrafts.length < 5 ? (
             <button
               type="button"
               className={styles.secondaryBtn}

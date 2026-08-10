@@ -135,7 +135,7 @@ describe('AskClarificationFlow capability gating', () => {
     expect(persistFrameToCase).not.toHaveBeenCalled();
   });
 
-  it('COMPARE/FIND remain coming soon even for car-interview', () => {
+  it('COMPARE ships for car-interview; FIND remains coming soon', () => {
     const frame = buildDecisionFrame('Interview timing?', {
       decision_type_id: 'car-interview',
     });
@@ -154,13 +154,10 @@ describe('AskClarificationFlow capability gating', () => {
       false
     );
     expect(screen.getByTestId('examine-compare').hasAttribute('disabled')).toBe(
-      true
+      false
     );
     expect(screen.getByTestId('examine-find').hasAttribute('disabled')).toBe(
       true
-    );
-    expect(screen.getByTestId('examine-compare').textContent).toContain(
-      copy.comingSoon
     );
     expect(screen.getByTestId('examine-find').textContent).toContain(
       copy.comingSoon

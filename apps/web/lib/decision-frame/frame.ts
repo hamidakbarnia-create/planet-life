@@ -222,7 +222,7 @@ export function applyFindDateRange(
   };
 }
 
-/** Set 2–3 labeled COMPARE dates — never invents today or collapses to target_date. */
+/** Set 2–5 labeled COMPARE dates — never invents today or collapses to target_date. */
 export function applyCompareDates(
   frame: DecisionFrameV1,
   drafts: CompareDateDraft[]
@@ -235,7 +235,7 @@ export function applyCompareDates(
     }))
     .filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(item.date));
 
-  if (cleaned.length < 2 || cleaned.length > 3) {
+  if (cleaned.length < 2 || cleaned.length > 5) {
     return {
       ...frame,
       operation: 'compare',

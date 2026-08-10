@@ -38,7 +38,7 @@ export function isFramingPersistReady(frame: DecisionFrameV1): boolean {
   if (frame.operation === 'compare') {
     const count = frame.time.dates?.length ?? 0;
     return (
-      frame.time.scope === 'multiple_dates' && count >= 2 && count <= 3
+      frame.time.scope === 'multiple_dates' && count >= 2 && count <= 5
     );
   }
   if (frame.operation === 'find') {

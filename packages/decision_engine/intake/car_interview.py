@@ -33,6 +33,25 @@ REQUIRED_SLOT_IDS: Final[frozenset[str]] = frozenset(
     slot.slot_id for slot in CAR_INTERVIEW_SLOTS if slot.required
 )
 
+# COMPARE dates live on decision_frame.options — target_date is not required.
+COMPARE_REQUIRED_SLOT_IDS: Final[frozenset[str]] = frozenset({"role"})
+
+
+def required_slot_ids_for_mode(mode: str | None) -> frozenset[str]:
+    if mode == "compare_dates":
+        return COMPARE_REQUIRED_SLOT_IDS
+    return REQUIRED_SLOT_IDS
+
+
+def intake_mode_from_mapping(intake: Mapping[str, Any] | None) -> str:
+    """Infer Case mode from persisted decision_frame when present."""
+    if not isinstance(intake, Mapping):
+        return "evaluate_date"
+    frame = intake.get("decision_frame")
+    if isinstance(frame, dict) and frame.get("operation") == "compare":
+        return "compare_dates"
+    return "evaluate_date"
+
 
 @dataclass(frozen=True, slots=True)
 class CarInterviewIntake:
@@ -63,6 +82,10 @@ def assert_car_interview_registered() -> None:
         raise RuntimeError("car-interview registry mismatch")
     if "evaluate_date" not in record.allowed_modes:
         raise RuntimeError("car-interview must allow evaluate_date")
+    if "compare_dates" not in record.allowed_modes:
+        raise RuntimeError("car-interview must allow compare_dates")
+    if record.family_id != "visibility":
+        raise RuntimeError("car-interview must belong to visibility")
 
 
 def normalize_answer(value: Any) -> str | None:
