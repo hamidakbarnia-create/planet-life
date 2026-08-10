@@ -83,13 +83,16 @@ def test_evaluate_canonical_persist_and_readback(client: TestClient) -> None:
     assert framing["runtime_executed"] is False
     assert framing["date"] != TODAY
     assert body["case"]["state"] == "intake"
+    assert body["intake"]["target_date"] == D2
 
     detail = client.get(f"{BASE}/{body['case']['case_id']}")
     assert detail.status_code == 200
-    recovered = detail.json()["intake"]["decision_frame"]
+    recovered_intake = detail.json()["intake"]
+    recovered = recovered_intake["decision_frame"]
     assert recovered["operation"] == "evaluate"
     assert recovered["time_scope"] == "specific_date"
     assert recovered["date"] == D2
+    assert recovered_intake["target_date"] == D2
     assert "dates" not in recovered
     _assert_no_legacy_aliases(recovered)
 
@@ -480,3 +483,207 @@ def test_car_interview_intake_preserves_decision_frame(client: TestClient) -> No
     assert intake["decision_frame"]["operation"] == "evaluate"
     assert intake["decision_frame"]["date"] == D2
     _assert_no_legacy_aliases(intake["decision_frame"])
+
+
+# --- Structured intake carry-forward (target_date seed) ---
+
+
+@pytest.mark.parametrize(
+    "decision_type_id,title",
+    [
+        ("car-interview", "Job interview"),
+        ("bus-investor-meeting", "Investor meeting"),
+        ("bus-product-launch", "Product launch"),
+        ("mar-wedding-date", "Wedding date"),
+    ],
+)
+def test_evaluate_from_framing_seeds_target_date(
+    client: TestClient, decision_type_id: str, title: str
+) -> None:
+    response = client.post(
+        f"{BASE}/from-framing",
+        json={
+            "decision_type_id": decision_type_id,
+            "title": title,
+            "framing": _evaluate_framing(
+                objective=title,
+                raw_intent=f"Is {D2} good?",
+            ),
+        },
+    )
+    assert response.status_code == 201, response.text
+    body = response.json()
+    assert body["framing"]["date"] == D2
+    assert body["intake"]["target_date"] == D2
+    assert body["intake"]["decision_frame"]["date"] == D2
+
+    readback = client.get(f"{BASE}/{body['case']['case_id']}")
+    assert readback.status_code == 200
+    intake = readback.json()["intake"]
+    assert intake["target_date"] == D2
+    assert intake["decision_frame"]["date"] == D2
+
+
+def test_evaluate_none_does_not_seed_target_date(client: TestClient) -> None:
+    response = client.post(
+        f"{BASE}/from-framing",
+        json={
+            "decision_type_id": "car-interview",
+            "title": "No date",
+            "framing": {
+                "operation": "evaluate",
+                "time_scope": "none",
+                "raw_intent": "Should I take the interview?",
+            },
+        },
+    )
+    assert response.status_code == 201, response.text
+    intake = response.json()["intake"]
+    assert "target_date" not in intake
+    assert "date" not in intake.get("decision_frame", {})
+
+
+def test_compare_does_not_seed_target_date(client: TestClient) -> None:
+    response = client.post(
+        f"{BASE}/from-framing",
+        json={
+            "decision_type_id": "mar-wedding-date",
+            "title": "Compare wedding dates",
+            "framing": {
+                "operation": "compare",
+                "time_scope": "multiple_dates",
+                "dates": [D1, D2],
+                "options": [
+                    {"id": "a", "label": "A", "date": D1},
+                    {"id": "b", "label": "B", "date": D2},
+                ],
+            },
+        },
+    )
+    assert response.status_code == 201, response.text
+    intake = response.json()["intake"]
+    assert "target_date" not in intake
+    assert intake["decision_frame"]["dates"] == [D1, D2]
+
+
+def test_find_does_not_seed_target_date(client: TestClient) -> None:
+    response = client.post(
+        f"{BASE}/from-framing",
+        json={
+            "decision_type_id": "bus-product-launch",
+            "title": "Find launch window",
+            "framing": {
+                "operation": "find",
+                "time_scope": "date_range",
+                "start": RANGE_START,
+                "end": RANGE_END,
+            },
+        },
+    )
+    assert response.status_code == 201, response.text
+    intake = response.json()["intake"]
+    assert "target_date" not in intake
+    assert intake["decision_frame"]["start"] == RANGE_START
+
+
+def test_invalid_evaluate_date_rejected_without_seed(client: TestClient) -> None:
+    response = client.post(
+        f"{BASE}/from-framing",
+        json={
+            "decision_type_id": "car-interview",
+            "title": "Bad date",
+            "framing": {
+                "operation": "evaluate",
+                "time_scope": "specific_date",
+                "date": "2026-13-40",
+            },
+        },
+    )
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "VALIDATION_ERROR"
+
+
+def test_seed_intake_from_framing_never_overwrites_target_date() -> None:
+    from decision_case.services.decision_frame import seed_intake_from_framing
+
+    framing = {
+        "operation": "evaluate",
+        "time_scope": "specific_date",
+        "date": D2,
+    }
+    seeded = seed_intake_from_framing(
+        {"decision_frame": framing, "target_date": D1},
+        framing,
+    )
+    assert seeded["target_date"] == D1
+
+
+def test_framing_update_does_not_overwrite_existing_target_date(
+    client: TestClient,
+) -> None:
+    created = client.post(
+        f"{BASE}/from-framing",
+        json={
+            "decision_type_id": "car-interview",
+            "title": "Interview",
+            "framing": _evaluate_framing(date=D1),
+        },
+    )
+    assert created.status_code == 201, created.text
+    case_id = created.json()["case"]["case_id"]
+    version = created.json()["case"]["case_version"]
+    assert created.json()["intake"]["target_date"] == D1
+
+    saved = client.post(
+        f"{BASE}/{case_id}/intake/answers",
+        json={
+            "expected_case_version": version,
+            "answers": {"target_date": D3, "role": "PM"},
+        },
+    )
+    assert saved.status_code == 200, saved.text
+    version = saved.json()["case"]["case_version"]
+    assert saved.json()["intake"]["target_date"] == D3
+
+    framed = client.put(
+        f"{BASE}/{case_id}/framing",
+        json={
+            "expected_case_version": version,
+            "framing": _evaluate_framing(date=D2),
+        },
+    )
+    assert framed.status_code == 200, framed.text
+    assert framed.json()["intake"]["target_date"] == D3
+    assert framed.json()["intake"]["decision_frame"]["date"] == D2
+
+
+def test_stale_case_version_on_answers_still_conflicts(client: TestClient) -> None:
+    created = client.post(
+        f"{BASE}/from-framing",
+        json={
+            "decision_type_id": "car-interview",
+            "title": "Interview",
+            "framing": _evaluate_framing(),
+        },
+    )
+    assert created.status_code == 201, created.text
+    case_id = created.json()["case"]["case_id"]
+    stale = created.json()["case"]["case_version"]
+
+    first = client.post(
+        f"{BASE}/{case_id}/intake/answers",
+        json={
+            "expected_case_version": stale,
+            "answers": {"target_date": D2, "role": "Engineer"},
+        },
+    )
+    assert first.status_code == 200, first.text
+
+    conflict = client.post(
+        f"{BASE}/{case_id}/intake/answers",
+        json={
+            "expected_case_version": stale,
+            "answers": {"target_date": D1, "role": "Designer"},
+        },
+    )
+    assert conflict.status_code == 409

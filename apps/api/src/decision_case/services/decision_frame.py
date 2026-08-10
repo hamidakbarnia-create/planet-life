@@ -37,6 +37,7 @@ from packages.decision_engine.registry import get_decision_type, resolve_decisio
 from packages.decision_engine.state_machine import CaseState
 
 DECISION_FRAME_INTAKE_KEY = "decision_frame"
+TARGET_DATE_INTAKE_KEY = "target_date"
 FRAME_SCHEMA_VERSION = "1.0.0"
 
 _OPERATIONS = frozenset({"evaluate", "compare", "find"})
@@ -323,6 +324,45 @@ def merge_intake_with_framing(
     return next_intake
 
 
+def seed_intake_from_framing(
+    intake: dict[str, Any],
+    framing: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Seed evaluate specific_date into intake.target_date when the slot is empty.
+
+    Consumes already-normalized framing only — no natural-language parsing.
+    Never overwrites a non-empty target_date.
+    Does not seed from COMPARE options or FIND ranges.
+    """
+    next_intake = dict(intake or {})
+    frame = (
+        framing
+        if isinstance(framing, dict)
+        else next_intake.get(DECISION_FRAME_INTAKE_KEY)
+    )
+    if not isinstance(frame, dict):
+        return next_intake
+
+    existing = next_intake.get(TARGET_DATE_INTAKE_KEY)
+    if isinstance(existing, str) and existing.strip():
+        return next_intake
+
+    if frame.get("operation") != "evaluate":
+        return next_intake
+    if frame.get("time_scope") != "specific_date":
+        return next_intake
+
+    date_value = frame.get("date")
+    if not isinstance(date_value, str) or not date_value.strip():
+        return next_intake
+
+    # Defense in depth: framing contract already validated ISO on normalize.
+    canonical = date_value.strip()
+    _parse_iso_date(canonical)
+    next_intake[TARGET_DATE_INTAKE_KEY] = canonical
+    return next_intake
+
+
 def extract_framing_from_intake(intake: dict[str, Any] | None) -> dict[str, Any] | None:
     if not intake:
         return None
@@ -346,7 +386,10 @@ def create_case_with_framing(
     if mode != "none" and mode not in record.allowed_modes:
         mode = resolution.mode
 
-    intake = {DECISION_FRAME_INTAKE_KEY: framing}
+    intake = seed_intake_from_framing(
+        {DECISION_FRAME_INTAKE_KEY: framing},
+        framing,
+    )
     case = repo.create_case(
         owner_subject_id=owner_subject_id,
         decision_type_id=resolution.decision_type_id,

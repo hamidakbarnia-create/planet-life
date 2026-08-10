@@ -12,6 +12,14 @@ import {
   type CarInterviewIntake,
   type CarInterviewSlotId,
 } from '@/lib/decision-case';
+import {
+  intakeControlClassName,
+  intakeLabelClassName,
+  intakePrimaryAction,
+  intakePrimaryButtonClassName,
+  intakePrimaryButtonStyle,
+  intakeSecondaryButtonClassName,
+} from './intake-field-presentation';
 
 const FIELD_COPY_KEY: Record<
   CarInterviewSlotId,
@@ -62,6 +70,8 @@ export function CarInterviewIntakeForm({
     () => demoHasFirstRequiredAnswer(draft, caseMode),
     [draft, caseMode]
   );
+  const primaryAction = intakePrimaryAction(requiredPresent);
+  const focusSlot = missingRequired[0];
 
   const setField = (slotId: CarInterviewSlotId, value: string) => {
     setDraft((prev) => ({ ...prev, [slotId]: value }));
@@ -90,11 +100,26 @@ export function CarInterviewIntakeForm({
           const value = draft[slotId] ?? '';
           const missing = missingRequired.includes(slotId);
           const required = requiredSet.has(slotId);
+          const optional = !required;
+          const known =
+            slotId === 'target_date' && Boolean(value.trim()) && !missing;
+          const focusMissing = focusSlot === slotId;
           const label = copy[FIELD_COPY_KEY[slotId]];
           const isSelect = slotId === 'interview_type';
           return (
-            <label key={slotId} className="block space-y-1.5">
-              <span className="fi text-sm text-white/75">
+            <label
+              key={slotId}
+              className="block space-y-1.5"
+              data-known={known ? 'true' : undefined}
+              data-focus-missing={focusMissing ? 'true' : undefined}
+            >
+              <span
+                className={intakeLabelClassName({
+                  known,
+                  focusMissing,
+                  optional,
+                })}
+              >
                 {label}
                 {required ? (
                   <span className="text-amber-300/90"> *</span>
@@ -102,12 +127,25 @@ export function CarInterviewIntakeForm({
                   <span className="text-white/35"> ({copy.intakeOptional})</span>
                 )}
               </span>
+              {known ? (
+                <p
+                  className="fi text-xs text-white/40"
+                  data-testid="intake-known-hint"
+                >
+                  {copy.intakeKnownFromAsk}
+                </p>
+              ) : null}
               {isSelect ? (
                 <select
-                  className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 fi text-sm text-white outline-none focus-visible:border-amber-400/50"
+                  className={intakeControlClassName({
+                    known,
+                    focusMissing,
+                    optional,
+                  })}
                   value={value}
                   onChange={(event) => setField(slotId, event.target.value)}
                   data-testid={`intake-${slotId}`}
+                  autoFocus={focusMissing}
                 >
                   <option value="">{copy.intakeSelect}</option>
                   {INTERVIEW_TYPE_OPTIONS.map((option) => (
@@ -119,11 +157,16 @@ export function CarInterviewIntakeForm({
               ) : (
                 <input
                   type={slotId === 'target_date' ? 'date' : 'text'}
-                  className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 fi text-sm text-white outline-none focus-visible:border-amber-400/50"
+                  className={intakeControlClassName({
+                    known,
+                    focusMissing,
+                    optional,
+                  })}
                   value={value}
                   onChange={(event) => setField(slotId, event.target.value)}
                   data-testid={`intake-${slotId}`}
                   aria-invalid={missing}
+                  autoFocus={focusMissing}
                 />
               )}
             </label>
@@ -146,10 +189,12 @@ export function CarInterviewIntakeForm({
         <button
           type="submit"
           disabled={submitting || !canSave}
-          className="fc rounded-xl px-4 py-2.5 text-sm font-medium text-[#0a0f1c] disabled:cursor-not-allowed disabled:opacity-40"
-          style={{
-            background: 'linear-gradient(135deg, #f2cf75, #d4af37)',
-          }}
+          className={
+            primaryAction === 'save'
+              ? intakePrimaryButtonClassName()
+              : intakeSecondaryButtonClassName()
+          }
+          style={primaryAction === 'save' ? intakePrimaryButtonStyle : undefined}
           data-testid="intake-save"
         >
           {copy.intakeSave}
@@ -160,7 +205,14 @@ export function CarInterviewIntakeForm({
           onClick={() => {
             void onComplete(draft);
           }}
-          className="fc rounded-xl border border-white/15 px-4 py-2.5 text-sm text-white/85 disabled:cursor-not-allowed disabled:opacity-40"
+          className={
+            primaryAction === 'complete'
+              ? intakePrimaryButtonClassName()
+              : intakeSecondaryButtonClassName()
+          }
+          style={
+            primaryAction === 'complete' ? intakePrimaryButtonStyle : undefined
+          }
           data-testid="intake-complete"
         >
           {caseMode === 'find_dates' ? copy.intakeCompleteFind : copy.intakeComplete}
