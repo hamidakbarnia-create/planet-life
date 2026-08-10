@@ -2,7 +2,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DecisionPackageView } from './DecisionPackageView';
 import type { DecisionEvaluationPackage } from '@/lib/decision-case';
-import { getAskProductCopy } from '@/lib/ask-product';
+import { getAskProductCopy, localizeStrength } from '@/lib/ask-product';
 
 afterEach(() => cleanup());
 
@@ -38,6 +38,8 @@ function comparePackage(tied = false): DecisionEvaluationPackage {
           band: 'high',
           option_id: 'late',
           label: 'Late weekend',
+          strengths: ['Ceremony-day timing favorable (score 69.0).'],
+          risks: ['Logistics or availability may still override timing preference.'],
         },
         {
           date: '2026-09-10',
@@ -46,6 +48,8 @@ function comparePackage(tied = false): DecisionEvaluationPackage {
           band: tied ? 'high' : 'moderate',
           option_id: 'early',
           label: 'Early weekend',
+          strengths: ['Ceremony-day timing mixed (score 61.0).'],
+          risks: ['Mixed ceremony-day signals — confirm non-timing constraints.'],
         },
       ],
       notes: 'Candidates ranked by wedding_date ceremony timing score.',
@@ -66,11 +70,12 @@ function comparePackage(tied = false): DecisionEvaluationPackage {
       why: tied
         ? 'Candidates are tied on ceremony-day timing.'
         : 'Late weekend ranks first with score 79.0 versus Early weekend (61.0).',
-      why_not: 'Lower-ranked dates have weaker combined wedding_date timing scores.',
+      why_not:
+        'Lower-ranked dates have weaker combined wedding_date timing scores.',
       assumptions: [],
       limits: [
         'Ceremony timing comparison only — not relationship quality or wedding success.',
-        'No clock-time window, avoid window, or FIND search was performed.',
+        'ceremony_type, partner_name, and venue did not affect the numeric scores.',
       ],
     },
     improve_accuracy: { items: [] },
@@ -78,6 +83,15 @@ function comparePackage(tied = false): DecisionEvaluationPackage {
     related_decisions: { items: [] },
   };
 }
+
+const RAW_ENGINE_PROSE = [
+  'Ceremony-day timing favorable (score 69.0)',
+  'Ceremony-day timing mixed (score 61.0)',
+  'ranks first with score 79.0',
+  'wedding_date',
+  'ceremony_type',
+  'partner_name',
+] as const;
 
 describe('DecisionPackageView COMPARE localization', () => {
   it.each(['en', 'fa', 'ar', 'ru'] as const)(
@@ -100,9 +114,16 @@ describe('DecisionPackageView COMPARE localization', () => {
       expect(root.textContent).toContain(copy.compareOptionsLabel);
       expect(root.textContent).toContain(copy.resultConfidence);
       expect(root.textContent).toContain(copy.timingScoreLabel);
+      const surface = root.textContent ?? '';
+      expect(surface).not.toContain('ceremony_type');
+      expect(surface).not.toContain('partner_name');
+      expect(surface).not.toMatch(/\b[a-z]+(?:_[a-z0-9]+)+\b/);
       if (lang === 'en') {
-        expect(root.textContent).toContain(
+        expect(surface).toContain(
           'Ceremony timing comparison only — not relationship quality or wedding success.'
+        );
+        expect(surface).toContain(
+          'Ceremony details such as ceremony type, partner name, and venue did not affect the numeric timing scores.'
         );
       } else {
         expect(root.textContent).not.toMatch(
@@ -120,12 +141,40 @@ describe('DecisionPackageView COMPARE localization', () => {
       for (const el of dateEls) {
         const iso = el.getAttribute('data-date-iso');
         expect(iso).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-        // Consumer-facing text is the localized label, not raw ISO.
         expect(el.textContent).not.toBe(iso);
         expect(el.textContent).not.toMatch(/^\d{4}-\d{2}-\d{2}$/);
       }
       expect(dateEls[0]?.getAttribute('data-date-iso')).toBe('2026-09-18');
       expect(dateEls[1]?.getAttribute('data-date-iso')).toBe('2026-09-10');
+    }
+  );
+
+  it.each(['fa', 'ar', 'ru'] as const)(
+    '%s COMPARE never renders raw engine strengths/why and uses structured explanation',
+    (lang) => {
+      const copy = getAskProductCopy(lang);
+      render(
+        <DecisionPackageView
+          package={comparePackage(false)}
+          dqStatus="pass"
+          lang={lang}
+        />
+      );
+      const root = screen.getByTestId('compare-result-view');
+      const surface = root.textContent ?? '';
+      for (const phrase of RAW_ENGINE_PROSE) {
+        expect(surface).not.toContain(phrase);
+      }
+      expect(surface).not.toMatch(/Ceremony-day timing|timing favorable/i);
+      expect(surface).not.toMatch(/ranks first with score/i);
+      const why = screen.getByTestId('compare-relative-why').textContent ?? '';
+      expect(why).toContain(copy.compareRelativeWhy);
+      expect(why).toContain('Late weekend');
+      expect(why).toMatch(/79/);
+      const strength = localizeStrength(lang, 'strong') ?? 'strong';
+      expect(why).toContain(
+        copy.compareWhyWinner('Late weekend', 79, strength)
+      );
     }
   );
 
@@ -143,5 +192,27 @@ describe('DecisionPackageView COMPARE localization', () => {
     );
     expect(screen.getAllByTestId('compare-option')).toHaveLength(2);
     expect(screen.queryByTestId('evaluate-product-result')).toBeNull();
+    const surface = screen.getByTestId('compare-result-view').textContent ?? '';
+    expect(surface).toContain(copy.compareWhyTied('Late weekend · Early weekend'));
+    expect(surface).not.toContain('Ceremony-day timing favorable');
+  });
+
+  it('COMPARE hierarchy places winner and candidates before confidence', () => {
+    const { container } = render(
+      <DecisionPackageView
+        package={comparePackage(false)}
+        dqStatus="pass"
+        lang="fa"
+      />
+    );
+    const html = container.innerHTML;
+    const winnerAt = html.indexOf('data-testid="compare-winner"');
+    const optionsAt = html.indexOf('data-testid="compare-options"');
+    const whyAt = html.indexOf('data-testid="compare-relative-why"');
+    const confidenceAt = html.indexOf('data-testid="result-confidence-card"');
+    expect(winnerAt).toBeGreaterThanOrEqual(0);
+    expect(optionsAt).toBeGreaterThan(winnerAt);
+    expect(whyAt).toBeGreaterThan(optionsAt);
+    expect(confidenceAt).toBeGreaterThan(whyAt);
   });
 });

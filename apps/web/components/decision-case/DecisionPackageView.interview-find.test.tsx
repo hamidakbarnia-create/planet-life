@@ -212,5 +212,42 @@ describe('DecisionPackageView car-interview FIND visual acceptance', () => {
     expect(screen.getByTestId('find-headline').textContent).toBe(
       copy.findInterviewHeadlineDominant
     );
+    // Localized Jalali-primary dates (not English month names).
+    expect(range.textContent ?? '').not.toMatch(/Sep|September|2026-09/);
+    expect(screen.getByTestId('find-range').textContent ?? '').not.toMatch(
+      /Sep|September|2026-09/
+    );
+    expect(score.textContent ?? '').toContain(copy.timingScoreOf(78));
+  });
+
+  it('RU interview FIND hierarchy keeps recommendation before windows/why/limits', () => {
+    const copy = getAskProductCopy('ru');
+    render(
+      <DecisionPackageView
+        package={interviewFindPackage()}
+        dqStatus="pass"
+        lang="ru"
+      />
+    );
+    const root = screen.getByTestId('find-result-view');
+    const text = root.textContent ?? '';
+    const headline = screen.getByTestId('find-headline');
+    const windows = screen.getByTestId('find-windows');
+    const why = screen.getByTestId('find-honesty');
+    const limits = screen.getByTestId('find-limits');
+    expect(
+      headline.compareDocumentPosition(windows) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      windows.compareDocumentPosition(why) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      why.compareDocumentPosition(limits) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(text).toContain(copy.resultConfidence);
+    expect(text).toContain(copy.findRangeLabel);
+    expect(text).not.toContain('Strongest interview window');
+    expect(text).not.toContain('Timing score:');
   });
 });

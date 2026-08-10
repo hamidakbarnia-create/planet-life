@@ -39,6 +39,9 @@ function basePackage(): DecisionEvaluationPackage {
           band: 'high',
           option_id: 'thu',
           label: 'Thursday',
+          strengths: [
+            'Interview-day communication timing favorable (score 78.0).',
+          ],
         },
         {
           date: '2026-09-10',
@@ -47,13 +50,16 @@ function basePackage(): DecisionEvaluationPackage {
           band: 'moderate',
           option_id: 'mon',
           label: 'Monday',
+          strengths: [
+            'Interview-day communication timing mixed (score 61.0).',
+          ],
         },
       ],
       notes: 'Ranked',
     },
     drivers: { items: [] },
     explainability: {
-      why: 'Thursday ranks first',
+      why: 'Thursday ranks first with score 78.0 versus Monday (61.0).',
       why_not: 'Monday weaker',
       assumptions: [],
       limits: [
@@ -83,6 +89,9 @@ describe('DecisionPackageView interview COMPARE', () => {
       .map((node) => node.textContent ?? '')
       .join(' ');
     expect(optionText).not.toMatch(/^2026-09-18$/m);
+    expect(surface).not.toMatch(/Interview-day communication timing|ranks first with score/i);
+    expect(surface).not.toContain('interview_type');
+    expect(surface).not.toContain('job_interview');
   });
 
   it('shows honest tie for FA locale', () => {

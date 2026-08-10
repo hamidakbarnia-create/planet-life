@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  containsInternalIdentifier,
   isCanonicalPackageLimit,
   localizePackageLimit,
   localizePackageLimits,
@@ -30,17 +31,49 @@ const INTERVIEW_FIND_CANONICAL =
 const INVESTOR_COMPARE_CANONICAL =
   'Investor-meeting communication/negotiation timing comparison only — not investment outcome or funding success.';
 
+const SCHEMA_FIELD_LEAKS = [
+  'launch_object',
+  'launch_channel',
+  'brand_or_company',
+  'ceremony_type',
+  'partner_name',
+  'interview_type',
+  'meeting_goal',
+  'investor_name',
+  'meeting_type',
+] as const;
+
+const SCHEMA_FIELD_CANONICALS = [
+  'launch_object, launch_channel, and brand_or_company did not affect scores.',
+  'launch_object, launch_channel, and brand_or_company did not affect the numeric score.',
+  'ceremony_type, partner_name, and venue did not affect the numeric score.',
+  'ceremony_type, partner_name, and venue did not affect the numeric scores.',
+  'role, company, and interview_type did not affect the numeric score.',
+  'role, company, and interview_type did not affect the numeric scores.',
+  'meeting_goal, investor_name, and meeting_type did not affect the numeric scores.',
+] as const;
+
+const SNAKE_CASE = /\b[a-z]+(?:_[a-z0-9]+)+\b/;
+
 describe('package limit semantic localization', () => {
   it('maps exact FIND canonical limits for EN/FA/AR/RU', () => {
     for (const limit of FIND_CANONICAL) {
       expect(isCanonicalPackageLimit(limit)).toBe(true);
-      expect(localizePackageLimit('en', limit)).toBe(limit);
+      const en = localizePackageLimit('en', limit);
+      expect(en).toBeTruthy();
+      expect(en).not.toMatch(SNAKE_CASE);
+      for (const token of SCHEMA_FIELD_LEAKS) {
+        expect(en).not.toContain(token);
+      }
       const fa = localizePackageLimit('fa', limit);
       const ar = localizePackageLimit('ar', limit);
       const ru = localizePackageLimit('ru', limit);
       expect(fa).toBeTruthy();
       expect(ar).toBeTruthy();
       expect(ru).toBeTruthy();
+      if (limit.includes('_')) {
+        expect(en).not.toBe(limit);
+      }
       expect(fa).not.toBe(limit);
       expect(ar).not.toBe(limit);
       expect(ru).not.toBe(limit);
@@ -107,43 +140,41 @@ describe('package limit semantic localization', () => {
     expect(localizePackageLimit('fa', collapsedInternal)).toBeNull();
   });
 
-  const SCHEMA_FIELD_LEAKS = [
-    'launch_object',
-    'launch_channel',
-    'brand_or_company',
-    'ceremony_type',
-    'partner_name',
-    'interview_type',
-  ] as const;
-
-  const SCHEMA_FIELD_CANONICALS = [
-    'launch_object, launch_channel, and brand_or_company did not affect scores.',
-    'launch_object, launch_channel, and brand_or_company did not affect the numeric score.',
-    'ceremony_type, partner_name, and venue did not affect the numeric score.',
-    'ceremony_type, partner_name, and venue did not affect the numeric scores.',
-    'role, company, and interview_type did not affect the numeric score.',
-  ] as const;
-
-  it('keeps EN canonical passthrough with schema identifiers', () => {
+  it('humanizes EN schema identifiers for all known schema-bearing limits', () => {
     for (const limit of SCHEMA_FIELD_CANONICALS) {
-      expect(localizePackageLimit('en', limit)).toBe(limit);
+      const en = localizePackageLimit('en', limit);
+      expect(en).toBeTruthy();
+      expect(en).not.toBe(limit);
+      for (const token of SCHEMA_FIELD_LEAKS) {
+        expect(en).not.toContain(token);
+      }
+      expect(en).not.toMatch(SNAKE_CASE);
     }
   });
 
-  it('FA/AR/RU consumer copy never exposes schema field identifiers', () => {
-    const snakeCase = /\b[a-z]+(?:_[a-z0-9]+)+\b/;
+  it('all four locales never expose schema field identifiers', () => {
     for (const limit of SCHEMA_FIELD_CANONICALS) {
-      for (const lang of ['fa', 'ar', 'ru'] as const) {
+      for (const lang of ['en', 'fa', 'ar', 'ru'] as const) {
         const localized = localizePackageLimit(lang, limit);
         expect(localized).toBeTruthy();
-        expect(localized).not.toBe(limit);
         for (const token of SCHEMA_FIELD_LEAKS) {
           expect(localized).not.toContain(token);
         }
-        // No raw snake_case schema identifiers in consumer display copy.
-        expect(localized).not.toMatch(snakeCase);
+        expect(localized).not.toMatch(SNAKE_CASE);
       }
     }
   });
-});
 
+  it('hides unknown schema-bearing limits in every language', () => {
+    const unknownSchema =
+      'ghost_field and natal_evidence did not enter the scoring function.';
+    expect(containsInternalIdentifier(unknownSchema)).toBe(true);
+    expect(localizePackageLimit('en', unknownSchema)).toBeNull();
+    expect(localizePackageLimit('fa', unknownSchema)).toBeNull();
+    expect(localizePackageLimit('ar', unknownSchema)).toBeNull();
+    expect(localizePackageLimit('ru', unknownSchema)).toBeNull();
+    expect(
+      localizePackageLimits('en', [unknownSchema, FIND_CANONICAL[0]], 4)
+    ).toEqual([localizePackageLimit('en', FIND_CANONICAL[0])]);
+  });
+});

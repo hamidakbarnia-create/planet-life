@@ -41,6 +41,9 @@ function basePackage(): DecisionEvaluationPackage {
           band: 'high',
           option_id: 'thu',
           label: 'Thursday',
+          strengths: [
+            'Meeting-day negotiation timing favorable (score 78.0).',
+          ],
         },
         {
           date: '2026-09-10',
@@ -49,17 +52,19 @@ function basePackage(): DecisionEvaluationPackage {
           band: 'moderate',
           option_id: 'mon',
           label: 'Monday',
+          strengths: ['Meeting-day negotiation timing mixed (score 61.0).'],
         },
       ],
       notes: 'Ranked',
     },
     drivers: { items: [] },
     explainability: {
-      why: 'Thursday ranks first',
+      why: 'Thursday ranks first with score 78.0 versus Monday (61.0).',
       why_not: 'Monday weaker',
       assumptions: [],
       limits: [
         'Investor-meeting communication/negotiation timing comparison only — not investment outcome or funding success.',
+        'meeting_goal, investor_name, and meeting_type did not affect the numeric scores.',
       ],
     },
   };
@@ -97,9 +102,13 @@ describe('DecisionPackageView investor COMPARE', () => {
         .map((node) => node.textContent ?? '')
         .join(' ');
       expect(optionText).not.toMatch(/^2026-09-18$/m);
+      const surface = root.textContent ?? '';
+      expect(surface).not.toMatch(/meeting_goal|investor_name|meeting_type/);
+      expect(surface).not.toMatch(/\b[a-z]+(?:_[a-z0-9]+)+\b/);
       if (lang !== 'en') {
-        const surface = root.textContent ?? '';
-        expect(surface).not.toMatch(/meeting_goal|investor_name/);
+        expect(surface).not.toMatch(
+          /Meeting-day negotiation timing|ranks first with score/i
+        );
       }
     }
   );
