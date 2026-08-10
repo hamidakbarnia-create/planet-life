@@ -14,11 +14,13 @@ export {
 } from '@/lib/decision-frame/frame';
 export type { CompareDateDraft } from '@/lib/decision-frame/frame';
 export {
+  clearDecisionFrame,
   isFramingPersistReady,
   loadDecisionFrame,
   loadFrameFromCase,
   persistFrameToCase,
   saveDecisionFrame,
+  sessionFrameBelongsToCurrentQuestion,
 } from '@/lib/decision-frame';
 export type { DecisionFrameV1 } from '@/lib/decision-frame/types';
 export { getAskProductCopy } from './copy';
