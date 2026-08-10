@@ -28,6 +28,8 @@ export {
   type AskEvidenceLine,
 } from './evidence';
 export {
+  formatEvidenceContribution,
+  formatUnavailableFactorDetail,
   localizeEvidenceFactor,
   tryLocalizeFactorKey,
   type LocalizedEvidenceFactor,

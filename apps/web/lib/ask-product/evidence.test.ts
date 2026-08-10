@@ -91,7 +91,8 @@ describe('ask-product evidence mapping honesty', () => {
     expect(fa[0]?.source).toBe('drivers.polarity');
     expect(fa[0]?.polarity).toBe('supportive');
     expect(fa[0]?.title).toBe(getAskProductCopy('fa').evidenceDetailUnavailable);
-    expect(fa[0]?.detail).toBeUndefined();
+    expect(fa[0]?.detail).toContain(getAskProductCopy('fa').evidenceSupportive);
+    expect(fa[0]?.detail).not.toMatch(/Visibility|presentation|selected date/i);
     expect(fa[0]?.driverLabel).toBe('Visibility');
     expect(fa[0]?.title).not.toMatch(/Visibility|Supporting factor/i);
   });
@@ -189,7 +190,10 @@ describe('ask-product evidence mapping honesty', () => {
     expect(fa.every((e) => e.title === getAskProductCopy('fa').evidenceDetailUnavailable)).toBe(
       true
     );
-    expect(fa.every((e) => !e.detail)).toBe(true);
+    expect(fa[0]?.detail).toContain(getAskProductCopy('fa').evidenceCaution);
+    expect(fa[0]?.detail).toContain(getAskProductCopy('fa').importance.medium);
+    expect(fa[1]?.detail).toContain(getAskProductCopy('fa').evidenceSupportive);
+    expect(new Set(fa.map((e) => `${e.title}|${e.detail}`)).size).toBe(2);
     // Consumer-facing title/detail must not dump English Package prose.
     expect(fa.map((e) => `${e.title}\n${e.detail ?? ''}`).join('\n')).not.toMatch(
       /Mercury|Mars|Communication|Momentum/
@@ -199,6 +203,61 @@ describe('ask-product evidence mapping honesty', () => {
     expect(en[0]?.title).toBe('Mercury square');
     expect(en[1]?.title).toBe('Mars hard aspect');
   });
+
+  it.each(['fa', 'ar', 'ru'] as const)(
+    'unknown factor_key caution rows stay distinct via localized metadata in %s',
+    (lang) => {
+      const copy = getAskProductCopy(lang);
+      const pkg = runtimePackage({
+        drivers: {
+          items: [
+            {
+              id: 'b',
+              label: 'Pace',
+              contribution: -1.4,
+              polarity: 'cautionary',
+              importance: 'medium',
+              score: 1.4,
+              band: 'low',
+              support: '',
+              friction: 'Pace may feel compressed.',
+            },
+            {
+              id: 'c',
+              label: 'Structure',
+              contribution: -0.9,
+              polarity: 'cautionary',
+              importance: 'low',
+              score: 0.9,
+              band: 'low',
+              support: '',
+              friction: 'Extra structure helps.',
+            },
+            {
+              id: 'd',
+              label: 'Clarity',
+              contribution: -1.1,
+              polarity: 'cautionary',
+              importance: 'medium',
+              score: 1.1,
+              band: 'low',
+              support: '',
+              friction: 'Clarify the ask early.',
+            },
+          ],
+        },
+      });
+      const caution = mapPackageEvidence(pkg, lang);
+      expect(caution).toHaveLength(3);
+      expect(caution.every((e) => e.title === copy.evidenceDetailUnavailable)).toBe(true);
+      expect(caution.every((e) => e.polarity === 'cautionary')).toBe(true);
+      expect(caution.every((e) => Boolean(e.detail))).toBe(true);
+      const rowText = caution.map((e) => `${e.title}\n${e.detail}`);
+      expect(new Set(rowText).size).toBe(3);
+      expect(rowText.join('\n')).not.toMatch(/Pace|Structure|Clarity|compressed|structure helps|Clarify/i);
+      expect(rowText.join('\n')).not.toMatch(/factor\s*[123]|عامل\s*[۱۲۳]|عامل\s*[123]/i);
+    }
+  );
 
   it('does not invent factors beyond package drivers', () => {
     const pkg = runtimePackage({
@@ -282,7 +341,12 @@ describe('ask-product evidence mapping honesty', () => {
         getAskProductCopy(lang).meaningByStrength.strong
       );
       expect(model?.meaning).not.toMatch(/[A-Za-z]{4,}/);
-      expect(model?.evidence.every((e) => !e.detail)).toBe(true);
+      const evidenceSurface = model?.evidence
+        .map((e) => `${e.title}\n${e.detail ?? ''}`)
+        .join('\n');
+      expect(evidenceSurface).not.toMatch(
+        /Visibility|Preparation|presentation|friction|selected date/i
+      );
       expect(model?.recommendationDetail).toBeUndefined();
     }
   );

@@ -182,7 +182,76 @@ export type EvidenceFactorFallbackContext = {
   polarity: 'supportive' | 'cautionary' | 'neutral';
   label?: string;
   importance?: string;
+  contribution?: number;
 };
+
+function localizeDigits(lang: AppLang, text: string): string {
+  if (lang === 'fa') {
+    return text.replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]!);
+  }
+  if (lang === 'ar') {
+    return text.replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]!);
+  }
+  return text;
+}
+
+/** Deterministic contribution magnitude string from Package driver.contribution. */
+export function formatEvidenceContribution(
+  lang: AppLang,
+  contribution: number
+): string {
+  const rounded = Math.round(contribution * 10) / 10;
+  const abs = Math.abs(rounded);
+  const body = Number.isInteger(abs) ? String(abs) : abs.toFixed(1);
+  const signed = rounded < 0 ? `-${body}` : rounded > 0 ? `+${body}` : body;
+  if (lang === 'fa') {
+    return localizeDigits('fa', signed).replace('-', '−').replace('.', '٫');
+  }
+  if (lang === 'ar') {
+    return localizeDigits('ar', signed).replace('-', '−').replace('.', '٫');
+  }
+  if (lang === 'ru') {
+    return signed.replace('-', '−').replace('.', ',');
+  }
+  return signed.replace('-', '−');
+}
+
+/**
+ * Localized metadata for unknown factor_key rows.
+ * Derived only from polarity / contribution / importance — never labels or ids.
+ */
+export function formatUnavailableFactorDetail(
+  lang: AppLang,
+  fallback: EvidenceFactorFallbackContext
+): string | undefined {
+  const copy = getAskProductCopy(lang);
+  const polarityLabel =
+    fallback.polarity === 'supportive'
+      ? copy.evidenceSupportive
+      : fallback.polarity === 'cautionary'
+        ? copy.evidenceCaution
+        : copy.evidenceNeutral;
+
+  const parts: string[] = [polarityLabel];
+  if (
+    typeof fallback.contribution === 'number' &&
+    Number.isFinite(fallback.contribution)
+  ) {
+    parts.push(formatEvidenceContribution(lang, fallback.contribution));
+  }
+  if (
+    fallback.importance === 'low' ||
+    fallback.importance === 'medium' ||
+    fallback.importance === 'high' ||
+    fallback.importance === 'critical'
+  ) {
+    parts.push(copy.importance[fallback.importance]);
+  }
+
+  // Polarity alone does not distinguish same-polarity rows.
+  if (parts.length < 2) return undefined;
+  return parts.join(' · ');
+}
 
 /**
  * Resolve a known factor_key against the bounded catalog.
@@ -199,7 +268,8 @@ export function tryLocalizeFactorKey(
 
 /**
  * Localize a Package driver factor_key for consumer Result evidence.
- * Unknown keys: EN may use label; FA/AR/RU use honest unavailable fallback.
+ * Unknown keys: EN may use label; FA/AR/RU use honest unavailable title +
+ * deterministic contribution/importance metadata detail.
  */
 export function localizeEvidenceFactor(
   lang: AppLang,
@@ -209,12 +279,21 @@ export function localizeEvidenceFactor(
   const fromCatalog = tryLocalizeFactorKey(lang, factorKey);
   if (fromCatalog) return fromCatalog;
 
+  const detail = formatUnavailableFactorDetail(lang, fallback);
+
   if (lang === 'en') {
     const label = fallback.label?.trim();
     if (label) return { title: label };
+    return {
+      title: getAskProductCopy(lang).evidenceDetailUnavailable,
+      detail,
+    };
   }
 
-  return { title: getAskProductCopy(lang).evidenceDetailUnavailable };
+  return {
+    title: getAskProductCopy(lang).evidenceDetailUnavailable,
+    detail,
+  };
 }
 
 function localizeKnownFactorKey(

@@ -165,6 +165,7 @@ function evidenceTitle(
     polarity,
     label: driver.label,
     importance: driver.importance,
+    contribution: driver.contribution,
   });
 
   // Unknown / missing key: EN may use Package label; FA/AR/RU honest fallback.
@@ -177,6 +178,7 @@ function evidenceTitle(
 
   return {
     title: localized.title,
+    detail: localized.detail,
     source: 'drivers.polarity',
   };
 }

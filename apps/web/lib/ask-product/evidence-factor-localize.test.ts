@@ -40,11 +40,55 @@ describe('evidence factor localization catalog', () => {
       const result = localizeEvidenceFactor(lang, undefined, {
         polarity: 'supportive',
         label: 'Transit Mercury square natal Saturn',
+        contribution: 2.1,
+        importance: 'high',
       });
       expect(result.title).toBe(getAskProductCopy(lang).evidenceDetailUnavailable);
       expect(result.title).not.toMatch(/Mercury|Transit|square/i);
+      expect(result.detail).toBeTruthy();
+      expect(result.detail).not.toMatch(/Mercury|Transit|square/i);
+      expect(result.detail).toContain(getAskProductCopy(lang).evidenceSupportive);
+      expect(result.detail).toContain(getAskProductCopy(lang).importance.high);
     }
   );
+
+  it('unknown FA caution rows differ by contribution/importance metadata', () => {
+    const a = localizeEvidenceFactor('fa', undefined, {
+      polarity: 'cautionary',
+      label: 'Pace',
+      contribution: -1.4,
+      importance: 'medium',
+    });
+    const b = localizeEvidenceFactor('fa', undefined, {
+      polarity: 'cautionary',
+      label: 'Structure',
+      contribution: -0.9,
+      importance: 'low',
+    });
+    const c = localizeEvidenceFactor('fa', undefined, {
+      polarity: 'cautionary',
+      label: 'Clarity',
+      contribution: -1.1,
+      importance: 'medium',
+    });
+    expect(a.title).toBe(b.title);
+    expect(a.detail).not.toEqual(b.detail);
+    expect(a.detail).not.toEqual(c.detail);
+    expect(b.detail).not.toEqual(c.detail);
+    expect(`${a.detail}${b.detail}${c.detail}`).not.toMatch(/Pace|Structure|Clarity/);
+  });
+
+  it('known factor_key ignores fallback metadata for title', () => {
+    const result = localizeEvidenceFactor('fa', 'aspect.mercury.square.saturn', {
+      polarity: 'cautionary',
+      label: 'Pace',
+      contribution: -1.4,
+      importance: 'medium',
+    });
+    expect(result.title).toContain('عطارد');
+    expect(result.title).not.toBe(getAskProductCopy('fa').evidenceDetailUnavailable);
+    expect(result.detail).toBeUndefined();
+  });
 
   it('EN unknown key may use package label', () => {
     const result = localizeEvidenceFactor('en', 'unknown.factor', {
