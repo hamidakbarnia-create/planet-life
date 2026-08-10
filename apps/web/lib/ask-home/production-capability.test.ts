@@ -39,15 +39,15 @@ describe('ASK Web UX capability hint (not backend authority)', () => {
     expect(canEvaluateInProduction('not-a-type')).toBe(false);
   });
 
-  it('COMPARE ships only for wedding; FIND ships only for product launch', () => {
-    expect(canExecuteInProduction('car-interview', 'compare')).toBe(false);
+  it('COMPARE ships for wedding and interview; FIND ships only for product launch', () => {
+    expect(canExecuteInProduction('car-interview', 'compare')).toBe(true);
     expect(canExecuteInProduction('mar-wedding-date', 'compare')).toBe(true);
     expect(canExecuteInProduction('tim-compare-three', 'compare')).toBe(false);
     expect(canExecuteInProduction('car-interview', 'find')).toBe(false);
     expect(canExecuteInProduction('mar-wedding-date', 'find')).toBe(false);
     expect(canExecuteInProduction('bus-product-launch', 'find')).toBe(true);
     expect(frameOperationToCaseMode('find')).toBe('find_dates');
-    expect(hasProductionRuntime('car-interview', 'compare_dates')).toBe(false);
+    expect(hasProductionRuntime('car-interview', 'compare_dates')).toBe(true);
     expect(hasProductionRuntime('mar-wedding-date', 'compare_dates')).toBe(true);
     expect(hasProductionRuntime('bus-product-launch', 'find_dates')).toBe(true);
     expect(hasProductionRuntime('mar-wedding-date', 'find_dates')).toBe(false);

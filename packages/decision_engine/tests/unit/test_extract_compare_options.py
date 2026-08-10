@@ -61,8 +61,8 @@ def test_extract_rejects_singular_date_collapse():
         )
 
 
-def test_extract_requires_two_to_three_options():
-    with pytest.raises(RuntimeFramingError, match="between 2 and 3"):
+def test_extract_requires_two_to_five_options():
+    with pytest.raises(RuntimeFramingError, match="between 2 and 5"):
         extract_compare_options_from_framing(
             {
                 "decision_frame": {
@@ -75,3 +75,50 @@ def test_extract_requires_two_to_three_options():
                 }
             }
         )
+
+    dates = [
+        "2026-09-10",
+        "2026-09-11",
+        "2026-09-12",
+        "2026-09-13",
+        "2026-09-14",
+        "2026-09-15",
+    ]
+    with pytest.raises(RuntimeFramingError, match="between 2 and 5"):
+        extract_compare_options_from_framing(
+            {
+                "decision_frame": {
+                    "operation": "compare",
+                    "time_scope": "multiple_dates",
+                    "dates": dates,
+                    "options": [
+                        {"id": f"o{i}", "label": f"L{i}", "date": d}
+                        for i, d in enumerate(dates)
+                    ],
+                }
+            }
+        )
+
+
+def test_extract_accepts_five_options():
+    dates = [
+        "2026-09-10",
+        "2026-09-11",
+        "2026-09-12",
+        "2026-09-13",
+        "2026-09-14",
+    ]
+    options = extract_compare_options_from_framing(
+        {
+            "decision_frame": {
+                "operation": "compare",
+                "time_scope": "multiple_dates",
+                "dates": dates,
+                "options": [
+                    {"id": f"o{i}", "label": f"L{i}", "date": d}
+                    for i, d in enumerate(dates)
+                ],
+            }
+        }
+    )
+    assert len(options) == 5

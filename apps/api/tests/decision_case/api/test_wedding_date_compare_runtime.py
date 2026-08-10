@@ -201,6 +201,60 @@ def test_compare_via_evaluations_is_rejected(client: TestClient) -> None:
     assert case.json()["state"] == "evidence_ready"
 
 
+def test_same_date_recompare_preserves_candidate_identity(
+    client: TestClient,
+) -> None:
+    """Shared append_candidate_dates upsert must work for Wedding COMPARE too."""
+    case_id, version = _prepare_compare_case(client)
+
+    with patch(
+        "decision_case.services.compare_runtime.generate_decision_outcome",
+        return_value=_outcome_for(70),
+    ):
+        first = client.post(
+            f"{BASE}/{case_id}/comparisons",
+            json={"expected_case_version": version},
+        )
+        assert first.status_code == 201, first.text
+        first_body = first.json()
+        case_after_first = client.get(f"{BASE}/{case_id}").json()
+        assert case_after_first["state"] == "compared"
+        assert case_after_first["activation_phase"] == "compared"
+
+        second = client.post(
+            f"{BASE}/{case_id}/comparisons",
+            json={"expected_case_version": case_after_first["case_version"]},
+        )
+    assert second.status_code == 201, second.text
+    second_body = second.json()
+
+    assert second_body["comparison_id"] != first_body["comparison_id"]
+    assert second_body["evaluation_id"] != first_body["evaluation_id"]
+    assert second_body["case_version"] == first_body["case_version"]
+
+    first_rank_ids = {
+        str(item["candidate_date_id"]) for item in first_body["ranking"]
+    }
+    second_rank_ids = {
+        str(item["candidate_date_id"]) for item in second_body["ranking"]
+    }
+    assert len(first_rank_ids) == 2
+    assert first_rank_ids == second_rank_ids
+
+    listed = client.get(f"{BASE}/{case_id}/comparisons")
+    assert len(listed.json()["comparisons"]) == 2
+
+    after = client.get(f"{BASE}/{case_id}").json()
+    assert after["state"] == "compared"
+    assert after["activation_phase"] == "compared"
+    assert after["case_version"] > case_after_first["case_version"]
+
+    listed_eval = client.get(f"{BASE}/{case_id}/evaluations")
+    assert listed_eval.json()["evaluations"] == []
+    listed_findings = client.get(f"{BASE}/{case_id}/findings")
+    assert listed_findings.json()["findings"] == []
+
+
 def test_compare_framing_rejects_duplicate_option_dates(client: TestClient) -> None:
     created = client.post(
         BASE,
@@ -212,6 +266,7 @@ def test_compare_framing_rejects_duplicate_option_dates(client: TestClient) -> N
     )
     case_id = created.json()["case_id"]
     version = created.json()["case_version"]
+    before = client.get(f"{BASE}/{case_id}").json()
     framed = client.put(
         f"{BASE}/{case_id}/framing",
         json={
@@ -228,3 +283,7 @@ def test_compare_framing_rejects_duplicate_option_dates(client: TestClient) -> N
         },
     )
     assert framed.status_code == 400
+    after = client.get(f"{BASE}/{case_id}").json()
+    assert after["case_version"] == before["case_version"]
+    assert after["state"] == before["state"]
+    assert client.get(f"{BASE}/{case_id}/comparisons").json()["comparisons"] == []

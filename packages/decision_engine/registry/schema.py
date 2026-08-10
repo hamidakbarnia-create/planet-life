@@ -60,7 +60,7 @@ EXPECTED_TYPE_IDS: frozenset[str] = frozenset(
 
 EXPECTED_RECORDS: dict[str, tuple[str, tuple[str, ...]]] = {
     "tim-compare-three": ("timing_opt", ("compare_dates",)),
-    "car-interview": ("visibility", ("evaluate_date",)),
+    "car-interview": ("visibility", ("evaluate_date", "compare_dates")),
     "mar-wedding-date": (
         "timing_opt",
         ("evaluate_date", "compare_dates"),

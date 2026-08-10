@@ -13,9 +13,9 @@ from typing import Any, Mapping
 NATAL_EVIDENCE_INTAKE_KEY = "natal_evidence"
 DECISION_FRAME_INTAKE_KEY = "decision_frame"
 
-# v1 COMPARE runtime accepts 2–3 labeled options (Package schema allows up to 5).
+# COMPARE runtime accepts 2–5 labeled options (aligned with Package schema).
 COMPARE_OPTIONS_MIN = 2
-COMPARE_OPTIONS_MAX = 3
+COMPARE_OPTIONS_MAX = 5
 
 _RATING_HIGHLY_FAVORABLE = "Highly Favorable"
 _RATING_FAVORABLE = "Favorable"

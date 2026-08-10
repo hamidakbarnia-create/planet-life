@@ -27,6 +27,7 @@ export type AskProductCopy = {
   compareAddOption: string;
   compareRemoveOption: string;
   compareNeedTwo: string;
+  compareTooMany: string;
   compareDuplicateDates: string;
   findRangePrompt: string;
   findRangeHint: string;
@@ -192,12 +193,13 @@ const EN: AskProductCopy = {
   dateMissing: 'Please enter a date.',
   compareDatesPrompt: 'Which dates should we compare?',
   compareDatesHint:
-    'Add 2 or 3 labeled candidate dates. METIORO never assumes today.',
+    'Add 2 to 5 labeled candidate dates. METIORO never assumes today.',
   compareOptionLabel: 'Label',
   compareOptionDate: 'Date',
   compareAddOption: 'Add another date',
   compareRemoveOption: 'Remove',
   compareNeedTwo: 'Enter at least two different dates.',
+  compareTooMany: 'Enter at most five candidate dates.',
   compareDuplicateDates: 'Each candidate needs a unique date.',
   findRangePrompt: 'What date range should we scan?',
   findRangeHint:
@@ -399,12 +401,13 @@ const FA: AskProductCopy = {
   dateMissing: 'لطفاً یک تاریخ وارد کنید.',
   compareDatesPrompt: 'کدام تاریخ‌ها را مقایسه کنیم؟',
   compareDatesHint:
-    '۲ یا ۳ تاریخ با برچسب اضافه کنید. METIORO هرگز «امروز» را فرض نمی‌کند.',
+    '۲ تا ۵ تاریخ با برچسب اضافه کنید. METIORO هرگز «امروز» را فرض نمی‌کند.',
   compareOptionLabel: 'برچسب',
   compareOptionDate: 'تاریخ',
   compareAddOption: 'افزودن تاریخ دیگر',
   compareRemoveOption: 'حذف',
   compareNeedTwo: 'حداقل دو تاریخ متفاوت وارد کنید.',
+  compareTooMany: 'حداکثر پنج تاریخ نامزد وارد کنید.',
   compareDuplicateDates: 'هر گزینه باید تاریخ یکتا داشته باشد.',
   findRangePrompt: 'کدام بازهٔ زمانی را جستجو کنیم؟',
   findRangeHint:
@@ -607,12 +610,13 @@ const AR: AskProductCopy = {
   dateMissing: 'يرجى إدخال تاريخ.',
   compareDatesPrompt: 'أي تواريخ نقارن؟',
   compareDatesHint:
-    'أضف تاريخين أو ثلاثة بتسميات. لا تفترض METIORO «اليوم».',
+    'أضف من تاريخين إلى خمسة بتسميات. لا تفترض METIORO «اليوم».',
   compareOptionLabel: 'التسمية',
   compareOptionDate: 'التاريخ',
   compareAddOption: 'إضافة تاريخ آخر',
   compareRemoveOption: 'إزالة',
   compareNeedTwo: 'أدخل تاريخين مختلفين على الأقل.',
+  compareTooMany: 'أدخل خمسة تواريخ مرشحة كحد أقصى.',
   compareDuplicateDates: 'يجب أن يكون لكل خيار تاريخ فريد.',
   findRangePrompt: 'ما النطاق الزمني الذي نمسحه؟',
   findRangeHint:
@@ -813,12 +817,13 @@ const RU: AskProductCopy = {
   dateMissing: 'Пожалуйста, укажите дату.',
   compareDatesPrompt: 'Какие даты сравнить?',
   compareDatesHint:
-    'Добавьте 2 или 3 даты с подписями. METIORO никогда не подставляет «сегодня».',
+    'Добавьте от 2 до 5 дат с подписями. METIORO никогда не подставляет «сегодня».',
   compareOptionLabel: 'Подпись',
   compareOptionDate: 'Дата',
   compareAddOption: 'Добавить ещё дату',
   compareRemoveOption: 'Удалить',
   compareNeedTwo: 'Укажите как минимум две разные даты.',
+  compareTooMany: 'Укажите не более пяти дат-кандидатов.',
   compareDuplicateDates: 'У каждого варианта должна быть уникальная дата.',
   findRangePrompt: 'Какой диапазон дат просканировать?',
   findRangeHint:

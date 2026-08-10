@@ -250,6 +250,76 @@ def test_evidence_eligibility(
     decision_db.conn.rollback()
 
 
+def test_append_candidate_dates_upserts_same_identity(
+    repo: DecisionCaseRepository,
+) -> None:
+    """ON CONFLICT (case_id, case_version, candidate_date) preserves row identity."""
+    created = _create(repo, mode="compare_dates")
+    c = repo.advance_state(
+        created.case_id,
+        OWNER,
+        to_state="intake",
+        trigger="start_intake",
+        expected_case_version=1,
+        has_decision_type_or_classification_pending=True,
+    )
+    c = repo.advance_state(
+        created.case_id,
+        OWNER,
+        to_state="evidence_ready",
+        trigger="complete_intake",
+        expected_case_version=c.current_case_version,
+        intake_complete_or_soft_gaps_accepted=True,
+    )
+    intake_version = repo.get_current_version(created.case_id, OWNER).version
+
+    first = repo.append_candidate_dates(
+        created.case_id,
+        OWNER,
+        expected_case_version=c.current_case_version,
+        candidates=[
+            (date(2026, 9, 10), "Monday"),
+            (date(2026, 9, 18), "Thursday"),
+        ],
+        case_version=intake_version,
+    )
+    first_ids = {
+        row["candidate_date"]: row["candidate_date_id"] for row in first
+    }
+    assert set(first_ids) == {date(2026, 9, 10), date(2026, 9, 18)}
+    assert first[0]["label"] == "Monday"
+
+    c = repo.get_case(created.case_id, OWNER)
+    second = repo.append_candidate_dates(
+        created.case_id,
+        OWNER,
+        expected_case_version=c.current_case_version,
+        candidates=[
+            (date(2026, 9, 10), "Mon updated"),
+            (date(2026, 9, 18), None),
+        ],
+        case_version=intake_version,
+    )
+    second_ids = {
+        row["candidate_date"]: row["candidate_date_id"] for row in second
+    }
+    assert second_ids == first_ids
+
+    by_date = {row["candidate_date"]: row for row in second}
+    # Non-null EXCLUDED.label replaces prior label.
+    assert by_date[date(2026, 9, 10)]["label"] == "Mon updated"
+    # NULL EXCLUDED.label keeps existing label via COALESCE.
+    assert by_date[date(2026, 9, 18)]["label"] == "Thursday"
+
+    timeline = repo.get_timeline(created.case_id, OWNER)
+    candidate_entries = [e for e in timeline if e.kind == "candidate_date"]
+    assert len(candidate_entries) == 2
+    timeline_ids = {
+        e.detail["candidate_date_id"] for e in candidate_entries
+    }
+    assert timeline_ids == {str(v) for v in first_ids.values()}
+
+
 def test_participants_candidates_comparisons(repo: DecisionCaseRepository) -> None:
     created = _create(repo, mode="compare_dates")
     c = repo.advance_state(

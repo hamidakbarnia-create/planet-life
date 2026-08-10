@@ -841,12 +841,20 @@ class DecisionCaseRepository:
                 out = []
                 for cand_date, label in candidates:
                     cid = uuid4()
+                    # Re-compare may re-bind the same intake case_version dates.
+                    # Upsert preserves identity while allowing a new comparison.
                     cur.execute(
                         """
                         INSERT INTO decision_candidate_dates (
                             candidate_date_id, case_id, case_version,
                             candidate_date, label
                         ) VALUES (%s, %s, %s, %s, %s)
+                        ON CONFLICT (case_id, case_version, candidate_date)
+                        DO UPDATE SET
+                            label = COALESCE(
+                                EXCLUDED.label,
+                                decision_candidate_dates.label
+                            )
                         RETURNING *
                         """,
                         (cid, case_id, ver, cand_date, label),

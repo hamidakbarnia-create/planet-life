@@ -239,6 +239,28 @@ const CANONICAL_PACKAGE_LIMITS: Record<string, LimitLocales> = {
       ru: 'Место рождения и место интервью/события различны; рождение не считалось городом интервью в доказательствах кейса.',
     },
 
+  // car-interview COMPARE
+  'Interview-date communication timing comparison only — not hiring outcome or job offer.':
+    {
+      en: 'Interview-date communication timing comparison only — not hiring outcome or job offer.',
+      fa: 'فقط مقایسهٔ زمان‌بندی ارتباط در تاریخ مصاحبه — نه نتیجهٔ استخدام یا پیشنهاد شغلی.',
+      ar: 'مقارنة توقيت التواصل لتاريخ المقابلة فقط — وليست نتيجة توظيف أو عرض عمل.',
+      ru: 'Только сравнение тайминга коммуникации на дату интервью — не исход найма или оффер.',
+    },
+  'Interview-date communication/visibility timing comparison only — not hiring outcome, job offer, salary, interview performance certainty, employer decision, or career success.':
+    {
+      en: 'Interview-date communication/visibility timing comparison only — not hiring outcome, job offer, salary, interview performance certainty, employer decision, or career success.',
+      fa: 'فقط مقایسهٔ زمان‌بندی ارتباط/دیده‌شدن در تاریخ مصاحبه — نه نتیجهٔ استخدام، پیشنهاد شغلی، حقوق، قطعیت عملکرد مصاحبه، تصمیم کارفرما یا موفقیت شغلی.',
+      ar: 'مقارنة توقيت التواصل/الظهور لتاريخ المقابلة فقط — وليست نتيجة توظيف أو عرض عمل أو راتب أو يقين أداء المقابلة أو قرار صاحب العمل أو نجاح مهني.',
+      ru: 'Только сравнение тайминга коммуникации/видимости на дату интервью — не исход найма, оффер, зарплата, уверенность в результате интервью, решение работодателя или карьерный успех.',
+    },
+  'role, company, and interview_type did not affect the numeric scores.': {
+    en: 'role, company, and interview_type did not affect the numeric scores.',
+    fa: 'نقش شغلی، شرکت و نوع مصاحبه بر امتیازهای عددی اثر نگذاشتند.',
+    ar: 'الدور الوظيفي والشركة ونوع المقابلة لم تؤثر على الدرجات الرقمية.',
+    ru: 'Роль, компания и тип интервью не влияли на числовые оценки.',
+  },
+
   // bus-investor-meeting EVALUATE
   'This is negotiation/communication timing evidence, not investment-outcome prediction.':
     {
