@@ -132,6 +132,18 @@ describe('buildDayIntelligenceView', () => {
     expect(view?.timingStrengthLabel).toBe('Timing strength');
     expect(view?.timingStrengthValue).toBe('81 / 100');
     expect(view?.timingStrengthValue).not.toContain('%');
+    expect(view?.interpretation).toBeNull();
+
+    const faView = buildDayIntelligenceView({
+      explanation: PREVIEW_MATRIX.strongSelective,
+      locale: 'fa',
+      score: 81,
+      posture: 'selective',
+    });
+    expect(faView?.headline).toBe(
+      'فرصت قوی است، اما گزینشی عمل کنید.'
+    );
+    expect(faView?.interpretation).toBeNull();
   });
 
   it('uses Decision conditions when legacy stance disagrees', () => {

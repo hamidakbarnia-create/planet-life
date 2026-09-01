@@ -83,8 +83,13 @@ export function buildDayIntelligenceView(input: {
     posture === 'mixed' ||
     input.explanation?.headline_code === 'semantic.mixed_conflict';
   const disagree = legacySemanticDisagree(input.stance, posture);
+  const selectiveInterpretationRepeatsHeadline =
+    input.explanation?.headline_code === 'semantic.strong_selective' &&
+    input.explanation?.posture_code === 'semantic.posture_selective';
   const interpretation =
-    rendered.posture && !substantiallySame(rendered.headline, rendered.posture)
+    rendered.posture &&
+    !selectiveInterpretationRepeatsHeadline &&
+    !substantiallySame(rendered.headline, rendered.posture)
       ? rendered.posture
       : null;
   const supports = insufficient ? [] : rendered.supports.slice(0, 2);
