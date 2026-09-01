@@ -296,7 +296,10 @@ describe('fetchMonthScores empty-cache regression', () => {
       string,
       {
         executive: { score: number };
-        strategic?: { component_breakdown?: { final_score: number } };
+        strategic?: {
+          component_breakdown?: { final_score: number } &
+            Record<string, unknown>;
+        };
         reasoning?: { summary: string; confidence: number; reasons: unknown[] };
         day_intelligence?: {
           final_score: number;
