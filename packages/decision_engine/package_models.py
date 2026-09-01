@@ -10,7 +10,7 @@ These models do not replace the JSON Schema as the contract source.
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
@@ -228,6 +228,34 @@ class RelatedDecisionsModule(ContractModel):
     items: tuple[DecisionLink, ...]
 
 
+class SemanticShadowModule(ContractModel):
+    """Additive experimental_shadow assessments. Not canonical. Not ranking.
+
+    Omitted from Package dumps when absent so Package v1 clients unchanged.
+    """
+
+    schema_version: Literal["decision_assessment.v1-shadow"]
+    semantic_status: Literal["experimental_shadow"]
+    assessments: tuple[dict[str, Any], ...]
+    score_vs_class_disagreements: tuple[dict[str, Any], ...] = ()
+    find_window_semantic_warnings: tuple[dict[str, Any], ...] = ()
+    policy: dict[str, Any] | None = None
+    policy_pairs: tuple[dict[str, Any], ...] = ()
+    window_policies: tuple[dict[str, Any], ...] = ()
+    explanation: dict[str, Any] | None = None
+    explanations: tuple[dict[str, Any], ...] = ()
+    window_explanations: tuple[dict[str, Any], ...] = ()
+
+    @model_serializer(mode="wrap")
+    def _omit_empty_policy(self, handler):
+        data = handler(self)
+        if data.get("policy") is None:
+            data.pop("policy", None)
+        if data.get("explanation") is None:
+            data.pop("explanation", None)
+        return data
+
+
 class DecisionEvaluationPackage(ContractModel):
     case_id: UUID
     evaluation_id: UUID
@@ -256,12 +284,15 @@ class DecisionEvaluationPackage(ContractModel):
     improve_accuracy: ImproveAccuracyModule
     next_decisions: NextDecisionsModule
     related_decisions: RelatedDecisionsModule
+    semantic_shadow: SemanticShadowModule | None = None
 
     @model_serializer(mode="wrap")
     def _omit_empty_find(self, handler):
         data = handler(self)
         if data.get("find") is None:
             data.pop("find", None)
+        if data.get("semantic_shadow") is None:
+            data.pop("semantic_shadow", None)
         return data
 
     @model_validator(mode="after")
@@ -321,6 +352,7 @@ __all__ = [
     "PrecisionLevel",
     "RecommendationModule",
     "RelatedDecisionsModule",
+    "SemanticShadowModule",
     "Stance",
     "TimingCandidate",
     "TimingModule",

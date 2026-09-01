@@ -168,6 +168,7 @@ def _score_one(
                 transit=transit,
                 activity_type=action,
                 scoring_context=scoring_context,
+                evaluation_date=target_date,
             )
         return {
             **payload,

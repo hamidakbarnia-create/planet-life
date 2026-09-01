@@ -115,13 +115,13 @@ describe('Calendar readiness percent presentation', () => {
     expect(insightSource).toContain('formatReadinessPercent(bestHour.score)');
     expect(insightSource).toContain('formatReadinessPercent(riskHour.score)');
     expect(pageSource).toContain('{label} · {formatReadinessPercent(h.score)}');
-    expect(pageSource).toContain(
+    expect(pageSource).toContain('formatTimingStrength(selectedScore)');
+    expect(pageSource).not.toContain(
       '{t.score}: {formatReadinessPercent(selectedScore)}'
     );
 
-    // No bare numeric score renders / legacy /100 label at display sites
+    // Hourly stays percent; selected-day product slice uses /100 timing strength
     expect(pageSource).not.toContain('{label} · {h.score}');
-    expect(pageSource).not.toContain('{selectedScore}/100');
     expect(pageSource).not.toMatch(/formatReadinessPercent\([^)]+\)%/);
     expect(cellSource).not.toMatch(/formatReadinessPercent\([^)]+\)%/);
 

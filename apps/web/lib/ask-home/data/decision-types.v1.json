@@ -12,7 +12,13 @@
       "allowed_modes": [
         "compare_dates"
       ],
-      "output_profile": "decision_evaluation_package.v1"
+      "output_profile": "decision_evaluation_package.v1",
+      "risk_context": {
+        "level": "standard",
+        "domains": [],
+        "outcome_prediction_prohibited": false,
+        "factual_deadline_priority": false
+      }
     },
     {
       "decision_type_id": "car-interview",
@@ -27,7 +33,15 @@
         "compare_dates",
         "find_dates"
       ],
-      "output_profile": "decision_evaluation_package.v1"
+      "output_profile": "decision_evaluation_package.v1",
+      "risk_context": {
+        "level": "elevated",
+        "domains": [
+          "employment"
+        ],
+        "outcome_prediction_prohibited": false,
+        "factual_deadline_priority": false
+      }
     },
     {
       "decision_type_id": "mar-wedding-date",
@@ -41,7 +55,15 @@
         "evaluate_date",
         "compare_dates"
       ],
-      "output_profile": "decision_evaluation_package.v1"
+      "output_profile": "decision_evaluation_package.v1",
+      "risk_context": {
+        "level": "elevated",
+        "domains": [
+          "relationship"
+        ],
+        "outcome_prediction_prohibited": false,
+        "factual_deadline_priority": false
+      }
     },
     {
       "decision_type_id": "bus-investor-meeting",
@@ -55,7 +77,15 @@
         "evaluate_date",
         "compare_dates"
       ],
-      "output_profile": "decision_evaluation_package.v1"
+      "output_profile": "decision_evaluation_package.v1",
+      "risk_context": {
+        "level": "elevated",
+        "domains": [
+          "employment"
+        ],
+        "outcome_prediction_prohibited": false,
+        "factual_deadline_priority": false
+      }
     },
     {
       "decision_type_id": "bus-product-launch",
@@ -69,7 +99,13 @@
         "evaluate_date",
         "find_dates"
       ],
-      "output_profile": "decision_evaluation_package.v1"
+      "output_profile": "decision_evaluation_package.v1",
+      "risk_context": {
+        "level": "standard",
+        "domains": [],
+        "outcome_prediction_prohibited": false,
+        "factual_deadline_priority": false
+      }
     }
   ]
 }

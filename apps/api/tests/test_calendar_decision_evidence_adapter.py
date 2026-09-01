@@ -104,6 +104,9 @@ def test_calendar_day_pipeline_score_unchanged_by_evidence_adapter():
     assert "classification_coverage" in shadow
     assert snapshot.classification.day_class == day_intelligence["day_class"]
     assert "day_intelligence" not in payload
+    assert "command" not in (day_intelligence.get("explanation") or {})
+    assert day_intelligence["explanation"]["headline_code"].startswith("semantic.")
+    assert day_intelligence["policy"]["evaluate_interpretation"]
 
 
 def test_analyze_style_scoring_response_has_no_day_intelligence():

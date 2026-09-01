@@ -10,6 +10,27 @@ from packages.decision_engine.day_intelligence_models import (
     build_day_intelligence_snapshot,
     day_intelligence_payload,
 )
+from packages.decision_engine.decision_assessment import (
+    ASSESSMENT_SCHEMA_VERSION,
+    DecisionAssessment,
+    build_decision_assessment,
+    decision_assessment_payload,
+)
+from packages.decision_engine.semantic_policy import (
+    SemanticDecisionPolicyResult,
+    compare_pair_policy,
+    evaluate_policy,
+)
+from packages.decision_engine.semantic_explanation import (
+    SemanticExplanation,
+    explain_assessment,
+)
+from packages.decision_engine.semantic_render import (
+    RenderedSemanticExplanation,
+    render_semantic_explanation,
+)
+from packages.decision_engine.registry.schema import RiskContext
+from packages.decision_engine.registry.risk import resolve_risk_context
 from packages.decision_engine.dimension_classification import (
     DimensionDayClassification,
     classify_from_dimensions,
@@ -54,6 +75,11 @@ __all__ = [
     "CaseState",
     "DayClassification",
     "DayIntelligenceSnapshot",
+    "DecisionAssessment",
+    "SemanticDecisionPolicyResult",
+    "SemanticExplanation",
+    "RenderedSemanticExplanation",
+    "RiskContext",
     "DimensionDayClassification",
     "DecisionDimension",
     "DecisionDimensions",
@@ -73,10 +99,17 @@ __all__ = [
     "archive_case_composite",
     "attach_calendar_day_intelligence",
     "build_day_intelligence_snapshot",
+    "build_decision_assessment",
+    "compare_pair_policy",
+    "evaluate_policy",
+    "explain_assessment",
+    "render_semantic_explanation",
+    "resolve_risk_context",
     "classify_day",
     "classify_from_dimensions",
     "compute_decision_dimensions",
     "day_intelligence_payload",
+    "decision_assessment_payload",
     "complete_case_composite",
     "dominant_evaluated_aspects",
     "map_activity_response_to_decision_outcome",

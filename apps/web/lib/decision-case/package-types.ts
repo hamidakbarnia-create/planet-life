@@ -171,6 +171,25 @@ export interface DecisionEvaluationPackage {
   readonly related_decisions: {
     readonly items: readonly DecisionLink[];
   };
+
+  /**
+   * Additive experimental_shadow DecisionAssessment sidecar.
+   * Not canonical. Evaluate selected-result product UI may render
+   * explanation copy; Compare/Find ranking does not consume it.
+   */
+  readonly semantic_shadow?: {
+    readonly schema_version: "decision_assessment.v1-shadow";
+    readonly semantic_status: "experimental_shadow";
+    readonly assessments: readonly Record<string, unknown>[];
+    readonly score_vs_class_disagreements?: readonly Record<string, unknown>[];
+    readonly find_window_semantic_warnings?: readonly Record<string, unknown>[];
+    readonly policy?: Record<string, unknown>;
+    readonly policy_pairs?: readonly Record<string, unknown>[];
+    readonly window_policies?: readonly Record<string, unknown>[];
+    readonly explanation?: Record<string, unknown>;
+    readonly explanations?: readonly Record<string, unknown>[];
+    readonly window_explanations?: readonly Record<string, unknown>[];
+  };
 }
 
 export interface DecisionLink {

@@ -38,6 +38,9 @@ from packages.decision_engine.evidence import (
     normalize_score_evidence,
 )
 
+# Imported lazily inside attach to keep snapshot construction the single
+# semantic path while avoiding an import cycle at module load.
+
 
 class DayIntelligenceSnapshot(BaseModel):
     """Passthrough score + normalized evidence + shadow layers.
@@ -147,18 +150,70 @@ def attach_calendar_day_intelligence(
     transit: Mapping[str, Any] | None = None,
     activity_type: str | None = None,
     scoring_context: ScoringContext | None = None,
+    evaluation_date: str | None = None,
 ) -> dict[str, Any]:
-    """Add ``day_intelligence`` without mutating executive.score."""
-    snapshot = build_day_intelligence_snapshot(
+    """Add ``day_intelligence`` without mutating executive.score.
+
+    Uses the shared DecisionAssessment builder so Calendar semantics originate
+    from the same path as Evaluate / Compare / Find.
+    """
+    from packages.decision_engine.decision_assessment import (
+        build_decision_assessment,
+    )
+
+    if scoring_context is None or not activity_type:
+        snapshot = build_day_intelligence_snapshot(
+            payload,
+            natal=natal,
+            transit=transit,
+            activity_type=activity_type,
+            scoring_context=scoring_context,
+        )
+        attached = dict(payload)
+        attached["day_intelligence"] = day_intelligence_payload(snapshot)
+        return attached
+
+    assessment = build_decision_assessment(
         payload,
+        scoring_context=scoring_context,
+        action_type=str(activity_type),
+        evaluation_date=evaluation_date,
         natal=natal,
         transit=transit,
-        activity_type=activity_type,
-        scoring_context=scoring_context,
+        module_origin="calendar",
     )
     attached = dict(payload)
-    attached["day_intelligence"] = day_intelligence_payload(snapshot)
+    di = day_intelligence_payload(assessment.snapshot)
+    di.update(_calendar_semantic_sidecar(assessment))
+    attached["day_intelligence"] = di
     return attached
+
+
+def _calendar_semantic_sidecar(assessment: Any) -> dict[str, Any]:
+    """Additive explanation/policy on Calendar DI. Not consumed by cells."""
+    from packages.decision_engine.decision_assessment import tagged_assessment_payload
+    from packages.decision_engine.semantic_explanation import (
+        explain_assessment,
+        explanation_payload,
+    )
+    from packages.decision_engine.semantic_policy import evaluate_policy
+
+    tagged = tagged_assessment_payload(assessment, include_day_intelligence=False)
+    policy = evaluate_policy(
+        score=assessment.score,
+        posture=assessment.dimension_class,
+        assessment=tagged,
+    )
+    explanation = explain_assessment(
+        tagged,
+        score=assessment.score,
+        posture=assessment.dimension_class,
+        policy=policy.model_dump(mode="json"),
+    )
+    return {
+        "explanation": explanation_payload(explanation),
+        "policy": policy.model_dump(mode="json"),
+    }
 
 
 def day_intelligence_payload(snapshot: DayIntelligenceSnapshot) -> dict[str, Any]:

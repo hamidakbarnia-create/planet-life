@@ -22,6 +22,7 @@ class ScoredCompareOption:
     band: str
     strengths: tuple[str, ...] = ()
     risks: tuple[str, ...] = ()
+    assessment: dict | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,6 +35,7 @@ class RankedCompareOption:
     rank: int
     strengths: tuple[str, ...] = ()
     risks: tuple[str, ...] = ()
+    assessment: dict | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,6 +43,9 @@ class CompareRankingResult:
     ranked: tuple[RankedCompareOption, ...]
     unique_winner: bool
     tied_option_ids: tuple[str, ...]
+    score_vs_class_disagreements: tuple[dict, ...] = ()
+    policy_pairs: tuple[dict, ...] = ()
+    explanations: tuple[dict, ...] = ()
 
 
 def rank_compare_options(
@@ -66,6 +71,7 @@ def rank_compare_options(
             rank=index + 1,
             strengths=item.strengths,
             risks=item.risks,
+            assessment=item.assessment,
         )
         for index, item in enumerate(ordered)
     )
@@ -77,10 +83,44 @@ def rank_compare_options(
         if abs(item.score - top.score) <= tie_epsilon
     ]
     unique_winner = len(tied) == 1
+    from packages.decision_engine.decision_assessment import (
+        score_class_disagreements,
+        shadow_dimension_class,
+    )
+
+    disagreements = score_class_disagreements(
+        [
+            {
+                "id": item.option_id,
+                "score": item.score,
+                "dimension_class": shadow_dimension_class(item.assessment),
+            }
+            for item in ranked
+            if item.assessment
+        ]
+    )
+    from packages.decision_engine.semantic_policy import compare_policy_pairs
+    from packages.decision_engine.semantic_explanation import explain_compare_pairs
+
+    rows = [
+        {
+            "id": item.option_id,
+            "option_id": item.option_id,
+            "score": item.score,
+            "assessment": item.assessment or {},
+            "dimension_class": shadow_dimension_class(item.assessment),
+        }
+        for item in ranked
+    ]
+    pairs = compare_policy_pairs(rows)
+    explanations = explain_compare_pairs(rows, pairs)
     return CompareRankingResult(
         ranked=ranked,
         unique_winner=unique_winner,
         tied_option_ids=tuple(tied),
+        score_vs_class_disagreements=disagreements,
+        policy_pairs=pairs,
+        explanations=explanations,
     )
 
 

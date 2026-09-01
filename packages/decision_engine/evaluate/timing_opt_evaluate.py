@@ -89,8 +89,51 @@ def evaluate_timing_opt(
             details={"error_type": type(exc).__name__},
         ) from exc
 
-    return assemble_package_from_outcome(
+    from packages.decision_engine.decision_assessment import (
+        assessment_from_request,
+        build_semantic_shadow,
+        tagged_assessment_payload,
+    )
+    from packages.decision_engine.semantic_policy import evaluate_policy
+    from packages.decision_engine.semantic_explanation import (
+        explain_assessment,
+        explanation_payload,
+    )
+
+    assessment = assessment_from_request(
         outcome,
+        request,
+        evaluation_date=target_date,
+        natal=getattr(outcome, "source_natal", None),
+        transit=getattr(outcome, "source_transit", None),
+        decision_type_id=config.decision_type_id,
+        family_id=config.family_id,
+    )
+    shadow = None
+    assessed = outcome
+    if assessment is not None:
+        tagged = tagged_assessment_payload(assessment)
+        assessed = outcome.model_copy(update={"decision_assessment": tagged})
+        policy = evaluate_policy(
+            score=assessment.score,
+            posture=assessment.dimension_class,
+            assessment=tagged,
+        ).model_dump(mode="json")
+        shadow = build_semantic_shadow(
+            [tagged],
+            policy=policy,
+            explanation=explanation_payload(
+                explain_assessment(
+                    tagged,
+                    score=assessment.score,
+                    posture=assessment.dimension_class,
+                    policy=policy,
+                )
+            ),
+        )
+
+    return assemble_package_from_outcome(
+        assessed,
         config,
         case_id=case_id,
         case_version=case_version,
@@ -99,6 +142,7 @@ def evaluate_timing_opt(
         evaluation_id=evaluation_id,
         created_at=created_at,
         event_location_supplied=event_location_supplied,
+        semantic_shadow=shadow,
     )
 
 

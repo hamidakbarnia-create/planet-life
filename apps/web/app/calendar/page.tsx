@@ -33,6 +33,7 @@ import {
   type PlanetTransit,
   type TransitSnapshotMeta,
   type ScoreBand,
+  type CalendarDayIntelligence,
 } from '@/lib/calendar-scores';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import {
@@ -65,6 +66,10 @@ import { CALENDAR_UI } from '@/lib/calendar-power-presentation';
 import { CalendarMonthGrid } from '@/components/calendar/CalendarMonthGrid';
 import { CalendarInsightStack } from '@/components/calendar/CalendarInsightStack';
 import { CalendarSelectedDayInsight } from '@/components/calendar/CalendarSelectedDayInsight';
+import {
+  DAY_INTELLIGENCE_CHROME,
+  formatTimingStrength,
+} from '@/lib/decision-intelligence/product-copy';
 
 type LangKey = AppLang;
 
@@ -88,7 +93,8 @@ export default function CalendarPage() {
     scores: Record<string, number>;
     breakdowns: Record<string, ScoreBreakdown | null>;
     reasoning: Record<string, ScoreReasoning | null>;
-  }>({ scores: {}, breakdowns: {}, reasoning: {} });
+    dayIntelligence: Record<string, CalendarDayIntelligence | null>;
+  }>({ scores: {}, breakdowns: {}, reasoning: {}, dayIntelligence: {} });
   const scores = monthScoreData.scores;
   const [loadingMonth, setLoadingMonth] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
@@ -180,10 +186,16 @@ export default function CalendarPage() {
         scores: monthScores,
         breakdowns,
         reasoning,
+        dayIntelligence,
       } = await fetchMonthScores(profile, year, month, (done, total) =>
         setProgress({ done, total })
       );
-      setMonthScoreData({ scores: monthScores, breakdowns, reasoning });
+      setMonthScoreData({
+        scores: monthScores,
+        breakdowns,
+        reasoning,
+        dayIntelligence,
+      });
     } finally {
       setLoadingMonth(false);
     }
@@ -439,8 +451,10 @@ export default function CalendarPage() {
                 <div
                   className="fi text-sm"
                   style={{ color: 'rgba(255,255,255,0.65)' }}
+                  data-testid="calendar-selected-timing-strength"
                 >
-                  {t.score}: {formatReadinessPercent(selectedScore)}
+                  {DAY_INTELLIGENCE_CHROME[lang].timingStrength}:{' '}
+                  {formatTimingStrength(selectedScore)}
                 </div>
               )}
             </div>
@@ -460,6 +474,12 @@ export default function CalendarPage() {
               }}
               reasoning={
                 selectedDate ? monthScoreData.reasoning[selectedDate] : null
+              }
+              score={selectedScore}
+              dayIntelligence={
+                selectedDate
+                  ? monthScoreData.dayIntelligence[selectedDate]
+                  : null
               }
               transit={transit}
               transitMeta={transitMeta}

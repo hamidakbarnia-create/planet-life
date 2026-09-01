@@ -1,8 +1,9 @@
 /**
  * Frontend adapter for Calendar Day Intelligence (data plane only).
  *
- * Maps the additive `/api/batch` `day_intelligence` object. Calendar UI does
- * not consume this yet. Nested additive blobs (dimensions,
+ * Maps the additive `/api/batch` `day_intelligence` object. Selected-day
+ * product UI may render explanation copy; month cells do not. Nested additive
+ * blobs (dimensions,
  * dimension_classification) keep API snake_case so cache round-trips cannot
  * silently drop classifier_version / semantic_status / evidence ids.
  */
@@ -41,6 +42,8 @@ export interface CalendarDayIntelligence {
   scoringContext: Record<string, unknown>;
   dimensions: DayIntelligenceObject | null;
   dimensionClassification: DayIntelligenceObject | null;
+  explanation: DayIntelligenceObject | null;
+  policy: DayIntelligenceObject | null;
 }
 
 function readNumber(value: unknown): number | null {
@@ -98,6 +101,8 @@ export function extractBatchDayIntelligence(
     scoringContext: cloneObject(src.scoring_context) ?? {},
     dimensions: cloneObject(src.dimensions),
     dimensionClassification: cloneObject(src.dimension_classification),
+    explanation: cloneObject(src.explanation),
+    policy: cloneObject(src.policy),
   };
 }
 

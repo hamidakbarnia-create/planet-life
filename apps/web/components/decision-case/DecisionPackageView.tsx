@@ -20,6 +20,15 @@ import {
   packageToFindView,
 } from '@/lib/decision-frame/package-adapter';
 import { useAppLang } from '@/lib/use-app-lang';
+import { PackageSemanticPreview } from '@/components/decision-intelligence/PackageSemanticPreview';
+import { DayIntelligencePanel } from '@/components/decision-intelligence/DayIntelligencePanel';
+import { isDecisionSemanticsPreviewEnabled } from '@/lib/decision-intelligence/preview-flag';
+import {
+  buildDayIntelligenceView,
+  evaluatePosture,
+  explanationFromEvaluatePackage,
+} from '@/lib/decision-intelligence/day-intelligence-view';
+import type { SemanticPreviewLocale } from '@/lib/decision-intelligence/types';
 
 /**
  * Case-path package renderer (consumer product surface).
@@ -52,10 +61,25 @@ export function DecisionPackageView({
     pkg.recommendation.stance === 'insufficient_data' ||
     (pkg.mode !== 'find_dates' && !pkg.timing.material);
 
+  const preview = isDecisionSemanticsPreviewEnabled() ? (
+    <PackageSemanticPreview package={pkg} lang={lang} />
+  ) : null;
+  const evaluateView =
+    pkg.mode === 'evaluate_date'
+      ? buildDayIntelligenceView({
+          explanation: explanationFromEvaluatePackage(pkg),
+          locale: lang as SemanticPreviewLocale,
+          score: pkg.timing.score,
+          stance: pkg.recommendation.stance,
+          posture: evaluatePosture(pkg),
+        })
+      : null;
+
   if (pkg.mode === 'find_dates' && pkg.find && !isBlocked && !isStub) {
     return (
       <div data-testid="decision-package-view" data-mode="find_dates">
         <FindResultView lang={lang} model={packageToFindView(pkg, lang)} />
+        {preview}
       </div>
     );
   }
@@ -126,6 +150,7 @@ export function DecisionPackageView({
     return (
       <div data-testid="decision-package-view" data-mode="compare_dates">
         <CompareResultView lang={lang} model={packageToCompareView(pkg, lang)} />
+        {preview}
       </div>
     );
   }
@@ -142,6 +167,12 @@ export function DecisionPackageView({
   return (
     <div data-testid="decision-package-view" data-mode="evaluate_date">
       <EvaluateProductResult lang={lang} model={model} />
+      {evaluateView ? (
+        <div className="mt-4" data-testid="evaluate-day-intelligence">
+          <DayIntelligencePanel view={evaluateView} />
+        </div>
+      ) : null}
+      {preview}
     </div>
   );
 }

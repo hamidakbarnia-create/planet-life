@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | Phase 0/1 + 2A (shadow classification) + 2B (dimensions) + 2C (dimension-class comparison) on `feat/calendar-decision-intelligence-p0-p1` |
+| **Status** | Phase 0/1 + 2A–2C + 3A–3F2 + 4A (product-facing selected-day / Evaluate detail) on `feat/calendar-decision-intelligence-p0-p1` |
 | **Invariant** | Astronomical signals → scored evidence → **normalized evidence** → decision synthesis → context → decision command → explanation |
 | **Non-goals (this phase)** | Calendar UI redesign, semantic commands, replacing 2A classification, domain scores, Power Window changes, Ask UI, LLM prose, production score recalibration, second scoring engine |
 
@@ -502,3 +502,99 @@ Comparison matrix: `semantic_validation_proposed_matrix.json`.
 **Size:** 13 Calendar score goldens: Day Intelligence JSON 3.3–10.1 KB/day (median 4.0 KB). A 31-day month of DI alone is ~101–306 KB. Evidence is not stripped; no compact representation was needed (under typical `localStorage` quotas).
 
 **UI:** Calendar page still destructures `{ scores, breakdowns, reasoning }` only. Pathfinder timing uses `.scores` only. Flag does not authorize user-visible semantics.
+
+---
+
+## Phase 3B — Shared semantic consumption contract
+
+**Scope:** One `DecisionAssessment` builder (`packages/decision_engine/decision_assessment.py`) consumed by Calendar, Evaluate, Compare, and Find. Composes `DayIntelligenceSnapshot` (v3 `dimension_class.v3-shadow`, `experimental_shadow`, Phase 2A retained). Additive `semantic_shadow` on Package v1. No scoring, ranking, command, or UI changes.
+
+**Context:** Assessment construction requires explicit `ScoringContext` + `action_type`. Case runtimes use the DecisionRequest context (`CONTEXT_ASK_ELECTIONAL`); Calendar uses `CONTEXT_CALENDAR_DAY`. No silent Calendar fallback.
+
+**Compare:** per-candidate assessments; ranking still score-desc. `score_vs_class_disagreements` records score-vs-v3 conflicts without changing the winner.
+
+**Find:** per-day compact assessments (no duplicated `day_intelligence` blob). Eligibility/window grouping unchanged. `find_window_semantic_warnings` flags score-eligible restrictive classes and mixed contiguous windows.
+
+---
+
+## Phase 3C — Semantic decision policy (shadow resolver)
+
+**Axes:** Opportunity/timing strength = executive score 0..100 (not success probability). Decision posture = v3 class. Independent. Higher score is not universally a better decision.
+
+**Partial posture order only:** `high_leverage` over `action`/`build`/`selective`/`defensive`/`recovery`; `action` over `selective`/`defensive`/`recovery`; `build` over `selective`/`defensive`; `selective` over `defensive`. Not a total ranking. `mixed` vs `review`, `recovery` vs `defensive`/`review`, and `action` vs `build` stay incomparable.
+
+**Near-tie:** `NEAR_TIE_DELTA = 2.0` (existing COMPARE/FIND uniqueness epsilon). Adopted after sensitivity: widening to 12 would turn 81-selective vs 70-action into a posture-only preference. Moderate vs large score gap (`LARGE_SCORE_GAP = 15`) is rationale-only and does not change conflict relation.
+
+**Relations:** `aligned` | `score_advantage_with_semantic_caution` | `semantic_quality_advantage` | `material_tradeoff` | `insufficient_semantics`. Reason codes, no prose, no commands.
+
+**Surfaces:** Compare `policy_pairs`, Find `window_policies`, Evaluate `policy` on additive `semantic_shadow`. Legacy winners/eligibility/UI unchanged.
+
+**High-stakes:** registry has no structured flag. Hook fires only if `context.high_stakes` is explicitly set. Never infers legal/medical/financial/immigration outcomes.
+
+---
+
+## Phase 3D — Decision risk context and high-stakes registry contract
+
+**Registry:** optional `risk_context` on `DecisionTypeRecord`: `level` (`standard` | `elevated` | `high_stakes`), `domains`, `outcome_prediction_prohibited`, `factual_deadline_priority`. Omitted field resolves to conservative documented default (`standard`, no domains, both flags false). Unknown / unregistered types are `unresolved` with the same values — unknown is not high risk. Never inferred from `decision_type_id` or label.
+
+**Current types (reviewed, explicit):** `tim-compare-three` and `bus-product-launch` = standard. `car-interview` and `bus-investor-meeting` = elevated / employment (professional meeting timing, not hiring or investment outcome). `mar-wedding-date` = elevated / relationship (ceremony date, not legal marriage/immigration). No legal, medical, immigration, or safety types exist.
+
+**Propagation:** `DecisionTypeRecord` → `resolve_risk_context` → `DecisionAssessment.context` (`risk_level`, `risk_domains`, `outcome_prediction_prohibited`, `factual_deadline_priority`, `risk_resolution`) → `SemanticDecisionPolicyResult`. Web/API do not reimplement defaults.
+
+**Policy:** `high_stakes` adds `high_stakes_review_required` and `no_outcome_prediction`. `factual_deadline_priority` adds that code. Interpretations (`strong_and_clean`, `strong_but_selective`, …) still apply. Score, posture, Compare winner, and Find eligibility unchanged.
+
+**Deadline invariant:** a known legal/administrative/medical/financial deadline must never be delayed because astrology indicates review/recovery/defensive timing. Contract and code only; no scheduler in this phase.
+
+**Safety contract:** timing semantics may affect preference, preparation, review intensity, verification, and relative opportunity. They must not establish visa/legal approval, diagnosis or treatment outcome, guaranteed investment return, factual safety outcome, or legal entitlement. External facts, evidence, professional advice, and deadlines take priority.
+
+---
+
+## Phase 3E — Semantic explanation contract
+
+**Model:** `SemanticExplanation` (`semantic_explanation.v1-shadow`, `experimental_shadow`): `headline_code`, `summary_code`, `opportunity_code`, `posture_code`, optional `tradeoff_code`, `caution_codes`, `support_codes`, `safety_codes`, `evidence_refs`, `localization_args`. Codes only. No commands. No LLM copy.
+
+**Origin:** score band, v3 posture, policy relation, scored dimensions (max 2 support + 2 caution), conflict/veto metadata, risk context, evidence ids. Insufficient dimensions are omitted, never "neutral".
+
+**Surfaces:** Evaluate `semantic_shadow.explanation`; Compare `explanations` parallel to `policy_pairs`; Find `window_explanations` parallel to `window_policies`. Ranking/eligibility/UI unchanged.
+
+**Safety:** `high_stakes` adds `semantic.high_stakes_review_required` + `semantic.no_outcome_prediction` without erasing timing codes. `factual_deadline_priority` adds `semantic.deadline_priority`. Elevated preserves `risk_level` in args only.
+
+**Localization:** named slots + `locales: [en, fa, ar, ru]`. RTL-safe: no meaning in word order. Copy principles recorded for later catalogs; catalogs and renderer landed in Phase 3F1.
+
+---
+
+## Phase 3F1 — Semantic localization catalog and deterministic renderer
+
+**Scope:** Copy infrastructure only. `render_semantic_explanation(explanation, locale, display_context?)` maps `SemanticExplanation` codes to concise EN/FA/AR/RU strings. Experimental shadow. No Calendar / Ask / Compare / Find UI consumption. No commands, ranking, score, or class changes. No LLM.
+
+**Catalogs:** `packages/decision_engine/i18n/catalogs/{en,fa,ar,ru}.json`. Every emitted `semantic.*` code has an entry in all four locales. No English fallback for a supported locale. Unsupported locale or missing named args fail in strict mode (tests/dev) or return `status=unavailable`.
+
+**Renderer:** `packages/decision_engine/semantic_render.py`. Output: `headline`, `summary`, `opportunity`, `posture`, `tradeoff?`, `supports[]`, `cautions[]`, `safety[]`, plus `text_direction`. Named `{slots}` only. Option labels come from display context; never hardcoded A/B when labels exist.
+
+**Material tradeoff:** higher-score option = stronger timing; lower-score cleaner posture = cleaner execution; framed as a trade-off, not a winner.
+
+**Not done:** user-facing UI, localized risk-domain names, command synthesis, canonical promotion.
+
+---
+
+## Phase 3F2 — Internal semantic preview UI
+
+**Scope:** Debug-only overlay gated by `NEXT_PUBLIC_DECISION_SEMANTICS_PREVIEW=true` (default OFF). Reuses Phase 3F1 catalogs/renderer. Does not replace Calendar cells, Compare winners, Find windows, Package stance, or commands.
+
+**Surfaces when ON:** selected-day Calendar detail (side-by-side current vs experimental); Evaluate / Compare / Find package views *below* the current result; `/dev/semantic-preview` fixture matrix.
+
+**When OFF:** no preview DOM.
+
+---
+
+## Phase 4A — Product-facing day detail intelligence
+
+**Scope:** First product-facing Decision Intelligence slice on Calendar **selected-day detail** and a single **Evaluate** result. Semantics remain `experimental_shadow`. Existing scores, Calendar cells, Compare ranking, Find ranking, and commands stay canonical.
+
+**Show:** executive score as timing strength (`81 / 100`, not `%` probability); one catalog headline; one short interpretation only when it is not the same as the headline; max 2 supports and 2 cautions in existing explanation order; optional Why only when it would add distinct copy; safety only when the renderer emits it; subtle `Decision Intelligence — Beta` (or `Decision conditions` when legacy stance and semantic posture materially disagree).
+
+**Do not show:** raw posture enums, policy relation ids, classifier versions, coverage, evidence ids, `semantic.*` codes, debug banners, or `experimental_shadow`.
+
+**Insufficient:** catalog insufficient sentence only; no invented supports/cautions. **Mixed:** conflict copy, not a uniformly bad/danger state. **Elevated:** normal semantic display. **High stakes:** existing safety codes only.
+
+**Compare / Find:** no product panel. Phase 3F2 debug preview remains independently gated.

@@ -36,6 +36,7 @@ class ScoredFindDay:
     band: str
     strengths: tuple[str, ...] = ()
     risks: tuple[str, ...] = ()
+    assessment: dict | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +57,9 @@ class FindWindowResult:
     windows: tuple[FindWindow, ...]
     unique_dominant: bool
     tied_window_ids: tuple[str, ...]
+    semantic_warnings: tuple[dict, ...] = ()
+    window_policies: tuple[dict, ...] = ()
+    window_explanations: tuple[dict, ...] = ()
 
 
 def inclusive_day_count(range_start: date, range_end: date) -> int:
@@ -212,10 +216,30 @@ def build_find_windows(
     tie_epsilon: float = FIND_TIE_EPSILON,
     max_windows: int = FIND_MAX_WINDOWS,
 ) -> FindWindowResult:
-    return rank_find_windows(
-        group_contiguous_windows(days),
+    grouped = group_contiguous_windows(days)
+    ranked = rank_find_windows(
+        grouped,
         tie_epsilon=tie_epsilon,
         max_windows=max_windows,
+    )
+    from packages.decision_engine.decision_assessment import (
+        find_window_semantic_warnings,
+    )
+
+    warnings = find_window_semantic_warnings(days, ranked.windows)
+    from packages.decision_engine.semantic_policy import find_window_policies
+
+    policies = find_window_policies(days, ranked.windows)
+    from packages.decision_engine.semantic_explanation import explain_find_windows
+
+    explanations = explain_find_windows(policies)
+    return FindWindowResult(
+        windows=ranked.windows,
+        unique_dominant=ranked.unique_dominant,
+        tied_window_ids=ranked.tied_window_ids,
+        semantic_warnings=warnings,
+        window_policies=policies,
+        window_explanations=explanations,
     )
 
 
