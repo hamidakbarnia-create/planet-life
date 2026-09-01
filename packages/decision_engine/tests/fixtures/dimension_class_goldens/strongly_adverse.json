@@ -1,0 +1,52 @@
+{
+  "classifier_version": "dimension_class.v1-shadow",
+  "dimension_classification": {
+    "classification_coverage": 0.9143,
+    "classifier_version": "dimension_class.v1-shadow",
+    "conflicted_dimension_ids": [],
+    "critical_dimensions_available": 4,
+    "day_class": "defensive",
+    "dimensions_used": [
+      "opportunity",
+      "momentum",
+      "clarity",
+      "stability",
+      "pressure",
+      "reversibility_safety"
+    ],
+    "disagreement": true,
+    "disagreement_reason": [
+      "label_adverse_vs_defensive",
+      "critical_veto",
+      "defensive_veto_without_drive"
+    ],
+    "executive_score": 2,
+    "high_dimension_ids": [],
+    "insufficient_dimension_count": 1,
+    "low_dimension_ids": [
+      "opportunity",
+      "momentum",
+      "clarity",
+      "stability",
+      "pressure",
+      "reversibility_safety"
+    ],
+    "phase2a_class": "adverse",
+    "rule_id": "defensive_veto_without_drive",
+    "same_dimension_conflict": false,
+    "scored_dimension_count": 6,
+    "semantic_status": "experimental_shadow",
+    "split_signal": false,
+    "veto_dimension_ids": [
+      "clarity",
+      "stability",
+      "reversibility_safety",
+      "pressure"
+    ]
+  },
+  "executive_score": 2,
+  "id": "strongly_adverse",
+  "phase2a_class": "adverse",
+  "phase2c_class": "defensive",
+  "semantic_status": "experimental_shadow"
+}

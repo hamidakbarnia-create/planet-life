@@ -1,0 +1,37 @@
+{
+  "classifier_version": "dimension_class.v1-shadow",
+  "dimension_classification": {
+    "classification_coverage": 0.2571,
+    "classifier_version": "dimension_class.v1-shadow",
+    "conflicted_dimension_ids": [],
+    "critical_dimensions_available": 0,
+    "day_class": "review",
+    "dimensions_used": [
+      "opportunity",
+      "momentum",
+      "cooperation"
+    ],
+    "disagreement": true,
+    "disagreement_reason": [
+      "label_mixed_vs_review",
+      "phase2a_score_band_mixed_without_conflict",
+      "review_indeterminate"
+    ],
+    "executive_score": 56,
+    "high_dimension_ids": [],
+    "insufficient_dimension_count": 4,
+    "low_dimension_ids": [],
+    "phase2a_class": "mixed",
+    "rule_id": "review_indeterminate",
+    "same_dimension_conflict": false,
+    "scored_dimension_count": 3,
+    "semantic_status": "experimental_shadow",
+    "split_signal": false,
+    "veto_dimension_ids": []
+  },
+  "executive_score": 56,
+  "id": "angular_contact",
+  "phase2a_class": "mixed",
+  "phase2c_class": "review",
+  "semantic_status": "experimental_shadow"
+}

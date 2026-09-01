@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | Phase 0/1 + 2A (shadow classification) + 2B (dimensions) on `feat/calendar-decision-intelligence-p0-p1` |
+| **Status** | Phase 0/1 + 2A (shadow classification) + 2B (dimensions) + 2C (dimension-class comparison) on `feat/calendar-decision-intelligence-p0-p1` |
 | **Invariant** | Astronomical signals → scored evidence → **normalized evidence** → decision synthesis → context → decision command → explanation |
 | **Non-goals (this phase)** | Calendar UI redesign, semantic commands, replacing 2A classification, domain scores, Power Window changes, Ask UI, LLM prose, production score recalibration, second scoring engine |
 
@@ -323,3 +323,61 @@ Weights scale existing signed `contribution`. They do not invent new astronomica
 - Computed in `build_day_intelligence_snapshot` in parallel with 2A classification.
 - Added to Calendar `day_intelligence.dimensions` with `semantic_status=experimental_shadow`. Frontend parser ignores unknown keys; Calendar UI unchanged.
 - Score goldens untouched. Separate `dimension_goldens/`.
+
+---
+
+## Phase 2C — Dimension-driven classification comparison (experimental shadow)
+
+**Scope:** Second deterministic classifier from `DecisionDimensions`, compared to Phase 2A. Not canonical. No commands, no Calendar UI, no score changes, no Find/Compare/Evaluate, no cache migration.
+
+**Status:** `classifier_version = dimension_class.v1-shadow`, `semantic_status = experimental_shadow`. Phase 2A `day_class` is unchanged. Comparison lives in additive `dimension_classification`.
+
+### Thresholds (scored dimensions only)
+
+| Bound | Value | Source |
+|-------|-------|--------|
+| HIGH | ≥ 65 | existing `_rating` Favorable floor |
+| LOW | ≤ 45 | existing `_rating` Mixed floor (inclusive caution side) |
+| high_leverage drive | ≥ 80 on a drive dim, or both drive dims HIGH | existing Highly Favorable floor |
+
+Insufficient dimensions are excluded from HIGH/LOW/veto/coverage-for-thresholds. Baseline 50 + `status=insufficient` is unknown.
+
+Pressure is inverse: HIGH pressure (≥65) is a veto, never a positive high.
+
+### Veto (scored only)
+
+- `clarity` ≤ 45
+- `stability` ≤ 45
+- `reversibility_safety` ≤ 45
+- `pressure` ≥ 65
+
+### Rule table (first match)
+
+1. No scored dimensions → `insufficient`
+2. Same-dimension `conflicted` on drive/critical/pressure → `mixed`
+3. Single scored dim and no veto → `insufficient` (blocks opportunity-only action)
+4. Split (drive HIGH + veto) and drive strong → `selective`
+5. Split, drive not strong → `review`
+6. Uneven drive (one HIGH, one LOW) → `review`
+7. Veto without drive HIGH, and (high pressure or ≥2 forward LOWs) → `defensive`
+8. Veto without drive HIGH otherwise → `review`
+9. No drive HIGH, ≥2 forward LOWs, pressure relief + stability ok → `recovery`
+10. No drive HIGH, ≥2 forward LOWs → `defensive`
+11. High pressure without drive HIGH → `defensive`
+12. Drive strong, no veto, scored ≥4, critical available ≥2 → `high_leverage`
+13. Drive HIGH, no veto → `action`
+14. Other supportive polarity, no veto → `build`
+15. Unpolarized, scored ≤2 → `insufficient`
+16. Unpolarized otherwise → `review`
+
+Drive HIGH requires **both** opportunity and momentum scored, at least one HIGH, neither LOW.
+
+`high_leverage` cannot be produced from `executive.score`.
+
+`classification_coverage` is 0..1 coverage metadata only (`0.6 × scored_dimension_count / 7 + 0.4 × critical_dimensions_available / 4`). It is not confidence, certainty, probability, or semantic strength.
+
+### Wiring
+
+- Computed in `build_day_intelligence_snapshot` after 2A + 2B.
+- Payload adds `dimension_classification` without replacing `day_class`.
+- Separate `dimension_class_goldens/`.

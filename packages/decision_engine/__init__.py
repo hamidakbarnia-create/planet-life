@@ -10,6 +10,10 @@ from packages.decision_engine.day_intelligence_models import (
     build_day_intelligence_snapshot,
     day_intelligence_payload,
 )
+from packages.decision_engine.dimension_classification import (
+    DimensionDayClassification,
+    classify_from_dimensions,
+)
 from packages.decision_engine.dimensions import (
     DecisionDimension,
     DecisionDimensions,
@@ -50,6 +54,7 @@ __all__ = [
     "CaseState",
     "DayClassification",
     "DayIntelligenceSnapshot",
+    "DimensionDayClassification",
     "DecisionDimension",
     "DecisionDimensions",
     "DecisionEvidence",
@@ -69,6 +74,7 @@ __all__ = [
     "attach_calendar_day_intelligence",
     "build_day_intelligence_snapshot",
     "classify_day",
+    "classify_from_dimensions",
     "compute_decision_dimensions",
     "day_intelligence_payload",
     "complete_case_composite",

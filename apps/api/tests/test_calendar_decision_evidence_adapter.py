@@ -93,6 +93,16 @@ def test_calendar_day_pipeline_score_unchanged_by_evidence_adapter():
     if sample_dim["status"] == "insufficient":
         assert sample_dim["evidence_strength"] is None
         assert sample_dim["value"] == 50
+    shadow = day_intelligence["dimension_classification"]
+    assert shadow["phase2a_class"] == day_intelligence["day_class"]
+    assert shadow["executive_score"] == original_score
+    assert shadow["semantic_status"] == "experimental_shadow"
+    assert shadow["classifier_version"] == "dimension_class.v1-shadow"
+    assert "command" not in shadow
+    assert "confidence" not in shadow
+    assert "classification_strength" not in shadow
+    assert "classification_coverage" in shadow
+    assert snapshot.classification.day_class == day_intelligence["day_class"]
     assert "day_intelligence" not in payload
 
 

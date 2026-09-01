@@ -3,6 +3,7 @@
 Phase 0/1: passthrough score + normalized DecisionEvidence.
 Phase 2A: PROVISIONAL SHADOW classification (regression/reference only).
 Phase 2B: DecisionDimensions in parallel from evidence (no commands).
+Phase 2C: dimension-driven shadow class + comparison (not canonical).
 """
 
 from __future__ import annotations
@@ -15,6 +16,11 @@ from packages.astro_engine.scoring_context import ScoringContext
 from packages.decision_engine.day_classification import (
     DayClassification,
     classify_day,
+)
+from packages.decision_engine.dimension_classification import (
+    DimensionDayClassification,
+    classify_from_dimensions,
+    dimension_classification_payload,
 )
 from packages.decision_engine.dimensions import (
     DecisionDimensions,
@@ -48,6 +54,7 @@ class DayIntelligenceSnapshot(BaseModel):
     scoring_context: dict[str, Any] = Field(default_factory=dict)
     classification: DayClassification
     dimensions: DecisionDimensions
+    dimension_classification: DimensionDayClassification
 
     @model_validator(mode="after")
     def _score_is_passthrough(self) -> DayIntelligenceSnapshot:
@@ -105,6 +112,11 @@ def build_day_intelligence_snapshot(
         evidence,
         action_type=resolved_activity or None,
     )
+    dimension_classification = classify_from_dimensions(
+        dimensions,
+        phase2a_class=classification.day_class,
+        executive_score=final_score,
+    )
     return DayIntelligenceSnapshot(
         action_type=resolved_activity,
         final_score=final_score,
@@ -115,6 +127,7 @@ def build_day_intelligence_snapshot(
         scoring_context=dict(technical.get("scoring_context") or {}),
         classification=classification,
         dimensions=dimensions,
+        dimension_classification=dimension_classification,
     )
 
 
@@ -156,6 +169,9 @@ def day_intelligence_payload(snapshot: DayIntelligenceSnapshot) -> dict[str, Any
         "dominant_aspects": list(snapshot.dominant_aspects),
         "scoring_context": snapshot.scoring_context,
         "dimensions": dimensions_payload(snapshot.dimensions),
+        "dimension_classification": dimension_classification_payload(
+            snapshot.dimension_classification
+        ),
     }
 
 
