@@ -1,47 +1,63 @@
 import { describe, expect, it } from 'vitest';
-import { extractBatchDayIntelligence } from './calendar-day-intelligence';
+
+import {
+  extractBatchDayIntelligence,
+  shadowClassifierVersion,
+  shadowDayClass,
+  shadowSemanticStatus,
+} from './calendar-day-intelligence';
+
+const BATCH_DAY = {
+  executive: { score: 72 },
+  day_intelligence: {
+    final_score: 72,
+    action_type: 'business_launch',
+    day_class: 'supportive',
+    conflict: false,
+    rating: 'Favorable',
+    material_supportive_count: 2,
+    material_caution_count: 0,
+    basis: 'score_bands+evidence_conflict',
+    evidence: [{ evidence_id: 'ev.aspect.jupiter.trine.sun', kind: 'aspect' }],
+    dominant_aspects: [{ transit_planet: 'jupiter', aspect: 'trine' }],
+    scoring_context: { location_mode: 'currentLiving' },
+    dimensions: {
+      mapping_version: 'dimensions.v1-shadow',
+      semantic_status: 'experimental_shadow',
+      opportunity: { value: 70, status: 'scored' },
+    },
+    dimension_classification: {
+      day_class: 'action',
+      semantic_status: 'experimental_shadow',
+      classifier_version: 'dimension_class.v3-shadow',
+      classification_coverage: 0.2571,
+    },
+  },
+};
 
 describe('extractBatchDayIntelligence', () => {
-  it('maps a valid day_intelligence payload', () => {
-    const parsed = extractBatchDayIntelligence({
-      executive: { score: 82 },
-      day_intelligence: {
-        final_score: 82,
-        day_class: 'mixed',
-        conflict: true,
-        rating: 'Highly Favorable',
-        material_supportive_count: 1,
-        material_caution_count: 1,
-        basis: 'score_bands+evidence_conflict',
-        evidence: [{ factor_key: 'aspect.jupiter.trine.sun' }],
-      },
-    });
-    expect(parsed).toEqual({
-      finalScore: 82,
-      dayClass: 'mixed',
-      conflict: true,
-      rating: 'Highly Favorable',
-      materialSupportiveCount: 1,
-      materialCautionCount: 1,
-      basis: 'score_bands+evidence_conflict',
-      evidence: [{ factor_key: 'aspect.jupiter.trine.sun' }],
-    });
+  it('preserves Phase 2A class plus v3 shadow metadata and dimensions', () => {
+    const extracted = extractBatchDayIntelligence(BATCH_DAY);
+    expect(extracted).not.toBeNull();
+    expect(extracted?.dayClass).toBe('supportive');
+    expect(extracted?.finalScore).toBe(72);
+    expect(extracted?.dimensions?.mapping_version).toBe('dimensions.v1-shadow');
+    expect(extracted?.dimensionClassification?.classifier_version).toBe(
+      'dimension_class.v3-shadow'
+    );
+    expect(extracted?.dimensionClassification?.semantic_status).toBe(
+      'experimental_shadow'
+    );
+    expect(extracted?.dimensionClassification?.day_class).toBe('action');
+    expect(shadowClassifierVersion(extracted)).toBe('dimension_class.v3-shadow');
+    expect(shadowSemanticStatus(extracted)).toBe('experimental_shadow');
+    expect(shadowDayClass(extracted)).toBe('action');
+    expect(extracted?.evidence[0]?.evidence_id).toBe(
+      'ev.aspect.jupiter.trine.sun'
+    );
   });
 
-  it('returns null when day_intelligence is missing', () => {
-    expect(extractBatchDayIntelligence({ executive: { score: 70 } })).toBeNull();
-  });
-
-  it('returns null for an unknown day_class', () => {
-    expect(
-      extractBatchDayIntelligence({
-        day_intelligence: {
-          final_score: 70,
-          day_class: 'go_now',
-          conflict: false,
-          rating: 'Favorable',
-        },
-      })
-    ).toBeNull();
+  it('returns null when day_intelligence is absent', () => {
+    expect(extractBatchDayIntelligence({ executive: { score: 50 } })).toBeNull();
   });
 });

@@ -128,7 +128,7 @@ Unrelated dirty files on the working tree (`DECISION_INTELLIGENCE_ENGINE.md`, `E
 - `test_evidence_normalization.py` — polarity, deterministic IDs, aspect/house/angular/retrograde provenance, unknown temporal fields, score immutability, natal-house when context includes it, reasoning fallback, Calendar natal-house exclusion
 - `test_calendar_score_goldens.py` — 13 engine-generated goldens covering the required scenarios
 - `test_calendar_decision_evidence_adapter.py` — live SwissEph calendar day path
-- cache contract tests — `CALENDAR_CACHE_STORES_DAY_INTELLIGENCE === false`; cache hit returns empty breakdowns/reasoning; live batch still extracts them
+- cache contract tests — originally `CALENDAR_CACHE_STORES_DAY_INTELLIGENCE === false`; superseded by Phase 3A (`true`, live/hit semantic parity)
 
 ### C. Test results
 
@@ -213,7 +213,7 @@ The engine does not emit these. Phase 1 **does not invent them**:
 | Live miss | Breakdown + reasoning + day intelligence extracted from `/api/batch` |
 | Persist rule | Complete month only; empty `{}` is a miss |
 
-`CALENDAR_CACHE_STORES_DAY_INTELLIGENCE = false` locks this contract until a dedicated content migration.
+`CALENDAR_CACHE_STORES_DAY_INTELLIGENCE` was `false` through Phase 2C. Phase 3A migrates stored content to v3 days (flag `true`) without changing fingerprint identity.
 
 ---
 
@@ -481,6 +481,24 @@ Comparison matrix: `semantic_validation_proposed_matrix.json`.
 
 **MX04:** cooperation conflict is preserved as metadata (`conflicted_dimension_ids`) but does not globally preempt classification. Future context-sensitive synthesis may use it for negotiation, networking, relationships, and hiring/team decisions.
 
-**Cache blocker (unchanged):** month cache is numeric-score-only (`CALENDAR_CACHE_STORES_DAY_INTELLIGENCE = false`). Shadow Day Intelligence cannot become user-visible Calendar semantics until cache parity exists.
+**Cache:** numeric-only until Phase 3A. After 3A, month cache stores additive Day Intelligence (`CALENDAR_CACHE_STORES_DAY_INTELLIGENCE = true`) without making it user-visible.
 
 **Not done:** canonical promotion, UI, commands, Find/Compare/Evaluate integration.
+
+---
+
+## Phase 3A — Calendar semantic cache parity (data plane only)
+
+**Scope:** Persist the additive Day Intelligence payload on Calendar month cache so a live `/api/batch` miss and a later cache hit return equivalent scores, breakdowns, reasoning, and `dayIntelligence`. Not user-visible. Not canonical. No scoring, 2A/v3, command, UI, Find/Compare/Evaluate, or Power Window changes.
+
+**Key identity (unchanged):** `CALENDAR_CACHE_VERSION = v2` remains the fingerprint / `metioro-cal-v2-` storage key. Fingerprint still includes birth, evaluation location/coords/timezone, house_system, zodiac, action_type, year, month, dates.
+
+**Content schema:** `CALENDAR_CACHE_CONTENT_VERSION = v3` stores `days: Record<ISODate, { score, breakdown?, reasoning?, dayIntelligence? }>`.
+
+**Legacy:** numeric `version: v2` records still parse for scores (`loadMonthCache`) but `loadMonthCacheRecord` returns null so `fetchMonthScores` refreshes from API instead of serving empty semantics.
+
+**Flag:** `CALENDAR_CACHE_STORES_DAY_INTELLIGENCE = true` after live/hit parity. Does not authorize Calendar UI consumption.
+
+**Size:** 13 Calendar score goldens: Day Intelligence JSON 3.3–10.1 KB/day (median 4.0 KB). A 31-day month of DI alone is ~101–306 KB. Evidence is not stripped; no compact representation was needed (under typical `localStorage` quotas).
+
+**UI:** Calendar page still destructures `{ scores, breakdowns, reasoning }` only. Pathfinder timing uses `.scores` only. Flag does not authorize user-visible semantics.

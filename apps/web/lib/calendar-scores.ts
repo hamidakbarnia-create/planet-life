@@ -22,10 +22,15 @@ import {
 } from './timing-presentation';
 import {
   buildCalendarFetchDiagnostic,
-  loadMonthCache,
+  breakdownsFromCachedDays,
+  dayIntelligenceFromCachedDays,
+  loadMonthCacheRecord,
   normalizeCalendarScoringInput,
+  reasoningFromCachedDays,
   saveMonthCache,
+  scoresFromCachedDays,
   setLastCalendarScoreFetchDiagnostic,
+  type CalendarCachedDay,
   type CalendarScoringInput,
 } from './calendar-cache';
 
@@ -39,13 +44,19 @@ import {
 export { API_BASE } from './api-config';
 export {
   CALENDAR_CACHE_VERSION,
+  CALENDAR_CACHE_CONTENT_VERSION,
   CALENDAR_CACHE_STORES_DAY_INTELLIGENCE,
   clearMonthScoreCaches,
   fingerprintCalendarScoringInput,
   getLastCalendarScoreFetchDiagnostic,
+  loadMonthCache,
+  loadMonthCacheRecord,
+  saveMonthCache,
   scoreMapChecksum,
+  type CalendarCachedDay,
   type CalendarScoreFetchDiagnostic,
   type CalendarScoringInput,
+  type MonthCacheRecord,
 } from './calendar-cache';
 
 export interface DayScore {
@@ -64,12 +75,17 @@ export interface HourScore {
 }
 
 export type MonthScoresResult = MonthScoresBase & {
-  /** Live /api/batch only. Cache hits are empty until a content migration. */
+  /** Live /api/batch or v3 cache hit. Legacy numeric cache is refreshed. */
   dayIntelligence: Record<string, CalendarDayIntelligence | null>;
 };
 export type { ScoreBreakdown };
 export type { ScoreReasoning } from './score-reasoning';
 export type { CalendarDayIntelligence, DayClass } from './calendar-day-intelligence';
+export {
+  shadowClassifierVersion,
+  shadowDayClass,
+  shadowSemanticStatus,
+} from './calendar-day-intelligence';
 export {
   BAND_STYLES,
   formatHourLabel,
@@ -79,10 +95,6 @@ export {
   scoreToBand,
   type ScoreBand,
 } from './timing-presentation';
-export {
-  loadMonthCache,
-  saveMonthCache,
-} from './calendar-cache';
 
 export function scoringLocationFields(
   profile: BirthProfile,
@@ -253,21 +265,25 @@ export async function fetchMonthScores(
     return { scores: {}, breakdowns: {}, reasoning: {}, dayIntelligence: {} };
   }
 
-  const cached = loadMonthCache(scoringInput);
-  // Empty {} must not short-circuit — it is a cache miss (failed prior load).
-  if (cached && Object.keys(cached).length > 0) {
+  const cachedRecord = loadMonthCacheRecord(scoringInput);
+  if (cachedRecord?.days && Object.keys(cachedRecord.days).length > 0) {
+    const scores = scoresFromCachedDays(cachedRecord.days);
     const diagnostic = buildCalendarFetchDiagnostic({
       cache: 'hit',
       input: scoringInput,
-      scores: cached,
+      scores,
+      contentVersion: cachedRecord.version,
     });
     setLastCalendarScoreFetchDiagnostic(diagnostic);
     if (process.env.NODE_ENV === 'development') {
       console.debug('[calendar-scores]', diagnostic);
     }
-    // Cache hits are numeric-only. Breakdown, reasoning, and day intelligence
-    // require a live /api/batch response; they are not part of MonthCacheRecord.
-    return { scores: cached, breakdowns: {}, reasoning: {}, dayIntelligence: {} };
+    return {
+      scores,
+      breakdowns: breakdownsFromCachedDays(cachedRecord.days),
+      reasoning: reasoningFromCachedDays(cachedRecord.days),
+      dayIntelligence: dayIntelligenceFromCachedDays(cachedRecord.days),
+    };
   }
 
   const dates = scoringInput.dates;
@@ -325,7 +341,16 @@ export async function fetchMonthScores(
   onProgress?.(total, total);
   // Persist only complete months so Outlook / Weekly Path / cells share one map.
   if (isCompleteMonthScores(scores, dates)) {
-    saveMonthCache(scoringInput, scores);
+    const days: Record<string, CalendarCachedDay> = {};
+    for (const date of dates) {
+      days[date] = {
+        score: scores[date],
+        breakdown: breakdowns[date] ?? null,
+        reasoning: reasoning[date] ?? null,
+        dayIntelligence: dayIntelligence[date] ?? null,
+      };
+    }
+    saveMonthCache(scoringInput, days);
   }
   const diagnostic = buildCalendarFetchDiagnostic({
     cache: 'miss',

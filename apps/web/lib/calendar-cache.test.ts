@@ -1,12 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  CALENDAR_CACHE_CONTENT_VERSION,
   CALENDAR_CACHE_STORES_DAY_INTELLIGENCE,
   CALENDAR_CACHE_VERSION,
+  daysFromScoreMap,
   fingerprintCalendarScoringInput,
   fnv1a64Hex,
   legacyV1MonthCacheKey,
   loadMonthCache,
+  loadMonthCacheRecord,
   monthCacheStorageKey,
   normalizeCalendarScoringInput,
   saveMonthCache,
@@ -115,6 +118,21 @@ describe('calendar scoring-input fingerprint', () => {
         baseInput({ action_type: 'relationship' })
       )
     ).not.toBe(base);
+    expect(
+      fingerprintCalendarScoringInput(
+        baseInput({ birth_location: 'Shiraz' })
+      )
+    ).not.toBe(base);
+    expect(
+      fingerprintCalendarScoringInput(
+        baseInput({ birth_latitude: 35.6892, birth_longitude: 51.389 })
+      )
+    ).not.toBe(base);
+    expect(
+      fingerprintCalendarScoringInput(
+        baseInput({ evaluation_location: 'Paris' })
+      )
+    ).not.toBe(base);
   });
 
   it('C: locale or language fields are not part of the fingerprint', () => {
@@ -146,11 +164,13 @@ describe('calendar cache v2 identity', () => {
     localStorage.clear();
   });
 
-  it('Phase 0/1 cache content is numeric scores only', () => {
-    expect(CALENDAR_CACHE_STORES_DAY_INTELLIGENCE).toBe(false);
+  it('Phase 3A cache content stores per-day Day Intelligence', () => {
+    expect(CALENDAR_CACHE_STORES_DAY_INTELLIGENCE).toBe(true);
+    expect(CALENDAR_CACHE_CONTENT_VERSION).toBe('v3');
+    expect(CALENDAR_CACHE_VERSION).toBe('v2');
     const input = baseInput();
     const scores = fullMonthScores();
-    saveMonthCache(input, scores);
+    saveMonthCache(input, daysFromScoreMap(scores));
     const key = monthCacheStorageKey(
       2026,
       8,
@@ -158,15 +178,18 @@ describe('calendar cache v2 identity', () => {
       fingerprintCalendarScoringInput(input)
     );
     const record = JSON.parse(String(localStorage.getItem(key))) as {
-      scores: Record<string, number>;
-      breakdowns?: unknown;
-      reasoning?: unknown;
-      evidence?: unknown;
+      version: string;
+      scoringIdentityVersion: string;
+      scores?: unknown;
+      days: Record<string, { score: number; dayIntelligence: unknown }>;
     };
-    expect(record.scores).toEqual(scores);
-    expect(record.breakdowns).toBeUndefined();
-    expect(record.reasoning).toBeUndefined();
-    expect(record.evidence).toBeUndefined();
+    expect(record.version).toBe(CALENDAR_CACHE_CONTENT_VERSION);
+    expect(record.scoringIdentityVersion).toBe(CALENDAR_CACHE_VERSION);
+    expect(record.scores).toBeUndefined();
+    expect(record.days['2026-08-01']?.score).toBe(scores['2026-08-01']);
+    expect(Object.prototype.hasOwnProperty.call(record.days['2026-08-01'], 'dayIntelligence')).toBe(
+      true
+    );
   });
 
   it('returns null for a cache miss', () => {
@@ -176,14 +199,39 @@ describe('calendar cache v2 identity', () => {
   it('stores and loads a complete month score map', () => {
     const input = baseInput();
     const scores = fullMonthScores();
-    saveMonthCache(input, scores);
+    saveMonthCache(input, daysFromScoreMap(scores));
     expect(loadMonthCache(input)).toEqual(scores);
+    expect(loadMonthCacheRecord(input)).not.toBeNull();
+  });
+
+  it('legacy numeric v2 records load scores but not semantic records', () => {
+    const input = baseInput();
+    const scores = fullMonthScores(70);
+    const fingerprint = fingerprintCalendarScoringInput(input);
+    const key = monthCacheStorageKey(
+      2026,
+      8,
+      input.action_type,
+      fingerprint
+    );
+    localStorage.setItem(
+      key,
+      JSON.stringify({
+        version: CALENDAR_CACHE_VERSION,
+        inputFingerprint: fingerprint,
+        savedAt: Date.now(),
+        dates: input.dates,
+        scores,
+      })
+    );
+    expect(loadMonthCache(input)).toEqual(scores);
+    expect(loadMonthCacheRecord(input)).toBeNull();
   });
 
   it('uses metioro-cal-v2 key with fingerprint, not city plaintext birth data', () => {
     const input = baseInput();
     const fingerprint = fingerprintCalendarScoringInput(input);
-    saveMonthCache(input, fullMonthScores());
+    saveMonthCache(input, daysFromScoreMap(fullMonthScores()));
     const key = monthCacheStorageKey(
       2026,
       8,
@@ -210,7 +258,7 @@ describe('calendar cache v2 identity', () => {
 
   it('E: fingerprint mismatch causes cache miss', () => {
     const scores = fullMonthScores();
-    saveMonthCache(baseInput(), scores);
+    saveMonthCache(baseInput(), daysFromScoreMap(scores));
     expect(
       loadMonthCache(baseInput({ evaluation_timezone: 'America/New_York' }))
     ).toBeNull();
@@ -218,7 +266,7 @@ describe('calendar cache v2 identity', () => {
 
   it('rejects incomplete month maps on save and load', () => {
     const input = baseInput();
-    saveMonthCache(input, { '2026-08-01': 72 });
+    saveMonthCache(input, { '2026-08-01': { score: 72, dayIntelligence: null } });
     expect(loadMonthCache(input)).toBeNull();
 
     const fingerprint = fingerprintCalendarScoringInput(input);
@@ -266,9 +314,10 @@ describe('calendar cache v2 identity', () => {
   it('rejects expired cache', () => {
     const input = baseInput();
     const scores = fullMonthScores();
-    saveMonthCache(input, scores);
+    saveMonthCache(input, daysFromScoreMap(scores));
     vi.advanceTimersByTime(1000 * 60 * 60 * 12 + 1);
     expect(loadMonthCache(input)).toBeNull();
+    expect(loadMonthCacheRecord(input)).toBeNull();
   });
 
   it('rejects malformed score values', () => {
@@ -310,7 +359,7 @@ describe('calendar cache v2 identity', () => {
   it('H: cached and freshly saved copies produce identical score-map checksum', () => {
     const input = baseInput();
     const scores = fullMonthScores(63);
-    saveMonthCache(input, scores);
+    saveMonthCache(input, daysFromScoreMap(scores));
     const loaded = loadMonthCache(input);
     expect(loaded).not.toBeNull();
     expect(scoreMapChecksum(loaded!)).toBe(scoreMapChecksum(scores));
