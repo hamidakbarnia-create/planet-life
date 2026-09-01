@@ -55,6 +55,9 @@ def test_canonical_type_metadata_is_available() -> None:
         "find_dates",
     )
     assert interview.output_profile == "decision_evaluation_package.v1"
+    assert interview.risk_context.level == "elevated"
+    assert interview.risk_context.domains == ("employment",)
+    assert interview.risk_context.outcome_prediction_prohibited is False
 
 
 def test_registry_records_are_immutable() -> None:

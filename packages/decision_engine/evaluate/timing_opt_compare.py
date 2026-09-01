@@ -331,6 +331,17 @@ def assemble_compare_package(
         "next_decisions": {"items": []},
         "related_decisions": {"items": []},
     }
+    assessments = [item.assessment for item in ranked if item.assessment]
+    from packages.decision_engine.decision_assessment import build_semantic_shadow
+
+    shadow = build_semantic_shadow(
+        assessments,
+        score_vs_class_disagreements=ranking.score_vs_class_disagreements,
+        policy_pairs=getattr(ranking, "policy_pairs", ()),
+        explanations=getattr(ranking, "explanations", ()),
+    )
+    if shadow:
+        payload["semantic_shadow"] = shadow
     return DecisionEvaluationPackage.model_validate(payload)
 
 
@@ -407,6 +418,20 @@ def compare_timing_opt(
             else score_to_candidate_band(score)
         )
         outcomes_by_option_id[option.option_id] = outcome
+        from packages.decision_engine.decision_assessment import (
+            assessment_from_request,
+            tagged_assessment_payload,
+        )
+
+        assessment = assessment_from_request(
+            outcome,
+            request,
+            evaluation_date=option.date,
+            natal=getattr(outcome, "source_natal", None),
+            transit=getattr(outcome, "source_transit", None),
+            decision_type_id=config.decision_type_id,
+            family_id=config.family_id,
+        )
         scored.append(
             ScoredCompareOption(
                 option_id=option.option_id,
@@ -419,6 +444,11 @@ def compare_timing_opt(
                 ),
                 risks=config.semantics.option_risks(
                     score=score, band=band, rating=rating
+                ),
+                assessment=(
+                    tagged_assessment_payload(assessment, option_id=option.option_id)
+                    if assessment is not None
+                    else None
                 ),
             )
         )

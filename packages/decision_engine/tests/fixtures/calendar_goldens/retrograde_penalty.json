@@ -1,0 +1,127 @@
+{
+  "component_breakdown": {
+    "aspect_score": 0.0,
+    "calculated_for": "London, United Kingdom",
+    "final_score": 50,
+    "location_component_score": 2.2,
+    "location_mode": "currentLiving",
+    "natal_house_bonus": 0.0,
+    "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+    "resolved_utc_datetime": "2026-06-15T11:00:00+00:00",
+    "retrograde_penalty": -2.5,
+    "target_time": "12:00",
+    "timezone": "Europe/London",
+    "transit_angular_score": 0.0,
+    "transit_house_score": 2.2
+  },
+  "dominant_aspects": [],
+  "executive": {
+    "activity": "Business Launch",
+    "rating": "Mixed / Proceed with Awareness",
+    "score": 50
+  },
+  "final_score": 50,
+  "id": "retrograde_penalty",
+  "input": {
+    "action_type": "business_launch",
+    "natal": {
+      "planets": {
+        "mars": {
+          "house": 11,
+          "longitude": 80.0
+        },
+        "sun": {
+          "house": 10,
+          "longitude": 0.0
+        }
+      }
+    },
+    "scoring_context": {
+      "default_transit_time": "12:00",
+      "include_natal_house_bonus": false,
+      "include_transit_angular_score": true,
+      "include_transit_house_score": true,
+      "location_mode": "currentLiving"
+    },
+    "transit": {
+      "evaluation": {
+        "calculated_for": "London, United Kingdom",
+        "evaluation_location": "London, United Kingdom",
+        "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+        "resolved_utc_datetime": "2026-06-15T11:00:00+00:00",
+        "target_time": "12:00",
+        "timezone": "Europe/London"
+      },
+      "planets": {
+        "mars": {
+          "house": 11,
+          "longitude": 40.0,
+          "retrograde": true
+        }
+      }
+    }
+  },
+  "reasoning": {
+    "confidence": 0.54,
+    "reasons": [
+      {
+        "category": "retrograde",
+        "evidence": {
+          "longitude": 40.0,
+          "planet": "mars",
+          "primary_ruler": true,
+          "retrograde": true
+        },
+        "explanation": "Transit Mars is retrograde while ruling business launch themes, favoring review over direct launch.",
+        "importance": "medium",
+        "planet": "Mars",
+        "score": -2.5,
+        "title": "Mars retrograde on primary rulers"
+      },
+      {
+        "category": "house",
+        "evidence": {
+          "evaluation_location": "London, United Kingdom",
+          "house": 11,
+          "longitude": 40.0,
+          "planet": "mars",
+          "polarity": "supportive",
+          "rule_set": "business_launch",
+          "scope": "transit"
+        },
+        "explanation": "Transit Mars falls in the local 11th house at the evaluation location, a supportive placement for business launch.",
+        "importance": "medium",
+        "planet": "Mars",
+        "score": 2.2,
+        "title": "Transit Mars in local 11th house"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "timing_note": "Primary rulers retrograde: mars \u2014 review, revise, or delay."
+        },
+        "explanation": "Primary rulers retrograde: mars \u2014 review, revise, or delay.",
+        "importance": "low",
+        "planet": "",
+        "score": -1.5,
+        "title": "Timing note"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "calculated_for": "London, United Kingdom",
+          "location_mode": "currentLiving",
+          "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+          "target_time": "12:00",
+          "timezone": "Europe/London"
+        },
+        "explanation": "Transit houses and angles are calculated for London, United Kingdom at 12:00 local using current living location.",
+        "importance": "low",
+        "planet": "",
+        "score": 0.5,
+        "title": "Timed for current living location"
+      }
+    ],
+    "summary": "Business Launch scores 50/100 (Mixed / Proceed with Awareness). 2 supporting factor(s) and 2 caution factor(s) identified from scored chart evidence. Strongest support: Transit Mars in local 11th house. Main caution: Mars retrograde on primary rulers."
+  }
+}

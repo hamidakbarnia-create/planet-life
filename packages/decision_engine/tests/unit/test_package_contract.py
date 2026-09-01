@@ -82,6 +82,47 @@ def test_golden_fixtures_validate_against_python_models(
     assert model.schema_version == "1.0.0"
 
 
+def test_optional_semantic_shadow_round_trip(
+    validator: Draft202012Validator,
+) -> None:
+    payload = _load_json(FIXTURES / "package_evaluate_date.valid.json")
+    validator.validate(payload)
+    payload["semantic_shadow"] = {
+        "schema_version": "decision_assessment.v1-shadow",
+        "semantic_status": "experimental_shadow",
+        "assessments": [
+            {
+                "schema_version": "decision_assessment.v1-shadow",
+                "semantic_status": "experimental_shadow",
+                "date": "2026-06-15",
+                "score": 72,
+                "phase2a_class": "supportive",
+            }
+        ],
+        "score_vs_class_disagreements": [],
+        "find_window_semantic_warnings": [],
+        "policy": {
+            "policy_version": "semantic_policy.v1-shadow",
+            "semantic_status": "experimental_shadow",
+            "relation": "aligned",
+            "conflict_level": "none",
+            "rationale_codes": ["cleaner_posture"],
+            "requires_user_tradeoff": False,
+            "evaluate_interpretation": "strong_and_clean",
+        },
+        "policy_pairs": [],
+        "window_policies": [],
+    }
+    validator.validate(payload)
+    model = DecisionEvaluationPackage.model_validate(payload)
+    dumped = model.model_dump(mode="json")
+    assert dumped["semantic_shadow"]["semantic_status"] == "experimental_shadow"
+    omitted = DecisionEvaluationPackage.model_validate(
+        _load_json(FIXTURES / "package_evaluate_date.valid.json")
+    )
+    assert "semantic_shadow" not in omitted.model_dump(mode="json")
+
+
 def test_optional_factor_key_round_trip_and_legacy_without_key(
     validator: Draft202012Validator,
 ) -> None:

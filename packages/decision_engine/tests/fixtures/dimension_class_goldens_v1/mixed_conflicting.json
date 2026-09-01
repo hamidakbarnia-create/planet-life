@@ -1,0 +1,53 @@
+{
+  "classifier_version": "dimension_class.v1-shadow",
+  "dimension_classification": {
+    "classification_coverage": 1.0,
+    "classifier_version": "dimension_class.v1-shadow",
+    "conflicted_dimension_ids": [],
+    "critical_dimensions_available": 4,
+    "day_class": "selective",
+    "dimensions_used": [
+      "opportunity",
+      "momentum",
+      "clarity",
+      "stability",
+      "cooperation",
+      "pressure",
+      "reversibility_safety"
+    ],
+    "disagreement": true,
+    "disagreement_reason": [
+      "label_mixed_vs_selective",
+      "split_signal",
+      "critical_veto",
+      "split_signal_selective"
+    ],
+    "executive_score": 57,
+    "high_dimension_ids": [
+      "opportunity",
+      "momentum"
+    ],
+    "insufficient_dimension_count": 0,
+    "low_dimension_ids": [
+      "clarity",
+      "stability",
+      "reversibility_safety"
+    ],
+    "phase2a_class": "mixed",
+    "rule_id": "split_signal_selective",
+    "same_dimension_conflict": false,
+    "scored_dimension_count": 7,
+    "semantic_status": "experimental_shadow",
+    "split_signal": true,
+    "veto_dimension_ids": [
+      "clarity",
+      "stability",
+      "reversibility_safety"
+    ]
+  },
+  "executive_score": 57,
+  "id": "mixed_conflicting",
+  "phase2a_class": "mixed",
+  "phase2c_class": "selective",
+  "semantic_status": "experimental_shadow"
+}

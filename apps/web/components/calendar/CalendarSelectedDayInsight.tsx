@@ -2,8 +2,18 @@
 
 import type { AppLang } from '@/lib/app-settings';
 import type { ScoreReasoning } from '@/lib/score-reasoning';
-import type { PlanetTransit, TransitSnapshotMeta } from '@/lib/calendar-scores';
+import type { CalendarDayIntelligence, PlanetTransit, TransitSnapshotMeta } from '@/lib/calendar-scores';
 import { WhyThisTiming } from '@/components/timing/WhyThisTiming';
+import { SemanticDebugPreview } from '@/components/decision-intelligence/SemanticDebugPreview';
+import { DayIntelligencePanel } from '@/components/decision-intelligence/DayIntelligencePanel';
+import { PREVIEW_CHROME } from '@/lib/decision-intelligence/preview-copy';
+import { isDecisionSemanticsPreviewEnabled } from '@/lib/decision-intelligence/preview-flag';
+import { shadowDayClass } from '@/lib/calendar-day-intelligence';
+import {
+  buildDayIntelligenceView,
+  explanationFromDayIntelligence,
+} from '@/lib/decision-intelligence/day-intelligence-view';
+import type { SemanticPreviewLocale } from '@/lib/decision-intelligence/types';
 
 export type CalendarSelectedDayInsightLabels = {
   dir: 'ltr' | 'rtl';
@@ -63,11 +73,16 @@ type Props = {
   transit: PlanetTransit[];
   transitMeta: TransitSnapshotMeta;
   loadingTransit: boolean;
+  score?: number | null;
+  dayIntelligence?: CalendarDayIntelligence | null;
+  forcePreview?: boolean;
 };
 
 /**
- * Selected-day presentation: producer ScoreReasoning first, sky/transit in Advanced details.
- * Does not invent explanations or expose ScoreReasoning.confidence as platform Confidence.
+ * Selected-day presentation: producer ScoreReasoning first, then product
+ * Decision Intelligence when a semantic explanation can be rendered.
+ * Sky/transit stay in Advanced details. Does not invent explanations or
+ * expose ScoreReasoning.confidence as platform Confidence.
  */
 export function CalendarSelectedDayInsight({
   lang,
@@ -76,7 +91,20 @@ export function CalendarSelectedDayInsight({
   transit,
   transitMeta,
   loadingTransit,
+  score,
+  dayIntelligence,
+  forcePreview = false,
 }: Props) {
+  const previewOn = forcePreview || isDecisionSemanticsPreviewEnabled();
+  const chrome = PREVIEW_CHROME[lang];
+  const explanation = explanationFromDayIntelligence(dayIntelligence ?? null);
+  const productView = buildDayIntelligenceView({
+    explanation,
+    locale: lang as SemanticPreviewLocale,
+    score: score ?? dayIntelligence?.finalScore,
+    posture: shadowDayClass(dayIntelligence),
+  });
+
   return (
     <div data-testid="calendar-selected-day-insight">
       <WhyThisTiming
@@ -90,6 +118,65 @@ export function CalendarSelectedDayInsight({
         }}
         reasoning={reasoning}
       />
+
+      {productView ? (
+        <div className="mb-4" data-testid="calendar-day-intelligence">
+          <DayIntelligencePanel view={productView} />
+        </div>
+      ) : null}
+
+      {previewOn ? (
+        <div
+          className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3"
+          data-testid="calendar-semantic-compare"
+        >
+          <section
+            className="rounded-lg px-3 py-2"
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+            data-testid="calendar-current-result"
+          >
+            <p className="fi text-[10px] uppercase tracking-widest text-white/40 mb-1">
+              {chrome.currentResult}
+            </p>
+            {score != null ? (
+              <p className="fi text-sm text-white/80" data-testid="calendar-current-score">
+                {chrome.score}: {score}
+              </p>
+            ) : null}
+          </section>
+          <section data-testid="calendar-experimental-di">
+            <p className="fi text-[10px] uppercase tracking-widest text-amber-200/80 mb-1">
+              {chrome.experimentalDi}
+            </p>
+            <SemanticDebugPreview
+              forceEnabled={forcePreview}
+              explanation={explanation}
+              policy={dayIntelligence?.policy ?? null}
+              score={score ?? dayIntelligence?.finalScore}
+              posture={shadowDayClass(dayIntelligence)}
+              locale={lang as SemanticPreviewLocale}
+              extra={{
+                classifierVersion:
+                  typeof dayIntelligence?.dimensionClassification?.classifier_version ===
+                  'string'
+                    ? String(
+                        dayIntelligence.dimensionClassification.classifier_version
+                      )
+                    : null,
+                schemaVersion: explanation?.schema_version ?? null,
+                policyVersion:
+                  typeof dayIntelligence?.policy?.policy_version === 'string'
+                    ? String(dayIntelligence.policy.policy_version)
+                    : null,
+                dimensionValues: dayIntelligence?.dimensions ?? undefined,
+              }}
+            />
+          </section>
+        </div>
+      ) : null}
 
       <details
         className="mb-5 rounded-lg px-3 py-2"

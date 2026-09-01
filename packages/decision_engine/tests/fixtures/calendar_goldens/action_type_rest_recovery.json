@@ -1,0 +1,169 @@
+{
+  "component_breakdown": {
+    "aspect_score": -5.86,
+    "calculated_for": "London, United Kingdom",
+    "final_score": 46,
+    "location_component_score": 2.2,
+    "location_mode": "currentLiving",
+    "natal_house_bonus": 0.0,
+    "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+    "resolved_utc_datetime": "2026-06-15T11:00:00+00:00",
+    "retrograde_penalty": -0.0,
+    "target_time": "12:00",
+    "timezone": "Europe/London",
+    "transit_angular_score": 0.0,
+    "transit_house_score": 2.2
+  },
+  "dominant_aspects": [
+    {
+      "aspect": "square",
+      "contribution": -9.4,
+      "label": "Transit Saturn square natal Sun (orb 0.2\u00b0)",
+      "natal_planet": "sun",
+      "orb": 0.20000000000000284,
+      "source": "calculated",
+      "transit_planet": "saturn"
+    },
+    {
+      "aspect": "trine",
+      "contribution": 3.54,
+      "label": "Transit Jupiter trine natal Sun (orb 0.1\u00b0)",
+      "natal_planet": "sun",
+      "orb": 0.09999999999999432,
+      "source": "calculated",
+      "transit_planet": "jupiter"
+    }
+  ],
+  "executive": {
+    "activity": "Rest & Recovery",
+    "rating": "Mixed / Proceed with Awareness",
+    "score": 46
+  },
+  "final_score": 46,
+  "id": "action_type_rest_recovery",
+  "input": {
+    "action_type": "rest_recovery",
+    "natal": {
+      "planets": {
+        "mercury": {
+          "house": 9,
+          "longitude": 14.0
+        },
+        "sun": {
+          "house": 10,
+          "longitude": 0.0
+        }
+      }
+    },
+    "scoring_context": {
+      "default_transit_time": "12:00",
+      "include_natal_house_bonus": false,
+      "include_transit_angular_score": true,
+      "include_transit_house_score": true,
+      "location_mode": "currentLiving"
+    },
+    "transit": {
+      "ascendant": 10.0,
+      "evaluation": {
+        "calculated_for": "London, United Kingdom",
+        "evaluation_location": "London, United Kingdom",
+        "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+        "resolved_utc_datetime": "2026-06-15T11:00:00+00:00",
+        "target_time": "12:00",
+        "timezone": "Europe/London"
+      },
+      "midheaven": 280.0,
+      "planets": {
+        "jupiter": {
+          "house": 10,
+          "longitude": 120.1
+        },
+        "saturn": {
+          "house": 12,
+          "longitude": 90.2
+        }
+      }
+    }
+  },
+  "reasoning": {
+    "confidence": 0.54,
+    "reasons": [
+      {
+        "category": "aspect",
+        "evidence": {
+          "aspect": "square",
+          "contribution": -9.4,
+          "label": "Transit Saturn square natal Sun (orb 0.2\u00b0)",
+          "natal_planet": "sun",
+          "orb": 0.2,
+          "transit_planet": "saturn"
+        },
+        "explanation": "Transit Saturn forms a square to natal Sun (orb 0.2\u00b0), which challenges this activity.",
+        "importance": "high",
+        "planet": "Saturn",
+        "score": -9.4,
+        "title": "Transit Saturn square natal Sun"
+      },
+      {
+        "category": "aspect",
+        "evidence": {
+          "aspect": "trine",
+          "contribution": 3.54,
+          "label": "Transit Jupiter trine natal Sun (orb 0.1\u00b0)",
+          "natal_planet": "sun",
+          "orb": 0.1,
+          "transit_planet": "jupiter"
+        },
+        "explanation": "Transit Jupiter forms a trine to natal Sun (orb 0.1\u00b0), which supports this activity.",
+        "importance": "medium",
+        "planet": "Jupiter",
+        "score": 3.54,
+        "title": "Transit Jupiter trine natal Sun"
+      },
+      {
+        "category": "house",
+        "evidence": {
+          "evaluation_location": "London, United Kingdom",
+          "house": 12,
+          "longitude": 90.2,
+          "planet": "saturn",
+          "polarity": "supportive",
+          "rule_set": "rest_recovery",
+          "scope": "transit"
+        },
+        "explanation": "Transit Saturn falls in the local 12th house at the evaluation location, a supportive placement for rest & recovery.",
+        "importance": "medium",
+        "planet": "Saturn",
+        "score": 2.2,
+        "title": "Transit Saturn in local 12th house"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "calculated_for": "London, United Kingdom",
+          "location_mode": "currentLiving",
+          "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+          "target_time": "12:00",
+          "timezone": "Europe/London"
+        },
+        "explanation": "Transit houses and angles are calculated for London, United Kingdom at 12:00 local using current living location.",
+        "importance": "low",
+        "planet": "",
+        "score": 0.5,
+        "title": "Timed for current living location"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "timing_note": "No major retrograde friction on primary rulers; standard due diligence applies."
+        },
+        "explanation": "No major retrograde friction on primary rulers; standard due diligence applies.",
+        "importance": "low",
+        "planet": "",
+        "score": -0.5,
+        "title": "Timing note"
+      }
+    ],
+    "summary": "Rest & Recovery scores 46/100 (Mixed / Proceed with Awareness). 3 supporting factor(s) and 2 caution factor(s) identified from scored chart evidence. Strongest support: Transit Jupiter trine natal Sun. Main caution: Transit Saturn square natal Sun."
+  }
+}

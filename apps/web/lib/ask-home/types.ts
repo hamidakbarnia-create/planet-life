@@ -1,5 +1,25 @@
 import type { GuidedQuestionId } from '@/lib/question-library';
 
+export type RiskLevel = 'standard' | 'elevated' | 'high_stakes';
+
+export type RiskDomain =
+  | 'legal'
+  | 'immigration'
+  | 'medical'
+  | 'financial'
+  | 'safety'
+  | 'employment'
+  | 'relationship'
+  | 'other';
+
+/** Optional registry field. Defaults and lookup live in decision_engine, not web. */
+export type RiskContext = {
+  level: RiskLevel;
+  domains: readonly RiskDomain[];
+  outcome_prediction_prohibited: boolean;
+  factual_deadline_priority: boolean;
+};
+
 export type DecisionTypeRecord = {
   decision_type_id: string;
   family_id: string;
@@ -8,6 +28,7 @@ export type DecisionTypeRecord = {
   available_entry_modes: string[];
   allowed_modes: string[];
   output_profile: string;
+  risk_context?: RiskContext;
 };
 
 export type DecisionTypeRegistryDocument = {

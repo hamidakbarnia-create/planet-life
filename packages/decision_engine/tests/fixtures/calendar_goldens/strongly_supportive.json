@@ -1,0 +1,295 @@
+{
+  "component_breakdown": {
+    "aspect_score": 42.75,
+    "calculated_for": "London, United Kingdom",
+    "final_score": 100,
+    "location_component_score": 11.84,
+    "location_mode": "currentLiving",
+    "natal_house_bonus": 0.0,
+    "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+    "resolved_utc_datetime": "2026-06-15T11:00:00+00:00",
+    "retrograde_penalty": -0.0,
+    "target_time": "12:00",
+    "timezone": "Europe/London",
+    "transit_angular_score": 7.0,
+    "transit_house_score": 4.84
+  },
+  "dominant_aspects": [
+    {
+      "aspect": "trine",
+      "contribution": 17.4,
+      "label": "Transit Jupiter trine natal Sun (orb 0.2\u00b0)",
+      "natal_planet": "sun",
+      "orb": 0.20000000000000284,
+      "source": "calculated",
+      "transit_planet": "jupiter"
+    },
+    {
+      "aspect": "trine",
+      "contribution": 17.4,
+      "label": "Transit Sun trine natal Sun (orb 0.2\u00b0)",
+      "natal_planet": "sun",
+      "orb": 0.20000000000000284,
+      "source": "calculated",
+      "transit_planet": "sun"
+    },
+    {
+      "aspect": "sextile",
+      "contribution": 8.49,
+      "label": "Transit Venus sextile natal Sun (orb 0.3\u00b0)",
+      "natal_planet": "sun",
+      "orb": 0.29999999999999716,
+      "source": "calculated",
+      "transit_planet": "venus"
+    },
+    {
+      "aspect": "square",
+      "contribution": -0.54,
+      "label": "Transit Sun square natal Jupiter (orb 5.8\u00b0)",
+      "natal_planet": "jupiter",
+      "orb": 5.799999999999997,
+      "source": "calculated",
+      "transit_planet": "sun"
+    }
+  ],
+  "executive": {
+    "activity": "Business Launch",
+    "rating": "Highly Favorable",
+    "score": 100
+  },
+  "final_score": 100,
+  "id": "strongly_supportive",
+  "input": {
+    "action_type": "business_launch",
+    "natal": {
+      "planets": {
+        "jupiter": {
+          "house": 11,
+          "longitude": 24.0
+        },
+        "mars": {
+          "house": 10,
+          "longitude": 12.0
+        },
+        "sun": {
+          "house": 10,
+          "longitude": 0.0
+        }
+      }
+    },
+    "scoring_context": {
+      "default_transit_time": "12:00",
+      "include_natal_house_bonus": false,
+      "include_transit_angular_score": true,
+      "include_transit_house_score": true,
+      "location_mode": "currentLiving"
+    },
+    "transit": {
+      "ascendant": 30.0,
+      "evaluation": {
+        "calculated_for": "London, United Kingdom",
+        "evaluation_location": "London, United Kingdom",
+        "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+        "resolved_utc_datetime": "2026-06-15T11:00:00+00:00",
+        "target_time": "12:00",
+        "timezone": "Europe/London"
+      },
+      "midheaven": 120.0,
+      "planets": {
+        "jupiter": {
+          "house": 10,
+          "longitude": 120.2
+        },
+        "sun": {
+          "house": 10,
+          "longitude": 119.8
+        },
+        "venus": {
+          "house": 11,
+          "longitude": 60.3
+        }
+      }
+    }
+  },
+  "reasoning": {
+    "confidence": 0.95,
+    "reasons": [
+      {
+        "category": "aspect",
+        "evidence": {
+          "aspect": "trine",
+          "contribution": 17.4,
+          "label": "Transit Jupiter trine natal Sun (orb 0.2\u00b0)",
+          "natal_planet": "sun",
+          "orb": 0.2,
+          "transit_planet": "jupiter"
+        },
+        "explanation": "Transit Jupiter forms a trine to natal Sun (orb 0.2\u00b0), which supports this activity.",
+        "importance": "high",
+        "planet": "Jupiter",
+        "score": 17.4,
+        "title": "Transit Jupiter trine natal Sun"
+      },
+      {
+        "category": "aspect",
+        "evidence": {
+          "aspect": "trine",
+          "contribution": 17.4,
+          "label": "Transit Sun trine natal Sun (orb 0.2\u00b0)",
+          "natal_planet": "sun",
+          "orb": 0.2,
+          "transit_planet": "sun"
+        },
+        "explanation": "Transit Sun forms a trine to natal Sun (orb 0.2\u00b0), which supports this activity.",
+        "importance": "high",
+        "planet": "Sun",
+        "score": 17.4,
+        "title": "Transit Sun trine natal Sun"
+      },
+      {
+        "category": "aspect",
+        "evidence": {
+          "aspect": "sextile",
+          "contribution": 8.49,
+          "label": "Transit Venus sextile natal Sun (orb 0.3\u00b0)",
+          "natal_planet": "sun",
+          "orb": 0.3,
+          "transit_planet": "venus"
+        },
+        "explanation": "Transit Venus forms a sextile to natal Sun (orb 0.3\u00b0), which supports this activity.",
+        "importance": "high",
+        "planet": "Venus",
+        "score": 8.49,
+        "title": "Transit Venus sextile natal Sun"
+      },
+      {
+        "category": "angular",
+        "evidence": {
+          "angle": "mc",
+          "angle_longitude": 120.0,
+          "evaluation_location": "London, United Kingdom",
+          "longitude": 120.2,
+          "orb_band": "strong",
+          "planet": "jupiter",
+          "separation_degrees": 0.2
+        },
+        "explanation": "Transit Jupiter is within a strong orb of local MC, highlighting visibility and timing at the evaluation location.",
+        "importance": "high",
+        "planet": "Jupiter",
+        "score": 3.5,
+        "title": "Jupiter near MC"
+      },
+      {
+        "category": "angular",
+        "evidence": {
+          "angle": "mc",
+          "angle_longitude": 120.0,
+          "evaluation_location": "London, United Kingdom",
+          "longitude": 119.8,
+          "orb_band": "strong",
+          "planet": "sun",
+          "separation_degrees": 0.2
+        },
+        "explanation": "Transit Sun is within a strong orb of local MC, highlighting visibility and timing at the evaluation location.",
+        "importance": "high",
+        "planet": "Sun",
+        "score": 3.5,
+        "title": "Sun near MC"
+      },
+      {
+        "category": "house",
+        "evidence": {
+          "evaluation_location": "London, United Kingdom",
+          "house": 10,
+          "longitude": 120.2,
+          "planet": "jupiter",
+          "polarity": "supportive",
+          "rule_set": "business_launch",
+          "scope": "transit"
+        },
+        "explanation": "Transit Jupiter falls in the local 10th house at the evaluation location, a supportive placement for business launch.",
+        "importance": "medium",
+        "planet": "Jupiter",
+        "score": 2.2,
+        "title": "Transit Jupiter in local 10th house"
+      },
+      {
+        "category": "house",
+        "evidence": {
+          "evaluation_location": "London, United Kingdom",
+          "house": 10,
+          "longitude": 119.8,
+          "planet": "sun",
+          "polarity": "supportive",
+          "rule_set": "business_launch",
+          "scope": "transit"
+        },
+        "explanation": "Transit Sun falls in the local 10th house at the evaluation location, a supportive placement for business launch.",
+        "importance": "medium",
+        "planet": "Sun",
+        "score": 2.2,
+        "title": "Transit Sun in local 10th house"
+      },
+      {
+        "category": "aspect",
+        "evidence": {
+          "aspect": "square",
+          "contribution": -0.54,
+          "label": "Transit Sun square natal Jupiter (orb 5.8\u00b0)",
+          "natal_planet": "jupiter",
+          "orb": 5.8,
+          "transit_planet": "sun"
+        },
+        "explanation": "Transit Sun forms a square to natal Jupiter (orb 5.8\u00b0), which challenges this activity.",
+        "importance": "low",
+        "planet": "Sun",
+        "score": -0.54,
+        "title": "Transit Sun square natal Jupiter"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "calculated_for": "London, United Kingdom",
+          "location_mode": "currentLiving",
+          "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+          "target_time": "12:00",
+          "timezone": "Europe/London"
+        },
+        "explanation": "Transit houses and angles are calculated for London, United Kingdom at 12:00 local using current living location.",
+        "importance": "low",
+        "planet": "",
+        "score": 0.5,
+        "title": "Timed for current living location"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "timing_note": "No major retrograde friction on primary rulers; standard due diligence applies."
+        },
+        "explanation": "No major retrograde friction on primary rulers; standard due diligence applies.",
+        "importance": "low",
+        "planet": "",
+        "score": -0.5,
+        "title": "Timing note"
+      },
+      {
+        "category": "house",
+        "evidence": {
+          "evaluation_location": "London, United Kingdom",
+          "house": 11,
+          "longitude": 60.3,
+          "planet": "venus",
+          "polarity": "supportive",
+          "rule_set": "business_launch",
+          "scope": "transit"
+        },
+        "explanation": "Transit Venus falls in the local 11th house at the evaluation location, a supportive placement for business launch.",
+        "importance": "low",
+        "planet": "Venus",
+        "score": 0.44,
+        "title": "Transit Venus in local 11th house"
+      }
+    ],
+    "summary": "Business Launch scores 100/100 (Highly Favorable). 9 supporting factor(s) and 2 caution factor(s) identified from scored chart evidence. Strongest support: Transit Jupiter trine natal Sun. Main caution: Transit Sun square natal Jupiter."
+  }
+}

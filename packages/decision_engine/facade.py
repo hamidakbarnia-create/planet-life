@@ -70,4 +70,7 @@ class DecisionEngineFacade:
             activity_type=action,
             context=request.context,
         )
-        return map_activity_response_to_decision_outcome(payload, request=request)
+        outcome = map_activity_response_to_decision_outcome(payload, request=request)
+        return outcome.model_copy(
+            update={"source_natal": natal, "source_transit": transit}
+        )

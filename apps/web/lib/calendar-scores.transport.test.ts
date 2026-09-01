@@ -37,15 +37,17 @@ type CalendarScoringInput = {
   [key: string]: unknown;
 };
 
-type LoadMonthCacheArgs = [input: CalendarScoringInput];
+type LoadMonthCacheRecordArgs = [input: CalendarScoringInput];
 type SaveMonthCacheArgs = [
   input: CalendarScoringInput,
-  scores: Record<string, number>,
+  days: Record<string, { score: number; dayIntelligence?: unknown }>,
   options?: { backendVersion?: string | null },
 ];
 
-const loadMonthCache = vi.fn<
-  (...args: LoadMonthCacheArgs) => Record<string, number> | null
+const loadMonthCacheRecord = vi.fn<
+  (...args: LoadMonthCacheRecordArgs) => {
+    days: Record<string, { score: number; dayIntelligence?: unknown }>;
+  } | null
 >(() => null);
 const saveMonthCache = vi.fn<(...args: SaveMonthCacheArgs) => void>(() => undefined);
 
@@ -55,7 +57,8 @@ vi.mock('./calendar-cache', async () => {
   );
   return {
     ...actual,
-    loadMonthCache: (...args: LoadMonthCacheArgs) => loadMonthCache(...args),
+    loadMonthCacheRecord: (...args: LoadMonthCacheRecordArgs) =>
+      loadMonthCacheRecord(...args),
     saveMonthCache: (...args: SaveMonthCacheArgs) => saveMonthCache(...args),
   };
 });
@@ -67,9 +70,9 @@ const profile = {
 } as BirthProfile;
 
 beforeEach(() => {
-  loadMonthCache.mockReturnValue(null);
+  loadMonthCacheRecord.mockReturnValue(null);
   saveMonthCache.mockClear();
-  loadMonthCache.mockClear();
+  loadMonthCacheRecord.mockClear();
 });
 
 afterEach(() => {
@@ -185,7 +188,7 @@ describe('calendar score transport behaviour', () => {
 
 describe('fetchMonthScores empty-cache regression', () => {
   it('does not short-circuit when cached month scores are an empty object', async () => {
-    loadMonthCache.mockReturnValue({});
+    loadMonthCacheRecord.mockReturnValue({ days: {} });
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -202,8 +205,33 @@ describe('fetchMonthScores empty-cache regression', () => {
     expect(result.scores['2026-07-01']).toBe(72);
   });
 
-  it('short-circuits when non-empty month scores are cached', async () => {
-    loadMonthCache.mockReturnValue({ '2026-07-01': 81 });
+  it('short-circuits when a semantic month record is cached', async () => {
+    loadMonthCacheRecord.mockReturnValue({
+      days: {
+        '2026-07-01': {
+          score: 81,
+          dayIntelligence: {
+            finalScore: 81,
+            dayClass: 'mixed',
+            conflict: false,
+            rating: 'Mixed',
+            materialSupportiveCount: 0,
+            materialCautionCount: 0,
+            basis: 'score_bands+evidence_conflict',
+            evidence: [],
+            actionType: 'business_launch',
+            dominantAspects: [],
+            scoringContext: {},
+            dimensions: { mapping_version: 'dimensions.v1-shadow' },
+            dimensionClassification: {
+              classifier_version: 'dimension_class.v3-shadow',
+              semantic_status: 'experimental_shadow',
+              day_class: 'review',
+            },
+          },
+        },
+      },
+    });
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
 
@@ -211,7 +239,132 @@ describe('fetchMonthScores empty-cache regression', () => {
 
     expect(fetchMock).not.toHaveBeenCalled();
     expect(result.scores).toEqual({ '2026-07-01': 81 });
+    expect(result.dayIntelligence['2026-07-01']?.dayClass).toBe('mixed');
+    expect(
+      result.dayIntelligence['2026-07-01']?.dimensionClassification
+        ?.classifier_version
+    ).toBe('dimension_class.v3-shadow');
     expect(saveMonthCache).not.toHaveBeenCalled();
+  });
+
+  it('legacy numeric cache mock (null semantic record) refetches live Day Intelligence', async () => {
+    loadMonthCacheRecord.mockReturnValue(null);
+    const cached: Record<string, number> = {};
+    for (let day = 1; day <= 31; day += 1) {
+      cached[`2026-07-${String(day).padStart(2, '0')}`] = 60 + (day % 10);
+    }
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        scores: {
+          '2026-07-01': {
+            executive: { score: 61 },
+            day_intelligence: {
+              final_score: 61,
+              day_class: 'mixed',
+              conflict: false,
+              rating: 'Mixed / Proceed with Awareness',
+              material_supportive_count: 0,
+              material_caution_count: 0,
+              basis: 'score_bands+evidence_conflict',
+              evidence: [],
+              dimensions: { mapping_version: 'dimensions.v1-shadow' },
+              dimension_classification: {
+                classifier_version: 'dimension_class.v3-shadow',
+                semantic_status: 'experimental_shadow',
+                day_class: 'review',
+              },
+            },
+          },
+        },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await fetchMonthScores(profile, 2026, 7);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(result.scores['2026-07-01']).toBe(61);
+    expect(
+      result.dayIntelligence['2026-07-01']?.dimensionClassification
+        ?.classifier_version
+    ).toBe('dimension_class.v3-shadow');
+  });
+
+  it('live /api/batch miss populates breakdowns and reasoning from the payload', async () => {
+    const dayPayloads: Record<
+      string,
+      {
+        executive: { score: number };
+        strategic?: {
+          component_breakdown?: { final_score: number } &
+            Record<string, unknown>;
+        };
+        reasoning?: { summary: string; confidence: number; reasons: unknown[] };
+        day_intelligence?: {
+          final_score: number;
+          day_class: string;
+          conflict: boolean;
+          rating: string;
+          material_supportive_count: number;
+          material_caution_count: number;
+          basis: string;
+          evidence: Record<string, unknown>[];
+        };
+      }
+    > = {};
+    for (let day = 1; day <= 31; day += 1) {
+      const date = `2026-07-${String(day).padStart(2, '0')}`;
+      dayPayloads[date] = {
+        executive: { score: 60 + (day % 10) },
+        strategic: {
+          component_breakdown: {
+            aspect_score: 1,
+            natal_house_bonus: 0,
+            transit_house_score: 0,
+            transit_angular_score: 0,
+            location_component_score: 0,
+            retrograde_penalty: 0,
+            final_score: 60 + (day % 10),
+            location_mode: 'currentLiving',
+            calculated_for: 'London',
+            resolved_local_datetime: `${date}T12:00:00+01:00`,
+            resolved_utc_datetime: `${date}T11:00:00+00:00`,
+            timezone: 'Europe/London',
+            target_time: '12:00',
+          },
+        },
+        reasoning: {
+          summary: 'Deterministic reasoning',
+          confidence: 0.6,
+          reasons: [],
+        },
+        day_intelligence: {
+          final_score: 60 + (day % 10),
+          day_class: 'mixed',
+          conflict: false,
+          rating: 'Mixed / Proceed with Awareness',
+          material_supportive_count: 0,
+          material_caution_count: 0,
+          basis: 'score_bands+evidence_conflict',
+          evidence: [],
+        },
+      };
+    }
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ scores: dayPayloads }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await fetchMonthScores(profile, 2026, 7);
+
+    expect(result.breakdowns['2026-07-01']).not.toBeNull();
+    expect(result.reasoning['2026-07-01']?.summary).toBe(
+      'Deterministic reasoning'
+    );
+    expect(result.dayIntelligence['2026-07-01']?.dayClass).toBe('mixed');
+    expect(result.dayIntelligence['2026-07-01']?.finalScore).toBe(61);
   });
 
   it('does not cache a non-2xx /api/batch response', async () => {
@@ -279,7 +432,12 @@ describe('fetchMonthScores empty-cache regression', () => {
 
     expect(Object.keys(result.scores)).toHaveLength(31);
     expect(saveMonthCache).toHaveBeenCalledTimes(1);
-    expect(saveMonthCache.mock.calls[0]?.[1]).toEqual(result.scores);
+    const savedDays = saveMonthCache.mock.calls[0]?.[1] as Record<
+      string,
+      { score: number }
+    >;
+    expect(Object.keys(savedDays)).toHaveLength(31);
+    expect(savedDays['2026-07-01']?.score).toBe(result.scores['2026-07-01']);
     expect(saveMonthCache.mock.calls[0]?.[0]?.dates).toHaveLength(31);
   });
 });

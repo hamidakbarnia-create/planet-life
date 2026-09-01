@@ -144,3 +144,12 @@ class DecisionOutcome(BaseModel):
         default_factory=dict,
         description="Preserved ActivityScoreResponse payload for traceability.",
     )
+    source_natal: dict[str, Any] | None = None
+    source_transit: dict[str, Any] | None = None
+    decision_assessment: dict[str, Any] | None = Field(
+        default=None,
+        description=(
+            "Additive experimental_shadow DecisionAssessment payload. "
+            "Not canonical. Not a command."
+        ),
+    )

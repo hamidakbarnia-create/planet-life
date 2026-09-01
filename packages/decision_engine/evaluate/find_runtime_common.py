@@ -297,6 +297,7 @@ def assemble_find_package(
     window_result,
     outcomes: list[DecisionOutcome],
     event_location_supplied: bool,
+    scored_days: list | None = None,
     evaluation_id: UUID | str | None = None,
     created_at: datetime | None = None,
 ) -> DecisionEvaluationPackage:
@@ -497,6 +498,23 @@ def assemble_find_package(
         "next_decisions": {"items": []},
         "related_decisions": {"items": []},
     }
+    day_payloads = [
+        item.assessment
+        for item in (scored_days or [])
+        if getattr(item, "assessment", None)
+    ]
+    from packages.decision_engine.decision_assessment import build_semantic_shadow
+
+    shadow = build_semantic_shadow(
+        day_payloads,
+        find_window_semantic_warnings=getattr(
+            window_result, "semantic_warnings", ()
+        ),
+        window_policies=getattr(window_result, "window_policies", ()),
+        window_explanations=getattr(window_result, "window_explanations", ()),
+    )
+    if shadow:
+        payload["semantic_shadow"] = shadow
     return DecisionEvaluationPackage.model_validate(payload)
 
 
@@ -574,6 +592,20 @@ def execute_find(
             else score_to_candidate_band(score)
         )
         outcomes.append(outcome)
+        from packages.decision_engine.decision_assessment import (
+            assessment_from_request,
+            tagged_assessment_payload,
+        )
+
+        assessment = assessment_from_request(
+            outcome,
+            request,
+            evaluation_date=day_iso,
+            natal=getattr(outcome, "source_natal", None),
+            transit=getattr(outcome, "source_transit", None),
+            decision_type_id=config.decision_type_id,
+            family_id=config.family_id,
+        )
         scored_days.append(
             ScoredFindDay(
                 day=day,
@@ -584,6 +616,14 @@ def execute_find(
                 ),
                 risks=config.semantics.option_risks(
                     score=score, band=band, rating=rating
+                ),
+                assessment=(
+                    tagged_assessment_payload(
+                        assessment,
+                        include_day_intelligence=False,
+                    )
+                    if assessment is not None
+                    else None
                 ),
             )
         )
@@ -600,6 +640,7 @@ def execute_find(
         window_result=window_result,
         outcomes=outcomes,
         event_location_supplied=event_location_supplied,
+        scored_days=scored_days,
         evaluation_id=evaluation_id,
         created_at=created_at,
     )

@@ -252,6 +252,46 @@
           "items": { "$ref": "#/$defs/decisionLink" }
         }
       }
+    },
+
+    "semantic_shadow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "semantic_status", "assessments"],
+      "properties": {
+        "schema_version": { "const": "decision_assessment.v1-shadow" },
+        "semantic_status": { "const": "experimental_shadow" },
+        "assessments": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "score_vs_class_disagreements": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "find_window_semantic_warnings": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "policy": { "type": "object" },
+        "policy_pairs": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "window_policies": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "explanation": { "type": "object" },
+        "explanations": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "window_explanations": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      }
     }
   },
 

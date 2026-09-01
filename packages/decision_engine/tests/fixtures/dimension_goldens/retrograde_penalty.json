@@ -1,0 +1,107 @@
+{
+  "action_type": "business_launch",
+  "classification_conflict": false,
+  "day_class": "mixed",
+  "dimensions": {
+    "action_type": "business_launch",
+    "baseline": 50,
+    "clarity": {
+      "caution_evidence_ids": [
+        "ev.retrograde.mars"
+      ],
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.retrograde.mars"
+      ],
+      "evidence_strength": 0.0556,
+      "status": "scored",
+      "supportive_evidence_ids": [],
+      "value": 49
+    },
+    "cooperation": {
+      "caution_evidence_ids": [],
+      "conflicted": false,
+      "dominant_evidence_ids": [],
+      "evidence_strength": null,
+      "status": "insufficient",
+      "supportive_evidence_ids": [],
+      "value": 50
+    },
+    "mapping_version": "dimensions.v1-shadow",
+    "momentum": {
+      "caution_evidence_ids": [
+        "ev.retrograde.mars"
+      ],
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.retrograde.mars",
+        "ev.house.transit.mars.11"
+      ],
+      "evidence_strength": 0.2611,
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.house.transit.mars.11"
+      ],
+      "value": 50
+    },
+    "opportunity": {
+      "caution_evidence_ids": [
+        "ev.retrograde.mars"
+      ],
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.retrograde.mars",
+        "ev.house.transit.mars.11"
+      ],
+      "evidence_strength": 0.1306,
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.house.transit.mars.11"
+      ],
+      "value": 50
+    },
+    "pressure": {
+      "caution_evidence_ids": [
+        "ev.retrograde.mars"
+      ],
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.retrograde.mars",
+        "ev.house.transit.mars.11"
+      ],
+      "evidence_strength": 0.2089,
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.house.transit.mars.11"
+      ],
+      "value": 50
+    },
+    "reversibility_safety": {
+      "caution_evidence_ids": [
+        "ev.retrograde.mars"
+      ],
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.retrograde.mars"
+      ],
+      "evidence_strength": 0.1389,
+      "status": "scored",
+      "supportive_evidence_ids": [],
+      "value": 48
+    },
+    "semantic_status": "experimental_shadow",
+    "stability": {
+      "caution_evidence_ids": [],
+      "conflicted": false,
+      "dominant_evidence_ids": [],
+      "evidence_strength": null,
+      "status": "insufficient",
+      "supportive_evidence_ids": [],
+      "value": 50
+    }
+  },
+  "final_score": 50,
+  "id": "retrograde_penalty",
+  "mapping_version": "dimensions.v1-shadow",
+  "semantic_status": "experimental_shadow"
+}

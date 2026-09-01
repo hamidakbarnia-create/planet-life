@@ -4,11 +4,13 @@ import {
   extractAnalyzeScoreBreakdown,
   extractHourlyScoreBreakdown,
   parseAnalyzeResponse,
-  type MonthScoresResult,
+  type MonthScoresResult as MonthScoresBase,
   type ScoreBreakdown,
 } from './score-breakdown';
 import { extractBatchDayReasoning } from './score-reasoning';
 import type { ScoreReasoning } from './score-reasoning';
+import { extractBatchDayIntelligence } from './calendar-day-intelligence';
+import type { CalendarDayIntelligence } from './calendar-day-intelligence';
 import {
   buildScoringLocationPayload,
   resolveCalendarEvaluationLocation,
@@ -20,10 +22,15 @@ import {
 } from './timing-presentation';
 import {
   buildCalendarFetchDiagnostic,
-  loadMonthCache,
+  breakdownsFromCachedDays,
+  dayIntelligenceFromCachedDays,
+  loadMonthCacheRecord,
   normalizeCalendarScoringInput,
+  reasoningFromCachedDays,
   saveMonthCache,
+  scoresFromCachedDays,
   setLastCalendarScoreFetchDiagnostic,
+  type CalendarCachedDay,
   type CalendarScoringInput,
 } from './calendar-cache';
 
@@ -37,12 +44,19 @@ import {
 export { API_BASE } from './api-config';
 export {
   CALENDAR_CACHE_VERSION,
+  CALENDAR_CACHE_CONTENT_VERSION,
+  CALENDAR_CACHE_STORES_DAY_INTELLIGENCE,
   clearMonthScoreCaches,
   fingerprintCalendarScoringInput,
   getLastCalendarScoreFetchDiagnostic,
+  loadMonthCache,
+  loadMonthCacheRecord,
+  saveMonthCache,
   scoreMapChecksum,
+  type CalendarCachedDay,
   type CalendarScoreFetchDiagnostic,
   type CalendarScoringInput,
+  type MonthCacheRecord,
 } from './calendar-cache';
 
 export interface DayScore {
@@ -60,8 +74,18 @@ export interface HourScore {
   breakdown?: ScoreBreakdown | null;
 }
 
-export type { MonthScoresResult, ScoreBreakdown };
+export type MonthScoresResult = MonthScoresBase & {
+  /** Live /api/batch or v3 cache hit. Legacy numeric cache is refreshed. */
+  dayIntelligence: Record<string, CalendarDayIntelligence | null>;
+};
+export type { ScoreBreakdown };
 export type { ScoreReasoning } from './score-reasoning';
+export type { CalendarDayIntelligence, DayClass } from './calendar-day-intelligence';
+export {
+  shadowClassifierVersion,
+  shadowDayClass,
+  shadowSemanticStatus,
+} from './calendar-day-intelligence';
 export {
   BAND_STYLES,
   formatHourLabel,
@@ -71,10 +95,6 @@ export {
   scoreToBand,
   type ScoreBand,
 } from './timing-presentation';
-export {
-  loadMonthCache,
-  saveMonthCache,
-} from './calendar-cache';
 
 export function scoringLocationFields(
   profile: BirthProfile,
@@ -242,22 +262,28 @@ export async function fetchMonthScores(
   const locFields = scoringLocationFields(profile, evalLoc);
   const scoringInput = buildMonthScoringInput(profile, year, month, evalLoc);
   if (!locFields || !scoringInput) {
-    return { scores: {}, breakdowns: {}, reasoning: {} };
+    return { scores: {}, breakdowns: {}, reasoning: {}, dayIntelligence: {} };
   }
 
-  const cached = loadMonthCache(scoringInput);
-  // Empty {} must not short-circuit — it is a cache miss (failed prior load).
-  if (cached && Object.keys(cached).length > 0) {
+  const cachedRecord = loadMonthCacheRecord(scoringInput);
+  if (cachedRecord?.days && Object.keys(cachedRecord.days).length > 0) {
+    const scores = scoresFromCachedDays(cachedRecord.days);
     const diagnostic = buildCalendarFetchDiagnostic({
       cache: 'hit',
       input: scoringInput,
-      scores: cached,
+      scores,
+      contentVersion: cachedRecord.version,
     });
     setLastCalendarScoreFetchDiagnostic(diagnostic);
     if (process.env.NODE_ENV === 'development') {
       console.debug('[calendar-scores]', diagnostic);
     }
-    return { scores: cached, breakdowns: {}, reasoning: {} };
+    return {
+      scores,
+      breakdowns: breakdownsFromCachedDays(cachedRecord.days),
+      reasoning: reasoningFromCachedDays(cachedRecord.days),
+      dayIntelligence: dayIntelligenceFromCachedDays(cachedRecord.days),
+    };
   }
 
   const dates = scoringInput.dates;
@@ -269,6 +295,7 @@ export async function fetchMonthScores(
   const scores: Record<string, number> = {};
   const breakdowns: Record<string, ScoreBreakdown | null> = {};
   const reasoning: Record<string, ScoreReasoning | null> = {};
+  const dayIntelligence: Record<string, CalendarDayIntelligence | null> = {};
 
   try {
     const res = await postCalendarBatch({
@@ -289,7 +316,7 @@ export async function fetchMonthScores(
           scores,
         })
       );
-      return { scores, breakdowns, reasoning };
+      return { scores, breakdowns, reasoning, dayIntelligence };
     }
     const data = await res.json();
     if (data.scores && typeof data.scores === 'object') {
@@ -304,6 +331,7 @@ export async function fetchMonthScores(
         }
         breakdowns[date] = extractAnalyzeScoreBreakdown(payload);
         reasoning[date] = extractBatchDayReasoning(payload);
+        dayIntelligence[date] = extractBatchDayIntelligence(payload);
       }
     }
   } catch {
@@ -313,7 +341,16 @@ export async function fetchMonthScores(
   onProgress?.(total, total);
   // Persist only complete months so Outlook / Weekly Path / cells share one map.
   if (isCompleteMonthScores(scores, dates)) {
-    saveMonthCache(scoringInput, scores);
+    const days: Record<string, CalendarCachedDay> = {};
+    for (const date of dates) {
+      days[date] = {
+        score: scores[date],
+        breakdown: breakdowns[date] ?? null,
+        reasoning: reasoning[date] ?? null,
+        dayIntelligence: dayIntelligence[date] ?? null,
+      };
+    }
+    saveMonthCache(scoringInput, days);
   }
   const diagnostic = buildCalendarFetchDiagnostic({
     cache: 'miss',
@@ -325,7 +362,7 @@ export async function fetchMonthScores(
     // No raw birth fields — fingerprint + checksum only.
     console.debug('[calendar-scores]', diagnostic);
   }
-  return { scores, breakdowns, reasoning };
+  return { scores, breakdowns, reasoning, dayIntelligence };
 }
 export async function fetchHourlyScores(
   profile: BirthProfile,
