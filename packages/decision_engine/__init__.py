@@ -1,8 +1,14 @@
 """METIORO Decision Intelligence Engine facade (Phase 3 implementation)."""
 
+from packages.decision_engine.day_classification import (
+    DayClassification,
+    classify_day,
+)
 from packages.decision_engine.day_intelligence_models import (
     DayIntelligenceSnapshot,
+    attach_calendar_day_intelligence,
     build_day_intelligence_snapshot,
+    day_intelligence_payload,
 )
 from packages.decision_engine.evidence import (
     DecisionEvidence,
@@ -37,6 +43,7 @@ __all__ = [
     "ALL_STATES",
     "ActivationPhase",
     "CaseState",
+    "DayClassification",
     "DayIntelligenceSnapshot",
     "DecisionEvidence",
     "Confidence",
@@ -52,7 +59,10 @@ __all__ = [
     "activation_phase",
     "apply_transition",
     "archive_case_composite",
+    "attach_calendar_day_intelligence",
     "build_day_intelligence_snapshot",
+    "classify_day",
+    "day_intelligence_payload",
     "complete_case_composite",
     "dominant_evaluated_aspects",
     "map_activity_response_to_decision_outcome",

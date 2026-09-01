@@ -165,4 +165,6 @@ def test_snapshot_preserves_golden_score() -> None:
         assert snapshot.final_score == golden["final_score"]
         assert snapshot.action_type == golden["input"]["action_type"]
         assert snapshot.evidence
+        assert snapshot.classification.score == snapshot.final_score
+        assert "command" not in snapshot.classification.model_dump()
         assert Path(GOLDEN_DIR).is_dir()

@@ -209,8 +209,8 @@ The engine does not emit these. Phase 1 **does not invent them**:
 |----------|--------|
 | Identity | Fingerprint over birth, evaluation coords/tz, house system, zodiac, action_type, month dates (`CALENDAR_CACHE_VERSION = v2`) |
 | Stored payload | `scores: Record<date, number>` only |
-| Cache hit | `{ scores, breakdowns: {}, reasoning: {} }` — **documented and tested** |
-| Live miss | Breakdown + reasoning extracted from `/api/batch` |
+| Cache hit | `{ scores, breakdowns: {}, reasoning: {}, dayIntelligence: {} }` — **documented and tested** |
+| Live miss | Breakdown + reasoning + day intelligence extracted from `/api/batch` |
 | Persist rule | Complete month only; empty `{}` is a miss |
 
 `CALENDAR_CACHE_STORES_DAY_INTELLIGENCE = false` locks this contract until a dedicated content migration.
@@ -225,3 +225,33 @@ Phase 2 (commands, classification, domain scores) may start **only if**:
 - Adapter never changes `final_score`
 - Unknown temporal fields stay unknown
 - Cache scores-only behavior remains explicit until content migration
+
+---
+
+## Phase 2A — Day classification (complete)
+
+**Scope:** Decision synthesis from normalized evidence + existing score bands. No semantic commands, domain scores, cache content migration, Calendar UI redesign, or production weight changes.
+
+### Rules
+
+1. `rating` is always `astro_engine.scoring._rating(final_score)` (80 / 65 / 45 / 30).
+2. Material evidence uses the existing ±4.0 opportunity/risk magnitude.
+3. No evidence → `insufficient`.
+4. Material supportive **and** material caution → `mixed` (`conflict=true`), even if the net score is Favorable+.
+5. Otherwise map score bands: ≥80 `strongly_supportive`, ≥65 `supportive`, ≥45 `mixed`, ≥30 `caution`, else `adverse`.
+6. Classification never changes `final_score`. No `command` field.
+
+### Wiring
+
+- Live Calendar `/api/batch` date-only payloads gain additive `day_intelligence`.
+- Hourly `/api/batch-hourly` and Ask `build_scoring_response` are unchanged.
+- Web `fetchMonthScores` extracts `dayIntelligence` on live miss; cache hits remain empty.
+
+### Explicitly deferred
+
+- Semantic commands (GO / WAIT / …)
+- Domain scores
+- Cache content migration
+- FIND/COMPARE consuming DecisionEvidence
+- Calendar UI presentation of `day_class`
+- Unifying Package `cautionary` vs Calendar `caution`

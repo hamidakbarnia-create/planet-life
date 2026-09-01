@@ -1,7 +1,7 @@
-"""Day Intelligence carrier for Calendar Decision Intelligence Phase 0/1.
+"""Day Intelligence carrier for Calendar Decision Intelligence.
 
-Holds the existing 0–100 score plus normalized DecisionEvidence.
-Does not classify days, emit commands, or compute domain scores.
+Phase 0/1: passthrough score + normalized DecisionEvidence.
+Phase 2A: deterministic day classification (no commands, no domain scores).
 """
 
 from __future__ import annotations
@@ -11,6 +11,10 @@ from typing import Any, Mapping
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from packages.astro_engine.scoring_context import ScoringContext
+from packages.decision_engine.day_classification import (
+    DayClassification,
+    classify_day,
+)
 from packages.decision_engine.evidence import (
     DecisionEvidence,
     dominant_evaluated_aspects,
@@ -19,10 +23,10 @@ from packages.decision_engine.evidence import (
 
 
 class DayIntelligenceSnapshot(BaseModel):
-    """Passthrough score + normalized evidence for one evaluated day.
+    """Passthrough score + normalized evidence + day classification.
 
-    ``final_score`` is copied from the astrology engine. Normalization must
-    never recompute or replace it.
+    ``final_score`` is copied from the astrology engine. Classification and
+    evidence must never recompute or replace it. No decision command in 2A.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -34,14 +38,20 @@ class DayIntelligenceSnapshot(BaseModel):
     dominant_aspects: tuple[dict[str, Any], ...] = ()
     reasoning: dict[str, Any] | None = None
     scoring_context: dict[str, Any] = Field(default_factory=dict)
+    classification: DayClassification
 
     @model_validator(mode="after")
-    def _score_matches_breakdown_when_present(self) -> DayIntelligenceSnapshot:
+    def _score_is_passthrough(self) -> DayIntelligenceSnapshot:
         breakdown_score = self.component_breakdown.get("final_score")
         if breakdown_score is not None and int(breakdown_score) != self.final_score:
             raise ValueError(
                 "DayIntelligenceSnapshot.final_score must equal "
                 "component_breakdown.final_score"
+            )
+        if self.classification.score != self.final_score:
+            raise ValueError(
+                "DayClassification.score must equal "
+                "DayIntelligenceSnapshot.final_score"
             )
         return self
 
@@ -81,6 +91,7 @@ def build_day_intelligence_snapshot(
         reasoning=resolved_reasoning,
         scoring_context=scoring_context,
     )
+    classification = classify_day(final_score=final_score, evidence=evidence)
     return DayIntelligenceSnapshot(
         action_type=resolved_activity,
         final_score=final_score,
@@ -89,10 +100,53 @@ def build_day_intelligence_snapshot(
         dominant_aspects=dominant_evaluated_aspects(score_result),
         reasoning=resolved_reasoning,
         scoring_context=dict(technical.get("scoring_context") or {}),
+        classification=classification,
     )
+
+
+def attach_calendar_day_intelligence(
+    payload: Mapping[str, Any],
+    *,
+    natal: Mapping[str, Any] | None = None,
+    transit: Mapping[str, Any] | None = None,
+    activity_type: str | None = None,
+    scoring_context: ScoringContext | None = None,
+) -> dict[str, Any]:
+    """Add ``day_intelligence`` without mutating executive.score."""
+    snapshot = build_day_intelligence_snapshot(
+        payload,
+        natal=natal,
+        transit=transit,
+        activity_type=activity_type,
+        scoring_context=scoring_context,
+    )
+    attached = dict(payload)
+    attached["day_intelligence"] = day_intelligence_payload(snapshot)
+    return attached
+
+
+def day_intelligence_payload(snapshot: DayIntelligenceSnapshot) -> dict[str, Any]:
+    """Compact Calendar-batch layer. Omits commands (not in Phase 2A)."""
+    return {
+        "final_score": snapshot.final_score,
+        "action_type": snapshot.action_type,
+        "day_class": snapshot.classification.day_class,
+        "conflict": snapshot.classification.conflict,
+        "rating": snapshot.classification.rating,
+        "material_supportive_count": (
+            snapshot.classification.material_supportive_count
+        ),
+        "material_caution_count": snapshot.classification.material_caution_count,
+        "basis": snapshot.classification.basis,
+        "evidence": [item.model_dump() for item in snapshot.evidence],
+        "dominant_aspects": list(snapshot.dominant_aspects),
+        "scoring_context": snapshot.scoring_context,
+    }
 
 
 __all__ = [
     "DayIntelligenceSnapshot",
+    "attach_calendar_day_intelligence",
     "build_day_intelligence_snapshot",
+    "day_intelligence_payload",
 ]

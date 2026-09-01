@@ -34,6 +34,9 @@ from decision_case.routes import (
     register_decision_case_exception_handlers,
     register_decision_case_openapi_filter,
 )
+from packages.decision_engine.day_intelligence_models import (
+    attach_calendar_day_intelligence,
+)
 from packages.astro_engine.scoring_context import CONTEXT_CALENDAR_DAY, CONTEXT_CALENDAR_HOURLY
 from schemas.score_breakdown import build_scoring_response, validate_component_breakdown
 from services.scoring_pipeline import score_with_context
@@ -156,6 +159,16 @@ def _score_one(
             activity_type=action if not target_time else None,
             context=scoring_context if not target_time else None,
         )
+        # Phase 2A: date-only Calendar batch carries classified evidence.
+        # Hourly batch stays score + breakdown only (no reasoning charts).
+        if not target_time:
+            payload = attach_calendar_day_intelligence(
+                payload,
+                natal=natal,
+                transit=transit,
+                activity_type=action,
+                scoring_context=scoring_context,
+            )
         return {
             **payload,
             "transit": transit.get("planets", {}),

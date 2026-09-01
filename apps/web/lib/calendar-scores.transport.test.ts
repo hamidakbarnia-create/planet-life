@@ -213,6 +213,7 @@ describe('fetchMonthScores empty-cache regression', () => {
     expect(result.scores).toEqual({ '2026-07-01': 81 });
     expect(result.breakdowns).toEqual({});
     expect(result.reasoning).toEqual({});
+    expect(result.dayIntelligence).toEqual({});
     expect(saveMonthCache).not.toHaveBeenCalled();
   });
 
@@ -231,6 +232,7 @@ describe('fetchMonthScores empty-cache regression', () => {
     expect(result.scores).toEqual(cached);
     expect(Object.keys(result.breakdowns)).toHaveLength(0);
     expect(Object.keys(result.reasoning)).toHaveLength(0);
+    expect(Object.keys(result.dayIntelligence)).toHaveLength(0);
   });
 
   it('live /api/batch miss populates breakdowns and reasoning from the payload', async () => {
@@ -240,6 +242,16 @@ describe('fetchMonthScores empty-cache regression', () => {
         executive: { score: number };
         strategic?: { component_breakdown?: { final_score: number } };
         reasoning?: { summary: string; confidence: number; reasons: unknown[] };
+        day_intelligence?: {
+          final_score: number;
+          day_class: string;
+          conflict: boolean;
+          rating: string;
+          material_supportive_count: number;
+          material_caution_count: number;
+          basis: string;
+          evidence: Record<string, unknown>[];
+        };
       }
     > = {};
     for (let day = 1; day <= 31; day += 1) {
@@ -268,6 +280,16 @@ describe('fetchMonthScores empty-cache regression', () => {
           confidence: 0.6,
           reasons: [],
         },
+        day_intelligence: {
+          final_score: 60 + (day % 10),
+          day_class: 'mixed',
+          conflict: false,
+          rating: 'Mixed / Proceed with Awareness',
+          material_supportive_count: 0,
+          material_caution_count: 0,
+          basis: 'score_bands+evidence_conflict',
+          evidence: [],
+        },
       };
     }
     const fetchMock = vi.fn().mockResolvedValue({
@@ -282,6 +304,8 @@ describe('fetchMonthScores empty-cache regression', () => {
     expect(result.reasoning['2026-07-01']?.summary).toBe(
       'Deterministic reasoning'
     );
+    expect(result.dayIntelligence['2026-07-01']?.dayClass).toBe('mixed');
+    expect(result.dayIntelligence['2026-07-01']?.finalScore).toBe(61);
   });
 
   it('does not cache a non-2xx /api/batch response', async () => {

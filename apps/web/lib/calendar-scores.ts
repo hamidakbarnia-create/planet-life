@@ -4,11 +4,13 @@ import {
   extractAnalyzeScoreBreakdown,
   extractHourlyScoreBreakdown,
   parseAnalyzeResponse,
-  type MonthScoresResult,
+  type MonthScoresResult as MonthScoresBase,
   type ScoreBreakdown,
 } from './score-breakdown';
 import { extractBatchDayReasoning } from './score-reasoning';
 import type { ScoreReasoning } from './score-reasoning';
+import { extractBatchDayIntelligence } from './calendar-day-intelligence';
+import type { CalendarDayIntelligence } from './calendar-day-intelligence';
 import {
   buildScoringLocationPayload,
   resolveCalendarEvaluationLocation,
@@ -61,8 +63,13 @@ export interface HourScore {
   breakdown?: ScoreBreakdown | null;
 }
 
-export type { MonthScoresResult, ScoreBreakdown };
+export type MonthScoresResult = MonthScoresBase & {
+  /** Live /api/batch only. Cache hits are empty until a content migration. */
+  dayIntelligence: Record<string, CalendarDayIntelligence | null>;
+};
+export type { ScoreBreakdown };
 export type { ScoreReasoning } from './score-reasoning';
+export type { CalendarDayIntelligence, DayClass } from './calendar-day-intelligence';
 export {
   BAND_STYLES,
   formatHourLabel,
@@ -243,7 +250,7 @@ export async function fetchMonthScores(
   const locFields = scoringLocationFields(profile, evalLoc);
   const scoringInput = buildMonthScoringInput(profile, year, month, evalLoc);
   if (!locFields || !scoringInput) {
-    return { scores: {}, breakdowns: {}, reasoning: {} };
+    return { scores: {}, breakdowns: {}, reasoning: {}, dayIntelligence: {} };
   }
 
   const cached = loadMonthCache(scoringInput);
@@ -258,9 +265,9 @@ export async function fetchMonthScores(
     if (process.env.NODE_ENV === 'development') {
       console.debug('[calendar-scores]', diagnostic);
     }
-    // Cache hits are numeric-only. Breakdown and reasoning require a live
-    // /api/batch response; they are not part of MonthCacheRecord in Phase 0/1.
-    return { scores: cached, breakdowns: {}, reasoning: {} };
+    // Cache hits are numeric-only. Breakdown, reasoning, and day intelligence
+    // require a live /api/batch response; they are not part of MonthCacheRecord.
+    return { scores: cached, breakdowns: {}, reasoning: {}, dayIntelligence: {} };
   }
 
   const dates = scoringInput.dates;
@@ -272,6 +279,7 @@ export async function fetchMonthScores(
   const scores: Record<string, number> = {};
   const breakdowns: Record<string, ScoreBreakdown | null> = {};
   const reasoning: Record<string, ScoreReasoning | null> = {};
+  const dayIntelligence: Record<string, CalendarDayIntelligence | null> = {};
 
   try {
     const res = await postCalendarBatch({
@@ -292,7 +300,7 @@ export async function fetchMonthScores(
           scores,
         })
       );
-      return { scores, breakdowns, reasoning };
+      return { scores, breakdowns, reasoning, dayIntelligence };
     }
     const data = await res.json();
     if (data.scores && typeof data.scores === 'object') {
@@ -307,6 +315,7 @@ export async function fetchMonthScores(
         }
         breakdowns[date] = extractAnalyzeScoreBreakdown(payload);
         reasoning[date] = extractBatchDayReasoning(payload);
+        dayIntelligence[date] = extractBatchDayIntelligence(payload);
       }
     }
   } catch {
@@ -328,7 +337,7 @@ export async function fetchMonthScores(
     // No raw birth fields — fingerprint + checksum only.
     console.debug('[calendar-scores]', diagnostic);
   }
-  return { scores, breakdowns, reasoning };
+  return { scores, breakdowns, reasoning, dayIntelligence };
 }
 export async function fetchHourlyScores(
   profile: BirthProfile,
