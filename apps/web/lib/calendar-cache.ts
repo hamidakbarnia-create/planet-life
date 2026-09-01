@@ -1,7 +1,19 @@
 import { API_BASE } from './api-config';
 
-/** Explicit cache / scoring-identity schema. Old v1 city-only entries are never reused. */
+/**
+ * Scoring-identity schema for month cache keys.
+ * Old v1 city-only entries are never reused.
+ *
+ * Content contract (Phase 0/1): `MonthCacheRecord` stores numeric `scores` only.
+ * It does not persist `component_breakdown`, reasoning, or DecisionEvidence.
+ * `CALENDAR_CACHE_VERSION` is the fingerprint schema, not a day-intelligence
+ * payload version. Persisting Day Intelligence is deferred to a later cache
+ * content migration.
+ */
 export const CALENDAR_CACHE_VERSION = 'v2' as const;
+
+/** False until a later cache-content migration stores breakdown/evidence. */
+export const CALENDAR_CACHE_STORES_DAY_INTELLIGENCE = false;
 
 const MONTH_CACHE_TTL_MS = 1000 * 60 * 60 * 12;
 
@@ -37,6 +49,7 @@ export type MonthCacheRecord = {
   inputFingerprint: string;
   savedAt: number;
   dates: string[];
+  /** Numeric 0–100 scores only. Breakdown / reasoning / evidence are not stored. */
   scores: Record<string, number>;
   backendVersion?: string | null;
 };

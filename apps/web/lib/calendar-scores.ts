@@ -37,6 +37,7 @@ import {
 export { API_BASE } from './api-config';
 export {
   CALENDAR_CACHE_VERSION,
+  CALENDAR_CACHE_STORES_DAY_INTELLIGENCE,
   clearMonthScoreCaches,
   fingerprintCalendarScoringInput,
   getLastCalendarScoreFetchDiagnostic,
@@ -257,6 +258,8 @@ export async function fetchMonthScores(
     if (process.env.NODE_ENV === 'development') {
       console.debug('[calendar-scores]', diagnostic);
     }
+    // Cache hits are numeric-only. Breakdown and reasoning require a live
+    // /api/batch response; they are not part of MonthCacheRecord in Phase 0/1.
     return { scores: cached, breakdowns: {}, reasoning: {} };
   }
 

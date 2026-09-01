@@ -1,0 +1,119 @@
+{
+  "component_breakdown": {
+    "aspect_score": 18.0,
+    "calculated_for": "Sydney, Australia",
+    "final_score": 68,
+    "location_component_score": 0.0,
+    "location_mode": "currentLiving",
+    "natal_house_bonus": 0.0,
+    "resolved_local_datetime": "2026-06-15T12:00:00+10:00",
+    "resolved_utc_datetime": "2026-06-15T02:00:00+00:00",
+    "retrograde_penalty": -0.0,
+    "target_time": "12:00",
+    "timezone": "Australia/Sydney",
+    "transit_angular_score": 0.0,
+    "transit_house_score": 0.0
+  },
+  "dominant_aspects": [
+    {
+      "aspect": "trine",
+      "contribution": 18.0,
+      "label": "Transit Jupiter trine natal Sun (orb 0.0\u00b0)",
+      "natal_planet": "sun",
+      "orb": 0.0,
+      "source": "calculated",
+      "transit_planet": "jupiter"
+    }
+  ],
+  "executive": {
+    "activity": "Business Launch",
+    "rating": "Favorable",
+    "score": 68
+  },
+  "final_score": 68,
+  "id": "evaluation_location_sydney",
+  "input": {
+    "action_type": "business_launch",
+    "natal": {
+      "planets": {
+        "sun": {
+          "house": 10,
+          "longitude": 0.0
+        }
+      }
+    },
+    "scoring_context": {
+      "default_transit_time": "12:00",
+      "include_natal_house_bonus": false,
+      "include_transit_angular_score": true,
+      "include_transit_house_score": true,
+      "location_mode": "currentLiving"
+    },
+    "transit": {
+      "ascendant": 0.0,
+      "evaluation": {
+        "calculated_for": "Sydney, Australia",
+        "evaluation_location": "Sydney, Australia",
+        "resolved_local_datetime": "2026-06-15T12:00:00+10:00",
+        "resolved_utc_datetime": "2026-06-15T02:00:00+00:00",
+        "target_time": "12:00",
+        "timezone": "Australia/Sydney"
+      },
+      "midheaven": 270.0,
+      "planets": {
+        "jupiter": {
+          "house": 12,
+          "longitude": 120.0
+        }
+      }
+    }
+  },
+  "reasoning": {
+    "confidence": 0.79,
+    "reasons": [
+      {
+        "category": "aspect",
+        "evidence": {
+          "aspect": "trine",
+          "contribution": 18.0,
+          "label": "Transit Jupiter trine natal Sun (orb 0.0\u00b0)",
+          "natal_planet": "sun",
+          "orb": 0.0,
+          "transit_planet": "jupiter"
+        },
+        "explanation": "Transit Jupiter forms a trine to natal Sun (orb 0.0\u00b0), which supports this activity.",
+        "importance": "high",
+        "planet": "Jupiter",
+        "score": 18.0,
+        "title": "Transit Jupiter trine natal Sun"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "calculated_for": "Sydney, Australia",
+          "location_mode": "currentLiving",
+          "resolved_local_datetime": "2026-06-15T12:00:00+10:00",
+          "target_time": "12:00",
+          "timezone": "Australia/Sydney"
+        },
+        "explanation": "Transit houses and angles are calculated for Sydney, Australia at 12:00 local using current living location.",
+        "importance": "low",
+        "planet": "",
+        "score": 0.5,
+        "title": "Timed for current living location"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "timing_note": "No major retrograde friction on primary rulers; standard due diligence applies."
+        },
+        "explanation": "No major retrograde friction on primary rulers; standard due diligence applies.",
+        "importance": "low",
+        "planet": "",
+        "score": -0.5,
+        "title": "Timing note"
+      }
+    ],
+    "summary": "Business Launch scores 68/100 (Favorable). 2 supporting factor(s) and 1 caution factor(s) identified from scored chart evidence. Strongest support: Transit Jupiter trine natal Sun. Main caution: Timing note."
+  }
+}

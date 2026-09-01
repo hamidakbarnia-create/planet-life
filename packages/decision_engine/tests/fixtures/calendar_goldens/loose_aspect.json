@@ -1,0 +1,117 @@
+{
+  "component_breakdown": {
+    "aspect_score": 0.6,
+    "calculated_for": "London, United Kingdom",
+    "final_score": 51,
+    "location_component_score": 0.0,
+    "location_mode": "currentLiving",
+    "natal_house_bonus": 0.0,
+    "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+    "resolved_utc_datetime": "2026-06-15T11:00:00+00:00",
+    "retrograde_penalty": -0.0,
+    "target_time": "12:00",
+    "timezone": "Europe/London",
+    "transit_angular_score": 0.0,
+    "transit_house_score": 0.0
+  },
+  "dominant_aspects": [
+    {
+      "aspect": "trine",
+      "contribution": 0.6,
+      "label": "Transit Jupiter trine natal Sun (orb 5.8\u00b0)",
+      "natal_planet": "sun",
+      "orb": 5.799999999999997,
+      "source": "calculated",
+      "transit_planet": "jupiter"
+    }
+  ],
+  "executive": {
+    "activity": "Business Launch",
+    "rating": "Mixed / Proceed with Awareness",
+    "score": 51
+  },
+  "final_score": 51,
+  "id": "loose_aspect",
+  "input": {
+    "action_type": "business_launch",
+    "natal": {
+      "planets": {
+        "sun": {
+          "house": 5,
+          "longitude": 0.0
+        }
+      }
+    },
+    "scoring_context": {
+      "default_transit_time": "12:00",
+      "include_natal_house_bonus": false,
+      "include_transit_angular_score": true,
+      "include_transit_house_score": true,
+      "location_mode": "currentLiving"
+    },
+    "transit": {
+      "evaluation": {
+        "calculated_for": "London, United Kingdom",
+        "evaluation_location": "London, United Kingdom",
+        "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+        "resolved_utc_datetime": "2026-06-15T11:00:00+00:00",
+        "target_time": "12:00",
+        "timezone": "Europe/London"
+      },
+      "planets": {
+        "jupiter": {
+          "house": 9,
+          "longitude": 125.8
+        }
+      }
+    }
+  },
+  "reasoning": {
+    "confidence": 0.61,
+    "reasons": [
+      {
+        "category": "aspect",
+        "evidence": {
+          "aspect": "trine",
+          "contribution": 0.6,
+          "label": "Transit Jupiter trine natal Sun (orb 5.8\u00b0)",
+          "natal_planet": "sun",
+          "orb": 5.8,
+          "transit_planet": "jupiter"
+        },
+        "explanation": "Transit Jupiter forms a trine to natal Sun (orb 5.8\u00b0), which supports this activity.",
+        "importance": "low",
+        "planet": "Jupiter",
+        "score": 0.6,
+        "title": "Transit Jupiter trine natal Sun"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "calculated_for": "London, United Kingdom",
+          "location_mode": "currentLiving",
+          "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+          "target_time": "12:00",
+          "timezone": "Europe/London"
+        },
+        "explanation": "Transit houses and angles are calculated for London, United Kingdom at 12:00 local using current living location.",
+        "importance": "low",
+        "planet": "",
+        "score": 0.5,
+        "title": "Timed for current living location"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "timing_note": "No major retrograde friction on primary rulers; standard due diligence applies."
+        },
+        "explanation": "No major retrograde friction on primary rulers; standard due diligence applies.",
+        "importance": "low",
+        "planet": "",
+        "score": -0.5,
+        "title": "Timing note"
+      }
+    ],
+    "summary": "Business Launch scores 51/100 (Mixed / Proceed with Awareness). 2 supporting factor(s) and 1 caution factor(s) identified from scored chart evidence. Strongest support: Transit Jupiter trine natal Sun. Main caution: Timing note."
+  }
+}

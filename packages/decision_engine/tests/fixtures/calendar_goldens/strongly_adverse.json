@@ -1,0 +1,318 @@
+{
+  "component_breakdown": {
+    "aspect_score": -35.05,
+    "calculated_for": "London, United Kingdom",
+    "final_score": 2,
+    "location_component_score": -10.25,
+    "location_mode": "currentLiving",
+    "natal_house_bonus": 0.0,
+    "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+    "resolved_utc_datetime": "2026-06-15T11:00:00+00:00",
+    "retrograde_penalty": -2.5,
+    "target_time": "12:00",
+    "timezone": "Europe/London",
+    "transit_angular_score": -5.25,
+    "transit_house_score": -5.0
+  },
+  "dominant_aspects": [
+    {
+      "aspect": "square",
+      "contribution": -15.12,
+      "label": "Transit Mars square natal Sun (orb 0.4\u00b0)",
+      "natal_planet": "sun",
+      "orb": 0.4000000000000057,
+      "source": "calculated",
+      "transit_planet": "mars"
+    },
+    {
+      "aspect": "square",
+      "contribution": -12.14,
+      "label": "Transit Saturn square natal Sun (orb 0.2\u00b0)",
+      "natal_planet": "sun",
+      "orb": 0.20000000000000284,
+      "source": "calculated",
+      "transit_planet": "saturn"
+    },
+    {
+      "aspect": "opposition",
+      "contribution": -7.8,
+      "label": "Transit Pluto opposition natal Sun (orb 0.3\u00b0)",
+      "natal_planet": "sun",
+      "orb": 0.30000000000001137,
+      "source": "calculated",
+      "transit_planet": "pluto"
+    }
+  ],
+  "executive": {
+    "activity": "Business Launch",
+    "rating": "Unfavorable",
+    "score": 2
+  },
+  "final_score": 2,
+  "id": "strongly_adverse",
+  "input": {
+    "action_type": "business_launch",
+    "natal": {
+      "planets": {
+        "mars": {
+          "house": 11,
+          "longitude": 40.0
+        },
+        "mercury": {
+          "house": 10,
+          "longitude": 18.0
+        },
+        "sun": {
+          "house": 10,
+          "longitude": 0.0
+        }
+      }
+    },
+    "scoring_context": {
+      "default_transit_time": "12:00",
+      "include_natal_house_bonus": false,
+      "include_transit_angular_score": true,
+      "include_transit_house_score": true,
+      "location_mode": "currentLiving"
+    },
+    "transit": {
+      "ascendant": 0.0,
+      "evaluation": {
+        "calculated_for": "London, United Kingdom",
+        "evaluation_location": "London, United Kingdom",
+        "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+        "resolved_utc_datetime": "2026-06-15T11:00:00+00:00",
+        "target_time": "12:00",
+        "timezone": "Europe/London"
+      },
+      "midheaven": 90.0,
+      "planets": {
+        "mars": {
+          "house": 8,
+          "longitude": 90.4,
+          "retrograde": true
+        },
+        "pluto": {
+          "house": 12,
+          "longitude": 180.3
+        },
+        "saturn": {
+          "house": 12,
+          "longitude": 90.2
+        }
+      }
+    }
+  },
+  "reasoning": {
+    "confidence": 0.13,
+    "reasons": [
+      {
+        "category": "aspect",
+        "evidence": {
+          "aspect": "square",
+          "contribution": -15.12,
+          "label": "Transit Mars square natal Sun (orb 0.4\u00b0)",
+          "natal_planet": "sun",
+          "orb": 0.4,
+          "transit_planet": "mars"
+        },
+        "explanation": "Transit Mars forms a square to natal Sun (orb 0.4\u00b0), which challenges this activity.",
+        "importance": "high",
+        "planet": "Mars",
+        "score": -15.12,
+        "title": "Transit Mars square natal Sun"
+      },
+      {
+        "category": "aspect",
+        "evidence": {
+          "aspect": "square",
+          "contribution": -12.14,
+          "label": "Transit Saturn square natal Sun (orb 0.2\u00b0)",
+          "natal_planet": "sun",
+          "orb": 0.2,
+          "transit_planet": "saturn"
+        },
+        "explanation": "Transit Saturn forms a square to natal Sun (orb 0.2\u00b0), which challenges this activity.",
+        "importance": "high",
+        "planet": "Saturn",
+        "score": -12.14,
+        "title": "Transit Saturn square natal Sun"
+      },
+      {
+        "category": "aspect",
+        "evidence": {
+          "aspect": "opposition",
+          "contribution": -7.8,
+          "label": "Transit Pluto opposition natal Sun (orb 0.3\u00b0)",
+          "natal_planet": "sun",
+          "orb": 0.3,
+          "transit_planet": "pluto"
+        },
+        "explanation": "Transit Pluto forms a opposition to natal Sun (orb 0.3\u00b0), which challenges this activity.",
+        "importance": "high",
+        "planet": "Pluto",
+        "score": -7.8,
+        "title": "Transit Pluto opposition natal Sun"
+      },
+      {
+        "category": "angular",
+        "evidence": {
+          "angle": "mc",
+          "angle_longitude": 90.0,
+          "evaluation_location": "London, United Kingdom",
+          "longitude": 90.4,
+          "orb_band": "strong",
+          "planet": "mars",
+          "separation_degrees": 0.4
+        },
+        "explanation": "Transit Mars sits near local MC (strong orb), adding resistance or delay themes.",
+        "importance": "high",
+        "planet": "Mars",
+        "score": -3.0,
+        "title": "Mars pressure near MC"
+      },
+      {
+        "category": "angular",
+        "evidence": {
+          "angle": "mc",
+          "angle_longitude": 90.0,
+          "evaluation_location": "London, United Kingdom",
+          "longitude": 90.2,
+          "orb_band": "strong",
+          "planet": "saturn",
+          "separation_degrees": 0.2
+        },
+        "explanation": "Transit Saturn sits near local MC (strong orb), adding resistance or delay themes.",
+        "importance": "high",
+        "planet": "Saturn",
+        "score": -1.65,
+        "title": "Saturn pressure near MC"
+      },
+      {
+        "category": "retrograde",
+        "evidence": {
+          "longitude": 90.4,
+          "planet": "mars",
+          "primary_ruler": true,
+          "retrograde": true
+        },
+        "explanation": "Transit Mars is retrograde while ruling business launch themes, favoring review over direct launch.",
+        "importance": "medium",
+        "planet": "Mars",
+        "score": -2.5,
+        "title": "Mars retrograde on primary rulers"
+      },
+      {
+        "category": "house",
+        "evidence": {
+          "evaluation_location": "London, United Kingdom",
+          "house": 8,
+          "longitude": 90.4,
+          "planet": "mars",
+          "polarity": "caution",
+          "rule_set": "business_launch",
+          "scope": "transit"
+        },
+        "explanation": "Transit Mars occupies the local 8th house, flagged as caution for business launch.",
+        "importance": "medium",
+        "planet": "Mars",
+        "score": -2.0,
+        "title": "Transit Mars in caution house 8"
+      },
+      {
+        "category": "house",
+        "evidence": {
+          "evaluation_location": "London, United Kingdom",
+          "house": 8,
+          "planet": "mars",
+          "retrograde": true,
+          "rule_set": "business_launch",
+          "scope": "transit"
+        },
+        "explanation": "Retrograde Mars in the local 8th house adds friction for timing and follow-through.",
+        "importance": "low",
+        "planet": "Mars",
+        "score": -1.5,
+        "title": "Retrograde Mars in caution house 8"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "timing_note": "Primary rulers retrograde: mars \u2014 review, revise, or delay."
+        },
+        "explanation": "Primary rulers retrograde: mars \u2014 review, revise, or delay.",
+        "importance": "low",
+        "planet": "",
+        "score": -1.5,
+        "title": "Timing note"
+      },
+      {
+        "category": "house",
+        "evidence": {
+          "evaluation_location": "London, United Kingdom",
+          "house": 12,
+          "longitude": 90.2,
+          "planet": "saturn",
+          "polarity": "caution",
+          "rule_set": "business_launch",
+          "scope": "transit"
+        },
+        "explanation": "Transit Saturn occupies the local 12th house, flagged as caution for business launch.",
+        "importance": "low",
+        "planet": "Saturn",
+        "score": -1.1,
+        "title": "Transit Saturn in caution house 12"
+      },
+      {
+        "category": "angular",
+        "evidence": {
+          "angle": "dsc",
+          "angle_longitude": 180.0,
+          "evaluation_location": "London, United Kingdom",
+          "longitude": 180.3,
+          "orb_band": "strong",
+          "planet": "pluto",
+          "separation_degrees": 0.3
+        },
+        "explanation": "Transit Pluto sits near local DSC (strong orb), adding resistance or delay themes.",
+        "importance": "low",
+        "planet": "Pluto",
+        "score": -0.6,
+        "title": "Pluto pressure near DSC"
+      },
+      {
+        "category": "electional_timing",
+        "evidence": {
+          "calculated_for": "London, United Kingdom",
+          "location_mode": "currentLiving",
+          "resolved_local_datetime": "2026-06-15T12:00:00+01:00",
+          "target_time": "12:00",
+          "timezone": "Europe/London"
+        },
+        "explanation": "Transit houses and angles are calculated for London, United Kingdom at 12:00 local using current living location.",
+        "importance": "low",
+        "planet": "",
+        "score": 0.5,
+        "title": "Timed for current living location"
+      },
+      {
+        "category": "house",
+        "evidence": {
+          "evaluation_location": "London, United Kingdom",
+          "house": 12,
+          "longitude": 180.3,
+          "planet": "pluto",
+          "polarity": "caution",
+          "rule_set": "business_launch",
+          "scope": "transit"
+        },
+        "explanation": "Transit Pluto occupies the local 12th house, flagged as caution for business launch.",
+        "importance": "low",
+        "planet": "Pluto",
+        "score": -0.4,
+        "title": "Transit Pluto in caution house 12"
+      }
+    ],
+    "summary": "Business Launch scores 2/100 (Unfavorable). 1 supporting factor(s) and 12 caution factor(s) identified from scored chart evidence. Strongest support: Timed for current living location. Main caution: Transit Mars square natal Sun."
+  }
+}
