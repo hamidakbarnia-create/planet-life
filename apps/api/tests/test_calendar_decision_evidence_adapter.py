@@ -85,6 +85,14 @@ def test_calendar_day_pipeline_score_unchanged_by_evidence_adapter():
     assert any(value != original_score for value in dim_values)
     assert "command" not in day_intelligence["dimensions"]
     assert snapshot.dimensions.mapping_version == day_intelligence["dimensions"]["mapping_version"]
+    assert day_intelligence["dimensions"]["mapping_version"] == "dimensions.v1-shadow"
+    assert day_intelligence["dimensions"]["semantic_status"] == "experimental_shadow"
+    sample_dim = day_intelligence["dimensions"]["opportunity"]
+    assert "confidence" not in sample_dim
+    assert "evidence_strength" in sample_dim
+    if sample_dim["status"] == "insufficient":
+        assert sample_dim["evidence_strength"] is None
+        assert sample_dim["value"] == 50
     assert "day_intelligence" not in payload
 
 

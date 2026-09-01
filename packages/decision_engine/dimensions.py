@@ -1,11 +1,18 @@
 """Phase 2B — DecisionDimensions from normalized DecisionEvidence.
 
+EXPERIMENTAL SHADOW LAYER. Not canonical classification or command semantics.
+
 Semantic decomposition of existing scored evidence. Does not recompute
 ``executive.score``, emit commands, or replace provisional Phase 2A
 classification.
 
 Baseline ``50`` is a neutral midpoint on the same 0–100 display scale as the
 legacy executive score. It is not a probability and is not ``executive.score``.
+A baseline value with ``status=insufficient`` is unknown, not neutral evidence.
+
+``evidence_strength`` is normalized evidence mass for that dimension
+(``min(1, Σ|delta| / 18)``). It is not prediction confidence, certainty, or
+probability.
 """
 
 from __future__ import annotations
@@ -23,6 +30,8 @@ from packages.decision_engine.dimension_mapping import (
     INVERTED_DIMENSIONS,
     KIND_DIMENSION_WEIGHTS,
     MAPPING_VERSION,
+    NATAL_TARGET_DIMENSION_WEIGHTS,
+    SEMANTIC_STATUS,
     merge_dimension_weights,
 )
 from packages.decision_engine.evidence import DecisionEvidence
@@ -31,12 +40,16 @@ DimensionStatus = Literal["scored", "insufficient"]
 
 
 class DecisionDimension(BaseModel):
-    """One named decision dimension with value + evidence provenance."""
+    """One named decision dimension with value + evidence provenance.
+
+    ``evidence_strength`` is evidence mass / support coverage, range 0..1 or
+    null. It is not prediction confidence. Null iff ``status=insufficient``.
+    """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     value: int = Field(ge=0, le=100)
-    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    evidence_strength: float | None = Field(default=None, ge=0.0, le=1.0)
     status: DimensionStatus
     supportive_evidence_ids: tuple[str, ...] = ()
     caution_evidence_ids: tuple[str, ...] = ()
@@ -45,11 +58,16 @@ class DecisionDimension(BaseModel):
 
 
 class DecisionDimensions(BaseModel):
-    """Parallel dimension set. Independent of executive.score."""
+    """Parallel experimental dimension set. Independent of executive.score.
+
+    ``semantic_status`` is ``experimental_shadow``. Do not treat as canonical
+    day class or as a decision command.
+    """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     mapping_version: str = MAPPING_VERSION
+    semantic_status: str = SEMANTIC_STATUS
     baseline: int = DIMENSION_BASELINE
     action_type: str | None = None
     opportunity: DecisionDimension
@@ -72,6 +90,7 @@ def compute_decision_dimensions(
     """Derive dimensions from evidence only. Order-independent. No LLM.
 
     Does not read ``executive.score`` or unsupported temporal fields.
+    Generic body routing uses ``transit_body`` only.
     """
     ordered = tuple(sorted(evidence, key=lambda item: item.evidence_id))
     buckets: dict[str, _Bucket] = {key: _Bucket() for key in DIMENSION_KEYS}
@@ -90,6 +109,7 @@ def compute_decision_dimensions(
     dims = {key: buckets[key].to_dimension() for key in DIMENSION_KEYS}
     return DecisionDimensions(
         mapping_version=MAPPING_VERSION,
+        semantic_status=SEMANTIC_STATUS,
         baseline=DIMENSION_BASELINE,
         action_type=action_type,
         **dims,
@@ -123,15 +143,15 @@ class _Bucket:
         if not self.deltas:
             return DecisionDimension(
                 value=DIMENSION_BASELINE,
-                confidence=None,
+                evidence_strength=None,
                 status="insufficient",
             )
         value = max(0, min(100, round(DIMENSION_BASELINE + sum(self.deltas))))
         mass = sum(abs(delta) for delta in self.deltas)
-        confidence = max(0.0, min(1.0, mass / CONTRIBUTION_UNIT))
+        strength = max(0.0, min(1.0, mass / CONTRIBUTION_UNIT))
         return DecisionDimension(
             value=value,
-            confidence=round(confidence, 4),
+            evidence_strength=round(strength, 4),
             status="scored",
             supportive_evidence_ids=tuple(sorted(set(self.supportive))),
             caution_evidence_ids=tuple(sorted(set(self.caution))),
@@ -142,25 +162,20 @@ class _Bucket:
 
 def _weights_for(item: DecisionEvidence) -> dict[str, float]:
     groups: list[tuple[tuple[str, float], ...]] = []
-    for body in _bodies(item):
-        mapped = BODY_DIMENSION_WEIGHTS.get(body)
+    if item.transit_body:
+        mapped = BODY_DIMENSION_WEIGHTS.get(item.transit_body)
         if mapped:
             groups.append(mapped)
+    if item.natal_target:
+        natal_mapped = NATAL_TARGET_DIMENSION_WEIGHTS.get(item.natal_target)
+        if natal_mapped:
+            groups.append(natal_mapped)
     kind_mapped = KIND_DIMENSION_WEIGHTS.get(item.kind)
     if kind_mapped:
         groups.append(kind_mapped)
     if not groups:
         return {}
     return merge_dimension_weights(*groups)
-
-
-def _bodies(item: DecisionEvidence) -> tuple[str, ...]:
-    bodies: list[str] = []
-    if item.transit_body:
-        bodies.append(item.transit_body)
-    if item.natal_target and item.natal_target not in bodies:
-        bodies.append(item.natal_target)
-    return tuple(bodies)
 
 
 def _dominant_ids(ranked: list[tuple[float, str]]) -> tuple[str, ...]:
@@ -175,7 +190,7 @@ def _dominant_ids(ranked: list[tuple[float, str]]) -> tuple[str, ...]:
 
 
 def dimensions_payload(dimensions: DecisionDimensions) -> dict:
-    """JSON-ready dump. No commands."""
+    """JSON-ready dump. No commands. Experimental shadow metadata included."""
     return dimensions.model_dump(mode="json")
 
 

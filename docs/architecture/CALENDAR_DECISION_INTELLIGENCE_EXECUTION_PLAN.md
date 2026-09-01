@@ -260,25 +260,33 @@ Phase 2 (commands, classification, domain scores) may start **only if**:
 
 ---
 
-## Phase 2B — Decision dimensions (complete)
+## Phase 2B — Decision dimensions (experimental shadow)
 
 **Scope:** Deterministic `DecisionEvidence[] → DecisionDimensions`. Parallel to 2A. No commands, no score recalibration, no Find/Compare/Evaluate semantic changes, no Calendar UI, no LLM.
 
+**Status:** `mapping_version = dimensions.v1-shadow`, `semantic_status = experimental_shadow`. Not canonical classification or command semantics.
+
 ### Model
 
-`DecisionDimension`: `value` 0–100, `confidence` 0–1 or `null`, `status` `scored` | `insufficient`, `supportive_evidence_ids`, `caution_evidence_ids`, `dominant_evidence_ids`, `conflicted`.
+`DecisionDimension`: `value` 0–100, `evidence_strength` 0–1 or `null`, `status` `scored` | `insufficient`, `supportive_evidence_ids`, `caution_evidence_ids`, `dominant_evidence_ids`, `conflicted`.
 
-`DecisionDimensions`: `opportunity`, `momentum`, `clarity`, `stability`, `cooperation`, `pressure`, `reversibility_safety`, plus `mapping_version`, `baseline`, `action_type`.
+`evidence_strength` is normalized evidence mass (`min(1, Σ|delta| / 18)`). It is **not** prediction confidence, certainty, or probability. Null iff `status=insufficient`.
 
-### Mapping (`dimensions.v1`)
+`DecisionDimensions`: seven canonical keys plus `mapping_version`, `semantic_status`, `baseline`, `action_type`.
 
-Language-neutral table in `packages/decision_engine/dimension_mapping.py`. Bodies reuse `PLANETS` / BENEFICS / MALEFICS / PRESSURE_TRANSIT. Kind overlays: `retrograde` → reversibility_safety + clarity; `angular` → momentum. Both `transit_body` and `natal_target` are mapped; max weight wins per dimension. Contribution already includes activity-profile planet weights — they are not applied again.
+### Mapping (`dimensions.v1-shadow`)
 
-**Baseline 50** is a neutral midpoint on the 0–100 display scale. It is not a probability and is not `executive.score`.
+Language-neutral table in `packages/decision_engine/dimension_mapping.py`. Bodies reuse `PLANETS` / BENEFICS / MALEFICS / PRESSURE_TRANSIT.
+
+**Routing:** generic body→dimension rows apply to `transit_body` only. Kind overlays still apply (`retrograde` → reversibility_safety + clarity; `angular` → momentum). `natal_target` does **not** inherit generic body mappings. Natal-target effects require an explicit `NATAL_TARGET_DIMENSION_WEIGHTS` row (empty in this version). Contribution already includes activity-profile planet weights — they are not applied again.
+
+**Baseline 50** is a numeric midpoint. With `status=insufficient` it is **unknown**, not neutral evidence. It is not a probability and is not `executive.score`.
 
 **Pressure is inverted:** caution raises pressure, support lowers it. Provenance lists still follow evidence polarity.
 
-### Mapping table (`dimensions.v1`)
+Unsupported temporal fields (`applying_or_separating`, `station_state`, `speed_class`, `duration_class`, `orb_strength`) are not read.
+
+### Mapping table (`dimensions.v1-shadow`, transit_body)
 
 | Body / kind | opportunity | momentum | clarity | stability | cooperation | pressure | reversibility_safety |
 |-------------|-------------|----------|---------|-----------|-------------|----------|----------------------|
@@ -297,22 +305,21 @@ Language-neutral table in `packages/decision_engine/dimension_mapping.py`. Bodie
 | kind:retrograde | | | 0.4 | | | | 1.0 |
 | kind:angular | | 0.8 | | | | | |
 
-Weights scale existing signed `contribution`. They do not invent new astronomical facts. Max weight wins when transit and natal bodies both map.
+Weights scale existing signed `contribution`. They do not invent new astronomical facts.
 
 ### Calculation
 
-
 1. Sort evidence by `evidence_id` (order independence).
-2. For each item, union body + kind weights.
+2. Union `transit_body` weights + explicit natal-target weights (none in v1-shadow) + kind overlays.
 3. `delta = contribution × weight` (negated for pressure).
 4. `value = clamp(round(50 + Σ delta), 0, 100)`.
-5. No mapped evidence → `value=50`, `confidence=null`, `status=insufficient`.
+5. No mapped evidence → `value=50`, `evidence_strength=null`, `status=insufficient` (unknown, not neutral).
 6. `conflicted` if material (±4.0) supportive **and** material caution both mapped to that dimension.
 7. Dominant IDs: top 3 by `|contribution|`, tie-break `evidence_id`.
-8. Confidence = `min(1, Σ|delta| / 18)` — 18 is the existing primary exact-trine contribution scale, not a new astrology weight.
+8. `evidence_strength = min(1, Σ|delta| / 18)` — evidence mass only.
 
 ### Wiring
 
 - Computed in `build_day_intelligence_snapshot` in parallel with 2A classification.
-- Added to Calendar `day_intelligence.dimensions`. Frontend parser ignores unknown keys; Calendar UI unchanged.
+- Added to Calendar `day_intelligence.dimensions` with `semantic_status=experimental_shadow`. Frontend parser ignores unknown keys; Calendar UI unchanged.
 - Score goldens untouched. Separate `dimension_goldens/`.

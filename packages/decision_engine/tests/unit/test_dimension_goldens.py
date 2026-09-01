@@ -44,6 +44,23 @@ def test_dimension_goldens_match_live_computation() -> None:
         assert live["dimensions"] == golden["dimensions"]
         assert live["mapping_version"] == MAPPING_VERSION
         assert golden["mapping_version"] == MAPPING_VERSION
+        assert golden["semantic_status"] == "experimental_shadow"
+        assert live["semantic_status"] == golden["semantic_status"]
+        for key in (
+            "opportunity",
+            "momentum",
+            "clarity",
+            "stability",
+            "cooperation",
+            "pressure",
+            "reversibility_safety",
+        ):
+            dim = golden["dimensions"][key]
+            assert "confidence" not in dim
+            assert "evidence_strength" in dim
+            if dim["status"] == "insufficient":
+                assert dim["value"] == 50
+                assert dim["evidence_strength"] is None
 
 
 def test_dimension_goldens_do_not_overwrite_score_goldens() -> None:

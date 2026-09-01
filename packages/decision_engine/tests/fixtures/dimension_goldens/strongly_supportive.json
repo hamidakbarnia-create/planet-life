@@ -7,24 +7,22 @@
     "baseline": 50,
     "clarity": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
     },
     "cooperation": {
-      "caution_evidence_ids": [
-        "ev.aspect.sun.square.jupiter"
-      ],
-      "confidence": 1.0,
+      "caution_evidence_ids": [],
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.jupiter.trine.sun",
         "ev.aspect.venus.sextile.sun",
         "ev.angular.jupiter.mc"
       ],
+      "evidence_strength": 1.0,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.angular.jupiter.mc",
@@ -35,41 +33,40 @@
       ],
       "value": 68
     },
-    "mapping_version": "dimensions.v1",
+    "mapping_version": "dimensions.v1-shadow",
     "momentum": {
       "caution_evidence_ids": [
         "ev.aspect.sun.square.jupiter"
       ],
-      "confidence": 1.0,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.jupiter.trine.sun",
         "ev.aspect.sun.trine.sun",
-        "ev.aspect.venus.sextile.sun"
+        "ev.angular.jupiter.mc"
       ],
+      "evidence_strength": 1.0,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.angular.jupiter.mc",
         "ev.angular.sun.mc",
         "ev.aspect.jupiter.trine.sun",
         "ev.aspect.sun.trine.sun",
-        "ev.aspect.venus.sextile.sun",
         "ev.house.transit.jupiter.10",
         "ev.house.transit.sun.10"
       ],
-      "value": 93
+      "value": 87
     },
     "opportunity": {
       "caution_evidence_ids": [
         "ev.aspect.sun.square.jupiter"
       ],
-      "confidence": 1.0,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.jupiter.trine.sun",
         "ev.aspect.sun.trine.sun",
         "ev.aspect.venus.sextile.sun"
       ],
+      "evidence_strength": 1.0,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.angular.jupiter.mc",
@@ -85,27 +82,28 @@
     },
     "pressure": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
     },
     "reversibility_safety": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
     },
+    "semantic_status": "experimental_shadow",
     "stability": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
@@ -113,5 +111,6 @@
   },
   "final_score": 100,
   "id": "strongly_supportive",
-  "mapping_version": "dimensions.v1"
+  "mapping_version": "dimensions.v1-shadow",
+  "semantic_status": "experimental_shadow"
 }

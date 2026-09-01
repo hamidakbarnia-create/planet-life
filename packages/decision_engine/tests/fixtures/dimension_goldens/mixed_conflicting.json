@@ -10,24 +10,24 @@
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
-      "confidence": 0.2942,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
+      "evidence_strength": 0.2942,
       "status": "scored",
       "supportive_evidence_ids": [],
       "value": 45
     },
     "cooperation": {
       "caution_evidence_ids": [],
-      "confidence": 0.4422,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.jupiter.trine.sun",
         "ev.house.transit.jupiter.10"
       ],
+      "evidence_strength": 0.4422,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.aspect.jupiter.trine.sun",
@@ -35,54 +35,48 @@
       ],
       "value": 58
     },
-    "mapping_version": "dimensions.v1",
+    "mapping_version": "dimensions.v1-shadow",
     "momentum": {
-      "caution_evidence_ids": [
-        "ev.aspect.saturn.square.sun"
-      ],
-      "confidence": 1.0,
-      "conflicted": true,
+      "caution_evidence_ids": [],
+      "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.jupiter.trine.sun",
-        "ev.aspect.saturn.square.sun",
         "ev.house.transit.jupiter.10"
       ],
+      "evidence_strength": 0.8844,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.aspect.jupiter.trine.sun",
         "ev.house.transit.jupiter.10"
       ],
-      "value": 56
+      "value": 66
     },
     "opportunity": {
-      "caution_evidence_ids": [
-        "ev.aspect.saturn.square.sun"
-      ],
-      "confidence": 1.0,
-      "conflicted": true,
+      "caution_evidence_ids": [],
+      "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.jupiter.trine.sun",
-        "ev.aspect.saturn.square.sun",
         "ev.house.transit.jupiter.10"
       ],
+      "evidence_strength": 1.0,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.aspect.jupiter.trine.sun",
         "ev.house.transit.jupiter.10"
       ],
-      "value": 58
+      "value": 70
     },
     "pressure": {
       "caution_evidence_ids": [
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
-      "confidence": 0.5884,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
+      "evidence_strength": 0.5884,
       "status": "scored",
       "supportive_evidence_ids": [],
       "value": 61
@@ -92,27 +86,28 @@
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
-      "confidence": 0.3678,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
+      "evidence_strength": 0.3678,
       "status": "scored",
       "supportive_evidence_ids": [],
       "value": 43
     },
+    "semantic_status": "experimental_shadow",
     "stability": {
       "caution_evidence_ids": [
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
-      "confidence": 0.7356,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
+      "evidence_strength": 0.7356,
       "status": "scored",
       "supportive_evidence_ids": [],
       "value": 37
@@ -120,5 +115,6 @@
   },
   "final_score": 57,
   "id": "mixed_conflicting",
-  "mapping_version": "dimensions.v1"
+  "mapping_version": "dimensions.v1-shadow",
+  "semantic_status": "experimental_shadow"
 }

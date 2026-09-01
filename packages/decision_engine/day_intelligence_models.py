@@ -29,12 +29,12 @@ from packages.decision_engine.evidence import (
 
 
 class DayIntelligenceSnapshot(BaseModel):
-    """Passthrough score + normalized evidence + day classification.
+    """Passthrough score + normalized evidence + shadow layers.
 
     ``final_score`` is copied from the astrology engine. Classification and
     dimensions must never recompute or replace it. No decision command.
     Phase 2A ``classification`` is provisional shadow logic. Phase 2B
-    ``dimensions`` are the parallel semantic layer.
+    ``dimensions`` are an experimental_shadow parallel layer — not canonical.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")

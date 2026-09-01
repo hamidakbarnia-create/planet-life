@@ -7,21 +7,21 @@
     "baseline": 50,
     "clarity": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
     },
     "cooperation": {
       "caution_evidence_ids": [],
-      "confidence": 0.1267,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.angular.jupiter.asc",
         "ev.house.transit.jupiter.1"
       ],
+      "evidence_strength": 0.1267,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.angular.jupiter.asc",
@@ -29,15 +29,15 @@
       ],
       "value": 52
     },
-    "mapping_version": "dimensions.v1",
+    "mapping_version": "dimensions.v1-shadow",
     "momentum": {
       "caution_evidence_ids": [],
-      "confidence": 0.2533,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.angular.jupiter.asc",
         "ev.house.transit.jupiter.1"
       ],
+      "evidence_strength": 0.2533,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.angular.jupiter.asc",
@@ -47,12 +47,12 @@
     },
     "opportunity": {
       "caution_evidence_ids": [],
-      "confidence": 0.3167,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.angular.jupiter.asc",
         "ev.house.transit.jupiter.1"
       ],
+      "evidence_strength": 0.3167,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.angular.jupiter.asc",
@@ -62,27 +62,28 @@
     },
     "pressure": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
     },
     "reversibility_safety": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
     },
+    "semantic_status": "experimental_shadow",
     "stability": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
@@ -90,5 +91,6 @@
   },
   "final_score": 56,
   "id": "angular_contact",
-  "mapping_version": "dimensions.v1"
+  "mapping_version": "dimensions.v1-shadow",
+  "semantic_status": "experimental_shadow"
 }

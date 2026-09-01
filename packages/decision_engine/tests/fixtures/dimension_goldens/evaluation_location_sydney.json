@@ -7,34 +7,34 @@
     "baseline": 50,
     "clarity": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
     },
     "cooperation": {
       "caution_evidence_ids": [],
-      "confidence": 0.4,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.jupiter.trine.sun"
       ],
+      "evidence_strength": 0.4,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.aspect.jupiter.trine.sun"
       ],
       "value": 57
     },
-    "mapping_version": "dimensions.v1",
+    "mapping_version": "dimensions.v1-shadow",
     "momentum": {
       "caution_evidence_ids": [],
-      "confidence": 0.8,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.jupiter.trine.sun"
       ],
+      "evidence_strength": 0.8,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.aspect.jupiter.trine.sun"
@@ -43,11 +43,11 @@
     },
     "opportunity": {
       "caution_evidence_ids": [],
-      "confidence": 1.0,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.jupiter.trine.sun"
       ],
+      "evidence_strength": 1.0,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.aspect.jupiter.trine.sun"
@@ -56,27 +56,28 @@
     },
     "pressure": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
     },
     "reversibility_safety": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
     },
+    "semantic_status": "experimental_shadow",
     "stability": {
       "caution_evidence_ids": [],
-      "confidence": null,
       "conflicted": false,
       "dominant_evidence_ids": [],
+      "evidence_strength": null,
       "status": "insufficient",
       "supportive_evidence_ids": [],
       "value": 50
@@ -84,5 +85,6 @@
   },
   "final_score": 68,
   "id": "evaluation_location_sydney",
-  "mapping_version": "dimensions.v1"
+  "mapping_version": "dimensions.v1-shadow",
+  "semantic_status": "experimental_shadow"
 }

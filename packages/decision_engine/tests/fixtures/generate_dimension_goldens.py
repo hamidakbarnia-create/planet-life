@@ -58,6 +58,7 @@ def build_dimension_golden(case: dict[str, Any]) -> dict[str, Any]:
     return {
         "id": case["id"],
         "mapping_version": MAPPING_VERSION,
+        "semantic_status": snapshot.dimensions.semantic_status,
         "action_type": snapshot.action_type,
         "final_score": snapshot.final_score,
         "day_class": snapshot.classification.day_class,

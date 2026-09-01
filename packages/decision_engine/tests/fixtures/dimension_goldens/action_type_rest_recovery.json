@@ -9,12 +9,12 @@
       "caution_evidence_ids": [
         "ev.aspect.saturn.square.sun"
       ],
-      "confidence": 0.2578,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
+      "evidence_strength": 0.2578,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.house.transit.saturn.12"
@@ -23,60 +23,54 @@
     },
     "cooperation": {
       "caution_evidence_ids": [],
-      "confidence": 0.0787,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.jupiter.trine.sun"
       ],
+      "evidence_strength": 0.0787,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.aspect.jupiter.trine.sun"
       ],
       "value": 51
     },
-    "mapping_version": "dimensions.v1",
+    "mapping_version": "dimensions.v1-shadow",
     "momentum": {
-      "caution_evidence_ids": [
-        "ev.aspect.saturn.square.sun"
-      ],
-      "confidence": 0.5751,
+      "caution_evidence_ids": [],
       "conflicted": false,
       "dominant_evidence_ids": [
-        "ev.aspect.saturn.square.sun",
         "ev.aspect.jupiter.trine.sun"
       ],
+      "evidence_strength": 0.1573,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.aspect.jupiter.trine.sun"
       ],
-      "value": 45
+      "value": 53
     },
     "opportunity": {
-      "caution_evidence_ids": [
-        "ev.aspect.saturn.square.sun"
-      ],
-      "confidence": 0.7189,
+      "caution_evidence_ids": [],
       "conflicted": false,
       "dominant_evidence_ids": [
-        "ev.aspect.saturn.square.sun",
         "ev.aspect.jupiter.trine.sun"
       ],
+      "evidence_strength": 0.1967,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.aspect.jupiter.trine.sun"
       ],
-      "value": 44
+      "value": 54
     },
     "pressure": {
       "caution_evidence_ids": [
         "ev.aspect.saturn.square.sun"
       ],
-      "confidence": 0.5156,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
+      "evidence_strength": 0.5156,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.house.transit.saturn.12"
@@ -87,28 +81,29 @@
       "caution_evidence_ids": [
         "ev.aspect.saturn.square.sun"
       ],
-      "confidence": 0.3222,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
+      "evidence_strength": 0.3222,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.house.transit.saturn.12"
       ],
       "value": 46
     },
+    "semantic_status": "experimental_shadow",
     "stability": {
       "caution_evidence_ids": [
         "ev.aspect.saturn.square.sun"
       ],
-      "confidence": 0.6444,
       "conflicted": false,
       "dominant_evidence_ids": [
         "ev.aspect.saturn.square.sun",
         "ev.house.transit.saturn.12"
       ],
+      "evidence_strength": 0.6444,
       "status": "scored",
       "supportive_evidence_ids": [
         "ev.house.transit.saturn.12"
@@ -118,5 +113,6 @@
   },
   "final_score": 46,
   "id": "action_type_rest_recovery",
-  "mapping_version": "dimensions.v1"
+  "mapping_version": "dimensions.v1-shadow",
+  "semantic_status": "experimental_shadow"
 }
