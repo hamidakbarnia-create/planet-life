@@ -1,4 +1,8 @@
 import type { AppLang } from './app-settings';
+import {
+  POWER_BAND_RANGES,
+  type CountedPowerBand,
+} from './calendar-power-presentation';
 
 export type CalendarPageLangPack = {
   dir: 'ltr' | 'rtl';
@@ -153,10 +157,10 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
       powerDistribution: 'Power distribution',
       weeklyTrend: 'Weekly trend',
       avg: 'Avg',
-      excellent: 'Excellent (85–100)',
-      good: 'Good (70–84)',
-      moderate: 'Moderate (50–69)',
-      low: 'Low (0–49)',
+      excellent: 'Excellent ({range})',
+      good: 'Good ({range})',
+      moderate: 'Moderate ({range})',
+      low: 'Low ({range})',
       bandCount: '{count} days ({percent}%)',
       bandCountForms: {
         one: '{count} day ({percent}%)',
@@ -263,10 +267,10 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
       powerDistribution: 'Распределение силы',
       weeklyTrend: 'Недельный тренд',
       avg: 'Ср.',
-      excellent: 'Отлично (85–100)',
-      good: 'Хорошо (70–84)',
-      moderate: 'Умеренно (50–69)',
-      low: 'Низко (0–49)',
+      excellent: 'Отлично ({range})',
+      good: 'Хорошо ({range})',
+      moderate: 'Умеренно ({range})',
+      low: 'Низко ({range})',
       bandCount: '{count} дн. ({percent}%)',
       weekBest: 'Лучший день недели',
       monthBest: 'Лучший день месяца',
@@ -369,10 +373,10 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
       powerDistribution: 'توزیع قدرت',
       weeklyTrend: 'روند هفتگی',
       avg: 'میانگین',
-      excellent: 'عالی (۸۵–۱۰۰)',
-      good: 'خوب (۷۰–۸۴)',
-      moderate: 'متوسط (۵۰–۶۹)',
-      low: 'پایین (۰–۴۹)',
+      excellent: 'عالی ({range})',
+      good: 'خوب ({range})',
+      moderate: 'متوسط ({range})',
+      low: 'پایین ({range})',
       bandCount: '{count} روز ({percent}٪)',
       weekBest: 'بهترین روز هفته',
       monthBest: 'بهترین روز ماه',
@@ -475,10 +479,10 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
       powerDistribution: 'توزيع القوة',
       weeklyTrend: 'الاتجاه الأسبوعي',
       avg: 'متوسط',
-      excellent: 'ممتاز (85–100)',
-      good: 'جيد (70–84)',
-      moderate: 'متوسط (50–69)',
-      low: 'منخفض (0–49)',
+      excellent: 'ممتاز ({range})',
+      good: 'جيد ({range})',
+      moderate: 'متوسط ({range})',
+      low: 'منخفض ({range})',
       bandCount: '{count} يوم ({percent}٪)',
       bandCountForms: {
         zero: '{count} يوم ({percent}٪)',
@@ -552,4 +556,43 @@ export function formatBandDayCount(
   return template
     .replace('{count}', formatCalendarInteger(lang, count))
     .replace('{percent}', formatCalendarInteger(lang, percent));
+}
+
+const POWER_BAND_EN_DASH = '–';
+
+/** Localized min–max interval. Logical order is always minimum → maximum. */
+export function formatPowerBandRange(
+  lang: AppLang,
+  min: number,
+  max: number
+): string {
+  return `${formatCalendarInteger(lang, min)}${POWER_BAND_EN_DASH}${formatCalendarInteger(lang, max)}`;
+}
+
+export function splitPowerBandLabel(
+  lang: AppLang,
+  band: CountedPowerBand
+): { before: string; range: string; after: string } {
+  const { min, max } = POWER_BAND_RANGES[band];
+  const range = formatPowerBandRange(lang, min, max);
+  const template = CALENDAR_PAGE_LANGS[lang].insight[band];
+  const marker = '{range}';
+  const idx = template.indexOf(marker);
+  if (idx < 0) {
+    return { before: template, range, after: '' };
+  }
+  return {
+    before: template.slice(0, idx),
+    range,
+    after: template.slice(idx + marker.length),
+  };
+}
+
+/** Accessible plain-text band label. Order remains min → max. */
+export function formatPowerBandLabel(
+  lang: AppLang,
+  band: CountedPowerBand
+): string {
+  const { before, range, after } = splitPowerBandLabel(lang, band);
+  return `${before}${range}${after}`;
 }

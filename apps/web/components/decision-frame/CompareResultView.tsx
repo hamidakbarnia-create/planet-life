@@ -8,6 +8,7 @@ import {
   resultShellStyles as styles,
 } from '@/components/decision-result/ResultShell';
 import { LtrIsolate } from '@/components/ui/LtrIsolate';
+import { TimingStrengthText } from '@/components/ui/TimingStrengthText';
 import {
   getAskProductCopy,
   localizeConfidence,
@@ -88,7 +89,9 @@ export function CompareResultView({
                 </p>
                 {option.score != null ? (
                   <p className={`fi ${styles.score}`}>
-                    {copy.timingScoreOf(option.score)}
+                    <TimingStrengthText
+                      formatted={copy.timingScoreOf(option.score)}
+                    />
                   </p>
                 ) : null}
               </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { TimingStrengthText } from '@/components/ui/TimingStrengthText';
 import { DAY_INTELLIGENCE_CHROME } from '@/lib/decision-intelligence/product-copy';
 import type { DayIntelligenceView } from '@/lib/decision-intelligence/day-intelligence-view';
 
@@ -41,7 +42,9 @@ export function DayIntelligencePanel({
       {showScore ? (
         <div data-testid="day-intelligence-score">
           <p className="fi text-[11px] text-white/40">{view.timingStrengthLabel}</p>
-          <p className="fc text-lg text-white/90">{view.timingStrengthValue}</p>
+          <p className="fc text-lg text-white/90">
+            <TimingStrengthText formatted={view.timingStrengthValue} />
+          </p>
         </div>
       ) : null}
 

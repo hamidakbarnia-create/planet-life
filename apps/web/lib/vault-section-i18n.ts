@@ -642,8 +642,8 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
     },
   },
   fa: {
-    back: '→ بازگشت به محرمانه',
-    vaultHome: 'محرمانه',
+    back: '→ بازگشت به گنجینه',
+    vaultHome: 'گنجینه',
     previewNote: 'حالت پیش‌نمایش — ابزار کامل با پریمیوم.',
     sensuality: {
       title: 'شهوت و جذابیت',

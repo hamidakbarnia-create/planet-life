@@ -1,6 +1,7 @@
 # Historical CRLF sources. Keep committed bytes so diffs stay content-only.
 # `cr-at-eol` tells git diff --check that CR is the line ending, not trailing space.
 apps/web/app/dashboard/page.tsx whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+apps/web/app/upgrade/page.tsx whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
 apps/web/components/calendar/CalendarInsightStack.tsx whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
 apps/web/components/calendar/CalendarSelectedDayInsight.test.tsx whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
 apps/web/components/calendar/DecisionPowerLegend.tsx whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
@@ -11,3 +12,4 @@ apps/web/components/timing/WhyThisTiming.test.tsx whitespace=blank-at-eol,space-
 apps/web/components/timing/WhyThisTiming.tsx whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
 apps/web/lib/calendar-page-i18n.ts whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
 apps/web/lib/home-i18n.ts whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol
+apps/web/components/decision-result/ResultShell.tsx whitespace=blank-at-eol,space-before-tab,blank-at-eof,cr-at-eol

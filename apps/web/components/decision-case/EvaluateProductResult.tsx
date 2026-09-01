@@ -1,5 +1,6 @@
 'use client';
 
+import { TimingStrengthText } from '@/components/ui/TimingStrengthText';
 import type { AppLang } from '@/lib/app-settings';
 import type { AskEvaluatePresentation } from '@/lib/ask-product';
 import { getAskProductCopy } from '@/lib/ask-product';
@@ -49,7 +50,11 @@ export function EvaluateProductResult({
 
       <VerdictCard
         verdict={model.verdict}
-        scoreLabel={model.scoreLabel}
+        scoreLabel={
+          model.scoreLabel ? (
+            <TimingStrengthText formatted={model.scoreLabel} />
+          ) : null
+        }
         scoreHint={model.scoreHonestyNote}
         meaning={model.meaning}
       />

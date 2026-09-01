@@ -145,6 +145,24 @@ export function formatTimingStrength(score: number): string {
   return `${Math.round(score)} / 100`;
 }
 
+const PREFIXED_NUMERIC_SEQUENCE =
+  /[\d۰-۹٠-٩]+(?:\s*[–\/]\s*[\d۰-۹٠-٩]+)+/u;
+
+/** Splits a localized prefix from a numeric interval or fraction. */
+export function splitPrefixedNumericSequence(value: string): {
+  prefix: string;
+  sequence: string;
+} {
+  const match = value.match(PREFIXED_NUMERIC_SEQUENCE);
+  if (!match || match.index == null) {
+    return { prefix: '', sequence: value };
+  }
+  return {
+    prefix: value.slice(0, match.index),
+    sequence: value.slice(match.index),
+  };
+}
+
 const FORWARD = new Set(['high_leverage', 'action', 'build', 'selective']);
 const RESTRICTIVE = new Set(['defensive', 'recovery', 'review']);
 

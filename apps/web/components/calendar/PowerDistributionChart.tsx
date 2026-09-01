@@ -2,6 +2,7 @@
 
 import type { AppLang } from '@/lib/app-settings';
 import { formatReadinessPercent } from '@/lib/calendar-scores';
+import { PowerBandLabel } from '@/components/calendar/PowerBandLabel';
 import {
   CALENDAR_PAGE_LANGS,
   formatBandDayCount,
@@ -131,7 +132,10 @@ export function PowerDistributionChart({
                   aria-hidden
                 />
                 <span style={{ color: CALENDAR_UI.textSoft }} className="truncate">
-                  {copy[band.band as CountedPowerBand]}
+                  <PowerBandLabel
+                    lang={lang}
+                    band={band.band as CountedPowerBand}
+                  />
                 </span>
               </span>
               <span

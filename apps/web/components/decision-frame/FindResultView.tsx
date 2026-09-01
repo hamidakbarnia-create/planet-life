@@ -7,6 +7,7 @@ import {
   resultShellStyles as styles,
 } from '@/components/decision-result/ResultShell';
 import { LtrIsolate } from '@/components/ui/LtrIsolate';
+import { TimingStrengthText } from '@/components/ui/TimingStrengthText';
 import {
   getAskProductCopy,
   localizeConfidence,
@@ -123,7 +124,9 @@ export function FindResultView({
                     className={`fi ${styles.scoreHint}`}
                     data-testid="find-window-score"
                   >
-                    {copy.timingScoreOf(window.peak_score)}
+                    <TimingStrengthText
+                      formatted={copy.timingScoreOf(window.peak_score)}
+                    />
                   </p>
                 ) : null}
               </li>

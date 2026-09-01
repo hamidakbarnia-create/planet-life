@@ -2,7 +2,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { CALENDAR_PAGE_LANGS, formatBandDayCount } from './calendar-page-i18n';
+import { CALENDAR_PAGE_LANGS, formatBandDayCount, formatCalendarInteger, formatPowerBandLabel, formatPowerBandRange } from './calendar-page-i18n';
+import {
+  POWER_BAND_ORDER,
+  POWER_BAND_RANGES,
+} from './calendar-power-presentation';
 import { buildStrategicGps } from './strategic-gps';
 import { isDangerHour, isGoldenHour, scoreToBand } from './timing-presentation';
 
@@ -213,5 +217,70 @@ describe('formatBandDayCount Arabic CLDR plurals', () => {
     expect(chart).toContain('formatBandDayCount');
     expect(chart).not.toMatch(/PluralRules|أيام|يوما/);
     expect(chart).not.toMatch(/lang\s*===\s*['"]ar['"]/);
+  });
+});
+
+describe('Power band range labels', () => {
+  const expected = {
+    excellent: { min: 85, max: 100 },
+    good: { min: 70, max: 84 },
+    moderate: { min: 50, max: 69 },
+    low: { min: 0, max: 49 },
+  } as const;
+
+  it('keeps canonical min/max thresholds unchanged', () => {
+    for (const band of POWER_BAND_ORDER) {
+      expect(POWER_BAND_RANGES[band].min).toBe(expected[band].min);
+      expect(POWER_BAND_RANGES[band].max).toBe(expected[band].max);
+      expect(POWER_BAND_RANGES[band].min).toBeLessThan(POWER_BAND_RANGES[band].max);
+    }
+  });
+
+  it('formats every band as localized min-to-max', () => {
+    expect(formatPowerBandRange('fa', 85, 100)).toBe('۸۵–۱۰۰');
+    expect(formatPowerBandRange('ar', 85, 100)).toBe('85–100');
+    expect(formatPowerBandRange('en', 85, 100)).toBe('85–100');
+    expect(formatPowerBandRange('ru', 85, 100)).toBe('85–100');
+
+    for (const lang of ['en', 'fa', 'ar', 'ru'] as const) {
+      for (const band of POWER_BAND_ORDER) {
+        const { min, max } = POWER_BAND_RANGES[band];
+        const minText = formatCalendarInteger(lang, min);
+        const maxText = formatCalendarInteger(lang, max);
+        const range = formatPowerBandRange(lang, min, max);
+        expect(range).toBe(`${minText}–${maxText}`);
+        expect(range.indexOf(minText)).toBeLessThan(range.indexOf(maxText));
+      }
+    }
+  });
+
+  it('keeps LTR locale band sentences unchanged', () => {
+    expect(formatPowerBandLabel('en', 'excellent')).toBe('Excellent (85–100)');
+    expect(formatPowerBandLabel('en', 'good')).toBe('Good (70–84)');
+    expect(formatPowerBandLabel('en', 'moderate')).toBe('Moderate (50–69)');
+    expect(formatPowerBandLabel('en', 'low')).toBe('Low (0–49)');
+    expect(formatPowerBandLabel('ru', 'excellent')).toBe('Отлично (85–100)');
+    expect(formatPowerBandLabel('ru', 'good')).toBe('Хорошо (70–84)');
+    expect(formatPowerBandLabel('ru', 'moderate')).toBe('Умеренно (50–69)');
+    expect(formatPowerBandLabel('ru', 'low')).toBe('Низко (0–49)');
+  });
+
+  it('keeps Persian 85–100 and Arabic 85–100 in logical min-to-max order', () => {
+    expect(formatPowerBandLabel('fa', 'excellent')).toBe('عالی (۸۵–۱۰۰)');
+    expect(formatPowerBandLabel('ar', 'excellent')).toBe('ممتاز (85–100)');
+    expect(formatPowerBandLabel('fa', 'excellent')).not.toContain('۱۰۰–۸۵');
+    expect(formatPowerBandLabel('ar', 'excellent')).not.toContain('100–85');
+  });
+
+  it('does not put HTML or reversed ranges in catalogs', () => {
+    for (const lang of ['en', 'fa', 'ar', 'ru'] as const) {
+      for (const band of POWER_BAND_ORDER) {
+        const template = CALENDAR_PAGE_LANGS[lang].insight[band];
+        expect(template).toContain('{range}');
+        expect(template).not.toMatch(/<\/?[a-z]/i);
+        expect(template).not.toContain('100–85');
+        expect(template).not.toContain('۱۰۰–۸۵');
+      }
+    }
   });
 });

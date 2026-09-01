@@ -13,6 +13,7 @@ import {
   buildDayIntelligenceView,
   explanationFromDayIntelligence,
 } from '@/lib/decision-intelligence/day-intelligence-view';
+import { LtrNumericSequence } from '@/components/ui/LtrNumericSequence';
 import {
   DAY_INTELLIGENCE_CHROME,
   formatTimingStrength,
@@ -148,7 +149,10 @@ export function CalendarSelectedDayInsight({
               style={{ color: 'rgba(255,255,255,0.65)' }}
               data-testid="calendar-selected-timing-strength"
             >
-              {productChrome.timingStrength}: {formatTimingStrength(score)}
+              {productChrome.timingStrength}:{' '}
+              <LtrNumericSequence kind="fraction">
+                {formatTimingStrength(score)}
+              </LtrNumericSequence>
             </div>
           ) : null}
         </div>
