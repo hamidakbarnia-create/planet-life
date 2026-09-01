@@ -173,7 +173,7 @@ export const VAULT_HOME_LANGS: Record<AppLang, VaultHomeLangPack> = {
   },
   fa: {
     eyebrow: '· عمق تصمیم ·',
-    title: 'محرمانه',
+    title: 'گنجینه',
     subtitle:
       'فضایی آرام برای هوش تصمیم: تایمینگ، مکان، سیگنال اعتماد و بافت شخصی — تا حرکت بعدی پنجره بهتری داشته باشد.',
     promise:
@@ -182,7 +182,7 @@ export const VAULT_HOME_LANGS: Record<AppLang, VaultHomeLangPack> = {
     ctaInside: 'خوش اومدی — کارت‌ها باز شد',
     ctaHint: 'تقویم قدرت بهترین جا برای شروع است.',
     backToToday: '→ بازگشت به امروز',
-    inside: 'داخل محرمانه',
+    inside: 'داخل گنجینه',
     tapHint: 'با تقویم قدرت شروع کن — بعد در صورت نیاز بافت عمیق‌تر را باز کن.',
     cards: {
       power: {

@@ -71,7 +71,7 @@ export function VerdictCard({
   meaning,
 }: {
   verdict: string;
-  scoreLabel?: string | null;
+  scoreLabel?: ReactNode | null;
   scoreHint?: string | null;
   meaning?: string | null;
 }) {

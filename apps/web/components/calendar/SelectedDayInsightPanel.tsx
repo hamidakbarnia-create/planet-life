@@ -8,6 +8,7 @@ import {
   CALENDAR_UI,
   POWER_BAND_STYLES,
 } from '@/lib/calendar-power-presentation';
+import { LtrNumericSequence } from '@/components/ui/LtrNumericSequence';
 
 export type SelectedDayInsightPanelProps = {
   lang: AppLang;
@@ -82,7 +83,9 @@ export function SelectedDayInsightPanel({
                 {copy.bestWindow}
               </div>
               <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                {formatHourWindow(bestHour.hour, lang)}
+                <LtrNumericSequence kind="interval">
+                  {formatHourWindow(bestHour.hour, lang)}
+                </LtrNumericSequence>
               </div>
             </div>
             <div
@@ -109,7 +112,9 @@ export function SelectedDayInsightPanel({
                 {copy.riskWindow}
               </div>
               <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                {formatHourWindow(riskHour.hour, lang)}
+                <LtrNumericSequence kind="interval">
+                  {formatHourWindow(riskHour.hour, lang)}
+                </LtrNumericSequence>
               </div>
             </div>
             <div

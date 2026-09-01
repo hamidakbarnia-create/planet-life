@@ -1,7 +1,7 @@
 'use client';
 
 import type { AppLang } from '@/lib/app-settings';
-import { CALENDAR_PAGE_LANGS } from '@/lib/calendar-page-i18n';
+import { CALENDAR_PAGE_LANGS, formatPowerBandLabel } from '@/lib/calendar-page-i18n';
 import {
   CALENDAR_UI,
   POWER_BAND_ORDER,
@@ -21,7 +21,9 @@ export function DecisionPowerLegend({
   const gradient = `linear-gradient(90deg, ${POWER_BAND_STYLES.low.color}, ${POWER_BAND_STYLES.moderate.color}, ${POWER_BAND_STYLES.good.color}, ${POWER_BAND_STYLES.excellent.color})`;
   const copy = CALENDAR_PAGE_LANGS[lang].insight;
   const title = copy.decisionPowerScore;
-  const bandLabels = POWER_BAND_ORDER.map((band) => copy[band]).join(', ');
+  const bandLabels = POWER_BAND_ORDER.map((band) =>
+    formatPowerBandLabel(lang, band)
+  ).join(', ');
 
   return (
     <div
