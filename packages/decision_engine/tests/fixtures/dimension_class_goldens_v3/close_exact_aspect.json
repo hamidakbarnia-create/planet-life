@@ -1,0 +1,39 @@
+{
+  "classifier_version": "dimension_class.v3-shadow",
+  "dimension_classification": {
+    "classification_coverage": 0.2571,
+    "classifier_version": "dimension_class.v3-shadow",
+    "conflicted_dimension_ids": [],
+    "critical_dimensions_available": 0,
+    "day_class": "action",
+    "dimensions_used": [
+      "opportunity",
+      "momentum",
+      "cooperation"
+    ],
+    "disagreement": true,
+    "disagreement_reason": [
+      "label_supportive_vs_action",
+      "phase2a_supportive_without_critical_coverage",
+      "action_drive_high_no_veto"
+    ],
+    "executive_score": 68,
+    "high_dimension_ids": [
+      "opportunity"
+    ],
+    "insufficient_dimension_count": 4,
+    "low_dimension_ids": [],
+    "phase2a_class": "supportive",
+    "rule_id": "action_drive_high_no_veto",
+    "same_dimension_conflict": false,
+    "scored_dimension_count": 3,
+    "semantic_status": "experimental_shadow",
+    "split_signal": false,
+    "veto_dimension_ids": []
+  },
+  "executive_score": 68,
+  "id": "close_exact_aspect",
+  "phase2a_class": "supportive",
+  "phase2c_class": "action",
+  "semantic_status": "experimental_shadow"
+}

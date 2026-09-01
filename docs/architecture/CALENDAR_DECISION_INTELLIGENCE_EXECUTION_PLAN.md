@@ -330,7 +330,7 @@ Weights scale existing signed `contribution`. They do not invent new astronomica
 
 **Scope:** Second deterministic classifier from `DecisionDimensions`, compared to Phase 2A. Not canonical. No commands, no Calendar UI, no score changes, no Find/Compare/Evaluate, no cache migration.
 
-**Status:** `classifier_version = dimension_class.v1-shadow`, `semantic_status = experimental_shadow`. Phase 2A `day_class` is unchanged. Comparison lives in additive `dimension_classification`.
+**Status after 2C.4:** the *active experimental shadow* emitted on snapshots is `dimension_class.v3-shadow`. v1 remains the original experimental-shadow oracle. Neither is canonical. Comparison lives in additive `dimension_classification`. Phase 2A `day_class` is unchanged.
 
 ### Thresholds (scored dimensions only)
 
@@ -381,3 +381,106 @@ Drive HIGH requires **both** opportunity and momentum scored, at least one HIGH,
 - Computed in `build_day_intelligence_snapshot` after 2A + 2B.
 - Payload adds `dimension_classification` without replacing `day_class`.
 - Separate `dimension_class_goldens/`.
+
+---
+
+## Phase 2C.1 — Semantic validation corpus (experimental shadow)
+
+**Scope:** 24–30 deterministic cases stressing taxonomy boundaries. Does not change 2C rules, scores, commands, or UI.
+
+Corpus lives in `tests/fixtures/semantic_validation_corpus.py`. Matrix: `semantic_validation_matrix.json`.
+
+32 cases. Product intent vs current 2C: **27/32 pass**, 5 documented divergences (HL03, AC03, RV03, MX02, MX04). Classifier rules were not changed.
+
+---
+
+## Phase 2C.2 — Candidate rule-refinement experiment (experimental shadow)
+
+**Scope:** Candidate classifier alongside current 2C. Not wired into snapshots or payloads. No score, 2A, 2B, command, UI, Find/Compare/Evaluate, or cache changes. Does not overwrite `dimension_class.v1-shadow`.
+
+**Candidate version:** `dimension_class.v2-candidate-shadow` in `dimension_classification_candidate.py`.
+
+**Corpus:** frozen 32-case 2C.1 set plus 4 BUILD probes (`BUILD_CORPUS`). Comparison matrix: `semantic_validation_candidate_matrix.json`.
+
+### Candidate rule table (first match)
+
+1. No scored dimensions → `insufficient`
+2. Split (drive HIGH + any veto) → `selective` (even if a relevant dim is `conflicted`; conflict stays metadata)
+3. Same-dimension `conflicted` on drive/critical/pressure, and no split → `mixed`
+4. Single scored dim and no veto → `insufficient`
+5. Uneven drive → `review`
+6. Veto without drive HIGH, and (high pressure or ≥2 forward LOWs) → `defensive`
+7. Veto without drive HIGH otherwise → `review`
+8. No drive HIGH, ≥2 forward LOWs, pressure relief + stability ok → `recovery`
+9. No drive HIGH, ≥2 forward LOWs → `defensive`
+10. High pressure without drive HIGH → `defensive`
+11. Both drive ≥65, no veto, scored ≥4, ≥2 criticals available, ≥2 forward criticals ≥55, pressure <65 if scored → `high_leverage`
+12. Drive HIGH, no veto → `action`
+13. Constructive drive (both scored, neither HIGH, neither LOW), no veto, scored ≥4, ≥2 criticals, at least one non-drive HIGH → `build`
+14. Unpolarized, scored ≤2 → `insufficient`
+15. Unpolarized otherwise / fallback → `review`
+
+Global HIGH/LOW/80 floors are unchanged. 55 is a candidate-only quality floor for high_leverage forward criticals.
+
+Cooperation remains omitted from conflict-preemption keys. `cooperation.conflicted` is preserved on `conflicted_dimension_ids` for a later context-sensitive pass (negotiation / networking / relationship families).
+
+### Result (do not treat as promotion)
+
+Original 32: current **27/32**, candidate **30/32**. Extended 36: candidate **34/36**.
+
+Resolved vs 2C.1: HL03, AC03, RV03, MX02. Remaining disagreements: MX04 (cooperation conflict still not mixed), BD01 (clarity 46 fails the 55 quality floor). Candidate is not promoted.
+
+---
+
+## Phase 2C.3 — Proposed shadow classifier (experimental, not wired)
+
+**Scope:** Final proposed 2C rules as `dimension_class.v3-proposed-shadow` in `dimension_classification_proposed.py`. Does not overwrite v1 or v2. Not wired into `DayIntelligenceSnapshot`. No score, 2A, 2B, command, UI, Find/Compare/Evaluate, Power Window, or cache changes.
+
+**v3 vs v2:** drop the candidate-only in-between critical quality floor. high_leverage requires both drive HIGH, coverage, no veto, and **at least one forward critical ≥65**. Pressure ≥65 never counts as a supportive critical.
+
+### v3 rule table (first match)
+
+1. No scored dimensions → `insufficient`
+2. Split (drive HIGH + any veto) → `selective` (conflict stays metadata)
+3. Same-dimension `conflicted` on drive/critical/pressure, and no split → `mixed`
+4. Single scored dim and no veto → `insufficient`
+5. Uneven drive → `review`
+6. Veto without drive HIGH, and (high pressure or ≥2 forward LOWs) → `defensive`
+7. Veto without drive HIGH otherwise → `review`
+8. No drive HIGH, ≥2 forward LOWs, pressure relief + stability ok → `recovery`
+9. No drive HIGH, ≥2 forward LOWs → `defensive`
+10. High pressure without drive HIGH → `defensive`
+11. Both drive ≥65, no veto, scored ≥4, ≥2 criticals scored, ≥1 of {clarity, stability, reversibility_safety} ≥65, pressure <65 if scored → `high_leverage`
+12. Drive HIGH, no veto → `action`
+13. Constructive drive (both scored, neither HIGH, neither LOW), no veto, scored ≥4, ≥2 criticals, ≥1 non-drive HIGH → `build`
+14. Unpolarized, scored ≤2 → `insufficient`
+15. Unpolarized / fallback → `review`
+
+Cooperation remains omitted from conflict-preemption. `cooperation.conflicted` is preserved for a later context-sensitive pass (negotiation, networking, relationships, hiring/team).
+
+Comparison matrix: `semantic_validation_proposed_matrix.json`.
+
+**Result (not promotion):** original 32 v3 **31/32** (MX04 remains). BD01 is high_leverage again; AC03 stays action. v3 is not wired.
+
+---
+
+## Phase 2C.4 — Promote v3 to the active experimental shadow (not canonical)
+
+**Scope:** Wire validated v3 rules into `build_day_intelligence_snapshot` as the additive `dimension_classification`. Remains `semantic_status = experimental_shadow`. Not canonical. No commands, Calendar UI, Find/Compare/Evaluate, Power Windows, or cache migration.
+
+**Active version:** `dimension_class.v3-shadow` (promoted from `dimension_class.v3-proposed-shadow`; that name is not shipped).
+
+**Oracles kept (cleanup later):**
+- v1 `dimension_class.v1-shadow` — original experimental shadow
+- v2 `dimension_class.v2-candidate-shadow` — candidate experiment
+- v3 `dimension_class.v3-shadow` — validated active experimental shadow
+
+**Wiring:** `day_intelligence_models.build_day_intelligence_snapshot` calls `classify_from_dimensions_v3`. Phase 2A `day_class`, `executive.score`, and `DecisionDimensions` are unchanged.
+
+**Goldens:** `dimension_class_goldens_v1/` frozen against the v1 oracle. `dimension_class_goldens_v3/` frozen against the wired snapshot. Score goldens and Phase 2B dimension goldens are untouched.
+
+**MX04:** cooperation conflict is preserved as metadata (`conflicted_dimension_ids`) but does not globally preempt classification. Future context-sensitive synthesis may use it for negotiation, networking, relationships, and hiring/team decisions.
+
+**Cache blocker (unchanged):** month cache is numeric-score-only (`CALENDAR_CACHE_STORES_DAY_INTELLIGENCE = false`). Shadow Day Intelligence cannot become user-visible Calendar semantics until cache parity exists.
+
+**Not done:** canonical promotion, UI, commands, Find/Compare/Evaluate integration.

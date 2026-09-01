@@ -96,8 +96,8 @@ def test_calendar_day_pipeline_score_unchanged_by_evidence_adapter():
     shadow = day_intelligence["dimension_classification"]
     assert shadow["phase2a_class"] == day_intelligence["day_class"]
     assert shadow["executive_score"] == original_score
+    assert shadow["classifier_version"] == "dimension_class.v3-shadow"
     assert shadow["semantic_status"] == "experimental_shadow"
-    assert shadow["classifier_version"] == "dimension_class.v1-shadow"
     assert "command" not in shadow
     assert "confidence" not in shadow
     assert "classification_strength" not in shadow

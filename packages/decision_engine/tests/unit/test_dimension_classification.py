@@ -18,6 +18,9 @@ from packages.decision_engine.dimension_classification import (
 )
 from packages.decision_engine.dimension_mapping import DIMENSION_KEYS
 from packages.decision_engine.dimension_classification import _resolve_class
+from packages.decision_engine.dimension_classification_proposed import (
+    ACTIVE_SHADOW_CLASSIFIER_VERSION,
+)
 from packages.decision_engine.dimensions import DecisionDimension, DecisionDimensions
 from packages.decision_engine.tests.fixtures.calendar_score_cases import (
     CASE_BUILDERS,
@@ -345,6 +348,7 @@ def test_payload_keeps_phase2a_and_adds_shadow_comparison() -> None:
     assert "classification_strength" not in shadow
     assert "classification_coverage" in shadow
     assert shadow["semantic_status"] == "experimental_shadow"
+    assert shadow["classifier_version"] == ACTIVE_SHADOW_CLASSIFIER_VERSION
 
 
 def test_snapshot_does_not_mutate_score() -> None:
@@ -371,7 +375,7 @@ def test_all_case_builders_produce_shadow_comparison() -> None:
     for builder in CASE_BUILDERS:
         _, snapshot = _snapshot_for(builder())
         cmp_ = snapshot.dimension_classification
-        assert cmp_.classifier_version == CLASSIFIER_VERSION
+        assert cmp_.classifier_version == ACTIVE_SHADOW_CLASSIFIER_VERSION
         assert cmp_.executive_score == snapshot.final_score
         assert cmp_.phase2a_class == snapshot.classification.day_class
         assert "command" not in cmp_.model_dump()

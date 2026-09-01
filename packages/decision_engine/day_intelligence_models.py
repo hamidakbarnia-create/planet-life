@@ -4,6 +4,9 @@ Phase 0/1: passthrough score + normalized DecisionEvidence.
 Phase 2A: PROVISIONAL SHADOW classification (regression/reference only).
 Phase 2B: DecisionDimensions in parallel from evidence (no commands).
 Phase 2C: dimension-driven shadow class + comparison (not canonical).
+Active experimental shadow: ``dimension_class.v3-shadow``.
+v1 and v2 remain callable regression oracles. Not user-visible until
+cache parity exists.
 """
 
 from __future__ import annotations
@@ -19,8 +22,10 @@ from packages.decision_engine.day_classification import (
 )
 from packages.decision_engine.dimension_classification import (
     DimensionDayClassification,
-    classify_from_dimensions,
     dimension_classification_payload,
+)
+from packages.decision_engine.dimension_classification_proposed import (
+    classify_from_dimensions_v3,
 )
 from packages.decision_engine.dimensions import (
     DecisionDimensions,
@@ -41,6 +46,9 @@ class DayIntelligenceSnapshot(BaseModel):
     dimensions must never recompute or replace it. No decision command.
     Phase 2A ``classification`` is provisional shadow logic. Phase 2B
     ``dimensions`` are an experimental_shadow parallel layer — not canonical.
+    Phase 2C ``dimension_classification`` is the active experimental shadow
+    (``dimension_class.v3-shadow``), compared to Phase 2A. Not canonical.
+    Month cache remains numeric-score-only, so this layer is not user-visible.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -112,7 +120,7 @@ def build_day_intelligence_snapshot(
         evidence,
         action_type=resolved_activity or None,
     )
-    dimension_classification = classify_from_dimensions(
+    dimension_classification = classify_from_dimensions_v3(
         dimensions,
         phase2a_class=classification.day_class,
         executive_score=final_score,
