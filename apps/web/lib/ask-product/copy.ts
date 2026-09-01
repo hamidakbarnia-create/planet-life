@@ -15,6 +15,10 @@ export type AskProductCopy = {
   examineEvaluate: string;
   examineCompare: string;
   examineFind: string;
+  /** Detector suggestion — never auto-submitted. */
+  examineRecommended: string;
+  /** Product Launch Compare is registered-off in this release. */
+  compareUnavailableForLaunch: string;
   comingSoon: string;
   datePrompt: string;
   dateHint: string;
@@ -204,9 +208,12 @@ const EN: AskProductCopy = {
   clarificationTitle: 'A few details before we evaluate',
   yourDecision: 'Your decision',
   examinePrompt: 'What would you like to examine?',
-  examineEvaluate: 'Check a specific date',
-  examineCompare: 'Compare several dates',
+  examineEvaluate: 'Evaluate one date',
+  examineCompare: 'Compare specific dates',
   examineFind: 'Find stronger timing windows',
+  examineRecommended: 'Recommended',
+  compareUnavailableForLaunch:
+    'Comparing specific dates for a launch is not available in this version.',
   comingSoon: 'Coming soon',
   datePrompt: 'Which date should we evaluate?',
   dateHint: 'Enter an explicit calendar date. METIORO never assumes today.',
@@ -431,9 +438,12 @@ const FA: AskProductCopy = {
   clarificationTitle: 'چند جزئیات قبل از ارزیابی',
   yourDecision: 'تصمیم شما',
   examinePrompt: 'چه چیزی را می‌خواهید بررسی کنیم؟',
-  examineEvaluate: 'بررسی یک تاریخ مشخص',
-  examineCompare: 'مقایسه چند تاریخ',
-  examineFind: 'یافتن پنجره‌های زمان‌بندی قوی‌تر',
+  examineEvaluate: 'ارزیابی یک تاریخ',
+  examineCompare: 'مقایسه چند تاریخ مشخص',
+  examineFind: 'یافتن پنجره‌های زمانی قوی‌تر',
+  examineRecommended: 'پیشنهادی',
+  compareUnavailableForLaunch:
+    'مقایسه تاریخ‌های مشخص برای لانچ در این نسخه فعال نیست.',
   comingSoon: 'به‌زودی',
   datePrompt: 'کدام تاریخ را ارزیابی کنیم؟',
   dateHint: 'یک تاریخ مشخص وارد کنید. METIORO هرگز «امروز» را فرض نمی‌کند.',
@@ -659,9 +669,12 @@ const AR: AskProductCopy = {
   clarificationTitle: 'بعض التفاصيل قبل التقييم',
   yourDecision: 'قرارك',
   examinePrompt: 'ماذا تريد أن نفحص؟',
-  examineEvaluate: 'فحص تاريخ محدد',
-  examineCompare: 'مقارنة عدة تواريخ',
-  examineFind: 'البحث عن نوافذ توقيت أقوى',
+  examineEvaluate: 'تقييم تاريخ واحد',
+  examineCompare: 'مقارنة تواريخ محددة',
+  examineFind: 'إيجاد نوافذ زمنية أقوى',
+  examineRecommended: 'موصى به',
+  compareUnavailableForLaunch:
+    'مقارنة تواريخ محددة للإطلاق غير متاحة في هذا الإصدار.',
   comingSoon: 'قريباً',
   datePrompt: 'أي تاريخ نقيّم؟',
   dateHint: 'أدخل تاريخاً صريحاً. لا تفترض METIORO «اليوم».',
@@ -885,9 +898,12 @@ const RU: AskProductCopy = {
   clarificationTitle: 'Несколько деталей перед оценкой',
   yourDecision: 'Ваше решение',
   examinePrompt: 'Что вы хотите проверить?',
-  examineEvaluate: 'Проверить конкретную дату',
-  examineCompare: 'Сравнить несколько дат',
+  examineEvaluate: 'Оценить одну дату',
+  examineCompare: 'Сравнить конкретные даты',
   examineFind: 'Найти более сильные окна тайминга',
+  examineRecommended: 'Рекомендуется',
+  compareUnavailableForLaunch:
+    'Сравнение конкретных дат запуска в этой версии недоступно.',
   comingSoon: 'Скоро',
   datePrompt: 'Какую дату оценить?',
   dateHint: 'Укажите явную дату. METIORO никогда не подставляет «сегодня».',

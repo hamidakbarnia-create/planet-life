@@ -61,6 +61,11 @@ export function deriveClarificationState(
   frame: DecisionFrameV1
 ): AskConsumerState {
   if (isUnsupportedOperationFrame(frame)) {
+    // Typed Cases keep the operation selector visible; untyped frames
+    // cannot recover a shipped operation and stay on the unsupported path.
+    if (frame.decision_type_id) {
+      return 'NEEDS_CLARIFICATION';
+    }
     return 'UNSUPPORTED_OPERATION';
   }
 
@@ -114,7 +119,7 @@ export function deriveClarificationState(
     isFramingPersistReady(frame) &&
     frame.time.scope === 'multiple_dates' &&
     (frame.time.dates?.length ?? 0) >= 2 &&
-    (frame.time.dates?.length ?? 0) <= 3 &&
+    (frame.time.dates?.length ?? 0) <= 5 &&
     canExecuteInProduction(frame.decision_type_id, 'compare')
   ) {
     return 'READY_TO_COMPARE';

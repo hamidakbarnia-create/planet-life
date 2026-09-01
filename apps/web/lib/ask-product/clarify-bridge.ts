@@ -11,6 +11,7 @@ export {
   applyOperationChoice,
   applyOpenEndedAxis,
   buildDecisionFrame,
+  recommendedOperation,
 } from '@/lib/decision-frame/frame';
 export type { CompareDateDraft } from '@/lib/decision-frame/frame';
 export {
