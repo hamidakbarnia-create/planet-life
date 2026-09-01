@@ -13,6 +13,10 @@ import {
   buildDayIntelligenceView,
   explanationFromDayIntelligence,
 } from '@/lib/decision-intelligence/day-intelligence-view';
+import {
+  DAY_INTELLIGENCE_CHROME,
+  formatTimingStrength,
+} from '@/lib/decision-intelligence/product-copy';
 import type { SemanticPreviewLocale } from '@/lib/decision-intelligence/types';
 
 export type CalendarSelectedDayInsightLabels = {
@@ -21,6 +25,8 @@ export type CalendarSelectedDayInsightLabels = {
   whyTiming: string;
   whyTimingFallback: string;
   supportingReasons: string;
+  seeDetails?: string;
+  hideDetails?: string;
   advancedDetails: string;
   transit: {
     title: string;
@@ -76,7 +82,17 @@ type Props = {
   score?: number | null;
   dayIntelligence?: CalendarDayIntelligence | null;
   forcePreview?: boolean;
+  dateLabel?: string | null;
+  selectedEyebrow?: string;
 };
+
+function conflictedDimensionIds(
+  intelligence: CalendarDayIntelligence | null | undefined
+): string[] {
+  const raw = intelligence?.dimensionClassification?.conflicted_dimension_ids;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((item): item is string => typeof item === 'string' && item.length > 0);
+}
 
 /**
  * Selected-day presentation: producer ScoreReasoning first, then product
@@ -94,36 +110,80 @@ export function CalendarSelectedDayInsight({
   score,
   dayIntelligence,
   forcePreview = false,
+  dateLabel,
+  selectedEyebrow,
 }: Props) {
   const previewOn = forcePreview || isDecisionSemanticsPreviewEnabled();
   const chrome = PREVIEW_CHROME[lang];
+  const productChrome = DAY_INTELLIGENCE_CHROME[lang as SemanticPreviewLocale];
   const explanation = explanationFromDayIntelligence(dayIntelligence ?? null);
   const productView = buildDayIntelligenceView({
     explanation,
     locale: lang as SemanticPreviewLocale,
     score: score ?? dayIntelligence?.finalScore,
     posture: shadowDayClass(dayIntelligence),
+    conflictedDimensionIds: conflictedDimensionIds(dayIntelligence),
   });
 
   return (
     <div data-testid="calendar-selected-day-insight">
+      {dateLabel ? (
+        <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
+          <div>
+            {selectedEyebrow ? (
+              <div
+                className="fi text-[10px] uppercase tracking-widest mb-1"
+                style={{ color: 'rgba(255,255,255,0.45)' }}
+              >
+                {selectedEyebrow}
+              </div>
+            ) : null}
+            <div className="fc text-lg" style={{ color: '#c5a059' }}>
+              {dateLabel}
+            </div>
+          </div>
+          {score != null && Number.isFinite(score) ? (
+            <div
+              className="fi text-sm"
+              style={{ color: 'rgba(255,255,255,0.65)' }}
+              data-testid="calendar-selected-timing-strength"
+            >
+              {productChrome.timingStrength}: {formatTimingStrength(score)}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {productView?.conditionsLabel ? (
+        <p
+          className="fi text-sm mb-3"
+          style={{ color: 'rgba(255,255,255,0.75)' }}
+          data-testid="calendar-selected-conditions"
+        >
+          {productChrome.conditions}: {productView.conditionsLabel}
+        </p>
+      ) : null}
+
+      {productView ? (
+        <div className="mb-4" data-testid="calendar-day-intelligence">
+          <DayIntelligencePanel view={productView} hideScore={Boolean(dateLabel)} />
+        </div>
+      ) : null}
+
       <WhyThisTiming
         className="mb-4"
         lang={lang}
+        compact={Boolean(productView)}
         labels={{
           dir: t.dir,
           whyTiming: t.whyTiming,
           whyTimingFallback: t.whyTimingFallback,
           supportingReasons: t.supportingReasons,
+          seeDetails: t.seeDetails,
+          hideDetails: t.hideDetails,
         }}
         reasoning={reasoning}
       />
-
-      {productView ? (
-        <div className="mb-4" data-testid="calendar-day-intelligence">
-          <DayIntelligencePanel view={productView} />
-        </div>
-      ) : null}
 
       {previewOn ? (
         <div

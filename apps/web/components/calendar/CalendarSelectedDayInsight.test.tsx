@@ -18,6 +18,8 @@ function labelsFor(lang: 'en' | 'fa' | 'ar' | 'ru') {
     whyTiming: t.whyTiming,
     whyTimingFallback: t.whyTimingFallback,
     supportingReasons: t.supportingReasons,
+    seeDetails: t.seeDetails,
+    hideDetails: t.hideDetails,
     advancedDetails: t.advancedDetails,
     transit: t.transit,
     signs: t.signs,

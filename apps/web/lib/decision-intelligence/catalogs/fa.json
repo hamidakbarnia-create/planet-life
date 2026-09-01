@@ -63,7 +63,7 @@
     "semantic.low_cooperation": "شرایط همکاری ضعیف‌تر است.",
     "semantic.high_reversibility_safety": "برگشت از تصمیم آسان‌تر است.",
     "semantic.low_reversibility_safety": "برگشت از تصمیم سخت‌تر است. گزینه‌ها را باز بگذارید.",
-    "semantic.same_dimension_conflict": "یک عامل هم پشتیبان است و هم هشدار.",
+    "semantic.same_dimension_conflict": "برخی اثرها هم فرصت می‌سازند و هم ریسک.",
     "semantic.veto_present": "یک هشدار قوی دامنه اقدام را محدود می‌کند.",
     "semantic.no_outcome_prediction": "سیگنال‌های زمان‌بندی نتیجهٔ واقعی را تعیین نمی‌کنند.",
     "semantic.high_stakes_review_required": "زمان‌بندی را ابزار برنامه‌ریزی بدانید. تصمیم را با شواهد واقعی و الزامات حرفه‌ای بسنجید.",

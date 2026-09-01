@@ -58,10 +58,10 @@ export function CalendarInsightStack({
         }}
         data-insight-legend-panel
       >
-        <DecisionPowerLegend />
+        <DecisionPowerLegend lang={lang} />
       </div>
 
-      <PowerDistributionChart scores={scores} />
+      <PowerDistributionChart scores={scores} lang={lang} />
 
       <WeeklyTrendChart
         weeks={weeks}

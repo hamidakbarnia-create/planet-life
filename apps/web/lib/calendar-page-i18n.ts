@@ -28,11 +28,39 @@ export type CalendarPageLangPack = {
   /** Shown when producer reasoning is not in the active UI language. */
   whyTimingFallback: string;
   supportingReasons: string;
+  seeDetails: string;
+  hideDetails: string;
   advancedDetails: string;
   uncertaintyDisclosure: string;
   weekdays: string[];
   nav: Record<string, string>;
   months: string[];
+  insight: {
+    decisionPowerScore: string;
+    powerDistribution: string;
+    weeklyTrend: string;
+    avg: string;
+    excellent: string;
+    good: string;
+    moderate: string;
+    low: string;
+    /** Default / `other` template. Prefer `bandCountForms` for plural-sensitive locales. */
+    bandCount: string;
+    /**
+     * Optional CLDR plural forms for `{count} … ({percent}…)`.
+     * `formatBandDayCount` selects with `Intl.PluralRules`; missing categories
+     * fall back to `other`, then `bandCount`.
+     */
+    bandCountForms?: Partial<Record<Intl.LDMLPluralRule, string>>;
+    weekBest: string;
+    monthBest: string;
+    viewWeek: string;
+    selectedDayInsight: string;
+    bestWindow: string;
+    riskWindow: string;
+    selectDayForHourly: string;
+    agencyFooter: string;
+  };
   legend: {
     title: string;
     hint: string;
@@ -85,6 +113,8 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
     whyTimingFallback:
       'A localized timing explanation is not available for this day.',
     supportingReasons: 'Supporting details',
+    seeDetails: 'See details',
+    hideDetails: 'Hide details',
     advancedDetails: 'Advanced details',
     uncertaintyDisclosure: 'Timing scores are relative estimates, not guarantees.',
     weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -117,6 +147,30 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
         { range: '40–59', label: 'Neutral — proceed carefully', color: '#fb923c' },
         { range: '0–39', label: 'Lower-readiness window; delay if practical', color: '#f87171' },
       ],
+    },
+    insight: {
+      decisionPowerScore: 'Decision power score',
+      powerDistribution: 'Power distribution',
+      weeklyTrend: 'Weekly trend',
+      avg: 'Avg',
+      excellent: 'Excellent (85–100)',
+      good: 'Good (70–84)',
+      moderate: 'Moderate (50–69)',
+      low: 'Low (0–49)',
+      bandCount: '{count} days ({percent}%)',
+      bandCountForms: {
+        one: '{count} day ({percent}%)',
+        other: '{count} days ({percent}%)',
+      },
+      weekBest: 'Week best',
+      monthBest: 'Month best',
+      viewWeek: 'View week',
+      selectedDayInsight: 'Selected day insight',
+      bestWindow: 'Best window',
+      riskWindow: 'Risk window',
+      selectDayForHourly: 'Select a day to load hourly guidance.',
+      agencyFooter:
+        'Scores are calculated from celestial and behavioral factors. You always make the final decision.',
     },
     transit: {
       title: 'Sky on this day',
@@ -169,6 +223,8 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
     whyTiming: 'Почему этот тайминг',
     whyTimingFallback: 'Локализованное объяснение тайминга для этого дня недоступно.',
     supportingReasons: 'Дополнительные детали',
+    seeDetails: 'Показать детали',
+    hideDetails: 'Скрыть детали',
     advancedDetails: 'Расширенные детали',
     uncertaintyDisclosure: 'Оценки тайминга относительны и не являются гарантией.',
     weekdays: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
@@ -201,6 +257,26 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
         { range: '40–59', label: 'Нейтрально — осторожно', color: '#fb923c' },
         { range: '0–39', label: 'Низкая готовность; отложите, если можно', color: '#f87171' },
       ],
+    },
+    insight: {
+      decisionPowerScore: 'Оценка силы решения',
+      powerDistribution: 'Распределение силы',
+      weeklyTrend: 'Недельный тренд',
+      avg: 'Ср.',
+      excellent: 'Отлично (85–100)',
+      good: 'Хорошо (70–84)',
+      moderate: 'Умеренно (50–69)',
+      low: 'Низко (0–49)',
+      bandCount: '{count} дн. ({percent}%)',
+      weekBest: 'Лучший день недели',
+      monthBest: 'Лучший день месяца',
+      viewWeek: 'Показать неделю',
+      selectedDayInsight: 'Обзор выбранного дня',
+      bestWindow: 'Лучшее окно',
+      riskWindow: 'Рискованное окно',
+      selectDayForHourly: 'Выберите день, чтобы загрузить почасовые подсказки.',
+      agencyFooter:
+        'Оценки рассчитаны по небесным и поведенческим факторам. Итоговое решение всегда за вами.',
     },
     transit: {
       title: 'Небо в этот день',
@@ -253,6 +329,8 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
     whyTiming: 'چرا این زمان‌بندی',
     whyTimingFallback: 'توضیح فارسی این زمان‌بندی برای این روز در دسترس نیست.',
     supportingReasons: 'جزئیات پشتیبان',
+    seeDetails: 'دیدن جزئیات',
+    hideDetails: 'پنهان کردن جزئیات',
     advancedDetails: 'جزئیات پیشرفته',
     uncertaintyDisclosure: 'امتیازهای زمان‌بندی برآورد نسبی‌اند، نه تضمین.',
     weekdays: ['ی', 'د', 'س', 'چ', 'پ', 'ج', 'ش'],
@@ -285,6 +363,26 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
         { range: '۴۰ تا ۵۹', label: 'خنثی — با احتیاط', color: '#fb923c' },
         { range: '۰ تا ۳۹', label: 'آمادگی پایین‌تر؛ در صورت امکان به تعویق بیندازید', color: '#f87171' },
       ],
+    },
+    insight: {
+      decisionPowerScore: 'امتیاز قدرت تصمیم',
+      powerDistribution: 'توزیع قدرت',
+      weeklyTrend: 'روند هفتگی',
+      avg: 'میانگین',
+      excellent: 'عالی (۸۵–۱۰۰)',
+      good: 'خوب (۷۰–۸۴)',
+      moderate: 'متوسط (۵۰–۶۹)',
+      low: 'پایین (۰–۴۹)',
+      bandCount: '{count} روز ({percent}٪)',
+      weekBest: 'بهترین روز هفته',
+      monthBest: 'بهترین روز ماه',
+      viewWeek: 'دیدن هفته',
+      selectedDayInsight: 'بینش روز انتخاب‌شده',
+      bestWindow: 'بهترین بازه',
+      riskWindow: 'بازهٔ ریسک',
+      selectDayForHourly: 'یک روز را انتخاب کنید تا راهنمای ساعتی بارگذاری شود.',
+      agencyFooter:
+        'امتیازها از عوامل آسمانی و رفتاری محاسبه می‌شوند. تصمیم نهایی همیشه با شماست.',
     },
     transit: {
       title: 'آسمان این روز',
@@ -337,6 +435,8 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
     whyTiming: 'لماذا هذا التوقيت',
     whyTimingFallback: 'الشرح المحلي لهذا التوقيت غير متاح لهذا اليوم.',
     supportingReasons: 'تفاصيل داعمة',
+    seeDetails: 'عرض التفاصيل',
+    hideDetails: 'إخفاء التفاصيل',
     advancedDetails: 'تفاصيل متقدمة',
     uncertaintyDisclosure: 'درجات التوقيت تقديرات نسبية وليست ضمانات.',
     weekdays: ['أح', 'إث', 'ث', 'أر', 'خ', 'ج', 'س'],
@@ -370,6 +470,34 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
         { range: '0–39', label: 'جاهزية أقل؛ أجّل إن أمكن', color: '#f87171' },
       ],
     },
+    insight: {
+      decisionPowerScore: 'درجة قوة القرار',
+      powerDistribution: 'توزيع القوة',
+      weeklyTrend: 'الاتجاه الأسبوعي',
+      avg: 'متوسط',
+      excellent: 'ممتاز (85–100)',
+      good: 'جيد (70–84)',
+      moderate: 'متوسط (50–69)',
+      low: 'منخفض (0–49)',
+      bandCount: '{count} يوم ({percent}٪)',
+      bandCountForms: {
+        zero: '{count} يوم ({percent}٪)',
+        one: '{count} يوم ({percent}٪)',
+        two: 'يومان ({percent}٪)',
+        few: '{count} أيام ({percent}٪)',
+        many: '{count} يوماً ({percent}٪)',
+        other: '{count} يوم ({percent}٪)',
+      },
+      weekBest: 'أفضل يوم في الأسبوع',
+      monthBest: 'أفضل يوم في الشهر',
+      viewWeek: 'عرض الأسبوع',
+      selectedDayInsight: 'تحليل اليوم المحدد',
+      bestWindow: 'أفضل نافذة',
+      riskWindow: 'نافذة المخاطر',
+      selectDayForHourly: 'اختر يوماً لتحميل الإرشاد الساعي.',
+      agencyFooter:
+        'تُحسب الدرجات من عوامل سماوية وسلوكية. القرار النهائي دائماً لك.',
+    },
     transit: {
       title: 'سماء هذا اليوم',
       hint: 'مواقع الكواكب لليوم المحدد عند الظهيرة المحلية في مكان إقامتك.',
@@ -394,3 +522,34 @@ export const CALENDAR_PAGE_LANGS: Record<AppLang, CalendarPageLangPack> = {
     },
   },
 };
+
+const NUMBER_LOCALES: Record<AppLang, string> = {
+  en: 'en-US',
+  ru: 'ru-RU',
+  fa: 'fa-IR',
+  ar: 'ar',
+};
+
+export function formatCalendarInteger(lang: AppLang, n: number): string {
+  return new Intl.NumberFormat(NUMBER_LOCALES[lang], {
+    useGrouping: false,
+  }).format(n);
+}
+
+export function formatBandDayCount(
+  lang: AppLang,
+  count: number,
+  percent: number
+): string {
+  const pack = CALENDAR_PAGE_LANGS[lang].insight;
+  const category = new Intl.PluralRules(NUMBER_LOCALES[lang]).select(
+    Math.abs(count)
+  );
+  const template =
+    pack.bandCountForms?.[category] ??
+    pack.bandCountForms?.other ??
+    pack.bandCount;
+  return template
+    .replace('{count}', formatCalendarInteger(lang, count))
+    .replace('{percent}', formatCalendarInteger(lang, percent));
+}

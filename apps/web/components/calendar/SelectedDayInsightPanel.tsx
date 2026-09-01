@@ -1,14 +1,16 @@
 'use client';
 
+import type { AppLang } from '@/lib/app-settings';
 import type { HourScore } from '@/lib/calendar-scores';
 import { formatHourLabel, formatReadinessPercent } from '@/lib/calendar-scores';
+import { CALENDAR_PAGE_LANGS } from '@/lib/calendar-page-i18n';
 import {
   CALENDAR_UI,
   POWER_BAND_STYLES,
 } from '@/lib/calendar-power-presentation';
 
 export type SelectedDayInsightPanelProps = {
-  lang: string;
+  lang: AppLang;
   dateLabel: string | null;
   bestHour: HourScore | null;
   riskHour: HourScore | null;
@@ -34,6 +36,7 @@ export function SelectedDayInsightPanel({
   loading,
   loadingLabel,
 }: SelectedDayInsightPanelProps) {
+  const copy = CALENDAR_PAGE_LANGS[lang].insight;
   return (
     <section
       data-selected-day-insight-panel
@@ -47,7 +50,7 @@ export function SelectedDayInsightPanel({
         className="fi text-[9px] uppercase tracking-[0.14em] mb-1"
         style={{ color: CALENDAR_UI.textMuted }}
       >
-        Selected Day Insight
+        {copy.selectedDayInsight}
       </div>
       <div
         data-insight-selected-date
@@ -76,7 +79,7 @@ export function SelectedDayInsightPanel({
                 className="fi text-[9px] uppercase tracking-wider mb-0.5"
                 style={{ color: CALENDAR_UI.textMuted }}
               >
-                Best window
+                {copy.bestWindow}
               </div>
               <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
                 {formatHourWindow(bestHour.hour, lang)}
@@ -103,7 +106,7 @@ export function SelectedDayInsightPanel({
                 className="fi text-[9px] uppercase tracking-wider mb-0.5"
                 style={{ color: CALENDAR_UI.textMuted }}
               >
-                Risk window
+                {copy.riskWindow}
               </div>
               <div className="fi text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
                 {formatHourWindow(riskHour.hour, lang)}
@@ -120,7 +123,7 @@ export function SelectedDayInsightPanel({
         </div>
       ) : (
         <div className="fi text-xs" style={{ color: CALENDAR_UI.textMuted }}>
-          Select a day to load hourly guidance.
+          {copy.selectDayForHourly}
         </div>
       )}
 
@@ -129,8 +132,7 @@ export function SelectedDayInsightPanel({
         className="fi text-[10px] leading-snug mt-3"
         style={{ color: 'rgba(255,255,255,0.38)' }}
       >
-        Scores are calculated from celestial &amp; behavioral factors. You
-        always make the final decision.
+        {copy.agencyFooter}
       </p>
     </section>
   );

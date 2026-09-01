@@ -1,5 +1,7 @@
 'use client';
 
+import type { AppLang } from '@/lib/app-settings';
+import { CALENDAR_PAGE_LANGS } from '@/lib/calendar-page-i18n';
 import {
   CALENDAR_UI,
   POWER_BAND_ORDER,
@@ -8,13 +10,18 @@ import {
 
 export type DecisionPowerLegendProps = {
   compact?: boolean;
+  lang?: AppLang;
 };
 
 /** Horizontal Decision Power Score gradient legend (0 → 100). */
 export function DecisionPowerLegend({
   compact = false,
+  lang = 'en',
 }: DecisionPowerLegendProps) {
   const gradient = `linear-gradient(90deg, ${POWER_BAND_STYLES.low.color}, ${POWER_BAND_STYLES.moderate.color}, ${POWER_BAND_STYLES.good.color}, ${POWER_BAND_STYLES.excellent.color})`;
+  const copy = CALENDAR_PAGE_LANGS[lang].insight;
+  const title = copy.decisionPowerScore;
+  const bandLabels = POWER_BAND_ORDER.map((band) => copy[band]).join(', ');
 
   return (
     <div
@@ -25,7 +32,7 @@ export function DecisionPowerLegend({
         className="fi text-[9px] uppercase tracking-[0.14em] mb-1.5"
         style={{ color: CALENDAR_UI.textMuted }}
       >
-        Decision Power Score
+        {title}
       </div>
       <div
         className="h-2 rounded-full w-full"
@@ -47,7 +54,7 @@ export function DecisionPowerLegend({
       </div>
       {!compact && (
         <div className="sr-only">
-          {POWER_BAND_ORDER.join(', ')}
+          {bandLabels}
         </div>
       )}
     </div>

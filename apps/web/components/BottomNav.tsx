@@ -367,11 +367,17 @@ export function BottomNav({
   );
 }
 
-export function VaultPill({ label }: { label?: string }) {
+export function VaultPill({
+  label,
+  title,
+}: {
+  label?: string;
+  title?: string;
+}) {
   return (
     <Link
       href="/vault"
-      title="Open the Vault"
+      title={title ?? label ?? 'Vault'}
       className="no-underline inline-flex items-center gap-2 shrink-0 rounded-full transition-opacity hover:opacity-90"
       style={{
         ...VAULT_PILL_STYLE,

@@ -2,6 +2,7 @@
 
 import type { AppLang, CalendarSystem } from '@/lib/app-settings';
 import { formatReadinessPercent } from '@/lib/calendar-scores';
+import { CALENDAR_PAGE_LANGS } from '@/lib/calendar-page-i18n';
 import {
   CALENDAR_UI,
   POWER_BAND_STYLES,
@@ -49,6 +50,7 @@ export function WeeklyTrendChart({
   calendar = 'gregorian',
   onViewMonthBestWeek,
 }: WeeklyTrendChartProps) {
+  const copy = CALENDAR_PAGE_LANGS[lang].insight;
   const plotWidth = WIDTH - PAD_X * 2;
   const count = Math.max(weeks.length, 1);
   const weekRange = formatWeekRangeLabel(weeks, lang, calendar);
@@ -112,7 +114,7 @@ export function WeeklyTrendChart({
           className="fi text-[9px] uppercase tracking-[0.14em]"
           style={{ color: CALENDAR_UI.textMuted }}
         >
-          Weekly Trend
+          {copy.weeklyTrend}
         </div>
         {weekRange ? (
           <div
@@ -130,7 +132,7 @@ export function WeeklyTrendChart({
         width="100%"
         height={HEIGHT}
         role="img"
-        aria-label="Weekly Trend"
+        aria-label={copy.weeklyTrend}
         className="block overflow-visible"
         data-weekly-trend-chart
         data-weekly-path-strategy="linear-segments"
@@ -267,7 +269,7 @@ export function WeeklyTrendChart({
           className="fi text-[11px] mt-2"
           style={{ color: POWER_BAND_STYLES.good.color }}
         >
-          Week best: {weekBest.weekdayLabel} ·{' '}
+          {copy.weekBest}: {weekBest.weekdayLabel} ·{' '}
           {formatReadinessPercent(weekBest.score)}
         </div>
       ) : null}
@@ -286,8 +288,8 @@ export function WeeklyTrendChart({
             outlineColor: CALENDAR_UI.gold,
           }}
         >
-          Month best: {monthBestDateLabel ?? monthBestDate} ·{' '}
-          {formatReadinessPercent(monthBestScore)} → View week
+          {copy.monthBest}: {monthBestDateLabel ?? monthBestDate} ·{' '}
+          {formatReadinessPercent(monthBestScore)} → {copy.viewWeek}
         </button>
       ) : null}
     </section>

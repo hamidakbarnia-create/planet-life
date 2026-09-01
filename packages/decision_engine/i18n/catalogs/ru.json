@@ -63,7 +63,7 @@
     "semantic.low_cooperation": "Условия сотрудничества слабее.",
     "semantic.high_reversibility_safety": "Решение легче отменить или скорректировать.",
     "semantic.low_reversibility_safety": "Решение труднее отменить. Оставляйте варианты открытыми.",
-    "semantic.same_dimension_conflict": "Один и тот же фактор и поддерживает, и предостерегает.",
+    "semantic.same_dimension_conflict": "Некоторые влияния создают и возможность, и риск.",
     "semantic.veto_present": "Сильное предостережение ограничивает, насколько далеко продвигаться.",
     "semantic.no_outcome_prediction": "Временные сигналы не определяют фактический исход.",
     "semantic.high_stakes_review_required": "Используйте время как помощь в планировании. Сверяйте решение с реальными данными и профессиональными требованиями.",

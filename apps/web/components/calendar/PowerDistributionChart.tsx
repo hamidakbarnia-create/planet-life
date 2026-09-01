@@ -1,9 +1,15 @@
 'use client';
 
+import type { AppLang } from '@/lib/app-settings';
 import { formatReadinessPercent } from '@/lib/calendar-scores';
+import {
+  CALENDAR_PAGE_LANGS,
+  formatBandDayCount,
+} from '@/lib/calendar-page-i18n';
 import {
   CALENDAR_UI,
   buildPowerDistribution,
+  type CountedPowerBand,
   type PowerDistribution,
 } from '@/lib/calendar-power-presentation';
 
@@ -12,6 +18,7 @@ export type PowerDistributionChartProps = {
   scores: Record<string, number>;
   /** Optional precomputed distribution (tests / memoization). */
   distribution?: PowerDistribution;
+  lang?: AppLang;
 };
 
 const SIZE = 148;
@@ -22,8 +29,10 @@ const C = 2 * Math.PI * R;
 export function PowerDistributionChart({
   scores,
   distribution,
+  lang = 'en',
 }: PowerDistributionChartProps) {
   const dist = distribution ?? buildPowerDistribution(scores);
+  const copy = CALENDAR_PAGE_LANGS[lang].insight;
   let offset = 0;
 
   return (
@@ -39,7 +48,7 @@ export function PowerDistributionChart({
         className="fi text-[9px] uppercase tracking-[0.14em] mb-3"
         style={{ color: CALENDAR_UI.textMuted }}
       >
-        Power Distribution
+        {copy.powerDistribution}
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -51,8 +60,8 @@ export function PowerDistributionChart({
             role="img"
             aria-label={
               dist.average == null
-                ? 'Power distribution'
-                : `Average ${formatReadinessPercent(dist.average)}`
+                ? copy.powerDistribution
+                : `${copy.avg} ${formatReadinessPercent(dist.average)}`
             }
           >
             <circle
@@ -94,7 +103,7 @@ export function PowerDistributionChart({
               className="fi text-[10px] uppercase tracking-wider"
               style={{ color: CALENDAR_UI.textMuted }}
             >
-              Avg
+              {copy.avg}
             </span>
             <span
               data-power-average
@@ -122,7 +131,7 @@ export function PowerDistributionChart({
                   aria-hidden
                 />
                 <span style={{ color: CALENDAR_UI.textSoft }} className="truncate">
-                  {band.label}
+                  {copy[band.band as CountedPowerBand]}
                 </span>
               </span>
               <span
@@ -131,7 +140,7 @@ export function PowerDistributionChart({
                 data-band-count={band.count}
                 data-band-percent={band.percent}
               >
-                {band.count} days ({band.percent}%)
+                {formatBandDayCount(lang, band.count, band.percent)}
               </span>
             </li>
           ))}

@@ -4,8 +4,14 @@
  */
 
 import { explainFromAssessment, asExplanation, postureOf } from './explain';
-import { DAY_INTELLIGENCE_CHROME, formatTimingStrength } from './product-copy';
-import { renderSemanticExplanation } from './semantic-render';
+import {
+  DAY_INTELLIGENCE_CHROME,
+  conditionsKindFromPosture,
+  formatTimingStrength,
+  namedConflictCopy,
+  type ConditionsKind,
+} from './product-copy';
+import { renderSemanticExplanation, templateFor } from './semantic-render';
 import type {
   SemanticExplanationInput,
   SemanticPreviewLocale,
@@ -22,6 +28,9 @@ export type DayIntelligenceView = {
   titleKind: 'intelligence' | 'conditions';
   timingStrengthLabel: string;
   timingStrengthValue: string | null;
+  conditionsKind: ConditionsKind | null;
+  conditionsLabel: string | null;
+  bridge: string | null;
   headline: string;
   interpretation: string | null;
   supports: string[];
@@ -61,6 +70,7 @@ export function buildDayIntelligenceView(input: {
   stance?: string | null;
   posture?: string | null;
   displayContext?: SemanticRenderContext;
+  conflictedDimensionIds?: readonly string[] | null;
 }): DayIntelligenceView | null {
   const rendered = renderSemanticExplanation(
     input.explanation ?? null,
@@ -83,17 +93,33 @@ export function buildDayIntelligenceView(input: {
     posture === 'mixed' ||
     input.explanation?.headline_code === 'semantic.mixed_conflict';
   const disagree = legacySemanticDisagree(input.stance, posture);
+  const conditionsKind =
+    conditionsKindFromPosture(posture) ??
+    (insufficient ? 'insufficient' : mixed ? 'mixed' : null);
   const selectiveInterpretationRepeatsHeadline =
     input.explanation?.headline_code === 'semantic.strong_selective' &&
     input.explanation?.posture_code === 'semantic.posture_selective';
   const interpretation =
     rendered.posture &&
+    !mixed &&
+    !insufficient &&
     !selectiveInterpretationRepeatsHeadline &&
     !substantiallySame(rendered.headline, rendered.posture)
       ? rendered.posture
       : null;
   const supports = insufficient ? [] : rendered.supports.slice(0, 2);
-  const cautions = insufficient ? [] : rendered.cautions.slice(0, 2);
+  const namedConflict = namedConflictCopy(
+    input.locale,
+    input.conflictedDimensionIds ?? []
+  );
+  const genericConflict =
+    templateFor(input.locale, 'semantic.same_dimension_conflict') ??
+    chrome.conflictGeneric;
+  const cautions = insufficient
+    ? []
+    : rendered.cautions.slice(0, 2).map((item) =>
+        namedConflict && item === genericConflict ? namedConflict : item
+      );
   const whyItems = [...supports, ...cautions];
 
   return {
@@ -106,6 +132,11 @@ export function buildDayIntelligenceView(input: {
       input.score != null && Number.isFinite(input.score)
         ? formatTimingStrength(input.score)
         : null,
+    conditionsKind,
+    conditionsLabel: conditionsKind
+      ? chrome.conditionsKinds[conditionsKind]
+      : null,
+    bridge: mixed && !insufficient ? chrome.mixedBridge : null,
     headline: rendered.headline,
     interpretation,
     supports,

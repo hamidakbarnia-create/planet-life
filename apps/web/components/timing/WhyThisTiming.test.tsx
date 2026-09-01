@@ -113,6 +113,29 @@ describe('WhyThisTiming', () => {
     expect(screen.getByText('پنجره حمایتی')).toBeTruthy();
   });
 
+  it('hides the producer lead in compact mode and keeps it behind details', () => {
+    render(
+      <WhyThisTiming
+        lang="en"
+        labels={{
+          ...enLabels,
+          seeDetails: 'See details',
+          hideDetails: 'Hide details',
+        }}
+        compact
+        reasoning={ENGLISH_PRODUCER}
+      />
+    );
+    expect(screen.queryByTestId('calendar-why-timing-summary')).toBeNull();
+    expect(screen.getByTestId('calendar-why-timing').getAttribute('data-compact')).toBe(
+      'true'
+    );
+    expect(screen.getByTestId('calendar-why-timing-details').textContent).toContain(
+      'Favorable'
+    );
+    expect(screen.getByText('See details')).toBeTruthy();
+  });
+
   it('replaces English producer prose with RU fallback', () => {
     const ruLabels = {
       dir: 'ltr' as const,

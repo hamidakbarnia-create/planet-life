@@ -57,6 +57,8 @@ function labelsFor(lang: 'en' | 'fa' | 'ar' | 'ru') {
     whyTiming: t.whyTiming,
     whyTimingFallback: t.whyTimingFallback,
     supportingReasons: t.supportingReasons,
+    seeDetails: t.seeDetails,
+    hideDetails: t.hideDetails,
     advancedDetails: t.advancedDetails,
     transit: t.transit,
     signs: t.signs,
@@ -365,14 +367,12 @@ describe('Phase 4A product day intelligence', () => {
   });
 
   it('F: score is timing strength, not probability', () => {
-    const pageSource = readFileSync(
-      resolve(__dirname, '../../app/calendar/page.tsx'),
+    const selectedSource = readFileSync(
+      resolve(__dirname, '../calendar/CalendarSelectedDayInsight.tsx'),
       'utf8'
     );
-    expect(pageSource).toContain('formatTimingStrength(selectedScore)');
-    expect(pageSource).not.toContain(
-      '{t.score}: {formatReadinessPercent(selectedScore)}'
-    );
+    expect(selectedSource).toContain('formatTimingStrength(score)');
+    expect(selectedSource).not.toContain('formatReadinessPercent(score)');
     render(
       <DayIntelligencePanel
         view={
@@ -439,6 +439,12 @@ describe('Phase 4A product day intelligence', () => {
     expect(panel.getAttribute('data-mixed')).toBe('true');
     expect(screen.getByTestId('day-intelligence-headline').textContent).toBe(
       'Signals conflict. This day is not uniformly favorable or unfavorable.'
+    );
+    expect(screen.getByTestId('day-intelligence-conditions').textContent).toContain(
+      'Mixed'
+    );
+    expect(screen.getByTestId('day-intelligence-bridge').textContent).toMatch(
+      /timing strength/i
     );
     expect(panel.className).not.toMatch(/red|danger|amber-300|warning/i);
     expect(panel.textContent?.toLowerCase()).not.toMatch(
@@ -620,5 +626,56 @@ describe('Phase 4A product day intelligence', () => {
       'Decision conditions'
     );
     expect(screen.getByTestId('result-recommendation')).toBeTruthy();
+  });
+
+  it('does not show Favorable beside mixed conditions in the default view', () => {
+    render(
+      <CalendarSelectedDayInsight
+        lang="en"
+        labels={labelsFor('en')}
+        dateLabel="Sep 1, 2026"
+        selectedEyebrow="Selected day"
+        reasoning={{
+          summary:
+            'Business Launch scores 66/100 (Favorable). 17 supporting factor(s) and 12 caution factor(s) identified from scored chart evidence.',
+          confidence: 0.5,
+          reasons: [],
+        }}
+        transit={[]}
+        transitMeta={{}}
+        loadingTransit={false}
+        score={66}
+        dayIntelligence={dayIntelligence(PREVIEW_MATRIX.mixed, 'mixed', 66)}
+      />
+    );
+    expect(screen.getByTestId('calendar-selected-timing-strength').textContent).toContain(
+      '66 / 100'
+    );
+    expect(screen.getByTestId('calendar-selected-conditions').textContent).toContain(
+      'Mixed'
+    );
+    expect(screen.getByTestId('day-intelligence-bridge').textContent).toMatch(
+      /not that the number is wrong/i
+    );
+    expect(screen.queryByTestId('calendar-why-timing-summary')).toBeNull();
+    expect(screen.getByTestId('day-intelligence-panel').textContent).not.toContain(
+      'Favorable'
+    );
+    expect(screen.getByTestId('calendar-why-timing-details').textContent).toContain(
+      'Favorable'
+    );
+    expect(screen.queryByTestId('day-intelligence-score')).toBeNull();
+  });
+
+  it('selected-day block sits with the month grid, not duplicated below', () => {
+    const pageSource = readFileSync(
+      resolve(__dirname, '../../app/calendar/page.tsx'),
+      'utf8'
+    );
+    expect(pageSource).toContain('data-testid="calendar-selected-day"');
+    expect(pageSource.match(/data-calendar-advanced-day/g)?.length).toBe(1);
+    expect(pageSource.indexOf('CalendarMonthGrid')).toBeLessThan(
+      pageSource.indexOf('calendar-selected-day')
+    );
   });
 });

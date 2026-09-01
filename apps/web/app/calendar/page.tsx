@@ -66,10 +66,6 @@ import { CALENDAR_UI } from '@/lib/calendar-power-presentation';
 import { CalendarMonthGrid } from '@/components/calendar/CalendarMonthGrid';
 import { CalendarInsightStack } from '@/components/calendar/CalendarInsightStack';
 import { CalendarSelectedDayInsight } from '@/components/calendar/CalendarSelectedDayInsight';
-import {
-  DAY_INTELLIGENCE_CHROME,
-  formatTimingStrength,
-} from '@/lib/decision-intelligence/product-copy';
 
 type LangKey = AppLang;
 
@@ -385,6 +381,7 @@ export default function CalendarPage() {
           data-calendar-desktop-layout
           className="mb-4 grid grid-cols-1 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.9fr)] gap-3 items-start"
         >
+          <div className="min-w-0 space-y-3">
           <CalendarMonthGrid
             lang={lang}
             dir={t.dir}
@@ -407,6 +404,111 @@ export default function CalendarPage() {
             onCellClick={handleCellClick}
           />
 
+          {selectedDate ? (
+            <div
+              className="rounded-xl p-4"
+              style={{
+                background: CALENDAR_UI.panel,
+                border: `1px solid ${CALENDAR_UI.panelBorder}`,
+              }}
+              data-calendar-advanced-day
+              data-testid="calendar-selected-day"
+            >
+              <CalendarSelectedDayInsight
+                lang={lang}
+                dateLabel={formatDisplayDate(lang, selectedDate, calendar)}
+                selectedEyebrow={t.selected}
+                labels={{
+                  dir: t.dir,
+                  loading: t.loading,
+                  whyTiming: t.whyTiming,
+                  whyTimingFallback: t.whyTimingFallback,
+                  supportingReasons: t.supportingReasons,
+                  seeDetails: t.seeDetails,
+                  hideDetails: t.hideDetails,
+                  advancedDetails: t.advancedDetails,
+                  transit: t.transit,
+                  signs: t.signs,
+                  planets: t.planets,
+                }}
+                reasoning={monthScoreData.reasoning[selectedDate] ?? null}
+                score={selectedScore}
+                dayIntelligence={
+                  monthScoreData.dayIntelligence[selectedDate] ?? null
+                }
+                transit={transit}
+                transitMeta={transitMeta}
+                loadingTransit={loadingTransit}
+              />
+
+              <div
+                className="fi text-[10px] uppercase tracking-widest mb-3 mt-4"
+                style={{ color: CALENDAR_UI.textMuted }}
+              >
+                {t.hourly}
+              </div>
+
+              {loadingHourly ? (
+                <div
+                  className="py-6 text-center fi text-xs"
+                  style={{ color: 'rgba(255,255,255,0.3)' }}
+                >
+                  {t.loading}
+                </div>
+              ) : (
+                <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
+                  {hourly.map((h) => {
+                    const kind = hourBarKind(h.band);
+                    const barColor =
+                      kind === 'golden'
+                        ? '#44bd32'
+                        : kind === 'danger'
+                          ? '#ff5a5a'
+                          : 'rgba(255,255,255,0.15)';
+                    const label =
+                      kind === 'golden'
+                        ? t.golden
+                        : kind === 'danger'
+                          ? t.danger
+                          : t.neutral;
+                    return (
+                      <div key={h.hour} className="mb-2">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="fi text-[10px] w-16 shrink-0"
+                            style={{ color: 'rgba(255,255,255,0.4)' }}
+                          >
+                            {formatHourLabel(h.hour, lang)}
+                          </span>
+                          <div
+                            className="flex-1 h-6 rounded-md overflow-hidden relative"
+                            style={{ background: 'rgba(0,0,0,0.3)' }}
+                          >
+                            <div
+                              className="h-full rounded-md transition-all"
+                              style={{
+                                width: `${Math.max(8, h.score)}%`,
+                                background: barColor,
+                                opacity: kind === 'neutral' ? 0.5 : 0.85,
+                              }}
+                            />
+                            <span className="absolute inset-0 flex items-center px-2 fi text-[10px] text-white/80">
+                              {label} · {formatReadinessPercent(h.score)}
+                            </span>
+                          </div>
+                        </div>
+                        {kind === 'golden' && (
+                          <ActionDisclaimer lang={lang as DisclaimerLang} />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : null}
+          </div>
+
           <div
             className="min-w-0"
             data-calendar-desktop-rail
@@ -425,133 +527,6 @@ export default function CalendarPage() {
         >
           {t.uncertaintyDisclosure}
         </p>
-
-        {selectedDate && (
-          <div
-            className="rounded-xl p-4 mb-4"
-            style={{
-              background: CALENDAR_UI.panel,
-              border: `1px solid ${CALENDAR_UI.panelBorder}`,
-            }}
-            data-calendar-advanced-day
-          >
-            <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
-              <div>
-                <div
-                  className="fi text-[10px] uppercase tracking-widest mb-1"
-                  style={{ color: CALENDAR_UI.textMuted }}
-                >
-                  {t.selected}
-                </div>
-                <div className="fc text-lg" style={{ color: CALENDAR_UI.gold }}>
-                  {formatDisplayDate(lang, selectedDate, calendar)}
-                </div>
-              </div>
-              {selectedScore != null && (
-                <div
-                  className="fi text-sm"
-                  style={{ color: 'rgba(255,255,255,0.65)' }}
-                  data-testid="calendar-selected-timing-strength"
-                >
-                  {DAY_INTELLIGENCE_CHROME[lang].timingStrength}:{' '}
-                  {formatTimingStrength(selectedScore)}
-                </div>
-              )}
-            </div>
-
-            <CalendarSelectedDayInsight
-              lang={lang}
-              labels={{
-                dir: t.dir,
-                loading: t.loading,
-                whyTiming: t.whyTiming,
-                whyTimingFallback: t.whyTimingFallback,
-                supportingReasons: t.supportingReasons,
-                advancedDetails: t.advancedDetails,
-                transit: t.transit,
-                signs: t.signs,
-                planets: t.planets,
-              }}
-              reasoning={
-                selectedDate ? monthScoreData.reasoning[selectedDate] : null
-              }
-              score={selectedScore}
-              dayIntelligence={
-                selectedDate
-                  ? monthScoreData.dayIntelligence[selectedDate]
-                  : null
-              }
-              transit={transit}
-              transitMeta={transitMeta}
-              loadingTransit={loadingTransit}
-            />
-
-            <div
-              className="fi text-[10px] uppercase tracking-widest mb-3 mt-4"
-              style={{ color: CALENDAR_UI.textMuted }}
-            >
-              {t.hourly}
-            </div>
-
-            {loadingHourly ? (
-              <div
-                className="py-6 text-center fi text-xs"
-                style={{ color: 'rgba(255,255,255,0.3)' }}
-              >
-                {t.loading}
-              </div>
-            ) : (
-              <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
-                {hourly.map((h) => {
-                  const kind = hourBarKind(h.band);
-                  const barColor =
-                    kind === 'golden'
-                      ? '#44bd32'
-                      : kind === 'danger'
-                        ? '#ff5a5a'
-                        : 'rgba(255,255,255,0.15)';
-                  const label =
-                    kind === 'golden'
-                      ? t.golden
-                      : kind === 'danger'
-                        ? t.danger
-                        : t.neutral;
-                  return (
-                    <div key={h.hour} className="mb-2">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="fi text-[10px] w-16 shrink-0"
-                          style={{ color: 'rgba(255,255,255,0.4)' }}
-                        >
-                          {formatHourLabel(h.hour, lang)}
-                        </span>
-                        <div
-                          className="flex-1 h-6 rounded-md overflow-hidden relative"
-                          style={{ background: 'rgba(0,0,0,0.3)' }}
-                        >
-                          <div
-                            className="h-full rounded-md transition-all"
-                            style={{
-                              width: `${Math.max(8, h.score)}%`,
-                              background: barColor,
-                              opacity: kind === 'neutral' ? 0.5 : 0.85,
-                            }}
-                          />
-                          <span className="absolute inset-0 flex items-center px-2 fi text-[10px] text-white/80">
-                            {label} · {formatReadinessPercent(h.score)}
-                          </span>
-                        </div>
-                      </div>
-                      {kind === 'golden' && (
-                        <ActionDisclaimer lang={lang as DisclaimerLang} />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
 
         <div
           className="rounded-xl p-4"
