@@ -211,7 +211,77 @@ describe('fetchMonthScores empty-cache regression', () => {
 
     expect(fetchMock).not.toHaveBeenCalled();
     expect(result.scores).toEqual({ '2026-07-01': 81 });
+    expect(result.breakdowns).toEqual({});
+    expect(result.reasoning).toEqual({});
     expect(saveMonthCache).not.toHaveBeenCalled();
+  });
+
+  it('cache hit returns numeric month scores without breakdown or reasoning', async () => {
+    const cached: Record<string, number> = {};
+    for (let day = 1; day <= 31; day += 1) {
+      cached[`2026-07-${String(day).padStart(2, '0')}`] = 60 + (day % 10);
+    }
+    loadMonthCache.mockReturnValue(cached);
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await fetchMonthScores(profile, 2026, 7);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(result.scores).toEqual(cached);
+    expect(Object.keys(result.breakdowns)).toHaveLength(0);
+    expect(Object.keys(result.reasoning)).toHaveLength(0);
+  });
+
+  it('live /api/batch miss populates breakdowns and reasoning from the payload', async () => {
+    const dayPayloads: Record<
+      string,
+      {
+        executive: { score: number };
+        strategic?: { component_breakdown?: { final_score: number } };
+        reasoning?: { summary: string; confidence: number; reasons: unknown[] };
+      }
+    > = {};
+    for (let day = 1; day <= 31; day += 1) {
+      const date = `2026-07-${String(day).padStart(2, '0')}`;
+      dayPayloads[date] = {
+        executive: { score: 60 + (day % 10) },
+        strategic: {
+          component_breakdown: {
+            aspect_score: 1,
+            natal_house_bonus: 0,
+            transit_house_score: 0,
+            transit_angular_score: 0,
+            location_component_score: 0,
+            retrograde_penalty: 0,
+            final_score: 60 + (day % 10),
+            location_mode: 'currentLiving',
+            calculated_for: 'London',
+            resolved_local_datetime: `${date}T12:00:00+01:00`,
+            resolved_utc_datetime: `${date}T11:00:00+00:00`,
+            timezone: 'Europe/London',
+            target_time: '12:00',
+          },
+        },
+        reasoning: {
+          summary: 'Deterministic reasoning',
+          confidence: 0.6,
+          reasons: [],
+        },
+      };
+    }
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ scores: dayPayloads }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await fetchMonthScores(profile, 2026, 7);
+
+    expect(result.breakdowns['2026-07-01']).not.toBeNull();
+    expect(result.reasoning['2026-07-01']?.summary).toBe(
+      'Deterministic reasoning'
+    );
   });
 
   it('does not cache a non-2xx /api/batch response', async () => {

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  CALENDAR_CACHE_STORES_DAY_INTELLIGENCE,
   CALENDAR_CACHE_VERSION,
   fingerprintCalendarScoringInput,
   fnv1a64Hex,
@@ -143,6 +144,29 @@ describe('calendar cache v2 identity', () => {
     vi.useRealTimers();
     vi.restoreAllMocks();
     localStorage.clear();
+  });
+
+  it('Phase 0/1 cache content is numeric scores only', () => {
+    expect(CALENDAR_CACHE_STORES_DAY_INTELLIGENCE).toBe(false);
+    const input = baseInput();
+    const scores = fullMonthScores();
+    saveMonthCache(input, scores);
+    const key = monthCacheStorageKey(
+      2026,
+      8,
+      input.action_type,
+      fingerprintCalendarScoringInput(input)
+    );
+    const record = JSON.parse(String(localStorage.getItem(key))) as {
+      scores: Record<string, number>;
+      breakdowns?: unknown;
+      reasoning?: unknown;
+      evidence?: unknown;
+    };
+    expect(record.scores).toEqual(scores);
+    expect(record.breakdowns).toBeUndefined();
+    expect(record.reasoning).toBeUndefined();
+    expect(record.evidence).toBeUndefined();
   });
 
   it('returns null for a cache miss', () => {
