@@ -11,6 +11,7 @@
  * - insufficient_data / non-material timing → Unknown strength & confidence.
  * - Empty counter_recommendation.summary → Unknown alternative (EVALUATE-only).
  * - FIND never fabricates a unique dominant window when unique_dominant=false.
+ * - COMPARE insufficient_data / non-material timing is not a unique winner.
  */
 
 import type { AppLang } from '@/lib/app-settings';
@@ -185,8 +186,13 @@ export function packageToCompareView(
 ): CompareResultViewModel {
   const copy = getAskProductCopy(lang);
   const ranked = [...pkg.timing.candidates].sort((a, b) => a.rank - b.rank);
+  const insufficient =
+    pkg.recommendation.stance === 'insufficient_data' ||
+    !pkg.timing.material;
   // Prefer stance no_unique_winner; keep summary regex for older packages.
+  // Insufficient natal/material is not a completed comparison.
   const uniqueWinner =
+    !insufficient &&
     pkg.recommendation.stance !== 'no_unique_winner' &&
     !/no unique winner/i.test(pkg.recommendation.summary || '');
   const options = ranked.map((c) => ({
@@ -195,20 +201,24 @@ export function packageToCompareView(
     date: c.date,
     date_label: formatAskDateLabel(lang, c.date),
     rank: c.rank,
-    score: c.score,
-    strength: timingBandToStrength(c.band) as StrengthBand,
+    score: insufficient ? undefined : c.score,
+    strength: (insufficient
+      ? 'unknown'
+      : timingBandToStrength(c.band)) as StrengthBand,
     strengths: c.strengths ? [...c.strengths] : undefined,
     risks: c.risks ? [...c.risks] : undefined,
   }));
   const winner = ranked[0];
-  const winnerLabel = uniqueWinner
-    ? winner?.label?.trim() ||
-      (winner ? formatAskDateLabel(lang, winner.date) : copy.compareTiedLabel)
-    : copy.compareTiedLabel;
+  const winnerLabel = insufficient
+    ? ''
+    : uniqueWinner
+      ? winner?.label?.trim() ||
+        (winner ? formatAskDateLabel(lang, winner.date) : copy.compareTiedLabel)
+      : copy.compareTiedLabel;
 
   // FA/AR/RU never surface raw engine strengths; EN only when consumer-safe.
   const advantages =
-    lang === 'en'
+    !insufficient && lang === 'en'
       ? ranked.flatMap((c) =>
           (c.strengths ?? [])
             .slice(0, 1)
@@ -221,11 +231,13 @@ export function packageToCompareView(
         )
       : [];
 
-  const relativeExplanation = buildCompareRelativeExplanation(lang, {
-    uniqueWinner,
-    options,
-    rawWhy: pkg.explainability.why,
-  });
+  const relativeExplanation = insufficient
+    ? undefined
+    : buildCompareRelativeExplanation(lang, {
+        uniqueWinner,
+        options,
+        rawWhy: pkg.explainability.why,
+      });
 
   return {
     operation: 'compare',
@@ -235,7 +247,9 @@ export function packageToCompareView(
     relative_explanation: relativeExplanation,
     deciding_factor: relativeExplanation,
     advantages,
-    confidence: confidenceValueToBand(pkg.confidence.value),
+    confidence: insufficient
+      ? 'unknown'
+      : confidenceValueToBand(pkg.confidence.value),
     limitations: localizePackageLimits(lang, pkg.explainability.limits, 3),
     known: undefined,
     inferred: undefined,
