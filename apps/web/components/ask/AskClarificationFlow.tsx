@@ -13,7 +13,6 @@ import {
   deriveClarificationState,
   getAskProductCopy,
   isEvaluateCapabilityUnavailable,
-  isUnsupportedOperationFrame,
   localizeCaseApiError,
   persistFrameToCase,
   recommendedOperation,
@@ -94,6 +93,7 @@ export function AskClarificationFlow({
     'compare'
   );
   const findCapable = canExecuteInProduction(frame.decision_type_id, 'find');
+  const typeExecutable = evaluateCapable || compareCapable || findCapable;
   const [dateInput, setDateInput] = useState(frame.time.dates?.[0] ?? '');
   const [dateError, setDateError] = useState('');
   const [compareDrafts, setCompareDrafts] = useState<CompareDraft[]>(() =>
@@ -111,26 +111,42 @@ export function AskClarificationFlow({
     onFrameChange(next);
   };
 
-  if (isUnsupportedOperationFrame(frame) && !frame.decision_type_id) {
+  if (!typeExecutable) {
     return (
       <section
         className={styles.panel}
-        data-testid="ask-unsupported-operation"
+        data-testid="ask-unsupported-type"
         data-state="UNSUPPORTED_OPERATION"
         dir={copy.dir}
       >
         <p className={`fi ${styles.eyebrow}`}>{copy.clarificationEyebrow}</p>
-        <h1 className={`fc ${styles.title}`}>{copy.unsupportedTitle}</h1>
-        <p className={`fi ${styles.body}`}>{copy.unsupportedBody}</p>
-        <p className={`fi ${styles.intent}`}>{frame.raw_intent}</p>
-        <button
-          type="button"
-          className={styles.secondaryBtn}
-          data-testid="unsupported-back"
-          onClick={() => update(resetToExamineStep(frame))}
-        >
-          {copy.unsupportedBack}
-        </button>
+        <h1 className={`fc ${styles.title}`}>{copy.unsupportedTypeTitle}</h1>
+        <p className={`fi ${styles.body}`}>{copy.unsupportedTypeBody}</p>
+        <div className={styles.intentBlock} data-testid="ask-intent-preserve">
+          <p className={`fi ${styles.label}`}>{copy.yourDecision}</p>
+          <p className={`fi ${styles.intent}`}>{frame.raw_intent}</p>
+        </div>
+        <div className={styles.actionsRow}>
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            data-testid="unsupported-type-edit"
+            onClick={() => {
+              update(resetToExamineStep(frame));
+              router.push('/ask');
+            }}
+          >
+            {copy.unsupportedTypeEdit}
+          </button>
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            data-testid="unsupported-type-back"
+            onClick={() => router.push('/ask')}
+          >
+            {copy.unsupportedTypeBack}
+          </button>
+        </div>
       </section>
     );
   }

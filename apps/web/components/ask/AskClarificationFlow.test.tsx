@@ -12,7 +12,7 @@ afterEach(() => cleanup());
 
 describe('AskClarificationFlow product recovery', () => {
   it.each(['en', 'fa', 'ar', 'ru'] as const)(
-    'shows evaluate disabled for untyped free-text and compare/find coming soon for %s',
+    'shows one unsupported panel for untyped free-text in %s',
     (lang) => {
       const copy = getAskProductCopy(lang);
       const frame = buildDecisionFrame("I'm meeting an investor.");
@@ -27,25 +27,29 @@ describe('AskClarificationFlow product recovery', () => {
         />
       );
 
-      const evaluate = screen.getByTestId('examine-evaluate');
-      expect(evaluate.textContent).toContain(copy.examineEvaluate);
-      expect(evaluate.hasAttribute('disabled')).toBe(true);
-      expect(evaluate.textContent).toContain(copy.evaluateUnavailableForType);
-      const compare = screen.getByTestId('examine-compare');
-      const find = screen.getByTestId('examine-find');
-      expect(compare.hasAttribute('disabled')).toBe(true);
-      expect(find.hasAttribute('disabled')).toBe(true);
-      expect(compare.textContent).toContain(copy.comingSoon);
-      expect(find.textContent).toContain(copy.comingSoon);
+      expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+      expect(screen.getByText(copy.unsupportedTypeTitle)).toBeTruthy();
+      expect(screen.getByText(copy.unsupportedTypeBody)).toBeTruthy();
+      expect(screen.getByTestId('unsupported-type-edit').textContent).toBe(
+        copy.unsupportedTypeEdit
+      );
+      expect(screen.getByTestId('unsupported-type-back').textContent).toBe(
+        copy.unsupportedTypeBack
+      );
+      expect(screen.queryByTestId('examine-choices')).toBeNull();
+      expect(screen.queryByTestId('examine-evaluate')).toBeNull();
+      expect(screen.queryByTestId('examine-compare')).toBeNull();
+      expect(screen.queryByTestId('examine-find')).toBeNull();
       expect(screen.getByTestId('ask-intent-preserve').textContent).toContain(
         frame.raw_intent
       );
       expect(screen.queryByText(/\bUnknown\b/)).toBeNull();
+      expect(screen.queryByText(copy.comingSoon)).toBeNull();
       expect(screen.queryByTestId('evaluate-product-result')).toBeNull();
     }
   );
 
-  it('renders unsupported recovery for untyped compare frames', () => {
+  it('renders unsupported-type panel for untyped compare frames', () => {
     const frame = buildDecisionFrame('14 or 18 August?', {
       reference_year: 2026,
       operation: 'compare',
@@ -62,9 +66,12 @@ describe('AskClarificationFlow product recovery', () => {
         onCaseBound={vi.fn()}
       />
     );
-    expect(screen.getByTestId('ask-unsupported-operation')).toBeTruthy();
-    expect(screen.getByText(getAskProductCopy('fa').unsupportedTitle)).toBeTruthy();
+    expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+    expect(
+      screen.getByText(getAskProductCopy('fa').unsupportedTypeTitle)
+    ).toBeTruthy();
     expect(screen.queryByTestId('examine-choices')).toBeNull();
+    expect(screen.queryByTestId('ask-unsupported-operation')).toBeNull();
   });
 
   it('enables compare for wedding and shows ready persist CTA', () => {

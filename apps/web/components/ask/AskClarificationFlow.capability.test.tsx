@@ -87,7 +87,7 @@ describe('AskClarificationFlow capability gating', () => {
     expect(screen.queryByText(/UNSUPPORTED_DECISION_TYPE/)).toBeNull();
   });
 
-  it('disables Evaluate for unsupported free-text and never creates Case', () => {
+  it('shows one unsupported panel for untyped free-text and never creates Case', () => {
     const intent = 'جلسه با سرمایه‌گذار برای جذب سرمایه';
     const frame = buildDecisionFrame(intent);
     const copy = getAskProductCopy('fa');
@@ -101,19 +101,29 @@ describe('AskClarificationFlow capability gating', () => {
         onCaseBound={vi.fn()}
       />
     );
-    const evaluate = screen.getByTestId('examine-evaluate');
-    expect(evaluate.hasAttribute('disabled')).toBe(true);
-    expect(evaluate.textContent).toContain(copy.evaluateUnavailableForType);
-    expect(screen.getByTestId('ask-capability-notice').textContent).toContain(
-      copy.capabilityTitle
+    expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+    expect(screen.getByText(copy.unsupportedTypeTitle)).toBeTruthy();
+    expect(screen.getByText(copy.unsupportedTypeBody)).toBeTruthy();
+    expect(screen.getByTestId('ask-intent-preserve').textContent).toContain(
+      intent
     );
+    expect(screen.getByTestId('unsupported-type-edit').textContent).toBe(
+      copy.unsupportedTypeEdit
+    );
+    expect(screen.getByTestId('unsupported-type-back').textContent).toBe(
+      copy.unsupportedTypeBack
+    );
+    expect(screen.queryByTestId('examine-choices')).toBeNull();
+    expect(screen.queryByTestId('examine-evaluate')).toBeNull();
+    expect(screen.queryByTestId('examine-compare')).toBeNull();
+    expect(screen.queryByTestId('examine-find')).toBeNull();
     expect(screen.queryByTestId('ask-ready-evaluate')).toBeNull();
     expect(screen.queryByTestId('ask-date-step')).toBeNull();
     expect(persistFrameToCase).not.toHaveBeenCalled();
     expect(screen.queryByText(/UNSUPPORTED_DECISION_TYPE/)).toBeNull();
   });
 
-  it('shows CAPABILITY_UNAVAILABLE when evaluate+date but no runtime type', () => {
+  it('shows unsupported panel when evaluate+date but no executable type', () => {
     const frame = buildDecisionFrame('Investor meeting on Sept 1', {
       operation: 'evaluate',
       time_scope: 'specific_date',
@@ -130,8 +140,82 @@ describe('AskClarificationFlow capability gating', () => {
         onCaseBound={vi.fn()}
       />
     );
-    expect(screen.getByTestId('ask-capability-unavailable')).toBeTruthy();
-    expect(screen.getByText(copy.capabilityTitle)).toBeTruthy();
+    expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+    expect(screen.getByText(copy.unsupportedTypeTitle)).toBeTruthy();
+    expect(screen.queryByTestId('examine-choices')).toBeNull();
+    expect(persistFrameToCase).not.toHaveBeenCalled();
+  });
+
+  it('shows unsupported panel for negotiate-offer without Decision Type', () => {
+    const intent = 'مذاکره روی پیشنهاد شغلی';
+    const frame = buildDecisionFrame(intent);
+    const copy = getAskProductCopy('fa');
+    render(
+      <AskClarificationFlow
+        lang="fa"
+        frame={frame}
+        caseId={null}
+        caseVersion={null}
+        onFrameChange={vi.fn()}
+        onCaseBound={vi.fn()}
+      />
+    );
+    expect(frame.decision_type_id).toBeUndefined();
+    expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+    expect(screen.getByText(copy.unsupportedTypeTitle)).toBeTruthy();
+    expect(screen.getByTestId('ask-intent-preserve').textContent).toContain(
+      intent
+    );
+    expect(screen.queryByTestId('examine-choices')).toBeNull();
+    expect(screen.queryByTestId('examine-evaluate')).toBeNull();
+    expect(screen.queryByTestId('examine-compare')).toBeNull();
+    expect(screen.queryByTestId('examine-find')).toBeNull();
+    expect(persistFrameToCase).not.toHaveBeenCalled();
+  });
+
+  it('shows unsupported panel for relocation and other untyped questions', () => {
+    for (const intent of [
+      'Should I relocate to Spain?',
+      'Negotiate a job offer',
+    ]) {
+      const frame = buildDecisionFrame(intent);
+      const { unmount } = render(
+        <AskClarificationFlow
+          lang="en"
+          frame={frame}
+          caseId={null}
+          caseVersion={null}
+          onFrameChange={vi.fn()}
+          onCaseBound={vi.fn()}
+        />
+      );
+      expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+      expect(screen.getByTestId('ask-intent-preserve').textContent).toContain(
+        intent
+      );
+      expect(screen.queryByTestId('examine-choices')).toBeNull();
+      expect(screen.queryByTestId('examine-evaluate')).toBeNull();
+      expect(persistFrameToCase).not.toHaveBeenCalled();
+      unmount();
+    }
+  });
+
+  it('keeps selector hidden for registry-only unreachable types', () => {
+    const frame = buildDecisionFrame('Compare three dates', {
+      decision_type_id: 'tim-compare-three',
+    });
+    render(
+      <AskClarificationFlow
+        lang="en"
+        frame={frame}
+        caseId={null}
+        caseVersion={null}
+        onFrameChange={vi.fn()}
+        onCaseBound={vi.fn()}
+      />
+    );
+    expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+    expect(screen.queryByTestId('examine-choices')).toBeNull();
     expect(persistFrameToCase).not.toHaveBeenCalled();
   });
 
@@ -216,11 +300,11 @@ describe('AskClarificationFlow capability gating', () => {
   });
 
   it.each(['en', 'fa', 'ar', 'ru'] as const)(
-    'localizes capability messages for %s',
+    'localizes unsupported-type panel for %s without internal IDs',
     (lang) => {
       const copy = getAskProductCopy(lang);
       const frame = buildDecisionFrame('جلسه با سرمایه‌گذار برای جذب سرمایه');
-      render(
+      const { container } = render(
         <AskClarificationFlow
           lang={lang}
           frame={frame}
@@ -230,12 +314,20 @@ describe('AskClarificationFlow capability gating', () => {
           onCaseBound={vi.fn()}
         />
       );
-      expect(screen.getByTestId('ask-capability-notice').textContent).toContain(
-        copy.capabilityTitle
+      expect(screen.getByTestId('ask-unsupported-type').textContent).toContain(
+        copy.unsupportedTypeTitle
       );
-      expect(screen.getByTestId('examine-evaluate').textContent).toContain(
-        copy.evaluateUnavailableForType
+      expect(screen.getByText(copy.unsupportedTypeBody)).toBeTruthy();
+      expect(screen.queryByTestId('examine-choices')).toBeNull();
+      const text = container.textContent ?? '';
+      expect(text).not.toMatch(
+        /bus-product-launch|car-interview|compare_dates|find_dates|evaluate_date|UNSUPPORTED_DECISION_TYPE/
       );
+      if (lang === 'fa' || lang === 'ar') {
+        expect(text).not.toMatch(
+          /This decision type is not yet supported|Your decision was not saved/
+        );
+      }
     }
   );
 });

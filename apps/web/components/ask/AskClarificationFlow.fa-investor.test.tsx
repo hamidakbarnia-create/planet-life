@@ -27,26 +27,19 @@ describe('FA investor free-text clarification', () => {
     );
 
     expect(frame.decision_type_id).toBeUndefined();
-    expect(screen.getByTestId('ask-clarification-flow').getAttribute('dir')).toBe(
+    expect(screen.getByTestId('ask-unsupported-type').getAttribute('dir')).toBe(
       'rtl'
     );
     expect(screen.getByTestId('ask-intent-preserve').textContent).toContain(
       intent
     );
-    expect(screen.getByText(copy.examinePrompt)).toBeTruthy();
-    const evaluate = screen.getByTestId('examine-evaluate');
-    expect(evaluate.hasAttribute('disabled')).toBe(true);
-    expect(evaluate.textContent).toContain(copy.examineEvaluate);
-    expect(evaluate.textContent).toContain(copy.evaluateUnavailableForType);
-    expect(screen.getByTestId('examine-compare').textContent).toContain(
-      copy.comingSoon
-    );
-    expect(screen.getByTestId('examine-find').textContent).toContain(
-      copy.comingSoon
-    );
-    expect(screen.getByTestId('ask-capability-notice').textContent).toContain(
-      copy.capabilityTitle
-    );
+    expect(screen.getByText(copy.unsupportedTypeTitle)).toBeTruthy();
+    expect(screen.getByText(copy.unsupportedTypeBody)).toBeTruthy();
+    expect(screen.queryByTestId('examine-choices')).toBeNull();
+    expect(screen.queryByTestId('examine-evaluate')).toBeNull();
+    expect(screen.queryByTestId('examine-compare')).toBeNull();
+    expect(screen.queryByTestId('examine-find')).toBeNull();
+    expect(screen.queryByText(copy.comingSoon)).toBeNull();
 
     const text = container.textContent ?? '';
     expect(text).not.toMatch(/Decision Frame|time_scope|operation|Unknown/i);

@@ -20,6 +20,10 @@ describe('ask-product consumer chrome locales', () => {
         copy.comingSoon,
         copy.unsupportedTitle,
         copy.unsupportedBody,
+        copy.unsupportedTypeTitle,
+        copy.unsupportedTypeBody,
+        copy.unsupportedTypeEdit,
+        copy.unsupportedTypeBack,
         copy.blockedTitle,
         copy.resultRecommendation,
         copy.intakeTitle,
@@ -85,5 +89,37 @@ describe('ask-product consumer chrome locales', () => {
     ].join(' | ');
     expect(chrome).not.toMatch(ENGINEERING);
     expect(chrome).not.toMatch(/UNSUPPORTED_DECISION_TYPE|runtime|registry/i);
+  });
+
+  it('FA/AR/RU unsupported-type copy is localized without internal IDs', () => {
+    const fa = getAskProductCopy('fa');
+    expect(fa.unsupportedTypeTitle).toBe(
+      'این نوع تصمیم هنوز برای تحلیل زمان‌بندی پشتیبانی نمی‌شود'
+    );
+    expect(fa.unsupportedTypeBody).toBe(
+      'تصمیم شما ذخیره نشده و METIORO برای این موضوع ارزیابی قابل‌اتکا تولید نمی‌کند.'
+    );
+    expect(fa.unsupportedTypeEdit).toBe('ویرایش تصمیم');
+    expect(fa.unsupportedTypeBack).toBe('بازگشت به طرح پرسش');
+    for (const lang of ['en', 'fa', 'ar', 'ru'] as const) {
+      const copy = getAskProductCopy(lang);
+      const chrome = [
+        copy.unsupportedTypeTitle,
+        copy.unsupportedTypeBody,
+        copy.unsupportedTypeEdit,
+        copy.unsupportedTypeBack,
+      ].join(' | ');
+      expect(chrome).not.toMatch(
+        /bus-product-launch|car-interview|compare_dates|find_dates|evaluate_date|decision_type|coming soon|Coming soon|قريباً|به‌زودی|Скоро/i
+      );
+      expect(chrome).not.toMatch(ENGINEERING);
+    }
+    const ar = getAskProductCopy('ar');
+    const ru = getAskProductCopy('ru');
+    expect(ar.unsupportedTypeTitle).not.toMatch(/[A-Za-z]{4,}/);
+    expect(ar.unsupportedTypeBody).toContain('METIORO');
+    expect(ru.unsupportedTypeTitle).toContain('тайминг');
+    expect(getAskProductCopy('en').unsupportedTypeEdit).toBe('Edit decision');
+    expect(getAskProductCopy('en').unsupportedTypeBack).toBe('Back to Ask');
   });
 });
