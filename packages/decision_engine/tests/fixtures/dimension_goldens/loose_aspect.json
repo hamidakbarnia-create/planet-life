@@ -1,0 +1,88 @@
+{
+  "action_type": "business_launch",
+  "classification_conflict": false,
+  "day_class": "mixed",
+  "dimensions": {
+    "action_type": "business_launch",
+    "baseline": 50,
+    "clarity": {
+      "caution_evidence_ids": [],
+      "confidence": null,
+      "conflicted": false,
+      "dominant_evidence_ids": [],
+      "status": "insufficient",
+      "supportive_evidence_ids": [],
+      "value": 50
+    },
+    "cooperation": {
+      "caution_evidence_ids": [],
+      "confidence": 0.0133,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "value": 50
+    },
+    "mapping_version": "dimensions.v1",
+    "momentum": {
+      "caution_evidence_ids": [],
+      "confidence": 0.0267,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "value": 50
+    },
+    "opportunity": {
+      "caution_evidence_ids": [],
+      "confidence": 0.0333,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "value": 51
+    },
+    "pressure": {
+      "caution_evidence_ids": [],
+      "confidence": null,
+      "conflicted": false,
+      "dominant_evidence_ids": [],
+      "status": "insufficient",
+      "supportive_evidence_ids": [],
+      "value": 50
+    },
+    "reversibility_safety": {
+      "caution_evidence_ids": [],
+      "confidence": null,
+      "conflicted": false,
+      "dominant_evidence_ids": [],
+      "status": "insufficient",
+      "supportive_evidence_ids": [],
+      "value": 50
+    },
+    "stability": {
+      "caution_evidence_ids": [],
+      "confidence": null,
+      "conflicted": false,
+      "dominant_evidence_ids": [],
+      "status": "insufficient",
+      "supportive_evidence_ids": [],
+      "value": 50
+    }
+  },
+  "final_score": 51,
+  "id": "loose_aspect",
+  "mapping_version": "dimensions.v1"
+}

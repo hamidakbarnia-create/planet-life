@@ -1,7 +1,15 @@
-"""Phase 2A — deterministic day classification from normalized evidence.
+"""Phase 2A — PROVISIONAL SHADOW LOGIC (regression / reference only).
 
-Decision synthesis only. Does not emit commands, domain scores, or LLM text.
-Does not recompute or replace the astrology 0–100 score.
+Deterministic day classification from normalized evidence + existing score
+bands. Kept for Phase 2C comparison against dimension-driven classification.
+
+This classifier is NOT the canonical basis for commands, Find, Compare,
+Evaluate conclusions, or user-visible Calendar semantics. Do not derive
+DecisionDimensions from ``day_class``. Phase 2B computes dimensions in
+parallel from DecisionEvidence.
+
+Does not emit commands, domain scores, or LLM text. Does not recompute or
+replace the astrology 0–100 score.
 
 Classification reuses existing ``_rating`` bands from ``astro_engine.scoring``
 and the existing ±4.0 opportunity/risk magnitude already used when populating

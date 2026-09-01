@@ -13,6 +13,7 @@ from packages.decision_engine.day_intelligence_models import (
     attach_calendar_day_intelligence,
     build_day_intelligence_snapshot,
 )
+from packages.decision_engine.dimension_mapping import DIMENSION_KEYS
 from schemas.score_breakdown import build_scoring_response
 from services.scoring_pipeline import score_with_context
 
@@ -76,6 +77,14 @@ def test_calendar_day_pipeline_score_unchanged_by_evidence_adapter():
     assert isinstance(day_intelligence["evidence"], list)
     assert day_intelligence["evidence"]
     assert snapshot.classification.score == original_score
+    assert "dimensions" in day_intelligence
+    dim_values = [
+        day_intelligence["dimensions"][key]["value"]
+        for key in DIMENSION_KEYS
+    ]
+    assert any(value != original_score for value in dim_values)
+    assert "command" not in day_intelligence["dimensions"]
+    assert snapshot.dimensions.mapping_version == day_intelligence["dimensions"]["mapping_version"]
     assert "day_intelligence" not in payload
 
 

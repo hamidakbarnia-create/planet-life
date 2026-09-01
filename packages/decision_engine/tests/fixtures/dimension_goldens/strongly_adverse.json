@@ -1,0 +1,150 @@
+{
+  "action_type": "business_launch",
+  "classification_conflict": false,
+  "day_class": "adverse",
+  "dimensions": {
+    "action_type": "business_launch",
+    "baseline": 50,
+    "clarity": {
+      "caution_evidence_ids": [
+        "ev.angular.saturn.mc",
+        "ev.aspect.saturn.square.sun",
+        "ev.house.transit.saturn.12",
+        "ev.retrograde.mars"
+      ],
+      "confidence": 0.3864,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.saturn.square.sun",
+        "ev.retrograde.mars",
+        "ev.angular.saturn.mc"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [],
+      "value": 43
+    },
+    "cooperation": {
+      "caution_evidence_ids": [],
+      "confidence": null,
+      "conflicted": false,
+      "dominant_evidence_ids": [],
+      "status": "insufficient",
+      "supportive_evidence_ids": [],
+      "value": 50
+    },
+    "mapping_version": "dimensions.v1",
+    "momentum": {
+      "caution_evidence_ids": [
+        "ev.angular.mars.mc",
+        "ev.angular.pluto.dsc",
+        "ev.angular.saturn.mc",
+        "ev.aspect.mars.square.sun",
+        "ev.aspect.pluto.opposition.sun",
+        "ev.aspect.saturn.square.sun",
+        "ev.house.transit.mars.8",
+        "ev.house.transit.mars.8.retrograde",
+        "ev.retrograde.mars"
+      ],
+      "confidence": 1.0,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.mars.square.sun",
+        "ev.aspect.saturn.square.sun",
+        "ev.aspect.pluto.opposition.sun"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [],
+      "value": 8
+    },
+    "opportunity": {
+      "caution_evidence_ids": [
+        "ev.angular.mars.mc",
+        "ev.aspect.mars.square.sun",
+        "ev.aspect.pluto.opposition.sun",
+        "ev.aspect.saturn.square.sun",
+        "ev.house.transit.mars.8",
+        "ev.house.transit.mars.8.retrograde",
+        "ev.retrograde.mars"
+      ],
+      "confidence": 1.0,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.mars.square.sun",
+        "ev.aspect.saturn.square.sun",
+        "ev.aspect.pluto.opposition.sun"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [],
+      "value": 10
+    },
+    "pressure": {
+      "caution_evidence_ids": [
+        "ev.angular.mars.mc",
+        "ev.angular.pluto.dsc",
+        "ev.angular.saturn.mc",
+        "ev.aspect.mars.square.sun",
+        "ev.aspect.pluto.opposition.sun",
+        "ev.aspect.saturn.square.sun",
+        "ev.house.transit.mars.8",
+        "ev.house.transit.mars.8.retrograde",
+        "ev.house.transit.pluto.12",
+        "ev.house.transit.saturn.12",
+        "ev.retrograde.mars"
+      ],
+      "confidence": 1.0,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.mars.square.sun",
+        "ev.aspect.saturn.square.sun",
+        "ev.aspect.pluto.opposition.sun"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [],
+      "value": 90
+    },
+    "reversibility_safety": {
+      "caution_evidence_ids": [
+        "ev.angular.pluto.dsc",
+        "ev.angular.saturn.mc",
+        "ev.aspect.pluto.opposition.sun",
+        "ev.aspect.saturn.square.sun",
+        "ev.house.transit.pluto.12",
+        "ev.house.transit.saturn.12",
+        "ev.retrograde.mars"
+      ],
+      "confidence": 0.9436,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.saturn.square.sun",
+        "ev.aspect.pluto.opposition.sun",
+        "ev.retrograde.mars"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [],
+      "value": 33
+    },
+    "stability": {
+      "caution_evidence_ids": [
+        "ev.angular.pluto.dsc",
+        "ev.angular.saturn.mc",
+        "ev.aspect.pluto.opposition.sun",
+        "ev.aspect.saturn.square.sun",
+        "ev.house.transit.pluto.12",
+        "ev.house.transit.saturn.12"
+      ],
+      "confidence": 1.0,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.saturn.square.sun",
+        "ev.aspect.pluto.opposition.sun",
+        "ev.angular.saturn.mc"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [],
+      "value": 31
+    }
+  },
+  "final_score": 2,
+  "id": "strongly_adverse",
+  "mapping_version": "dimensions.v1"
+}

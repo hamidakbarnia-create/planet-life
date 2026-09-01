@@ -2,11 +2,11 @@
 
 | Field | Value |
 |-------|-------|
-| **Status** | Phase 0/1 complete on `feat/calendar-decision-intelligence-p0-p1` |
+| **Status** | Phase 0/1 + 2A (shadow classification) + 2B (dimensions) on `feat/calendar-decision-intelligence-p0-p1` |
 | **Invariant** | Astronomical signals → scored evidence → **normalized evidence** → decision synthesis → context → decision command → explanation |
-| **Non-goals (this phase)** | Calendar UI redesign, semantic commands, day classification, domain scores, Power Window changes, Ask UI, LLM prose, production score recalibration, second scoring engine |
+| **Non-goals (this phase)** | Calendar UI redesign, semantic commands, replacing 2A classification, domain scores, Power Window changes, Ask UI, LLM prose, production score recalibration, second scoring engine |
 
-This document is the Phase 0 audit plus the Phase 1 adapter contract. Calendar, Evaluate, Compare, and Find must consume the same Decision Intelligence semantics; Phase 0/1 only delivers the **normalized evidence** seam.
+This document is the Phase 0 audit plus the Phase 1 adapter contract, with Phase 2A (provisional shadow classification) and Phase 2B (decision dimensions) recorded below. Calendar, Evaluate, Compare, and Find must consume the same Decision Intelligence semantics; Phase 0/1 only delivers the **normalized evidence** seam.
 
 ---
 
@@ -255,3 +255,64 @@ Phase 2 (commands, classification, domain scores) may start **only if**:
 - FIND/COMPARE consuming DecisionEvidence
 - Calendar UI presentation of `day_class`
 - Unifying Package `cautionary` vs Calendar `caution`
+
+**Status after 2B:** this classifier is **PROVISIONAL SHADOW LOGIC**. It remains attached for regression and for Phase 2C comparison. It is **not** the canonical basis for commands, Find, Compare, Evaluate conclusions, or user-visible Calendar semantics.
+
+---
+
+## Phase 2B — Decision dimensions (complete)
+
+**Scope:** Deterministic `DecisionEvidence[] → DecisionDimensions`. Parallel to 2A. No commands, no score recalibration, no Find/Compare/Evaluate semantic changes, no Calendar UI, no LLM.
+
+### Model
+
+`DecisionDimension`: `value` 0–100, `confidence` 0–1 or `null`, `status` `scored` | `insufficient`, `supportive_evidence_ids`, `caution_evidence_ids`, `dominant_evidence_ids`, `conflicted`.
+
+`DecisionDimensions`: `opportunity`, `momentum`, `clarity`, `stability`, `cooperation`, `pressure`, `reversibility_safety`, plus `mapping_version`, `baseline`, `action_type`.
+
+### Mapping (`dimensions.v1`)
+
+Language-neutral table in `packages/decision_engine/dimension_mapping.py`. Bodies reuse `PLANETS` / BENEFICS / MALEFICS / PRESSURE_TRANSIT. Kind overlays: `retrograde` → reversibility_safety + clarity; `angular` → momentum. Both `transit_body` and `natal_target` are mapped; max weight wins per dimension. Contribution already includes activity-profile planet weights — they are not applied again.
+
+**Baseline 50** is a neutral midpoint on the 0–100 display scale. It is not a probability and is not `executive.score`.
+
+**Pressure is inverted:** caution raises pressure, support lowers it. Provenance lists still follow evidence polarity.
+
+### Mapping table (`dimensions.v1`)
+
+| Body / kind | opportunity | momentum | clarity | stability | cooperation | pressure | reversibility_safety |
+|-------------|-------------|----------|---------|-----------|-------------|----------|----------------------|
+| sun | 1.0 | 0.8 | | | | | |
+| moon | | | | 1.0 | 0.6 | | |
+| mercury | | | 1.0 | | | | 0.5 |
+| venus | 0.6 | | | | 1.0 | | |
+| mars | 0.5 | 1.0 | | | | 0.8 | |
+| jupiter | 1.0 | 0.8 | | | 0.4 | | |
+| saturn | | | 0.4 | 1.0 | | 0.8 | 0.5 |
+| uranus | | 0.4 | | 0.7 | | 0.8 | |
+| neptune | | | 1.0 | | | | 1.0 |
+| pluto | | | | 0.5 | | 1.0 | 0.8 |
+| north_node | 1.0 | | | | | | |
+| chiron | | | | 0.5 | | | 0.4 |
+| kind:retrograde | | | 0.4 | | | | 1.0 |
+| kind:angular | | 0.8 | | | | | |
+
+Weights scale existing signed `contribution`. They do not invent new astronomical facts. Max weight wins when transit and natal bodies both map.
+
+### Calculation
+
+
+1. Sort evidence by `evidence_id` (order independence).
+2. For each item, union body + kind weights.
+3. `delta = contribution × weight` (negated for pressure).
+4. `value = clamp(round(50 + Σ delta), 0, 100)`.
+5. No mapped evidence → `value=50`, `confidence=null`, `status=insufficient`.
+6. `conflicted` if material (±4.0) supportive **and** material caution both mapped to that dimension.
+7. Dominant IDs: top 3 by `|contribution|`, tie-break `evidence_id`.
+8. Confidence = `min(1, Σ|delta| / 18)` — 18 is the existing primary exact-trine contribution scale, not a new astrology weight.
+
+### Wiring
+
+- Computed in `build_day_intelligence_snapshot` in parallel with 2A classification.
+- Added to Calendar `day_intelligence.dimensions`. Frontend parser ignores unknown keys; Calendar UI unchanged.
+- Score goldens untouched. Separate `dimension_goldens/`.

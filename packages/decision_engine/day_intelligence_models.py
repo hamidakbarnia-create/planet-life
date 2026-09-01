@@ -1,7 +1,8 @@
 """Day Intelligence carrier for Calendar Decision Intelligence.
 
 Phase 0/1: passthrough score + normalized DecisionEvidence.
-Phase 2A: deterministic day classification (no commands, no domain scores).
+Phase 2A: PROVISIONAL SHADOW classification (regression/reference only).
+Phase 2B: DecisionDimensions in parallel from evidence (no commands).
 """
 
 from __future__ import annotations
@@ -15,6 +16,11 @@ from packages.decision_engine.day_classification import (
     DayClassification,
     classify_day,
 )
+from packages.decision_engine.dimensions import (
+    DecisionDimensions,
+    compute_decision_dimensions,
+    dimensions_payload,
+)
 from packages.decision_engine.evidence import (
     DecisionEvidence,
     dominant_evaluated_aspects,
@@ -26,7 +32,9 @@ class DayIntelligenceSnapshot(BaseModel):
     """Passthrough score + normalized evidence + day classification.
 
     ``final_score`` is copied from the astrology engine. Classification and
-    evidence must never recompute or replace it. No decision command in 2A.
+    dimensions must never recompute or replace it. No decision command.
+    Phase 2A ``classification`` is provisional shadow logic. Phase 2B
+    ``dimensions`` are the parallel semantic layer.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -39,6 +47,7 @@ class DayIntelligenceSnapshot(BaseModel):
     reasoning: dict[str, Any] | None = None
     scoring_context: dict[str, Any] = Field(default_factory=dict)
     classification: DayClassification
+    dimensions: DecisionDimensions
 
     @model_validator(mode="after")
     def _score_is_passthrough(self) -> DayIntelligenceSnapshot:
@@ -92,6 +101,10 @@ def build_day_intelligence_snapshot(
         scoring_context=scoring_context,
     )
     classification = classify_day(final_score=final_score, evidence=evidence)
+    dimensions = compute_decision_dimensions(
+        evidence,
+        action_type=resolved_activity or None,
+    )
     return DayIntelligenceSnapshot(
         action_type=resolved_activity,
         final_score=final_score,
@@ -101,6 +114,7 @@ def build_day_intelligence_snapshot(
         reasoning=resolved_reasoning,
         scoring_context=dict(technical.get("scoring_context") or {}),
         classification=classification,
+        dimensions=dimensions,
     )
 
 
@@ -126,7 +140,7 @@ def attach_calendar_day_intelligence(
 
 
 def day_intelligence_payload(snapshot: DayIntelligenceSnapshot) -> dict[str, Any]:
-    """Compact Calendar-batch layer. Omits commands (not in Phase 2A)."""
+    """Compact Calendar-batch layer. Omits commands. Dimensions are additive."""
     return {
         "final_score": snapshot.final_score,
         "action_type": snapshot.action_type,
@@ -141,6 +155,7 @@ def day_intelligence_payload(snapshot: DayIntelligenceSnapshot) -> dict[str, Any
         "evidence": [item.model_dump() for item in snapshot.evidence],
         "dominant_aspects": list(snapshot.dominant_aspects),
         "scoring_context": snapshot.scoring_context,
+        "dimensions": dimensions_payload(snapshot.dimensions),
     }
 
 

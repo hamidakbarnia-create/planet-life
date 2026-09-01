@@ -1,0 +1,122 @@
+{
+  "action_type": "rest_recovery",
+  "classification_conflict": false,
+  "day_class": "mixed",
+  "dimensions": {
+    "action_type": "rest_recovery",
+    "baseline": 50,
+    "clarity": {
+      "caution_evidence_ids": [
+        "ev.aspect.saturn.square.sun"
+      ],
+      "confidence": 0.2578,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.saturn.square.sun",
+        "ev.house.transit.saturn.12"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.house.transit.saturn.12"
+      ],
+      "value": 47
+    },
+    "cooperation": {
+      "caution_evidence_ids": [],
+      "confidence": 0.0787,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "value": 51
+    },
+    "mapping_version": "dimensions.v1",
+    "momentum": {
+      "caution_evidence_ids": [
+        "ev.aspect.saturn.square.sun"
+      ],
+      "confidence": 0.5751,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.saturn.square.sun",
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "value": 45
+    },
+    "opportunity": {
+      "caution_evidence_ids": [
+        "ev.aspect.saturn.square.sun"
+      ],
+      "confidence": 0.7189,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.saturn.square.sun",
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.aspect.jupiter.trine.sun"
+      ],
+      "value": 44
+    },
+    "pressure": {
+      "caution_evidence_ids": [
+        "ev.aspect.saturn.square.sun"
+      ],
+      "confidence": 0.5156,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.saturn.square.sun",
+        "ev.house.transit.saturn.12"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.house.transit.saturn.12"
+      ],
+      "value": 56
+    },
+    "reversibility_safety": {
+      "caution_evidence_ids": [
+        "ev.aspect.saturn.square.sun"
+      ],
+      "confidence": 0.3222,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.saturn.square.sun",
+        "ev.house.transit.saturn.12"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.house.transit.saturn.12"
+      ],
+      "value": 46
+    },
+    "stability": {
+      "caution_evidence_ids": [
+        "ev.aspect.saturn.square.sun"
+      ],
+      "confidence": 0.6444,
+      "conflicted": false,
+      "dominant_evidence_ids": [
+        "ev.aspect.saturn.square.sun",
+        "ev.house.transit.saturn.12"
+      ],
+      "status": "scored",
+      "supportive_evidence_ids": [
+        "ev.house.transit.saturn.12"
+      ],
+      "value": 43
+    }
+  },
+  "final_score": 46,
+  "id": "action_type_rest_recovery",
+  "mapping_version": "dimensions.v1"
+}
