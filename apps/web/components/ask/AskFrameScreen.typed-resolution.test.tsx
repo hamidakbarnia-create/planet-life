@@ -89,9 +89,10 @@ describe('AskFrameScreen typed resolution integration', () => {
     });
 
     expect(loadDecisionFrame()?.decision_type_id).toBeUndefined();
-    expect(screen.getByTestId('examine-evaluate').hasAttribute('disabled')).toBe(
-      true
-    );
+    expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+    expect(screen.queryByTestId('examine-choices')).toBeNull();
+    expect(screen.queryByTestId('examine-evaluate')).toBeNull();
+    expect(persistFrameToCase).not.toHaveBeenCalled();
   });
 
   it('keeps unsupported typed Ask fail-closed without Decision Type', async () => {
@@ -104,9 +105,31 @@ describe('AskFrameScreen typed resolution integration', () => {
     });
 
     expect(loadDecisionFrame()?.decision_type_id).toBeUndefined();
-    expect(screen.getByTestId('examine-evaluate').hasAttribute('disabled')).toBe(
-      true
+    expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+    expect(screen.queryByTestId('examine-choices')).toBeNull();
+    expect(screen.queryByTestId('examine-evaluate')).toBeNull();
+    expect(persistFrameToCase).not.toHaveBeenCalled();
+  });
+
+  it('shows unsupported panel for negotiate-offer without inventing a type', async () => {
+    seedTyped('مذاکره روی پیشنهاد شغلی');
+
+    render(<AskFrameScreen lang="fa" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ask-frame-screen')).toBeTruthy();
+    });
+
+    expect(loadDecisionFrame()?.decision_type_id).toBeUndefined();
+    expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+    expect(screen.getByTestId('ask-intent-preserve').textContent).toContain(
+      'مذاکره روی پیشنهاد شغلی'
     );
+    expect(screen.queryByTestId('examine-choices')).toBeNull();
+    expect(screen.queryByTestId('examine-evaluate')).toBeNull();
+    expect(screen.queryByTestId('examine-compare')).toBeNull();
+    expect(screen.queryByTestId('examine-find')).toBeNull();
+    expect(persistFrameToCase).not.toHaveBeenCalled();
   });
 
   it('honors explicit stored decision_type_id over typed text cues', async () => {

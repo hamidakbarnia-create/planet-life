@@ -48,6 +48,10 @@ export type AskProductCopy = {
   unsupportedTitle: string;
   unsupportedBody: string;
   unsupportedBack: string;
+  unsupportedTypeTitle: string;
+  unsupportedTypeBody: string;
+  unsupportedTypeEdit: string;
+  unsupportedTypeBack: string;
   compareResultTitle: string;
   compareWinnerLabel: string;
   compareTiedLabel: string;
@@ -246,6 +250,12 @@ const EN: AskProductCopy = {
   unsupportedBody:
     'Finding timing windows is not available for this decision yet. You can evaluate one date or compare a few candidates when offered.',
   unsupportedBack: 'Choose a different option',
+  unsupportedTypeTitle:
+    'This decision type is not yet supported for timing analysis',
+  unsupportedTypeBody:
+    'Your decision was not saved, and METIORO cannot produce a reliable evaluation for this topic.',
+  unsupportedTypeEdit: 'Edit decision',
+  unsupportedTypeBack: 'Back to Ask',
   compareResultTitle: 'Date comparison',
   compareWinnerLabel: 'Preferred date',
   compareTiedLabel: 'No unique winner',
@@ -476,6 +486,12 @@ const FA: AskProductCopy = {
   unsupportedBody:
     'یافتن پنجره‌های زمان‌بندی برای این تصمیم هنوز فعال نیست. می‌توانید یک تاریخ را ارزیابی کنید یا چند گزینه را مقایسه کنید وقتی پیشنهاد می‌شود.',
   unsupportedBack: 'انتخاب گزینه دیگر',
+  unsupportedTypeTitle:
+    'این نوع تصمیم هنوز برای تحلیل زمان‌بندی پشتیبانی نمی‌شود',
+  unsupportedTypeBody:
+    'تصمیم شما ذخیره نشده و METIORO برای این موضوع ارزیابی قابل‌اتکا تولید نمی‌کند.',
+  unsupportedTypeEdit: 'ویرایش تصمیم',
+  unsupportedTypeBack: 'بازگشت به طرح پرسش',
   compareResultTitle: 'مقایسه تاریخ',
   compareWinnerLabel: 'تاریخ ترجیحی',
   compareTiedLabel: 'برنده یکتا نیست',
@@ -707,6 +723,11 @@ const AR: AskProductCopy = {
   unsupportedBody:
     'البحث عن نوافذ التوقيت غير متاح لهذا القرار بعد. يمكنك تقييم تاريخ واحد أو مقارنة مرشحين عند توفر ذلك.',
   unsupportedBack: 'اختر خياراً آخر',
+  unsupportedTypeTitle: 'هذا النوع من القرار غير مدعوم بعد لتحليل التوقيت',
+  unsupportedTypeBody:
+    'لم يُحفظ قرارك، ولا تنتج METIORO تقييماً موثوقاً لهذا الموضوع.',
+  unsupportedTypeEdit: 'تعديل القرار',
+  unsupportedTypeBack: 'العودة إلى طرح السؤال',
   compareResultTitle: 'مقارنة التواريخ',
   compareWinnerLabel: 'التاريخ المفضّل',
   compareTiedLabel: 'لا فائز وحيد',
@@ -936,6 +957,12 @@ const RU: AskProductCopy = {
   unsupportedBody:
     'Поиск окон тайминга для этого решения пока недоступен. Можно оценить одну дату или сравнить несколько кандидатов, когда это предложено.',
   unsupportedBack: 'Выбрать другой вариант',
+  unsupportedTypeTitle:
+    'Этот тип решения пока не поддерживается для анализа тайминга',
+  unsupportedTypeBody:
+    'Ваше решение не сохранено, и METIORO не может дать надёжную оценку по этой теме.',
+  unsupportedTypeEdit: 'Изменить решение',
+  unsupportedTypeBack: 'Вернуться к вопросу',
   compareResultTitle: 'Сравнение дат',
   compareWinnerLabel: 'Предпочтительная дата',
   compareTiedLabel: 'Нет единственного победителя',
