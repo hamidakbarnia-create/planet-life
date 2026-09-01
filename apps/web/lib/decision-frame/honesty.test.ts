@@ -120,6 +120,92 @@ describe('package adapter absent-data honesty', () => {
     expect(compare.winner_label).toBe('No unique winner');
   });
 
+  it('does not treat insufficient natal Compare as a unique winner or a tie', () => {
+    const pkg = bindDemoStubPackage({
+      caseId: '11111111-1111-4111-8111-111111111111',
+      caseVersion: 1,
+      intake: { target_date: '2026-08-18', role: 'Engineer' },
+    });
+    const insufficient = {
+      ...pkg,
+      mode: 'compare_dates' as const,
+      recommendation: {
+        ...pkg.recommendation,
+        stance: 'insufficient_data' as const,
+        conditions: ['Add birth date, birth time, and birth location evidence'],
+        summary: 'Cannot compare these dates without natal evidence.',
+      },
+      timing: {
+        material: false,
+        band: 'na' as const,
+        score: null,
+        candidates: [
+          {
+            date: '2026-08-14',
+            rank: 1,
+            score: 0,
+            band: 'low' as const,
+            option_id: 'a',
+            label: 'Thursday',
+          },
+          {
+            date: '2026-08-18',
+            rank: 2,
+            score: 0,
+            band: 'low' as const,
+            option_id: 'b',
+            label: 'Monday',
+          },
+        ],
+        notes: 'Timing not evaluated',
+      },
+      confidence: {
+        value: 0,
+        precision_level: 'L3' as const,
+        penalties: [
+          {
+            code: 'MISSING_NATAL_EVIDENCE',
+            message: 'Birth date/time/location evidence is required.',
+          },
+        ],
+      },
+      explainability: {
+        ...pkg.explainability,
+        why: 'Thursday ranks first with score 0.0 versus Monday (0.0).',
+      },
+    };
+    const compare = packageToCompareView(insufficient);
+    expect(compare.unique_winner).toBe(false);
+    expect(compare.winner_label).toBe('');
+    expect(compare.winner_label).not.toBe('Thursday');
+    expect(compare.winner_label).not.toBe('Monday');
+    expect(compare.confidence).toBe('unknown');
+    expect(compare.relative_explanation).toBeUndefined();
+    expect(compare.deciding_factor).toBeUndefined();
+    expect(compare.advantages).toEqual([]);
+    expect(compare.options).toHaveLength(2);
+    expect(compare.options.map((option) => option.date)).toEqual([
+      '2026-08-14',
+      '2026-08-18',
+    ]);
+    expect(compare.options.map((option) => option.rank)).toEqual([1, 2]);
+    expect(compare.options.map((option) => option.label)).toEqual([
+      'Thursday',
+      'Monday',
+    ]);
+    expect(compare.options.every((option) => option.score === undefined)).toBe(
+      true
+    );
+    expect(
+      compare.options.every((option) => option.strength === 'unknown')
+    ).toBe(true);
+    const surface = JSON.stringify(compare);
+    expect(surface).not.toMatch(/ranks first/i);
+    expect(surface).not.toMatch(/comparable on timing/i);
+    expect(surface).not.toContain('unfavorable');
+    expect(surface).not.toMatch(/"score":0/);
+  });
+
   it('selects renderer from Package.mode only, not candidate count', () => {
     const pkg = bindDemoStubPackage({
       caseId: '11111111-1111-4111-8111-111111111111',
