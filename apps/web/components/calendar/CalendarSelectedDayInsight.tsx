@@ -97,7 +97,7 @@ export function CalendarSelectedDayInsight({
 }: Props) {
   const previewOn = forcePreview || isDecisionSemanticsPreviewEnabled();
   const chrome = PREVIEW_CHROME[lang];
-  const explanation = explanationFromDayIntelligence(dayIntelligence);
+  const explanation = explanationFromDayIntelligence(dayIntelligence ?? null);
   const productView = buildDayIntelligenceView({
     explanation,
     locale: lang as SemanticPreviewLocale,
