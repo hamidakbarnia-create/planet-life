@@ -34,6 +34,7 @@ describe('ask-product consumer states', () => {
       range_end: '2026-09-30',
     });
     expect(isUnsupportedOperationFrame(find)).toBe(true);
+    expect(deriveClarificationState(find)).toBe('NEEDS_CLARIFICATION');
   });
 
   it('READY_TO_FIND for product launch with inclusive range', () => {
@@ -59,6 +60,40 @@ describe('ask-product consumer states', () => {
     expect(isUnsupportedOperationFrame(ready)).toBe(false);
     expect(deriveClarificationState(ready)).toBe('READY_TO_COMPARE');
   });
+
+  it.each([2, 3, 4, 5] as const)(
+    'READY_TO_COMPARE accepts %s candidate dates',
+    (count) => {
+      const dates = Array.from(
+        { length: count },
+        (_, index) => `2026-08-${String(10 + index).padStart(2, '0')}`
+      );
+      const frame = buildDecisionFrame('Compare wedding dates', {
+        decision_type_id: 'mar-wedding-date',
+        operation: 'compare',
+        time_scope: 'multiple_dates',
+        dates,
+      });
+      expect(deriveClarificationState(frame)).toBe('READY_TO_COMPARE');
+    }
+  );
+
+  it.each([1, 6] as const)(
+    'READY_TO_COMPARE rejects %s candidate dates',
+    (count) => {
+      const dates = Array.from(
+        { length: count },
+        (_, index) => `2026-08-${String(10 + index).padStart(2, '0')}`
+      );
+      const frame = buildDecisionFrame('Compare wedding dates', {
+        decision_type_id: 'mar-wedding-date',
+        operation: 'compare',
+        time_scope: 'multiple_dates',
+        dates,
+      });
+      expect(deriveClarificationState(frame)).not.toBe('READY_TO_COMPARE');
+    }
+  );
 
   it('resetToExamineStep clears compare without fabricating evaluate result', () => {
     const compare = buildDecisionFrame('14 or 18 August?', {

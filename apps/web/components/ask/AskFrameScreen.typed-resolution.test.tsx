@@ -14,12 +14,23 @@ import {
 
 const replace = vi.fn();
 const push = vi.fn();
+const persistFrameToCase = vi.fn();
 let searchParams = new URLSearchParams();
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push, replace }),
   useSearchParams: () => searchParams,
 }));
+
+vi.mock('@/lib/ask-product', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/ask-product')>(
+    '@/lib/ask-product'
+  );
+  return {
+    ...actual,
+    persistFrameToCase: (...args: unknown[]) => persistFrameToCase(...args),
+  };
+});
 
 function seedTyped(text: string, decisionTypeId?: string) {
   getAskQuestionRepository().saveQuestion({
@@ -37,6 +48,7 @@ describe('AskFrameScreen typed resolution integration', () => {
     resetAskQuestionRepositoryForTests();
     replace.mockReset();
     push.mockReset();
+    persistFrameToCase.mockReset();
     searchParams = new URLSearchParams();
   });
 
@@ -57,10 +69,14 @@ describe('AskFrameScreen typed resolution integration', () => {
     expect(screen.getByTestId('ask-intent-preserve').textContent).toContain(
       'job interview'
     );
-    // Date cue + shipped DT → ready evaluate (capability-aware), not disabled examine.
+    // Date cue + shipped DT → ready evaluate. Selector stays visible.
+    const evaluateChoice = screen.getByTestId('examine-evaluate');
+    expect(evaluateChoice).toBeTruthy();
+    expect(evaluateChoice.getAttribute('data-recommended')).toBe('true');
+    expect(evaluateChoice.getAttribute('data-selected')).toBe('true');
     expect(screen.getByTestId('ask-ready-evaluate')).toBeTruthy();
     expect(screen.getByTestId('ask-persist-evaluate')).toBeTruthy();
-    expect(screen.queryByTestId('examine-evaluate')).toBeNull();
+    expect(persistFrameToCase).not.toHaveBeenCalled();
   });
 
   it('keeps ambiguous typed Ask fail-closed without Decision Type', async () => {

@@ -16,11 +16,14 @@ import {
   isUnsupportedOperationFrame,
   localizeCaseApiError,
   persistFrameToCase,
+  recommendedOperation,
   resetToExamineStep,
   saveDecisionFrame,
+  type AskProductCopy,
   type DecisionFrameV1,
 } from '@/lib/ask-product';
 import type { AppLang } from '@/lib/app-settings';
+import type { DecisionOperation } from '@/lib/decision-frame';
 import styles from './ask-clarification.module.css';
 
 type CompareDraft = { id: string; label: string; date: string };
@@ -33,19 +36,33 @@ function initialCompareDrafts(frame: DecisionFrameV1): CompareDraft[] {
       label: o.label || o.date || '',
       date: o.date || '',
     }));
-  if (fromOptions.length >= 2) return fromOptions.slice(0, 3);
+  if (fromOptions.length >= 2) return fromOptions.slice(0, 5);
   const dates = frame.time.dates ?? [];
   if (dates.length >= 2) {
-    return dates.slice(0, 3).map((date, index) => ({
+    return dates.slice(0, 5).map((date, index) => ({
       id: `opt-${index + 1}`,
       label: date,
       date,
     }));
   }
+  return emptyCompareDrafts();
+}
+
+function emptyCompareDrafts(): CompareDraft[] {
   return [
     { id: 'opt-1', label: '', date: '' },
     { id: 'opt-2', label: '', date: '' },
   ];
+}
+
+function compareDisabledReason(
+  copy: AskProductCopy,
+  decisionTypeId: string | undefined
+): string {
+  if (decisionTypeId === 'bus-product-launch') {
+    return copy.compareUnavailableForLaunch;
+  }
+  return copy.comingSoon;
 }
 
 /**
@@ -94,7 +111,7 @@ export function AskClarificationFlow({
     onFrameChange(next);
   };
 
-  if (isUnsupportedOperationFrame(frame)) {
+  if (isUnsupportedOperationFrame(frame) && !frame.decision_type_id) {
     return (
       <section
         className={styles.panel}
@@ -160,28 +177,29 @@ export function AskClarificationFlow({
   }
 
   const showOpenEnded = frame.pending_clarification === 'open_ended_axis';
-  const showExamine =
-    !showOpenEnded &&
-    (frame.operation === 'unresolved' ||
-      frame.pending_clarification === 'operation');
+  const recommended = recommendedOperation(frame.raw_intent);
+  const selectedOperation =
+    frame.operation === 'evaluate' ||
+    frame.operation === 'compare' ||
+    frame.operation === 'find'
+      ? frame.operation
+      : null;
+  const showSelector = !showOpenEnded;
 
   const showDate =
     evaluateCapable &&
-    !showExamine &&
     !showOpenEnded &&
     frame.operation === 'evaluate' &&
     (frame.time.scope !== 'specific_date' || !frame.time.dates?.[0]);
 
   const showCompareDates =
     compareCapable &&
-    !showExamine &&
     !showOpenEnded &&
     frame.operation === 'compare' &&
     state !== 'READY_TO_COMPARE';
 
   const showFindRange =
     findCapable &&
-    !showExamine &&
     !showOpenEnded &&
     frame.operation === 'find' &&
     state !== 'READY_TO_FIND';
@@ -195,7 +213,7 @@ export function AskClarificationFlow({
     !compareCapable &&
     !findCapable &&
     !showOpenEnded &&
-    (showExamine ||
+    (showSelector ||
       frame.operation === 'evaluate' ||
       isEvaluateCapabilityUnavailable(frame));
 
@@ -255,6 +273,74 @@ export function AskClarificationFlow({
     update(applyCompareDates(frame, cleaned));
   };
 
+  const chooseOperation = (
+    operation: Exclude<DecisionOperation, 'unresolved'>
+  ) => {
+    if (operation === 'evaluate' && !evaluateCapable) return;
+    if (operation === 'compare' && !compareCapable) return;
+    if (operation === 'find' && !findCapable) return;
+    const next = applyOperationChoice(frame, operation);
+    if (operation === 'evaluate') {
+      setDateInput(next.time.dates?.[0] ?? '');
+      setDateError('');
+      setRangeStart('');
+      setRangeEnd('');
+      setCompareDrafts(emptyCompareDrafts());
+    } else if (operation === 'compare') {
+      setDateInput('');
+      setRangeStart('');
+      setRangeEnd('');
+      setCompareDrafts(initialCompareDrafts(next));
+    } else {
+      setDateInput('');
+      setCompareDrafts(emptyCompareDrafts());
+      setRangeStart(next.time.range_start ?? '');
+      setRangeEnd(next.time.range_end ?? '');
+    }
+    setCompareError('');
+    setRangeError('');
+    setError('');
+    update(next);
+  };
+
+  const renderOperationChoice = (
+    operation: Exclude<DecisionOperation, 'unresolved'>,
+    label: string,
+    enabled: boolean,
+    disabledReason: string
+  ) => {
+    const isRecommended = recommended === operation;
+    const isSelected = selectedOperation === operation;
+    return (
+      <button
+        type="button"
+        className={[
+          styles.choice,
+          enabled ? '' : styles.choiceDisabled,
+          isRecommended ? styles.choiceRecommended : '',
+          isSelected ? styles.choiceSelected : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        data-testid={`examine-${operation === 'evaluate' ? 'evaluate' : operation === 'compare' ? 'compare' : 'find'}`}
+        data-recommended={isRecommended ? 'true' : undefined}
+        data-selected={isSelected ? 'true' : undefined}
+        disabled={!enabled}
+        aria-disabled={!enabled}
+        aria-pressed={isSelected}
+        onClick={() => chooseOperation(operation)}
+      >
+        {label}
+        {isRecommended ? (
+          <span className={styles.soon}> — {copy.examineRecommended}</span>
+        ) : null}
+        {!enabled ? (
+          <span className={styles.soon}> — {disabledReason}</span>
+        ) : null}
+      </button>
+    );
+  };
+
   return (
     <section
       className={styles.panel}
@@ -308,83 +394,27 @@ export function AskClarificationFlow({
         </div>
       ) : null}
 
-      {showExamine ||
-      (!evaluateCapable &&
-        !compareCapable &&
-        !findCapable &&
-        !showOpenEnded &&
-        !showDate &&
-        !showReady &&
-        !showReadyCompare &&
-        !showReadyFind) ? (
+      {showSelector ? (
         <div className={styles.block}>
           <p className={`fi ${styles.prompt}`}>{copy.examinePrompt}</p>
           <div className={styles.choices} data-testid="examine-choices">
-            {evaluateCapable ? (
-              <button
-                type="button"
-                className={styles.choice}
-                data-testid="examine-evaluate"
-                onClick={() => update(applyOperationChoice(frame, 'evaluate'))}
-              >
-                {copy.examineEvaluate}
-              </button>
-            ) : (
-              <button
-                type="button"
-                className={`${styles.choice} ${styles.choiceDisabled}`}
-                data-testid="examine-evaluate"
-                disabled
-                aria-disabled="true"
-              >
-                {copy.examineEvaluate}
-                <span className={styles.soon}>
-                  {' '}
-                  — {copy.evaluateUnavailableForType}
-                </span>
-              </button>
+            {renderOperationChoice(
+              'evaluate',
+              copy.examineEvaluate,
+              evaluateCapable,
+              copy.evaluateUnavailableForType
             )}
-            {compareCapable ? (
-              <button
-                type="button"
-                className={styles.choice}
-                data-testid="examine-compare"
-                onClick={() => update(applyOperationChoice(frame, 'compare'))}
-              >
-                {copy.examineCompare}
-              </button>
-            ) : (
-              <button
-                type="button"
-                className={`${styles.choice} ${styles.choiceDisabled}`}
-                data-testid="examine-compare"
-                disabled
-                aria-disabled="true"
-              >
-                {copy.examineCompare}
-                <span className={styles.soon}> — {copy.comingSoon}</span>
-              </button>
+            {renderOperationChoice(
+              'compare',
+              copy.examineCompare,
+              compareCapable,
+              compareDisabledReason(copy, frame.decision_type_id)
             )}
-            {findCapable ? (
-              <button
-                type="button"
-                className={styles.choice}
-                data-testid="examine-find"
-                onClick={() => update(applyOperationChoice(frame, 'find'))}
-              >
-                {copy.examineFind}
-              </button>
-            ) : (
-              <button
-                type="button"
-                className={`${styles.choice} ${styles.choiceDisabled}`}
-                data-testid="examine-find"
-                disabled
-                aria-disabled="true"
-              >
-                {copy.examineFind}
-                <span className={styles.soon}> — {copy.comingSoon}</span>
-              </button>
+            {renderOperationChoice(
+              'find',
+              copy.examineFind,
+              findCapable,
+              copy.comingSoon
             )}
           </div>
           {!evaluateCapable && !compareCapable && !findCapable ? (

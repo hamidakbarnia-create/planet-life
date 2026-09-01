@@ -87,41 +87,142 @@ export function buildDecisionFrame(
   };
 }
 
+/** Detector suggestion only — never persist or skip the selector. */
+export function recommendedOperation(
+  rawIntent: string,
+  referenceYear?: number
+): DecisionOperation {
+  const time = detectTimeScope(
+    rawIntent,
+    referenceYear ?? new Date().getUTCFullYear()
+  );
+  return detectOperation(rawIntent, time.scope);
+}
+
+function isIsoDate(value: string | undefined): value is string {
+  return Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
+}
+
+/**
+ * Commit an explicit operation. Clears incompatible time fields so Find
+ * ranges never become Compare candidates and Compare dates never become
+ * a Find range.
+ */
 export function applyOperationChoice(
   frame: DecisionFrameV1,
   operation: Exclude<DecisionOperation, 'unresolved'>
 ): DecisionFrameV1 {
-  const next = buildDecisionFrame(frame.raw_intent, {
+  const base = {
     decision_type_id: frame.decision_type_id,
     objective: frame.objective,
     operation,
-    time_scope: frame.time.scope,
-    dates: frame.time.dates,
-    range_start: frame.time.range_start,
-    range_end: frame.time.range_end,
+  };
+
+  if (operation === 'evaluate') {
+    const keepDate =
+      (frame.operation === 'evaluate' || frame.time.scope === 'specific_date') &&
+      isIsoDate(frame.time.dates?.[0])
+        ? frame.time.dates[0]
+        : undefined;
+    const next = buildDecisionFrame(frame.raw_intent, {
+      ...base,
+      time_scope: keepDate ? 'specific_date' : 'none',
+      dates: keepDate ? [keepDate] : [],
+    });
+    const unknowns = next.unknowns.filter(
+      (item) =>
+        item !== 'Operation' &&
+        item !== 'Date range bounds' &&
+        item !== 'Dates to compare'
+    );
+    if (!keepDate && !unknowns.includes('Time')) unknowns.push('Time');
+    if (!keepDate && !unknowns.includes('Specific date value')) {
+      unknowns.push('Specific date value');
+    }
+    return {
+      ...next,
+      operation: 'evaluate',
+      time: {
+        scope: keepDate ? 'specific_date' : 'none',
+        dates: keepDate ? [keepDate] : undefined,
+      },
+      options: undefined,
+      unknowns: uniqueUnknowns(unknowns),
+      pending_clarification: keepDate ? null : 'time',
+      open_ended: false,
+    };
+  }
+
+  if (operation === 'compare') {
+    const preserve =
+      frame.operation === 'compare' || frame.time.scope === 'multiple_dates';
+    const fromOptions = preserve
+      ? (frame.options ?? []).filter((item) => isIsoDate(item.date))
+      : [];
+    const dates = preserve
+      ? fromOptions.length
+        ? fromOptions.map((item) => item.date as string)
+        : (frame.time.dates ?? []).filter(isIsoDate)
+      : [];
+    const options =
+      fromOptions.length > 0
+        ? fromOptions
+        : dates.length
+          ? optionsFromDates(dates)
+          : undefined;
+    const next = buildDecisionFrame(frame.raw_intent, {
+      ...base,
+      time_scope: 'multiple_dates',
+      dates,
+    });
+    const unknowns = next.unknowns.filter(
+      (item) => item !== 'Operation' && item !== 'Date range bounds'
+    );
+    if (dates.length < 2 && !unknowns.includes('Dates to compare')) {
+      unknowns.push('Dates to compare');
+    }
+    return {
+      ...next,
+      operation: 'compare',
+      time: { scope: 'multiple_dates', dates: dates.length ? dates : undefined },
+      options,
+      unknowns: uniqueUnknowns(unknowns),
+      pending_clarification: dates.length < 2 ? 'time' : null,
+      open_ended: false,
+    };
+  }
+
+  const preserveRange =
+    frame.operation === 'find' || frame.time.scope === 'date_range';
+  const rangeStart = preserveRange ? frame.time.range_start : undefined;
+  const rangeEnd = preserveRange ? frame.time.range_end : undefined;
+  const next = buildDecisionFrame(frame.raw_intent, {
+    ...base,
+    time_scope: 'date_range',
+    dates: [],
+    range_start: rangeStart,
+    range_end: rangeEnd,
   });
-  // Force chosen operation even if detector disagrees.
-  const unknowns = next.unknowns.filter((u) => u !== 'Operation');
-  let pending = next.pending_clarification;
-  if (pending === 'operation') pending = null;
-  if (operation === 'compare' && (next.time.dates?.length ?? 0) < 2) {
-    pending = 'time';
-    next.time = { ...next.time, scope: 'multiple_dates' };
-    if (!unknowns.includes('Dates to compare')) unknowns.push('Dates to compare');
-  }
-  if (operation === 'find' && next.time.scope === 'none') {
-    next.time = { ...next.time, scope: 'date_range' };
-    pending = null;
-    if (!unknowns.includes('Date range bounds')) unknowns.push('Date range bounds');
-  }
-  if (operation === 'evaluate' && next.time.scope === 'none') {
-    if (!unknowns.includes('Time')) unknowns.push('Time');
+  const unknowns = next.unknowns.filter(
+    (item) =>
+      item !== 'Operation' &&
+      item !== 'Dates to compare' &&
+      item !== 'Specific date value'
+  );
+  if ((!rangeStart || !rangeEnd) && !unknowns.includes('Date range bounds')) {
+    unknowns.push('Date range bounds');
   }
   return {
     ...next,
-    operation,
-    unknowns,
-    pending_clarification: pending,
+    operation: 'find',
+    time: {
+      scope: 'date_range',
+      range_start: rangeStart,
+      range_end: rangeEnd,
+    },
+    options: undefined,
+    unknowns: uniqueUnknowns(unknowns),
+    pending_clarification: rangeStart && rangeEnd ? null : 'time',
     open_ended: false,
   };
 }

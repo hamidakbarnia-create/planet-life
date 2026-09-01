@@ -81,6 +81,19 @@ describe('persistFrameToCase capability gate', () => {
     );
   });
 
+  it('refuses Product Launch Compare without creating a Case', async () => {
+    const frame = buildDecisionFrame('Compare launch dates', {
+      decision_type_id: 'bus-product-launch',
+      operation: 'compare',
+      time_scope: 'multiple_dates',
+      dates: ['2026-09-15', '2026-09-17'],
+    });
+    await expect(persistFrameToCase({ frame })).rejects.toMatchObject({
+      code: 'UNSUPPORTED_DECISION_TYPE',
+    });
+    expect(createDecisionCaseFromFraming).not.toHaveBeenCalled();
+  });
+
   it('surfaces DecisionCaseApiError (not generic Error) for unsupported type', async () => {
     const frame = buildDecisionFrame('Compare three dates?', {
       decision_type_id: 'tim-compare-three',

@@ -83,6 +83,15 @@
   border-color: rgba(242, 207, 117, 0.45);
 }
 
+.choiceRecommended {
+  border-color: rgba(242, 207, 117, 0.55);
+}
+
+.choiceSelected {
+  background: rgba(242, 207, 117, 0.08);
+  border-color: rgba(242, 207, 117, 0.7);
+}
+
 .choiceDisabled {
   opacity: 0.55;
   cursor: not-allowed;

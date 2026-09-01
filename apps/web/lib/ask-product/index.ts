@@ -49,6 +49,7 @@ export {
   applyOperationChoice,
   applyOpenEndedAxis,
   buildDecisionFrame,
+  recommendedOperation,
   clearDecisionFrame,
   isFramingPersistReady,
   loadDecisionFrame,

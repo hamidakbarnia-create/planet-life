@@ -15,6 +15,8 @@ describe('ask-product consumer chrome locales', () => {
         copy.examineEvaluate,
         copy.examineCompare,
         copy.examineFind,
+        copy.examineRecommended,
+        copy.compareUnavailableForLaunch,
         copy.comingSoon,
         copy.unsupportedTitle,
         copy.unsupportedBody,
@@ -27,6 +29,27 @@ describe('ask-product consumer chrome locales', () => {
     }
   );
 
+  it('EN/FA/AR/RU selector copy has no internal IDs', () => {
+    for (const lang of ['en', 'fa', 'ar', 'ru'] as const) {
+      const copy = getAskProductCopy(lang);
+      const chrome = [
+        copy.examineEvaluate,
+        copy.examineCompare,
+        copy.examineFind,
+        copy.examineRecommended,
+        copy.compareUnavailableForLaunch,
+      ].join(' | ');
+      expect(chrome).not.toMatch(
+        /bus-product-launch|car-interview|compare_dates|find_dates|evaluate_date|decision_type/i
+      );
+    }
+    expect(getAskProductCopy('en').examineEvaluate).toBe('Evaluate one date');
+    expect(getAskProductCopy('en').examineCompare).toBe('Compare specific dates');
+    expect(getAskProductCopy('en').examineFind).toBe(
+      'Find stronger timing windows'
+    );
+  });
+
   it('FA/AR expose RTL dir; EN/RU LTR', () => {
     expect(getAskProductCopy('fa').dir).toBe('rtl');
     expect(getAskProductCopy('ar').dir).toBe('rtl');
@@ -37,8 +60,12 @@ describe('ask-product consumer chrome locales', () => {
   it('FA examine labels match recovery framing', () => {
     const fa = getAskProductCopy('fa');
     expect(fa.examinePrompt).toBe('چه چیزی را می‌خواهید بررسی کنیم؟');
-    expect(fa.examineEvaluate).toBe('بررسی یک تاریخ مشخص');
-    expect(fa.examineCompare).toContain('مقایسه');
+    expect(fa.examineEvaluate).toBe('ارزیابی یک تاریخ');
+    expect(fa.examineCompare).toBe('مقایسه چند تاریخ مشخص');
+    expect(fa.examineFind).toBe('یافتن پنجره‌های زمانی قوی‌تر');
+    expect(fa.compareUnavailableForLaunch).toBe(
+      'مقایسه تاریخ‌های مشخص برای لانچ در این نسخه فعال نیست.'
+    );
     expect(fa.comingSoon).toBe('به‌زودی');
   });
 
