@@ -63,7 +63,7 @@
     "semantic.low_cooperation": "Cooperation conditions are weaker.",
     "semantic.high_reversibility_safety": "Decisions are easier to reverse or adjust.",
     "semantic.low_reversibility_safety": "Decisions are harder to reverse. Keep options open.",
-    "semantic.same_dimension_conflict": "The same factor both supports and cautions.",
+    "semantic.same_dimension_conflict": "Some influences create both opportunity and risk.",
     "semantic.veto_present": "A strong caution limits how far to push.",
     "semantic.no_outcome_prediction": "Timing signals cannot determine the factual outcome.",
     "semantic.high_stakes_review_required": "Use timing as a planning aid. Verify the decision against real-world evidence and professional requirements.",

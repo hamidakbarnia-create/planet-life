@@ -137,7 +137,10 @@ export function AppShell({
               {navLabels?.signIn ?? 'Sign in'}
             </Link>
           )}
-          <VaultPill label={navLabels?.['/vault'] ?? 'Vault'} />
+          <VaultPill
+            label={navLabels?.['/vault'] ?? 'Vault'}
+            title={navLabels?.openVault ?? navLabels?.['/vault']}
+          />
           <Link
             href="/upgrade"
             className="metioro-header-chip fi text-[10px] tracking-[0.18em] uppercase no-underline"

@@ -63,7 +63,7 @@
     "semantic.low_cooperation": "شروط التعاون أضعف.",
     "semantic.high_reversibility_safety": "التراجع عن القرار أيسر.",
     "semantic.low_reversibility_safety": "التراجع عن القرار أصعب. أبقِ الخيارات مفتوحة.",
-    "semantic.same_dimension_conflict": "العامل نفسه يدعم ويحذّر في آن واحد.",
+    "semantic.same_dimension_conflict": "بعض التأثيرات تخلق فرصة ومخاطرة معاً.",
     "semantic.veto_present": "تحذير قوي يحدّ من مدى الدفع إلى الأمام.",
     "semantic.no_outcome_prediction": "إشارات التوقيت لا تحدّد النتيجة الواقعية.",
     "semantic.high_stakes_review_required": "استخدم التوقيت كأداة تخطيط. تحقق من القرار وفق الأدلة الواقعية والمتطلبات المهنية.",

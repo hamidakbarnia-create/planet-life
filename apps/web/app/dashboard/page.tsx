@@ -253,7 +253,10 @@ export default function Dashboard() {
       <nav className="flex items-center justify-between px-6 py-4 border-b border-white/5">
         <BrandLogo lang={lang as BrandLang} href="/home" size="md" showTagline />
         <div className="flex items-center gap-3">
-          <VaultPill label={HOME_LANGS[lang]?.nav?.['/vault'] ?? 'Vault'} />
+          <VaultPill
+            label={HOME_LANGS[lang]?.nav?.['/vault'] ?? 'Vault'}
+            title={HOME_LANGS[lang]?.nav?.openVault}
+          />
           <span
             className="fi text-[10px] tracking-[0.18em] px-2.5 py-1 rounded-md uppercase"
             title="Subscription tier — paywall ships in Sprint R3"

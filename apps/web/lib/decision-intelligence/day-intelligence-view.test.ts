@@ -114,6 +114,9 @@ describe('buildDayIntelligenceView', () => {
       posture: 'mixed',
     });
     expect(view?.mixed).toBe(true);
+    expect(view?.conditionsKind).toBe('mixed');
+    expect(view?.conditionsLabel).toBe('Mixed');
+    expect(view?.bridge).toMatch(/timing strength/i);
     expect(view?.headline).toBe(
       'Signals conflict. This day is not uniformly favorable or unfavorable.'
     );
@@ -198,5 +201,50 @@ describe('buildDayIntelligenceView', () => {
         score: 80,
       })
     ).toBeNull();
+  });
+
+  it('names a conflicted factor only when exactly one known dimension is present', () => {
+    const named = buildDayIntelligenceView({
+      explanation: {
+        ...PREVIEW_MATRIX.mixed,
+        caution_codes: ['semantic.same_dimension_conflict'],
+      },
+      locale: 'en',
+      score: 66,
+      posture: 'mixed',
+      conflictedDimensionIds: ['stability'],
+    });
+    expect(named?.cautions).toEqual([
+      'Stability both supports and cautions.',
+    ]);
+
+    const generic = buildDayIntelligenceView({
+      explanation: {
+        ...PREVIEW_MATRIX.mixed,
+        caution_codes: ['semantic.same_dimension_conflict'],
+      },
+      locale: 'en',
+      score: 66,
+      posture: 'mixed',
+      conflictedDimensionIds: ['stability', 'pressure'],
+    });
+    expect(generic?.cautions).toEqual([
+      'Some influences create both opportunity and risk.',
+    ]);
+
+    const unknown = buildDayIntelligenceView({
+      explanation: {
+        ...PREVIEW_MATRIX.mixed,
+        caution_codes: ['semantic.same_dimension_conflict'],
+      },
+      locale: 'en',
+      score: 66,
+      posture: 'mixed',
+      conflictedDimensionIds: ['raw_factor_key'],
+    });
+    expect(unknown?.cautions.join(' ')).not.toContain('raw_factor_key');
+    expect(unknown?.cautions).toEqual([
+      'Some influences create both opportunity and risk.',
+    ]);
   });
 });

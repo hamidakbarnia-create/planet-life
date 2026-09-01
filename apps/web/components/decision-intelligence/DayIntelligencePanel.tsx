@@ -5,14 +5,17 @@ import type { DayIntelligenceView } from '@/lib/decision-intelligence/day-intell
 
 export function DayIntelligencePanel({
   view,
+  hideScore = false,
 }: {
   view: DayIntelligenceView;
+  hideScore?: boolean;
 }) {
   const chrome = DAY_INTELLIGENCE_CHROME[view.locale];
   const showWhy =
     view.whyItems.length > 0 &&
     !view.insufficient &&
     view.whyItems.join('|') !== [...view.supports, ...view.cautions].join('|');
+  const showScore = !hideScore && Boolean(view.timingStrengthValue);
 
   return (
     <section
@@ -20,6 +23,7 @@ export function DayIntelligencePanel({
       data-title-kind={view.titleKind}
       data-insufficient={view.insufficient ? 'true' : 'false'}
       data-mixed={view.mixed ? 'true' : 'false'}
+      data-conditions-kind={view.conditionsKind ?? ''}
       dir={view.textDirection}
       className="rounded-xl px-3 py-3 space-y-3"
       style={{
@@ -34,10 +38,17 @@ export function DayIntelligencePanel({
         {view.title}
       </p>
 
-      {view.timingStrengthValue ? (
+      {showScore ? (
         <div data-testid="day-intelligence-score">
           <p className="fi text-[11px] text-white/40">{view.timingStrengthLabel}</p>
           <p className="fc text-lg text-white/90">{view.timingStrengthValue}</p>
+        </div>
+      ) : null}
+
+      {view.conditionsLabel ? (
+        <div data-testid="day-intelligence-conditions">
+          <p className="fi text-[11px] text-white/40">{chrome.conditions}</p>
+          <p className="fi text-sm text-white/90">{view.conditionsLabel}</p>
         </div>
       ) : null}
 
@@ -48,7 +59,14 @@ export function DayIntelligencePanel({
         {view.headline}
       </p>
 
-      {view.interpretation ? (
+      {view.bridge ? (
+        <p
+          className="fi text-[13px] text-white/60"
+          data-testid="day-intelligence-bridge"
+        >
+          {view.bridge}
+        </p>
+      ) : view.interpretation ? (
         <p
           className="fi text-[13px] text-white/65"
           data-testid="day-intelligence-interpretation"
