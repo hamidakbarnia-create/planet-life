@@ -111,6 +111,53 @@ describe('AskFrameScreen typed resolution integration', () => {
     expect(persistFrameToCase).not.toHaveBeenCalled();
   });
 
+  it('resolves guided launch-project to Product Launch selector', async () => {
+    getAskQuestionRepository().saveQuestion({
+      submitted_at: Date.now(),
+      source: 'suggestion',
+      suggestion_id: 'launch-project',
+    });
+
+    render(<AskFrameScreen lang="en" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ask-frame-screen')).toBeTruthy();
+    });
+
+    expect(loadDecisionFrame()?.decision_type_id).toBe('bus-product-launch');
+    expect(screen.getByTestId('examine-choices')).toBeTruthy();
+    expect(screen.queryByTestId('ask-unsupported-type')).toBeNull();
+    expect(screen.getByTestId('examine-evaluate').hasAttribute('disabled')).toBe(
+      false
+    );
+    expect(screen.getByTestId('examine-find').hasAttribute('disabled')).toBe(
+      false
+    );
+    expect(screen.getByTestId('examine-compare').hasAttribute('disabled')).toBe(
+      true
+    );
+    expect(persistFrameToCase).not.toHaveBeenCalled();
+  });
+
+  it('shows unsupported panel for guided negotiate-offer without inventing a type', async () => {
+    getAskQuestionRepository().saveQuestion({
+      submitted_at: Date.now(),
+      source: 'suggestion',
+      suggestion_id: 'negotiate-offer',
+    });
+
+    render(<AskFrameScreen lang="en" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ask-frame-screen')).toBeTruthy();
+    });
+
+    expect(loadDecisionFrame()?.decision_type_id).toBeUndefined();
+    expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+    expect(screen.queryByTestId('examine-choices')).toBeNull();
+    expect(persistFrameToCase).not.toHaveBeenCalled();
+  });
+
   it('shows unsupported panel for negotiate-offer without inventing a type', async () => {
     seedTyped('مذاکره روی پیشنهاد شغلی');
 

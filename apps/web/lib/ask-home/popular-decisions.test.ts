@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { resolveDecisionRequest } from '@/lib/decision-request';
+import { resolveAskQuestion } from '@/lib/resolve-ask-question';
 import { hasDecisionTypeRegistry, listDecisionTypes } from './decision-type-registry';
 import {
   classifyPopularDecisionRefs,
@@ -102,6 +104,51 @@ describe('ask-home popular decisions provider', () => {
       expect(interview?.label).not.toMatch(/Job interview/i);
     }
   );
+
+  it('keeps Popular explicit DT equal to Guided resolved DT for shipped pairs', () => {
+    const available = listPopularDecisions('en').filter(
+      (item) => item.capability === 'available' && item.guidedQuestionId
+    );
+    expect(available.map((item) => item.id).sort()).toEqual([
+      'job-interview',
+      'launch-business',
+      'meet-investor',
+    ]);
+
+    for (const item of available) {
+      const guided = resolveDecisionRequest(
+        resolveAskQuestion(
+          {
+            submitted_at: Date.now(),
+            source: 'suggestion',
+            suggestion_id: item.guidedQuestionId,
+          },
+          'en'
+        )
+      );
+      expect(guided.execution.decisionTypeId).toBe(item.decisionTypeId);
+    }
+  });
+
+  it('does not require Guided DT bind for unavailable Popular cards', () => {
+    const unavailable = listPopularDecisions('en').filter(
+      (item) => item.capability === 'unavailable' && item.guidedQuestionId
+    );
+    expect(unavailable.length).toBeGreaterThan(0);
+    for (const item of unavailable) {
+      const guided = resolveDecisionRequest(
+        resolveAskQuestion(
+          {
+            submitted_at: Date.now(),
+            source: 'suggestion',
+            suggestion_id: item.guidedQuestionId,
+          },
+          'en'
+        )
+      );
+      expect(guided.execution.decisionTypeId).toBeUndefined();
+    }
+  });
 
   it('lists registry types for See All with honesty classification', () => {
     const all = listAllDecisionTypesAsPopular();

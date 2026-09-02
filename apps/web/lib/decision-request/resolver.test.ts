@@ -174,6 +174,7 @@ describe('resolveDecisionRequest', () => {
       displayText: 'Job interview',
       question: { source: 'guided' },
       execution: {
+        decisionTypeId: 'car-interview',
         guidedQuestionId: 'job-interview',
         actionType: 'job_interview',
         categoryId: 'career-work',
@@ -212,6 +213,47 @@ describe('resolveDecisionRequest', () => {
   });
 });
 describe('decision request resolver', () => {
+  it.each([
+    ['job_interview', 'car-interview'],
+    ['investor_meeting', 'bus-investor-meeting'],
+    ['business_launch', 'bus-product-launch'],
+  ] as const)('binds shipped actionType %s to %s', (actionType, decisionTypeId) => {
+    const result = resolveDecisionRequest({
+      source: 'suggestion',
+      displayText: actionType,
+      executionMetadata: {
+        actionType,
+        categoryId: 'career-work',
+        needsTime: true,
+      },
+    });
+
+    expect(result.execution.decisionTypeId).toBe(decisionTypeId);
+  });
+
+  it.each([
+    'offer_negotiation',
+    'salary_negotiation',
+    'promotion_request',
+    'deal_closing',
+    'property_trade',
+    'asset_trade',
+    'relocation',
+    'career_focus',
+  ] as const)('does not bind unsupported actionType %s', (actionType) => {
+    const result = resolveDecisionRequest({
+      source: 'suggestion',
+      displayText: actionType,
+      executionMetadata: {
+        actionType,
+        categoryId: 'career-work',
+        needsTime: true,
+      },
+    });
+
+    expect(result.execution.decisionTypeId).toBeUndefined();
+  });
+
   it('binds investor meeting action type to its decision type', () => {
     const result = resolveDecisionRequest({
       source: 'suggestion',

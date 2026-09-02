@@ -276,11 +276,6 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     if (!guidedQuestion) return;
     markStarted();
     trackAskEvent('ftue.ask.question_selected', { suggestion_id: questionId });
-    // PR-1/PR-2: car-interview enters Decision Case intake (backend Case API).
-    if (questionId === 'job-interview') {
-      router.push('/decision-cases/car-interview');
-      return;
-    }
     setSelectedSuggestionId(questionId);
   };
 
@@ -305,19 +300,8 @@ export function AskScreen({ copy, lang }: { copy: AskCopy; lang: AppLang }) {
     markStarted();
 
     // Runnable Popular cards only — requires shipped Decision Type capability.
+    // All shipped types enter ASK Frame; no Decision Case shortcut.
     if (item.capability === 'available' && item.decisionTypeId) {
-      // Interview keeps the dedicated Case intake entry (existing journey).
-      if (
-        item.decisionTypeId === 'car-interview' ||
-        item.guidedQuestionId === 'job-interview'
-      ) {
-        trackAskEvent('ftue.ask.question_selected', {
-          suggestion_id: item.decisionTypeId,
-        });
-        router.push('/decision-cases/car-interview');
-        return;
-      }
-
       trackAskEvent('ftue.ask.question_selected', {
         suggestion_id: item.decisionTypeId,
       });
