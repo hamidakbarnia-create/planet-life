@@ -16,6 +16,9 @@ describe('resolveTypedDecisionType exact matches', () => {
     ['en', 'Is September 12 good for my job interview?', 'car-interview'],
     ['en', 'When should I schedule my interview for this role?', 'car-interview'],
     ['fa', 'آیا ۱۲ سپتامبر برای مصاحبه کاری من خوب است؟', 'car-interview'],
+    ['fa', 'آیا ۱۲ سپتامبر برای مصاحبه خوبه؟', 'car-interview'],
+    ['fa', 'برای مصاحبه کاری ۱۲ سپتامبر چطوره؟', 'car-interview'],
+    ['fa', 'بهترین روز مصاحبه را در ۳۰ روز آینده پیدا کن', 'car-interview'],
     ['ar', 'هل ١٢ سبتمبر مناسب لمقابلة عمل؟', 'car-interview'],
     ['ru', 'Подходит ли 12 сентября для собеседования?', 'car-interview'],
     ['en', 'What date should we get married?', 'mar-wedding-date'],
@@ -62,6 +65,11 @@ describe('resolveTypedDecisionType negative guards', () => {
     ['Should I pivot the company?', 'bus-product-launch'],
     ['Should I marry this person?', 'mar-wedding-date'],
     ['Is this relationship right for me?', 'mar-wedding-date'],
+    ['۱۲ سپتامبر برای مذاکره پیشنهاد شغلی خوبه؟', 'car-interview'],
+    ['۱۲ سپتامبر برای مذاکره حقوق خوبه؟', 'car-interview'],
+    ['۱۵ سپتامبر برای خرید بیت‌کوین خوبه؟', 'car-interview'],
+    ['فردا برای مهاجرت خوبه؟', 'car-interview'],
+    ['Should I negotiate my job offer tomorrow?', 'car-interview'],
   ] as const)('does not bind %s to %s', (text, bannedId) => {
     const result = resolveTypedDecisionType(text, 'en');
     if (result.status === 'exact') {
@@ -104,6 +112,8 @@ describe('resolveTypedDecisionType unsupported', () => {
     ['Should we sign a commercial agreement?', 'commercial_agreement'],
     ['Is this relationship right for me?', 'relationship'],
     ['Should I invest in this stock?', 'personal_investment'],
+    ['۱۵ سپتامبر برای خرید بیت‌کوین خوبه؟', 'personal_investment'],
+    ['فردا برای مهاجرت خوبه؟', 'relocation'],
   ] as const)('unsupported: %s', (text, domain) => {
     const result = resolveTypedDecisionType(text, 'en');
     expect(result.status).toBe('unsupported');

@@ -54,6 +54,14 @@ describe('decision-frame persist readiness', () => {
       range_end: '2026-08-31',
     });
     expect(isFramingPersistReady(ready)).toBe(true);
+
+    const tooShort = buildDecisionFrame('Find the best date', {
+      operation: 'find',
+      time_scope: 'date_range',
+      range_start: '2026-08-01',
+      range_end: '2026-08-03',
+    });
+    expect(isFramingPersistReady(tooShort)).toBe(false);
     const payload = toPersistedFraming(ready);
     expect(payload.start).toBe('2026-08-01');
     expect(payload.end).toBe('2026-08-31');

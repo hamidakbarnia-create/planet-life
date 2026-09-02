@@ -19,6 +19,7 @@ import {
 } from '@/lib/decision-case';
 import type { DecisionFrameV1 } from './types';
 import { canSelectOperationRenderer } from './frame';
+import { isValidFindInclusiveRange } from './resolve';
 
 /**
  * @deprecated Do not use for evaluation Case create.
@@ -45,7 +46,8 @@ export function isFramingPersistReady(frame: DecisionFrameV1): boolean {
     return (
       frame.time.scope === 'date_range' &&
       !!frame.time.range_start &&
-      !!frame.time.range_end
+      !!frame.time.range_end &&
+      isValidFindInclusiveRange(frame.time.range_start, frame.time.range_end)
     );
   }
   return false;

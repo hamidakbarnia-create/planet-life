@@ -11,7 +11,10 @@ import {
   canEvaluateInProduction,
   canExecuteInProduction,
   deriveClarificationState,
+  FIND_MAX_RANGE_DAYS,
+  FIND_MIN_RANGE_DAYS,
   getAskProductCopy,
+  inclusiveFindDayCount,
   isEvaluateCapabilityUnavailable,
   localizeCaseApiError,
   persistFrameToCase,
@@ -35,10 +38,10 @@ function initialCompareDrafts(frame: DecisionFrameV1): CompareDraft[] {
       label: o.label || o.date || '',
       date: o.date || '',
     }));
-  if (fromOptions.length >= 2) return fromOptions.slice(0, 5);
+  if (fromOptions.length >= 2) return fromOptions;
   const dates = frame.time.dates ?? [];
   if (dates.length >= 2) {
-    return dates.slice(0, 5).map((date, index) => ({
+    return dates.map((date, index) => ({
       id: `opt-${index + 1}`,
       label: date,
       date,
@@ -672,6 +675,15 @@ export function AskClarificationFlow({
               }
               if (rangeStart > rangeEnd) {
                 setRangeError(copy.findRangeInvalid);
+                return;
+              }
+              const days = inclusiveFindDayCount(rangeStart, rangeEnd);
+              if (days == null || days < FIND_MIN_RANGE_DAYS) {
+                setRangeError(copy.findRangeTooShort);
+                return;
+              }
+              if (days > FIND_MAX_RANGE_DAYS) {
+                setRangeError(copy.findRangeTooLong);
                 return;
               }
               setRangeError('');

@@ -5,6 +5,9 @@
  * - Never silently assume today.
  * - Prefer unresolved over invented operation/time.
  * - Window is not an operation (FIND owns best-window rendering).
+ * - Digit folding is parse-only. raw_intent stays the original input.
+ * - Jalali month names and Jalali numeric dates are not converted here
+ *   (Phase 1B.1B). Relative ISO materialization is Phase 1B.2.
  */
 
 import type {
@@ -12,6 +15,15 @@ import type {
   DecisionOperation,
   TimeScope,
 } from './types';
+
+/**
+ * Inclusive FIND range bounds. Mirror of
+ * `packages/decision_engine/find_windows.py`:
+ * FIND_MIN_RANGE_DAYS = 7, FIND_MAX_RANGE_DAYS = 90.
+ * Client validation must not weaken the backend contract.
+ */
+export const FIND_MIN_RANGE_DAYS = 7;
+export const FIND_MAX_RANGE_DAYS = 90;
 
 const MONTHS: Record<string, number> = {
   jan: 1,
@@ -38,7 +50,49 @@ const MONTHS: Record<string, number> = {
   november: 11,
   dec: 12,
   december: 12,
+  // Persian spellings of Gregorian months (home/calendar i18n + common August aliases).
+  ژانویه: 1,
+  فوریه: 2,
+  مارس: 3,
+  آوریل: 4,
+  مه: 5,
+  ژوئن: 6,
+  ژوئیه: 7,
+  اوت: 8,
+  آگوست: 8,
+  آگست: 8,
+  سپتامبر: 9,
+  اکتبر: 10,
+  نوامبر: 11,
+  دسامبر: 12,
 };
+
+const EN_MONTH_RE =
+  'jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?';
+
+const FA_MONTH_RE =
+  'ژانویه|فوریه|مارس|آوریل|ژوئن|ژوئیه|سپتامبر|اکتبر|نوامبر|دسامبر|آگوست|آگست|اوت|مه';
+
+const MONTH_RE = `(?:${EN_MONTH_RE}|${FA_MONTH_RE})`;
+
+type DateHit = { index: number; iso: string };
+
+/** Parse-only: Persian and Arabic-Indic digits → ASCII 0–9. */
+export function foldLocaleDigits(text: string): string {
+  let out = '';
+  for (const ch of text) {
+    const code = ch.codePointAt(0);
+    if (code == null) continue;
+    if (code >= 0x06f0 && code <= 0x06f9) {
+      out += String(code - 0x06f0);
+    } else if (code >= 0x0660 && code <= 0x0669) {
+      out += String(code - 0x0660);
+    } else {
+      out += ch;
+    }
+  }
+  return out;
+}
 
 function pad2(n: number): string {
   return String(n).padStart(2, '0');
@@ -57,65 +111,154 @@ function toIso(year: number, month: number, day: number): string | null {
   return `${year}-${pad2(month)}-${pad2(day)}`;
 }
 
-/** Extract explicit calendar dates from text. Does not invent "today". */
+function monthFromToken(token: string): number | undefined {
+  return MONTHS[token.toLowerCase()] ?? MONTHS[token];
+}
+
+function pushHit(hits: DateHit[], index: number, iso: string | null): void {
+  if (iso) hits.push({ index, iso });
+}
+
+function uniqueInAppearanceOrder(hits: DateHit[]): string[] {
+  hits.sort((a, b) => a.index - b.index);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const hit of hits) {
+    if (seen.has(hit.iso)) continue;
+    seen.add(hit.iso);
+    out.push(hit.iso);
+  }
+  return out;
+}
+
+function isoDayCount(start: string, end: string): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end)) {
+    return null;
+  }
+  if (start > end) return null;
+  const a = Date.parse(`${start}T00:00:00Z`);
+  const b = Date.parse(`${end}T00:00:00Z`);
+  if (Number.isNaN(a) || Number.isNaN(b)) return null;
+  return Math.round((b - a) / 86_400_000) + 1;
+}
+
+/** Inclusive day count for a Gregorian ISO range, or null if invalid/reversed. */
+export function inclusiveFindDayCount(
+  start: string,
+  end: string
+): number | null {
+  return isoDayCount(start, end);
+}
+
+/** True when start/end are ISO and the inclusive span is 7–90 days. */
+export function isValidFindInclusiveRange(
+  start: string,
+  end: string
+): boolean {
+  const days = isoDayCount(start, end);
+  return (
+    days != null &&
+    days >= FIND_MIN_RANGE_DAYS &&
+    days <= FIND_MAX_RANGE_DAYS
+  );
+}
+
+function hasFaFindHint(text: string): boolean {
+  return (
+    /\d+\s*روز[\u200c\s]*آینده/.test(text) ||
+    /هفته[\u200c\s]*آینده/.test(text) ||
+    /ماه[\u200c\s]*آینده/.test(text) ||
+    /پیدا[\u200c\s]*کن/.test(text) ||
+    /چه[\u200c\s]+روز/.test(text) ||
+    /چه[\u200c\s]+تاریخ/.test(text) ||
+    /بهترین[\u200c\s]+(?:روز|تاریخ)/.test(text)
+  );
+}
+
+function hasFaCompareLanguage(text: string): boolean {
+  return (
+    /مقایسه/.test(text) ||
+    /کدام/.test(text) ||
+    /کدوم/.test(text) ||
+    /بین[\u200c\s]+\d/.test(text)
+  );
+}
+
+/** Extract explicit Gregorian calendar dates. Does not invent "today". */
 export function extractExplicitDates(
   text: string,
   referenceYear = new Date().getUTCFullYear()
 ): string[] {
-  const found = new Set<string>();
-  const iso = text.matchAll(/\b(20\d{2})-(\d{2})-(\d{2})\b/g);
+  const parseText = foldLocaleDigits(text);
+  const hits: DateHit[] = [];
+
+  const iso = parseText.matchAll(/\b(20\d{2})-(\d{2})-(\d{2})\b/g);
   for (const m of iso) {
     const value = toIso(Number(m[1]), Number(m[2]), Number(m[3]));
-    if (value) found.add(value);
+    pushHit(hits, m.index ?? 0, value);
   }
 
-  const dmy = text.matchAll(
+  const dmy = parseText.matchAll(
     /\b(\d{1,2})[\/\-.](\d{1,2})[\/\-.](20\d{2})\b/g
   );
   for (const m of dmy) {
-    const day = Number(m[1]);
-    const month = Number(m[2]);
-    const year = Number(m[3]);
-    const value = toIso(year, month, day);
-    if (value) found.add(value);
+    const value = toIso(Number(m[3]), Number(m[2]), Number(m[1]));
+    pushHit(hits, m.index ?? 0, value);
   }
 
-  const named = text.matchAll(
-    /\b(?:(\d{1,2})\s+)?(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s*(20\d{2}))?\b/gi
+  const named = parseText.matchAll(
+    new RegExp(
+      `\\b(?:(\\d{1,2})\\s+)?(${EN_MONTH_RE})\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s*(20\\d{2}))?\\b`,
+      'gi'
+    )
   );
   for (const m of named) {
-    const month = MONTHS[m[2].toLowerCase()];
+    const month = monthFromToken(m[2]);
+    if (!month) continue;
     const day = Number(m[3]);
     const year = m[4] ? Number(m[4]) : referenceYear;
-    const value = toIso(year, month, day);
-    if (value) found.add(value);
+    pushHit(hits, m.index ?? 0, toIso(year, month, day));
   }
 
-  const dayMonth = text.matchAll(
-    /\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)(?:,?\s*(20\d{2}))?\b/gi
+  const dayMonth = parseText.matchAll(
+    new RegExp(
+      `(\\d{1,2})(?:st|nd|rd|th)?\\s+(${MONTH_RE})ه?(?![\\p{L}])(?:,?\\s*(20\\d{2}))?`,
+      'giu'
+    )
   );
   for (const m of dayMonth) {
+    const month = monthFromToken(m[2]);
+    if (!month) continue;
     const day = Number(m[1]);
-    const month = MONTHS[m[2].toLowerCase()];
     const year = m[3] ? Number(m[3]) : referenceYear;
-    const value = toIso(year, month, day);
-    if (value) found.add(value);
+    pushHit(hits, m.index ?? 0, toIso(year, month, day));
   }
 
-  // "14 or 18 August" — shared month across compared day numbers.
-  const orDays = text.matchAll(
-    /\b(\d{1,2})(?:st|nd|rd|th)?\s+or\s+(\d{1,2})(?:st|nd|rd|th)?\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)(?:,?\s*(20\d{2}))?\b/gi
+  // Shared-month lists: "14 or 18 August", "۱۲ یا ۱۵ سپتامبر",
+  // "بین ۱۲ و ۱۵ سپتامبر", "۱۲، ۱۵ و ۱۸ سپتامبر".
+  const orDays = parseText.matchAll(
+    new RegExp(
+      `(?:بین[\\u200c\\s]+)?(\\d{1,2}(?:st|nd|rd|th)?(?:[\\u200c\\s]*(?:یا|و|,|،|or|and)[\\u200c\\s]*\\d{1,2}(?:st|nd|rd|th)?)+)\\s+(${MONTH_RE})ه?(?![\\p{L}])(?:,?\\s*(20\\d{2}))?`,
+      'giu'
+    )
   );
   for (const m of orDays) {
-    const month = MONTHS[m[3].toLowerCase()];
-    const year = m[4] ? Number(m[4]) : referenceYear;
-    const a = toIso(year, month, Number(m[1]));
-    const b = toIso(year, month, Number(m[2]));
-    if (a) found.add(a);
-    if (b) found.add(b);
+    const month = monthFromToken(m[2]);
+    if (!month) continue;
+    const year = m[3] ? Number(m[3]) : referenceYear;
+    const list = m[1];
+    const listStart = m.index ?? 0;
+    for (const dayMatch of list.matchAll(/\d{1,2}/g)) {
+      const day = Number(dayMatch[0]);
+      pushHit(
+        hits,
+        listStart + (dayMatch.index ?? 0),
+        toIso(year, month, day)
+      );
+    }
   }
 
-  return [...found].sort();
+  return uniqueInAppearanceOrder(hits);
 }
 
 export function detectTimeScope(
@@ -128,17 +271,18 @@ export function detectTimeScope(
   range_end?: string;
 } {
   const dates = extractExplicitDates(text, referenceYear);
-  const lower = text.toLowerCase();
+  const parseText = foldLocaleDigits(text);
+  const lower = parseText.toLowerCase();
 
   const rangeHint =
     /\b(next\s+\d+\s+days?|next\s+(week|month)|within\s+\d+\s+days?|in the next|date range|best (date|day|window) (in|within|over))\b/i.test(
-      text
-    ) || /\bfind the best\b/i.test(text);
+      parseText
+    ) ||
+    /\bfind the best\b/i.test(parseText) ||
+    hasFaFindHint(parseText);
 
-  if (rangeHint && dates.length < 2) {
-    return { scope: 'date_range', dates: [], range_start: undefined, range_end: undefined };
-  }
-
+  // Explicit Gregorian dates beat relative/search hints (Evaluate/Compare
+  // precedence). Relative phrases never materialize ISO bounds here.
   if (dates.length >= 2) {
     return { scope: 'multiple_dates', dates };
   }
@@ -146,10 +290,15 @@ export function detectTimeScope(
     return { scope: 'specific_date', dates };
   }
   if (rangeHint) {
-    return { scope: 'date_range', dates: [] };
+    return {
+      scope: 'date_range',
+      dates: [],
+      range_start: undefined,
+      range_end: undefined,
+    };
   }
 
-  // Explicit "today" is a stated scope — still not an implicit default.
+  // Explicit "today" is a stated EN scope — still not an implicit default.
   if (/\b(today|tonight|this morning|this afternoon)\b/i.test(lower)) {
     return { scope: 'specific_date', dates: [] };
   }
@@ -159,40 +308,56 @@ export function detectTimeScope(
 
 export function detectOperation(
   text: string,
-  timeScope: TimeScope
+  timeScope: TimeScope,
+  referenceYear = new Date().getUTCFullYear()
 ): DecisionOperation {
-  const lower = text.toLowerCase();
+  const parseText = foldLocaleDigits(text);
+  const lower = parseText.toLowerCase();
+  const dates = extractExplicitDates(text, referenceYear);
 
+  // A. 2+ parsed Gregorian candidates → Compare (order preserved upstream).
+  if (dates.length >= 2 || timeScope === 'multiple_dates') {
+    return 'compare';
+  }
+
+  // B. Exactly one explicit date (or EN "today" scope) → Evaluate.
+  // One date beats "best"/"بهترین" so Find is not inferred.
+  if (dates.length === 1 || timeScope === 'specific_date') {
+    return 'evaluate';
+  }
+
+  // C. Find requires search/range semantics — not every بهتر/بهترین.
   if (
     /\b(find the best|best date|best day|best window|when (should|is|can) i|what's the best (date|day|time))\b/i.test(
       lower
     ) ||
-    timeScope === 'date_range'
+    timeScope === 'date_range' ||
+    hasFaFindHint(parseText)
   ) {
     return 'find';
   }
 
   if (
-    timeScope === 'multiple_dates' ||
-    /\b(or|vs\.?|versus|compare|which (date|day|one) (is )?better)\b/i.test(lower)
+    hasFaCompareLanguage(parseText) ||
+    /\b(or|vs\.?|versus|compare|which (date|day|one) (is )?better)\b/i.test(
+      lower
+    )
   ) {
-    // "14 or 18" style without verbs still compares when multiple dates exist.
-    if (timeScope === 'multiple_dates') return 'compare';
-    if (/\b(compare|which|vs\.?|versus)\b/i.test(lower)) return 'compare';
+    if (/\b(compare|which|vs\.?|versus)\b/i.test(lower) || hasFaCompareLanguage(parseText)) {
+      return 'compare';
+    }
   }
 
   if (
-    timeScope === 'specific_date' ||
     /\b(is .+ good|evaluate|check (this|the) date|how (is|good) .+ for)\b/i.test(
       lower
     )
   ) {
-    if (timeScope === 'specific_date') return 'evaluate';
+    return 'evaluate';
   }
 
   if (/\b(should i accept|should i go|should i take)\b/i.test(lower)) {
-    // Yes/no directional — evaluate when time known; else unresolved time.
-    return timeScope === 'none' ? 'evaluate' : 'evaluate';
+    return 'evaluate';
   }
 
   return 'unresolved';

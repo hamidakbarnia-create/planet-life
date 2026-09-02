@@ -10,21 +10,49 @@ import {
 } from '@/lib/decision-frame';
 
 describe('multilingual operation resolution honesty', () => {
-  const faSamples = [
-    '۱۸ آگوست برای مصاحبه خوبه؟',
-    '۱۴ یا ۱۸ آگوست؟',
-    'بهترین تاریخ را در ۳۰ روز آینده پیدا کن',
-    'با سرمایه‌گذار جلسه دارم',
-  ];
+  it('resolves Persian Gregorian dates and search hints exactly', () => {
+    const evaluate = buildDecisionFrame('۱۸ آگوست برای مصاحبه خوبه؟', {
+      reference_year: 2026,
+    });
+    expect(evaluate.operation).toBe('evaluate');
+    expect(evaluate.time.scope).toBe('specific_date');
+    expect(evaluate.time.dates).toEqual(['2026-08-18']);
+    expect(evaluate.raw_intent).toBe('۱۸ آگوست برای مصاحبه خوبه؟');
 
-  const arSamples = ['هل يوم 18 أغسطس مناسب لمقابلتي؟'];
-  const ruSamples = [
-    '14 или 18 августа?',
-    'Найди лучшую дату в ближайшие 30 дней',
-  ];
+    const compare = buildDecisionFrame('۱۴ یا ۱۸ آگوست؟', {
+      reference_year: 2026,
+    });
+    expect(compare.operation).toBe('compare');
+    expect(compare.time.scope).toBe('multiple_dates');
+    expect(compare.time.dates).toEqual(['2026-08-14', '2026-08-18']);
 
-  it('leaves Persian/AR/RU unsupported natural language unresolved', () => {
-    for (const text of [...faSamples, ...arSamples, ...ruSamples]) {
+    const find = buildDecisionFrame('بهترین تاریخ را در ۳۰ روز آینده پیدا کن');
+    expect(find.operation).toBe('find');
+    expect(find.time.scope).toBe('date_range');
+    expect(find.time.range_start).toBeUndefined();
+    expect(find.time.range_end).toBeUndefined();
+
+    const vague = buildDecisionFrame('با سرمایه‌گذار جلسه دارم');
+    expect(vague.operation).toBe('unresolved');
+    expect(vague.time.scope).toBe('none');
+    expect(vague.time.dates ?? []).toEqual([]);
+  });
+
+  it('leaves Jalali numeric/month forms unparsed pending Phase 1B.1B', () => {
+    for (const text of ['۱۵ مهر', '۲۵ شهریور', '۱۴۰۵/۰۶/۲۵', '۱۴۰۵-۰۶-۲۵']) {
+      const frame = buildDecisionFrame(text, { reference_year: 2026 });
+      expect(frame.time.dates ?? []).toEqual([]);
+      expect(frame.time.scope).toBe('none');
+    }
+  });
+
+  it('leaves AR/RU unsupported natural language unresolved', () => {
+    const arSamples = ['هل يوم 18 أغسطس مناسب لمقابلتي؟'];
+    const ruSamples = [
+      '14 или 18 августа?',
+      'Найди лучшую дату в ближайшие 30 дней',
+    ];
+    for (const text of [...arSamples, ...ruSamples]) {
       const frame = buildDecisionFrame(text, { reference_year: 2026 });
       // Must not silently invent evaluate/compare/find from unsupported NL.
       expect(

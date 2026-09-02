@@ -65,3 +65,9 @@ export {
   canEvaluateInProduction,
   canExecuteInProduction,
 } from '@/lib/ask-home';
+export {
+  FIND_MAX_RANGE_DAYS,
+  FIND_MIN_RANGE_DAYS,
+  inclusiveFindDayCount,
+  isValidFindInclusiveRange,
+} from '@/lib/decision-frame';

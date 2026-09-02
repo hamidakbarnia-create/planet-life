@@ -96,4 +96,16 @@ describe('recommendedOperation', () => {
       recommendedOperation('بهترین زمان برای لانچ پروژه یا محصول جدید')
     ).toBe('unresolved');
   });
+
+  it('recommends FA Evaluate / Compare / Find without auto-selecting persist', () => {
+    expect(recommendedOperation('آیا ۱۲ سپتامبر برای مصاحبه خوبه؟', 2026)).toBe(
+      'evaluate'
+    );
+    expect(
+      recommendedOperation('۱۲ یا ۱۵ سپتامبر کدوم بهتره؟', 2026)
+    ).toBe('compare');
+    expect(
+      recommendedOperation('بهترین روز را در ۳۰ روز آینده پیدا کن')
+    ).toBe('find');
+  });
 });
