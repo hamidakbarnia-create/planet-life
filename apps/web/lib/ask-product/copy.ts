@@ -39,6 +39,8 @@ export type AskProductCopy = {
   findRangeEnd: string;
   findRangeMissing: string;
   findRangeInvalid: string;
+  findRangeTooShort: string;
+  findRangeTooLong: string;
   persistAndEvaluate: string;
   persistAndCompare: string;
   persistAndFind: string;
@@ -235,11 +237,13 @@ const EN: AskProductCopy = {
   compareDuplicateDates: 'Each candidate needs a unique date.',
   findRangePrompt: 'What date range should we scan?',
   findRangeHint:
-    'Enter an inclusive start and end. METIORO never assumes today or invents a single best date.',
+    'Enter an inclusive start and end of 7 to 90 days. METIORO never assumes today or invents a single best date.',
   findRangeStart: 'Start',
   findRangeEnd: 'End',
   findRangeMissing: 'Please enter both start and end dates.',
-  findRangeInvalid: 'End date must be on or after the start date.',
+  findRangeInvalid: 'End date must be after the start date.',
+  findRangeTooShort: 'Choose a range of at least 7 inclusive days.',
+  findRangeTooLong: 'Choose a range of at most 90 inclusive days.',
   persistAndEvaluate: 'Evaluate this date',
   persistAndCompare: 'Compare these dates',
   persistAndFind: 'Find stronger timing windows',
@@ -471,11 +475,13 @@ const FA: AskProductCopy = {
   compareDuplicateDates: 'هر گزینه باید تاریخ یکتا داشته باشد.',
   findRangePrompt: 'کدام بازهٔ زمانی را جستجو کنیم؟',
   findRangeHint:
-    'شروع و پایان را وارد کنید. METIORO هرگز «امروز» یا یک تاریخ برتر ساختگی فرض نمی‌کند.',
+    'شروع و پایانِ ۷ تا ۹۰ روزه را وارد کنید. METIORO هرگز «امروز» یا یک تاریخ برتر ساختگی فرض نمی‌کند.',
   findRangeStart: 'شروع',
   findRangeEnd: 'پایان',
   findRangeMissing: 'لطفاً هر دو تاریخ شروع و پایان را وارد کنید.',
-  findRangeInvalid: 'تاریخ پایان باید بعد از شروع یا برابر آن باشد.',
+  findRangeInvalid: 'تاریخ پایان باید بعد از تاریخ شروع باشد.',
+  findRangeTooShort: 'بازه باید حداقل ۷ روز شامل ابتدا و انتها باشد.',
+  findRangeTooLong: 'بازه باید حداکثر ۹۰ روز شامل ابتدا و انتها باشد.',
   persistAndEvaluate: 'ارزیابی این تاریخ',
   persistAndCompare: 'مقایسه این تاریخ‌ها',
   persistAndFind: 'یافتن پنجره‌های زمان‌بندی قوی‌تر',
@@ -708,11 +714,13 @@ const AR: AskProductCopy = {
   compareDuplicateDates: 'يجب أن يكون لكل خيار تاريخ فريد.',
   findRangePrompt: 'ما النطاق الزمني الذي نمسحه؟',
   findRangeHint:
-    'أدخل بداية ونهاية شاملتين. لا تفترض METIORO «اليوم» ولا تختلق تاريخاً أفضل وحيداً.',
+    'أدخل بداية ونهاية شاملتين من 7 إلى 90 يوماً. لا تفترض METIORO «اليوم» ولا تختلق تاريخاً أفضل وحيداً.',
   findRangeStart: 'البداية',
   findRangeEnd: 'النهاية',
   findRangeMissing: 'يرجى إدخال تاريخي البداية والنهاية.',
-  findRangeInvalid: 'يجب أن يكون تاريخ النهاية في يوم البداية أو بعده.',
+  findRangeInvalid: 'يجب أن يكون تاريخ النهاية بعد تاريخ البداية.',
+  findRangeTooShort: 'اختر نطاقاً لا يقل عن 7 أيام شاملة.',
+  findRangeTooLong: 'اختر نطاقاً لا يزيد عن 90 يوماً شاملاً.',
   persistAndEvaluate: 'تقييم هذا التاريخ',
   persistAndCompare: 'مقارنة هذه التواريخ',
   persistAndFind: 'البحث عن نوافذ توقيت أقوى',
@@ -942,11 +950,13 @@ const RU: AskProductCopy = {
   compareDuplicateDates: 'У каждого варианта должна быть уникальная дата.',
   findRangePrompt: 'Какой диапазон дат просканировать?',
   findRangeHint:
-    'Укажите включительные начало и конец. METIORO не подставляет «сегодня» и не выдумывает единственную лучшую дату.',
+    'Укажите включительные начало и конец от 7 до 90 дней. METIORO не подставляет «сегодня» и не выдумывает единственную лучшую дату.',
   findRangeStart: 'Начало',
   findRangeEnd: 'Конец',
   findRangeMissing: 'Укажите и начальную, и конечную дату.',
-  findRangeInvalid: 'Дата окончания должна быть не раньше начала.',
+  findRangeInvalid: 'Дата окончания должна быть позже начала.',
+  findRangeTooShort: 'Выберите диапазон не менее 7 включительных дней.',
+  findRangeTooLong: 'Выберите диапазон не более 90 включительных дней.',
   persistAndEvaluate: 'Оценить эту дату',
   persistAndCompare: 'Сравнить эти даты',
   persistAndFind: 'Найти более сильные окна тайминга',

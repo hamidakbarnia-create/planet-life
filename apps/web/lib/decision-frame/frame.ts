@@ -8,6 +8,7 @@ import {
   detectOperation,
   detectTimeScope,
   isOpenEndedIntent,
+  isValidFindInclusiveRange,
   optionsFromDates,
 } from './resolve';
 
@@ -29,14 +30,12 @@ export function buildDecisionFrame(
   }
 ): DecisionFrameV1 {
   const raw_intent = rawIntent.trim();
-  const detectedTime = detectTimeScope(
-    raw_intent,
-    extras?.reference_year ?? new Date().getUTCFullYear()
-  );
+  const referenceYear = extras?.reference_year ?? new Date().getUTCFullYear();
+  const detectedTime = detectTimeScope(raw_intent, referenceYear);
   const scope = extras?.time_scope ?? detectedTime.scope;
   const dates = extras?.dates ?? detectedTime.dates;
   const operation =
-    extras?.operation ?? detectOperation(raw_intent, scope);
+    extras?.operation ?? detectOperation(raw_intent, scope, referenceYear);
   const open_ended = isOpenEndedIntent(raw_intent);
 
   const unknowns: string[] = [];
@@ -47,7 +46,7 @@ export function buildDecisionFrame(
   if (scope === 'specific_date' && dates.length === 0) {
     unknowns.push('Specific date value');
   }
-  if (scope === 'multiple_dates' && dates.length < 2) {
+  if (scope === 'multiple_dates' && (dates.length < 2 || dates.length > 5)) {
     unknowns.push('Dates to compare');
   }
   if (scope === 'date_range' && !extras?.range_start && !detectedTime.range_start) {
@@ -62,11 +61,21 @@ export function buildDecisionFrame(
     pending_clarification = 'open_ended_axis';
   } else if (operation === 'unresolved') {
     pending_clarification = 'operation';
-  } else if (operation === 'compare' && dates.length < 2) {
+  } else if (
+    operation === 'compare' &&
+    (dates.length < 2 || dates.length > 5)
+  ) {
+    pending_clarification = 'time';
+  } else if (
+    operation === 'find' &&
+    scope === 'date_range' &&
+    !(extras?.range_start && extras?.range_end) &&
+    !(detectedTime.range_start && detectedTime.range_end)
+  ) {
     pending_clarification = 'time';
   }
   // EVALUATE may proceed without a date (yes/no directional). FIND with
-  // date_range intent may proceed with unknown bounds visible in unknowns.
+  // date_range intent keeps unknown bounds visible until the user supplies ISO.
 
   return {
     schema_version: DECISION_FRAME_SCHEMA_VERSION,
@@ -92,11 +101,9 @@ export function recommendedOperation(
   rawIntent: string,
   referenceYear?: number
 ): DecisionOperation {
-  const time = detectTimeScope(
-    rawIntent,
-    referenceYear ?? new Date().getUTCFullYear()
-  );
-  return detectOperation(rawIntent, time.scope);
+  const year = referenceYear ?? new Date().getUTCFullYear();
+  const time = detectTimeScope(rawIntent, year);
+  return detectOperation(rawIntent, time.scope, year);
 }
 
 function isIsoDate(value: string | undefined): value is string {
@@ -293,7 +300,8 @@ export function applyFindDateRange(
   if (
     !/^\d{4}-\d{2}-\d{2}$/.test(start) ||
     !/^\d{4}-\d{2}-\d{2}$/.test(end) ||
-    start > end
+    start > end ||
+    !isValidFindInclusiveRange(start, end)
   ) {
     return {
       ...frame,

@@ -149,6 +149,23 @@ describe('AskClarificationFlow explicit operation selector', () => {
     expect(find.textContent).toContain(copy.comingSoon);
   });
 
+  it('FA Evaluate recommendation still shows the selector (PR #35)', () => {
+    const copy = getAskProductCopy('fa');
+    const frame = buildDecisionFrame('آیا ۱۲ سپتامبر برای مصاحبه خوبه؟', {
+      decision_type_id: 'car-interview',
+      reference_year: 2026,
+    });
+    renderFlow(frame, 'fa');
+    expect(screen.getByTestId('examine-choices')).toBeTruthy();
+    expect(
+      screen.getByTestId('examine-evaluate').getAttribute('data-recommended')
+    ).toBe('true');
+    expect(screen.getByTestId('examine-evaluate').textContent).toContain(
+      copy.examineRecommended
+    );
+    expect(persistFrameToCase).not.toHaveBeenCalled();
+  });
+
   it('English auto-Find still shows the selector with Find recommended', () => {
     const frame = buildDecisionFrame(
       'Find the best date in the next 30 days',
@@ -259,6 +276,44 @@ describe('AskClarificationFlow explicit operation selector', () => {
     expect(screen.getByTestId('examine-compare').hasAttribute('disabled')).toBe(
       true
     );
+  });
+
+  it('rejects Find ranges outside the 7–90 inclusive contract before persist', () => {
+    const copy = getAskProductCopy('en');
+    render(
+      <Harness
+        initial={buildDecisionFrame('Find the best date in the next 30 days', {
+          decision_type_id: 'car-interview',
+        })}
+      />
+    );
+    const start = screen.getByTestId('ask-find-range-start');
+    const end = screen.getByTestId('ask-find-range-end');
+
+    fireEvent.change(start, { target: { value: '2026-09-01' } });
+    fireEvent.change(end, { target: { value: '2026-09-06' } });
+    fireEvent.click(screen.getByTestId('ask-find-range-continue'));
+    expect(screen.getByRole('alert').textContent).toBe(copy.findRangeTooShort);
+    expect(screen.queryByTestId('ask-ready-find')).toBeNull();
+    expect(persistFrameToCase).not.toHaveBeenCalled();
+
+    fireEvent.change(end, { target: { value: '2026-11-30' } });
+    fireEvent.click(screen.getByTestId('ask-find-range-continue'));
+    expect(screen.getByRole('alert').textContent).toBe(copy.findRangeTooLong);
+
+    fireEvent.change(end, { target: { value: '2026-09-01' } });
+    fireEvent.click(screen.getByTestId('ask-find-range-continue'));
+    expect(screen.getByRole('alert').textContent).toBe(copy.findRangeTooShort);
+
+    fireEvent.change(end, { target: { value: '2026-08-01' } });
+    fireEvent.click(screen.getByTestId('ask-find-range-continue'));
+    expect(screen.getByRole('alert').textContent).toBe(copy.findRangeInvalid);
+
+    fireEvent.change(end, { target: { value: '2026-09-07' } });
+    fireEvent.click(screen.getByTestId('ask-find-range-continue'));
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByTestId('ask-ready-find')).toBeTruthy();
+    expect(persistFrameToCase).not.toHaveBeenCalled();
   });
 
   it.each(['en', 'fa', 'ar', 'ru'] as const)(
