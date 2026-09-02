@@ -3,7 +3,11 @@ export type {
   DecisionQuestionSource,
   DecisionRequest,
 } from './types';
-export { resolveDecisionRequest } from './resolver';
+export {
+  decisionTypeIdForActionType,
+  resolveDecisionRequest,
+  SHIPPED_ACTION_TYPE_TO_DECISION_TYPE,
+} from './resolver';
 export {
   normalizeTypedAskText,
   resolveTypedDecisionType,

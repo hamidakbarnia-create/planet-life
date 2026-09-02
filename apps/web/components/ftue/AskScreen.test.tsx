@@ -21,8 +21,10 @@ import { saveSession } from '@/lib/auth';
 import { getAskCopy } from '@/lib/ftue-i18n';
 import type { AppLang } from '@/lib/app-settings';
 import { getAskHomeCopy } from '@/lib/ask-home';
+import { resolveDecisionRequest } from '@/lib/decision-request';
 import { getProfileRepository, resetProfileRepositoryForTests } from '@/lib/profile';
 import { questionsByCategory } from '@/lib/question-library';
+import { resolveAskQuestion } from '@/lib/resolve-ask-question';
 
 const replace = vi.fn();
 const push = vi.fn();
@@ -432,16 +434,18 @@ describe('AskScreen', () => {
     ).toBeTruthy();
   });
 
-  it('routes car-interview popular cards into Decision Case intake', async () => {
+  it('routes car-interview popular cards into ASK frame with Decision Type', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
     await screen.findByRole('button', { name: 'Job interview' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Job interview' }));
 
-    expect(push).toHaveBeenCalledWith('/decision-cases/car-interview');
+    expect(push).toHaveBeenCalledWith('/ask/frame');
+    expect(push).not.toHaveBeenCalledWith('/decision-cases/car-interview');
     expect(push).not.toHaveBeenCalledWith('/result');
-    expect(push).not.toHaveBeenCalledWith('/ask/frame');
+    const stored = getAskQuestionRepository().loadQuestion();
+    expect(stored?.decision_type_id).toBe('car-interview');
   });
 
   it('routes launch-business popular cards into ASK frame with Decision Type', async () => {
@@ -506,7 +510,7 @@ describe('AskScreen', () => {
     );
   });
 
-  it('routes job-interview guided chips into Decision Case intake', async () => {
+  it('routes job-interview guided chips into ASK frame on submit', async () => {
     getProfileRepository().saveProfile(sampleProfile);
     renderAsk('en');
     await screen.findByRole('heading', {
@@ -518,10 +522,22 @@ describe('AskScreen', () => {
     fireEvent.click(
       guidedPanel().getByRole('button', { name: /^job interview$/i })
     );
-
-    expect(push).toHaveBeenCalledWith('/decision-cases/car-interview');
-    expect(push).not.toHaveBeenCalledWith('/result');
+    expect(push).not.toHaveBeenCalledWith('/decision-cases/car-interview');
     expect(push).not.toHaveBeenCalledWith('/ask/frame');
+
+    fireEvent.click(
+      screen.getByRole('button', { name: getAskHomeCopy('en').searchSubmitAria })
+    );
+    expect(push).toHaveBeenCalledWith('/ask/frame');
+    expect(push).not.toHaveBeenCalledWith('/decision-cases/car-interview');
+    const stored = getAskQuestionRepository().loadQuestion();
+    expect(stored?.source).toBe('suggestion');
+    expect(stored?.suggestion_id).toBe('job-interview');
+    expect(stored?.decision_type_id).toBeUndefined();
+    expect(
+      resolveDecisionRequest(resolveAskQuestion(stored!, 'en')).execution
+        .decisionTypeId
+    ).toBe('car-interview');
   });
 
   it('routes unrelated guided questions into Decision Frame path', async () => {
