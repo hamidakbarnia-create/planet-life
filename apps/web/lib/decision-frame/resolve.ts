@@ -6,10 +6,17 @@
  * - Prefer unresolved over invented operation/time.
  * - Window is not an operation (FIND owns best-window rendering).
  * - Digit folding is parse-only. raw_intent stays the original input.
- * - Jalali month names and Jalali numeric dates are not converted here
- *   (Phase 1B.1B). Relative ISO materialization is Phase 1B.2.
+ * - Strongly identified Jalali input is normalized to Gregorian ISO here
+ *   (Phase 1B.1B); every date leaving this module is Gregorian ISO.
+ * - Relative ISO materialization is Phase 1B.2.
  */
 
+import {
+  gregorianToJalali,
+  isJalaliYearInProductRange,
+  jalaliToGregorianIso,
+  jalaliYearContainingIso,
+} from '@/lib/calendar/jalali';
 import type {
   DecisionFrameOption,
   DecisionOperation,
@@ -75,7 +82,60 @@ const FA_MONTH_RE =
 
 const MONTH_RE = `(?:${EN_MONTH_RE}|${FA_MONTH_RE})`;
 
+/**
+ * Jalali (Shamsi) month names. Disjoint from the Persian spellings of the
+ * Gregorian months above: `مهر` is Jalali month 7, never September/October,
+ * and `سپتامبر` is Gregorian, never Jalali.
+ */
+const JALALI_MONTHS: Record<string, number> = {
+  فروردین: 1,
+  اردیبهشت: 2,
+  خرداد: 3,
+  تیر: 4,
+  مرداد: 5,
+  شهریور: 6,
+  مهر: 7,
+  آبان: 8,
+  آذر: 9,
+  دی: 10,
+  بهمن: 11,
+  اسفند: 12,
+};
+
+const JALALI_MONTH_RE =
+  'فروردین|اردیبهشت|خرداد|تیر|مرداد|شهریور|مهر|آبان|آذر|دی|بهمن|اسفند';
+
+/** List separators shared by Gregorian and Jalali Compare candidates. */
+const LIST_SEP = '[\\u200c\\s]*(?:یا|و|,|،|or|and)[\\u200c\\s]*';
+
 type DateHit = { index: number; iso: string };
+
+/**
+ * Parse reference. A Gregorian year keeps the Phase 1B.1A contract; a
+ * Gregorian ISO date is the precise form, because a bare Gregorian year spans
+ * two Jalali years and yearless Jalali months need one of them.
+ */
+export type ParseReference = number | string;
+
+function referenceGregorianYear(reference: ParseReference): number {
+  if (typeof reference === 'number') return reference;
+  const m = /^(\d{4})-\d{2}-\d{2}$/.exec(reference.trim());
+  return m ? Number(m[1]) : new Date().getUTCFullYear();
+}
+
+/**
+ * Jalali year used for yearless Jalali months: the Jalali year containing the
+ * reference date. Given only a Gregorian year, that is the Jalali year
+ * covering it from 21 March onward (year − 621), which holds ~286 of its days.
+ * Deterministic current/reference year — never the next future occurrence.
+ */
+function referenceJalaliYear(reference: ParseReference): number {
+  if (typeof reference === 'string') {
+    const contained = jalaliYearContainingIso(reference.trim());
+    if (contained != null) return contained;
+  }
+  return gregorianToJalali(referenceGregorianYear(reference), 7, 1).year;
+}
 
 /** Parse-only: Persian and Arabic-Indic digits → ASCII 0–9. */
 export function foldLocaleDigits(text: string): string {
@@ -184,12 +244,105 @@ function hasFaCompareLanguage(text: string): boolean {
   );
 }
 
-/** Extract explicit Gregorian calendar dates. Does not invent "today". */
+type JalaliScan = {
+  /** Converted Gregorian ISO hits, in appearance order. */
+  hits: DateHit[];
+  /** Strong Jalali evidence was present, whether or not it converted. */
+  evidence: boolean;
+};
+
+/**
+ * Recognize strongly identified Jalali dates and convert them to Gregorian
+ * ISO. Strong evidence is a Jalali month name with a day, or a year-first
+ * numeric date whose year is inside the supported Jalali horizon.
+ *
+ * Ambiguous numeric forms (`۰۶/۰۹`, `6/9`, `25/06`) and Gregorian-year forms
+ * (`06/09/2026`, `2026/09/16`) are never read as Jalali. Invalid Jalali dates
+ * record evidence but produce no ISO — the caller falls through to time
+ * clarification instead of inventing a date.
+ */
+function scanJalaliDates(parseText: string, referenceJy: number): JalaliScan {
+  const hits: DateHit[] = [];
+  let evidence = false;
+
+  const pushJalali = (
+    index: number,
+    year: number,
+    month: number,
+    day: number
+  ): void => {
+    pushHit(hits, index, jalaliToGregorianIso(year, month, day));
+  };
+
+  // Year-first numeric: "۱۴۰۵/۰۶/۲۵", "1405/06/25", "۱۴۰۵-۰۶-۲۵".
+  const numeric = parseText.matchAll(
+    /\b(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})\b/g
+  );
+  for (const m of numeric) {
+    const year = Number(m[1]);
+    if (!isJalaliYearInProductRange(year)) continue;
+    evidence = true;
+    pushJalali(m.index ?? 0, year, Number(m[2]), Number(m[3]));
+  }
+
+  // Day + Jalali month (+ optional Jalali year): "۱۵ مهر", "15 مهر 1405".
+  const dayMonth = parseText.matchAll(
+    new RegExp(
+      `(\\d{1,2})[\\u200c\\s]+(${JALALI_MONTH_RE})(?![\\p{L}])(?:[\\u200c\\s]*(\\d{4}))?`,
+      'gu'
+    )
+  );
+  for (const m of dayMonth) {
+    const month = JALALI_MONTHS[m[2] as string];
+    if (!month) continue;
+    evidence = true;
+    const year = m[3] ? Number(m[3]) : referenceJy;
+    // A stated year outside the Jalali horizon contradicts the month name.
+    if (m[3] && !isJalaliYearInProductRange(year)) continue;
+    pushJalali(m.index ?? 0, year, month, Number(m[1]));
+  }
+
+  // Shared Jalali month across a candidate list: "۱۵ یا ۲۰ مهر ۱۴۰۵",
+  // "بین ۱۵ و ۲۰ مهر", "۱۵، ۲۰ و ۲۵ مهر ۱۴۰۵".
+  const listDays = parseText.matchAll(
+    new RegExp(
+      `(?:بین[\\u200c\\s]+)?(\\d{1,2}(?:${LIST_SEP}\\d{1,2})+)[\\u200c\\s]+(${JALALI_MONTH_RE})(?![\\p{L}])(?:[\\u200c\\s]*(\\d{4}))?`,
+      'gu'
+    )
+  );
+  for (const m of listDays) {
+    const month = JALALI_MONTHS[m[2] as string];
+    if (!month) continue;
+    evidence = true;
+    const year = m[3] ? Number(m[3]) : referenceJy;
+    if (m[3] && !isJalaliYearInProductRange(year)) continue;
+    const list = m[1] as string;
+    const listStart = m.index ?? 0;
+    for (const dayMatch of list.matchAll(/\d{1,2}/g)) {
+      pushJalali(
+        listStart + (dayMatch.index ?? 0),
+        year,
+        month,
+        Number(dayMatch[0])
+      );
+    }
+  }
+
+  return { hits, evidence };
+}
+
+/**
+ * Extract explicit calendar dates as Gregorian ISO. Does not invent "today".
+ *
+ * Jalali input is normalized to Gregorian ISO; mixed-calendar input is left
+ * unresolved rather than silently combined into one candidate set.
+ */
 export function extractExplicitDates(
   text: string,
-  referenceYear = new Date().getUTCFullYear()
+  reference: ParseReference = new Date().getUTCFullYear()
 ): string[] {
   const parseText = foldLocaleDigits(text);
+  const referenceYear = referenceGregorianYear(reference);
   const hits: DateHit[] = [];
 
   const iso = parseText.matchAll(/\b(20\d{2})-(\d{2})-(\d{2})\b/g);
@@ -238,7 +391,7 @@ export function extractExplicitDates(
   // "بین ۱۲ و ۱۵ سپتامبر", "۱۲، ۱۵ و ۱۸ سپتامبر".
   const orDays = parseText.matchAll(
     new RegExp(
-      `(?:بین[\\u200c\\s]+)?(\\d{1,2}(?:st|nd|rd|th)?(?:[\\u200c\\s]*(?:یا|و|,|،|or|and)[\\u200c\\s]*\\d{1,2}(?:st|nd|rd|th)?)+)\\s+(${MONTH_RE})ه?(?![\\p{L}])(?:,?\\s*(20\\d{2}))?`,
+      `(?:بین[\\u200c\\s]+)?(\\d{1,2}(?:st|nd|rd|th)?(?:${LIST_SEP}\\d{1,2}(?:st|nd|rd|th)?)+)\\s+(${MONTH_RE})ه?(?![\\p{L}])(?:,?\\s*(20\\d{2}))?`,
       'giu'
     )
   );
@@ -258,19 +411,25 @@ export function extractExplicitDates(
     }
   }
 
-  return uniqueInAppearanceOrder(hits);
+  const jalali = scanJalaliDates(parseText, referenceJalaliYear(reference));
+
+  // One question speaks one calendar. Mixed Jalali/Gregorian input needs time
+  // clarification (Phase 1B.1B) instead of a silently merged candidate set.
+  if (jalali.evidence && hits.length > 0) return [];
+
+  return uniqueInAppearanceOrder(jalali.evidence ? jalali.hits : hits);
 }
 
 export function detectTimeScope(
   text: string,
-  referenceYear = new Date().getUTCFullYear()
+  reference: ParseReference = new Date().getUTCFullYear()
 ): {
   scope: TimeScope;
   dates: string[];
   range_start?: string;
   range_end?: string;
 } {
-  const dates = extractExplicitDates(text, referenceYear);
+  const dates = extractExplicitDates(text, reference);
   const parseText = foldLocaleDigits(text);
   const lower = parseText.toLowerCase();
 
@@ -309,13 +468,13 @@ export function detectTimeScope(
 export function detectOperation(
   text: string,
   timeScope: TimeScope,
-  referenceYear = new Date().getUTCFullYear()
+  reference: ParseReference = new Date().getUTCFullYear()
 ): DecisionOperation {
   const parseText = foldLocaleDigits(text);
   const lower = parseText.toLowerCase();
-  const dates = extractExplicitDates(text, referenceYear);
+  const dates = extractExplicitDates(text, reference);
 
-  // A. 2+ parsed Gregorian candidates → Compare (order preserved upstream).
+  // A. 2+ parsed candidates → Compare (order preserved upstream).
   if (dates.length >= 2 || timeScope === 'multiple_dates') {
     return 'compare';
   }

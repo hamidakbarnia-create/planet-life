@@ -34,7 +34,9 @@ describe('Phase 1B.1A localized resolution matrix', () => {
     expect(extractExplicitDates('۱۸ اوت', YEAR)).toEqual(['2026-08-18']);
     expect(extractExplicitDates('۱۲ سپتامبر', YEAR)).toEqual(['2026-09-12']);
     expect(extractExplicitDates('۱ ژانویه', YEAR)).toEqual(['2026-01-01']);
-    expect(extractExplicitDates('۱۵ مهر', YEAR)).toEqual([]);
+    // مهر is Jalali month 7, converted as Jalali (Phase 1B.1B) — never read
+    // as Gregorian September/October by approximation.
+    expect(extractExplicitDates('۱۵ مهر', YEAR)).toEqual(['2026-10-07']);
   });
 
   it('D. recommends Evaluate for one FA Gregorian date + suitability', () => {
@@ -203,13 +205,18 @@ describe('Phase 1B.1A localized resolution matrix', () => {
     expect(frame.raw_intent).not.toContain('12');
   });
 
-  it('T. Jalali input stays unparsed in this PR (pending 1B.1B)', () => {
-    const pending = ['۱۵ مهر', '۲۵ شهریور', '۱۴۰۵/۰۶/۲۵', '۱۴۰۵-۰۶-۲۵'];
-    for (const text of pending) {
-      expect(extractExplicitDates(text, YEAR)).toEqual([]);
+  it('T. Jalali input normalizes to Gregorian ISO (Phase 1B.1B)', () => {
+    const normalized: Array<[string, string]> = [
+      ['۱۵ مهر', '2026-10-07'],
+      ['۲۵ شهریور', '2026-09-16'],
+      ['۱۴۰۵/۰۶/۲۵', '2026-09-16'],
+      ['۱۴۰۵-۰۶-۲۵', '2026-09-16'],
+    ];
+    for (const [text, iso] of normalized) {
+      expect(extractExplicitDates(text, YEAR)).toEqual([iso]);
       const time = detectTimeScope(text, YEAR);
-      expect(time.scope).not.toBe('specific_date');
-      expect(time.dates).toEqual([]);
+      expect(time.scope).toBe('specific_date');
+      expect(time.dates).toEqual([iso]);
     }
   });
 
