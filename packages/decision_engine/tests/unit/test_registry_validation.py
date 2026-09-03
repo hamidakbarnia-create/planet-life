@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, get_args
 
 import pytest
 from pydantic import ValidationError
@@ -17,7 +17,13 @@ from packages.decision_engine.registry.loader import (
     list_decision_types,
     registry_by_id,
 )
-from packages.decision_engine.registry.schema import EXPECTED_TYPE_IDS
+from packages.decision_engine.registry.schema import (
+    DecisionTypeId,
+    DecisionTypeRegistry,
+    EXPECTED_RECORDS,
+    EXPECTED_REGISTRY_SIZE,
+    EXPECTED_TYPE_IDS,
+)
 
 
 CANONICAL = (
@@ -25,6 +31,8 @@ CANONICAL = (
     / "registry"
     / "decision_types.v1.json"
 )
+
+WRONG_SIZE_ERROR = rf"validation failed|exactly {EXPECTED_REGISTRY_SIZE}"
 
 
 def _canonical_payload() -> dict[str, Any]:
@@ -37,11 +45,34 @@ def _write(tmp_path: Path, payload: Any) -> Path:
     return path
 
 
-def test_canonical_registry_contains_exactly_five_authorized_types() -> None:
+def test_canonical_registry_contains_exactly_the_authorized_types() -> None:
     records = list_decision_types()
 
-    assert len(records) == 5
+    assert len(records) == EXPECTED_REGISTRY_SIZE
     assert {record.decision_type_id for record in records} == EXPECTED_TYPE_IDS
+
+
+def test_authorized_ids_derive_from_the_decision_type_id_literal() -> None:
+    assert EXPECTED_TYPE_IDS == frozenset(get_args(DecisionTypeId))
+    assert frozenset(EXPECTED_RECORDS) == EXPECTED_TYPE_IDS
+    assert EXPECTED_REGISTRY_SIZE == len(EXPECTED_TYPE_IDS)
+
+
+def test_registry_size_bounds_derive_from_authority() -> None:
+    """Registry capacity tracks the authorized set instead of a fixed count."""
+
+    metadata = DecisionTypeRegistry.model_fields["decision_types"].metadata
+    declared = {
+        bound
+        for constraint in metadata
+        for bound in (
+            getattr(constraint, "min_length", None),
+            getattr(constraint, "max_length", None),
+        )
+        if bound is not None
+    }
+
+    assert declared == {EXPECTED_REGISTRY_SIZE}
 
 
 def test_canonical_type_metadata_is_available() -> None:
@@ -80,7 +111,7 @@ def test_extra_type_is_rejected(tmp_path: Path) -> None:
     extra["decision_type_id"] = "tim-extra"
     payload["decision_types"].append(extra)
 
-    with pytest.raises(RegistryLoadError, match="validation failed|exactly 5"):
+    with pytest.raises(RegistryLoadError, match=WRONG_SIZE_ERROR):
         _load_registry(_write(tmp_path, payload))
 
 
@@ -88,7 +119,19 @@ def test_missing_authorized_type_is_rejected(tmp_path: Path) -> None:
     payload = _canonical_payload()
     payload["decision_types"] = payload["decision_types"][:2]
 
-    with pytest.raises(RegistryLoadError, match="validation failed|exactly 5"):
+    with pytest.raises(RegistryLoadError, match=WRONG_SIZE_ERROR):
+        _load_registry(_write(tmp_path, payload))
+
+
+def test_unauthorized_type_id_is_rejected_at_unchanged_size(
+    tmp_path: Path,
+) -> None:
+    """Capacity derives from authority; the authorized id set stays closed."""
+
+    payload = _canonical_payload()
+    payload["decision_types"][0]["decision_type_id"] = "tim-unauthorized"
+
+    with pytest.raises(RegistryLoadError, match="validation failed"):
         _load_registry(_write(tmp_path, payload))
 
 

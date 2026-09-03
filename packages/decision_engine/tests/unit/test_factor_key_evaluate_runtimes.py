@@ -1,4 +1,8 @@
-"""Four-runtime evaluate packages preserve factor_key without score drift."""
+"""Every evaluate runtime preserves factor_key without score drift.
+
+One test per shipped evaluate runtime. New runtimes add a case here; the file
+is not structured around a fixed runtime count.
+"""
 
 from __future__ import annotations
 
