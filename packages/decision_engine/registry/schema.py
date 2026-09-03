@@ -7,7 +7,7 @@ canonical type records are authorized.
 
 from __future__ import annotations
 
-from typing import Any, Literal, Mapping
+from typing import Any, Final, Literal, Mapping, get_args
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -137,23 +137,11 @@ class DecisionTypeRecord(RegistryModel):
     risk_context: RiskContext = Field(default_factory=RiskContext)
 
 
-class DecisionTypeRegistry(RegistryModel):
-    schema_version: RegistrySchemaVersion
-    decision_types: tuple[DecisionTypeRecord, ...] = Field(
-        min_length=5,
-        max_length=5,
-    )
-
-
-EXPECTED_TYPE_IDS: frozenset[str] = frozenset(
-    {
-        "tim-compare-three",
-        "car-interview",
-        "mar-wedding-date",
-        "bus-investor-meeting",
-        "bus-product-launch",
-    }
-)
+# Canonical registry authority. Authorizing a Decision Type requires two
+# explicit edits: extend ``DecisionTypeId`` and add the matching
+# ``EXPECTED_RECORDS`` entry. Registry size is derived from those declarations
+# so the authorized count is never restated as a literal.
+EXPECTED_TYPE_IDS: Final[frozenset[str]] = frozenset(get_args(DecisionTypeId))
 
 EXPECTED_RECORDS: dict[str, tuple[str, tuple[str, ...]]] = {
     "tim-compare-three": ("timing_opt", ("compare_dates",)),
@@ -175,6 +163,25 @@ EXPECTED_RECORDS: dict[str, tuple[str, tuple[str, ...]]] = {
     ),
 }
 
+if frozenset(EXPECTED_RECORDS) != EXPECTED_TYPE_IDS:
+    _missing = sorted(EXPECTED_TYPE_IDS - frozenset(EXPECTED_RECORDS))
+    _unexpected = sorted(frozenset(EXPECTED_RECORDS) - EXPECTED_TYPE_IDS)
+    raise RuntimeError(
+        "registry authority is inconsistent: DecisionTypeId and "
+        "EXPECTED_RECORDS must authorize the same decision type ids; "
+        f"missing={_missing}, unexpected={_unexpected}"
+    )
+
+EXPECTED_REGISTRY_SIZE: Final[int] = len(EXPECTED_TYPE_IDS)
+
+
+class DecisionTypeRegistry(RegistryModel):
+    schema_version: RegistrySchemaVersion
+    decision_types: tuple[DecisionTypeRecord, ...] = Field(
+        min_length=EXPECTED_REGISTRY_SIZE,
+        max_length=EXPECTED_REGISTRY_SIZE,
+    )
+
 
 __all__ = [
     "DEADLINE_PRIORITY_INVARIANT",
@@ -183,6 +190,7 @@ __all__ = [
     "DecisionTypeRecord",
     "DecisionTypeRegistry",
     "EXPECTED_RECORDS",
+    "EXPECTED_REGISTRY_SIZE",
     "EXPECTED_TYPE_IDS",
     "ResolvedRiskContext",
     "RiskContext",
