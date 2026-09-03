@@ -38,8 +38,23 @@ describe('multilingual operation resolution honesty', () => {
     expect(vague.time.dates ?? []).toEqual([]);
   });
 
-  it('leaves Jalali numeric/month forms unparsed pending Phase 1B.1B', () => {
-    for (const text of ['۱۵ مهر', '۲۵ شهریور', '۱۴۰۵/۰۶/۲۵', '۱۴۰۵-۰۶-۲۵']) {
+  it('normalizes Jalali numeric/month forms to Gregorian ISO', () => {
+    const normalized: Array<[string, string]> = [
+      ['۱۵ مهر', '2026-10-07'],
+      ['۲۵ شهریور', '2026-09-16'],
+      ['۱۴۰۵/۰۶/۲۵', '2026-09-16'],
+      ['۱۴۰۵-۰۶-۲۵', '2026-09-16'],
+    ];
+    for (const [text, iso] of normalized) {
+      const frame = buildDecisionFrame(text, { reference_year: 2026 });
+      expect(frame.time.dates).toEqual([iso]);
+      expect(frame.time.scope).toBe('specific_date');
+      expect(frame.raw_intent).toBe(text);
+    }
+  });
+
+  it('leaves invalid or ambiguous Jalali-looking input unresolved', () => {
+    for (const text of ['۱۴۰۵/۱۳/۰۱', '۱۴۰۵/۰۶/۳۲', '۰۶/۰۹', '۲۵/۰۶']) {
       const frame = buildDecisionFrame(text, { reference_year: 2026 });
       expect(frame.time.dates ?? []).toEqual([]);
       expect(frame.time.scope).toBe('none');

@@ -5,6 +5,7 @@ import {
   type TimeScope,
 } from './types';
 import {
+  type ParseReference,
   detectOperation,
   detectTimeScope,
   isOpenEndedIntent,
@@ -27,15 +28,21 @@ export function buildDecisionFrame(
     range_start?: string;
     range_end?: string;
     reference_year?: number;
+    /** Gregorian ISO reference date. Fixes the Jalali year for yearless
+     * Jalali months more precisely than `reference_year` alone. */
+    reference_date?: string;
   }
 ): DecisionFrameV1 {
   const raw_intent = rawIntent.trim();
-  const referenceYear = extras?.reference_year ?? new Date().getUTCFullYear();
-  const detectedTime = detectTimeScope(raw_intent, referenceYear);
+  const reference: ParseReference =
+    extras?.reference_date ??
+    extras?.reference_year ??
+    new Date().getUTCFullYear();
+  const detectedTime = detectTimeScope(raw_intent, reference);
   const scope = extras?.time_scope ?? detectedTime.scope;
   const dates = extras?.dates ?? detectedTime.dates;
   const operation =
-    extras?.operation ?? detectOperation(raw_intent, scope, referenceYear);
+    extras?.operation ?? detectOperation(raw_intent, scope, reference);
   const open_ended = isOpenEndedIntent(raw_intent);
 
   const unknowns: string[] = [];
@@ -99,11 +106,11 @@ export function buildDecisionFrame(
 /** Detector suggestion only — never persist or skip the selector. */
 export function recommendedOperation(
   rawIntent: string,
-  referenceYear?: number
+  reference?: ParseReference
 ): DecisionOperation {
-  const year = referenceYear ?? new Date().getUTCFullYear();
-  const time = detectTimeScope(rawIntent, year);
-  return detectOperation(rawIntent, time.scope, year);
+  const ref = reference ?? new Date().getUTCFullYear();
+  const time = detectTimeScope(rawIntent, ref);
+  return detectOperation(rawIntent, time.scope, ref);
 }
 
 function isIsoDate(value: string | undefined): value is string {
