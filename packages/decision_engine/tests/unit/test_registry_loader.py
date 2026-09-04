@@ -17,6 +17,7 @@ from packages.decision_engine.registry.loader import (
     _reset_registry_cache_for_tests,
     resolve_decision_type,
 )
+from packages.decision_engine.registry.schema import EXPECTED_TYPE_IDS
 
 CANONICAL = Path(__file__).resolve().parents[2] / "registry" / "decision_types.v1.json"
 
@@ -132,18 +133,12 @@ def test_json_is_only_canonical_record_source() -> None:
     assert CANONICAL.is_file()
     data = json.loads(CANONICAL.read_text(encoding="utf-8"))
     ids = {row["decision_type_id"] for row in data["decision_types"]}
-    assert ids == {
-        "tim-compare-three",
-        "car-interview",
-        "mar-wedding-date",
-        "bus-investor-meeting",
-        "bus-product-launch",
-    }
+    # Authority lives in the schema literal; the JSON must match it exactly.
+    assert ids == EXPECTED_TYPE_IDS
     loaded = _registry()
     assert set(loaded) == ids
     # Loader module must not embed a parallel decision-type allowlist table.
     source = Path(__file__).resolve().parents[2] / "registry" / "loader.py"
     text = source.read_text(encoding="utf-8")
-    assert "tim-compare-three" not in text
-    assert "car-interview" not in text
-    assert "mar-wedding-date" not in text
+    for type_id in EXPECTED_TYPE_IDS:
+        assert type_id not in text

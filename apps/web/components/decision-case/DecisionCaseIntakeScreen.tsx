@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { CarInterviewIntakeForm } from '@/components/decision-case/CarInterviewIntakeForm';
 import { InvestorMeetingIntakeForm } from '@/components/decision-case/InvestorMeetingIntakeForm';
+import { OfferNegotiationIntakeForm } from '@/components/decision-case/OfferNegotiationIntakeForm';
 import { ProductLaunchIntakeForm } from '@/components/decision-case/ProductLaunchIntakeForm';
 import { WeddingDateIntakeForm } from '@/components/decision-case/WeddingDateIntakeForm';
 import { getAskProductCopy } from '@/lib/ask-product';
@@ -20,6 +21,7 @@ import {
   type DecisionCaseIntake,
   type DecisionCaseResource,
   type InvestorMeetingIntake,
+  type OfferNegotiationIntake,
   type ProductLaunchIntake,
   type WeddingDateIntake,
 } from '@/lib/decision-case';
@@ -50,6 +52,25 @@ function intakeAsInvestor(intake: DecisionCaseIntake): InvestorMeetingIntake {
         : undefined,
     meeting_type:
       typeof intake.meeting_type === 'string' ? intake.meeting_type : undefined,
+  };
+}
+
+function intakeAsOfferNegotiation(
+  intake: DecisionCaseIntake
+): OfferNegotiationIntake {
+  return {
+    target_date:
+      typeof intake.target_date === 'string' ? intake.target_date : undefined,
+    negotiation_goal:
+      typeof intake.negotiation_goal === 'string'
+        ? intake.negotiation_goal
+        : undefined,
+    offer_stage:
+      typeof intake.offer_stage === 'string' ? intake.offer_stage : undefined,
+    counterparty_role:
+      typeof intake.counterparty_role === 'string'
+        ? intake.counterparty_role
+        : undefined,
   };
 }
 
@@ -148,7 +169,9 @@ export function DecisionCaseIntakeScreen({
         ? copy.intakeTitleWeddingDate
         : caseRecord?.decision_type_id === 'bus-product-launch'
           ? copy.intakeTitleProductLaunch
-          : copy.intakeTitle;
+          : caseRecord?.decision_type_id === 'car-offer-negotiation'
+            ? copy.intakeTitleOfferNegotiation
+            : copy.intakeTitle;
   const body =
     caseRecord?.decision_type_id === 'bus-investor-meeting'
       ? copy.intakeBodyInvestorMeeting
@@ -158,7 +181,9 @@ export function DecisionCaseIntakeScreen({
           ? caseRecord.mode === 'find_dates'
             ? copy.intakeBodyProductLaunchFind
             : copy.intakeBodyProductLaunch
-          : copy.intakeBody;
+          : caseRecord?.decision_type_id === 'car-offer-negotiation'
+            ? copy.intakeBodyOfferNegotiation
+            : copy.intakeBody;
 
   const persistAnswers = async (answers: Record<string, unknown>) => {
     if (caseVersion == null) {
@@ -322,6 +347,62 @@ export function DecisionCaseIntakeScreen({
             key={`${caseId}-${caseVersion ?? 0}`}
             lang={lang}
             initialIntake={intakeAsWedding(intake)}
+            caseMode={caseRecord?.mode}
+            submitting={busy}
+            onSubmitAnswers={async (answers) => {
+              setBusy(true);
+              setError('');
+              try {
+                await persistAnswers(answers);
+              } catch (err) {
+                setError(
+                  err instanceof Error ? err.message : copy.intakeSaveError
+                );
+              } finally {
+                setBusy(false);
+              }
+            }}
+            onComplete={async (answers) => {
+              setBusy(true);
+              setError('');
+              try {
+                const saved = await persistAnswers(answers);
+                if (!saved.is_complete) {
+                  setError(
+                    copy.intakeRequiredRemaining(
+                      saved.missing_required.join(', ')
+                    )
+                  );
+                  return;
+                }
+                const completed = await completeCaseIntake({
+                  caseId: saved.case.case_id,
+                  caseVersion: saved.case.case_version,
+                });
+                router.push(
+                  `/decision-cases/${completed.case.case_id}/result`
+                );
+              } catch (err) {
+                setError(
+                  err instanceof Error
+                    ? err.message
+                    : copy.intakeCompleteError
+                );
+              } finally {
+                setBusy(false);
+              }
+            }}
+          />
+        </div>
+      ) : null}
+
+      {!unsupported &&
+      caseRecord?.decision_type_id === 'car-offer-negotiation' ? (
+        <div className="mio-glass mio-glass--primary !p-5">
+          <OfferNegotiationIntakeForm
+            key={`${caseId}-${caseVersion ?? 0}`}
+            lang={lang}
+            initialIntake={intakeAsOfferNegotiation(intake)}
             caseMode={caseRecord?.mode}
             submitting={busy}
             onSubmitAnswers={async (answers) => {

@@ -88,6 +88,14 @@ const SHIPPED_ROWS = [
     guidedId: undefined,
     typedEn: 'Best day for our wedding ceremony?',
   },
+  {
+    semantic: 'Offer Negotiation',
+    expectedType: 'car-offer-negotiation',
+    expected: { evaluate: true, compare: false, find: false },
+    popularId: 'accept-job-offer',
+    guidedId: 'negotiate-offer',
+    typedEn: 'Is September 15 a good date to negotiate my job offer?',
+  },
 ] as const;
 
 describe('ASK shipped entry convergence', () => {
@@ -198,6 +206,7 @@ describe('ASK home must not shortcut to Decision Case', () => {
     ['launch-business', 'bus-product-launch'],
     ['meet-investor', 'bus-investor-meeting'],
     ['best-wedding-date', 'mar-wedding-date'],
+    ['accept-job-offer', 'car-offer-negotiation'],
   ] as const)('Popular %s enters /ask/frame with %s', async (popularId, decisionTypeId) => {
     render(<AskScreen copy={getAskCopy('en')} lang="en" />);
     await screen.findByTestId(`ask-popular-${popularId}`);
@@ -212,22 +221,6 @@ describe('ASK home must not shortcut to Decision Case', () => {
 
 describe('unsupported entry remain fail-closed', () => {
   it.each([
-    {
-      label: 'Guided negotiate-offer',
-      question: {
-        submitted_at: 1,
-        source: 'suggestion' as const,
-        suggestion_id: 'negotiate-offer',
-      },
-    },
-    {
-      label: 'Typed offer negotiation',
-      question: {
-        submitted_at: 1,
-        source: 'typed' as const,
-        text: 'Should I negotiate my job offer tomorrow?',
-      },
-    },
     {
       label: 'Guided salary',
       question: {

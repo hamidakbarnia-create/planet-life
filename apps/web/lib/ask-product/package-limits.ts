@@ -310,6 +310,34 @@ const CANONICAL_PACKAGE_LIMITS: Record<string, LimitLocales> = {
     ru: 'Альтернативные даты не искались.',
   },
 
+  // car-offer-negotiation EVALUATE
+  "This is negotiation/communication timing evidence, not a prediction of the employer's decision.":
+    {
+      en: "This is negotiation/communication timing evidence, not a prediction of the employer's decision.",
+      fa: 'این شواهد زمان‌بندی مذاکره/ارتباط است، نه پیش‌بینی تصمیم کارفرما.',
+      ar: 'هذا دليل توقيت التفاوض/التواصل، وليس تنبؤًا بقرار صاحب العمل.',
+      ru: 'Это доказательство тайминга переговоров/коммуникации, не прогноз решения работодателя.',
+    },
+  'No salary, benefit, or compensation outcome is predicted.': {
+    en: 'No salary, benefit, or compensation outcome is predicted.',
+    fa: 'هیچ نتیجه‌ای دربارهٔ حقوق، مزایا یا میزان جبران خدمت پیش‌بینی نمی‌شود.',
+    ar: 'لا يُتنبأ بأي نتيجة تتعلق بالراتب أو المزايا أو التعويض.',
+    ru: 'Никакой прогноз по зарплате, льготам или размеру вознаграждения не даётся.',
+  },
+  'Contract terms were not reviewed for legal validity.': {
+    en: 'Contract terms were not reviewed for legal validity.',
+    fa: 'مفاد قرارداد از نظر اعتبار حقوقی بررسی نشده است.',
+    ar: 'لم تُراجع بنود العقد من حيث الصحة القانونية.',
+    ru: 'Условия договора не проверялись на юридическую силу.',
+  },
+  'Timing evidence never indicates whether the employer will agree to any term.':
+    {
+      en: 'Timing evidence never indicates whether the employer will agree to any term.',
+      fa: 'شواهد زمان‌بندی هرگز نشان نمی‌دهد کارفرما با کدام شرط موافقت می‌کند.',
+      ar: 'لا تشير أدلة التوقيت أبدًا إلى ما إذا كان صاحب العمل سيوافق على أي بند.',
+      ru: 'Доказательства тайминга никогда не показывают, согласится ли работодатель с каким-либо условием.',
+    },
+
   // bus-investor-meeting COMPARE
   'Investor-meeting communication/negotiation timing comparison only — not investment outcome or funding success.':
     {

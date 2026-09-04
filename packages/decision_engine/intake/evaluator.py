@@ -310,3 +310,71 @@ def evaluate_product_launch_intake(
         is_complete=not missing,
         has_first_required_answer=bool(answered),
     )
+
+
+from packages.decision_engine.intake.offer_negotiation import (
+    OFFER_NEGOTIATION_SLOTS,
+    OfferNegotiationIntake,
+    merge_offer_negotiation_intake,
+    required_slot_ids_for_mode as offer_negotiation_required_slot_ids_for_mode,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class OfferNegotiationIntakeEvaluation:
+    intake: OfferNegotiationIntake
+    missing_required: tuple[str, ...]
+    answered_required: tuple[str, ...]
+    is_complete: bool
+    has_first_required_answer: bool
+
+
+def evaluate_offer_negotiation_intake(
+    intake: Mapping[str, Any] | OfferNegotiationIntake | None = None,
+    *,
+    answers: Mapping[str, Any] | None = None,
+    mode: str | None = None,
+) -> OfferNegotiationIntakeEvaluation:
+    """Evaluate completeness for car-offer-negotiation intake.
+
+    EVALUATE is the only supported mode, so target_date is always the single
+    required slot. Unauthorized enum values never count as answered.
+    """
+    if isinstance(intake, OfferNegotiationIntake) and not answers:
+        normalized = intake
+    else:
+        current = (
+            intake.as_dict()
+            if isinstance(intake, OfferNegotiationIntake)
+            else intake
+        )
+        normalized = merge_offer_negotiation_intake(current, answers or {})
+
+    values = {
+        "target_date": normalized.target_date,
+        "negotiation_goal": normalized.negotiation_goal,
+        "offer_stage": normalized.offer_stage,
+        "counterparty_role": normalized.counterparty_role,
+    }
+
+    # Slot declaration order keeps missing/answered stable across runs;
+    # required_ids is a set and must not drive ordering.
+    required_ids = offer_negotiation_required_slot_ids_for_mode(mode)
+    missing = tuple(
+        slot.slot_id
+        for slot in OFFER_NEGOTIATION_SLOTS
+        if slot.slot_id in required_ids and not values.get(slot.slot_id)
+    )
+    answered = tuple(
+        slot.slot_id
+        for slot in OFFER_NEGOTIATION_SLOTS
+        if slot.slot_id in required_ids and values.get(slot.slot_id)
+    )
+
+    return OfferNegotiationIntakeEvaluation(
+        intake=normalized,
+        missing_required=missing,
+        answered_required=answered,
+        is_complete=not missing,
+        has_first_required_answer=bool(answered),
+    )

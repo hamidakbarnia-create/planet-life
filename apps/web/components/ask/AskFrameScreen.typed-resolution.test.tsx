@@ -139,7 +139,7 @@ describe('AskFrameScreen typed resolution integration', () => {
     expect(persistFrameToCase).not.toHaveBeenCalled();
   });
 
-  it('shows unsupported panel for guided negotiate-offer without inventing a type', async () => {
+  it('binds guided negotiate-offer to the offer-negotiation type', async () => {
     getAskQuestionRepository().saveQuestion({
       submitted_at: Date.now(),
       source: 'suggestion',
@@ -152,13 +152,13 @@ describe('AskFrameScreen typed resolution integration', () => {
       expect(screen.getByTestId('ask-frame-screen')).toBeTruthy();
     });
 
-    expect(loadDecisionFrame()?.decision_type_id).toBeUndefined();
-    expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
-    expect(screen.queryByTestId('examine-choices')).toBeNull();
+    expect(loadDecisionFrame()?.decision_type_id).toBe('car-offer-negotiation');
+    expect(screen.queryByTestId('ask-unsupported-type')).toBeNull();
+    expect(screen.getByTestId('examine-choices')).toBeTruthy();
     expect(persistFrameToCase).not.toHaveBeenCalled();
   });
 
-  it('shows unsupported panel for negotiate-offer without inventing a type', async () => {
+  it('offers Evaluate only for dateless Persian offer-negotiation intent', async () => {
     seedTyped('مذاکره روی پیشنهاد شغلی');
 
     render(<AskFrameScreen lang="fa" />);
@@ -167,15 +167,21 @@ describe('AskFrameScreen typed resolution integration', () => {
       expect(screen.getByTestId('ask-frame-screen')).toBeTruthy();
     });
 
-    expect(loadDecisionFrame()?.decision_type_id).toBeUndefined();
-    expect(screen.getByTestId('ask-unsupported-type')).toBeTruthy();
+    expect(loadDecisionFrame()?.decision_type_id).toBe('car-offer-negotiation');
+    expect(screen.queryByTestId('ask-unsupported-type')).toBeNull();
     expect(screen.getByTestId('ask-intent-preserve').textContent).toContain(
       'مذاکره روی پیشنهاد شغلی'
     );
-    expect(screen.queryByTestId('examine-choices')).toBeNull();
-    expect(screen.queryByTestId('examine-evaluate')).toBeNull();
-    expect(screen.queryByTestId('examine-compare')).toBeNull();
-    expect(screen.queryByTestId('examine-find')).toBeNull();
+    expect(screen.getByTestId('examine-choices')).toBeTruthy();
+    expect(screen.getByTestId('examine-evaluate').hasAttribute('disabled')).toBe(
+      false
+    );
+    expect(screen.getByTestId('examine-compare').hasAttribute('disabled')).toBe(
+      true
+    );
+    expect(screen.getByTestId('examine-find').hasAttribute('disabled')).toBe(
+      true
+    );
     expect(persistFrameToCase).not.toHaveBeenCalled();
   });
 

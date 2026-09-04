@@ -947,3 +947,154 @@ class InvestorMeetingVisibilityCompareSemantics:
         return (
             "Weaker negotiation timing relative to higher-ranked options.",
         )
+
+
+@dataclass(frozen=True, slots=True)
+class OfferNegotiationVisibilitySemantics:
+    """EVALUATE Package wording for car-offer-negotiation.
+
+    Describes timing conditions for conducting the negotiation. Never
+    characterizes the employer's decision, any compensation amount, or the
+    legal standing of contract terms.
+    """
+
+    def insufficient_summary(self, answers: Any, target_date: str) -> str:
+        return (
+            "Cannot evaluate the offer-negotiation date "
+            "without natal evidence."
+        )
+
+    def insufficient_action(self) -> str:
+        return (
+            "Provide natal evidence (birth date, time, location) on the "
+            "Case, then re-evaluate the negotiation date."
+        )
+
+    def insufficient_counter_reason(self) -> str:
+        return (
+            "No alternative date was evaluated. EVALUATE assesses only the "
+            "requested date; FIND is not implemented for this decision type."
+        )
+
+    def insufficient_limits(self) -> list[str]:
+        return [
+            "No clock-time window was computed.",
+            "No alternative dates were searched.",
+            (
+                "Timing evidence never indicates whether the employer "
+                "will agree to any term."
+            ),
+        ]
+
+    def insufficient_timing_notes(self) -> str:
+        return (
+            "Timing not evaluated: natal evidence unavailable. "
+            "Candidate score/band are Package v1 placeholders."
+        )
+
+    def insufficient_confidence_message(self) -> str:
+        return (
+            "Birth date/time/location evidence is required "
+            "for timing evaluation."
+        )
+
+    def scored_summary(
+        self,
+        answers: Any,
+        *,
+        target_date: str,
+        rating: str,
+        outcome: DecisionOutcome,
+    ) -> str:
+        return (
+            f"{rating or 'Scored'} timing conditions for conducting the "
+            f"offer negotiation on {target_date}."
+        )
+
+    def scored_conditions(self, answers: Any) -> list[str]:
+        conditions: list[str] = []
+        if not getattr(answers, "negotiation_goal", None):
+            conditions.append("Negotiation goal was not used in scoring.")
+        if not getattr(answers, "offer_stage", None):
+            conditions.append("Offer stage was not used in scoring.")
+        if not getattr(answers, "counterparty_role", None):
+            conditions.append("Counterparty role was not used in scoring.")
+        return conditions
+
+    def scored_evidence_limits(self) -> list[str]:
+        return [
+            (
+                "Canonical activity mapping: "
+                "offer_negotiation → negotiation profile."
+            ),
+            (
+                "Score reflects negotiation/communication timing, not the "
+                "employer's decision and not any compensation amount."
+            ),
+            (
+                "Negotiation goal, offer stage, and counterparty role "
+                "do not determine the numeric timing score."
+            ),
+        ]
+
+    def scored_timing_notes(self, *, rating: str) -> str:
+        return (
+            "Date-level score from decision-engine facade "
+            f"(action=offer_negotiation → negotiation profile, "
+            f"rating={rating}). No clock-time window was computed."
+        )
+
+    def scored_action_step(self, target_date: str) -> str:
+        return (
+            "Decide whether to open or advance the offer negotiation on "
+            f"{target_date} given the timing evidence above."
+        )
+
+    def scored_assumptions(self, *, event_location_supplied: bool) -> list[str]:
+        return [
+            (
+                "Explicit activity mapping offer_negotiation→negotiation "
+                "was used for scoring."
+            ),
+            (
+                "Event location was supplied separately from birth place."
+                if event_location_supplied
+                else "Event location was not supplied on the Case."
+            ),
+        ]
+
+    def scored_limits(self) -> list[str]:
+        return [
+            (
+                "This is negotiation/communication timing evidence, not a "
+                "prediction of the employer's decision."
+            ),
+            (
+                "No salary, benefit, or compensation outcome is predicted."
+            ),
+            (
+                "Contract terms were not reviewed for legal validity."
+            ),
+            "Alternative dates were not searched.",
+        ]
+
+    def scored_improve_accuracy(self) -> list[str]:
+        return [
+            (
+                "Provide the negotiation clock time for future "
+                "hourly-window analysis."
+            ),
+            (
+                "Verify salary, benefits, and contractual details "
+                "directly with the employer."
+            ),
+        ]
+
+    def scored_counter_reason(self) -> str:
+        return (
+            "No alternative date was evaluated. EVALUATE assesses only the "
+            "requested date; FIND is not implemented for this decision type."
+        )
+
+    def scored_confidence_unavailable_message(self) -> str:
+        return "Upstream scoring did not supply a reasoning confidence value."

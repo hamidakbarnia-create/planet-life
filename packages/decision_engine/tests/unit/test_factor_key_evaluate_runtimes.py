@@ -17,6 +17,10 @@ from packages.decision_engine.evaluate.investor_meeting_evaluate import (
     REAL_ENGINE_ID as INV_ENGINE,
     evaluate_investor_meeting,
 )
+from packages.decision_engine.evaluate.offer_negotiation_evaluate import (
+    REAL_ENGINE_ID as OFFER_ENGINE,
+    evaluate_offer_negotiation,
+)
 from packages.decision_engine.evaluate.product_launch_evaluate import (
     REAL_ENGINE_ID as LAUNCH_ENGINE,
     evaluate_product_launch,
@@ -272,6 +276,41 @@ def test_wedding_date_factor_keys() -> None:
         decision_type_id="mar-wedding-date",
         engine_id=WEDDING_ENGINE,
         score=68.0,
+    )
+
+
+def test_offer_negotiation_factor_keys() -> None:
+    package = evaluate_offer_negotiation(
+        case_id=CASE_ID,
+        case_version=1,
+        intake={
+            "target_date": TARGET,
+            "negotiation_goal": "salary",
+            "decision_frame": {
+                "operation": "evaluate",
+                "time_scope": "specific_date",
+                "date": TARGET,
+            },
+            "natal_evidence": {
+                "birth_date": "1982-02-25",
+                "birth_time": "05:47",
+                "location": "Tehran",
+            },
+        },
+        generate_outcome=lambda _req: _outcome(
+            score=66,
+            activity="negotiation",
+            decision_intent="offer-negotiation-evaluate-date",
+            action_type="offer_negotiation",
+        ),
+        evaluation_id=EVAL_ID,
+        created_at=CREATED,
+    )
+    _assert_factor_key_package(
+        package,
+        decision_type_id="car-offer-negotiation",
+        engine_id=OFFER_ENGINE,
+        score=66.0,
     )
 
 

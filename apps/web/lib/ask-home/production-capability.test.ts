@@ -15,17 +15,20 @@ describe('ASK Web UX capability hint (not backend authority)', () => {
     expect(canEvaluateInProduction('bus-investor-meeting')).toBe(true);
     expect(canEvaluateInProduction('mar-wedding-date')).toBe(true);
     expect(canEvaluateInProduction('bus-product-launch')).toBe(true);
+    expect(canEvaluateInProduction('car-offer-negotiation')).toBe(true);
     expect(canExecuteInProduction('car-interview', 'evaluate')).toBe(true);
     expect(listProductionEvaluateDecisionTypeIds()).toEqual([
       'car-interview',
       'bus-investor-meeting',
       'mar-wedding-date',
       'bus-product-launch',
+      'car-offer-negotiation',
     ]);
     expect(listShippedExecutableDecisionTypeIds().sort()).toEqual([
       'bus-investor-meeting',
       'bus-product-launch',
       'car-interview',
+      'car-offer-negotiation',
       'mar-wedding-date',
     ]);
     expect(isShippedExecutableDecisionType('car-interview')).toBe(true);
@@ -57,5 +60,23 @@ describe('ASK Web UX capability hint (not backend authority)', () => {
     expect(hasProductionRuntime('mar-wedding-date', 'compare_dates')).toBe(true);
     expect(hasProductionRuntime('bus-product-launch', 'find_dates')).toBe(true);
     expect(hasProductionRuntime('mar-wedding-date', 'find_dates')).toBe(false);
+  });
+
+  it('offer negotiation ships EVALUATE only', () => {
+    expect(canExecuteInProduction('car-offer-negotiation', 'evaluate')).toBe(
+      true
+    );
+    expect(canExecuteInProduction('car-offer-negotiation', 'compare')).toBe(
+      false
+    );
+    expect(canExecuteInProduction('car-offer-negotiation', 'find')).toBe(false);
+    expect(hasProductionRuntime('car-offer-negotiation', 'compare_dates')).toBe(
+      false
+    );
+    expect(hasProductionRuntime('car-offer-negotiation', 'find_dates')).toBe(
+      false
+    );
+    // One real capability keeps the type executable, so the selector stays.
+    expect(isShippedExecutableDecisionType('car-offer-negotiation')).toBe(true);
   });
 });

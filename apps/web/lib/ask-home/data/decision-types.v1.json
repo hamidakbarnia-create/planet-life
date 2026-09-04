@@ -106,6 +106,27 @@
         "outcome_prediction_prohibited": false,
         "factual_deadline_priority": false
       }
+    },
+    {
+      "decision_type_id": "car-offer-negotiation",
+      "family_id": "visibility",
+      "label": "Negotiate a job offer",
+      "create_mode": "none",
+      "available_entry_modes": [
+        "structured"
+      ],
+      "allowed_modes": [
+        "evaluate_date"
+      ],
+      "output_profile": "decision_evaluation_package.v1",
+      "risk_context": {
+        "level": "elevated",
+        "domains": [
+          "employment"
+        ],
+        "outcome_prediction_prohibited": true,
+        "factual_deadline_priority": false
+      }
     }
   ]
 }
