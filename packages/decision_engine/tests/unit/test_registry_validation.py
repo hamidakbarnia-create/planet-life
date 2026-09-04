@@ -91,6 +91,40 @@ def test_canonical_type_metadata_is_available() -> None:
     assert interview.risk_context.outcome_prediction_prohibited is False
 
 
+def test_offer_negotiation_is_authorized_as_evaluate_only() -> None:
+    """Sixth canonical type: EVALUATE only, elevated employment risk."""
+
+    offer = get_decision_type("car-offer-negotiation")
+
+    assert offer.label == "Negotiate a job offer"
+    assert offer.family_id == "visibility"
+    assert offer.allowed_modes == ("evaluate_date",)
+    assert "compare_dates" not in offer.allowed_modes
+    assert "find_dates" not in offer.allowed_modes
+    assert offer.create_mode == "none"
+    assert offer.available_entry_modes == ("structured",)
+    assert offer.output_profile == "decision_evaluation_package.v1"
+    assert offer.risk_context.level == "elevated"
+    assert offer.risk_context.domains == ("employment",)
+    assert offer.risk_context.outcome_prediction_prohibited is True
+    assert offer.risk_context.factual_deadline_priority is False
+
+
+def test_offer_negotiation_matches_the_expected_record_contract() -> None:
+    assert EXPECTED_RECORDS["car-offer-negotiation"] == (
+        "visibility",
+        ("evaluate_date",),
+    )
+    assert "car-offer-negotiation" in EXPECTED_TYPE_IDS
+
+
+def test_registry_size_grew_with_the_new_authorized_type() -> None:
+    """Capacity is derived, so authorizing a sixth type needs no count edit."""
+
+    assert EXPECTED_REGISTRY_SIZE == 6
+    assert len(list_decision_types()) == EXPECTED_REGISTRY_SIZE
+
+
 def test_registry_records_are_immutable() -> None:
     interview = get_decision_type("car-interview")
 

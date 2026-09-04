@@ -513,6 +513,7 @@ def _transit_house_rules_key(activity_type: str) -> str:
         "marriage_proposal",
         "relationship_ending",
         "difficult_conversation",
+        "offer_negotiation",
     ):
         return "negotiation"
     return "default"
@@ -739,6 +740,7 @@ def _resolve_profile(activity_type: str) -> ActivityProfile:
         # Oracle: Work & Voice
         "social_media_post": "networking",
         "job_interview": "negotiation",
+        "offer_negotiation": "negotiation",
         "presentation": "networking",
         "job_application": "networking",
         "creative_project": "creative_work",

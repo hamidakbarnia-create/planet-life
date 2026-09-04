@@ -40,8 +40,14 @@ const POPULAR_DECISION_REFS: readonly PopularDecisionRef[] = [
     decisionTypeId: 'bus-investor-meeting',
     guidedQuestionId: 'meet-investor',
   },
+  {
+    // Slot id kept for stored-question compatibility; the consumer label
+    // comes from the `negotiate-offer` guided question in every locale.
+    id: 'accept-job-offer',
+    decisionTypeId: 'car-offer-negotiation',
+    guidedQuestionId: 'negotiate-offer',
+  },
   // Browseable but not Case-executable yet — shown as unavailable.
-  { id: 'accept-job-offer', guidedQuestionId: 'negotiate-offer' },
   { id: 'career-change', guidedQuestionId: 'change-career-path' },
   { id: 'promotion', guidedQuestionId: 'ask-promotion' },
   { id: 'salary-negotiation', guidedQuestionId: 'ask-raise' },
@@ -91,9 +97,10 @@ const MOCK_POPULAR_DECISIONS: readonly PopularDecision[] = [
   },
   {
     id: 'accept-job-offer',
-    label: 'Accept Job Offer',
+    label: 'Negotiate a job offer',
+    decisionTypeId: 'car-offer-negotiation',
     source: 'mock',
-    capability: 'unavailable',
+    capability: 'available',
   },
   {
     id: 'career-change',

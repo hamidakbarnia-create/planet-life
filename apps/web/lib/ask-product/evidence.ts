@@ -68,7 +68,10 @@ export type AskEvaluatePresentation = {
   cautionaryEvidence: AskEvidenceLine[];
   contextEvidence: AskEvidenceLine[];
   scope: string;
-  scopeSource: 'car-interview-contract' | 'generic-timing';
+  scopeSource:
+    | 'car-interview-contract'
+    | 'car-offer-negotiation-contract'
+    | 'generic-timing';
   packageLimits: string[];
   nextSteps: string[];
   confidence: string | null;
@@ -244,6 +247,9 @@ function topicFromPackage(
   if (pkg.decision_type_id === 'bus-product-launch') {
     return copy.topicProductLaunch;
   }
+  if (pkg.decision_type_id === 'car-offer-negotiation') {
+    return copy.topicOfferNegotiation;
+  }
   return copy.topicGeneric;
 }
 
@@ -255,6 +261,12 @@ function scopeForPackage(
     return {
       scope: copy.scopeInterviewTiming,
       scopeSource: 'car-interview-contract',
+    };
+  }
+  if (pkg.decision_type_id === 'car-offer-negotiation') {
+    return {
+      scope: copy.scopeOfferNegotiationTiming,
+      scopeSource: 'car-offer-negotiation-contract',
     };
   }
   return {

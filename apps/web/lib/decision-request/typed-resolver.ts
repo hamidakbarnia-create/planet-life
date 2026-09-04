@@ -12,7 +12,8 @@ export type TypedResolvableDecisionTypeId =
   | 'car-interview'
   | 'mar-wedding-date'
   | 'bus-investor-meeting'
-  | 'bus-product-launch';
+  | 'bus-product-launch'
+  | 'car-offer-negotiation';
 
 export type TypedDecisionResolution =
   | {
@@ -102,6 +103,104 @@ const EXACT_FAMILIES: readonly ExactFamily[] = [
         'подкаст',
         'принять эту работу',
         'принять предложение',
+      ],
+    },
+  },
+  {
+    // Positives require both an offer and explicit negotiation intent, so
+    // accepting an offer, reviewing salary, or a generic business offer stay
+    // unresolved instead of falling into this type.
+    decisionTypeId: 'car-offer-negotiation',
+    domain: 'career',
+    positives: {
+      en: [
+        'negotiate a job offer',
+        'negotiate my job offer',
+        'negotiate the job offer',
+        'negotiate this job offer',
+        'negotiating a job offer',
+        'negotiating my job offer',
+        'job offer negotiation',
+        'negotiate an employment offer',
+        'negotiate my employment offer',
+        'employment offer negotiation',
+      ],
+      fa: [
+        'مذاکره روی پیشنهاد شغلی',
+        'مذاکره پیشنهاد شغلی',
+        'مذاکره روی پیشنهاد کاری',
+        'مذاکره پیشنهاد کاری',
+        'مذاکره درباره پیشنهاد شغلی',
+        'مذاکره برای پیشنهاد شغلی',
+        'مذاکره سر پیشنهاد شغلی',
+      ],
+      // Stem forms without the definite article also cover the
+      // ال / لل prefixed variants ("التفاوض", "للتفاوض").
+      ar: [
+        'تفاوض على عرض عمل',
+        'تفاوض على عرض العمل',
+        'تفاوض على عرض وظيفي',
+        'تفاوض على العرض الوظيفي',
+        'تفاوض بشأن عرض العمل',
+        'مفاوضة عرض العمل',
+      ],
+      ru: [
+        'обсудить условия предложения о работе',
+        'обсудить предложение о работе',
+        'переговоры о предложении о работе',
+        'переговоры по предложению о работе',
+        'договориться о предложении о работе',
+        'обсудить условия оффера',
+        'обсудить оффер',
+        'переговоры об оффере',
+        'переговоры по офферу',
+      ],
+    },
+    negatives: {
+      en: [
+        'job interview',
+        'investor meeting',
+        'meet an investor',
+        'business deal',
+        'salary review',
+        'ask for a raise',
+        'career change',
+        'change my career',
+        'hire someone',
+        'hiring someone',
+        'sign a contract',
+        'sign the contract',
+      ],
+      fa: [
+        'مصاحبه',
+        'جلسه با سرمایه‌گذار',
+        'معامله تجاری',
+        'بازبینی حقوق',
+        'افزایش حقوق',
+        'تغییر شغل',
+        'تغییر مسیر شغلی',
+        'استخدام',
+        'امضای قرارداد',
+      ],
+      ar: [
+        'مقابلة',
+        'لقاء مستثمر',
+        'صفقة تجارية',
+        'مراجعة الراتب',
+        'زيادة الراتب',
+        'تغيير المسار المهني',
+        'توظيف',
+        'توقيع عقد',
+      ],
+      ru: [
+        'собеседование',
+        'встреча с инвестором',
+        'деловая сделка',
+        'пересмотр зарплаты',
+        'повышение зарплаты',
+        'смена карьеры',
+        'нанять',
+        'подписать договор',
       ],
     },
   },

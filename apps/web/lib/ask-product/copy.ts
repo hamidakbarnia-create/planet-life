@@ -6,6 +6,31 @@
 import type { AppLang } from '@/lib/app-settings';
 import type { ConfidenceBand, StrengthBand } from '@/lib/decision-frame/types';
 
+/**
+ * Canonical stored enum values for car-offer-negotiation intake selects.
+ * Declared here so option labels stay localized; parity with
+ * lib/decision-case/offer-negotiation-form.ts is asserted in tests.
+ */
+export type NegotiationGoalKey =
+  | 'salary'
+  | 'benefits'
+  | 'role_title'
+  | 'start_date'
+  | 'working_arrangement'
+  | 'complete_package'
+  | 'other';
+
+export type OfferStageKey =
+  | 'verbal_offer'
+  | 'written_offer'
+  | 'revised_offer';
+
+export type CounterpartyRoleKey =
+  | 'recruiter'
+  | 'hiring_manager'
+  | 'founder_executive'
+  | 'hr_representative';
+
 export type AskProductCopy = {
   dir: 'ltr' | 'rtl';
   clarificationEyebrow: string;
@@ -132,6 +157,8 @@ export type AskProductCopy = {
   scopeTimingGeneric: string;
   /** car-interview only — mirrors Runtime-1 negotiation-timing contract. */
   scopeInterviewTiming: string;
+  /** car-offer-negotiation only — conduct timing, never the employer's answer. */
+  scopeOfferNegotiationTiming: string;
   evidenceSupportive: string;
   evidenceCaution: string;
   evidenceNeutral: string;
@@ -139,6 +166,7 @@ export type AskProductCopy = {
   topicInvestorMeeting: string;
   topicWeddingDate: string;
   topicProductLaunch: string;
+  topicOfferNegotiation: string;
   topicGeneric: string;
   intakeEyebrow: string;
   intakeEyebrowProductLaunch: string;
@@ -152,6 +180,8 @@ export type AskProductCopy = {
   intakeBodyProductLaunch: string;
   /** FIND intake body — range scan, not single-date evaluate. */
   intakeBodyProductLaunchFind: string;
+  intakeTitleOfferNegotiation: string;
+  intakeBodyOfferNegotiation: string;
   intakeOptional: string;
   intakeSelect: string;
   intakeSave: string;
@@ -180,6 +210,14 @@ export type AskProductCopy = {
   intakeFieldLaunchObject: string;
   intakeFieldLaunchChannel: string;
   intakeFieldBrandOrCompany: string;
+  intakeFieldNegotiationDate: string;
+  intakeFieldNegotiationGoal: string;
+  intakeFieldOfferStage: string;
+  intakeFieldCounterpartyRole: string;
+  /** Localized select labels — canonical enum tokens never reach the UI. */
+  negotiationGoalOptions: Record<NegotiationGoalKey, string>;
+  offerStageOptions: Record<OfferStageKey, string>;
+  counterpartyRoleOptions: Record<CounterpartyRoleKey, string>;
   intakeUnsupportedType: string;
   intakeLoadError: string;
   intakeSaveError: string;
@@ -187,6 +225,9 @@ export type AskProductCopy = {
   backToAsk: string;
   /** Evaluate disabled when Decision Type has no production runtime. */
   evaluateUnavailableForType: string;
+  /** Offer negotiation supports one date only — no delivery promise. */
+  compareUnavailableForOfferNegotiation: string;
+  findUnavailableForOfferNegotiation: string;
   capabilityTitle: string;
   capabilityBody: string;
   capabilitySecondary: string;
@@ -363,6 +404,8 @@ const EN: AskProductCopy = {
     'This analysis covers timing for the requested date only. It does not assess outcomes beyond that timing question.',
   scopeInterviewTiming:
     'This analysis covers interview negotiation and communication timing for the requested date. It does not assess employer fit, role fit, salary, or interview outcome.',
+  scopeOfferNegotiationTiming:
+    'This analysis covers timing for conducting the offer negotiation on the requested date. It does not assess whether the employer will agree, any salary or benefit amount, or the legal standing of contract terms.',
   evidenceSupportive: 'Supportive timing signal',
   evidenceCaution: 'Cautionary timing signal',
   evidenceNeutral: 'Timing signal',
@@ -370,6 +413,7 @@ const EN: AskProductCopy = {
   topicInvestorMeeting: 'Meet an investor',
   topicWeddingDate: 'Choose wedding date',
   topicProductLaunch: 'Launch a project or product',
+  topicOfferNegotiation: 'Negotiate a job offer',
   topicGeneric: 'Your decision',
   intakeEyebrow: 'Interview timing',
   intakeEyebrowProductLaunch: 'Launch timing',
@@ -387,6 +431,9 @@ const EN: AskProductCopy = {
     'Share what you are launching. We’ll evaluate launch-day timing for the date you provide — not market fit, revenue, or business success.',
   intakeBodyProductLaunchFind:
     'Share what you are launching. We’ll scan the selected range for stronger timing windows within this range — not market fit, revenue, or business success.',
+  intakeTitleOfferNegotiation: 'Negotiate a job offer',
+  intakeBodyOfferNegotiation:
+    'Tell us what you want to negotiate. We’ll evaluate the timing for holding that conversation on the date you provide — not whether the employer will agree.',
   intakeOptional: 'optional',
   intakeSelect: 'Select…',
   intakeSave: 'Save answers',
@@ -413,6 +460,30 @@ const EN: AskProductCopy = {
   intakeFieldLaunchObject: 'What launches',
   intakeFieldLaunchChannel: 'Launch channel',
   intakeFieldBrandOrCompany: 'Brand or company',
+  intakeFieldNegotiationDate: 'Negotiation date',
+  intakeFieldNegotiationGoal: 'What you want to negotiate',
+  intakeFieldOfferStage: 'Offer stage',
+  intakeFieldCounterpartyRole: 'Who you negotiate with',
+  negotiationGoalOptions: {
+    salary: 'Salary',
+    benefits: 'Benefits',
+    role_title: 'Role or title',
+    start_date: 'Start date',
+    working_arrangement: 'Working arrangement',
+    complete_package: 'The complete package',
+    other: 'Something else',
+  },
+  offerStageOptions: {
+    verbal_offer: 'Verbal offer',
+    written_offer: 'Written offer',
+    revised_offer: 'Revised offer',
+  },
+  counterpartyRoleOptions: {
+    recruiter: 'Recruiter',
+    hiring_manager: 'Hiring manager',
+    founder_executive: 'Founder or executive',
+    hr_representative: 'HR representative',
+  },
   intakeUnsupportedType: 'This decision type is not available for intake yet.',
   intakeLoadError: 'Unable to load this decision.',
   intakeSaveError: 'Could not save answers.',
@@ -420,6 +491,10 @@ const EN: AskProductCopy = {
   backToAsk: 'Back to Ask',
   evaluateUnavailableForType:
     'Not available for this decision type yet',
+  compareUnavailableForOfferNegotiation:
+    'Offer negotiation is evaluated one date at a time, so comparing dates is not available.',
+  findUnavailableForOfferNegotiation:
+    'Offer negotiation is evaluated one date at a time, so searching a date range is not available.',
   capabilityTitle: 'Timing analysis is not available for this decision yet',
   capabilityBody:
     'This kind of decision is not enabled for timing evaluation in this release.',
@@ -603,6 +678,8 @@ const FA: AskProductCopy = {
     'این تحلیل فقط زمان‌بندی تاریخ درخواست‌شده را پوشش می‌دهد و فراتر از آن نتیجه‌ای را ارزیابی نمی‌کند.',
   scopeInterviewTiming:
     'این تحلیل زمان‌بندی مذاکره و ارتباط مصاحبه را برای تاریخ درخواست‌شده بررسی می‌کند. تناسب کارفرما، نقش، حقوق یا نتیجهٔ مصاحبه را ارزیابی نمی‌کند.',
+  scopeOfferNegotiationTiming:
+    'این تحلیل زمان‌بندی انجام مذاکره را در تاریخ درخواست‌شده بررسی می‌کند. اینکه کارفرما موافقت می‌کند یا نه، میزان حقوق و مزایا، و اعتبار حقوقی مفاد قرارداد را ارزیابی نمی‌کند.',
   evidenceSupportive: 'عامل حمایت‌کننده',
   evidenceCaution: 'عامل احتیاطی',
   evidenceNeutral: 'عامل زمینه',
@@ -610,6 +687,7 @@ const FA: AskProductCopy = {
   topicInvestorMeeting: 'جلسه با سرمایه‌گذار',
   topicWeddingDate: 'انتخاب تاریخ عروسی',
   topicProductLaunch: 'لانچ پروژه یا محصول',
+  topicOfferNegotiation: 'مذاکره روی پیشنهاد شغلی',
   topicGeneric: 'تصمیم شما',
   intakeEyebrow: 'زمان‌بندی مصاحبه',
   intakeEyebrowProductLaunch: 'زمان‌بندی لانچ',
@@ -627,6 +705,9 @@ const FA: AskProductCopy = {
     'آنچه لانچ می‌کنید را مشخص کنید. فقط زمان‌بندی روز لانچ را ارزیابی می‌کنیم — نه تناسب بازار، درآمد یا موفقیت کسب‌وکار.',
   intakeBodyProductLaunchFind:
     'آنچه لانچ می‌کنید را مشخص کنید. بازهٔ انتخاب‌شده را برای یافتن پنجره‌های زمان‌بندی قوی‌تر در همین بازه اسکن می‌کنیم — نه تناسب بازار، درآمد یا موفقیت کسب‌وکار.',
+  intakeTitleOfferNegotiation: 'مذاکره روی پیشنهاد شغلی',
+  intakeBodyOfferNegotiation:
+    'مشخص کنید روی چه چیزی می‌خواهید مذاکره کنید. زمان‌بندی انجام این گفت‌وگو را برای تاریخی که می‌دهید ارزیابی می‌کنیم — نه اینکه کارفرما موافقت می‌کند یا نه.',
   intakeOptional: 'اختیاری',
   intakeSelect: 'انتخاب…',
   intakeSave: 'ذخیره پاسخ‌ها',
@@ -653,12 +734,40 @@ const FA: AskProductCopy = {
   intakeFieldLaunchObject: 'چه چیزی لانچ می‌شود',
   intakeFieldLaunchChannel: 'کانال لانچ',
   intakeFieldBrandOrCompany: 'برند یا شرکت',
+  intakeFieldNegotiationDate: 'تاریخ مذاکره',
+  intakeFieldNegotiationGoal: 'موضوع مذاکره',
+  intakeFieldOfferStage: 'مرحلهٔ پیشنهاد',
+  intakeFieldCounterpartyRole: 'طرف مقابل مذاکره',
+  negotiationGoalOptions: {
+    salary: 'حقوق',
+    benefits: 'مزایا',
+    role_title: 'نقش یا عنوان شغلی',
+    start_date: 'تاریخ شروع کار',
+    working_arrangement: 'شرایط و نحوهٔ کار',
+    complete_package: 'کل بستهٔ پیشنهادی',
+    other: 'موضوع دیگر',
+  },
+  offerStageOptions: {
+    verbal_offer: 'پیشنهاد شفاهی',
+    written_offer: 'پیشنهاد کتبی',
+    revised_offer: 'پیشنهاد اصلاح‌شده',
+  },
+  counterpartyRoleOptions: {
+    recruiter: 'کارشناس جذب',
+    hiring_manager: 'مدیر استخدام',
+    founder_executive: 'بنیان‌گذار یا مدیر ارشد',
+    hr_representative: 'نمایندهٔ منابع انسانی',
+  },
   intakeUnsupportedType: 'این نوع تصمیم هنوز برای ورود جزئیات در دسترس نیست.',
   intakeLoadError: 'بارگذاری این تصمیم ممکن نشد.',
   intakeSaveError: 'ذخیره پاسخ‌ها ممکن نشد.',
   intakeCompleteError: 'ادامه ممکن نیست.',
   backToAsk: 'بازگشت به ASK',
   evaluateUnavailableForType: 'برای این نوع تصمیم هنوز در دسترس نیست',
+  compareUnavailableForOfferNegotiation:
+    'مذاکره روی پیشنهاد شغلی هر بار برای یک تاریخ بررسی می‌شود؛ مقایسهٔ چند تاریخ در دسترس نیست.',
+  findUnavailableForOfferNegotiation:
+    'مذاکره روی پیشنهاد شغلی هر بار برای یک تاریخ بررسی می‌شود؛ جست‌وجو در یک بازهٔ زمانی در دسترس نیست.',
   capabilityTitle: 'این نوع تصمیم هنوز برای تحلیل زمان‌بندی فعال نشده است.',
   capabilityBody:
     'این نوع تصمیم هنوز برای تحلیل زمان‌بندی فعال نشده است.',
@@ -841,6 +950,8 @@ const AR: AskProductCopy = {
     'يغطي هذا التحليل توقيت التاريخ المطلوب فقط. ولا يقيّم نتائجًا خارج سؤال التوقيت.',
   scopeInterviewTiming:
     'يغطي هذا التحليل توقيت التفاوض والتواصل للمقابلة في التاريخ المطلوب. لا يقيّم ملاءمة صاحب العمل أو الدور أو الراتب أو نتيجة المقابلة.',
+  scopeOfferNegotiationTiming:
+    'يغطي هذا التحليل توقيت إجراء التفاوض في التاريخ المطلوب. لا يقيّم ما إذا كان صاحب العمل سيوافق، ولا قيمة الراتب أو المزايا، ولا الصحة القانونية لبنود العقد.',
   evidenceSupportive: 'إشارة توقيت داعمة',
   evidenceCaution: 'إشارة توقيت تحذيرية',
   evidenceNeutral: 'إشارة توقيت',
@@ -848,6 +959,7 @@ const AR: AskProductCopy = {
   topicInvestorMeeting: 'لقاء مع مستثمر',
   topicWeddingDate: 'اختيار تاريخ الزواج',
   topicProductLaunch: 'إطلاق مشروع أو منتج',
+  topicOfferNegotiation: 'التفاوض على عرض عمل',
   topicGeneric: 'قرارك',
   intakeEyebrow: 'توقيت المقابلة',
   intakeEyebrowProductLaunch: 'توقيت الإطلاق',
@@ -865,6 +977,9 @@ const AR: AskProductCopy = {
     'حدّد ما الذي تُطلقه. نقيّم توقيت يوم الإطلاق فقط — لا ملاءمة السوق أو الإيرادات أو نجاح العمل.',
   intakeBodyProductLaunchFind:
     'حدّد ما الذي تُطلقه. سنمسح النطاق المحدد بحثًا عن نوافذ توقيت أقوى داخل هذا النطاق — لا ملاءمة السوق أو الإيرادات أو نجاح العمل.',
+  intakeTitleOfferNegotiation: 'التفاوض على عرض عمل',
+  intakeBodyOfferNegotiation:
+    'حدّد ما الذي تريد التفاوض عليه. سنقيّم توقيت إجراء هذا الحوار في التاريخ الذي تقدّمه — لا ما إذا كان صاحب العمل سيوافق.',
   intakeOptional: 'اختياري',
   intakeSelect: 'اختر…',
   intakeSave: 'حفظ الإجابات',
@@ -891,12 +1006,40 @@ const AR: AskProductCopy = {
   intakeFieldLaunchObject: 'ما الذي يُطلق',
   intakeFieldLaunchChannel: 'قناة الإطلاق',
   intakeFieldBrandOrCompany: 'العلامة أو الشركة',
+  intakeFieldNegotiationDate: 'تاريخ التفاوض',
+  intakeFieldNegotiationGoal: 'موضوع التفاوض',
+  intakeFieldOfferStage: 'مرحلة العرض',
+  intakeFieldCounterpartyRole: 'الطرف المقابل في التفاوض',
+  negotiationGoalOptions: {
+    salary: 'الراتب',
+    benefits: 'المزايا',
+    role_title: 'الدور أو المسمّى الوظيفي',
+    start_date: 'تاريخ المباشرة',
+    working_arrangement: 'ترتيبات العمل',
+    complete_package: 'العرض بالكامل',
+    other: 'موضوع آخر',
+  },
+  offerStageOptions: {
+    verbal_offer: 'عرض شفهي',
+    written_offer: 'عرض مكتوب',
+    revised_offer: 'عرض مُعدّل',
+  },
+  counterpartyRoleOptions: {
+    recruiter: 'أخصائي التوظيف',
+    hiring_manager: 'مدير التوظيف',
+    founder_executive: 'مؤسس أو مدير تنفيذي',
+    hr_representative: 'ممثل الموارد البشرية',
+  },
   intakeUnsupportedType: 'نوع القرار هذا غير متاح لإدخال التفاصيل بعد.',
   intakeLoadError: 'تعذّر تحميل هذا القرار.',
   intakeSaveError: 'تعذّر حفظ الإجابات.',
   intakeCompleteError: 'تعذّرت المتابعة.',
   backToAsk: 'العودة إلى ASK',
   evaluateUnavailableForType: 'غير متاح لهذا النوع من القرار بعد',
+  compareUnavailableForOfferNegotiation:
+    'يُقيَّم التفاوض على عرض العمل لتاريخ واحد في كل مرة، لذلك مقارنة التواريخ غير متاحة.',
+  findUnavailableForOfferNegotiation:
+    'يُقيَّم التفاوض على عرض العمل لتاريخ واحد في كل مرة، لذلك البحث ضمن نطاق زمني غير متاح.',
   capabilityTitle: 'تحليل التوقيت غير مفعّل لهذا القرار بعد.',
   capabilityBody: 'تحليل التوقيت غير مفعّل لهذا النوع من القرار في هذا الإصدار.',
   capabilitySecondary:
@@ -1076,6 +1219,8 @@ const RU: AskProductCopy = {
     'Этот анализ касается только тайминга запрошенной даты. Он не оценивает исходы вне этого вопроса тайминга.',
   scopeInterviewTiming:
     'Этот анализ касается тайминга переговоров и коммуникации на запрошенную дату интервью. Он не оценивает соответствие работодателю, роли, зарплате или исходу интервью.',
+  scopeOfferNegotiationTiming:
+    'Этот анализ касается тайминга проведения переговоров в запрошенную дату. Он не оценивает, согласится ли работодатель, размер зарплаты и льгот, а также юридическую силу условий договора.',
   evidenceSupportive: 'Поддерживающий сигнал тайминга',
   evidenceCaution: 'Предупреждающий сигнал тайминга',
   evidenceNeutral: 'Сигнал тайминга',
@@ -1083,6 +1228,7 @@ const RU: AskProductCopy = {
   topicInvestorMeeting: 'Встреча с инвестором',
   topicWeddingDate: 'Выбор даты свадьбы',
   topicProductLaunch: 'Запуск проекта или продукта',
+  topicOfferNegotiation: 'Обсуждение условий предложения о работе',
   topicGeneric: 'Ваше решение',
   intakeEyebrow: 'Тайминг собеседования',
   intakeEyebrowProductLaunch: 'Тайминг запуска',
@@ -1100,6 +1246,9 @@ const RU: AskProductCopy = {
     'Укажите, что запускаете. Мы оценим только тайминг дня запуска — не соответствие рынку, выручку или успех бизнеса.',
   intakeBodyProductLaunchFind:
     'Укажите, что запускаете. Мы просканируем выбранный диапазон, чтобы найти более сильные окна тайминга внутри этого диапазона — не соответствие рынку, выручку или успех бизнеса.',
+  intakeTitleOfferNegotiation: 'Обсуждение условий предложения о работе',
+  intakeBodyOfferNegotiation:
+    'Укажите, что именно вы хотите обсудить. Мы оценим тайминг для этого разговора на указанную дату — но не то, согласится ли работодатель.',
   intakeOptional: 'необязательно',
   intakeSelect: 'Выберите…',
   intakeSave: 'Сохранить ответы',
@@ -1126,12 +1275,40 @@ const RU: AskProductCopy = {
   intakeFieldLaunchObject: 'Что запускается',
   intakeFieldLaunchChannel: 'Канал запуска',
   intakeFieldBrandOrCompany: 'Бренд или компания',
+  intakeFieldNegotiationDate: 'Дата переговоров',
+  intakeFieldNegotiationGoal: 'Предмет обсуждения',
+  intakeFieldOfferStage: 'Стадия предложения',
+  intakeFieldCounterpartyRole: 'С кем вы ведёте переговоры',
+  negotiationGoalOptions: {
+    salary: 'Зарплата',
+    benefits: 'Льготы и бонусы',
+    role_title: 'Роль или должность',
+    start_date: 'Дата выхода на работу',
+    working_arrangement: 'Формат работы',
+    complete_package: 'Предложение целиком',
+    other: 'Другое',
+  },
+  offerStageOptions: {
+    verbal_offer: 'Устное предложение',
+    written_offer: 'Письменное предложение',
+    revised_offer: 'Пересмотренное предложение',
+  },
+  counterpartyRoleOptions: {
+    recruiter: 'Рекрутер',
+    hiring_manager: 'Нанимающий руководитель',
+    founder_executive: 'Основатель или топ-менеджер',
+    hr_representative: 'Представитель HR',
+  },
   intakeUnsupportedType: 'Этот тип решения пока недоступен для ввода деталей.',
   intakeLoadError: 'Не удалось загрузить это решение.',
   intakeSaveError: 'Не удалось сохранить ответы.',
   intakeCompleteError: 'Не удалось продолжить.',
   backToAsk: 'Назад в Ask',
   evaluateUnavailableForType: 'Пока недоступно для этого типа решения',
+  compareUnavailableForOfferNegotiation:
+    'Переговоры по предложению оцениваются по одной дате за раз, поэтому сравнение дат недоступно.',
+  findUnavailableForOfferNegotiation:
+    'Переговоры по предложению оцениваются по одной дате за раз, поэтому поиск по диапазону дат недоступен.',
   capabilityTitle: 'Анализ тайминга для этого решения ещё не включён.',
   capabilityBody:
     'Этот тип решения пока не включён для оценки тайминга в этом релизе.',

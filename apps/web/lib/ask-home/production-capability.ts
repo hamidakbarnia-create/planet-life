@@ -36,6 +36,7 @@ const SHIPPED_RUNTIME_MODE_HINT: Readonly<
   'bus-investor-meeting': ['evaluate_date', 'compare_dates'],
   'mar-wedding-date': ['evaluate_date', 'compare_dates'],
   'bus-product-launch': ['evaluate_date', 'find_dates'],
+  'car-offer-negotiation': ['evaluate_date'],
 };
 
 export type ProductionCaseMode =
@@ -87,7 +88,7 @@ export function canExecuteInProduction(
 /**
  * UX hint: EVALUATE offered for Decision Types with a shipped evaluate runtime.
  * Current matrix: car-interview, bus-investor-meeting, mar-wedding-date,
- * bus-product-launch.
+ * bus-product-launch, car-offer-negotiation.
  */
 export function canEvaluateInProduction(
   decisionTypeId: string | undefined

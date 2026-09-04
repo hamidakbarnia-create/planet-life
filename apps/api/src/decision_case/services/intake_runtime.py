@@ -16,6 +16,10 @@ from decision_case.services.investor_meeting_intake import (
     complete_investor_meeting_intake,
     save_investor_meeting_answers,
 )
+from decision_case.services.offer_negotiation_intake import (
+    complete_offer_negotiation_intake,
+    save_offer_negotiation_answers,
+)
 from decision_case.services.product_launch_intake import (
     complete_product_launch_intake,
     save_product_launch_answers,
@@ -72,6 +76,15 @@ def save_intake_answers(
             answers=answers,
         )
 
+    if case.decision_type_id == "car-offer-negotiation":
+        return save_offer_negotiation_answers(
+            repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=expected_case_version,
+            answers=answers,
+        )
+
     raise UnsupportedDecisionTypeError(case.decision_type_id)
 
 
@@ -110,6 +123,14 @@ def complete_intake(
 
     if case.decision_type_id == "bus-product-launch":
         return complete_product_launch_intake(
+            repo,
+            case_id=case_id,
+            owner_subject_id=owner_subject_id,
+            expected_case_version=expected_case_version,
+        )
+
+    if case.decision_type_id == "car-offer-negotiation":
+        return complete_offer_negotiation_intake(
             repo,
             case_id=case_id,
             owner_subject_id=owner_subject_id,

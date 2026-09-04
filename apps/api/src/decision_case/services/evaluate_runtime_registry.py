@@ -12,6 +12,9 @@ from packages.decision_engine.evaluate import (  # noqa: F401
     investor_meeting_evaluate as _investor,
 )
 from packages.decision_engine.evaluate import (  # noqa: F401
+    offer_negotiation_evaluate as _offer_negotiation,
+)
+from packages.decision_engine.evaluate import (  # noqa: F401
     product_launch_evaluate as _product_launch,
 )
 from packages.decision_engine.evaluate import (  # noqa: F401
@@ -23,6 +26,9 @@ from packages.decision_engine.evaluate.car_interview_evaluate import (
 from packages.decision_engine.evaluate.contract import EvaluateRuntimeContract
 from packages.decision_engine.evaluate.investor_meeting_evaluate import (
     INVESTOR_MEETING_EVALUATE_RUNTIME,
+)
+from packages.decision_engine.evaluate.offer_negotiation_evaluate import (
+    OFFER_NEGOTIATION_EVALUATE_RUNTIME,
 )
 from packages.decision_engine.evaluate.product_launch_evaluate import (
     PRODUCT_LAUNCH_EVALUATE_RUNTIME,
@@ -42,6 +48,9 @@ _RUNTIMES: dict[str, EvaluateRuntimeContract] = {
     INVESTOR_MEETING_EVALUATE_RUNTIME.decision_type_id: INVESTOR_MEETING_EVALUATE_RUNTIME,
     WEDDING_DATE_EVALUATE_RUNTIME.decision_type_id: WEDDING_DATE_EVALUATE_RUNTIME,
     PRODUCT_LAUNCH_EVALUATE_RUNTIME.decision_type_id: PRODUCT_LAUNCH_EVALUATE_RUNTIME,
+    OFFER_NEGOTIATION_EVALUATE_RUNTIME.decision_type_id: (
+        OFFER_NEGOTIATION_EVALUATE_RUNTIME
+    ),
 }
 
 

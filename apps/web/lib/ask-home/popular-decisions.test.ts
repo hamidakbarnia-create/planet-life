@@ -40,6 +40,7 @@ describe('ask-home popular decisions provider', () => {
       'bus-investor-meeting',
       'bus-product-launch',
       'car-interview',
+      'car-offer-negotiation',
       'mar-wedding-date',
     ]);
     expect(
@@ -59,8 +60,29 @@ describe('ask-home popular decisions provider', () => {
       )
     ).toBe(true);
     expect(unavailable.some((item) => item.id === 'career-change')).toBe(true);
-    expect(unavailable.some((item) => item.id === 'accept-job-offer')).toBe(true);
   });
+
+  it('binds the offer-negotiation Popular card to the shipped Decision Type', () => {
+    const offer = listPopularDecisions('en').find(
+      (item) => item.id === 'accept-job-offer'
+    );
+    expect(offer?.decisionTypeId).toBe('car-offer-negotiation');
+    expect(offer?.capability).toBe('available');
+    // Visible label must describe negotiating, not merely accepting.
+    expect(offer?.label).toBe('Negotiate a job offer');
+  });
+
+  it.each(['fa', 'ar', 'ru'] as const)(
+    'localizes the offer-negotiation Popular label for %s',
+    (lang) => {
+      const offer = listPopularDecisions(lang).find(
+        (item) => item.id === 'accept-job-offer'
+      );
+      expect(offer?.decisionTypeId).toBe('car-offer-negotiation');
+      expect(offer?.label).not.toMatch(/[A-Za-z]/);
+      expect(offer?.label).not.toMatch(/offer_negotiation|accept-job-offer/);
+    }
+  );
 
   it('resolves popular cards without embedding labels in the UI layer', () => {
     const items = listPopularDecisions('en');
@@ -110,6 +132,7 @@ describe('ask-home popular decisions provider', () => {
       (item) => item.capability === 'available' && item.guidedQuestionId
     );
     expect(available.map((item) => item.id).sort()).toEqual([
+      'accept-job-offer',
       'job-interview',
       'launch-business',
       'meet-investor',
@@ -164,6 +187,7 @@ describe('ask-home popular decisions provider', () => {
       'bus-investor-meeting',
       'bus-product-launch',
       'car-interview',
+      'car-offer-negotiation',
       'mar-wedding-date',
     ]);
   });

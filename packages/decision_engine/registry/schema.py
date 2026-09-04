@@ -19,6 +19,7 @@ DecisionTypeId = Literal[
     "mar-wedding-date",
     "bus-investor-meeting",
     "bus-product-launch",
+    "car-offer-negotiation",
 ]
 FamilyId = Literal["timing_opt", "visibility"]
 DecisionMode = Literal["evaluate_date", "compare_dates", "find_dates"]
@@ -160,6 +161,10 @@ EXPECTED_RECORDS: dict[str, tuple[str, tuple[str, ...]]] = {
     "bus-product-launch": (
         "timing_opt",
         ("evaluate_date", "find_dates"),
+    ),
+    "car-offer-negotiation": (
+        "visibility",
+        ("evaluate_date",),
     ),
 }
 

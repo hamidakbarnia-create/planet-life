@@ -11,6 +11,7 @@ export const SHIPPED_ACTION_TYPE_TO_DECISION_TYPE = {
   job_interview: 'car-interview',
   investor_meeting: 'bus-investor-meeting',
   business_launch: 'bus-product-launch',
+  offer_negotiation: 'car-offer-negotiation',
 } as const satisfies Record<string, TypedResolvableDecisionTypeId>;
 
 export function decisionTypeIdForActionType(

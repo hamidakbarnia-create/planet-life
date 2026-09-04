@@ -217,6 +217,7 @@ describe('decision request resolver', () => {
     ['job_interview', 'car-interview'],
     ['investor_meeting', 'bus-investor-meeting'],
     ['business_launch', 'bus-product-launch'],
+    ['offer_negotiation', 'car-offer-negotiation'],
   ] as const)('binds shipped actionType %s to %s', (actionType, decisionTypeId) => {
     const result = resolveDecisionRequest({
       source: 'suggestion',
@@ -232,7 +233,6 @@ describe('decision request resolver', () => {
   });
 
   it.each([
-    'offer_negotiation',
     'salary_negotiation',
     'promotion_request',
     'deal_closing',

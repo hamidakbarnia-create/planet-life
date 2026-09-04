@@ -177,11 +177,9 @@ describe('Phase 1B.1A localized resolution matrix', () => {
 
   it('R/W. valid Persian dates do not create Decision Types for unsupported topics', () => {
     const unsupported = [
-      '۱۲ سپتامبر برای مذاکره پیشنهاد شغلی خوبه؟',
       '۱۲ سپتامبر برای مذاکره حقوق خوبه؟',
       '۱۵ سپتامبر برای خرید بیت‌کوین خوبه؟',
       'فردا برای مهاجرت خوبه؟',
-      'Should I negotiate my job offer tomorrow?',
     ];
     for (const text of unsupported) {
       const result = resolveTypedDecisionType(text, 'fa');
@@ -189,6 +187,21 @@ describe('Phase 1B.1A localized resolution matrix', () => {
       expect(
         result.status === 'exact' ? result.decisionTypeId : undefined
       ).toBeUndefined();
+    }
+  });
+
+  it('R/W. offer-negotiation topics bind without the date changing resolution', () => {
+    const supported = [
+      '۱۲ سپتامبر برای مذاکره پیشنهاد شغلی خوبه؟',
+      'Should I negotiate my job offer tomorrow?',
+      'مذاکره روی پیشنهاد شغلی',
+    ];
+    for (const text of supported) {
+      const result = resolveTypedDecisionType(text, 'fa');
+      expect(result.status).toBe('exact');
+      expect(
+        result.status === 'exact' ? result.decisionTypeId : undefined
+      ).toBe('car-offer-negotiation');
     }
   });
 

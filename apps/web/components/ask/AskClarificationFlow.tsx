@@ -64,6 +64,19 @@ function compareDisabledReason(
   if (decisionTypeId === 'bus-product-launch') {
     return copy.compareUnavailableForLaunch;
   }
+  if (decisionTypeId === 'car-offer-negotiation') {
+    return copy.compareUnavailableForOfferNegotiation;
+  }
+  return copy.comingSoon;
+}
+
+function findDisabledReason(
+  copy: AskProductCopy,
+  decisionTypeId: string | undefined
+): string {
+  if (decisionTypeId === 'car-offer-negotiation') {
+    return copy.findUnavailableForOfferNegotiation;
+  }
   return copy.comingSoon;
 }
 
@@ -433,7 +446,7 @@ export function AskClarificationFlow({
               'find',
               copy.examineFind,
               findCapable,
-              copy.comingSoon
+              findDisabledReason(copy, frame.decision_type_id)
             )}
           </div>
           {!evaluateCapable && !compareCapable && !findCapable ? (
