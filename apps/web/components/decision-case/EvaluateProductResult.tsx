@@ -18,15 +18,24 @@ import {
   VerdictCard,
 } from '@/components/decision-result/ResultShell';
 
-/** Consumer Evaluate result — polarity-split evidence, honest timing score. */
+/**
+ * Consumer Evaluate result — polarity-split evidence, honest timing score.
+ *
+ * `narrative="chrome"` keeps date, score, confidence, limits and agency, and
+ * drops the generic recommendation / meaning / evidence / next-step copy.
+ * Offer Negotiation uses that mode so its specific panel is the only reading.
+ */
 export function EvaluateProductResult({
   lang,
   model,
+  narrative = 'full',
 }: {
   lang: AppLang;
   model: AskEvaluatePresentation;
+  narrative?: 'full' | 'chrome';
 }) {
   const copy = getAskProductCopy(lang);
+  const full = narrative === 'full';
   return (
     <ResultShell
       testId="evaluate-product-result"
@@ -42,11 +51,13 @@ export function EvaluateProductResult({
         dateSecondary={model.date.secondary}
       />
 
-      <RecommendationCard
-        label={copy.resultRecommendation}
-        body={model.recommendation}
-        detail={model.recommendationDetail}
-      />
+      {full ? (
+        <RecommendationCard
+          label={copy.resultRecommendation}
+          body={model.recommendation}
+          detail={model.recommendationDetail}
+        />
+      ) : null}
 
       <VerdictCard
         verdict={model.verdict}
@@ -56,41 +67,45 @@ export function EvaluateProductResult({
           ) : null
         }
         scoreHint={model.scoreHonestyNote}
-        meaning={model.meaning}
+        meaning={full ? model.meaning : null}
       />
 
-      {/* 3. Why / evidence */}
-      <ResultEvidenceGrid>
-        <EvidenceDrivers
-          label={copy.evidenceSupportSection}
-          items={model.supportiveEvidence.map((line) => ({
-            id: line.id,
-            title: line.title,
-            detail: line.detail,
-          }))}
-        />
-        <CautionDrivers
-          label={copy.evidenceCautionSection}
-          items={model.cautionaryEvidence.map((line) => ({
-            id: line.id,
-            title: line.title,
-            detail: line.detail,
-          }))}
-        />
-      </ResultEvidenceGrid>
+      {full ? (
+        <>
+          {/* 3. Why / evidence */}
+          <ResultEvidenceGrid>
+            <EvidenceDrivers
+              label={copy.evidenceSupportSection}
+              items={model.supportiveEvidence.map((line) => ({
+                id: line.id,
+                title: line.title,
+                detail: line.detail,
+              }))}
+            />
+            <CautionDrivers
+              label={copy.evidenceCautionSection}
+              items={model.cautionaryEvidence.map((line) => ({
+                id: line.id,
+                title: line.title,
+                detail: line.detail,
+              }))}
+            />
+          </ResultEvidenceGrid>
 
-      {model.contextEvidence.length > 0 ? (
-        <EvidenceDrivers
-          label={copy.evidenceContextSection}
-          items={model.contextEvidence.map((line) => ({
-            id: line.id,
-            title: line.title,
-            detail: line.detail,
-          }))}
-        />
+          {model.contextEvidence.length > 0 ? (
+            <EvidenceDrivers
+              label={copy.evidenceContextSection}
+              items={model.contextEvidence.map((line) => ({
+                id: line.id,
+                title: line.title,
+                detail: line.detail,
+              }))}
+            />
+          ) : null}
+
+          <NextStepsBlock label={copy.nextStepsLabel} steps={model.nextSteps} />
+        </>
       ) : null}
-
-      <NextStepsBlock label={copy.nextStepsLabel} steps={model.nextSteps} />
 
       {/* 4. Confidence (secondary; must not dominate the answer) */}
       {model.confidence ? (

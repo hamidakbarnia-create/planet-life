@@ -104,4 +104,17 @@ describe('EvaluateProductResult first viewport', () => {
       .map((el) => el.textContent ?? '');
     expect(new Set(cautionTitles).size).toBe(cautionTitles.length);
   });
+
+  it('keeps date, score and limits when narrative is chrome-only', () => {
+    const model = buildEvaluatePresentation(runtimePkg(), 'en');
+    render(
+      <EvaluateProductResult lang="en" model={model!} narrative="chrome" />
+    );
+    expect(screen.getByTestId('result-score')).toBeTruthy();
+    expect(screen.getByTestId('result-limits')).toBeTruthy();
+    expect(screen.queryByTestId('result-recommendation')).toBeNull();
+    expect(screen.queryByTestId('result-meaning')).toBeNull();
+    expect(screen.queryByTestId('result-evidence-support')).toBeNull();
+    expect(screen.queryByTestId('result-next-steps')).toBeNull();
+  });
 });
