@@ -35,6 +35,19 @@ export {
   type LocalizedEvidenceFactor,
 } from './evidence-factor-localize';
 export {
+  buildOfferNegotiationResultView,
+  categoryForDimensionRole,
+  CANONICAL_DIMENSION_IDS,
+  OFFER_NEGOTIATION_DECISION_TYPE_ID,
+  type CanonicalDimensionId,
+  type OfferNegotiationCategory,
+  type OfferNegotiationConditionQuality,
+  type OfferNegotiationContext,
+  type OfferNegotiationEvidenceTrace,
+  type OfferNegotiationResultView,
+  type OfferNegotiationStrength,
+} from './offer-negotiation-semantics';
+export {
   deriveClarificationState,
   isCapabilityUnavailableEvaluateFrame,
   isEvaluateCapabilityUnavailable,

@@ -78,7 +78,9 @@ export default function DecisionCaseResultPage() {
           ? copy.topicWeddingDate
           : caseRecord?.decision_type_id === 'bus-product-launch'
             ? copy.topicProductLaunch
-            : caseRecord?.title;
+            : caseRecord?.decision_type_id === 'car-offer-negotiation'
+              ? copy.topicOfferNegotiation
+              : caseRecord?.title;
 
   return (
     <AppShell
@@ -106,6 +108,7 @@ export default function DecisionCaseResultPage() {
               caseId={caseId}
               topic={topic}
               lang={lang}
+              intake={caseRecord?.intake}
             />
           </div>
         ) : !error ? (

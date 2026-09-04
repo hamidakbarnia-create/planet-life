@@ -13,8 +13,11 @@ import {
 import type { AppLang } from '@/lib/app-settings';
 import {
   buildEvaluatePresentation,
+  buildOfferNegotiationResultView,
   getAskProductCopy,
+  type OfferNegotiationContext,
 } from '@/lib/ask-product';
+import { OfferNegotiationResultPanel } from '@/components/decision-case/OfferNegotiationResultPanel';
 import {
   packageToCompareView,
   packageToFindView,
@@ -40,6 +43,7 @@ export function DecisionPackageView({
   caseId,
   topic,
   lang: langProp,
+  intake,
 }: {
   package: DecisionEvaluationPackage;
   dqStatus?: string;
@@ -47,6 +51,11 @@ export function DecisionPackageView({
   topic?: string;
   /** Optional override for tests / parent-owned locale. */
   lang?: AppLang;
+  /**
+   * Optional Case intake. Used only to scope offer-negotiation wording; it
+   * never affects any score.
+   */
+  intake?: OfferNegotiationContext;
 }) {
   assertPackageRenderContract(pkg);
   const [hookLang] = useAppLang();
@@ -64,8 +73,15 @@ export function DecisionPackageView({
   const preview = isDecisionSemanticsPreviewEnabled() ? (
     <PackageSemanticPreview package={pkg} lang={lang} />
   ) : null;
+  // car-offer-negotiation gets a negotiation-specific reading instead of the
+  // generic day-intelligence panel, so the same evidence is not narrated twice.
+  const offerNegotiationView = buildOfferNegotiationResultView(
+    pkg,
+    lang,
+    intake
+  );
   const evaluateView =
-    pkg.mode === 'evaluate_date'
+    pkg.mode === 'evaluate_date' && !offerNegotiationView
       ? buildDayIntelligenceView({
           explanation: explanationFromEvaluatePackage(pkg),
           locale: lang as SemanticPreviewLocale,
@@ -166,7 +182,19 @@ export function DecisionPackageView({
 
   return (
     <div data-testid="decision-package-view" data-mode="evaluate_date">
-      <EvaluateProductResult lang={lang} model={model} />
+      <EvaluateProductResult
+        lang={lang}
+        model={model}
+        narrative={offerNegotiationView ? 'chrome' : 'full'}
+      />
+      {offerNegotiationView ? (
+        <div className="mt-4" data-testid="evaluate-offer-negotiation">
+          <OfferNegotiationResultPanel
+            lang={lang}
+            view={offerNegotiationView}
+          />
+        </div>
+      ) : null}
       {evaluateView ? (
         <div className="mt-4" data-testid="evaluate-day-intelligence">
           <DayIntelligencePanel view={evaluateView} />
