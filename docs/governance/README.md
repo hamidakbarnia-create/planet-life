@@ -59,6 +59,7 @@ Cursor and other AI agents may maintain structure, links, references, and consis
 | [ADR_INDEX.md](./ADR_INDEX.md) | Index of Architecture Decision Records |
 | [CHANGELOG.md](./CHANGELOG.md) | Version history of the governance structure itself |
 | [P2.2-04-PRODUCTION-OBSERVABILITY.md](./P2.2-04-PRODUCTION-OBSERVABILITY.md) | Ratified P2.2-04 Production Observability acceptance package (implementation not started) |
+| [P4B-COMPARE-SPECIFICATION-AUTHORIZATION.md](./P4B-COMPARE-SPECIFICATION-AUTHORIZATION.md) | Operational authorization for Compare semantic-presentation specification and review only; implementation not authorized |
 
 ## Relationship to Existing Documentation
 

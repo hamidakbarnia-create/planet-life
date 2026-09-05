@@ -1,7 +1,7 @@
 # METIORO Master Status
 
 > **Document type:** Sprint & workstream status registry
-> **Last updated:** 2026-07-26
+> **Last updated:** 2026-09-05
 > **Authority:** Authoritative registry for sprint and workstream status per [GOVERNANCE.md](./governance/GOVERNANCE.md). Summarizes repository artifacts — does not override Constitution, Decision Log LOCKED entries, Token Registry, or LOCKED ADRs.
 
 **Quick links:** [Governance](./governance/GOVERNANCE.md) · [Governance hub](./governance/README.md) · [Design Token Registry](./design/system/design-token-registry.md) · [Performance Baseline](./performance/BASELINE.md) · [UI Audit](./design/ui-audit/README.md)
@@ -249,6 +249,7 @@ Approved or documented engineering work only (no new feature proposals):
 | **SPRINT-4A** | Unified ask resolution contract | **CLOSED** | commit `09e0c65` |
 | **SPRINT-4B** | Decision request mapping layer | **CLOSED** | commit `48543f2` |
 | **SPRINT-4C** | Decision execution readiness boundary | **CLOSED** | commit `2a94693` |
+| **P4B-COMPARE-SPEC** | Compare Semantic Presentation — specification and review only (working label: “Phase 4B Compare”; unrelated to CLOSED `SPRINT-4B`) | **PROPOSED** | [Specification authorization](./governance/P4B-COMPARE-SPECIFICATION-AUTHORIZATION.md); DEC-0021. Application code, implementation, and deployment are not authorized. |
 | **SPRINT-5A** | Deterministic decision engine facade | **CLOSED** | commit `b60bf68` |
 | **SPRINT-5B** | Result runtime pipeline integration | **CLOSED** | commit `d90f127` |
 | **ADR-DS-001** | Design System Architecture v1 | **PROPOSED** | [ADR-DS-001](./governance/adr/ADR-DS-001-design-system-architecture.md) |

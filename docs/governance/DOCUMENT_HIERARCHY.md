@@ -140,6 +140,7 @@ Documents at this level define day-to-day workflows — handoffs, roadmaps, spri
 | Strategic Roadmap | *Existing* | `ROADMAP.md` (root) |
 | Handoff Notes | *Existing* | `HANDOFF.md` (root) |
 | [Master Status / Sprint Registry](../MASTER_STATUS.md) | *Active* | `docs/MASTER_STATUS.md` |
+| [P4B Compare Specification Authorization](./P4B-COMPARE-SPECIFICATION-AUTHORIZATION.md) | Proposed | `docs/governance/P4B-COMPARE-SPECIFICATION-AUTHORIZATION.md` |
 | Operational Procedures (formal) | *Not yet authored* | `docs/operations/` (proposed) |
 
 ---
