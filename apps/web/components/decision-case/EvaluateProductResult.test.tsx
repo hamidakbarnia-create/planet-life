@@ -116,5 +116,44 @@ describe('EvaluateProductResult first viewport', () => {
     expect(screen.queryByTestId('result-meaning')).toBeNull();
     expect(screen.queryByTestId('result-evidence-support')).toBeNull();
     expect(screen.queryByTestId('result-next-steps')).toBeNull();
+    expect(screen.queryByTestId('result-date-primary-token')).toBeNull();
+    expect(
+      screen.getByTestId('evaluate-product-result').getAttribute('data-density')
+    ).toBeNull();
+  });
+
+  it('places an insight slot before limits and can omit the scope intro', () => {
+    const model = buildEvaluatePresentation(runtimePkg(), 'en');
+    const { container } = render(
+      <EvaluateProductResult
+        lang="en"
+        model={model!}
+        narrative="chrome"
+        verdictOverride="Strong timing — but handle the conversation deliberately"
+        insight={<div data-testid="evaluate-offer-negotiation">Insight</div>}
+        omitLimitsScope
+        isolateDates
+        compact
+      />
+    );
+    const html = container.innerHTML;
+    expect(html.indexOf('data-testid="evaluate-offer-negotiation"')).toBeLessThan(
+      html.indexOf('data-testid="result-limits"')
+    );
+    expect(screen.getByTestId('result-verdict').textContent).toBe(
+      'Strong timing — but handle the conversation deliberately'
+    );
+    expect(screen.getByTestId('result-verdict').textContent).not.toMatch(
+      /Highly favorable/i
+    );
+    expect(screen.getByTestId('result-date-primary-token').tagName.toLowerCase()).toBe(
+      'bdi'
+    );
+    expect(screen.getByTestId('evaluate-product-result').getAttribute('data-density')).toBe(
+      'compact'
+    );
+    expect(screen.getByTestId('result-limits').textContent).not.toContain(
+      model!.scope
+    );
   });
 });

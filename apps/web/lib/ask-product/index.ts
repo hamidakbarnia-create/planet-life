@@ -37,6 +37,7 @@ export {
 export {
   buildOfferNegotiationResultView,
   categoryForDimensionRole,
+  offerNegotiationBackToAsk,
   CANONICAL_DIMENSION_IDS,
   OFFER_NEGOTIATION_DECISION_TYPE_ID,
   type CanonicalDimensionId,

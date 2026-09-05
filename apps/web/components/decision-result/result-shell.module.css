@@ -4,6 +4,14 @@
   width: 100%;
 }
 
+.shellCompact {
+  gap: 0.65rem;
+}
+
+.shellCompact .verdictCard {
+  padding-top: 0.35rem;
+}
+
 .header {
   display: grid;
   gap: 0.3rem;

@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { AppShell } from '@/components/AppShell';
+import { DecisionCaseResultBackLink } from '@/components/decision-case/DecisionCaseResultBackLink';
 import { DecisionPackageView } from '@/components/decision-case/DecisionPackageView';
 import { getAskProductCopy, localizeCaseApiError } from '@/lib/ask-product';
 import { localeFontFamily } from '@/lib/brand-theme';
@@ -117,12 +117,10 @@ export default function DecisionCaseResultPage() {
           </p>
         ) : null}
 
-        <Link
-          href="/ask"
-          className="fi text-sm text-[#93B4FF] hover:text-white"
-        >
-          {copy.backToAsk}
-        </Link>
+        <DecisionCaseResultBackLink
+          lang={lang}
+          decisionTypeId={caseRecord?.decision_type_id}
+        />
       </div>
     </AppShell>
   );

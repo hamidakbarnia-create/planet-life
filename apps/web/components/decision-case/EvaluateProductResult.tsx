@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { TimingStrengthText } from '@/components/ui/TimingStrengthText';
 import type { AppLang } from '@/lib/app-settings';
 import type { AskEvaluatePresentation } from '@/lib/ask-product';
@@ -24,24 +25,42 @@ import {
  * `narrative="chrome"` keeps date, score, confidence, limits and agency, and
  * drops the generic recommendation / meaning / evidence / next-step copy.
  * Offer Negotiation uses that mode so its specific panel is the only reading.
+ *
+ * Optional chrome slots (`insight`, `verdictOverride`, compact limits) are
+ * presentation-only and default off so other Decision Types stay unchanged.
+ * `omitAgency` is Offer Negotiation only — the panel already has the next step.
  */
 export function EvaluateProductResult({
   lang,
   model,
   narrative = 'full',
+  insight = null,
+  verdictOverride = null,
+  omitLimitsScope = false,
+  isolateDates = false,
+  compact = false,
+  omitAgency = false,
 }: {
   lang: AppLang;
   model: AskEvaluatePresentation;
   narrative?: 'full' | 'chrome';
+  insight?: ReactNode;
+  verdictOverride?: string | null;
+  omitLimitsScope?: boolean;
+  isolateDates?: boolean;
+  compact?: boolean;
+  omitAgency?: boolean;
 }) {
   const copy = getAskProductCopy(lang);
   const full = narrative === 'full';
+  const verdict = verdictOverride ?? model.verdict;
   return (
     <ResultShell
       testId="evaluate-product-result"
       mode="evaluate_date"
       dir={copy.dir}
       ariaLabel={copy.resultRecommendation}
+      compact={compact}
     >
       {/* 1–2. Recommendation / answer + primary date */}
       <ResultHeader
@@ -49,6 +68,7 @@ export function EvaluateProductResult({
         topic={model.topic}
         datePrimary={model.date.primary}
         dateSecondary={model.date.secondary}
+        isolateDates={isolateDates}
       />
 
       {full ? (
@@ -60,7 +80,8 @@ export function EvaluateProductResult({
       ) : null}
 
       <VerdictCard
-        verdict={model.verdict}
+        verdict={verdict}
+        extraTestId={verdictOverride ? 'offer-negotiation-headline' : undefined}
         scoreLabel={
           model.scoreLabel ? (
             <TimingStrengthText formatted={model.scoreLabel} />
@@ -69,6 +90,8 @@ export function EvaluateProductResult({
         scoreHint={model.scoreHonestyNote}
         meaning={full ? model.meaning : null}
       />
+
+      {insight}
 
       {full ? (
         <>
@@ -118,11 +141,11 @@ export function EvaluateProductResult({
       {/* 5. Limits */}
       <LimitsBlock
         label={copy.limitsLabel}
-        scope={model.scope}
+        scope={omitLimitsScope ? null : model.scope}
         limits={model.packageLimits}
       />
 
-      <AgencyLine text={model.agencyLine} />
+      {omitAgency ? null : <AgencyLine text={model.agencyLine} />}
     </ResultShell>
   );
 }
