@@ -368,3 +368,20 @@ Evidence recorded on [PRG-02](./PRG-02-reading-contract-presence-validity-gates.
 | **ACT** | Accept **ADR-0015 Wire Supplement 01**: (1) E5 activates only create/list/get, complete, archive, evaluation reads, history; intake writes → E6; NL create → E8; POST evaluations/comparisons → E10+; (2) `expected_case_version` required JSON body on material writes (create exempt); (3) freeze response envelopes + `201` create; `activation_phase` null for NO_ACTIVE_PHASE; (4) ADR-0006-shaped error envelope with Case codes; (5) owner isolation Option A — single internal owner context; `403` reserved; (6) OpenAPI lists only ACTIVE_IN_E5 routes; no stubs. **Do not amend ACR-0001 or ADR-0014.** After Owner ratification, E5 implementation may proceed. |
 | **OUTCOME** | **RATIFIED.** Owner accepts ADR-0015-WS-01. GOV-API-01…06 resolved; GOV-ISSUE-003 CLOSED. **E5 implementation authorized** for the ACTIVE_IN_E5 subset. Create-time type/entry-mode/`family_id`/`mode` authority remains the Decision Type Registry (minimal E2 seam authorized). |
 | **LEARN** | Prefer activation subsets + wire supplements over early stubs for later-task capabilities. |
+
+---
+
+## DEC-0021 — Authorize P4B Compare specification and review only
+
+| Field | Value |
+|-------|-------|
+| **Status** | **ACCEPTED** |
+| **Authority** | Operational |
+| **Owner** | METIORO Product Owner |
+| **Date** | 2026-09-05 |
+| **WHERE** | Explicit Product Owner authorization; [P4B-COMPARE-SPEC authorization record](./P4B-COMPARE-SPECIFICATION-AUTHORIZATION.md) |
+| **References** | [GOVERNANCE.md](./GOVERNANCE.md) Sprint Protocol; [MASTER_STATUS.md](../MASTER_STATUS.md); ACR-0001; ADR-0014; PRG-02 Reading Contract presence/validity gates; PRG-04; PRG-05 |
+| **WHY** | Compare semantic-presentation work had accumulated technical design-ahead without a registered workstream. Readiness and detailed scope were at risk of being treated as authorization. A distinct record is required because historical `SPRINT-4B` is CLOSED and unrelated. |
+| **ACT** | Authorize `P4B-COMPARE-SPEC` for provenance-verified inspection, specification drafting, and governance/compatibility review only. Register the workstream as **PROPOSED**. Do **not** authorize application or test code, API/schema/runtime/registry/scoring/ranking/policy/UI/renderer/localization changes, implementation, deployment, production activation, Salary Raise work, or consumer-side derivation of comparative semantics. A separate explicit Product Owner decision is required before implementation. |
+| **OUTCOME** | Specification/review gate opened. Implementation and deployment gates remain closed. No existing Compare behavior, ranking, winner, payload, or product surface is changed by this decision. |
+| **LEARN** | Register proposal authority before detailed design creates legitimacy by momentum; keep specification acceptance and implementation authorization as separate gates. |

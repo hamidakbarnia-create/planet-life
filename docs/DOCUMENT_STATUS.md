@@ -51,6 +51,7 @@ This index classifies every Markdown documentation file in the repository. It do
 | Evidence Registry | `docs/governance/EVIDENCE_REGISTRY.md` | Registry schema for evidence artifacts | Level 2 | **Active** | — | Status: Draft |
 | Requirement Registry | `docs/governance/REQUIREMENT_REGISTRY.md` | Product requirement registration schema | Level 2 | **Active** | — | Status: Draft |
 | Legal & Compliance Policies | `docs/governance/LEGAL_COMPLIANCE_POLICIES.md` | Legal/compliance policy framework | Level 2 | **Active** | — | Status: Draft |
+| P4B Compare Specification Authorization | `docs/governance/P4B-COMPARE-SPECIFICATION-AUTHORIZATION.md` | Registers Compare semantic-presentation specification/review authority and explicit implementation prohibitions | Operational (Level 5) | **Proposed** | — | Canonical workstream ID `P4B-COMPARE-SPEC`; unrelated to CLOSED `SPRINT-4B` |
 
 ### `docs/governance/adr/` — architecture decision records
 

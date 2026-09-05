@@ -2,13 +2,29 @@
 
 > Status: Review
 
-**Version:** 1.3.3
+**Version:** 1.4.0
 
 **Authority:** This document derives from [METIORO_CONSTITUTION.md](./METIORO_CONSTITUTION.md) (governance instrument).
 
 **Purpose:** Version history of the METIORO governance structure itself.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) for governance releases.
+
+---
+
+## [1.4.0] — 2026-09-05
+
+### Added
+
+- [P4B-COMPARE-SPECIFICATION-AUTHORIZATION.md](./P4B-COMPARE-SPECIFICATION-AUTHORIZATION.md) — operational authorization for Compare semantic-presentation specification and review only
+- `DEC-0021` — Product Owner authorization with explicit implementation and deployment prohibitions
+- `P4B-COMPARE-SPEC` row in [MASTER_STATUS.md](../MASTER_STATUS.md) with status `PROPOSED`
+
+### Documented
+
+- `P4B-COMPARE-SPEC` is unrelated to historical and CLOSED `SPRINT-4B`
+- Specification readiness or acceptance does not authorize application code
+- A separate explicit Product Owner decision is required before implementation
 
 ---
 
