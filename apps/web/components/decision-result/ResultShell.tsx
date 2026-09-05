@@ -8,23 +8,40 @@ export function ResultShell({
   testId,
   mode,
   ariaLabel,
+  compact = false,
 }: {
   children: ReactNode;
   dir: 'ltr' | 'rtl';
   testId: string;
   mode?: string;
   ariaLabel: string;
+  compact?: boolean;
 }) {
   return (
     <article
-      className={styles.shell}
+      className={`${styles.shell}${compact ? ` ${styles.shellCompact}` : ''}`}
       data-testid={testId}
       data-mode={mode}
+      {...(compact ? { 'data-density': 'compact' } : {})}
       dir={dir}
       aria-label={ariaLabel}
     >
       {children}
     </article>
+  );
+}
+
+function IsolatedDateToken({
+  children,
+  testId,
+}: {
+  children: string;
+  testId: string;
+}) {
+  return (
+    <bdi data-testid={testId} data-bidi-isolate="date" style={{ unicodeBidi: 'isolate' }}>
+      {children}
+    </bdi>
   );
 }
 
@@ -34,12 +51,14 @@ export function ResultHeader({
   topicTestId,
   datePrimary,
   dateSecondary,
+  isolateDates = false,
 }: {
   eyebrow?: string;
   topic: string;
   topicTestId?: string;
   datePrimary?: string;
   dateSecondary?: string;
+  isolateDates?: boolean;
 }) {
   return (
     <header className={styles.header}>
@@ -49,7 +68,13 @@ export function ResultHeader({
       </h2>
       {datePrimary ? (
         <p className={`fi ${styles.datePrimary}`} data-testid="result-date-primary">
-          {datePrimary}
+          {isolateDates ? (
+            <IsolatedDateToken testId="result-date-primary-token">
+              {datePrimary}
+            </IsolatedDateToken>
+          ) : (
+            datePrimary
+          )}
         </p>
       ) : null}
       {dateSecondary ? (
@@ -57,7 +82,13 @@ export function ResultHeader({
           className={`fi ${styles.dateSecondary}`}
           data-testid="result-date-secondary"
         >
-          {dateSecondary}
+          {isolateDates ? (
+            <IsolatedDateToken testId="result-date-secondary-token">
+              {dateSecondary}
+            </IsolatedDateToken>
+          ) : (
+            dateSecondary
+          )}
         </p>
       ) : null}
     </header>
@@ -69,16 +100,18 @@ export function VerdictCard({
   scoreLabel,
   scoreHint,
   meaning,
+  extraTestId,
 }: {
   verdict: string;
   scoreLabel?: ReactNode | null;
   scoreHint?: string | null;
   meaning?: string | null;
+  extraTestId?: string;
 }) {
   return (
     <div className={styles.verdictCard} data-testid="result-verdict-card">
       <p className={`fc ${styles.verdict}`} data-testid="result-verdict">
-        {verdict}
+        {extraTestId ? <span data-testid={extraTestId}>{verdict}</span> : verdict}
       </p>
       {scoreLabel ? (
         <p className={`fi ${styles.score}`} data-testid="result-score">

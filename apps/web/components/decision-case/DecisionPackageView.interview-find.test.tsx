@@ -250,4 +250,21 @@ describe('DecisionPackageView car-interview FIND visual acceptance', () => {
     expect(text).not.toContain('Strongest interview window');
     expect(text).not.toContain('Timing score:');
   });
+
+  it('keeps the Find ResultShell non-compact and date markup unisolated', () => {
+    render(
+      <DecisionPackageView
+        package={interviewFindPackage()}
+        dqStatus="pass"
+        lang="en"
+      />
+    );
+    const shell = screen.getByTestId('find-result-view');
+    expect(shell.getAttribute('data-density')).toBeNull();
+    const date = screen.getByTestId('result-date-primary');
+    expect(screen.queryByTestId('result-date-primary-token')).toBeNull();
+    expect(screen.queryByTestId('result-date-secondary-token')).toBeNull();
+    expect(date.querySelector('[data-bidi-isolate]')).toBeNull();
+    expect(date.textContent?.trim()).toBeTruthy();
+  });
 });

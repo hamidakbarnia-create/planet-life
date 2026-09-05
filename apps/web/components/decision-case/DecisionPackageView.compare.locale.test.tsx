@@ -215,4 +215,18 @@ describe('DecisionPackageView COMPARE localization', () => {
     expect(whyAt).toBeGreaterThan(optionsAt);
     expect(confidenceAt).toBeGreaterThan(whyAt);
   });
+
+  it('keeps the Compare ResultShell non-compact and date markup unisolated', () => {
+    render(
+      <DecisionPackageView
+        package={comparePackage()}
+        dqStatus="pass"
+        lang="en"
+      />
+    );
+    const shell = screen.getByTestId('compare-result-view');
+    expect(shell.getAttribute('data-density')).toBeNull();
+    expect(screen.queryByTestId('result-date-primary-token')).toBeNull();
+    expect(screen.queryByTestId('result-date-secondary-token')).toBeNull();
+  });
 });

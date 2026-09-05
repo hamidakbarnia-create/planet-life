@@ -14,6 +14,7 @@ import { bindDemoStubPackage } from '@/lib/decision-case';
 import {
   buildOfferNegotiationResultView,
   categoryForDimensionRole,
+  offerNegotiationBackToAsk,
   type CanonicalDimensionId,
 } from './offer-negotiation-semantics';
 
@@ -424,6 +425,38 @@ describe('condition quality authority', () => {
     );
     expect(view?.conditionQuality).toBe('strained');
     expect(view?.semanticInsufficient).toBe(false);
+    expect(view?.headline).toBe(
+      'Workable timing — but the conditions are strained'
+    );
+    expect(view?.headline).not.toMatch(/Highly favorable|opening the negotiation/i);
+    expect(view?.summary).not.toMatch(/point in one direction|Highly favorable/i);
+  });
+
+  it('qualifies a 100 score when conditions are strained', () => {
+    const view = buildOfferNegotiationResultView(
+      groundedPackage({
+        score: 100,
+        classification: {
+          scored_dimension_count: 3,
+          day_class: 'defensive',
+          same_dimension_conflict: false,
+          conflicted_dimension_ids: [],
+          veto_dimension_ids: ['pressure'],
+        },
+        explanation: {
+          headline_code: 'semantic.veto_present',
+          support_codes: ['semantic.high_clarity'],
+          caution_codes: ['semantic.veto_present', 'semantic.high_pressure'],
+        },
+      }),
+      'en'
+    );
+    expect(view?.strength).toBe('strong');
+    expect(view?.conditionQuality).toBe('strained');
+    expect(view?.headline).toBe(
+      'Strong timing — but the conditions call for caution'
+    );
+    expect(view?.headline).not.toMatch(/Highly favorable/i);
   });
 
   it('marks insufficient semantic data as mixed with restrained copy', () => {
@@ -436,7 +469,14 @@ describe('condition quality authority', () => {
     );
     expect(view?.semanticInsufficient).toBe(true);
     expect(view?.conditionQuality).toBe('mixed');
-    expect(view?.summary).toContain('general timing guidance only');
+    expect(view?.headline).toBe('General timing for this date is strong');
+    expect(view?.headline).not.toMatch(/opening the negotiation|Highly favorable/i);
+    expect(view?.summary).toBe(
+      'The available evidence supports general timing guidance only, so no specific negotiation reading is offered for this date.'
+    );
+    expect(view?.supports).toEqual([]);
+    expect(view?.watch).toEqual([]);
+    expect(view?.watchNotice).toBeNull();
   });
 });
 
@@ -522,7 +562,7 @@ describe('evidence-grounded result view', () => {
     expect(view?.supports).toEqual([]);
     expect(view?.watch).toEqual([]);
     expect(view?.summary).toContain('general timing guidance only');
-    expect(view?.nextStep).toMatch(/Ordinary preparation/i);
+    expect(view?.nextStep).toMatch(/Practical preparation/i);
   });
 
   it('qualifies a 100/100 score when semantic.same_dimension_conflict is present', () => {
@@ -535,8 +575,9 @@ describe('evidence-grounded result view', () => {
       'Strong timing — but handle the conversation deliberately'
     );
     expect(view?.summary).toBe(
-      'Timing potential for this date is high. The conditions are mixed, so the conversation should not be rushed.'
+      'The conditions are mixed, so the conversation should not be rushed.'
     );
+    expect(view?.headline).not.toBe(view?.summary);
     expect(view?.headline.toLowerCase()).not.toMatch(
       /perfect|guarantee|ideal day/
     );
@@ -597,7 +638,7 @@ describe('optional intake context', () => {
     expect(view?.contextNote).toBeNull();
     expect(view?.headline).toBeTruthy();
     expect(view?.summary).toBeTruthy();
-    expect(view?.nextStep).toMatch(/Ordinary preparation/i);
+    expect(view?.nextStep).toMatch(/Practical preparation/i);
     expect(
       [view?.headline, view?.summary, view?.nextStep].join(' ')
     ).not.toMatch(/missing|not provided|incomplete/i);
@@ -696,14 +737,14 @@ describe('claim boundary', () => {
     expect(blob).not.toMatch(/\d{4}-\d{2}-\d{2}/);
   });
 
-  it('keeps next-step as ordinary preparation, not an evidence conclusion', () => {
+  it('keeps next-step as practical preparation, not an evidence conclusion', () => {
     const grounded = buildOfferNegotiationResultView(groundedPackage(), 'en');
     const restrained = buildOfferNegotiationResultView(
       offerNegotiationPackage({ score: 74, drivers: GROUNDED_DRIVERS }),
       'en'
     );
     expect(grounded?.nextStep).toBe(restrained?.nextStep);
-    expect(grounded?.nextStep).toMatch(/^Ordinary preparation:/);
+    expect(grounded?.nextStep).toMatch(/^Practical preparation:/);
   });
 });
 
@@ -719,6 +760,9 @@ describe('localization', () => {
       view?.summary,
       view?.nextStep,
       view?.contextNote,
+      view?.supportHeading,
+      view?.watchHeading,
+      view?.nextStepHeading,
       ...(view?.supports ?? []),
       ...(view?.watch ?? []),
     ]) {
@@ -735,5 +779,505 @@ describe('localization', () => {
         buildOfferNegotiationResultView(hundredMixedPackage(), lang)?.headline
     );
     expect(new Set(headlines).size).toBe(LANGS.length);
+  });
+
+  it('localizes the Offer Negotiation back-to-Ask label', () => {
+    expect(offerNegotiationBackToAsk('en')).toBe('Back to Ask');
+    expect(offerNegotiationBackToAsk('fa')).toBe('بازگشت به طرح پرسش');
+    expect(offerNegotiationBackToAsk('ar')).not.toMatch(/ASK|Ask/);
+    expect(offerNegotiationBackToAsk('ru')).not.toMatch(/ASK|Ask/);
+    expect(offerNegotiationBackToAsk('ar')).toMatch(/سؤال/);
+  });
+});
+
+describe('grounded category wording', () => {
+  it('uses communication wording for grounded clarity support', () => {
+    const view = buildOfferNegotiationResultView(
+      groundedPackage({
+        dimensions: {
+          clarity: scoredDimension(
+            78,
+            'ev.aspect.mercury.trine.mercury',
+            'support'
+          ),
+        },
+        classification: {
+          scored_dimension_count: 1,
+          day_class: 'action',
+          same_dimension_conflict: false,
+          conflicted_dimension_ids: [],
+          veto_dimension_ids: [],
+        },
+        explanation: {
+          headline_code: 'semantic.strong_clean',
+          support_codes: ['semantic.high_clarity'],
+          caution_codes: [],
+          evidence_refs: [
+            {
+              code: 'semantic.high_clarity',
+              role: 'support',
+              dimension_id: 'clarity',
+              evidence_ids: ['ev.aspect.mercury.trine.mercury'],
+            },
+          ],
+        },
+        drivers: GROUNDED_DRIVERS.slice(0, 1),
+      }),
+      'en'
+    );
+
+    expect(view?.supports).toEqual([
+      'Communication conditions support presenting your priorities clearly.',
+    ]);
+    expect(view?.supports.join(' ')).not.toContain(
+      'Conditions support opening or advancing the conversation.'
+    );
+    expect(view?.evidence).toHaveLength(1);
+    expect(view?.evidence[0]).toMatchObject({
+      dimensionId: 'clarity',
+      polarity: 'supportive',
+      category: 'clarity',
+    });
+  });
+
+  it('uses constructive-exchange wording for grounded cooperation support', () => {
+    const view = buildOfferNegotiationResultView(
+      groundedPackage({
+        dimensions: {
+          cooperation: scoredDimension(
+            72,
+            'ev.aspect.venus.trine.sun',
+            'support'
+          ),
+        },
+        classification: {
+          scored_dimension_count: 1,
+          day_class: 'action',
+          same_dimension_conflict: false,
+          conflicted_dimension_ids: [],
+          veto_dimension_ids: [],
+        },
+        explanation: {
+          support_codes: ['semantic.high_cooperation'],
+          caution_codes: [],
+          evidence_refs: [
+            {
+              code: 'semantic.high_cooperation',
+              role: 'support',
+              dimension_id: 'cooperation',
+              evidence_ids: ['ev.aspect.venus.trine.sun'],
+            },
+          ],
+        },
+        drivers: [GROUNDED_DRIVERS[1]],
+      }),
+      'en'
+    );
+
+    expect(view?.supports).toEqual([
+      'Cooperative conditions support a constructive exchange.',
+    ]);
+  });
+
+  it('uses restrained timing wording for grounded momentum support', () => {
+    const view = buildOfferNegotiationResultView(
+      groundedPackage({
+        dimensions: {
+          momentum: scoredDimension(
+            80,
+            'ev.aspect.mercury.trine.mercury',
+            'support'
+          ),
+        },
+        classification: {
+          scored_dimension_count: 1,
+          day_class: 'action',
+          same_dimension_conflict: false,
+          conflicted_dimension_ids: [],
+          veto_dimension_ids: [],
+        },
+        explanation: {
+          support_codes: ['semantic.high_momentum'],
+          caution_codes: [],
+          evidence_refs: [
+            {
+              code: 'semantic.high_momentum',
+              role: 'support',
+              dimension_id: 'momentum',
+              evidence_ids: ['ev.aspect.mercury.trine.mercury'],
+            },
+          ],
+        },
+        drivers: GROUNDED_DRIVERS.slice(0, 1),
+      }),
+      'en'
+    );
+
+    expect(view?.supports).toEqual([
+      'The timing supports opening or advancing the negotiation.',
+    ]);
+    expect(view?.supports.join(' ')).not.toBe(
+      'Conditions support opening or advancing the conversation.'
+    );
+  });
+
+  it('uses non-rushed wording for grounded pressure caution', () => {
+    const view = buildOfferNegotiationResultView(groundedPackage(), 'en');
+    expect(view?.watch.join(' ')).toContain(
+      'Do not rush a response or escalate the conversation.'
+    );
+    expect(view?.watch.join(' ')).not.toMatch(
+      /aggression|rejection|employer|will/i
+    );
+    expect(
+      view?.evidence.find((item) => item.category === 'pressure')
+    ).toMatchObject({
+      dimensionId: 'pressure',
+      polarity: 'cautionary',
+    });
+  });
+
+  it('does not invent a claim from an unmapped dimension', () => {
+    const view = buildOfferNegotiationResultView(
+      offerNegotiationPackage({
+        score: 80,
+        drivers: GROUNDED_DRIVERS.slice(0, 1),
+        dimensions: {
+          opportunity: scoredDimension(
+            80,
+            'ev.aspect.mercury.trine.mercury',
+            'support'
+          ),
+        },
+        classification: {
+          scored_dimension_count: 1,
+          day_class: 'action',
+        },
+        explanation: {
+          support_codes: ['semantic.high_opportunity'],
+          evidence_refs: [
+            {
+              code: 'semantic.high_opportunity',
+              role: 'support',
+              dimension_id: 'opportunity',
+              evidence_ids: ['ev.aspect.mercury.trine.mercury'],
+            },
+          ],
+        },
+      }),
+      'en'
+    );
+
+    expect(view?.supports).toEqual([]);
+    expect(view?.watch).toEqual([]);
+    expect(view?.evidence).toEqual([]);
+    expect(view?.evidenceGrounded).toBe(false);
+  });
+
+  it('does not invent a claim when polarity is mismatched', () => {
+    const view = buildOfferNegotiationResultView(
+      offerNegotiationPackage({
+        score: 80,
+        drivers: [
+          {
+            factor_key: 'aspect.mercury.trine.mercury',
+            polarity: 'cautionary',
+            contribution: -6,
+          },
+        ],
+        dimensions: {
+          clarity: scoredDimension(
+            78,
+            'ev.aspect.mercury.trine.mercury',
+            'support'
+          ),
+        },
+        classification: {
+          scored_dimension_count: 1,
+          day_class: 'action',
+        },
+        explanation: {
+          support_codes: ['semantic.high_clarity'],
+          evidence_refs: [
+            {
+              code: 'semantic.high_clarity',
+              role: 'support',
+              dimension_id: 'clarity',
+              evidence_ids: ['ev.aspect.mercury.trine.mercury'],
+            },
+          ],
+        },
+      }),
+      'en'
+    );
+
+    expect(view?.supports).toEqual([]);
+    expect(view?.watch).toEqual([]);
+    expect(view?.evidence).toEqual([]);
+  });
+
+  it('does not invent a claim when the evidence id is not on the claimed dimension', () => {
+    const view = buildOfferNegotiationResultView(
+      offerNegotiationPackage({
+        score: 80,
+        drivers: GROUNDED_DRIVERS.slice(0, 1),
+        dimensions: {
+          clarity: scoredDimension(78, 'ev.aspect.venus.trine.sun', 'support'),
+        },
+        classification: {
+          scored_dimension_count: 1,
+          day_class: 'action',
+        },
+        explanation: {
+          support_codes: ['semantic.high_clarity'],
+          evidence_refs: [
+            {
+              code: 'semantic.high_clarity',
+              role: 'support',
+              dimension_id: 'clarity',
+              evidence_ids: ['ev.aspect.mercury.trine.mercury'],
+            },
+          ],
+        },
+      }),
+      'en'
+    );
+
+    expect(view?.supports).toEqual([]);
+    expect(view?.watch).toEqual([]);
+    expect(view?.evidence).toEqual([]);
+    expect(view?.evidenceGrounded).toBe(false);
+  });
+
+  it('uses mutual-understanding wording for grounded clarity caution', () => {
+    const view = buildOfferNegotiationResultView(
+      offerNegotiationPackage({
+        score: 70,
+        drivers: [GROUNDED_DRIVERS[2]],
+        dimensions: {
+          clarity: scoredDimension(
+            30,
+            'ev.aspect.mars.square.saturn',
+            'caution'
+          ),
+        },
+        classification: {
+          scored_dimension_count: 1,
+          day_class: 'review',
+        },
+        explanation: {
+          caution_codes: ['semantic.low_clarity'],
+          evidence_refs: [
+            {
+              code: 'semantic.low_clarity',
+              role: 'caution',
+              dimension_id: 'clarity',
+              evidence_ids: ['ev.aspect.mars.square.saturn'],
+            },
+          ],
+        },
+      }),
+      'en'
+    );
+
+    expect(view?.watch).toEqual([
+      'Verify mutual understanding and avoid unclear wording.',
+    ]);
+    expect(view?.evidence).toHaveLength(1);
+    expect(view?.evidence[0]).toMatchObject({
+      dimensionId: 'clarity',
+      polarity: 'cautionary',
+      category: 'clarity',
+    });
+  });
+
+  it('uses constructive-tone wording for grounded cooperation caution', () => {
+    const view = buildOfferNegotiationResultView(
+      offerNegotiationPackage({
+        score: 70,
+        drivers: [GROUNDED_DRIVERS[2]],
+        dimensions: {
+          cooperation: scoredDimension(
+            30,
+            'ev.aspect.mars.square.saturn',
+            'caution'
+          ),
+        },
+        classification: {
+          scored_dimension_count: 1,
+          day_class: 'review',
+        },
+        explanation: {
+          caution_codes: ['semantic.low_cooperation'],
+          evidence_refs: [
+            {
+              code: 'semantic.low_cooperation',
+              role: 'caution',
+              dimension_id: 'cooperation',
+              evidence_ids: ['ev.aspect.mars.square.saturn'],
+            },
+          ],
+        },
+      }),
+      'en'
+    );
+
+    expect(view?.watch).toEqual([
+      'Keep a constructive tone throughout the conversation.',
+    ]);
+    expect(view?.evidence[0]).toMatchObject({
+      dimensionId: 'cooperation',
+      polarity: 'cautionary',
+      category: 'cooperation',
+    });
+  });
+
+  it('uses practical-detail wording for grounded stability verification caution', () => {
+    const view = buildOfferNegotiationResultView(
+      offerNegotiationPackage({
+        score: 70,
+        drivers: [GROUNDED_DRIVERS[2]],
+        dimensions: {
+          stability: scoredDimension(
+            30,
+            'ev.aspect.mars.square.saturn',
+            'caution'
+          ),
+        },
+        classification: {
+          scored_dimension_count: 1,
+          day_class: 'review',
+        },
+        explanation: {
+          caution_codes: ['semantic.low_stability'],
+          evidence_refs: [
+            {
+              code: 'semantic.low_stability',
+              role: 'caution',
+              dimension_id: 'stability',
+              evidence_ids: ['ev.aspect.mars.square.saturn'],
+            },
+          ],
+        },
+      }),
+      'en'
+    );
+
+    expect(view?.watch).toEqual([
+      'Check the practical details before relying on them.',
+    ]);
+    expect(view?.evidence[0]).toMatchObject({
+      dimensionId: 'stability',
+      polarity: 'cautionary',
+      category: 'verification',
+    });
+  });
+
+  it('uses the same verification wording for grounded reversibility_safety caution', () => {
+    const view = buildOfferNegotiationResultView(
+      offerNegotiationPackage({
+        score: 70,
+        drivers: [GROUNDED_DRIVERS[2]],
+        dimensions: {
+          reversibility_safety: scoredDimension(
+            30,
+            'ev.aspect.mars.square.saturn',
+            'caution'
+          ),
+        },
+        classification: {
+          scored_dimension_count: 1,
+          day_class: 'review',
+        },
+        explanation: {
+          caution_codes: ['semantic.low_reversibility_safety'],
+          evidence_refs: [
+            {
+              code: 'semantic.low_reversibility_safety',
+              role: 'caution',
+              dimension_id: 'reversibility_safety',
+              evidence_ids: ['ev.aspect.mars.square.saturn'],
+            },
+          ],
+        },
+      }),
+      'en'
+    );
+
+    expect(view?.watch).toEqual([
+      'Check the practical details before relying on them.',
+    ]);
+    expect(view?.evidence[0]?.dimensionId).toBe('reversibility_safety');
+    expect(view?.evidence[0]?.category).toBe('verification');
+  });
+});
+
+describe('mixed without a joined caution trace', () => {
+  function mixedWithoutCautionTrace() {
+    return offerNegotiationPackage({
+      score: 100,
+      drivers: GROUNDED_DRIVERS.slice(0, 1),
+      dimensions: {
+        momentum: scoredDimension(
+          80,
+          'ev.aspect.mercury.trine.mercury',
+          'support'
+        ),
+      },
+      classification: {
+        scored_dimension_count: 1,
+        day_class: 'mixed',
+        same_dimension_conflict: true,
+        conflicted_dimension_ids: ['momentum'],
+        veto_dimension_ids: [],
+      },
+      explanation: {
+        headline_code: 'semantic.mixed_conflict',
+        support_codes: ['semantic.high_momentum'],
+        caution_codes: ['semantic.same_dimension_conflict'],
+        evidence_refs: [
+          {
+            code: 'semantic.high_momentum',
+            role: 'support',
+            dimension_id: 'momentum',
+            evidence_ids: ['ev.aspect.mercury.trine.mercury'],
+          },
+        ],
+      },
+    });
+  }
+
+  it('explains mixed conditions without fabricating a Watch bullet', () => {
+    const view = buildOfferNegotiationResultView(
+      mixedWithoutCautionTrace(),
+      'en'
+    );
+
+    expect(view?.conditionQuality).toBe('mixed');
+    expect(view?.semanticInsufficient).toBe(false);
+    expect(view?.watch).toEqual([]);
+    expect(view?.watchNotice).toBe(
+      'Mixed conditions were detected, but there is not enough grounded evidence to explain the caution precisely.'
+    );
+    expect(view?.supports).toEqual([
+      'The timing supports opening or advancing the negotiation.',
+    ]);
+  });
+
+  it('uses the required Persian insufficient-caution meaning', () => {
+    const view = buildOfferNegotiationResultView(
+      mixedWithoutCautionTrace(),
+      'fa'
+    );
+    expect(view?.watchNotice).toBe(
+      'شرایط ترکیبی تشخیص داده شده، اما شواهد کافی برای توضیح دقیق عامل احتیاط وجود ندارد.'
+    );
+    expect(view?.watch).toEqual([]);
+  });
+
+  it('does not show the notice when a grounded caution trace exists', () => {
+    const view = buildOfferNegotiationResultView(groundedPackage(), 'en');
+    expect(view?.watch.length).toBeGreaterThan(0);
+    expect(view?.watchNotice).toBeNull();
   });
 });

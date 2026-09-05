@@ -186,15 +186,22 @@ export function DecisionPackageView({
         lang={lang}
         model={model}
         narrative={offerNegotiationView ? 'chrome' : 'full'}
+        verdictOverride={offerNegotiationView?.headline ?? null}
+        insight={
+          offerNegotiationView ? (
+            <div data-testid="evaluate-offer-negotiation">
+              <OfferNegotiationResultPanel
+                lang={lang}
+                view={offerNegotiationView}
+              />
+            </div>
+          ) : null
+        }
+        omitLimitsScope={Boolean(offerNegotiationView)}
+        isolateDates={Boolean(offerNegotiationView)}
+        compact={Boolean(offerNegotiationView)}
+        omitAgency={Boolean(offerNegotiationView)}
       />
-      {offerNegotiationView ? (
-        <div className="mt-4" data-testid="evaluate-offer-negotiation">
-          <OfferNegotiationResultPanel
-            lang={lang}
-            view={offerNegotiationView}
-          />
-        </div>
-      ) : null}
       {evaluateView ? (
         <div className="mt-4" data-testid="evaluate-day-intelligence">
           <DayIntelligencePanel view={evaluateView} />
