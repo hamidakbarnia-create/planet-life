@@ -30,6 +30,7 @@ from decision_case.mapping import (
     to_history_event,
 )
 from decision_case.repository import DecisionCaseRepository
+from decision_case.services.intake_errors import IntakeIncompleteError
 from decision_case.repository.errors import (
     CaseNotFoundError,
     DuplicateCaseError,
@@ -64,7 +65,6 @@ from decision_case.schemas.cases import (
     UpdateCaseFramingRequest,
 )
 from decision_case.services.car_interview_intake import (
-    IntakeIncompleteError,
     RuntimeFramingError,
     RuntimeProviderError,
     RuntimeUnsupportedOperationError,
