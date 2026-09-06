@@ -132,3 +132,57 @@ def test_investor_meeting_evaluate_api(client: TestClient) -> None:
     assert package["decision_type_id"] == "bus-investor-meeting"
     assert package["timing"]["score"] == 72.0
     assert package["timing"]["candidates"][0]["date"] == TARGET
+
+
+@pytest.mark.parametrize(
+    ("answers", "missing_fields"),
+    [
+        pytest.param({}, ["target_date", "meeting_goal"], id="empty-intake"),
+        pytest.param(
+            {"meeting_goal": "AUDIT TEST: pitch meeting"},
+            ["target_date"],
+            id="missing-target-date",
+        ),
+        pytest.param(
+            {"target_date": TARGET},
+            ["meeting_goal"],
+            id="missing-meeting-goal",
+        ),
+    ],
+)
+def test_investor_meeting_incomplete_intake_api(
+    client: TestClient, answers: dict[str, str], missing_fields: list[str]
+) -> None:
+    created = client.post(
+        BASE,
+        json={
+            "decision_type_id": "bus-investor-meeting",
+            "title": "AUDIT TEST: incomplete investor intake",
+            "entry_mode": "structured",
+        },
+    )
+    assert created.status_code == 201, created.text
+    case_id = created.json()["case_id"]
+    saved = client.post(
+        f"{BASE}/{case_id}/intake/answers",
+        json={"expected_case_version": 1, "answers": answers},
+    )
+    version = 1
+    responses = []
+    if answers:
+        assert saved.status_code == 200, saved.text
+        version = saved.json()["case"]["case_version"]
+    else:
+        responses.append(saved)
+    responses.append(client.post(
+        f"{BASE}/{case_id}/intake/complete",
+        json={"expected_case_version": version},
+    ))
+    for response in responses:
+        assert response.status_code == 400, response.text
+        error = response.json()["error"]
+        assert error["code"] == "INTAKE_INCOMPLETE"
+        assert error["message"] == "Intake is incomplete"
+        assert error["details"] == {"missing_required": missing_fields}
+        for internal_text in ("Traceback", "IntakeIncompleteError", "Exception", "stack"):
+            assert internal_text.lower() not in response.text.lower()

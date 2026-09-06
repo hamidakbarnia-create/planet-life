@@ -6,6 +6,7 @@ from typing import Any
 from uuid import UUID
 
 from decision_case.repository import DecisionCaseRepository
+from decision_case.services.intake_errors import IntakeIncompleteError
 from decision_case.repository.errors import IllegalTransitionError
 from decision_case.repository.models import CaseRecord
 from decision_case.services.decision_frame import DECISION_FRAME_INTAKE_KEY
@@ -22,12 +23,6 @@ from packages.decision_engine.intake.investor_meeting import (
 from packages.decision_engine.state_machine import CaseState
 
 _INVESTOR_MEETING_MODE = "evaluate_date"
-
-
-class IntakeIncompleteError(Exception):
-    def __init__(self, missing_required: tuple[str, ...]):
-        self.missing_required = missing_required
-        super().__init__("intake incomplete")
 
 
 class UnsupportedDecisionTypeError(Exception):
