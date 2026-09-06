@@ -92,7 +92,7 @@ export const privacyContent: LegalPageContent = {
       paragraphs: [
         // TODO: Replace with registered legal entity name once company incorporation is finalized.
         'Data controller: [REGISTERED COMPANY NAME], [REGISTERED ADDRESS].',
-        'Privacy inquiries: [PRIVACY@METIORO.COM] — see our Contact page for current details.',
+        'Privacy inquiries: privacy@metioro.com — see our Contact page for current details.',
       ],
     },
   ],
@@ -194,7 +194,7 @@ export const termsContent: LegalPageContent = {
       paragraphs: [
         // TODO: Replace with registered legal entity name and address once finalized.
         '[REGISTERED COMPANY NAME], [REGISTERED ADDRESS].',
-        'Legal inquiries: [LEGAL@METIORO.COM] — see our Contact page.',
+        'Legal inquiries: legal@metioro.com — see our Contact page.',
       ],
     },
   ],
@@ -250,7 +250,7 @@ export const cookiesContent: LegalPageContent = {
     {
       heading: '7. Contact',
       paragraphs: [
-        'Questions about this Cookie Policy: [PRIVACY@METIORO.COM] — see our Contact page.',
+        'Questions about this Cookie Policy: privacy@metioro.com — see our Contact page.',
       ],
     },
   ],
@@ -327,7 +327,7 @@ export const disclaimerContent: LegalPageContent = {
     {
       heading: '10. Contact',
       paragraphs: [
-        'Questions about this Disclaimer: [SUPPORT@METIORO.COM] — see our Contact page.',
+        'Questions about this Disclaimer: support@metioro.com — see our Contact page.',
       ],
     },
   ],
@@ -340,11 +340,15 @@ export const contactContent: LegalPageContent = {
     'We welcome inquiries about METIORO, your account, privacy, legal matters, and partnerships. Use the channels below to reach the appropriate team.',
   sections: [
     {
+      heading: 'General Enquiries',
+      paragraphs: ['Email: contact@metioro.com'],
+    },
+    {
       heading: 'General Support',
       paragraphs: [
         'For product questions, account help, and technical issues:',
-        // TODO: Confirm support email and ticketing system before production launch.
-        'Email: [SUPPORT@METIORO.COM]',
+        // TODO: Confirm the support ticketing system before production launch.
+        'Email: support@metioro.com',
         'We aim to respond to support requests within two (2) business days.',
       ],
     },
@@ -352,22 +356,21 @@ export const contactContent: LegalPageContent = {
       heading: 'Privacy and Data Protection',
       paragraphs: [
         'For privacy requests, data subject access requests, and cookie-related inquiries:',
-        'Email: [PRIVACY@METIORO.COM]',
+        'Email: privacy@metioro.com',
       ],
     },
     {
       heading: 'Legal and Compliance',
       paragraphs: [
         'For terms of service, compliance, law enforcement requests, and legal notices:',
-        'Email: [LEGAL@METIORO.COM]',
+        'Email: legal@metioro.com',
       ],
     },
     {
       heading: 'Business and Partnerships',
       paragraphs: [
         'For enterprise inquiries, media, and partnership opportunities:',
-        // TODO: Confirm partnerships contact channel.
-        'Email: [PARTNERS@METIORO.COM]',
+        'Email: partners@metioro.com',
       ],
     },
     {
@@ -382,7 +385,7 @@ export const contactContent: LegalPageContent = {
     {
       heading: 'Service Availability',
       paragraphs: [
-        'METIORO is provided globally via metioro.com. Support hours and response times may vary by region and inquiry type. Critical security issues reported to [SECURITY@METIORO.COM] receive prioritized handling.',
+        'METIORO is provided globally via metioro.com. Support hours and response times may vary by region and inquiry type. Critical security issues reported to security@metioro.com receive prioritized handling.',
       ],
     },
   ],

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { BrandLogo } from '@/components/BrandLogo';
 import type { LegalPageContent } from '@/lib/legal-content';
+import { renderLegalTextWithApprovedMailto } from '@/lib/legal-emails';
 import { SiteFooter } from '@/components/SiteFooter';
 type LegalPageShellProps = {
   content: LegalPageContent;
@@ -16,6 +17,9 @@ export function LegalPageShell({ content }: LegalPageShellProps) {
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap');
         .fc{font-family:'Cinzel',serif}
         .fi{font-family:'Inter',sans-serif}
+        .legal-email{color:#93B4FF;text-decoration:underline}
+        .legal-email:hover{color:#ffffff}
+        .legal-email:focus-visible{outline:2px solid #93B4FF;outline-offset:2px}
       `}</style>
 
       <header className="flex items-center justify-between px-6 py-5 border-b border-white/5">
@@ -47,7 +51,7 @@ export function LegalPageShell({ content }: LegalPageShellProps) {
             className="fi text-sm leading-relaxed mb-8"
             style={{ color: 'rgba(255,255,255,0.72)' }}
           >
-            {content.intro}
+            {renderLegalTextWithApprovedMailto(content.intro)}
           </p>
         ) : null}
 
@@ -67,7 +71,7 @@ export function LegalPageShell({ content }: LegalPageShellProps) {
                     className="fi text-sm leading-relaxed"
                     style={{ color: 'rgba(255,255,255,0.65)' }}
                   >
-                    {paragraph}
+                    {renderLegalTextWithApprovedMailto(paragraph)}
                   </p>
                 ))}
               </div>
