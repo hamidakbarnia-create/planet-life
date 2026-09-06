@@ -12,6 +12,9 @@ export type LegalPageContent = {
 
 export const LEGAL_LAST_UPDATED = '2 July 2026';
 
+// TODO(legal): Add the verified operator/controller identity, registered address,
+// and governing-law/venue clause before paid launch.
+
 export const privacyContent: LegalPageContent = {
   title: 'Privacy Policy',
   lastUpdated: LEGAL_LAST_UPDATED,
@@ -88,10 +91,8 @@ export const privacyContent: LegalPageContent = {
       ],
     },
     {
-      heading: '11. Contact and Data Controller',
+      heading: '11. Contact',
       paragraphs: [
-        // TODO: Replace with registered legal entity name once company incorporation is finalized.
-        'Data controller: [REGISTERED COMPANY NAME], [REGISTERED ADDRESS].',
         'Privacy inquiries: privacy@metioro.com — see our Contact page for current details.',
       ],
     },
@@ -107,7 +108,7 @@ export const termsContent: LegalPageContent = {
     {
       heading: '1. About METIORO',
       paragraphs: [
-        'METIORO is a personal decision intelligence platform that combines astronomical calculation, analytical modeling, and AI-assisted interpretation to help users evaluate timing and context for personal decisions. METIORO is operated by the entity identified in Section 14.',
+        'METIORO is a personal decision intelligence platform that combines astronomical calculation, analytical modeling, and AI-assisted interpretation to help users evaluate timing and context for personal decisions.',
         'METIORO is not a licensed financial, legal, medical, or mental health service provider.',
       ],
     },
@@ -173,27 +174,18 @@ export const termsContent: LegalPageContent = {
     {
       heading: '11. Termination',
       paragraphs: [
-        'You may stop using the Service at any time. We may suspend or terminate your access with or without notice if you breach these Terms, if required by law, or if we discontinue the Service. Provisions that by nature should survive termination will survive, including intellectual property, disclaimers, limitation of liability, and governing law.',
+        'You may stop using the Service at any time. We may suspend or terminate your access with or without notice if you breach these Terms, if required by law, or if we discontinue the Service. Provisions that by nature should survive termination will survive, including intellectual property, disclaimers, and limitation of liability.',
       ],
     },
     {
-      heading: '12. Governing Law and Disputes',
-      paragraphs: [
-        // TODO: Confirm governing jurisdiction and dispute resolution venue with legal counsel.
-        'These Terms are governed by the laws of [JURISDICTION], without regard to conflict-of-law principles. Disputes shall be resolved in the courts of [JURISDICTION], unless mandatory consumer protection laws in your country require otherwise.',
-      ],
-    },
-    {
-      heading: '13. Changes to Terms',
+      heading: '12. Changes to Terms',
       paragraphs: [
         'We may modify these Terms from time to time. Continued use after the effective date of revised Terms constitutes acceptance, except where applicable law requires explicit consent.',
       ],
     },
     {
-      heading: '14. Contact',
+      heading: '13. Contact',
       paragraphs: [
-        // TODO: Replace with registered legal entity name and address once finalized.
-        '[REGISTERED COMPANY NAME], [REGISTERED ADDRESS].',
         'Legal inquiries: legal@metioro.com — see our Contact page.',
       ],
     },
@@ -371,15 +363,6 @@ export const contactContent: LegalPageContent = {
       paragraphs: [
         'For enterprise inquiries, media, and partnership opportunities:',
         'Email: partners@metioro.com',
-      ],
-    },
-    {
-      heading: 'Registered Office',
-      paragraphs: [
-        // TODO: Replace with registered legal entity name and full postal address once incorporation is complete.
-        '[REGISTERED COMPANY NAME]',
-        '[REGISTERED ADDRESS LINE 1]',
-        '[CITY, POSTAL CODE, COUNTRY]',
       ],
     },
     {

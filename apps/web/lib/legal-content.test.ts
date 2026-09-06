@@ -84,6 +84,73 @@ describe('legal-content public emails', () => {
   });
 });
 
+const UNRESOLVED_IDENTITY_TOKENS = [
+  '[REGISTERED COMPANY NAME]',
+  '[REGISTERED ADDRESS]',
+  '[REGISTERED ADDRESS LINE 1]',
+  '[CITY, POSTAL CODE, COUNTRY]',
+  '[JURISDICTION]',
+] as const;
+
+const LEGAL_PAGES = [
+  privacyContent,
+  termsContent,
+  cookiesContent,
+  disclaimerContent,
+  contactContent,
+] as const;
+
+function numberedHeadingValues(headings: string[]): number[] {
+  return headings.flatMap((heading) => {
+    const match = heading.match(/^(\d+)\./);
+    return match ? [Number(match[1])] : [];
+  });
+}
+
+describe('legal-content unresolved identity placeholders', () => {
+  it('omits unresolved identity and jurisdiction tokens from public legal copy', () => {
+    const copy = allLegalCopy();
+    for (const token of UNRESOLVED_IDENTITY_TOKENS) {
+      expect(copy).not.toContain(token);
+    }
+  });
+
+  it('keeps current legal sections structurally complete after temporary suppression', () => {
+    for (const page of LEGAL_PAGES) {
+      for (const section of page.sections) {
+        expect(section.heading.trim()).not.toBe('');
+        expect(section.paragraphs.length).toBeGreaterThan(0);
+        for (const paragraph of section.paragraphs) {
+          expect(paragraph.trim()).not.toBe('');
+        }
+      }
+    }
+
+    const termsNumbers = numberedHeadingValues(
+      termsContent.sections.map((section) => section.heading)
+    );
+    expect(termsNumbers).toEqual(termsNumbers.map((_, index) => index + 1));
+
+    expect(
+      privacyContent.sections.some((section) =>
+        section.paragraphs.some((paragraph) => paragraph.includes('privacy@metioro.com'))
+      )
+    ).toBe(true);
+    expect(
+      termsContent.sections.some((section) =>
+        section.paragraphs.some((paragraph) => paragraph.includes('legal@metioro.com'))
+      )
+    ).toBe(true);
+    for (const email of APPROVED_PUBLIC_EMAILS) {
+      expect(
+        contactContent.sections.some((section) =>
+          section.paragraphs.some((paragraph) => paragraph.includes(email))
+        )
+      ).toBe(true);
+    }
+  });
+});
+
 describe('approved email token boundaries', () => {
   it('accepts approved addresses next to ordinary legal punctuation', () => {
     expect(approvedPublicEmailsIn('Email: contact@metioro.com')).toEqual([
