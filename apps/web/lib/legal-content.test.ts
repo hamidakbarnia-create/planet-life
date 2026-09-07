@@ -82,6 +82,16 @@ describe('legal-content public emails', () => {
   it('does not place hello@metioro.com in approved legal copy', () => {
     expect(allLegalCopy()).not.toContain('hello@metioro.com');
   });
+
+  it('omits unverified support and security service claims', () => {
+    const copy = allLegalCopy();
+    expect(copy).not.toContain('two (2) business days');
+    expect(copy).not.toContain('prioritized handling');
+    expect(copy).not.toContain('Support hours and response times may vary');
+    expect(copy).toContain('support@metioro.com');
+    expect(copy).toContain('security@metioro.com');
+    expect(copy).toContain('Report security issues to security@metioro.com.');
+  });
 });
 
 const UNRESOLVED_IDENTITY_TOKENS = [

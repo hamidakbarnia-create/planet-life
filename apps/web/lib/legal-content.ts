@@ -339,9 +339,8 @@ export const contactContent: LegalPageContent = {
       heading: 'General Support',
       paragraphs: [
         'For product questions, account help, and technical issues:',
-        // TODO: Confirm the support ticketing system before production launch.
+        // TODO(operations): Publish response-time guidance only after the support workflow is verified.
         'Email: support@metioro.com',
-        'We aim to respond to support requests within two (2) business days.',
       ],
     },
     {
@@ -368,7 +367,7 @@ export const contactContent: LegalPageContent = {
     {
       heading: 'Service Availability',
       paragraphs: [
-        'METIORO is provided globally via metioro.com. Support hours and response times may vary by region and inquiry type. Critical security issues reported to security@metioro.com receive prioritized handling.',
+        'METIORO is provided globally via metioro.com. Report security issues to security@metioro.com.',
       ],
     },
   ],
