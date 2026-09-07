@@ -51,6 +51,40 @@ describe('LegalPageShell approved mailto links', () => {
     expect(link.getAttribute('href')).toBe('mailto:support@metioro.com');
   });
 
+  it('renders current legal pages without unresolved tokens or empty sections', () => {
+    const unresolvedTokens = [
+      '[REGISTERED COMPANY NAME]',
+      '[REGISTERED ADDRESS]',
+      '[REGISTERED ADDRESS LINE 1]',
+      '[CITY, POSTAL CODE, COUNTRY]',
+      '[JURISDICTION]',
+    ] as const;
+    const pages = [
+      privacyContent,
+      termsContent,
+      cookiesContent,
+      disclaimerContent,
+      contactContent,
+    ];
+
+    for (const content of pages) {
+      render(<LegalPageShell content={content} />);
+      const rendered = document.body.textContent ?? '';
+      for (const token of unresolvedTokens) {
+        expect(rendered).not.toContain(token);
+      }
+      const sectionHeadings = screen.getAllByRole('heading', { level: 2 });
+      expect(sectionHeadings).toHaveLength(content.sections.length);
+      for (const heading of sectionHeadings) {
+        expect(heading.textContent?.trim()).toBeTruthy();
+      }
+      for (const paragraph of document.querySelectorAll('main p')) {
+        expect(paragraph.textContent?.trim()).toBeTruthy();
+      }
+      cleanup();
+    }
+  });
+
   it('renders every approved Contact address with a matching mailto', () => {
     render(<LegalPageShell content={contactContent} />);
     const expected = [
