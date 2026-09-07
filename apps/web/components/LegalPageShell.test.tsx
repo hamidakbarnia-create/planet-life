@@ -103,6 +103,10 @@ describe('LegalPageShell approved mailto links', () => {
     expect(screen.getByRole('heading', { name: 'General Enquiries' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'General Support' })).toBeTruthy();
     expect(screen.queryByText('hello@metioro.com')).toBeNull();
+    expect(screen.queryByText(/two \(2\) business days/)).toBeNull();
+    expect(screen.queryByText(/prioritized handling/)).toBeNull();
+    expect(screen.queryByText('Support hours and response times may vary')).toBeNull();
+    expect(screen.getByText(/Report security issues to/)).toBeTruthy();
   });
 
   it('does not link arbitrary, unapproved, or embedded email-shaped text', () => {
