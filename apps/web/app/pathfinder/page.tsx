@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import './pathfinder-visual-spike.css';
 import { localeFontFamily } from '@/lib/brand-theme';
 import { AppShell } from '@/components/AppShell';
 import { loadBirthProfile, type BirthProfile } from '@/lib/birth-profile';
@@ -11,9 +12,15 @@ import { loadCalendarSystem, type AppLang, type CalendarSystem } from '@/lib/app
 import { formatDisplayDateRange } from '@/lib/date-format';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { todayYMD } from '@/lib/calendar-utils';
+import { PathfinderGlobe } from '@/components/pathfinder/PathfinderGlobe';
+import { PathfinderSelectedLineCard } from '@/components/pathfinder/PathfinderSelectedLineCard';
+import type { PathfinderSunAngle, PathfinderSunAngleFilter } from '@/lib/pathfinder-geometry-demo';
+import { fetchLocationPreview } from '@/lib/location-resolve';
 import {
+  classifyAnalyzeFailure,
   fetchPathfinderBestTimes,
   fetchPathfinderRelocation,
+  PathfinderApiError,
   type PathfinderArea,
   type PathfinderBestTimes,
   type PathfinderCity,
@@ -28,6 +35,19 @@ import {
   pathfinderPlanetName,
   periodLabel,
 } from '@/lib/pathfinder-i18n';
+import {
+  canUseFreeTierAnalyze,
+  formatSelectedCoordinates,
+  isAnalyzeEligible,
+  isBestTimesEligible,
+  isPolarCalculationRisk,
+  pathfinderAllowanceKey,
+  selectedPointFromCitySearch,
+  selectedPointFromGlobePick,
+  selectedPointToApiTarget,
+  withAuthoritativeTimezone,
+  type PathfinderSelectedPoint,
+} from '@/lib/pathfinder-selection';
 
 type Labels = {
   title: string;
@@ -50,11 +70,99 @@ type Labels = {
   selectedCity: string;
   orbLabel: string;
   globeNote: string;
+  selectedLocation: string;
+  coordinates: string;
+  timezoneUnavailable: string;
+  localTimeUnavailable: string;
+  bestTimesNeedsTimezone: string;
+  unsupportedCalculation: string;
+  polarShippingBlocker: string;
+  globeLoading: string;
+  globeUnavailable: string;
+  reset: string;
+  fullscreen: string;
+  attribution: string;
+  selectHint: string;
+  timezoneLabel: string;
+  localTimeLabel: string;
   areas: Record<PathfinderArea | 'all', string>;
   verdicts: Record<string, string>;
 };
 
-const COPY: Record<AppLang, Labels> = {
+export const PATHFINDER_FREE_CITY_KEY = 'planet-life-pathfinder-free-city';
+
+export async function executePathfinderAnalyze(input: {
+  point: PathfinderSelectedPoint;
+  profile: BirthProfile;
+  isPaidMember: boolean;
+  storage: Pick<Storage, 'getItem' | 'setItem'>;
+  lang: string;
+  unsupportedCalculation: string;
+  fallbackError: string;
+  fetchRelocation: (
+    profile: BirthProfile,
+    city: PathfinderCity,
+    lang: string
+  ) => Promise<PathfinderRelocation>;
+}): Promise<
+  | { status: 'success'; relocation: PathfinderRelocation }
+  | { status: 'blocked_free_tier' }
+  | { status: 'failed'; message: string; allowanceConsumed: false }
+> {
+  const used = input.storage.getItem(PATHFINDER_FREE_CITY_KEY);
+  if (!canUseFreeTierAnalyze(input.point, input.isPaidMember, used)) {
+    return { status: 'blocked_free_tier' };
+  }
+  try {
+    const relocation = await input.fetchRelocation(
+      input.profile,
+      selectedPointToApiTarget(input.point),
+      input.lang
+    );
+    input.storage.setItem(PATHFINDER_FREE_CITY_KEY, pathfinderAllowanceKey(input.point));
+    return { status: 'success', relocation };
+  } catch (error) {
+    const failure =
+      error instanceof PathfinderApiError
+        ? classifyAnalyzeFailure(error.status, error.detail)
+        : classifyAnalyzeFailure(0, error instanceof Error ? error.message : '');
+    return {
+      status: 'failed',
+      message:
+        failure.kind === 'unsupported_calculation' ? input.unsupportedCalculation : input.fallbackError,
+      allowanceConsumed: false,
+    };
+  }
+}
+
+async function enrichSelectedPointTimezone(
+  point: PathfinderSelectedPoint
+): Promise<PathfinderSelectedPoint> {
+  try {
+    const preview = await fetchLocationPreview({
+      location: `${point.latitude},${point.longitude}`,
+      latitude: point.latitude,
+      longitude: point.longitude,
+    });
+    return withAuthoritativeTimezone(point, preview.timezone);
+  } catch {
+    return point;
+  }
+}
+
+function formatLocalTimeInZone(timezone: string, now: Date, locale: string): string | null {
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      timeZone: timezone,
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(now);
+  } catch {
+    return null;
+  }
+}
+
+export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
   en: {
     title: 'Pathfinder',
     subtitle:
@@ -77,6 +185,23 @@ const COPY: Record<AppLang, Labels> = {
     selectedCity: 'Selected city',
     orbLabel: 'orb',
     globeNote: 'City compatibility now. Full astrocartography map lines in Phase 2.',
+    selectedLocation: 'Selected location',
+    coordinates: 'Coordinates',
+    timezoneUnavailable: 'Local timezone is unavailable for this point.',
+    localTimeUnavailable: 'Local time unavailable',
+    bestTimesNeedsTimezone: 'Best Times needs an authoritative timezone for this point.',
+    unsupportedCalculation:
+      'This coordinate can be selected, but the current calculation cannot be completed for this latitude. The selected point is unchanged.',
+    polarShippingBlocker:
+      'Shipping blocker: high-latitude analysis is currently unsupported. The point stays selected. The house system was not changed.',
+    globeLoading: 'Loading Earth…',
+    globeUnavailable: 'The 3D Earth is unavailable. Search and Analyze still work.',
+    reset: 'Reset view',
+    fullscreen: 'Fullscreen',
+    attribution: '© OpenStreetMap contributors © OpenFreeMap © MapLibre',
+    selectHint: 'Select any point on Earth or search a place.',
+    timezoneLabel: 'Timezone',
+    localTimeLabel: 'Local time',
     areas: {
       all: 'All Areas',
       love: 'Love',
@@ -111,6 +236,23 @@ const COPY: Record<AppLang, Labels> = {
     selectedCity: 'Выбранный город',
     orbLabel: 'орб',
     globeNote: 'Сейчас — совместимость с городом. Полные линии астрокартографии во 2-й фазе.',
+    selectedLocation: 'Выбранная точка',
+    coordinates: 'Координаты',
+    timezoneUnavailable: 'Часовой пояс для этой точки недоступен.',
+    localTimeUnavailable: 'Местное время недоступно',
+    bestTimesNeedsTimezone: 'Для Best Times нужен подтверждённый часовой пояс этой точки.',
+    unsupportedCalculation:
+      'Эту точку можно выбрать, но текущий расчёт для данной широты недоступен. Выбранная точка сохранена.',
+    polarShippingBlocker:
+      'Блокер выпуска: расчёт на высоких широтах сейчас недоступен. Точка остаётся выбранной. Система домов не менялась.',
+    globeLoading: 'Загрузка Земли…',
+    globeUnavailable: '3D-Земля недоступна. Поиск и анализ по-прежнему работают.',
+    reset: 'Сбросить вид',
+    fullscreen: 'Полный экран',
+    attribution: '© участники OpenStreetMap © OpenFreeMap © MapLibre',
+    selectHint: 'Выберите любую точку на Земле или найдите место.',
+    timezoneLabel: 'Часовой пояс',
+    localTimeLabel: 'Местное время',
     areas: {
       all: 'Все сферы',
       love: 'Любовь',
@@ -145,6 +287,23 @@ const COPY: Record<AppLang, Labels> = {
     selectedCity: 'شهر انتخاب‌شده',
     orbLabel: 'اوربیت',
     globeNote: 'فعلاً سازگاری با شهر. خطوط کامل آسترو‌کارتوگرافی در فاز دوم.',
+    selectedLocation: 'مکان انتخاب‌شده',
+    coordinates: 'مختصات',
+    timezoneUnavailable: 'منطقه زمانی معتبر برای این نقطه در دسترس نیست.',
+    localTimeUnavailable: 'ساعت محلی در دسترس نیست',
+    bestTimesNeedsTimezone: 'بهترین زمان‌ها فقط با منطقه زمانی معتبر این نقطه فعال می‌شود.',
+    unsupportedCalculation:
+      'این مختصات قابل انتخاب است، اما محاسبه فعلی برای این عرض جغرافیایی انجام نمی‌شود. نقطه انتخاب‌شده حفظ شده است.',
+    polarShippingBlocker:
+      'مسدودکننده انتشار: تحلیل عرض‌های بالا فعلاً پشتیبانی نمی‌شود. نقطه انتخاب‌شده باقی می‌ماند. سامانه خانه‌ها تغییر نکرد.',
+    globeLoading: 'در حال بارگذاری زمین…',
+    globeUnavailable: 'کره سه‌بعدی در دسترس نیست. جستجو و تحلیل همچنان کار می‌کند.',
+    reset: 'بازنشانی نما',
+    fullscreen: 'تمام‌صفحه',
+    attribution: '© مشارکت‌کنندگان OpenStreetMap © OpenFreeMap © MapLibre',
+    selectHint: 'هر نقطه‌ای روی زمین را انتخاب کن یا مکانی را جستجو کن.',
+    timezoneLabel: 'منطقه زمانی',
+    localTimeLabel: 'ساعت محلی',
     areas: {
       all: 'همه حوزه‌ها',
       love: 'عشق',
@@ -179,6 +338,23 @@ const COPY: Record<AppLang, Labels> = {
     selectedCity: 'المدينة المختارة',
     orbLabel: 'فلك',
     globeNote: 'الآن توافق المدينة. خطوط خريطة الفلك الكاملة في المرحلة الثانية.',
+    selectedLocation: 'الموقع المحدد',
+    coordinates: 'الإحداثيات',
+    timezoneUnavailable: 'المنطقة الزمنية غير متاحة لهذه النقطة.',
+    localTimeUnavailable: 'الوقت المحلي غير متاح',
+    bestTimesNeedsTimezone: 'أفضل الأوقات يحتاج إلى منطقة زمنية موثوقة لهذه النقطة.',
+    unsupportedCalculation:
+      'يمكن اختيار هذا الإحداثي، لكن الحساب الحالي غير متاح عند هذا العرض. بقيت النقطة المحددة كما هي.',
+    polarShippingBlocker:
+      'عائق إطلاق: التحليل عند العروض العالية غير مدعوم حالياً. بقيت النقطة محددة. لم يتغير نظام البيوت.',
+    globeLoading: 'جارٍ تحميل الأرض…',
+    globeUnavailable: 'الأرض ثلاثية الأبعاد غير متاحة. البحث والتحليل ما زالا يعملان.',
+    reset: 'إعادة العرض',
+    fullscreen: 'ملء الشاشة',
+    attribution: '© مساهمو OpenStreetMap © OpenFreeMap © MapLibre',
+    selectHint: 'اختر أي نقطة على الأرض أو ابحث عن مكان.',
+    timezoneLabel: 'المنطقة الزمنية',
+    localTimeLabel: 'الوقت المحلي',
     areas: {
       all: 'كل المجالات',
       love: 'الحب',
@@ -193,7 +369,6 @@ const COPY: Record<AppLang, Labels> = {
   },
 };
 
-const FREE_CITY_KEY = 'planet-life-pathfinder-free-city';
 const PURPOSES: (PathfinderArea | 'all')[] = [
   'all',
   'love',
@@ -205,11 +380,7 @@ const PURPOSES: (PathfinderArea | 'all')[] = [
   'spirituality',
 ];
 
-type CitySearchResult = PathfinderCity;
-
-function cityKey(city: PathfinderCity) {
-  return `${city.lat.toFixed(4)},${city.lon.toFixed(4)}`;
-}
+type CitySearchResult = PathfinderCity & { country?: string };
 
 function scoreColor(score: number) {
   if (score >= 70) return '#4ade80';
@@ -223,38 +394,6 @@ function lineColor(line: PathfinderLine) {
   if (line.angle === 'DC') return '#f472b6';
   if (line.angle === 'AC') return '#60a5fa';
   return '#4ade80';
-}
-
-function GlobePreview({ note, title }: { note: string; title: string }) {
-  return (
-    <div
-      className="relative overflow-hidden rounded-3xl min-h-[200px]"
-      style={{
-        background:
-          'radial-gradient(circle at 45% 38%, rgba(96,165,250,0.5), rgba(20,30,60,0.55) 35%, rgba(4,8,18,0.95) 70%), radial-gradient(circle at 70% 20%, rgba(251,191,36,0.25), transparent 28%)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.45)',
-      }}
-    >
-      <div className="absolute inset-0 opacity-45" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.55) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-      <div className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20" />
-      <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10" />
-      {[
-        ['left-[30%]', 'bg-pink-400', 'rotate-[7deg]'],
-        ['left-[42%]', 'bg-amber-400', '-rotate-[4deg]'],
-        ['left-[52%]', 'bg-sky-400', 'rotate-[10deg]'],
-        ['left-[64%]', 'bg-violet-400', '-rotate-[7deg]'],
-      ].map(([left, color, rotate], idx) => (
-        <div key={idx} className={`absolute top-4 bottom-4 w-1 rounded-full ${left} ${color} ${rotate} opacity-80`} />
-      ))}
-      <div className="absolute bottom-6 left-6 right-6">
-        <div className="fc text-3xl tracking-wide text-white">{title}</div>
-        <div className="fi mt-2 max-w-md text-sm text-white/55">
-          {note}
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function EffectCard({ effect, labels, lang }: { effect: PathfinderEffect; labels: Labels; lang: AppLang }) {
@@ -314,7 +453,7 @@ export default function PathfinderPage() {
   const [calendar] = useState<CalendarSystem>(() => loadCalendarSystem());
   const [citySearch, setCitySearch] = useState('');
   const [cities, setCities] = useState<CitySearchResult[]>([]);
-  const [selectedCity, setSelectedCity] = useState<PathfinderCity | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<PathfinderSelectedPoint | null>(null);
   const [showCities, setShowCities] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingTimes, setLoadingTimes] = useState(false);
@@ -323,10 +462,23 @@ export default function PathfinderPage() {
   const [bestTimes, setBestTimes] = useState<PathfinderBestTimes | null>(null);
   const [purpose, setPurpose] = useState<PathfinderArea | 'all'>('all');
   const [blocked, setBlocked] = useState(false);
+  const [angleFilter, setAngleFilter] = useState<PathfinderSunAngleFilter>('all');
+  const [selectedLine, setSelectedLine] = useState<PathfinderSunAngle | null>(null);
   const debounceRef = useRef<number | null>(null);
+  const selectionSeqRef = useRef(0);
 
-  const labels = COPY[lang];
+  useEffect(() => {
+    document.documentElement.classList.add('pathfinder-visual-spike');
+    return () => document.documentElement.classList.remove('pathfinder-visual-spike');
+  }, []);
+
+  const labels = PATHFINDER_PAGE_COPY[lang];
   const shellLabels = HOME_LANGS[lang];
+  const analyzeEnabled = isAnalyzeEligible(selectedPoint, Boolean(profile));
+  const bestTimesEnabled = isBestTimesEligible(selectedPoint, Boolean(relocation));
+  const localTime = selectedPoint?.timezone
+    ? formatLocalTimeInZone(selectedPoint.timezone, new Date(), lang)
+    : null;
 
   const setLang = (next: AppLang) => {
     setLangState(next);
@@ -350,43 +502,66 @@ export default function PathfinderPage() {
     }, 250);
   }, [lang]);
 
-  const canAnalyzeCity = (city: PathfinderCity) => {
-    // Paid members get unlimited cities; free users get one teaser city.
-    if (isPaid()) return true;
-    const used = localStorage.getItem(FREE_CITY_KEY);
-    return !used || used === cityKey(city);
-  };
-
-  const analyze = async (city = selectedCity) => {
-    if (!profile || !city) return;
+  const applySelection = useCallback((point: PathfinderSelectedPoint) => {
+    const seq = selectionSeqRef.current + 1;
+    selectionSeqRef.current = seq;
+    setSelectedPoint(point);
+    setRelocation(null);
+    setBestTimes(null);
     setBlocked(false);
-    if (!canAnalyzeCity(city)) {
-      setBlocked(true);
-      return;
-    }
+    setError('');
+    void enrichSelectedPointTimezone(point).then((enriched) => {
+      if (selectionSeqRef.current !== seq) return;
+      setSelectedPoint(enriched);
+    });
+  }, []);
+
+  const analyze = async () => {
+    if (!profile || !selectedPoint) return;
+    setBlocked(false);
     setLoading(true);
     setError('');
     setBestTimes(null);
-    try {
-      const data = await fetchPathfinderRelocation(profile, city, lang);
-      setRelocation(data);
-      localStorage.setItem(FREE_CITY_KEY, cityKey(city));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : labels.error);
-    } finally {
-      setLoading(false);
+    const result = await executePathfinderAnalyze({
+      point: selectedPoint,
+      profile,
+      isPaidMember: isPaid(),
+      storage: window.localStorage,
+      lang,
+      unsupportedCalculation: labels.unsupportedCalculation,
+      fallbackError: labels.error,
+      fetchRelocation: fetchPathfinderRelocation,
+    });
+    if (result.status === 'blocked_free_tier') {
+      setBlocked(true);
+    } else if (result.status === 'success') {
+      setRelocation(result.relocation);
+    } else {
+      setError(result.message);
     }
+    setLoading(false);
   };
 
   const loadBestTimes = async () => {
-    if (!profile || !selectedCity) return;
+    if (!profile || !selectedPoint || !bestTimesEnabled) return;
     setLoadingTimes(true);
     setError('');
     try {
-      const data = await fetchPathfinderBestTimes(profile, selectedCity, purpose, todayYMD(), lang);
+      const data = await fetchPathfinderBestTimes(
+        profile,
+        selectedPointToApiTarget(selectedPoint),
+        purpose,
+        todayYMD(),
+        lang
+      );
       setBestTimes(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : labels.error);
+      if (e instanceof PathfinderApiError) {
+        const failure = classifyAnalyzeFailure(e.status, e.detail);
+        setError(failure.kind === 'unsupported_calculation' ? labels.unsupportedCalculation : labels.error);
+      } else {
+        setError(e instanceof Error ? e.message : labels.error);
+      }
     } finally {
       setLoadingTimes(false);
     }
@@ -402,9 +577,36 @@ export default function PathfinderPage() {
       navLabels={shellLabels.nav}
       fontFamily={localeFontFamily(lang)}
     >
-      <div className="mx-auto max-w-6xl px-5 py-8">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <GlobePreview note={labels.globeNote} title={labels.title} />
+      <div
+        className="pathfinder-visual-page"
+        data-testid="pathfinder-visual-page"
+        data-has-selection={selectedPoint ? '1' : '0'}
+      >
+        <div className="pathfinder-visual-map-stage" data-testid="pathfinder-map-stage">
+          <PathfinderGlobe
+            selected={selectedPoint}
+            angleFilter={angleFilter}
+            selectedLine={selectedLine}
+            onAngleFilterChange={setAngleFilter}
+            onSelectLine={setSelectedLine}
+            labels={{
+              globeLoading: labels.globeLoading,
+              globeUnavailable: labels.globeUnavailable,
+              reset: labels.reset,
+              fullscreen: labels.fullscreen,
+              attribution: labels.attribution,
+            }}
+            onPick={(latitude, longitude) => {
+              applySelection(selectedPointFromGlobePick(latitude, longitude, labels.selectedLocation));
+            }}
+          />
+        </div>
+        <div className="pathfinder-visual-decision" data-testid="pathfinder-decision-panel">
+          {selectedLine ? (
+            <div className="pathfinder-selected-line-desktop mb-4 hidden lg:block">
+              <PathfinderSelectedLineCard angle={selectedLine} variant="desktop-panel" />
+            </div>
+          ) : null}
           <section className="rounded-3xl p-6" style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="fc text-3xl tracking-wide text-amber-300">{labels.title}</div>
             <p className="fi mt-3 text-sm leading-relaxed text-white/55">{labels.subtitle}</p>
@@ -435,7 +637,7 @@ export default function PathfinderPage() {
                       key={`${city.lat}-${city.lon}-${city.name}`}
                       type="button"
                       onClick={() => {
-                        setSelectedCity(city);
+                        applySelection(selectedPointFromCitySearch(city));
                         setCitySearch(city.short || city.name);
                         setShowCities(false);
                       }}
@@ -449,15 +651,48 @@ export default function PathfinderPage() {
               )}
             </div>
 
-            {selectedCity && (
-              <div className="fi mt-3 text-xs text-white/45">
-                {labels.selectedCity}: <span className="text-white/75">{selectedCity.short}</span>
+            {selectedPoint && (
+              <div
+                data-testid="pathfinder-selected-point"
+                data-source={selectedPoint.source}
+                data-resolution={selectedPoint.placeResolutionStatus}
+                className="fi mt-3 space-y-1 text-xs text-white/45"
+              >
+                <div>
+                  {selectedPoint.displayName}
+                  {selectedPoint.country ? ` · ${selectedPoint.country}` : ''}
+                </div>
+                <div data-testid="pathfinder-selected-coords">
+                  {labels.coordinates}: {formatSelectedCoordinates(selectedPoint)}
+                </div>
+                <div data-testid="pathfinder-selected-timezone">
+                  {selectedPoint.timezone
+                    ? `${labels.timezoneLabel}: ${selectedPoint.timezone}`
+                    : labels.timezoneUnavailable}
+                </div>
+                <div data-testid="pathfinder-selected-local-time">
+                  {localTime
+                    ? `${labels.localTimeLabel}: ${localTime}`
+                    : labels.localTimeUnavailable}
+                </div>
               </div>
             )}
 
+            {selectedPoint && isPolarCalculationRisk(selectedPoint.latitude) && (
+              <p
+                data-testid="pathfinder-polar-shipping-blocker"
+                className="fi mt-3 text-xs text-amber-200/80"
+              >
+                {labels.polarShippingBlocker}
+              </p>
+            )}
+
+            <p className="fi mt-3 text-xs text-white/35">{labels.selectHint}</p>
+
             <button
               type="button"
-              disabled={!profile || !selectedCity || loading}
+              data-testid="pathfinder-analyze"
+              disabled={!analyzeEnabled || loading}
               onClick={() => analyze()}
               className="fi mt-5 w-full rounded-2xl px-4 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40"
               style={{ background: '#fbbf24', color: '#101010' }}
@@ -473,7 +708,6 @@ export default function PathfinderPage() {
             )}
             {error && <div className="fi mt-4 text-sm text-red-300">{error}</div>}
           </section>
-        </div>
 
         {relocation && (
           <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[0.8fr_1.2fr]">
@@ -534,12 +768,18 @@ export default function PathfinderPage() {
             </div>
             <button
               type="button"
+              data-testid="pathfinder-best-times"
               onClick={loadBestTimes}
-              disabled={loadingTimes}
+              disabled={!bestTimesEnabled || loadingTimes}
               className="fi mt-5 rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
             >
               {loadingTimes ? labels.loading : labels.searchPeriods}
             </button>
+            {!bestTimesEnabled && (
+              <p data-testid="pathfinder-best-times-reason" className="fi mt-3 text-xs text-white/45">
+                {labels.bestTimesNeedsTimezone}
+              </p>
+            )}
             {bestTimes && (
               <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
                 {bestTimes.best_periods.slice(0, 6).map((period) => (
@@ -549,6 +789,7 @@ export default function PathfinderPage() {
             )}
           </section>
         )}
+        </div>
       </div>
     </AppShell>
   );

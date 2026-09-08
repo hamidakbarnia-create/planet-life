@@ -20,6 +20,7 @@
     "visual:diff": "playwright test --project=visual && node tests/visual/write-current.mjs && node tests/visual/diff-report.mjs"
   },
   "dependencies": {
+    "maplibre-gl": "^5.7.3",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
