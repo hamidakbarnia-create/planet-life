@@ -105,8 +105,161 @@ is not treated as meaningful at the exact poles.
   not an independent ephemeris.
 - AstroClick Travel and Astro-Seek are not numerical proof for this spike.
 
-## Explicitly excluded
+## Explicitly excluded from the first checkpoint
 
-ASC, DSC, Moon and other bodies, paran lines, natal birthplace UI, location
-ranking, Discovery, Analyze, Best Times, frontend rendering, HTTP endpoints,
-persistence, caching, and production rollout.
+Moon and other bodies, paran lines, natal birthplace UI, location ranking,
+Discovery, Analyze, Best Times, frontend rendering, HTTP endpoints,
+persistence, caching, and production rollout. ASC/DSC exist only as a second
+experimental local function in this module.
+
+## Sun ASC/DSC — experimental, not wired
+
+`compute_sun_asc_dsc` is a separate function. It must not change
+`compute_sun_mc_ic` output. `calculation_version` for ASC/DSC is `2`.
+Line IDs are `spike.v1.sun.ASC` and `spike.v1.sun.DSC`.
+
+This remains local experimental work. Swiss Ephemeris licensing is unresolved.
+No ASC/DSC geometry may be deployed publicly pending owner licensing clearance.
+
+### Horizon derivation
+
+Geometric altitude:
+
+```
+sin(h) = sin(φ) sin(δ) + cos(φ) cos(δ) cos(H)
+```
+
+Provisional convention: `geometric_geocentric_altitude_zero` (`h = 0`).
+No refraction, semidiameter, observer elevation, or topocentric parallax.
+
+```
+x = -tan(φ) tan(δ)
+H0 = acos(x)          # radians internally; stored in degrees
+```
+
+Hour angle `H` is west-positive from the meridian (`H = LST − α`).
+`LST = α + H`. East-positive longitude:
+
+```
+λ = normalize(α + H − GAST)
+```
+
+At `H = 0` this is the existing MC formula.
+
+### Sign proof
+
+At `h = 0`, `dh/dH = −cos(φ) cos(δ) sin(H)`. For ordinary latitudes
+`cos(φ) cos(δ) > 0`:
+
+- ASC uses `H = −H0` so `dh/dH > 0` (rising as time advances).
+- DSC uses `H = +H0` so `dh/dH < 0` (setting as time advances).
+
+A small earlier hour angle places the ASC body below the horizon and the DSC
+body above it. The reverse holds slightly later. This is independent of
+Swiss Ephemeris `azalt`.
+
+### Critical latitudes and tangents
+
+For nonzero declination, `φ_crit = 90° − |δ|`. `|x| = 1` at `φ = ±φ_crit`.
+Those tangent solutions are included as curve endpoints unless they would be
+an exact geographic pole.
+
+Positive declination:
+
+- northern tangent coincides with IC;
+- southern tangent coincides with MC.
+
+Negative declination reverses that pairing.
+
+`|x| > 1 + 10⁻¹²` is not clamped. It is classified as continuously above or
+continuously below from the meridian / lower-culmination altitudes.
+
+`acos` is clamped only when `abs(abs(x) − 1) <= 1e-12`.
+
+Exact geographic poles are excluded. If declination is so close to zero that
+`φ_crit` would reach a pole, endpoints use the interior limit
+`±89.999999` and a polar-endpoint warning is recorded.
+
+### Adaptive sampling
+
+Sampling is deterministic adaptive subdivision, not fixed latitude bands.
+
+- Seeds (mandatory, never dropped by the interior budget): southern
+  tangent endpoint, equator if interior, northern tangent endpoint.
+- `max_points` is a **total vertex** budget. Mandatory seeds are reserved
+  first. Only leftover slots are optional interior refinement vertices.
+  A budget smaller than the mandatory count is rejected before geometry
+  is emitted.
+- Antimeridian cut endpoints are added after the unsplit curve and are
+  not removed by interior-point accounting. Dedup cannot collapse a
+  `+180/−180` pair at the same latitude.
+- Order: south to north; south half of an interval is refined first.
+- Refinement acceptance uses internal probes at **25%, 50%, and 75%** of
+  each candidate latitude interval. Each probe compares the true horizon
+  longitude with the longitude implied by the candidate edge using
+  `wrapped_longitude_geographic_deg`. Errors are not averaged. The interval
+  is accepted only when **every** probe is within `0.05°`.
+- When any probe exceeds tolerance, the interval is split at the midpoint.
+  Join: `left interiors + midpoint + right interiors`. The midpoint is
+  kept exactly once.
+- After the unsplit curve is assembled, a denser post-validation runs at
+  **1/8, 1/4, 3/8, 1/2, 5/8, 3/4, 7/8** of every edge, wrap-safe, before
+  antimeridian splitting. The result records probe count, maximum error,
+  over-tolerance count, and the latitude/edge of the maximum.
+- This finite probe set is the experimental **rendering** validation
+  contract. It is not a formal mathematical proof of a global maximum
+  interpolation error, and `0.05°` is not an exact line-distance or orb.
+- Dedup removes only genuinely duplicate consecutive coordinates.
+
+`geometry_complete` is true only when all of the following hold:
+
+- no recursion-depth or point-budget limit was hit;
+- every required endpoint/seed is present in the vertices;
+- post-validation finds zero probes above `0.05°`;
+- antimeridian segmentation succeeds;
+- no invalid or empty segment is emitted.
+
+Otherwise `geometry_complete` is false, a specific warning names the
+failure, and the geometry is not described as tolerance-compliant.
+Forced limits still keep both tangents and the equator, preserve
+south-to-north order, and name only the limit that actually fired.
+
+### Antimeridian root solving
+
+When consecutive normalized longitudes jump more than 180°, the crossing
+latitude is found by bracketed bisection of the actual ASC/DSC longitude
+function. Linear longitude interpolation is not used as the crossing
+definition.
+
+Segment cuts use a separate convention that allows both `-180` and `+180` at
+the same latitude. Interior vertices still follow `(-180, 180]`. This prevents
+a false world-spanning bridge.
+
+Output is a stable list of GeoJSON `LineString` segments per angle. Duplicate
+consecutive vertices, one-point segments, and zero-length segments are omitted.
+
+### Hard EQUATORIAL requirement
+
+Before RA and declination are used for ASC/DSC:
+
+- returned flags must include `EQUATORIAL`;
+- RA and declination must be finite;
+- declination must lie in `[-90°, +90°]`;
+- actual ephemeris provenance must decode.
+
+Missing `EQUATORIAL` or unresolved ephemeris is a hard failure. A
+SWIEPH→MOSEPH fallback may remain an explicit warning when the returned
+coordinates are still equatorial.
+
+The module still does not call `set_ephe_path`, `close`, or `houses`.
+
+### Limitations
+
+- Sun only.
+- Geometric horizon only.
+- Finite 25/50/75 and 1/8 probe validation is a rendering contract, not a
+  global-error proof and not an exact proximity/orb.
+- Local snapshot / same-build SWE values, not external astronomical validation.
+- AstroClick and similar maps are visual comparison only.
+- Not production-validated astrocartography.
+- Licensing hold: do not deploy this function on a public service.
