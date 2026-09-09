@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PATHFINDER_PAGE_COPY } from '@/app/pathfinder/page';
-import { selectedPointFromGlobePick } from '@/lib/pathfinder-selection';
+import { selectedPointFromGlobePick, withAuthoritativeTimezone } from '@/lib/pathfinder-selection';
 import { PathfinderGlobe } from './PathfinderGlobe';
 import { PathfinderGlobeMap } from './PathfinderGlobeMap';
 
@@ -11,6 +11,16 @@ const labels = {
   reset: PATHFINDER_PAGE_COPY.en.reset,
   fullscreen: PATHFINDER_PAGE_COPY.en.fullscreen,
   attribution: PATHFINDER_PAGE_COPY.en.attribution,
+  filterAll: PATHFINDER_PAGE_COPY.en.filterAll,
+  linesActive: PATHFINDER_PAGE_COPY.en.linesActive,
+  focusLine: PATHFINDER_PAGE_COPY.en.focusLine,
+  experimental: PATHFINDER_PAGE_COPY.en.experimental,
+  technicalProvenance: PATHFINDER_PAGE_COPY.en.technicalProvenance,
+  sunLineMeaning: PATHFINDER_PAGE_COPY.en.sunLineMeaning,
+  demoBadge: PATHFINDER_PAGE_COPY.en.demoBadge,
+  demoNotice: PATHFINDER_PAGE_COPY.en.demoNotice,
+  demoStatus: PATHFINDER_PAGE_COPY.en.demoStatus,
+  demoCompact: PATHFINDER_PAGE_COPY.en.demoCompact,
 };
 
 vi.mock('next/dynamic', () => ({
@@ -29,8 +39,12 @@ vi.mock('maplibre-gl', () => {
     }
     addControl() {}
     on() {}
+    once() {}
     remove() {}
     loaded() {
+      return false;
+    }
+    isStyleLoaded() {
       return false;
     }
     getCanvas() {
@@ -91,6 +105,26 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe('Pathfinder catalog', () => {
+  it('keeps the product name Pathfinder and English-only basemap contract', () => {
+    expect(PATHFINDER_PAGE_COPY.en.title).toBe('Pathfinder');
+    expect(PATHFINDER_PAGE_COPY.ru.title).toBe('Pathfinder');
+    expect(PATHFINDER_PAGE_COPY.fa.title).toBe('Pathfinder');
+    expect(PATHFINDER_PAGE_COPY.ar.title).toBe('Pathfinder');
+    expect(PATHFINDER_PAGE_COPY.ru.bestTimesNeedsTimezone).not.toMatch(/Best Times/);
+    expect(PATHFINDER_PAGE_COPY.fa.noProfile).toContain('Pathfinder');
+    expect(PATHFINDER_PAGE_COPY.ar.noProfile).toContain('Pathfinder');
+    expect(PATHFINDER_PAGE_COPY.fa.selectedLocation).not.toBe(PATHFINDER_PAGE_COPY.en.selectedLocation);
+    expect(PATHFINDER_PAGE_COPY.ar.demoCompact).not.toMatch(/Demo chart/);
+    expect(PATHFINDER_PAGE_COPY.ru.title).toBe('Pathfinder');
+    expect(PATHFINDER_PAGE_COPY.fa.reset).not.toBe(PATHFINDER_PAGE_COPY.en.reset);
+    expect(PATHFINDER_PAGE_COPY.ar.analyze).not.toBe(PATHFINDER_PAGE_COPY.en.analyze);
+    expect(PATHFINDER_PAGE_COPY.ru.searchPlaceholder).not.toBe(PATHFINDER_PAGE_COPY.en.searchPlaceholder);
+    expect(PATHFINDER_PAGE_COPY.fa.selectedLocation).not.toBe(PATHFINDER_PAGE_COPY.en.selectedLocation);
+    expect(PATHFINDER_PAGE_COPY.ar.filterAll).not.toBe(PATHFINDER_PAGE_COPY.en.filterAll);
+  });
+});
+
 describe('PathfinderGlobe', () => {
   it('renders a usable fallback when WebGL is unavailable', () => {
     stubWebGL(false);
@@ -125,14 +159,19 @@ describe('PathfinderGlobe', () => {
     expect(screen.getByTestId('pathfinder-geometry-demo-notice').textContent).toContain(
       'Not your personal chart'
     );
+    expect(screen.getByTestId('pathfinder-geometry-demo-notice').textContent).toContain(
+      'Experimental — not production validated'
+    );
+    expect(screen.getByTestId('pathfinder-demo-compact').textContent).toBe('Demo · not personal');
     expect(screen.getByTestId('pathfinder-geometry-demo-legend').textContent).toContain('☉ MC');
     expect(screen.getByTestId('pathfinder-geometry-demo-legend').textContent).toContain('☉ IC');
-    expect(screen.getByTestId('pathfinder-geometry-demo-legend').textContent).toContain('☉ ASC');
-    expect(screen.getByTestId('pathfinder-geometry-demo-legend').textContent).toContain('☉ DSC');
+    expect(screen.getByTestId('pathfinder-geometry-demo-legend').textContent).toContain('☉ AC');
+    expect(screen.getByTestId('pathfinder-geometry-demo-legend').textContent).toContain('☉ DC');
+    expect(screen.getByTestId('pathfinder-geometry-demo-legend').textContent).not.toContain('☉ ASC');
     expect(screen.getByTestId('pathfinder-geometry-demo-legend').textContent).not.toContain('Sun MC');
-    expect(screen.getByTestId('pathfinder-geometry-demo-explore').textContent).toContain(
-      '4 lines active · rotate globe to explore'
-    );
+    expect(screen.queryByTestId('pathfinder-geometry-demo-explore')).toBeNull();
+    expect(screen.queryByTestId('pathfinder-geometry-demo-focus-MC')).toBeNull();
+    expect(screen.getByTestId('pathfinder-geometry-demo-legend').className).toContain('pathfinder-filter-row');
     expect(screen.queryByTestId('pathfinder-globe-attribution')).toBeNull();
   });
 
@@ -145,13 +184,21 @@ describe('PathfinderGlobe', () => {
     expect(onPick).not.toHaveBeenCalled();
     fireEvent.click(screen.getByTestId('pathfinder-geometry-demo-filter-all'));
     expect(screen.getByTestId('pathfinder-globe').getAttribute('data-angle-filter')).toBe('all');
+    fireEvent.click(screen.getByTestId('pathfinder-geometry-demo-filter-MC'));
+    expect(screen.getByTestId('pathfinder-globe').getAttribute('data-angle-filter')).toBe('MC');
+    expect(screen.getByTestId('pathfinder-globe').getAttribute('data-selected-line')).toBe('MC');
+    expect(onPick).not.toHaveBeenCalled();
   });
 
   it('selects a Sun line, shows the experimental info panel, and clears it when filtered away', () => {
     const onPick = vi.fn();
+    const selected = withAuthoritativeTimezone(
+      selectedPointFromGlobePick(30.0444, 31.2357, PATHFINDER_PAGE_COPY.en.selectedLocation),
+      'Africa/Cairo'
+    );
     render(
       <PathfinderGlobe
-        selected={selectedPointFromGlobePick(30.0444, 31.2357, PATHFINDER_PAGE_COPY.en.selectedLocation)}
+        selected={selected}
         labels={labels}
         onPick={onPick}
       />
@@ -159,17 +206,18 @@ describe('PathfinderGlobe', () => {
     expect(screen.getByTestId('pathfinder-globe').getAttribute('data-selected-marker')).toBe('1');
     fireEvent.click(screen.getByTestId('pathfinder-geometry-demo-filter-ASC'));
     expect(screen.getByTestId('pathfinder-globe').getAttribute('data-selected-line')).toBe('ASC');
-    expect(screen.getByTestId('pathfinder-geometry-demo-info').textContent).toContain('Sun — Ascendant');
+    expect(screen.getByTestId('pathfinder-geometry-demo-info').textContent).toContain('☉ AC');
     expect(screen.getByTestId('pathfinder-geometry-demo-info').textContent).toContain('Experimental');
     expect(screen.getByTestId('pathfinder-geometry-demo-provenance').textContent).toContain(
-      'Experimental — not production-validated.'
+      'Experimental — not production validated'
     );
     expect(screen.getByTestId('pathfinder-geometry-demo-provenance').textContent).toContain('MOSEPH');
     expect(screen.getByTestId('pathfinder-globe').getAttribute('data-selected-marker')).toBe('1');
+    expect(selected.timezone).toBe('Africa/Cairo');
     expect(onPick).not.toHaveBeenCalled();
     fireEvent.click(screen.getByTestId('pathfinder-geometry-demo-filter-MC'));
     expect(screen.getByTestId('pathfinder-globe').getAttribute('data-selected-line')).toBe('MC');
-    expect(screen.getByTestId('pathfinder-geometry-demo-info').textContent).toContain('Sun — Midheaven');
+    expect(screen.getByTestId('pathfinder-geometry-demo-info').textContent).toContain('☉ MC');
     expect(screen.getByTestId('pathfinder-globe').getAttribute('data-selected-marker')).toBe('1');
   });
 
@@ -186,6 +234,30 @@ describe('PathfinderGlobe', () => {
       />
     );
     expect(screen.getByTestId('pathfinder-globe').getAttribute('data-selected-marker')).toBe('1');
+  });
+
+  it('keeps selected coordinates when Reset View or line focus is used', () => {
+    const onPick = vi.fn();
+    const selected = withAuthoritativeTimezone(
+      selectedPointFromGlobePick(10.0638, 17.9784, PATHFINDER_PAGE_COPY.en.selectedLocation),
+      'Africa/Ndjamena'
+    );
+    render(<PathfinderGlobe selected={selected} labels={labels} onPick={onPick} />);
+    fireEvent.click(screen.getByTestId('pathfinder-geometry-demo-filter-ASC'));
+    fireEvent.click(screen.getByTestId('pathfinder-globe-reset'));
+    expect(screen.getByTestId('pathfinder-globe').getAttribute('data-selected-marker')).toBe('1');
+    expect(selected.latitude).toBe(10.0638);
+    expect(selected.longitude).toBe(17.9784);
+    expect(selected.timezone).toBe('Africa/Ndjamena');
+    expect(onPick).not.toHaveBeenCalled();
+  });
+
+  it('does not start Analyze or Best Times from globe chrome', () => {
+    render(<PathfinderGlobe selected={null} labels={labels} onPick={() => undefined} />);
+    expect(screen.queryByRole('button', { name: /analyze location|best times/i })).toBeNull();
+    fireEvent.click(screen.getByTestId('pathfinder-geometry-demo-filter-DSC'));
+    fireEvent.click(screen.getByTestId('pathfinder-globe-reset'));
+    expect(screen.queryByRole('button', { name: /analyze location|best times/i })).toBeNull();
   });
 
   it('unmounts reset and fullscreen controls without leftover handlers', () => {
@@ -223,5 +295,6 @@ describe('PathfinderGlobeMap host layout', () => {
     expect(host.classList.contains('absolute')).toBe(false);
     expect(host.classList.contains('relative')).toBe(false);
     expect(host.classList.contains('inset-0')).toBe(false);
+    expect(host.getAttribute('data-label-language')).toBe('en');
   });
 });

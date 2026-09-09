@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import type { AppLang } from './app-settings';
 import { loadAppLang, saveAppLang as persistAppLang, APP_LANG_CHANGED_EVENT } from './calendar-preferences';
 import { useQueuedEffect } from './use-queued-effect';
@@ -23,11 +23,11 @@ export function useClientReady(): boolean {
 
 /** Reactive app language synced with `planet-life-lang` localStorage. */
 export function useAppLang(): [AppLang, (lang: AppLang) => void] {
-  const [lang, setLangState] = useState<AppLang>(() =>
-    typeof window === 'undefined' ? 'en' : parseAppLang(loadAppLang())
-  );
+  // Always start from the SSR default. Reading localStorage here mismatches
+  // the server tree and is the Next.js "1 Issue" hydration warning.
+  const [lang, setLangState] = useState<AppLang>('en');
 
-  useQueuedEffect(() => {
+  useLayoutEffect(() => {
     setLangState(parseAppLang(loadAppLang()));
     const sync = () => setLangState(parseAppLang(loadAppLang()));
     window.addEventListener(APP_LANG_CHANGED_EVENT, sync);

@@ -20,7 +20,11 @@ export type CitySearchHit = {
   country?: string;
 };
 
-const FIXED_OFFSET_ZONE = /^(UTC|Etc\/UTC|Etc\/GMT([+-]\d+)?)$/i;
+const FIXED_OFFSET_STYLE_NAME = /^(?:UTC|GMT)?[+-]\d/i;
+
+export type TimezoneLookup = (
+  point: PathfinderSelectedPoint
+) => Promise<string | undefined>;
 
 export function normalizeLongitude(longitude: number): number {
   if (!Number.isFinite(longitude)) {
@@ -96,8 +100,13 @@ export function selectedPointFromGlobePick(
 }
 
 export function isAuthoritativeTimezoneName(timezone: string | undefined): boolean {
-  const zone = timezone?.trim();
-  if (!zone || FIXED_OFFSET_ZONE.test(zone) || !zone.includes('/')) return false;
+  const zone = timezone?.trim().replace(/\\/g, '/');
+  if (!zone) return false;
+  const folded = zone.toUpperCase();
+  if (folded === 'UTC' || folded === 'GMT') return false;
+  if (folded.startsWith('ETC/')) return false;
+  if (!zone.includes('/')) return false;
+  if (FIXED_OFFSET_STYLE_NAME.test(zone)) return false;
   return true;
 }
 
@@ -154,4 +163,20 @@ export function canUseFreeTierAnalyze(
 ): boolean {
   if (isPaidMember) return true;
   return !usedAllowanceKey || usedAllowanceKey === pathfinderAllowanceKey(point);
+}
+
+export async function enrichSelectedPointTimezone(
+  point: PathfinderSelectedPoint,
+  lookup: TimezoneLookup
+): Promise<PathfinderSelectedPoint> {
+  try {
+    const timezone = await lookup(point);
+    return withAuthoritativeTimezone(point, timezone);
+  } catch {
+    return withAuthoritativeTimezone(point, undefined);
+  }
+}
+
+export function acceptTimezoneEnrichment(currentSeq: number, requestSeq: number): boolean {
+  return currentSeq === requestSeq;
 }

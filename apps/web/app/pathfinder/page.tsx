@@ -7,7 +7,7 @@ import { localeFontFamily } from '@/lib/brand-theme';
 import { AppShell } from '@/components/AppShell';
 import { loadBirthProfile, type BirthProfile } from '@/lib/birth-profile';
 import { isPaid } from '@/lib/membership';
-import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
+import { useAppLang } from '@/lib/use-app-lang';
 import { loadCalendarSystem, type AppLang, type CalendarSystem } from '@/lib/app-settings';
 import { formatDisplayDateRange } from '@/lib/date-format';
 import { HOME_LANGS } from '@/lib/home-i18n';
@@ -36,7 +36,9 @@ import {
   periodLabel,
 } from '@/lib/pathfinder-i18n';
 import {
+  acceptTimezoneEnrichment,
   canUseFreeTierAnalyze,
+  enrichSelectedPointTimezone,
   formatSelectedCoordinates,
   isAnalyzeEligible,
   isBestTimesEligible,
@@ -45,9 +47,14 @@ import {
   selectedPointFromCitySearch,
   selectedPointFromGlobePick,
   selectedPointToApiTarget,
-  withAuthoritativeTimezone,
   type PathfinderSelectedPoint,
 } from '@/lib/pathfinder-selection';
+import {
+  searchQueryAfterCommit,
+  searchQueryAfterLocaleChange,
+  searchQueryMatchesSelection,
+  visibleSelectionLabel,
+} from '@/lib/pathfinder-globe-projection';
 
 type Labels = {
   title: string;
@@ -85,6 +92,16 @@ type Labels = {
   selectHint: string;
   timezoneLabel: string;
   localTimeLabel: string;
+  filterAll: string;
+  linesActive: string;
+  focusLine: string;
+  experimental: string;
+  technicalProvenance: string;
+  demoBadge: string;
+  demoNotice: string;
+  demoStatus: string;
+  demoCompact: string;
+  sunLineMeaning: Record<PathfinderSunAngle, string>;
   areas: Record<PathfinderArea | 'all', string>;
   verdicts: Record<string, string>;
 };
@@ -135,19 +152,13 @@ export async function executePathfinderAnalyze(input: {
   }
 }
 
-async function enrichSelectedPointTimezone(
-  point: PathfinderSelectedPoint
-): Promise<PathfinderSelectedPoint> {
-  try {
-    const preview = await fetchLocationPreview({
-      location: `${point.latitude},${point.longitude}`,
-      latitude: point.latitude,
-      longitude: point.longitude,
-    });
-    return withAuthoritativeTimezone(point, preview.timezone);
-  } catch {
-    return point;
-  }
+async function lookupPathfinderTimezone(point: PathfinderSelectedPoint): Promise<string | undefined> {
+  const preview = await fetchLocationPreview({
+    location: `${point.latitude},${point.longitude}`,
+    latitude: point.latitude,
+    longitude: point.longitude,
+  });
+  return preview.timezone;
 }
 
 function formatLocalTimeInZone(timezone: string, now: Date, locale: string): string | null {
@@ -202,6 +213,21 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     selectHint: 'Select any point on Earth or search a place.',
     timezoneLabel: 'Timezone',
     localTimeLabel: 'Local time',
+    filterAll: 'All',
+    linesActive: '4 lines active',
+    focusLine: 'Focus',
+    experimental: 'Experimental',
+    technicalProvenance: 'Technical provenance',
+    demoBadge: 'Demo chart · 21 Jun 2020',
+    demoNotice: 'Not your personal chart',
+    demoStatus: 'Experimental — not production validated',
+    demoCompact: 'Demo · not personal',
+    sunLineMeaning: {
+      MC: 'Where the Sun stands overhead — public role, vocation, and visibility.',
+      IC: 'Opposite the Midheaven — home, roots, and the private foundation.',
+      ASC: 'Where the Sun is rising — identity, presence, and first impression.',
+      DSC: 'Where the Sun is setting — relationships, counterparts, and the other.',
+    },
     areas: {
       all: 'All Areas',
       love: 'Love',
@@ -215,7 +241,7 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     verdicts: { positive: 'Supportive', mixed: 'Mixed', challenging: 'Careful' },
   },
   ru: {
-    title: 'Маршрут',
+    title: 'Pathfinder',
     subtitle:
       'Астрология релокации по городам: где открываются любовь, карьера, деньги, дом и удачные периоды.',
     searchPlaceholder: 'Поиск города...',
@@ -240,7 +266,7 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     coordinates: 'Координаты',
     timezoneUnavailable: 'Часовой пояс для этой точки недоступен.',
     localTimeUnavailable: 'Местное время недоступно',
-    bestTimesNeedsTimezone: 'Для Best Times нужен подтверждённый часовой пояс этой точки.',
+    bestTimesNeedsTimezone: 'Для лучших периодов нужен подтверждённый часовой пояс этой точки.',
     unsupportedCalculation:
       'Эту точку можно выбрать, но текущий расчёт для данной широты недоступен. Выбранная точка сохранена.',
     polarShippingBlocker:
@@ -253,6 +279,21 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     selectHint: 'Выберите любую точку на Земле или найдите место.',
     timezoneLabel: 'Часовой пояс',
     localTimeLabel: 'Местное время',
+    filterAll: 'Все',
+    linesActive: '4 линии активны',
+    focusLine: 'Фокус',
+    experimental: 'Эксперимент',
+    technicalProvenance: 'Техническое происхождение',
+    demoBadge: 'Демо-карта · 21 июн 2020',
+    demoNotice: 'Это не ваша личная карта',
+    demoStatus: 'Эксперимент — не проверено для продакшена',
+    demoCompact: 'Демо · не личная',
+    sunLineMeaning: {
+      MC: 'Где Солнце в зените — публичная роль, призвание и видимость.',
+      IC: 'Напротив середины неба — дом, корни и частная основа.',
+      ASC: 'Где Солнце восходит — идентичность, присутствие и первое впечатление.',
+      DSC: 'Где Солнце садится — отношения, партнёры и другой человек.',
+    },
     areas: {
       all: 'Все сферы',
       love: 'Любовь',
@@ -266,12 +307,12 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     verdicts: { positive: 'Поддерживает', mixed: 'Неоднозначно', challenging: 'Осторожно' },
   },
   fa: {
-    title: 'مسیر‌یاب',
+    title: 'Pathfinder',
     subtitle:
       'استرولوژی جابه‌جایی برای شهرها: ببین عشق، کار، پول، خانه و زمان سفر برای چارت تو کجا بهتر باز می‌شود.',
     searchPlaceholder: 'جستجوی شهر...',
     analyze: 'تحلیل شهر',
-    noProfile: 'برای مسیر‌یاب ابتدا پروفایل تولد را ذخیره کنید.',
+    noProfile: 'برای Pathfinder ابتدا پروفایل تولد را ذخیره کنید.',
     goProfile: 'رفتن به پروفایل',
     freeTeaser: 'نسخه رایگان فقط یک شهر را نشان می‌دهد. برای مقایسه شهرها ارتقا دهید.',
     upgrade: 'ارتقا',
@@ -304,6 +345,21 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     selectHint: 'هر نقطه‌ای روی زمین را انتخاب کن یا مکانی را جستجو کن.',
     timezoneLabel: 'منطقه زمانی',
     localTimeLabel: 'ساعت محلی',
+    filterAll: 'همه',
+    linesActive: '۴ خط فعال',
+    focusLine: 'تمرکز',
+    experimental: 'آزمایشی',
+    technicalProvenance: 'منشأ فنی',
+    demoBadge: 'نمودار آزمایشی · ۲۱ ژوئن ۲۰۲۰',
+    demoNotice: 'چارت شخصی شما نیست',
+    demoStatus: 'آزمایشی — برای تولید اعتبارسنجی نشده',
+    demoCompact: 'آزمایشی · غیرشخصی',
+    sunLineMeaning: {
+      MC: 'جایی که خورشید بالای سر است — نقش عمومی، حرفه و دیده‌شدن.',
+      IC: 'روبه‌روی اوج آسمان — خانه، ریشه‌ها و بنیاد خصوصی.',
+      ASC: 'جایی که خورشید طلوع می‌کند — هویت، حضور و برداشت اول.',
+      DSC: 'جایی که خورشید غروب می‌کند — رابطه، طرف مقابل و دیگری.',
+    },
     areas: {
       all: 'همه حوزه‌ها',
       love: 'عشق',
@@ -317,12 +373,12 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     verdicts: { positive: 'حمایت‌گر', mixed: 'ترکیبی', challenging: 'با احتیاط' },
   },
   ar: {
-    title: 'المسار',
+    title: 'Pathfinder',
     subtitle:
       'فلك الانتقال بين المدن: أين تنفتح لك فرص الحب والعمل والمال والبيت وأفضل توقيت للسفر.',
     searchPlaceholder: 'ابحث عن مدينة...',
     analyze: 'تحليل الموقع',
-    noProfile: 'يحتاج المسار إلى حفظ بيانات ميلادك أولاً.',
+    noProfile: 'يحتاج Pathfinder إلى حفظ بيانات ميلادك أولاً.',
     goProfile: 'إلى الملف',
     freeTeaser: 'المعاينة المجانية تشمل مدينة واحدة. افتح الخطة المدفوعة للمقارنة.',
     upgrade: 'ترقية',
@@ -355,6 +411,21 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     selectHint: 'اختر أي نقطة على الأرض أو ابحث عن مكان.',
     timezoneLabel: 'المنطقة الزمنية',
     localTimeLabel: 'الوقت المحلي',
+    filterAll: 'الكل',
+    linesActive: '4 خطوط نشطة',
+    focusLine: 'تركيز',
+    experimental: 'تجريبي',
+    technicalProvenance: 'الأصل التقني',
+    demoBadge: 'خريطة تجريبية · 21 يونيو 2020',
+    demoNotice: 'ليست خريطتك الشخصية',
+    demoStatus: 'تجريبي — غير مُتحقق للإنتاج',
+    demoCompact: 'تجريبي · غير شخصي',
+    sunLineMeaning: {
+      MC: 'حيث تكون الشمس في كبد السماء — الدور العام والمهنة والظهور.',
+      IC: 'مقابل وسط السماء — البيت والجذور والأساس الخاص.',
+      ASC: 'حيث تشرق الشمس — الهوية والحضور والانطباع الأول.',
+      DSC: 'حيث تغرب الشمس — العلاقات والشركاء والآخر.',
+    },
     areas: {
       all: 'كل المجالات',
       love: 'الحب',
@@ -443,12 +514,7 @@ function PeriodCard({ period, lang, calendar }: { period: { start: string; end: 
 }
 
 export default function PathfinderPage() {
-  const [lang, setLangState] = useState<AppLang>(() => {
-    const stored = loadAppLang();
-    return stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar'
-      ? stored
-      : 'en';
-  });
+  const [lang, setLangState] = useAppLang();
   const [profile] = useState<BirthProfile | null>(() => loadBirthProfile());
   const [calendar] = useState<CalendarSystem>(() => loadCalendarSystem());
   const [citySearch, setCitySearch] = useState('');
@@ -482,7 +548,8 @@ export default function PathfinderPage() {
 
   const setLang = (next: AppLang) => {
     setLangState(next);
-    saveAppLang(next);
+    setCitySearch((current) => searchQueryAfterLocaleChange(current, selectedPoint));
+    setShowCities(false);
   };
 
   const searchCities = useCallback((q: string) => {
@@ -510,8 +577,8 @@ export default function PathfinderPage() {
     setBestTimes(null);
     setBlocked(false);
     setError('');
-    void enrichSelectedPointTimezone(point).then((enriched) => {
-      if (selectionSeqRef.current !== seq) return;
+    void enrichSelectedPointTimezone(point, lookupPathfinderTimezone).then((enriched) => {
+      if (!acceptTimezoneEnrichment(selectionSeqRef.current, seq)) return;
       setSelectedPoint(enriched);
     });
   }, []);
@@ -585,6 +652,7 @@ export default function PathfinderPage() {
         <div className="pathfinder-visual-map-stage" data-testid="pathfinder-map-stage">
           <PathfinderGlobe
             selected={selectedPoint}
+            labelLanguage={lang}
             angleFilter={angleFilter}
             selectedLine={selectedLine}
             onAngleFilterChange={setAngleFilter}
@@ -595,16 +663,35 @@ export default function PathfinderPage() {
               reset: labels.reset,
               fullscreen: labels.fullscreen,
               attribution: labels.attribution,
+              filterAll: labels.filterAll,
+              linesActive: labels.linesActive,
+              focusLine: labels.focusLine,
+              experimental: labels.experimental,
+              technicalProvenance: labels.technicalProvenance,
+              sunLineMeaning: labels.sunLineMeaning,
+              demoBadge: labels.demoBadge,
+              demoNotice: labels.demoNotice,
+              demoStatus: labels.demoStatus,
+              demoCompact: labels.demoCompact,
             }}
             onPick={(latitude, longitude) => {
               applySelection(selectedPointFromGlobePick(latitude, longitude, labels.selectedLocation));
+              setCitySearch(searchQueryAfterCommit('globe_point'));
+              setShowCities(false);
             }}
           />
         </div>
         <div className="pathfinder-visual-decision" data-testid="pathfinder-decision-panel">
           {selectedLine ? (
             <div className="pathfinder-selected-line-desktop mb-4 hidden lg:block">
-              <PathfinderSelectedLineCard angle={selectedLine} variant="desktop-panel" />
+              <PathfinderSelectedLineCard
+                angle={selectedLine}
+                variant="desktop-panel"
+                experimental={labels.experimental}
+                technicalProvenance={labels.technicalProvenance}
+                meaning={labels.sunLineMeaning[selectedLine]}
+                status={labels.demoStatus}
+              />
             </div>
           ) : null}
           <section className="rounded-3xl p-6" style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -621,6 +708,8 @@ export default function PathfinderPage() {
             <div className="relative mt-5">
               <input
                 value={citySearch}
+                data-testid="pathfinder-city-search"
+                data-search-matches-selection={searchQueryMatchesSelection(citySearch, selectedPoint) ? '1' : '0'}
                 onChange={(e) => {
                   setCitySearch(e.target.value);
                   setShowCities(true);
@@ -638,7 +727,7 @@ export default function PathfinderPage() {
                       type="button"
                       onClick={() => {
                         applySelection(selectedPointFromCitySearch(city));
-                        setCitySearch(city.short || city.name);
+                        setCitySearch(searchQueryAfterCommit('city_search', city.short || city.name));
                         setShowCities(false);
                       }}
                       className="fi block w-full px-4 py-3 text-left text-xs text-white/70 hover:bg-white/[0.05]"
@@ -659,21 +748,38 @@ export default function PathfinderPage() {
                 className="fi mt-3 space-y-1 text-xs text-white/45"
               >
                 <div>
-                  {selectedPoint.displayName}
+                  {visibleSelectionLabel(selectedPoint, labels.selectedLocation)}
                   {selectedPoint.country ? ` · ${selectedPoint.country}` : ''}
                 </div>
                 <div data-testid="pathfinder-selected-coords">
-                  {labels.coordinates}: {formatSelectedCoordinates(selectedPoint)}
+                  {labels.coordinates}:{' '}
+                  <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>
+                    {formatSelectedCoordinates(selectedPoint)}
+                  </span>
                 </div>
                 <div data-testid="pathfinder-selected-timezone">
-                  {selectedPoint.timezone
-                    ? `${labels.timezoneLabel}: ${selectedPoint.timezone}`
-                    : labels.timezoneUnavailable}
+                  {selectedPoint.timezone ? (
+                    <>
+                      {labels.timezoneLabel}:{' '}
+                      <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>
+                        {selectedPoint.timezone}
+                      </span>
+                    </>
+                  ) : (
+                    labels.timezoneUnavailable
+                  )}
                 </div>
                 <div data-testid="pathfinder-selected-local-time">
-                  {localTime
-                    ? `${labels.localTimeLabel}: ${localTime}`
-                    : labels.localTimeUnavailable}
+                  {localTime ? (
+                    <>
+                      {labels.localTimeLabel}:{' '}
+                      <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>
+                        {localTime}
+                      </span>
+                    </>
+                  ) : (
+                    labels.localTimeUnavailable
+                  )}
                 </div>
               </div>
             )}

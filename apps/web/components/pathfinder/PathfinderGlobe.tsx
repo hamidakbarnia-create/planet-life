@@ -3,18 +3,20 @@
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { PathfinderSelectedPoint } from '@/lib/pathfinder-selection';
+import type { AppLang } from '@/lib/app-settings';
 import {
-  PATHFINDER_ALL_LINES_EXPLORE,
   PATHFINDER_GEOMETRY_DEMO_BADGE,
   PATHFINDER_GEOMETRY_DEMO_NOTICE,
+  PATHFINDER_GEOMETRY_DEMO_STATUS,
   PATHFINDER_SUN_ANGLE_COLORS,
   PATHFINDER_SUN_ANGLE_FILTERS,
   type PathfinderSunAngle,
   type PathfinderSunAngleFilter,
-  nextSelectionForFilterControl,
-  sunAngleFilterLabel,
+  pathfinderAngleChipAction,
+  sunAngleDisplayLabel,
 } from '@/lib/pathfinder-geometry-demo';
 import { PathfinderSelectedLineCard } from './PathfinderSelectedLineCard';
+import { scrollDeltaToRevealChip } from '@/lib/pathfinder-globe-projection';
 
 const PathfinderGlobeMap = dynamic(
   () => import('./PathfinderGlobeMap').then((mod) => mod.PathfinderGlobeMap),
@@ -32,6 +34,16 @@ export type PathfinderGlobeLabels = {
   reset: string;
   fullscreen: string;
   attribution: string;
+  filterAll: string;
+  linesActive: string;
+  focusLine: string;
+  experimental: string;
+  technicalProvenance: string;
+  sunLineMeaning?: Partial<Record<PathfinderSunAngle, string>>;
+  demoBadge?: string;
+  demoNotice?: string;
+  demoStatus?: string;
+  demoCompact?: string;
 };
 
 export type PathfinderGlobeProps = {
@@ -40,6 +52,7 @@ export type PathfinderGlobeProps = {
   onPick: (latitude: number, longitude: number) => void;
   onResetView?: () => void;
   forceVisualMode?: GlobeVisualMode;
+  labelLanguage?: AppLang;
   angleFilter?: PathfinderSunAngleFilter;
   selectedLine?: PathfinderSunAngle | null;
   onAngleFilterChange?: (filter: PathfinderSunAngleFilter) => void;
@@ -81,6 +94,7 @@ export function PathfinderGlobe({
   onPick,
   onResetView,
   forceVisualMode,
+  labelLanguage: _labelLanguage = 'en',
   angleFilter: angleFilterProp,
   selectedLine: selectedLineProp,
   onAngleFilterChange,
@@ -96,6 +110,9 @@ export function PathfinderGlobe({
   const [ready, setReady] = useState(false);
   const [initFailed, setInitFailed] = useState(false);
   const [resetToken, setResetToken] = useState(0);
+  const [focusToken, setFocusToken] = useState(0);
+  const [focusAngle, setFocusAngle] = useState<PathfinderSunAngle | null>(null);
+  const [demoOpen, setDemoOpen] = useState(false);
   const [internalFilter, setInternalFilter] = useState<PathfinderSunAngleFilter>('all');
   const [internalSelectedLine, setInternalSelectedLine] = useState<PathfinderSunAngle | null>(null);
   const filterRowRef = useRef<HTMLDivElement | null>(null);
@@ -134,9 +151,14 @@ export function PathfinderGlobe({
   );
   const handleFilter = useCallback(
     (next: PathfinderSunAngleFilter) => {
-      if (angleFilterProp === undefined) setInternalFilter(next);
-      onAngleFilterChange?.(next);
-      commitSelectedLine(nextSelectionForFilterControl(selectedLine, next));
+      const action = pathfinderAngleChipAction(next, selectedLine);
+      if (angleFilterProp === undefined) setInternalFilter(action.filter);
+      onAngleFilterChange?.(action.filter);
+      commitSelectedLine(action.selectedLine);
+      if (action.focusAngle) {
+        setFocusAngle(action.focusAngle);
+        setFocusToken((value) => value + 1);
+      }
     },
     [angleFilterProp, commitSelectedLine, onAngleFilterChange, selectedLine]
   );
@@ -144,11 +166,29 @@ export function PathfinderGlobe({
   useEffect(() => {
     const row = filterRowRef.current;
     if (!row) return;
-    const active = row.querySelector<HTMLElement>(`[data-testid="pathfinder-geometry-demo-filter-${angleFilter}"]`);
-    if (typeof active?.scrollIntoView === 'function') {
-      active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    const id = selectedLine ?? angleFilter;
+    const active = row.querySelector<HTMLElement>(`[data-testid="pathfinder-geometry-demo-filter-${id}"]`);
+    if (!active) return;
+    const rowRect = row.getBoundingClientRect();
+    const chipRect = active.getBoundingClientRect();
+    const delta = scrollDeltaToRevealChip(
+      rowRect,
+      chipRect,
+      { left: 0, right: typeof window !== 'undefined' ? window.innerWidth : rowRect.right }
+    );
+    if (delta !== 0) {
+      row.scrollLeft += delta;
     }
-  }, [angleFilter]);
+    const nextRect = active.getBoundingClientRect();
+    const stillClipped = scrollDeltaToRevealChip(
+      row.getBoundingClientRect(),
+      nextRect,
+      { left: 0, right: typeof window !== 'undefined' ? window.innerWidth : rowRect.right }
+    );
+    if (stillClipped !== 0) {
+      row.scrollLeft += stillClipped;
+    }
+  }, [angleFilter, selectedLine]);
 
   const enterFullscreen = useCallback(() => {
     const node = document.getElementById('pathfinder-globe-shell');
@@ -183,8 +223,11 @@ export function PathfinderGlobe({
           mode={mode}
           selected={selected}
           resetToken={resetToken}
+          focusToken={focusToken}
+          focusAngle={focusAngle}
           angleFilter={angleFilter}
           selectedLine={selectedLine}
+          labelLanguage="en"
           onPick={onPick}
           onSelectLine={handleSelectLine}
           onReady={handleReady}
@@ -211,7 +254,7 @@ export function PathfinderGlobe({
         </div>
       ) : null}
 
-      <div className="absolute left-2 top-2 z-10 flex gap-1.5">
+      <div className="pathfinder-globe-chrome-top z-10 flex gap-1.5">
         <button
           type="button"
           data-testid="pathfinder-globe-reset"
@@ -219,7 +262,7 @@ export function PathfinderGlobe({
             setResetToken((value) => value + 1);
             onResetView?.();
           }}
-          className="fi min-h-9 rounded-lg border border-white/15 bg-black/45 px-2.5 text-[10px] text-white"
+          className="fi min-h-10 rounded-full border border-white/12 bg-black/40 px-3 text-[11px] text-white/90"
         >
           {labels.reset}
         </button>
@@ -227,7 +270,7 @@ export function PathfinderGlobe({
           type="button"
           data-testid="pathfinder-globe-fullscreen"
           onClick={enterFullscreen}
-          className="fi min-h-9 rounded-lg border border-white/15 bg-black/45 px-2.5 text-[10px] text-white"
+          className="fi min-h-10 rounded-full border border-white/12 bg-black/40 px-3 text-[11px] text-white/90"
         >
           {labels.fullscreen}
         </button>
@@ -235,68 +278,83 @@ export function PathfinderGlobe({
 
       <div
         data-testid="pathfinder-geometry-demo-notice"
-        className="pointer-events-none absolute left-2 top-12 z-10"
-        title={PATHFINDER_GEOMETRY_DEMO_NOTICE}
+        data-demo-open={demoOpen ? '1' : '0'}
+        className="pathfinder-demo-notice absolute z-10"
+        title={labels.demoNotice ?? PATHFINDER_GEOMETRY_DEMO_NOTICE}
       >
-        <div
-          className="rounded-lg px-2 py-1"
-          style={{
-            background: 'rgba(8,12,22,0.72)',
-            border: '1px solid rgba(251,191,36,0.28)',
-          }}
+        <button
+          type="button"
+          data-testid="pathfinder-demo-compact"
+          className="pathfinder-demo-compact fi"
+          onClick={() => setDemoOpen((value) => !value)}
+          aria-expanded={demoOpen}
         >
-          <p className="fi text-[10px] font-medium leading-none text-amber-100">{PATHFINDER_GEOMETRY_DEMO_BADGE}</p>
-          <p className="fi mt-0.5 text-[9px] leading-none text-white/50">{PATHFINDER_GEOMETRY_DEMO_NOTICE}</p>
+          {labels.demoCompact ?? 'Demo · not personal'}
+        </button>
+        <div className={`pathfinder-demo-full rounded-md px-1.5 py-1 ${demoOpen ? 'is-open' : ''}`}>
+          <p className="fi text-[11px] font-medium leading-snug text-white/88">
+            {labels.demoBadge ?? PATHFINDER_GEOMETRY_DEMO_BADGE}
+          </p>
+          <p className="fi mt-1 text-[10px] leading-snug text-white/72">
+            {labels.demoNotice ?? PATHFINDER_GEOMETRY_DEMO_NOTICE}
+          </p>
+          <p className="fi mt-1 text-[10px] leading-snug text-white/64">
+            {labels.demoStatus ?? PATHFINDER_GEOMETRY_DEMO_STATUS}
+          </p>
         </div>
       </div>
 
       {selectedLine ? (
-        <div className="pathfinder-selected-line-mobile pointer-events-auto absolute inset-x-2 bottom-[7.25rem] z-20 lg:hidden">
-          <PathfinderSelectedLineCard angle={selectedLine} variant="mobile-sheet" />
+        <div className="pathfinder-selected-line-mobile pointer-events-auto absolute inset-x-2 z-20 lg:hidden">
+          <PathfinderSelectedLineCard
+            angle={selectedLine}
+            variant="mobile-sheet"
+            experimental={labels.experimental}
+            technicalProvenance={labels.technicalProvenance}
+            meaning={labels.sunLineMeaning?.[selectedLine]}
+            status={labels.demoStatus}
+          />
         </div>
-      ) : null}
-
-      {angleFilter === 'all' && !selectedLine ? (
-        <p
-          data-testid="pathfinder-geometry-demo-explore"
-          className="pointer-events-none absolute bottom-[6.85rem] left-2 z-10 max-w-[16rem] fi text-[10px] leading-snug text-white/55 lg:bottom-[4.85rem]"
-        >
-          {PATHFINDER_ALL_LINES_EXPLORE}
-        </p>
       ) : null}
 
       <div
         data-testid="pathfinder-geometry-demo-legend"
-        className="pathfinder-filter-row absolute bottom-10 left-2 right-2 z-10 lg:bottom-8 lg:max-w-[28rem]"
+        className="pathfinder-filter-row absolute left-2 right-2 z-10"
       >
         <div
           ref={filterRowRef}
           data-testid="pathfinder-geometry-demo-filter"
-          className="flex max-w-full gap-1 overflow-x-auto scroll-px-2"
+          className="flex max-w-full gap-1.5 overflow-x-auto scroll-px-2 pb-0.5"
           role="group"
           aria-label="Sun angle filter"
         >
           {PATHFINDER_SUN_ANGLE_FILTERS.map((filter) => {
             const active = angleFilter === filter;
-            const color = filter === 'all' ? '#fbbf24' : PATHFINDER_SUN_ANGLE_COLORS[filter];
+            const selected = filter !== 'all' && selectedLine === filter;
+            const color = filter === 'all' ? '#e8d39a' : PATHFINDER_SUN_ANGLE_COLORS[filter];
             return (
               <button
                 key={filter}
                 type="button"
                 data-testid={`pathfinder-geometry-demo-filter-${filter}`}
+                data-filter-active={active ? '1' : '0'}
+                data-line-selected={selected ? '1' : '0'}
                 aria-pressed={active}
                 onClick={() => handleFilter(filter)}
-                className="fi inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-lg border px-2 text-[10px]"
+                className="pathfinder-filter-chip fi inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[11px]"
                 style={{
-                  borderColor: active ? `${color}99` : 'rgba(255,255,255,0.12)',
-                  color: active ? '#fff' : 'rgba(255,255,255,0.72)',
-                  background: active ? `${color}22` : 'rgba(8,12,22,0.72)',
+                  borderColor: selected ? `${color}` : active ? `${color}88` : 'rgba(255,255,255,0.1)',
+                  color: active || selected ? '#fff' : 'rgba(255,255,255,0.68)',
+                  background: selected ? `${color}30` : active ? `${color}1c` : 'rgba(8,12,22,0.72)',
+                  boxShadow: selected ? `0 0 0 1px ${color}66` : 'none',
                 }}
               >
-                {filter !== 'all' ? (
+                {filter === 'all' ? (
+                  <span aria-hidden className="fi text-[12px] leading-none">☉</span>
+                ) : (
                   <span aria-hidden className="inline-block h-1.5 w-3.5 rounded-full" style={{ background: color }} />
-                ) : null}
-                {sunAngleFilterLabel(filter)}
+                )}
+                {filter === 'all' ? labels.filterAll ?? 'All' : sunAngleDisplayLabel(filter)}
               </button>
             );
           })}

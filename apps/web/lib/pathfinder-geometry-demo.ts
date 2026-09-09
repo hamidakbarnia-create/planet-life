@@ -21,6 +21,13 @@ export const PATHFINDER_SUN_ANGLE_DASH: Record<PathfinderSunAngle, number[] | nu
   DSC: [3.1, 1.9],
 };
 
+export const PATHFINDER_SUN_ANGLE_DISPLAY: Record<PathfinderSunAngle, 'MC' | 'IC' | 'AC' | 'DC'> = {
+  MC: 'MC',
+  IC: 'IC',
+  ASC: 'AC',
+  DSC: 'DC',
+};
+
 export const PATHFINDER_SUN_ANGLE_LEGEND: ReadonlyArray<{
   angle: PathfinderSunAngle;
   color: string;
@@ -29,8 +36,8 @@ export const PATHFINDER_SUN_ANGLE_LEGEND: ReadonlyArray<{
 }> = [
   { angle: 'MC', color: PATHFINDER_SUN_ANGLE_COLORS.MC, label: '☉ MC', shortLabel: '☉ MC' },
   { angle: 'IC', color: PATHFINDER_SUN_ANGLE_COLORS.IC, label: '☉ IC', shortLabel: '☉ IC' },
-  { angle: 'ASC', color: PATHFINDER_SUN_ANGLE_COLORS.ASC, label: '☉ ASC', shortLabel: '☉ ASC' },
-  { angle: 'DSC', color: PATHFINDER_SUN_ANGLE_COLORS.DSC, label: '☉ DSC', shortLabel: '☉ DSC' },
+  { angle: 'ASC', color: PATHFINDER_SUN_ANGLE_COLORS.ASC, label: '☉ AC', shortLabel: '☉ AC' },
+  { angle: 'DSC', color: PATHFINDER_SUN_ANGLE_COLORS.DSC, label: '☉ DC', shortLabel: '☉ DC' },
 ];
 
 export const PATHFINDER_SUN_ANGLE_SOURCE_ID = 'pathfinder-sun-angles';
@@ -41,10 +48,10 @@ export const PATHFINDER_SUN_ANGLE_FILTERS = ['all', 'MC', 'IC', 'ASC', 'DSC'] as
 export type PathfinderSunAngleFilter = (typeof PATHFINDER_SUN_ANGLE_FILTERS)[number];
 
 export const PATHFINDER_SUN_LINE_TITLES: Record<PathfinderSunAngle, string> = {
-  MC: 'Sun — Midheaven',
-  IC: 'Sun — Imum Coeli',
-  ASC: 'Sun — Ascendant',
-  DSC: 'Sun — Descendant',
+  MC: '☉ MC',
+  IC: '☉ IC',
+  ASC: '☉ AC',
+  DSC: '☉ DC',
 };
 
 export const PATHFINDER_SUN_LINE_COPY: Record<
@@ -77,12 +84,21 @@ export const PATHFINDER_SUN_LINE_COPY: Record<
   },
 };
 
-export const PATHFINDER_SUN_LINE_STATUS = 'Experimental — not production-validated.';
+export const PATHFINDER_SUN_LINE_STATUS = 'Experimental — not production validated';
+export const PATHFINDER_GEOMETRY_DEMO_STATUS = PATHFINDER_SUN_LINE_STATUS;
 export const PATHFINDER_SUN_LINE_PROVENANCE =
   'Requested SWIEPH. This local snapshot may actually be MOSEPH. Do not treat this as production ephemeris provenance.';
 
+export function sunAngleDisplayCode(angle: PathfinderSunAngle): 'MC' | 'IC' | 'AC' | 'DC' {
+  return PATHFINDER_SUN_ANGLE_DISPLAY[angle];
+}
+
+export function sunAngleDisplayLabel(angle: PathfinderSunAngle): string {
+  return `☉ ${sunAngleDisplayCode(angle)}`;
+}
+
 export function sunAngleFilterLabel(filter: PathfinderSunAngleFilter): string {
-  return filter === 'all' ? 'All' : `☉ ${filter}`;
+  return filter === 'all' ? 'All' : sunAngleDisplayLabel(filter);
 }
 
 export function sunAngleVisibleLayerId(angle: PathfinderSunAngle): string {
@@ -122,15 +138,36 @@ export function nextSelectionForFilterControl(
   return filter;
 }
 
+/** Single user-facing angle row: filter + focus. Never starts Analyze or Best Times. */
+export function pathfinderAngleChipAction(
+  next: PathfinderSunAngleFilter,
+  currentSelected: PathfinderSunAngle | null
+): {
+  filter: PathfinderSunAngleFilter;
+  selectedLine: PathfinderSunAngle | null;
+  focusAngle: PathfinderSunAngle | null;
+  startsAnalyze: false;
+  startsBestTimes: false;
+} {
+  const selectedLine = nextSelectionForFilterControl(currentSelected, next);
+  return {
+    filter: next,
+    selectedLine,
+    focusAngle: next === 'all' ? null : next,
+    startsAnalyze: false,
+    startsBestTimes: false,
+  };
+}
+
 export function visibleSunLineWidth(angle: PathfinderSunAngle, selected: PathfinderSunAngle | null): number {
-  const base = angle === 'MC' || angle === 'IC' ? 2.4 : 2.8;
-  if (selected === angle) return angle === 'MC' || angle === 'IC' ? 3.6 : 4;
+  const base = angle === 'MC' || angle === 'IC' ? 2.85 : 3.1;
+  if (selected === angle) return angle === 'MC' || angle === 'IC' ? 3.7 : 3.95;
   return base;
 }
 
 export function visibleSunLineOpacity(angle: PathfinderSunAngle, selected: PathfinderSunAngle | null): number {
-  if (selected == null) return 0.92;
-  return selected === angle ? 1 : 0.28;
+  if (selected == null) return 0.96;
+  return selected === angle ? 1 : 0.64;
 }
 
 export function pathfinderSunAngleGeoJSON(): GeoJSON.FeatureCollection {
@@ -208,7 +245,7 @@ export function pathfinderSunAngleLabelGeoJSON(): GeoJSON.FeatureCollection {
       properties: {
         ...entry.feature.properties,
         angle,
-        label: `☉ ${angle}`,
+        label: sunAngleDisplayLabel(angle),
       },
       geometry: {
         type: 'Point',
@@ -228,8 +265,39 @@ export function sunAngleLabelPoint(angle: PathfinderSunAngle): [number, number] 
   return [longitude, latitude];
 }
 
-function shortestLongitudeDelta(from: number, to: number): number {
-  return ((((to - from + 540) % 360) + 360) % 360) - 180;
+export function pathfinderOverviewCamera(desktop: boolean): { center: [number, number]; zoom: number } {
+  return {
+    center: [18, 10],
+    zoom: desktop ? 2.44 : 1.28,
+  };
+}
+
+export function pathfinderCityCamera(
+  longitude: number,
+  latitude: number,
+  desktop: boolean
+): { center: [number, number]; zoom: number } {
+  return {
+    center: [longitude, latitude],
+    zoom: desktop ? 4.55 : 4.25,
+  };
+}
+
+export function pathfinderLineFocusCamera(
+  angle: PathfinderSunAngle,
+  desktop: boolean
+): { center: [number, number]; zoom: number } {
+  const linePoint = sunAngleLabelPoint(angle);
+  if (angle === 'MC') {
+    return { center: [14, 12], zoom: desktop ? 1.5 : 1.3 };
+  }
+  if (angle === 'IC') {
+    return { center: [-168, 8], zoom: desktop ? 1.5 : 1.3 };
+  }
+  if (linePoint) {
+    return { center: linePoint, zoom: desktop ? 1.52 : 1.32 };
+  }
+  return pathfinderOverviewCamera(desktop);
 }
 
 export function pathfinderPresentationCamera(input: {
@@ -238,40 +306,14 @@ export function pathfinderPresentationCamera(input: {
   marker: { longitude: number; latitude: number } | null;
   desktop: boolean;
 }): { center: [number, number]; zoom: number } {
-  const overview: { center: [number, number]; zoom: number } = {
-    center: [10, 18],
-    zoom: input.desktop ? 2.05 : 1.5,
-  };
   const focusAngle = input.selectedLine ?? (input.filter === 'all' ? null : input.filter);
-  const linePoint = focusAngle ? sunAngleLabelPoint(focusAngle) : null;
-
-  if (input.marker && linePoint) {
-    const dLon = shortestLongitudeDelta(input.marker.longitude, linePoint[0]);
-    const dLat = linePoint[1] - input.marker.latitude;
-    const span = Math.hypot(dLon, dLat);
-    const zoom = span > 90 ? 1.28 : span > 50 ? 1.4 : 1.52;
-    return {
-      center: [input.marker.longitude + dLon / 2, (input.marker.latitude + linePoint[1]) / 2],
-      zoom: input.desktop ? zoom + 0.12 : zoom,
-    };
-  }
-
-  if (focusAngle === 'MC') {
-    return { center: [14, 12], zoom: input.desktop ? 1.62 : 1.48 };
-  }
-  if (focusAngle === 'IC') {
-    return { center: [-168, 8], zoom: input.desktop ? 1.62 : 1.48 };
-  }
-  if (linePoint) {
-    return { center: linePoint, zoom: input.desktop ? 1.68 : 1.52 };
+  if (focusAngle) {
+    return pathfinderLineFocusCamera(focusAngle, input.desktop);
   }
   if (input.marker) {
-    return {
-      center: [input.marker.longitude, input.marker.latitude],
-      zoom: input.desktop ? 2.15 : 1.8,
-    };
+    return pathfinderCityCamera(input.marker.longitude, input.marker.latitude, input.desktop);
   }
-  return overview;
+  return pathfinderOverviewCamera(input.desktop);
 }
 
-export const PATHFINDER_ALL_LINES_EXPLORE = '4 lines active · rotate globe to explore';
+export const PATHFINDER_ALL_LINES_EXPLORE = '4 lines active';
