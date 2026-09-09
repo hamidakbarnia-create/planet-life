@@ -758,9 +758,6 @@ export function PathfinderGlobeMap({
   const resultsOpenRef = useRef(resultsOpen);
   const [rtlFallback, setRtlFallback] = useState(false);
   const animated = mode === 'globe';
-  animatedRef.current = animated;
-  labelLanguageRef.current = labelLanguage;
-  resultsOpenRef.current = resultsOpen;
 
   const applyCameraIntent = (map: maplibregl.Map, camera: CameraTarget, caller = 'applyCameraIntent') => {
     cameraIntentRef.current = camera;
@@ -778,7 +775,10 @@ export function PathfinderGlobeMap({
     onSelectLineRef.current = onSelectLine;
     angleFilterRef.current = angleFilter;
     selectedLineRef.current = selectedLine;
-  }, [selected, onPick, onSelectLine, angleFilter, selectedLine]);
+    animatedRef.current = animated;
+    labelLanguageRef.current = labelLanguage;
+    resultsOpenRef.current = resultsOpen;
+  }, [selected, onPick, onSelectLine, angleFilter, selectedLine, animated, labelLanguage, resultsOpen]);
 
   useEffect(() => {
     const container = containerRef.current;
