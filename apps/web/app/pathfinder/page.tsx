@@ -6,6 +6,7 @@ import './pathfinder-visual-spike.css';
 import { localeFontFamily } from '@/lib/brand-theme';
 import { AppShell } from '@/components/AppShell';
 import { loadBirthProfile, type BirthProfile } from '@/lib/birth-profile';
+import { pathfinderAnalysisProvenance } from '@/lib/pathfinder-profile-provenance';
 import { isPaid } from '@/lib/membership';
 import { useAppLang } from '@/lib/use-app-lang';
 import { loadCalendarSystem, type AppLang, type CalendarSystem } from '@/lib/app-settings';
@@ -101,7 +102,12 @@ type Labels = {
   demoNotice: string;
   demoStatus: string;
   demoCompact: string;
+  analysisSourceSaved: string;
+  analysisSourceSynthetic: string;
+  demoSeparationWarning: string;
+  rtlFallbackWarning: string;
   sunLineMeaning: Record<PathfinderSunAngle, string>;
+  relocationOverview: string;
   areas: Record<PathfinderArea | 'all', string>;
   verdicts: Record<string, string>;
 };
@@ -218,16 +224,25 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     focusLine: 'Focus',
     experimental: 'Experimental',
     technicalProvenance: 'Technical provenance',
-    demoBadge: 'Demo chart · 21 Jun 2020',
-    demoNotice: 'Not your personal chart',
+    demoBadge: 'Public demo lines · 21 Jun 2020',
+    demoNotice: 'Public demo lines — not calculated from your chart.',
     demoStatus: 'Experimental — not production validated',
-    demoCompact: 'Demo · not personal',
+    demoCompact: 'Public demo lines',
+    analysisSourceSaved:
+      'Relocation from your saved birth profile. Not calculated from the public demo Sun lines.',
+    analysisSourceSynthetic:
+      'This analysis used documented synthetic test data. Public demo Sun lines are a separate demonstration.',
+    demoSeparationWarning:
+      'Experimental Sun lines are a public demonstration and are not part of this personal analysis.',
+    rtlFallbackWarning:
+      'Map place names are shown in English. Right-to-left map text could not be loaded.',
     sunLineMeaning: {
       MC: 'Where the Sun stands overhead — public role, vocation, and visibility.',
       IC: 'Opposite the Midheaven — home, roots, and the private foundation.',
       ASC: 'Where the Sun is rising — identity, presence, and first impression.',
       DSC: 'Where the Sun is setting — relationships, counterparts, and the other.',
     },
+    relocationOverview: 'Relocation overview',
     areas: {
       all: 'All Areas',
       love: 'Love',
@@ -284,16 +299,25 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     focusLine: 'Фокус',
     experimental: 'Эксперимент',
     technicalProvenance: 'Техническое происхождение',
-    demoBadge: 'Демо-карта · 21 июн 2020',
-    demoNotice: 'Это не ваша личная карта',
+    demoBadge: 'Публичные демо-линии · 21 июн 2020',
+    demoNotice: 'Публичные демо-линии — не рассчитаны по вашей карте.',
     demoStatus: 'Эксперимент — не проверено для продакшена',
-    demoCompact: 'Демо · не личная',
+    demoCompact: 'Публичные демо-линии',
+    analysisSourceSaved:
+      'Релокация по сохранённому профилю рождения. Не из публичных демо-линий Солнца.',
+    analysisSourceSynthetic:
+      'Этот анализ использует задокументированные синтетические тестовые данные. Публичные демо-линии Солнца — отдельная демонстрация.',
+    demoSeparationWarning:
+      'Экспериментальные линии Солнца — публичная демонстрация и не входят в этот личный анализ.',
+    rtlFallbackWarning:
+      'Подписи на карте показаны по-английски. Текст карты справа налево не загрузился.',
     sunLineMeaning: {
       MC: 'Где Солнце в зените — публичная роль, призвание и видимость.',
       IC: 'Напротив середины неба — дом, корни и частная основа.',
       ASC: 'Где Солнце восходит — идентичность, присутствие и первое впечатление.',
       DSC: 'Где Солнце садится — отношения, партнёры и другой человек.',
     },
+    relocationOverview: 'Обзор релокации',
     areas: {
       all: 'Все сферы',
       love: 'Любовь',
@@ -350,16 +374,25 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     focusLine: 'تمرکز',
     experimental: 'آزمایشی',
     technicalProvenance: 'منشأ فنی',
-    demoBadge: 'نمودار آزمایشی · ۲۱ ژوئن ۲۰۲۰',
-    demoNotice: 'چارت شخصی شما نیست',
+    demoBadge: 'خطوط آزمایشی عمومی · ۲۱ ژوئن ۲۰۲۰',
+    demoNotice: 'خطوط آزمایشی عمومی — از روی چارت شما محاسبه نشده‌اند.',
     demoStatus: 'آزمایشی — برای تولید اعتبارسنجی نشده',
-    demoCompact: 'آزمایشی · غیرشخصی',
+    demoCompact: 'خطوط آزمایشی عمومی',
+    analysisSourceSaved:
+      'جابه‌جایی بر اساس پرونده تولد ذخیره‌شده. از خطوط خورشید آزمایشی عمومی محاسبه نشده.',
+    analysisSourceSynthetic:
+      'این تحلیل از دادهٔ آزمایشی مستند استفاده می‌کند. خطوط خورشید آزمایشی عمومی نمایشی جداگانه است.',
+    demoSeparationWarning:
+      'خطوط خورشید آزمایشی یک نمایش عمومی است و بخشی از این تحلیل شخصی نیست.',
+    rtlFallbackWarning:
+      'نام مکان‌ها روی نقشه به انگلیسی نشان داده می‌شود. متن راست‌به‌چپ نقشه بارگذاری نشد.',
     sunLineMeaning: {
       MC: 'جایی که خورشید بالای سر است — نقش عمومی، حرفه و دیده‌شدن.',
       IC: 'روبه‌روی اوج آسمان — خانه، ریشه‌ها و بنیاد خصوصی.',
       ASC: 'جایی که خورشید طلوع می‌کند — هویت، حضور و برداشت اول.',
       DSC: 'جایی که خورشید غروب می‌کند — رابطه، طرف مقابل و دیگری.',
     },
+    relocationOverview: 'نمای کلی جابه‌جایی',
     areas: {
       all: 'همه حوزه‌ها',
       love: 'عشق',
@@ -416,16 +449,25 @@ export const PATHFINDER_PAGE_COPY: Record<AppLang, Labels> = {
     focusLine: 'تركيز',
     experimental: 'تجريبي',
     technicalProvenance: 'الأصل التقني',
-    demoBadge: 'خريطة تجريبية · 21 يونيو 2020',
-    demoNotice: 'ليست خريطتك الشخصية',
+    demoBadge: 'خطوط تجريبية عامة · 21 يونيو 2020',
+    demoNotice: 'خطوط تجريبية عامة — ليست محسوبة من خارطتك.',
     demoStatus: 'تجريبي — غير مُتحقق للإنتاج',
-    demoCompact: 'تجريبي · غير شخصي',
+    demoCompact: 'خطوط تجريبية عامة',
+    analysisSourceSaved:
+      'الانتقال من ملف الميلاد المحفوظ. ليست محسوبة من خطوط الشمس التجريبية العامة.',
+    analysisSourceSynthetic:
+      'يستخدم هذا التحليل بيانات اختبار تركيبية موثّقة. خطوط الشمس التجريبية العامة عرض منفصل.',
+    demoSeparationWarning:
+      'خطوط الشمس التجريبية عرض عام وليست جزءاً من هذا التحليل الشخصي.',
+    rtlFallbackWarning:
+      'تظهر أسماء الأماكن على الخريطة بالإنجليزية. تعذر تحميل نص الخريطة من اليمين إلى اليسار.',
     sunLineMeaning: {
       MC: 'حيث تكون الشمس في كبد السماء — الدور العام والمهنة والظهور.',
       IC: 'مقابل وسط السماء — البيت والجذور والأساس الخاص.',
       ASC: 'حيث تشرق الشمس — الهوية والحضور والانطباع الأول.',
       DSC: 'حيث تغرب الشمس — العلاقات والشركاء والآخر.',
     },
+    relocationOverview: 'نظرة عامة على الانتقال',
     areas: {
       all: 'كل المجالات',
       love: 'الحب',
@@ -473,13 +515,17 @@ function EffectCard({ effect, labels, lang }: { effect: PathfinderEffect; labels
   const lead = composeEffectLead(lang, effect, areaLabel);
   const reasons = composeReasons(lang, effect);
   return (
-    <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-      <div className="flex items-start justify-between gap-3">
-        <div>
+    <div
+      className="pathfinder-effect-card rounded-2xl p-4"
+      data-testid="pathfinder-life-area-card"
+      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+    >
+      <div className="pathfinder-effect-card__head">
+        <div className="pathfinder-effect-card__title">
           <div className="fi text-sm font-semibold text-white">{areaLabel}</div>
           <div className="fi mt-1 text-[11px]" style={{ color }}>{labels.verdicts[effect.verdict]}</div>
         </div>
-        <div className="fi text-xl font-semibold" style={{ color }}>{effect.score}</div>
+        <div className="pathfinder-effect-card__score fi text-xl font-semibold" style={{ color }}>{effect.score}</div>
       </div>
       <p className="fi mt-3 text-xs leading-relaxed text-white/58">{lead}</p>
       {reasons.length > 0 && (
@@ -499,10 +545,18 @@ function EffectCard({ effect, labels, lang }: { effect: PathfinderEffect; labels
 function PeriodCard({ period, lang, calendar }: { period: { start: string; end: string; score: number; daily_scores: number[] }; lang: AppLang; calendar: CalendarSystem }) {
   const color = scoreColor(period.score);
   return (
-    <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-      <div className="flex items-center justify-between">
-        <div className="fi text-sm font-semibold text-white">{formatDisplayDateRange(lang, period.start, period.end, calendar)}</div>
-        <div className="fi text-xs font-medium" style={{ color }}>{periodLabel(lang, period.score)} · {period.score}</div>
+    <div
+      className="pathfinder-period-card rounded-2xl p-4"
+      data-testid="pathfinder-best-times-card"
+      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+    >
+      <div className="pathfinder-period-card__head">
+        <div className="pathfinder-period-card__dates fi text-sm font-semibold text-white">
+          {formatDisplayDateRange(lang, period.start, period.end, calendar)}
+        </div>
+        <div className="pathfinder-period-card__score fi text-xs font-medium" style={{ color }}>
+          {periodLabel(lang, period.score)} · {period.score}
+        </div>
       </div>
       <div className="mt-3 grid grid-cols-7 gap-1">
         {period.daily_scores.map((score, idx) => (
@@ -530,6 +584,8 @@ export default function PathfinderPage() {
   const [blocked, setBlocked] = useState(false);
   const [angleFilter, setAngleFilter] = useState<PathfinderSunAngleFilter>('all');
   const [selectedLine, setSelectedLine] = useState<PathfinderSunAngle | null>(null);
+  const resultsOpen = Boolean(relocation);
+  const analysisProvenance = pathfinderAnalysisProvenance(profile);
   const debounceRef = useRef<number | null>(null);
   const selectionSeqRef = useRef(0);
 
@@ -648,11 +704,13 @@ export default function PathfinderPage() {
         className="pathfinder-visual-page"
         data-testid="pathfinder-visual-page"
         data-has-selection={selectedPoint ? '1' : '0'}
+        data-results-open={resultsOpen ? '1' : '0'}
       >
         <div className="pathfinder-visual-map-stage" data-testid="pathfinder-map-stage">
           <PathfinderGlobe
             selected={selectedPoint}
             labelLanguage={lang}
+            resultsOpen={resultsOpen}
             angleFilter={angleFilter}
             selectedLine={selectedLine}
             onAngleFilterChange={setAngleFilter}
@@ -673,6 +731,7 @@ export default function PathfinderPage() {
               demoNotice: labels.demoNotice,
               demoStatus: labels.demoStatus,
               demoCompact: labels.demoCompact,
+              rtlFallbackWarning: labels.rtlFallbackWarning,
             }}
             onPick={(latitude, longitude) => {
               applySelection(selectedPointFromGlobePick(latitude, longitude, labels.selectedLocation));
@@ -682,6 +741,14 @@ export default function PathfinderPage() {
           />
         </div>
         <div className="pathfinder-visual-decision" data-testid="pathfinder-decision-panel">
+          {resultsOpen && analysisProvenance === 'saved-profile' ? (
+            <p
+              data-testid="pathfinder-demo-separation-warning"
+              className="pathfinder-demo-separation fi mb-3 text-xs leading-relaxed text-amber-100/80"
+            >
+              {labels.demoSeparationWarning}
+            </p>
+          ) : null}
           {selectedLine ? (
             <div className="pathfinder-selected-line-desktop mb-4 hidden lg:block">
               <PathfinderSelectedLineCard
@@ -816,45 +883,76 @@ export default function PathfinderPage() {
           </section>
 
         {relocation && (
-          <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[0.8fr_1.2fr]">
-            <section className="rounded-3xl p-5" style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div className="fi text-[11px] uppercase tracking-[0.22em] text-white/35">{labels.activeLines}</div>
-              <div className="mt-4 flex flex-col gap-3">
-                {relocation.active_lines.length === 0 ? (
-                  <p className="fi text-sm leading-relaxed text-white/55">{labels.noLines}</p>
-                ) : (
-                  relocation.active_lines.map((line) => (
-                    <div key={`${line.planet}-${line.angle}`} className="flex items-center justify-between rounded-2xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.04)' }}>
-                      <div>
-                        <div className="fi text-sm font-medium text-white">{pathfinderPlanetName(lang, line.planet)} · {line.angle}</div>
-                        <div className="fi text-[11px] text-white/40">{pathfinderAngleName(lang, line.angle)} · {line.orb}° {labels.orbLabel}</div>
-                      </div>
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: lineColor(line) }} />
-                    </div>
-                  ))
-                )}
-              </div>
-            </section>
-
-            <section>
-              <div className="fi mb-4 text-[11px] uppercase tracking-[0.22em] text-white/35">{labels.effects}</div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {topEffects.map((effect) => (
-                  <EffectCard key={effect.area} effect={effect} labels={labels} lang={lang} />
-                ))}
-              </div>
-            </section>
-          </div>
+          <section
+            data-testid="pathfinder-relocation-overview"
+            className="pathfinder-result-section mt-6 rounded-3xl p-5"
+            style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <div className="fi text-[11px] uppercase tracking-[0.22em] text-white/35">{labels.relocationOverview}</div>
+            <p
+              data-testid="pathfinder-analysis-source"
+              data-provenance={analysisProvenance}
+              className="fi mt-2 text-xs leading-relaxed text-amber-100/75"
+            >
+              {analysisProvenance === 'synthetic'
+                ? labels.analysisSourceSynthetic
+                : labels.analysisSourceSaved}
+            </p>
+            <p className="fi mt-3 text-sm font-medium text-white">{relocation.target.label || relocation.target.location}</p>
+            {relocation.target.location && relocation.target.location !== relocation.target.label ? (
+              <p className="fi mt-1 text-xs text-white/45">{relocation.target.location}</p>
+            ) : null}
+          </section>
         )}
 
         {relocation && (
-          <section className="mt-8 rounded-3xl p-5" style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <section
+            data-testid="pathfinder-active-lines"
+            className="pathfinder-result-section mt-6 rounded-3xl p-5"
+            style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <div className="fi text-[11px] uppercase tracking-[0.22em] text-white/35">{labels.activeLines}</div>
+            <div className="mt-4 flex flex-col gap-3">
+              {relocation.active_lines.length === 0 ? (
+                <p className="fi text-sm leading-relaxed text-white/55">{labels.noLines}</p>
+              ) : (
+                relocation.active_lines.map((line) => (
+                  <div key={`${line.planet}-${line.angle}`} className="flex min-w-0 items-center justify-between gap-3 rounded-2xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                    <div className="min-w-0">
+                      <div className="fi text-sm font-medium text-white">{pathfinderPlanetName(lang, line.planet)} · {line.angle}</div>
+                      <div className="fi text-[11px] text-white/40">{pathfinderAngleName(lang, line.angle)} · {line.orb}° {labels.orbLabel}</div>
+                    </div>
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: lineColor(line) }} />
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        )}
+
+        {relocation && (
+          <section data-testid="pathfinder-life-areas" className="pathfinder-result-section mt-6">
+            <div className="fi mb-4 text-[11px] uppercase tracking-[0.22em] text-white/35">{labels.effects}</div>
+            <div className="pathfinder-life-area-grid">
+              {topEffects.map((effect) => (
+                <EffectCard key={effect.area} effect={effect} labels={labels} lang={lang} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {relocation && (
+          <section
+            data-testid="pathfinder-best-times-panel"
+            className="pathfinder-result-section mt-6 rounded-3xl p-5"
+            style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <div className="pathfinder-best-times-controls">
               <div>
                 <div className="fc text-2xl text-amber-300">{labels.bestTimes}</div>
                 <p className="fi mt-1 text-sm text-white/45">{labels.bestTimesSub}</p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="pathfinder-purpose-row">
                 {PURPOSES.map((item) => (
                   <button
                     key={item}
@@ -877,7 +975,7 @@ export default function PathfinderPage() {
               data-testid="pathfinder-best-times"
               onClick={loadBestTimes}
               disabled={!bestTimesEnabled || loadingTimes}
-              className="fi mt-5 rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
+              className="fi mt-5 w-full rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-white disabled:opacity-40"
             >
               {loadingTimes ? labels.loading : labels.searchPeriods}
             </button>
@@ -887,7 +985,7 @@ export default function PathfinderPage() {
               </p>
             )}
             {bestTimes && (
-              <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="pathfinder-best-times-grid mt-5">
                 {bestTimes.best_periods.slice(0, 6).map((period) => (
                   <PeriodCard key={`${period.start}-${period.end}`} period={period} lang={lang} calendar={calendar} />
                 ))}

@@ -6,6 +6,7 @@ import type { PathfinderSelectedPoint } from '@/lib/pathfinder-selection';
 import type { AppLang } from '@/lib/app-settings';
 import {
   PATHFINDER_GEOMETRY_DEMO_BADGE,
+  PATHFINDER_GEOMETRY_DEMO_COMPACT,
   PATHFINDER_GEOMETRY_DEMO_NOTICE,
   PATHFINDER_GEOMETRY_DEMO_STATUS,
   PATHFINDER_SUN_ANGLE_COLORS,
@@ -44,6 +45,7 @@ export type PathfinderGlobeLabels = {
   demoNotice?: string;
   demoStatus?: string;
   demoCompact?: string;
+  rtlFallbackWarning?: string;
 };
 
 export type PathfinderGlobeProps = {
@@ -53,6 +55,7 @@ export type PathfinderGlobeProps = {
   onResetView?: () => void;
   forceVisualMode?: GlobeVisualMode;
   labelLanguage?: AppLang;
+  resultsOpen?: boolean;
   angleFilter?: PathfinderSunAngleFilter;
   selectedLine?: PathfinderSunAngle | null;
   onAngleFilterChange?: (filter: PathfinderSunAngleFilter) => void;
@@ -94,7 +97,8 @@ export function PathfinderGlobe({
   onPick,
   onResetView,
   forceVisualMode,
-  labelLanguage: _labelLanguage = 'en',
+  labelLanguage = 'en',
+  resultsOpen = false,
   angleFilter: angleFilterProp,
   selectedLine: selectedLineProp,
   onAngleFilterChange,
@@ -227,7 +231,9 @@ export function PathfinderGlobe({
           focusAngle={focusAngle}
           angleFilter={angleFilter}
           selectedLine={selectedLine}
-          labelLanguage="en"
+          labelLanguage={labelLanguage}
+          resultsOpen={resultsOpen}
+          rtlFallbackWarning={labels.rtlFallbackWarning}
           onPick={onPick}
           onSelectLine={handleSelectLine}
           onReady={handleReady}
@@ -289,7 +295,7 @@ export function PathfinderGlobe({
           onClick={() => setDemoOpen((value) => !value)}
           aria-expanded={demoOpen}
         >
-          {labels.demoCompact ?? 'Demo · not personal'}
+          {labels.demoCompact ?? PATHFINDER_GEOMETRY_DEMO_COMPACT}
         </button>
         <div className={`pathfinder-demo-full rounded-md px-1.5 py-1 ${demoOpen ? 'is-open' : ''}`}>
           <p className="fi text-[11px] font-medium leading-snug text-white/88">

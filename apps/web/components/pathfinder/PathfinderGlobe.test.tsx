@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PATHFINDER_PAGE_COPY } from '@/app/pathfinder/page';
 import { selectedPointFromGlobePick, withAuthoritativeTimezone } from '@/lib/pathfinder-selection';
@@ -67,6 +67,8 @@ vi.mock('maplibre-gl', () => {
       NavigationControl: class {},
       Marker,
     },
+    getRTLTextPluginStatus: () => 'unavailable',
+    setRTLTextPlugin: () => Promise.reject(new Error('rtl-plugin-blocked')),
   };
 });
 
@@ -116,6 +118,13 @@ describe('Pathfinder catalog', () => {
     expect(PATHFINDER_PAGE_COPY.ar.noProfile).toContain('Pathfinder');
     expect(PATHFINDER_PAGE_COPY.fa.selectedLocation).not.toBe(PATHFINDER_PAGE_COPY.en.selectedLocation);
     expect(PATHFINDER_PAGE_COPY.ar.demoCompact).not.toMatch(/Demo chart/);
+    expect(PATHFINDER_PAGE_COPY.en.demoNotice).toBe(
+      'Public demo lines — not calculated from your chart.'
+    );
+    expect(PATHFINDER_PAGE_COPY.en.demoSeparationWarning).toBe(
+      'Experimental Sun lines are a public demonstration and are not part of this personal analysis.'
+    );
+    expect(PATHFINDER_PAGE_COPY.en.analysisSourceSynthetic).toMatch(/synthetic test data/i);
     expect(PATHFINDER_PAGE_COPY.ru.title).toBe('Pathfinder');
     expect(PATHFINDER_PAGE_COPY.fa.reset).not.toBe(PATHFINDER_PAGE_COPY.en.reset);
     expect(PATHFINDER_PAGE_COPY.ar.analyze).not.toBe(PATHFINDER_PAGE_COPY.en.analyze);
@@ -154,15 +163,15 @@ describe('PathfinderGlobe', () => {
   it('labels the experimental Sun-angle demo without a second custom attribution', () => {
     render(<PathfinderGlobe selected={null} labels={labels} onPick={() => undefined} />);
     expect(screen.getByTestId('pathfinder-geometry-demo-notice').textContent).toContain(
-      'Demo chart · 21 Jun 2020'
+      'Public demo lines · 21 Jun 2020'
     );
     expect(screen.getByTestId('pathfinder-geometry-demo-notice').textContent).toContain(
-      'Not your personal chart'
+      'Public demo lines — not calculated from your chart.'
     );
     expect(screen.getByTestId('pathfinder-geometry-demo-notice').textContent).toContain(
       'Experimental — not production validated'
     );
-    expect(screen.getByTestId('pathfinder-demo-compact').textContent).toBe('Demo · not personal');
+    expect(screen.getByTestId('pathfinder-demo-compact').textContent).toBe('Public demo lines');
     expect(screen.getByTestId('pathfinder-geometry-demo-legend').textContent).toContain('☉ MC');
     expect(screen.getByTestId('pathfinder-geometry-demo-legend').textContent).toContain('☉ IC');
     expect(screen.getByTestId('pathfinder-geometry-demo-legend').textContent).toContain('☉ AC');
@@ -296,5 +305,43 @@ describe('PathfinderGlobeMap host layout', () => {
     expect(host.classList.contains('relative')).toBe(false);
     expect(host.classList.contains('inset-0')).toBe(false);
     expect(host.getAttribute('data-label-language')).toBe('en');
+  });
+
+  it('falls back to English basemap labels when the RTL plugin fails', async () => {
+    const { rerender } = render(
+      <PathfinderGlobeMap
+        mode="globe"
+        selected={null}
+        labelLanguage="fa"
+        onPick={() => undefined}
+        onReady={() => undefined}
+        onContextLost={() => undefined}
+        onInitFailure={() => undefined}
+      />
+    );
+    const host = screen.getByTestId('pathfinder-globe-map');
+    expect(host.getAttribute('data-label-language')).toBe('fa');
+    await waitFor(() => {
+      expect(host.getAttribute('data-basemap-label-language')).toBe('en');
+      expect(host.getAttribute('data-rtl-plugin')).toBe('failed');
+      expect(screen.getByTestId('pathfinder-rtl-fallback-warning').textContent).toMatch(/English/);
+    });
+    rerender(
+      <PathfinderGlobeMap
+        mode="globe"
+        selected={null}
+        labelLanguage="ar"
+        onPick={() => undefined}
+        onReady={() => undefined}
+        onContextLost={() => undefined}
+        onInitFailure={() => undefined}
+      />
+    );
+    const sameHost = screen.getByTestId('pathfinder-globe-map');
+    expect(sameHost).toBe(host);
+    expect(sameHost.getAttribute('data-label-language')).toBe('ar');
+    await waitFor(() => {
+      expect(sameHost.getAttribute('data-basemap-label-language')).toBe('en');
+    });
   });
 });

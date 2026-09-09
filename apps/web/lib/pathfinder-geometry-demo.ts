@@ -1,7 +1,9 @@
 import demoCollection from './pathfinder-geometry-demo.json';
 
-export const PATHFINDER_GEOMETRY_DEMO_NOTICE = 'Not your personal chart';
-export const PATHFINDER_GEOMETRY_DEMO_BADGE = 'Demo chart · 21 Jun 2020';
+export const PATHFINDER_GEOMETRY_DEMO_NOTICE =
+  'Public demo lines — not calculated from your chart.';
+export const PATHFINDER_GEOMETRY_DEMO_BADGE = 'Public demo lines · 21 Jun 2020';
+export const PATHFINDER_GEOMETRY_DEMO_COMPACT = 'Public demo lines';
 export const PATHFINDER_GEOMETRY_DEMO_INSTANT_UTC = '2020-06-21T12:00:00Z';
 
 export type PathfinderSunAngle = 'MC' | 'IC' | 'ASC' | 'DSC';

@@ -23,6 +23,16 @@ import {
   shouldMeasureGlobeDiscForMask,
   shouldRecomputeGlobeDisc,
   visibleSelectionLabel,
+  BASEMAP_LABEL_RUNTIME_REJECTS_MALFORMED,
+  PATHFINDER_RTL_TEXT_PLUGIN_URL,
+  PATHFINDER_RTL_FALLBACK_WARNING,
+  basemapLanguageAfterRtlPlugin,
+  basemapLabelFieldOrder,
+  basemapLabelTextField,
+  isUsableBasemapName,
+  resolveBasemapLabel,
+  resultCardColumnCount,
+  symbolLayerUsesNameField,
 } from './pathfinder-globe-projection';
 
 describe('globe front-hemisphere occlusion', () => {
@@ -351,5 +361,158 @@ describe('globe stage alignment and mobile containment', () => {
     expect(first).toBeLessThan(2.44);
     expect(first).toBeGreaterThan(2.1);
     expect(Math.abs(first - 2.44)).toBeGreaterThan(0.001);
+  });
+
+  it('refits the globe for a results-layout change only when the user has not moved the camera', () => {
+    expect(
+      shouldApplyAutomaticCameraWrite({ source: 'results-layout', userHasMovedCamera: false })
+    ).toBe(true);
+    expect(
+      shouldApplyAutomaticCameraWrite({ source: 'results-layout', userHasMovedCamera: true })
+    ).toBe(false);
+  });
+});
+
+describe('basemap label field expression', () => {
+  const london = {
+    name: 'London',
+    'name:en': 'London',
+    name_en: 'London',
+    'name:latin': 'London',
+    'name:ru': 'Лондон',
+    'name:fa': 'لندن',
+    'name:ar': 'لندن',
+  };
+  const riyadh = {
+    name: 'الرياض',
+    'name:en': 'Riyadh',
+    name_en: 'Riyadh',
+    'name:latin': 'Riyadh',
+    'name:ru': 'Эр-Рияд',
+    'name:fa': 'ریاض',
+    'name:ar': 'الرياض',
+  };
+  const ethiopia = {
+    name: 'ኢትዮጵያ / Ethiopia',
+    'name:en': 'Ethiopia',
+    name_en: 'Ethiopia',
+    'name:latin': 'Ethiopia',
+    'name:ru': 'Эфиопия',
+    'name:fa': 'اتیوپی',
+    'name:ar': 'إثيوبيا',
+  };
+  const atlantic = {
+    name: 'North Atlantic Ocean',
+    'name:en': 'North Atlantic Ocean',
+    name_en: 'North Atlantic Ocean',
+    'name:ru': 'Северный Атлантический океан',
+    'name:fa': 'اقیانوس اطلس شمالی',
+    'name:ar': 'شمال المحيط الأطلسي',
+  };
+
+  it('uses confirmed OpenFreeMap fields in locale → English → source name order', () => {
+    expect(basemapLabelFieldOrder('ru')).toEqual(['name:ru', 'name:en', 'name_en', 'name']);
+    expect(basemapLabelFieldOrder('fa')).toEqual(['name:fa', 'name:en', 'name_en', 'name']);
+    expect(basemapLabelFieldOrder('ar')).toEqual(['name:ar', 'name:en', 'name_en', 'name']);
+    expect(basemapLabelFieldOrder('en')).toEqual(['name:en', 'name_en', 'name:latin', 'name']);
+    expect(basemapLabelTextField('fa')).toEqual([
+      'coalesce',
+      ['get', 'name:fa'],
+      ['get', 'name:en'],
+      ['get', 'name_en'],
+      ['get', 'name'],
+    ]);
+  });
+
+  it('resolves native labels for country, capital, city and ocean samples', () => {
+    expect(resolveBasemapLabel(london, 'en')).toBe('London');
+    expect(resolveBasemapLabel(london, 'ru')).toBe('Лондон');
+    expect(resolveBasemapLabel(london, 'fa')).toBe('لندن');
+    expect(resolveBasemapLabel(london, 'ar')).toBe('لندن');
+    expect(resolveBasemapLabel(riyadh, 'ar')).toBe('الرياض');
+    expect(resolveBasemapLabel(ethiopia, 'fa')).toBe('اتیوپی');
+    expect(resolveBasemapLabel(atlantic, 'ru')).toBe('Северный Атлантический океан');
+  });
+
+  it('falls back to English then source name when a localized field is missing or corrupted', () => {
+    expect(resolveBasemapLabel({ name: 'Nigeria', 'name:en': 'Nigeria' }, 'fa')).toBe('Nigeria');
+    expect(resolveBasemapLabel({ name: 'الرياض', 'name:fa': 'Ã±Ã­' }, 'fa')).toBe('الرياض');
+    expect(isUsableBasemapName('Ã³Â¨', 'fa')).toBe(false);
+    expect(isUsableBasemapName('ریاض', 'fa')).toBe(true);
+    expect(isUsableBasemapName('Riyadh', 'fa')).toBe(false);
+    expect(symbolLayerUsesNameField(['coalesce', ['get', 'name:en'], ['get', 'name']])).toBe(true);
+    expect(symbolLayerUsesNameField(['to-string', ['get', 'ref']])).toBe(false);
+  });
+
+  const fixtures = {
+    validPersian: { name: 'ایران', 'name:en': 'Iran', name_en: 'Iran', 'name:fa': 'ایران' },
+    validArabic: { name: 'السعودية', 'name:en': 'Saudi Arabia', name_en: 'Saudi Arabia', 'name:ar': 'السعودية' },
+    validRussian: { name: 'Иран', 'name:en': 'Iran', name_en: 'Iran', 'name:ru': 'Иран' },
+    mojibakeFa: { name: 'ایران', 'name:en': 'Iran', 'name:fa': 'Ã­Ã±Ã§' },
+    latinInsideFa: { name: 'ایران', 'name:en': 'Iran', 'name:fa': 'Iran' },
+    latinInsideAr: { name: 'السعودية', 'name:en': 'Saudi Arabia', 'name:ar': 'Saudi Arabia' },
+    latinInsideRu: { name: 'Иран', 'name:en': 'Iran', 'name:ru': 'Iran' },
+    missingLocalized: { name: 'Nigeria', 'name:en': 'Nigeria', name_en: 'Nigeria' },
+    englishThenSource: { name: 'الرياض', 'name:en': 'Riyadh' },
+    sourceOnly: { name: 'الرياض' },
+  } as const;
+
+  it('accepts valid Persian, Arabic and Russian localized names in the JS helper', () => {
+    expect(isUsableBasemapName(fixtures.validPersian['name:fa'], 'fa')).toBe(true);
+    expect(isUsableBasemapName(fixtures.validArabic['name:ar'], 'ar')).toBe(true);
+    expect(isUsableBasemapName(fixtures.validRussian['name:ru'], 'ru')).toBe(true);
+    expect(resolveBasemapLabel(fixtures.validPersian, 'fa')).toBe('ایران');
+    expect(resolveBasemapLabel(fixtures.validArabic, 'ar')).toBe('السعودية');
+    expect(resolveBasemapLabel(fixtures.validRussian, 'ru')).toBe('Иран');
+  });
+
+  it('JS helper rejects mojibake and Latin text inside localized fields', () => {
+    expect(isUsableBasemapName(fixtures.mojibakeFa['name:fa'], 'fa')).toBe(false);
+    expect(isUsableBasemapName(fixtures.latinInsideFa['name:fa'], 'fa')).toBe(false);
+    expect(isUsableBasemapName(fixtures.latinInsideAr['name:ar'], 'ar')).toBe(false);
+    expect(isUsableBasemapName(fixtures.latinInsideRu['name:ru'], 'ru')).toBe(false);
+    expect(resolveBasemapLabel(fixtures.mojibakeFa, 'fa')).toBe('Iran');
+    expect(resolveBasemapLabel(fixtures.latinInsideFa, 'fa')).toBe('Iran');
+    expect(resolveBasemapLabel(fixtures.latinInsideAr, 'ar')).toBe('Saudi Arabia');
+    expect(resolveBasemapLabel(fixtures.latinInsideRu, 'ru')).toBe('Iran');
+  });
+
+  it('JS helper falls back to English then source name when localized is missing', () => {
+    expect(resolveBasemapLabel(fixtures.missingLocalized, 'fa')).toBe('Nigeria');
+    expect(resolveBasemapLabel(fixtures.englishThenSource, 'fa')).toBe('Riyadh');
+    expect(resolveBasemapLabel(fixtures.sourceOnly, 'fa')).toBe('الرياض');
+  });
+
+  it('does not encode malformed-value rejection into the live MapLibre expression', () => {
+    expect(BASEMAP_LABEL_RUNTIME_REJECTS_MALFORMED).toBe(false);
+    expect(JSON.stringify(basemapLabelTextField('fa'))).not.toContain('Ã');
+    expect(basemapLabelTextField('fa')[0]).toBe('coalesce');
+    expect(PATHFINDER_RTL_TEXT_PLUGIN_URL).toBe('/vendor/mapbox-gl-rtl-text-0.3.0.js');
+    expect(PATHFINDER_RTL_TEXT_PLUGIN_URL).not.toContain('unpkg');
+  });
+
+  it('falls back to English basemap labels when the RTL plugin is not ready', () => {
+    expect(basemapLanguageAfterRtlPlugin('fa', false)).toBe('en');
+    expect(basemapLanguageAfterRtlPlugin('ar', false)).toBe('en');
+    expect(basemapLanguageAfterRtlPlugin('fa', true)).toBe('fa');
+    expect(basemapLanguageAfterRtlPlugin('ar', true)).toBe('ar');
+    expect(basemapLanguageAfterRtlPlugin('en', false)).toBe('en');
+    expect(basemapLanguageAfterRtlPlugin('ru', false)).toBe('ru');
+    expect(PATHFINDER_RTL_FALLBACK_WARNING).toMatch(/English/);
+    expect(PATHFINDER_RTL_FALLBACK_WARNING).not.toMatch(/unshaped|readable Arabic/i);
+  });
+});
+
+describe('results panel card columns', () => {
+  it('keeps one column until each card can stay at least 180px', () => {
+    expect(resultCardColumnCount(348)).toBe(1);
+    expect(resultCardColumnCount(372)).toBe(2);
+    expect(globeStageLayout({
+      stageWidth: 900,
+      stageHeight: 787,
+      desktop: true,
+      compact: false,
+      sidePanelReserve: 0,
+    }).padding.right).toBe(16);
   });
 });

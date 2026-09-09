@@ -149,9 +149,105 @@ export function visibleSelectionLabel(
 export const GLOBE_CLIP_MAX_ZOOM = 2.55;
 export const GLOBE_HEADER_CLEARANCE_PX = 12;
 export const GLOBE_DESKTOP_PANEL_PX = 340;
+export const GLOBE_DESKTOP_RESULTS_PANEL_MIN = 380;
+export const GLOBE_DESKTOP_RESULTS_PANEL_PREFERRED = 440;
+export const GLOBE_DESKTOP_RESULTS_PANEL_MAX = 480;
 export const GLOBE_DESKTOP_DISC_MIN = 620;
 export const GLOBE_DESKTOP_DISC_MAX = 700;
 export const GLOBE_DESKTOP_DISC_TARGET = 660;
+export const PATHFINDER_RESULT_CARD_MIN_PX = 180;
+
+export function resultCardColumnCount(
+  contentWidth: number,
+  minCard = PATHFINDER_RESULT_CARD_MIN_PX,
+  gap = 12
+): 1 | 2 {
+  return contentWidth >= minCard * 2 + gap ? 2 : 1;
+}
+
+export type BasemapLabelLang = 'en' | 'ru' | 'fa' | 'ar';
+
+/** Confirmed on live OpenFreeMap/OpenMapTiles place + water_name features. */
+export const BASEMAP_LABEL_FIELDS = {
+  localized: {
+    en: 'name:en',
+    ru: 'name:ru',
+    fa: 'name:fa',
+    ar: 'name:ar',
+  },
+  english: ['name:en', 'name_en'] as const,
+  source: 'name',
+} as const;
+
+export function basemapLabelFieldOrder(lang: BasemapLabelLang): readonly string[] {
+  if (lang === 'en') {
+    return ['name:en', 'name_en', 'name:latin', 'name'];
+  }
+  return [BASEMAP_LABEL_FIELDS.localized[lang], 'name:en', 'name_en', 'name'];
+}
+
+/**
+ * Live MapLibre text-field. Coalesce skips null/empty only.
+ * It cannot reject mojibake or wrong-script values on rendered features.
+ */
+export function basemapLabelTextField(lang: BasemapLabelLang): unknown[] {
+  return ['coalesce', ...basemapLabelFieldOrder(lang).map((field) => ['get', field])];
+}
+
+/** Same-origin pinned copy of @mapbox/mapbox-gl-rtl-text@0.3.0. */
+export const PATHFINDER_RTL_TEXT_PLUGIN_URL = '/vendor/mapbox-gl-rtl-text-0.3.0.js';
+
+export const PATHFINDER_RTL_FALLBACK_WARNING =
+  'Map place names are shown in English. Right-to-left map text could not be loaded.';
+
+export function basemapLanguageAfterRtlPlugin(
+  lang: BasemapLabelLang,
+  pluginReady: boolean
+): BasemapLabelLang {
+  if ((lang === 'fa' || lang === 'ar') && !pluginReady) return 'en';
+  return lang;
+}
+
+/** The live map expression does not inspect glyph quality per feature. */
+export const BASEMAP_LABEL_RUNTIME_REJECTS_MALFORMED = false;
+
+const MOJIBAKE_RE = /Ã.|Â.|Ù.|Ø.|Ú.|Ð.|Ñ.|\uFFFD/;
+const SCRIPT_RE: Record<BasemapLabelLang, RegExp> = {
+  en: /[A-Za-z]/,
+  ru: /[\u0400-\u04FF]/,
+  fa: /[\u0600-\u06FF]/,
+  ar: /[\u0600-\u06FF]/,
+};
+
+export function isUsableBasemapName(value: unknown, lang: BasemapLabelLang): boolean {
+  if (typeof value !== 'string') return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  if (MOJIBAKE_RE.test(trimmed)) return false;
+  if (lang === 'en') return SCRIPT_RE.en.test(trimmed);
+  if (!SCRIPT_RE[lang].test(trimmed)) return false;
+  return true;
+}
+
+export function resolveBasemapLabel(
+  properties: Record<string, string | undefined | null>,
+  lang: BasemapLabelLang
+): string {
+  for (const field of basemapLabelFieldOrder(lang)) {
+    const value = properties[field];
+    if (field === BASEMAP_LABEL_FIELDS.localized[lang] && lang !== 'en') {
+      if (isUsableBasemapName(value, lang)) return value!.trim();
+      continue;
+    }
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return '';
+}
+
+export function symbolLayerUsesNameField(textField: unknown): boolean {
+  if (textField == null) return false;
+  return JSON.stringify(textField).includes('"name');
+}
 export type GlobeStageLayout = {
   padding: { top: number; right: number; bottom: number; left: number };
   usableWidth: number;
@@ -164,11 +260,13 @@ export function globeStageLayout(input: {
   stageHeight: number;
   desktop: boolean;
   compact: boolean;
+  sidePanelReserve?: number;
 }): GlobeStageLayout {
+  const overlayReserve = input.sidePanelReserve ?? (input.desktop ? GLOBE_DESKTOP_PANEL_PX : 0);
   const padding = {
     top: input.desktop ? 24 : input.compact ? 16 : 20,
     left: input.desktop ? 16 : 12,
-    right: input.desktop ? GLOBE_DESKTOP_PANEL_PX + 16 : 12,
+    right: input.desktop ? overlayReserve + 16 : 12,
     bottom: input.compact ? 154 : input.desktop ? 56 : 72,
   };
   const usableWidth = Math.max(160, input.stageWidth - padding.left - padding.right);
@@ -222,7 +320,12 @@ export function scrollDeltaToRevealChip(
   return 0;
 }
 
-export type AutomaticCameraSource = 'load' | 'idle-settle' | 'resize' | 'moveend-constrain';
+export type AutomaticCameraSource =
+  | 'load'
+  | 'idle-settle'
+  | 'resize'
+  | 'moveend-constrain'
+  | 'results-layout';
 
 /** Late idle/resize/moveend writers must not overwrite a newer user zoom or drag. */
 export function nextGlobeOverviewZoom(
@@ -254,6 +357,7 @@ export function shouldApplyAutomaticCameraWrite(input: {
 }): boolean {
   if (input.userHasMovedCamera) return false;
   if (input.source === 'moveend-constrain') return false;
+  if (input.source === 'results-layout') return !input.userHasMovedCamera;
   if (input.source === 'resize') {
     // Locale/dir reflow can change the container box without a viewport change.
     return Boolean(input.containerSizeChanged) && Boolean(input.viewportSizeChanged);

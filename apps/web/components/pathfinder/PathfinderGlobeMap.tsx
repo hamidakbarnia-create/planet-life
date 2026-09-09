@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import maplibregl from 'maplibre-gl';
+import { useEffect, useRef, useState } from 'react';
+import maplibregl, { getRTLTextPluginStatus, setRTLTextPlugin } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { AppLang } from '@/lib/app-settings';
 import type { PathfinderSelectedPoint } from '@/lib/pathfinder-selection';
@@ -30,10 +30,15 @@ import {
 } from '@/lib/pathfinder-geometry-demo';
 import type { GlobeCameraSnapshot, GlobeCameraWriteMethod, ProjectedGlobeDisc } from '@/lib/pathfinder-globe-projection';
 import {
+  basemapLabelTextField,
+  basemapLanguageAfterRtlPlugin,
+  PATHFINDER_RTL_FALLBACK_WARNING,
+  PATHFINDER_RTL_TEXT_PLUGIN_URL,
   cancelLatestFrame,
   createLatestFrameScheduler,
   destinationPoint,
   discFromProjectedLimb,
+  GLOBE_DESKTOP_PANEL_PX,
   globeCanvasMaskStyle,
   globeStageLayout,
   globeVisualWork,
@@ -50,6 +55,7 @@ import {
   shouldMeasureGlobeDiscForMask,
   shouldRecomputeGlobeDisc,
   snapshotCameraLngLat,
+  symbolLayerUsesNameField,
 } from '@/lib/pathfinder-globe-projection';
 
 export type PathfinderGlobeMapProps = {
@@ -61,6 +67,8 @@ export type PathfinderGlobeMapProps = {
   angleFilter?: PathfinderSunAngleFilter;
   selectedLine?: PathfinderSunAngle | null;
   labelLanguage?: AppLang;
+  resultsOpen?: boolean;
+  rtlFallbackWarning?: string;
   onPick: (latitude: number, longitude: number) => void;
   onSelectLine?: (angle: PathfinderSunAngle) => void;
   onReady: () => void;
@@ -70,8 +78,49 @@ export type PathfinderGlobeMapProps = {
 
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 const PIXEL_RATIO_CAP = 2;
-/** Phase 0: localized basemap names are deferred until OpenFreeMap name:fa/ar/ru tiles are validated. */
-const BASEMAP_LABEL_LANGUAGE = 'en' as const;
+const RTL_TEXT_PLUGIN_URL = PATHFINDER_RTL_TEXT_PLUGIN_URL;
+
+function rtlPluginStatus(): string {
+  if (typeof getRTLTextPluginStatus === 'function') return getRTLTextPluginStatus();
+  if (typeof maplibregl.getRTLTextPluginStatus === 'function') return maplibregl.getRTLTextPluginStatus();
+  return 'unavailable';
+}
+
+function ensureRtlTextPlugin(): Promise<boolean> {
+  try {
+    const status = rtlPluginStatus();
+    if (status === 'loaded') return Promise.resolve(true);
+    if (status === 'error') return Promise.resolve(false);
+    if (status === 'loading') {
+      return new Promise((resolve) => {
+        const started = Date.now();
+        const timer = window.setInterval(() => {
+          const next = rtlPluginStatus();
+          if (next === 'loaded') {
+            window.clearInterval(timer);
+            resolve(true);
+            return;
+          }
+          if (next === 'error' || Date.now() - started > 8000) {
+            window.clearInterval(timer);
+            resolve(false);
+          }
+        }, 50);
+      });
+    }
+    const register =
+      typeof setRTLTextPlugin === 'function'
+        ? setRTLTextPlugin
+        : maplibregl.setRTLTextPlugin;
+    if (typeof register !== 'function') return Promise.resolve(false);
+    return Promise.resolve(register(RTL_TEXT_PLUGIN_URL, false)).then(
+      () => rtlPluginStatus() !== 'error',
+      () => false
+    );
+  } catch {
+    return Promise.resolve(false);
+  }
+}
 const MARKER_COLOR = '#fbbf24';
 const MAPLIBRE_ATTRIBUTION =
   '<a href="https://maplibre.org/" target="_blank" rel="noreferrer">© MapLibre</a>';
@@ -116,8 +165,19 @@ function hitLayerIds(): string[] {
   return PATHFINDER_SUN_ANGLE_LEGEND.map((item) => sunAngleHitLayerId(item.angle));
 }
 
-function englishNameField(): maplibregl.ExpressionSpecification {
-  return ['coalesce', ['get', 'name:en'], ['get', 'name_en'], ['get', 'name:latin'], ['get', 'name']];
+function applyBasemapLanguage(map: maplibregl.Map, lang: AppLang) {
+  const style = map.getStyle();
+  if (!style?.layers) return;
+  const field = basemapLabelTextField(lang) as maplibregl.ExpressionSpecification;
+  for (const layer of style.layers) {
+    if (layer.type !== 'symbol') continue;
+    if (layer.id.startsWith(PATHFINDER_SUN_ANGLE_SOURCE_ID)) continue;
+    if (layer.id.startsWith(PATHFINDER_SUN_ANGLE_LABEL_SOURCE_ID)) continue;
+    if (HIDDEN_LABEL_LAYERS.includes(layer.id)) continue;
+    const current = map.getLayoutProperty(layer.id, 'text-field');
+    if (!symbolLayerUsesNameField(current)) continue;
+    map.setLayoutProperty(layer.id, 'text-field', field);
+  }
 }
 
 function applyLineDash(map: maplibregl.Map, layerId: string, angle: PathfinderSunAngle) {
@@ -322,30 +382,17 @@ function applySunAnglePresentation(
   }
 }
 
-function applyBasemapLanguage(map: maplibregl.Map) {
-  const style = map.getStyle();
-  if (!style?.layers) return;
-  const field = englishNameField();
-  for (const layer of style.layers) {
-    if (layer.type !== 'symbol') continue;
-    if (layer.id.startsWith(PATHFINDER_SUN_ANGLE_SOURCE_ID)) continue;
-    if (layer.id.startsWith(PATHFINDER_SUN_ANGLE_LABEL_SOURCE_ID)) continue;
-    if (HIDDEN_LABEL_LAYERS.includes(layer.id)) continue;
-    const current = map.getLayoutProperty(layer.id, 'text-field');
-    if (current == null) continue;
-    map.setLayoutProperty(layer.id, 'text-field', field);
-  }
-}
-
 function currentStageLayout(container?: HTMLElement | null) {
   const desktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
   const compact = typeof window !== 'undefined' && window.innerWidth < 768;
   const host = container ?? undefined;
+  const resultsOpen = host?.dataset.resultsOpen === '1';
   return globeStageLayout({
     stageWidth: host?.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 1348),
     stageHeight: host?.clientHeight || (typeof window !== 'undefined' ? window.innerHeight : 787),
     desktop,
     compact,
+    sidePanelReserve: desktop && !resultsOpen ? GLOBE_DESKTOP_PANEL_PX : 0,
   });
 }
 
@@ -353,7 +400,7 @@ function applyStagePadding(map: maplibregl.Map, container?: HTMLElement | null) 
   map.setPadding(currentStageLayout(container).padding);
 }
 
-function applyMetioroBasemap(map: maplibregl.Map): boolean {
+function applyMetioroBasemap(map: maplibregl.Map, lang: AppLang): boolean {
   const style = map.getStyle();
   if (!style?.layers) return false;
 
@@ -452,7 +499,7 @@ function applyMetioroBasemap(map: maplibregl.Map): boolean {
         }
       }
     }
-    applyBasemapLanguage(map);
+    applyBasemapLanguage(map, lang);
     return true;
   } catch {
     return false;
@@ -685,7 +732,9 @@ export function PathfinderGlobeMap({
   focusAngle = null,
   angleFilter = 'all',
   selectedLine = null,
-  labelLanguage: _labelLanguage = 'en',
+  labelLanguage = 'en',
+  resultsOpen = false,
+  rtlFallbackWarning = PATHFINDER_RTL_FALLBACK_WARNING,
   onPick,
   onSelectLine,
   onReady,
@@ -704,8 +753,14 @@ export function PathfinderGlobeMap({
   const cameraIntentRef = useRef<CameraTarget | null>(null);
   const overviewZoomRef = useRef<number | null>(null);
   const cancelAutomaticCameraRef = useRef<() => void>(() => undefined);
+  const applyResultsLayoutRef = useRef<(open: boolean) => void>(() => undefined);
+  const labelLanguageRef = useRef(labelLanguage);
+  const resultsOpenRef = useRef(resultsOpen);
+  const [rtlFallback, setRtlFallback] = useState(false);
   const animated = mode === 'globe';
   animatedRef.current = animated;
+  labelLanguageRef.current = labelLanguage;
+  resultsOpenRef.current = resultsOpen;
 
   const applyCameraIntent = (map: maplibregl.Map, camera: CameraTarget, caller = 'applyCameraIntent') => {
     cameraIntentRef.current = camera;
@@ -735,6 +790,7 @@ export function PathfinderGlobeMap({
     let lastCameraSnapshot: GlobeCameraSnapshot | null = null;
     const overview = pathfinderOverviewCamera(typeof window !== 'undefined' && window.innerWidth >= 1024);
     try {
+      ensureRtlTextPlugin();
       map = new maplibregl.Map({
         container,
         style: STYLE_URL,
@@ -887,6 +943,30 @@ export function PathfinderGlobeMap({
         idleSettleOverview = null;
       }
     };
+    applyResultsLayoutRef.current = (open) => {
+      if (cancelled || !map.loaded()) return;
+      container.dataset.resultsOpen = open ? '1' : '0';
+      if (typeof map.resize === 'function') map.resize();
+      applyStagePadding(map, container);
+      const applyFit = shouldApplyAutomaticCameraWrite({
+        source: 'results-layout',
+        userHasMovedCamera,
+      });
+      logCameraWrite(map, {
+        caller: 'applyResultsLayout',
+        method: 'resize',
+        mapEvent: 'results-layout',
+        applied: applyFit,
+      });
+      if (applyFit) {
+        withAutomaticCamera(() => {
+          fitOverviewGlobeDisc(map, typeof window !== 'undefined' && window.innerWidth >= 1024, container);
+          overviewZoomRef.current = map.getZoom();
+        });
+      }
+      lastCameraSnapshot = null;
+      scheduleLiveGlobeVisual('resize');
+    };
     const withAutomaticCamera = (fn: () => void) => {
       ignoreAutomaticGesture = true;
       try {
@@ -941,9 +1021,21 @@ export function PathfinderGlobeMap({
       if (cancelled) return;
       applyProjection();
       applyStagePadding(map, container);
-      const basemapApplied = applyMetioroBasemap(map);
+      const requestedLang = labelLanguageRef.current;
+      const pendingRtl = requestedLang === 'fa' || requestedLang === 'ar';
+      const conservativeLang = pendingRtl ? 'en' : requestedLang;
+      const basemapApplied = applyMetioroBasemap(map, conservativeLang);
       container.dataset.basemap = basemapApplied ? 'metioro-dark' : 'liberty-unmodified';
-      container.dataset.basemapLabelLanguage = BASEMAP_LABEL_LANGUAGE;
+      container.dataset.basemapLabelLanguage = conservativeLang;
+      void ensureRtlTextPlugin().then((pluginReady) => {
+        if (cancelled || mapRef.current !== map) return;
+        const paintLang = basemapLanguageAfterRtlPlugin(requestedLang, pluginReady);
+        applyBasemapLanguage(map, paintLang);
+        container.dataset.basemapLabelLanguage = paintLang;
+        container.dataset.rtlPlugin = pluginReady ? 'ready' : 'failed';
+        setRtlFallback(pendingRtl && !pluginReady);
+      });
+      container.dataset.resultsOpen = resultsOpenRef.current ? '1' : '0';
       addSunAngleLayers(map);
       applySunAnglePresentation(map, angleFilterRef.current, selectedLineRef.current);
       syncFocusedLineLabel(map, selectedLineRef.current);
@@ -1089,6 +1181,24 @@ export function PathfinderGlobeMap({
 
   useEffect(() => {
     const map = mapRef.current;
+    const container = containerRef.current;
+    if (!container) return;
+    void ensureRtlTextPlugin().then((pluginReady) => {
+      const paintLang = basemapLanguageAfterRtlPlugin(labelLanguage, pluginReady);
+      container.dataset.basemapLabelLanguage = paintLang;
+      container.dataset.rtlPlugin = pluginReady ? 'ready' : 'failed';
+      setRtlFallback((labelLanguage === 'fa' || labelLanguage === 'ar') && !pluginReady);
+      if (!map || mapRef.current !== map) return;
+      runWhenMapReady(map, () => applyBasemapLanguage(map, paintLang));
+    });
+  }, [labelLanguage]);
+
+  useEffect(() => {
+    applyResultsLayoutRef.current(resultsOpen);
+  }, [resultsOpen]);
+
+  useEffect(() => {
+    const map = mapRef.current;
     if (!map || focusToken <= 0 || !focusAngle) return;
     applyCameraIntent(map, {
       ...pathfinderLineFocusCamera(focusAngle, typeof window !== 'undefined' && window.innerWidth >= 1024),
@@ -1113,11 +1223,20 @@ export function PathfinderGlobeMap({
 
   return (
     <div className="absolute inset-0">
+      {rtlFallback ? (
+        <p
+          data-testid="pathfinder-rtl-fallback-warning"
+          className="pathfinder-rtl-fallback-warning fi pointer-events-none absolute bottom-14 left-2 z-20 max-w-[18rem] rounded-md bg-black/70 px-2 py-1 text-[10px] leading-snug text-amber-100/90"
+        >
+          {rtlFallbackWarning}
+        </p>
+      ) : null}
       <div
         ref={containerRef}
         data-testid="pathfinder-globe-map"
         data-globe-mode={mode}
-        data-label-language={BASEMAP_LABEL_LANGUAGE}
+        data-label-language={labelLanguage}
+        data-results-open={resultsOpen ? '1' : '0'}
         className="h-full w-full"
       />
     </div>
