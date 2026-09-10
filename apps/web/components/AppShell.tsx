@@ -79,7 +79,9 @@ export function AppShell({
     setSession(null);
   };
 
-  const tierLabel = tier.toUpperCase();
+  const freeLabels = { en: 'FREE', ru: 'Бесплатно', fa: 'رایگان', ar: 'مجاني' };
+  const tierLabel = tier === 'free' ? freeLabels[lang] : tier.toUpperCase();
+  const tierTitle = tier === 'free' ? tierLabel : `${tierLabel} plan`;
   const headingFont = brandHeadingFont(lang);
   const bodyFont = brandBodyFont(lang, fontFamily);
 
@@ -144,7 +146,7 @@ export function AppShell({
           <Link
             href="/upgrade"
             className="metioro-header-chip fi text-[10px] tracking-[0.18em] uppercase no-underline"
-            title={`${tierLabel} plan`}
+            title={tierTitle}
             style={tierBadgeStyle(tier)}
           >
             {tierLabel}

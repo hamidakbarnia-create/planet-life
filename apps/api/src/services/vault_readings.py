@@ -521,6 +521,20 @@ def yes_day_reading(
             "action_type": f"{_YES_ASK_ACTION}+{_YES_SIGN_ACTION}",
         }
 
+    # Keep the public rating enum unchanged; only rating_label is display copy.
+    labels = {
+        "Highly Favorable": ("Highly favorable", "Очень благоприятно", "بسیار مساعد", "ملائم جداً"),
+        "Favorable": ("Favorable", "Благоприятно", "مساعد", "ملائم"),
+        "Mixed / Proceed with Awareness": ("Mixed / proceed with awareness", "Неоднозначно / действуйте осмотрительно", "ترکیبی؛ با دقت پیش بروید", "متباين؛ المتابعة بحذر"),
+        "Challenging": ("Challenging", "Непросто", "چالش‌برانگیز", "صعب"),
+        "Unfavorable": ("Unfavorable", "Неблагоприятно", "نامساعد", "غير ملائم"),
+    }
+    locale_index = ("en", "ru", "fa", "ar").index(lang if lang in {"en", "ru", "fa", "ar"} else "en")
+    def with_rating_label(slot):
+        values = labels.get(slot.get("rating"))
+        return {**slot, "rating_label": values[locale_index] if values else None}
+    ask, commit, sign = (with_rating_label(slot) for slot in (ask, commit, sign))
+
     text = render_yes_day_reading(
         ask=ask,
         commit=commit,
@@ -3289,8 +3303,8 @@ def _comm_risk_questions(relationship_type: str, lang: str) -> list[str]:
         },
         "ar": {
             "romantic": [
-                "ماذا سمعتِ من طلبي — بكلماتك؟",
-                "حين تصمتين، ماذا يفترض أن أفهم؟",
+                "كيف يمكن تلخيص الطلب كما وصل إلى الطرف الآخر؟",
+                "كيف يمكن توضيح الحاجة إلى استراحة بدلاً من ترك معنى الصمت للتخمين؟",
                 "ما الذي يجعل الإصلاح آمناً بعد التوتر؟",
             ],
             "marriage": [

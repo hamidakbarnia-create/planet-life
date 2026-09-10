@@ -260,9 +260,9 @@ describe('Power timing localization + page wiring', () => {
     expect(pageSource).toContain('powerRatingTitle');
     expect(pageSource).toContain('VaultRankedDayChip');
     expect(pageSource).toContain('VaultYesDecisionSlot');
-    // Page prepares visible rating / title; Yes keeps raw rating prop.
+    // Page prepares visible rating / title; Yes uses localized display copy without exposing the raw enum.
     expect(pageSource).toMatch(/rating=\{visibleRating\}/);
-    expect(pageSource).toMatch(/rating=\{slot\.rating\}/);
+    expect(pageSource).toMatch(/rating=\{slot\.rating_label\}/);
     // Timing UI is gated to the power section only.
     expect(pageSource).toMatch(/raw === ['"]power['"] && powerTiming/);
     // Timing still renders before reading prose.

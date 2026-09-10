@@ -172,6 +172,8 @@ export type VaultTodaysColorResponse = {
 
 /** Yes Day slot — not a top-level windows[] item. */
 export type VaultYesDaySlot = {
+  /** Localized display copy; legacy rating remains a stable API value. */
+  rating_label?: string | null;
   date: string;
   score: number;
   rating?: string | null;

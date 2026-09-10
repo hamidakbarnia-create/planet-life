@@ -874,7 +874,7 @@ export default function VaultSectionPage() {
                                         band={band}
                                         bandLabel={bandLabel(band)}
                                         confidence={null}
-                                        rating={slot.rating}
+                                        rating={slot.rating_label}
                                       />
                                     );
                                   })}
@@ -972,7 +972,7 @@ export default function VaultSectionPage() {
                                               band={band}
                                               bandLabel={bandLabel(band)}
                                               confidence={liveReading?.evidence_status === 'unvalidated' || liveReading?.confidence_basis === 'unvalidated_symbolic_guidance' ? null : slot.confidence}
-                                              rating={slot.rating}
+                                              rating={slot.rating_label}
                                             />
                                           );
                                         })}
