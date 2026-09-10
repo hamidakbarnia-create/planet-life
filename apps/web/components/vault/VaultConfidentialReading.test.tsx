@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 
 import { VaultConfidentialReading } from './VaultConfidentialReading';
+import marsApiReadings from './fixtures/mars-symbolic-api.json';
 import { VAULT_READING_PRESENTATION_COPY } from '@/lib/vault-reading-presentation';
 import type { VaultReadingLayer } from '@/lib/vault-reading';
 
@@ -153,5 +154,93 @@ describe('VaultConfidentialReading', () => {
     expect(root.textContent?.toLowerCase()).not.toMatch(
       /\bmars\b|\bsquare\b|\bpluto\b|\baries\b|\bdignity\b|\bhouse\b/
     );
+  });
+});
+
+
+describe('symbolic guidance safety context', () => {
+  it.each(['en', 'ru', 'fa', 'ar'] as const)('preserves the API limitation and hides evidential confidence in %s', (lang) => {
+    const limitations = {
+      en: 'A symbolic score is not a probability. Actual behavior and fidelity are unknown.',
+      ru: 'Символический балл не является вероятностью. Поведение и верность неизвестны.',
+      fa: 'امتیاز نمادین احتمال نیست. رفتار و وفاداری نامشخص‌اند.',
+      ar: 'الدرجة الرمزية ليست احتمالاً. السلوك والوفاء غير معروفين.',
+    };
+    const explanation = {
+      en: 'Predictive reliability is unvalidated. Chart data is not observed behavior.',
+      ru: 'Надёжность прогноза не подтверждена. Данные карты не являются поведением.',
+      fa: 'اعتبار پیش‌بینی تأیید نشده است. دادهٔ چارت رفتار مشاهده‌شده نیست.',
+      ar: 'موثوقية التنبؤ غير مثبتة. بيانات الخريطة ليست سلوكاً ملاحظاً.',
+    };
+    const reading: VaultReadingLayer = {
+      ...READING,
+      executive: limitations[lang],
+      strategic: explanation[lang],
+      headline: limitations[lang],
+      action: {en: 'Reflect on your own experience', ru: 'Подумайте о своём опыте', fa: 'به تجربهٔ خودت فکر کن', ar: 'تأمل تجربتك الشخصية'}[lang],
+      confidence: 'low',
+      confidence_basis: 'unvalidated_symbolic_guidance',
+      limitation: limitations[lang],
+      confidence_explanation: explanation[lang],
+    };
+    render(<VaultConfidentialReading lang={lang} reading={reading}
+      labels={VAULT_READING_PRESENTATION_COPY[lang]} confidenceLabel="Old confidence label" />);
+    const safety = screen.getByTestId('vault-symbolic-limitation');
+    expect(safety.textContent).toContain(limitations[lang]);
+    expect(safety.textContent).toContain(explanation[lang]);
+    expect(screen.queryByTestId('vault-reading-confidence-bar')).toBeNull();
+    expect(screen.queryByText('Old confidence label')).toBeNull();
+  });
+});
+
+
+describe('structured symbolic output', () => {
+  const limitations = {
+    en: 'The score measures symbolic timing strength, not the probability of receiving money or financial success—even at 100/100. Commercial terms, affordability and real evidence remain decisive.',
+    ru: 'Символический балл не является вероятностью. Поведение и верность неизвестны.',
+    fa: 'امتیاز نمادین احتمال نیست. رفتار و وفاداری نامشخص‌اند.',
+    ar: 'الدرجة الرمزية ليست احتمالاً. السلوك والوفاء غير معروفين.',
+  };
+  it.each(['en', 'ru', 'fa', 'ar'] as const)('renders the exact limitation once next to the action, independently of the legacy enum in %s', (lang) => {
+    const reading: VaultReadingLayer = {
+      executive: 'Legacy summary', strategic: 'Legacy interpretation', technical: '',
+      headline: 'Symbolic window', action: 'Review the terms', avoid: 'Pressure',
+      interpretation: 'Compare the symbolic theme with your experience.',
+      evidence_status: 'unvalidated', data_completeness: 'supplied_unverified',
+      limitation: limitations[lang],
+      strongest_window: { date: '2026-09-12', score: 100 },
+      secondary_windows: [11, 13, 14, 15].map((day) => ({ date: `2026-09-${day}`, score: 70 })),
+    };
+    const { rerender } = render(<VaultConfidentialReading lang={lang} reading={reading} labels={VAULT_READING_PRESENTATION_COPY[lang]} />);
+    for (const confidence of ['high', 'medium', 'low']) {
+      rerender(<VaultConfidentialReading lang={lang} reading={{ ...reading, confidence }} labels={VAULT_READING_PRESENTATION_COPY[lang]} confidenceLabel="Predictive confidence" />);
+      const root = screen.getByTestId('vault-confidential-reading');
+      expect(root.textContent?.split(limitations[lang])).toHaveLength(2);
+      expect(screen.getAllByText(limitations[lang], { exact: true })).toHaveLength(1);
+      expect(screen.getByTestId('vault-reading-hero-action').nextElementSibling).toBe(screen.getByTestId('vault-symbolic-limitation'));
+      expect(screen.getByTestId('vault-evidence-status').textContent).toBeTruthy();
+      expect(screen.getByTestId('vault-data-completeness').textContent).not.toMatch(/supplied_unverified|complete|incomplete/);
+      expect(screen.queryByTestId('vault-reading-confidence-bar')).toBeNull();
+      expect(screen.queryByText('Predictive confidence')).toBeNull();
+      expect(screen.getByTestId('vault-reading-windows').querySelectorAll('li')).toHaveLength(4);
+      expect(screen.getByTestId('vault-reading-hero-decision').textContent).not.toMatch(/2026|100/);
+      expect(root.getAttribute('dir')).toBe(lang === 'fa' || lang === 'ar' ? 'rtl' : 'ltr');
+    }
+  });
+
+  it('keeps materially different API Mars interpretations visible without the legacy jargon filter', () => {
+    // These are actual local ASGI responses for the documented synthetic primary
+    // and the controlled 1981-12-01 variation (fixture is verified by API tests).
+    const { rerender } = render(<VaultConfidentialReading lang="en" reading={marsApiReadings[0] as VaultReadingLayer} labels={labels} />);
+    const first = screen.getByTestId('vault-reading-interpretation').textContent;
+    expect(first).toContain(marsApiReadings[0].interpretation);
+    rerender(<VaultConfidentialReading lang="en" reading={marsApiReadings[1] as VaultReadingLayer} labels={labels} />);
+    const second = screen.getByTestId('vault-reading-interpretation').textContent;
+    expect(second).toContain(marsApiReadings[1].interpretation);
+    expect(first).not.toBe(second);
+    for (const text of [first, second]) {
+      expect(text).toMatch(/symbolic/);
+      expect(text).not.toMatch(/your sexuality is|your desire ignites|you are|you behave/i);
+    }
   });
 });

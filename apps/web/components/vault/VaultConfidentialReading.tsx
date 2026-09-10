@@ -136,10 +136,96 @@ export function VaultConfidentialReading({
   className,
   style,
 }: Props) {
+  // New symbolic responses are already structured and localized. Do not run
+  // their interpretation/limitation through the legacy sentence filter: it
+  // removes explained astrology themes and can silently erase safety context.
+  if (reading.evidence_status === 'unvalidated') {
+    const copy = {
+      en: {
+        evidence: 'Predictive validity has not been established.',
+        complete: 'Required inputs are complete; this does not validate a prediction.',
+        supplied_unverified: 'Required birth details are supplied but unverified.',
+        incomplete: 'Some required birth details are missing.',
+        not_assessed: 'Input completeness has not been assessed.',
+        strongest: 'Strongest symbolic window', secondary: 'Secondary windows',
+      },
+      ru: {
+        evidence: 'Предсказательная достоверность не подтверждена.',
+        complete: 'Все необходимые данные есть; это не подтверждает прогноз.',
+        supplied_unverified: 'Необходимые данные рождения указаны, но не проверены.',
+        incomplete: 'Часть необходимых данных рождения отсутствует.',
+        not_assessed: 'Полнота данных не оценивалась.',
+        strongest: 'Наиболее выраженное символическое окно', secondary: 'Другие окна',
+      },
+      fa: {
+        evidence: 'اعتبار پیش‌بینی تأیید نشده است.',
+        complete: 'اطلاعات لازم کامل است؛ این به معنای تأیید پیش‌بینی نیست.',
+        supplied_unverified: 'اطلاعات لازمِ تولد وارد شده، اما راستی‌آزمایی نشده است.',
+        incomplete: 'بخشی از اطلاعات لازمِ تولد وارد نشده است.',
+        not_assessed: 'کامل‌بودن اطلاعات بررسی نشده است.',
+        strongest: 'قوی‌ترین بازه از نظر نمادین', secondary: 'بازه‌های دیگر',
+      },
+      ar: {
+        evidence: 'لم تثبت صلاحية هذه القراءة للتنبؤ.',
+        complete: 'البيانات المطلوبة مكتملة؛ وهذا لا يثبت صحة التنبؤ.',
+        supplied_unverified: 'بيانات الميلاد المطلوبة متوفرة، لكنها غير متحقق منها.',
+        incomplete: 'بعض بيانات الميلاد المطلوبة غير متوفرة.',
+        not_assessed: 'لم يُقيَّم اكتمال البيانات.',
+        strongest: 'الفترة الأقوى رمزياً', secondary: 'فترات أخرى',
+      },
+    }[lang];
+    return (
+      <div className={className} style={style} dir={lang === 'fa' || lang === 'ar' ? 'rtl' : 'ltr'}
+        data-testid="vault-confidential-reading" data-vault-reading-presented="true">
+        <section className="fi rounded-xl px-3 py-2.5 mb-3" data-testid="vault-reading-hero"
+          style={{ background: 'linear-gradient(165deg, rgba(212,175,55,0.10), rgba(0,0,0,0.28))', border: '1px solid rgba(212,175,55,0.22)' }}>
+          <h2 className="fi text-[1.2rem] leading-snug font-medium" data-testid="vault-reading-hero-decision">
+            {reading.headline}
+          </h2>
+          <div className="mt-2" data-testid="vault-reading-hero-action">
+            <SectionLabel>{labels.recommendedActions}</SectionLabel>
+            <p>{reading.action}</p>
+          </div>
+          <aside className="fi text-xs leading-relaxed mt-3" data-testid="vault-symbolic-limitation">
+            <p>{reading.limitation}</p>
+          </aside>
+          <div className="fi text-xs leading-relaxed mt-2" data-testid="vault-evidence-status">
+            <p>{copy.evidence}</p>
+            <p data-testid="vault-data-completeness">{copy[reading.data_completeness ?? 'not_assessed']}</p>
+          </div>
+        </section>
+        {reading.strongest_window ? (
+          <section className="mb-4" data-testid="vault-reading-windows">
+            <SectionLabel>{copy.strongest}</SectionLabel>
+            <p><bdi dir="ltr">{reading.strongest_window.date} · {reading.strongest_window.score}/100</bdi></p>
+            {reading.secondary_windows?.length ? (
+              <>
+                <SectionLabel>{copy.secondary}</SectionLabel>
+                <ul>{reading.secondary_windows.slice(0, 4).map((window) => (
+                  <li key={window.date}><bdi dir="ltr">{window.date} · {window.score}/100</bdi></li>
+                ))}</ul>
+              </>
+            ) : null}
+          </section>
+        ) : windowsSlot ? <section className="mb-4" data-testid="vault-reading-windows">{windowsSlot}</section> : null}
+        <section className="mb-3" data-testid="vault-reading-interpretation">
+          <SectionLabel>{labels.overallSituation}</SectionLabel>
+          <p>{reading.interpretation ?? reading.strategic}</p>
+        </section>
+        {reading.avoid ? (
+          <section className="mb-3" data-testid="vault-reading-hero-risk">
+            <SectionLabel>{labels.thingsToAvoid}</SectionLabel>
+            <p>{reading.avoid}</p>
+          </section>
+        ) : null}
+      </div>
+    );
+  }
   const presented = presentVaultReading(reading, lang);
   const decisionHeadline = sanitizeVaultReadingProse(reading.headline, lang);
   const ux = shapeVaultReadingUxV2(presented, labels, decisionHeadline);
-  const confidenceLevel = parseConfidenceLevel(reading.confidence);
+  const symbolic = reading.confidence_basis === 'unvalidated_symbolic_guidance';
+  const confidenceLevel = symbolic ? null : parseConfidenceLevel(reading.confidence);
 
   return (
     <div
@@ -185,6 +271,14 @@ export function VaultConfidentialReading({
           </div>
         </div>
 
+        {symbolic ? (
+          <aside className="fi text-xs leading-relaxed mt-3" data-testid="vault-symbolic-limitation">
+            {/* Safety context is returned localized and must survive prose filtering. */}
+            <p>{reading.limitation}</p>
+            <p>{reading.confidence_explanation}</p>
+          </aside>
+        ) : null}
+
         <div className="mt-2.5 flex flex-wrap items-end gap-x-4 gap-y-2">
           {bestWindowLabel ? (
             <div
@@ -208,7 +302,7 @@ export function VaultConfidentialReading({
             </div>
           ) : null}
 
-          {confidenceLabel || confidenceLevel ? (
+          {!symbolic && (confidenceLabel || confidenceLevel) ? (
             <div
               className="w-full min-w-[9rem] sm:w-[11rem] sm:flex-none"
               data-testid="vault-reading-hero-confidence"

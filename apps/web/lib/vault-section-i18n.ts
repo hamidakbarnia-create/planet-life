@@ -473,7 +473,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'Patterns of secrecy, trust, and emotional protection. We show signals — never verdicts. Verify before you decide.',
       items: [
-        { label: 'Cheating Radar', hint: 'Signals to verify — never verdicts' },
+        { label: 'Trust & Clarity Signals', hint: 'Signals to verify — never verdicts' },
         { label: 'Trust Patterns', hint: 'Building, pressure, repair — not verdicts' },
         { label: 'Communication Risk', hint: 'Clarity, reactivity, escalation — not verdicts' },
         { label: 'Private Conversation Timing', hint: 'Quieter windows for private talks — reflection only' },
@@ -582,7 +582,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'Паттерны скрытности, доверия и защиты. Мы показываем сигналы — не приговоры. Проверяйте перед решением.',
       items: [
-        { label: 'Радар верности', hint: 'Сигналы для проверки — не приговоры' },
+        { label: 'Сигналы доверия и ясности', hint: 'Сигналы для проверки — не приговоры' },
         { label: 'Паттерны доверия', hint: 'Строительство, давление, ремонт — не приговоры' },
         { label: 'Риск общения', hint: 'Ясность, реактивность, эскалация — не приговоры' },
         { label: 'Время для частных разговоров', hint: 'Более тихие окна для личных бесед — только рефлексия' },
@@ -690,7 +690,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'الگوهای پنهان‌کاری، اعتماد و محافظت احساسی. ما نشانه می‌دهیم — نه حکم. قبل از تصمیم بررسی کن.',
       items: [
-        { label: 'رادار خیانت', hint: 'نشانه‌هایی برای بررسی — نه حکم' },
+        { label: 'نشانه‌های اعتماد و وضوح', hint: 'نشانه‌هایی برای بررسی — نه حکم' },
         { label: 'الگوهای اعتماد', hint: 'ساخت، فشار، ترمیم — نه حکم' },
         { label: 'ریسک ارتباط', hint: 'وضوح، واکنش، تشدید — نه حکم' },
         { label: 'زمان گفت‌وگوی خصوصی', hint: 'پنجره‌های آرام‌تر برای حرف خصوصی — فقط بازتاب' },
@@ -798,7 +798,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'أنماط الكتمان والثقة والحماية العاطفية. نعرض إشارات — لا أحكاماً. تحقّقي قبل القرار.',
       items: [
-        { label: 'رادار الخيانة', hint: 'إشارات للتحقّق — لا أحكام' },
+        { label: 'إشارات الثقة والوضوح', hint: 'إشارات للتحقّق — لا أحكام' },
         { label: 'أنماط الثقة', hint: 'بناء وضغط وإصلاح — لا أحكام' },
         { label: 'مخاطر التواصل', hint: 'وضوح وردة فعل وتصعيد — لا أحكام' },
         { label: 'توقيت المحادثة الخاصة', hint: 'نوافذ أهدأ لأحاديث خاصة — تأمّل فقط' },

@@ -16,7 +16,17 @@ export type VaultReadingLayer = {
   intensity?: string;
   sign?: string;
   house?: number;
+  /** @deprecated For symbolic readings use evidence_status and data_completeness. */
   confidence?: string;
+  /** Legacy confidence enum is not calibrated accuracy for symbolic readings. */
+  confidence_basis?: 'unvalidated_symbolic_guidance';
+  confidence_explanation?: string;
+  limitation?: string;
+  evidence_status?: 'unvalidated';
+  data_completeness?: 'complete' | 'not_assessed' | 'supplied_unverified' | 'incomplete';
+  interpretation?: string;
+  strongest_window?: VaultPowerDayWindow | null;
+  secondary_windows?: VaultPowerDayWindow[];
   action?: string;
   avoid?: string;
 };
@@ -164,6 +174,7 @@ export type VaultYesDaySlot = {
   date: string;
   score: number;
   rating?: string | null;
+  /** @deprecated Retained because normalizeYesSlot requires a nonempty legacy value. */
   confidence: string;
   action_type: string;
 };

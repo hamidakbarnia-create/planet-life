@@ -134,10 +134,10 @@ def test_yes_day_localized_en_fa_ar_ru():
         assert reading["confidence"] in {"high", "medium", "low"}
         assert "Avoid:" in reading["executive"] or "پرهیز:" in reading[
             "executive"
-        ] or "Избегать:" in reading["executive"] or "تجنبي:" in reading["executive"]
+        ] or "Избегать:" in reading["executive"] or "ما ينبغي تجنّبه:" in reading["executive"]
 
 
-def test_yes_day_confidence_calculated_from_scores():
+def test_yes_day_intensity_not_predictive_confidence_from_scores():
     high = render_yes_day_reading(
         ask={"date": "d1", "score": 90, "action_type": "negotiation"},
         commit={"date": "d2", "score": 88, "action_type": "negotiation+contract_signing"},
@@ -150,7 +150,11 @@ def test_yes_day_confidence_calculated_from_scores():
         sign={"date": "d3", "score": 38, "action_type": "contract_signing"},
         lang="en",
     )
-    assert high["confidence"] == "high"
-    assert low["confidence"] == "low"
+    assert high["evidence_status"] == low["evidence_status"] == "unvalidated"
+    assert high["intensity"] == "strong"
+    assert low["intensity"] == "subtle"
+    assert high["confidence_basis"] == "unvalidated_symbolic_guidance"
+    assert "unvalidated" in high["confidence_explanation"]
+    assert low["evidence_status"] == "unvalidated"
     assert high["avoid"]
     assert low["avoid"]

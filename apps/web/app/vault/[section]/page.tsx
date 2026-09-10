@@ -867,7 +867,7 @@ export default function VaultSectionPage() {
                                         score={slot.score}
                                         band={band}
                                         bandLabel={bandLabel(band)}
-                                        confidence={slot.confidence}
+                                        confidence={null}
                                         rating={slot.rating}
                                       />
                                     );
@@ -965,7 +965,7 @@ export default function VaultSectionPage() {
                                               score={slot.score}
                                               band={band}
                                               bandLabel={bandLabel(band)}
-                                              confidence={slot.confidence}
+                                              confidence={liveReading?.evidence_status === 'unvalidated' || liveReading?.confidence_basis === 'unvalidated_symbolic_guidance' ? null : slot.confidence}
                                               rating={slot.rating}
                                             />
                                           );

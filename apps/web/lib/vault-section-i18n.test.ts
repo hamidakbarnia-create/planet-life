@@ -215,3 +215,11 @@ describe('Vault section presentation copy', () => {
     expect(pageSource).toContain("power: ['hot', 'money', 'ghost', 'yes']");
   });
 });
+
+
+it('uses trust and clarity titles while preserving the legacy radar slot', () => {
+  const titles = {en: 'Trust & Clarity Signals', ru: 'Сигналы доверия и ясности', fa: 'نشانه‌های اعتماد و وضوح', ar: 'إشارات الثقة والوضوح'};
+  for (const lang of ['en', 'ru', 'fa', 'ar'] as const) {
+    expect(SECTION_LANGS[lang].shadow.items[0].label).toBe(titles[lang]);
+  }
+});
