@@ -44,11 +44,12 @@ def test_render_live_reel_includes_windows_confidence_reason():
         target_date="2026-07-24",
         lang="en",
     )
-    assert "14:00–15:00" in reading["executive"]
-    assert "10:00–11:00" in reading["executive"]
-    assert "19:00–20:00" in reading["executive"]
-    assert "Confidence:" in reading["executive"]
-    assert "Reason:" in reading["strategic"]
+    assert "14:00–15:00" in str(reading["details"])
+    assert "10:00–11:00" in str(reading["details"])
+    assert "19:00–20:00" in str(reading["details"])
+    assert "Confidence:" not in reading["executive"]
+    assert reading["limitation"]
+    assert "symbolic" in reading["limitation"].lower()
     assert reading["confidence"] in {"high", "medium", "low"}
     assert reading["reason"]
     assert "social_media_post" in reading["technical"]

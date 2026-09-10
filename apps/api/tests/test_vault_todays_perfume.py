@@ -35,12 +35,13 @@ def test_render_perfume_uses_all_four_inputs_and_required_outputs():
     assert reading["avoid"]
     assert reading["reason"]
     assert reading["confidence"] in {"high", "medium", "low"}
-    assert "Family:" in reading["executive"]
-    assert "Confidence:" in reading["executive"]
-    assert "Natal Venus" in reading["reason"] or "Venus" in reading["reason"]
-    assert "Asc" in reading["reason"]
-    assert "Transit Moon" in reading["reason"]
-    assert "natal_venus=taurus" in reading["technical"]
+    assert "rose + sandalwood" in reading["details"][1]["value"]
+    assert "Confidence:" not in reading["executive"]
+    assert reading["limitation"]
+    assert "white musk + lotus" in reading["details"][1]["value"]
+    assert "peony + soft vanilla" in reading["details"][1]["value"]
+    assert "jasmine + amber" in reading["details"][1]["value"]
+    assert "venus=taurus" in reading["technical"]
     assert "asc=libra" in reading["technical"]
     assert "transit_moon=leo" in reading["technical"]
 
@@ -80,7 +81,7 @@ def test_render_perfume_optional_accent_omitted_when_same_as_venus():
     assert reading["accent_note"] == ""
 
 
-def test_render_perfume_high_confidence_when_venus_aligns():
+def test_render_perfume_alignment_does_not_validate_prediction():
     # Venus Taurus (earth) + Asc Virgo (earth) + natal Moon Capricorn (earth)
     reading = render_todays_perfume_reading(
         natal_venus_sign="taurus",
@@ -90,8 +91,8 @@ def test_render_perfume_high_confidence_when_venus_aligns():
         target_date="2026-07-24",
         lang="en",
     )
-    assert reading["confidence"] == "high"
-    assert reading["intensity"] == "strong"
+    assert reading["evidence_status"] == "unvalidated"
+    assert reading["data_completeness"] == "supplied_unverified"
 
 
 def test_todays_perfume_reading_shape():

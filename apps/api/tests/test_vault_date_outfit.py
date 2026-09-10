@@ -28,7 +28,7 @@ def test_render_date_outfit_fields():
         target_date="2026-07-24",
         lang="en",
     )
-    assert reading["outfit_style"] == "soft luxe"
+    assert reading["outfit_style"] == "soft fabrics with refined details"
     assert "Gold" in reading["primary_color"] or reading["primary_color"] == "Gold"
     assert reading["accent_color"]
     assert "bracelet" in reading["accessories"]
@@ -36,7 +36,8 @@ def test_render_date_outfit_fields():
     assert reading["best_meeting_time"] == "19:00–20:00"
     assert reading["avoid"]
     assert reading["confidence"] in {"high", "medium", "low"}
-    assert "Confidence:" in reading["executive"]
+    assert "Confidence:" not in reading["executive"]
+    assert reading["limitation"]
     assert "Avoid:" in reading["executive"]
     assert "venus=taurus" in reading["technical"]
 

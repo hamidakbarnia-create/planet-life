@@ -57,14 +57,16 @@ def test_render_hot_attraction_ranked_windows():
         horizon_days=14,
     )
     assert reading["intensity"] == "strong"
-    assert reading["confidence"] == "high"
-    assert "2026-07-26" in reading["executive"]
-    assert "88" in reading["executive"]
+    assert reading["evidence_status"] == "unvalidated"
+    assert reading["strongest_window"]["date"] == "2026-07-26"
+    assert reading["strongest_window"]["score"] == 88
+    assert reading["secondary_windows"][0]["date"] == "2026-07-29"
     assert "hot_attraction" in reading["technical"]
     assert "business_launch" not in reading["technical"]
     assert "business_launch" not in reading["strategic"]
     assert "hot_attraction" not in reading["strategic"]
-    assert "Confidence:" in reading["executive"]
+    assert "Confidence:" not in reading["executive"]
+    assert reading["limitation"]
     assert "Action:" in reading["executive"]
     assert "Avoid:" in reading["executive"]
     assert reading["action"]

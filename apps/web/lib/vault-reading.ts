@@ -25,6 +25,7 @@ export type VaultReadingLayer = {
   evidence_status?: 'unvalidated';
   data_completeness?: 'complete' | 'not_assessed' | 'supplied_unverified' | 'incomplete';
   interpretation?: string;
+  details?: Array<{ label: string; value: string; reason?: string; direction?: "ltr" | "rtl" | "auto" }>;
   strongest_window?: VaultPowerDayWindow | null;
   secondary_windows?: VaultPowerDayWindow[];
   action?: string;

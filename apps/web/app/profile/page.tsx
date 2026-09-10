@@ -933,6 +933,9 @@ function ProfileEditor() {
                 )}
               </div>
               <div className="flex flex-col gap-2 pt-1">
+                <p className="fi text-xs leading-relaxed" data-testid="profile-vault-continuity">
+                  {t.vaultContinuity}
+                </p>
                 <button
                   type="button"
                   onClick={handleGenerateClick}

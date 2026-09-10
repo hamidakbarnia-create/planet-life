@@ -208,6 +208,16 @@ export function VaultConfidentialReading({
             ) : null}
           </section>
         ) : windowsSlot ? <section className="mb-4" data-testid="vault-reading-windows">{windowsSlot}</section> : null}
+        {reading.details?.length ? (
+          <dl className="mb-4 space-y-2" data-testid="vault-reading-details">
+            {reading.details.filter((detail) => /[\p{L}\p{N}]/u.test(detail.label) && /[\p{L}\p{N}]/u.test(detail.value)).map((detail, index) => (
+              <div key={`${detail.label}-${index}`} className="min-w-0 break-words">
+                <dt className="fi text-xs opacity-70">{detail.label}</dt>
+                <dd><bdi dir={detail.direction ?? "auto"}>{detail.value}</bdi>{detail.reason && <p>{detail.reason}</p>}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : null}
         <section className="mb-3" data-testid="vault-reading-interpretation">
           <SectionLabel>{labels.overallSituation}</SectionLabel>
           <p>{reading.interpretation ?? reading.strategic}</p>

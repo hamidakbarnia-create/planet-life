@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from packages.astro_engine.vault_quality_copy import QUALITY_COPY, LANGS as QUALITY_LANGS
+
 from datetime import date, timedelta
 
 from packages.astro_engine.scoring_context import (
@@ -849,9 +851,11 @@ def _best_hourly_window(
         candidate = {
             "hour": int(hour),
             "window": window,
+            "timezone": (_transit.get("evaluation") or {}).get("timezone"),
             "score": score_i,
             "rating": rating,
-            "confidence": _reel_confidence(score_i),
+            "confidence": "low",  # Deprecated; symbolic strength is the score, not evidence.
+            "evidence_status": "unvalidated",
             "reason": reason,
             "action_type": action_type,
         }
@@ -937,6 +941,12 @@ def live_reel_time_reading(
         target_date=day,
         lang=lang,
     )
+    from packages.astro_engine.vault_templates import _quality_label
+    timezone_label = posting.get("timezone")
+    if timezone_label:
+        text["details"].append({"label": _quality_label("timezone", lang), "value": timezone_label, "direction": "ltr"})
+
+
     return {
         "planet": "reel",
         "lang": lang,
@@ -1035,6 +1045,7 @@ def date_outfit_reading(
         transit_moon_sign=transit_moon_sign,
         meeting_window=str(meeting.get("window") or "—"),
         meeting_score=int(meeting.get("score") or 0),
+        meeting_timezone=meeting.get("timezone"),
         target_date=day,
         lang=lang,
     )
@@ -1217,6 +1228,8 @@ def best_countries_reading(
             missing.append(f"location:{label}")
             continue
         top_effect = effects[0] if effects else goal_effect
+        from packages.astro_engine.vault_quality_copy import geography_symbolic_reason
+        symbolic_reason = geography_symbolic_reason(goal_effect, reloc, lang)
         opportunity, risk = _opp_risk_from_effect(goal_effect, lang=lang)
         score = int(goal_effect.get("score") or 0)
         next_action = {
@@ -1234,6 +1247,7 @@ def best_countries_reading(
                 "strongest_use_case": top_effect.get("area") or area,
                 "goal_area": area,
                 "opportunity": opportunity,
+                "symbolic_reason": symbolic_reason,
                 "risk": risk,
                 "recommended_next_action": next_action,
                 "confidence": (
@@ -1245,6 +1259,14 @@ def best_countries_reading(
     ranked.sort(key=lambda r: int(r.get("score") or 0), reverse=True)
     if not ranked and "locations" not in missing:
         missing.append("locations")
+
+    # Keep ranking weights and legacy keys; none of the prose predicts outcomes.
+    for item in ranked:
+        if "commercial_risk" in item:
+            item["commercial_risk"] = ""
+        item.update(opportunity=item["symbolic_reason"], risk="", recommended_next_action="",
+                    confidence="low", evidence_status="unvalidated",
+                    data_completeness="supplied_unverified")
 
     text = render_best_countries_reading(
         ranked,
@@ -1403,6 +1425,8 @@ def business_geography_reading(
         if effect_for_reasons is None:
             missing.append(f"location:{label}")
             continue
+        from packages.astro_engine.vault_quality_copy import geography_symbolic_reason
+        symbolic_reason = geography_symbolic_reason(effect_for_reasons, reloc, lang)
         opportunity, risk = _opp_risk_from_effect(effect_for_reasons, lang=lang)
         next_action = {
             "en": f"Prioritize {label} for {goal_key} market work",
@@ -1419,6 +1443,7 @@ def business_geography_reading(
                 "strongest_use_case": use_area,
                 "goal_areas": [a for a, _ in weights],
                 "opportunity": opportunity,
+                "symbolic_reason": symbolic_reason,
                 "risk": risk,
                 "commercial_risk": risk,
                 "recommended_next_action": next_action,
@@ -1431,6 +1456,14 @@ def business_geography_reading(
     ranked.sort(key=lambda r: int(r.get("score") or 0), reverse=True)
     if not ranked and "locations" not in missing:
         missing.append("locations")
+
+    # Keep ranking weights and legacy keys; none of the prose predicts outcomes.
+    for item in ranked:
+        if "commercial_risk" in item:
+            item["commercial_risk"] = ""
+        item.update(opportunity=item["symbolic_reason"], risk="", recommended_next_action="",
+                    confidence="low", evidence_status="unvalidated",
+                    data_completeness="supplied_unverified")
 
     text = render_business_geography_reading(
         ranked,
@@ -1924,9 +1957,16 @@ def partner_profile_reading(
                 }.get(lang, "")
             )
 
+    # Context follows the selected relationship profile, including Business Partner.
+    presentation_goal = "business" if profile.key == "business_partner" else goal_key
+    copy = QUALITY_COPY["business" if presentation_goal == "business" else "partner"][QUALITY_LANGS.index(lang if lang in QUALITY_LANGS else "en")]
+    traits, patterns, friction = [copy[1]], [copy[2]], [copy[3]]
+    dynamics = {key: copy[1] for key in dynamics}
+    questions = [copy[2]]
+    confidence = "low"  # Deprecated compatibility enum, never predictive accuracy.
     text = render_partner_profile_reading(
         mode=mode,
-        goal=goal_key,
+        goal=presentation_goal,
         lang=lang,
         ideal_traits=traits,
         compatibility_patterns=patterns,
@@ -1937,6 +1977,11 @@ def partner_profile_reading(
         confidence=confidence,
         synastry_score=synastry_score,
     )
+    from packages.astro_engine.vault_quality_copy import partner_symbolic_details, partner_comparison_details
+    text["details"] = partner_symbolic_details(venus_sign, moon_sign, seventh_sign, lang)
+    if partner_complete:
+        text["details"].extend(partner_comparison_details(harmony, tension, lang))
+
     return {
         "planet": "partner",
         "lang": lang,
@@ -2303,6 +2348,10 @@ def compatibility_reading(
         }.get(lang)
 
     questions = _compat_verify_questions(rel, lang)
+    copy = QUALITY_COPY["compatibility"][QUALITY_LANGS.index(lang if lang in QUALITY_LANGS else "en")]
+    strengths, friction, questions = [copy[1]], [copy[3]], [copy[2]]
+    confidence = "low"  # Deprecated; evidence_status is authoritative, not overall score.
+    time_note = None
     text = render_compatibility_reading(
         lang=lang,
         relationship_type=rel,
@@ -3079,6 +3128,11 @@ def trust_patterns_reading(
 
     behaviors = _trust_verify_behaviors(lang)
     questions = _trust_questions(rel, lang)
+    copy = QUALITY_COPY["trust"][QUALITY_LANGS.index(lang if lang in QUALITY_LANGS else "en")]
+    observed, inferred, unknown = [], [copy[1]], [copy[4]]
+    behaviors, questions = [copy[2]], [copy[2]]
+    confidence = "low"  # Deprecated; no inference of observed behavior from birth data.
+    time_note = None
     text = render_trust_patterns_reading(
         lang=lang,
         mode=mode,
