@@ -47,6 +47,7 @@ export const PROFILE_LANGS: Record<
     calendarHijri: string;
     calendarTodo: string;
     generate: string;
+    vaultContinuity: string;
     save: string;
     saved: string;
     loading: string;
@@ -124,6 +125,7 @@ export const PROFILE_LANGS: Record<
     calendarHijri: 'Hijri',
     calendarTodo: 'Alternate calendar display — conversion coming soon.',
     generate: 'Create Chart',
+    vaultContinuity: 'Create Chart previews your chart. To use Vault, choose Save Profile to store your completed birth profile on this device.',
     save: 'Save Profile',
     saved: 'Saved ✓',
     loading: 'Loading...',
@@ -203,6 +205,7 @@ export const PROFILE_LANGS: Record<
     calendarHijri: 'Хиджра',
     calendarTodo: 'Альтернативный календарь — конвертация скоро.',
     generate: 'Построить карту',
+    vaultContinuity: '«Построить карту» показывает предварительную карту. Для Vault нажмите «Сохранить профиль»: заполненные данные рождения сохранятся на этом устройстве.',
     save: 'Сохранить профиль',
     saved: 'Сохранено ✓',
     loading: 'Загрузка...',
@@ -281,6 +284,7 @@ export const PROFILE_LANGS: Record<
     calendarHijri: 'هجری قمری',
     calendarTodo: 'نمایش تقویم جایگزین — تبدیل به‌زودی.',
     generate: 'ساخت نمودار',
+    vaultContinuity: '«ساخت نمودار» پیش‌نمایش نمودار را نشان می‌دهد. برای استفاده از Vault، «ذخیره پروفایل» را بزنید تا اطلاعات کامل تولد در همین دستگاه ذخیره شود.',
     save: 'ذخیره پروفایل',
     saved: 'ذخیره شد ✓',
     loading: 'در حال بارگذاری...',
@@ -358,6 +362,7 @@ export const PROFILE_LANGS: Record<
     calendarHijri: 'هجري',
     calendarTodo: 'عرض التقويم البديل — التحويل قريباً.',
     generate: 'إنشاء الخريطة',
+    vaultContinuity: '«إنشاء الخريطة» يعرض معاينة فقط. لاستخدام Vault، يلزم اختيار «حفظ الملف» لحفظ بيانات الميلاد المكتملة على هذا الجهاز.',
     save: 'حفظ الملف',
     saved: 'تم الحفظ ✓',
     loading: 'جاري التحميل...',

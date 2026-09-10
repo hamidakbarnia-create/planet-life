@@ -53,11 +53,11 @@ def test_render_best_countries_ranked_en():
         lang="en",
     )
     assert reading["intensity"] == "strong"
-    assert reading["confidence"] == "high"
-    assert "Dubai" in reading["executive"]
-    assert "Opportunity:" in reading["executive"]
-    assert "Risk:" in reading["executive"]
-    assert "Dubai" in reading["strategic"]
+    assert reading["evidence_status"] == "unvalidated"
+    assert "Dubai" in str(reading["details"])
+    assert reading["interpretation"] and reading["limitation"]
+    assert reading["avoid"]
+    assert "Dubai" in str(reading["details"])
     assert reading["action"]
 
 
@@ -75,7 +75,7 @@ def test_render_best_countries_langs():
         reading = render_best_countries_reading(sample, goal="visibility", lang=lang)
         assert reading["executive"]
         assert reading["strategic"]
-        assert reading["confidence"] == "medium"
+        assert reading["evidence_status"] == "unvalidated"
 
 
 def test_best_countries_missing_locations_no_invented_ranks():

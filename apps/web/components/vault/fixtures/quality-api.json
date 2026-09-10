@@ -1,0 +1,2514 @@
+{
+  "en": {
+    "hot-attraction-days": {
+      "executive": "Optional attraction timing. Action: Choose a low-pressure invitation only if you want to; leave room for a clear answer. Avoid: Using a score to justify pressure, intimacy or silence.",
+      "strategic": "These windows compare symbolic timing strength for social initiative. They say nothing about another person’s interest.",
+      "technical": "action=hot_attraction · horizon=14d",
+      "headline": "Optional attraction timing",
+      "action": "Choose a low-pressure invitation only if you want to; leave room for a clear answer",
+      "avoid": "Using a score to justify pressure, intimacy or silence",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "These windows compare symbolic timing strength for social initiative. They say nothing about another person’s interest.",
+      "limitation": "Timing scores are symbolic weights, not probabilities of attraction. Predictive validity is unestablished; consent and another person’s response cannot be inferred.",
+      "explanation": "Timing scores are symbolic weights, not probabilities of attraction. Predictive validity is unestablished; consent and another person’s response cannot be inferred.",
+      "details": [],
+      "strongest_window": {
+        "date": "2026-09-10",
+        "score": 58,
+        "rating": "Mixed / Proceed with Awareness"
+      },
+      "secondary_windows": [
+        {
+          "date": "2026-09-11",
+          "score": 56,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-15",
+          "score": 49,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-12",
+          "score": 47,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-22",
+          "score": 31,
+          "rating": "Challenging"
+        }
+      ]
+    },
+    "todays-color": {
+      "executive": "An optional colour palette. Action: Try one main colour and a small accent in daylight. Avoid: Buying something only because a colour was suggested.",
+      "strategic": "A symbolic palette to try alongside your existing wardrobe.",
+      "technical": "transit_moon=virgo · date=2026-09-10",
+      "headline": "An optional colour palette",
+      "action": "Try one main colour and a small accent in daylight",
+      "avoid": "Buying something only because a colour was suggested",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "A symbolic palette to try alongside your existing wardrobe.",
+      "limitation": "This palette is a presentation prompt, not a prediction of confidence, approval or success. Your taste, comfort and setting decide.",
+      "explanation": "This palette is a presentation prompt, not a prediction of confidence, approval or success. Your taste, comfort and setting decide.",
+      "details": [
+        {
+          "label": "Date",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "Palette",
+          "value": "Stone beige · Navy"
+        }
+      ],
+      "sign": "Virgo"
+    },
+    "todays-perfume": {
+      "executive": "An optional scent direction. Action: Compare the suggested notes on a scent strip; choose a subtle amount appropriate to the space. Avoid: Heavy fragrance in shared or scent-free spaces.",
+      "strategic": "The symbolic blend combines scent notes; it does not describe your personality.",
+      "technical": "venus=taurus · moon=pisces · asc=virgo · transit_moon=virgo",
+      "headline": "An optional scent direction",
+      "action": "Compare the suggested notes on a scent strip; choose a subtle amount appropriate to the space",
+      "avoid": "Heavy fragrance in shared or scent-free spaces",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "The symbolic blend combines scent notes; it does not describe your personality.",
+      "limitation": "Scent is an optional presentation choice, not a way to secure attraction or influence others. Preference, sensitivity and venue rules take priority.",
+      "explanation": "Scent is an optional presentation choice, not a way to secure attraction or influence others. Preference, sensitivity and venue rules take priority.",
+      "details": [
+        {
+          "label": "Date",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "Scent notes",
+          "value": "rose + sandalwood · aquatic florals + soft incense · iris + clean cedar"
+        }
+      ],
+      "sign": "Taurus",
+      "fragrance_family": "floral-woody",
+      "primary_notes": "rose + sandalwood · aquatic florals + soft incense",
+      "accent_note": "iris + clean cedar",
+      "occasion": "intimate dinner",
+      "reason": "Scent notes"
+    },
+    "date-outfit": {
+      "executive": "An optional outfit direction. Action: Try the pieces together; check weather, dress code, movement and comfort before choosing. Avoid: Changing your boundaries or comfort to fit a suggested look.",
+      "strategic": "Use the symbolic clothing, colour and accessory combination as a starting point.",
+      "technical": "venus=taurus · asc=virgo · transit_moon=virgo",
+      "headline": "An optional outfit direction",
+      "action": "Try the pieces together; check weather, dress code, movement and comfort before choosing",
+      "avoid": "Changing your boundaries or comfort to fit a suggested look",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Use the symbolic clothing, colour and accessory combination as a starting point.",
+      "limitation": "The meeting score measures symbolic timing strength, not the probability of date success. This is a styling prompt, not a prediction of attraction, consent or how a meeting will go. Personal preference and practical needs decide.",
+      "explanation": "The meeting score measures symbolic timing strength, not the probability of date success. This is a styling prompt, not a prediction of attraction, consent or how a meeting will go. Personal preference and practical needs decide.",
+      "details": [
+        {
+          "label": "Symbolic meeting window",
+          "value": "23:00–00:00 · 78/100 · Europe/London",
+          "direction": "ltr"
+        },
+        {
+          "label": "Date",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "Clothing",
+          "value": "soft fabrics with refined details"
+        },
+        {
+          "label": "Palette",
+          "value": "Stone beige · Navy"
+        },
+        {
+          "label": "Accessory",
+          "value": "fine chain without a pendant"
+        }
+      ],
+      "outfit_style": "soft fabrics with refined details",
+      "primary_color": "Stone beige",
+      "accent_color": "Navy",
+      "accessories": "fine chain without a pendant",
+      "fragrance_family": "floral-woody",
+      "best_meeting_time": "23:00–00:00"
+    },
+    "live-reel-time": {
+      "executive": "Symbolic content timing. Action: Use the windows to plan a small experiment; compare results against your usual publishing baseline. Avoid: Treating a high score as predicted reach or engagement.",
+      "strategic": "Posting, filming and live windows are compared separately. Identical times and scores are grouped rather than repeated.",
+      "technical": "date=2026-09-10 · actions=social_media_post,creative_work,presentation",
+      "headline": "Symbolic content timing",
+      "action": "Use the windows to plan a small experiment; compare results against your usual publishing baseline",
+      "avoid": "Treating a high score as predicted reach or engagement",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Posting, filming and live windows are compared separately. Identical times and scores are grouped rather than repeated.",
+      "limitation": "Scores measure symbolic timing strength, not expected reach, engagement or audience response. Audience data, platform analytics, content quality and the displayed timezone remain decisive.",
+      "explanation": "Scores measure symbolic timing strength, not expected reach, engagement or audience response. Audience data, platform analytics, content quality and the displayed timezone remain decisive.",
+      "details": [
+        {
+          "label": "Date",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "Posting / Live stream",
+          "value": "23:00–00:00 · 95/100"
+        },
+        {
+          "label": "Filming",
+          "value": "23:00–00:00 · 85/100"
+        },
+        {
+          "label": "Timezone",
+          "value": "Europe/London",
+          "direction": "ltr"
+        }
+      ],
+      "reason": "Symbolic comparison weights"
+    },
+    "best-countries": {
+      "executive": "Symbolic location comparison: Shared expectations. Compare the listed places against an independently researched shortlist",
+      "strategic": "Ranks order symbolic weights within this candidate list only; they are not a recommendation to move.",
+      "technical": "pathfinder.relocation · mode=relationship · jupiter,mercury,sun,saturn · houses=2,6,10,11",
+      "headline": "Symbolic location comparison: Shared expectations",
+      "action": "Compare the listed places against an independently researched shortlist",
+      "avoid": "Choosing a destination on the ranking alone",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Ranks order symbolic weights within this candidate list only; they are not a recommendation to move.",
+      "limitation": "These comparisons cannot predict prosperity, expansion, love or relationship outcomes. Real market, legal, financial, safety and relationship evidence must guide decisions.",
+      "explanation": "These comparisons cannot predict prosperity, expansion, love or relationship outcomes. Real market, legal, financial, safety and relationship evidence must guide decisions.",
+      "details": [
+        {
+          "label": "London",
+          "value": "67/100",
+          "reason": "Moon: 0.06° from the chart axis symbolizing agreements; Venus: chart sector 9, a symbolic theme of exploration and differing perspectives; 21.25° from the axis symbolizing public roles"
+        },
+        {
+          "label": "New York",
+          "value": "66/100",
+          "reason": "Jupiter: 1.57° from the chart axis symbolizing presentation; Venus: chart sector 11, a symbolic theme of independence and collective ideas; 54.76° from the axis symbolizing public roles"
+        },
+        {
+          "label": "Paris",
+          "value": "63/100",
+          "reason": "Moon: 1.24° from the chart axis symbolizing agreements; Venus: chart sector 9, a symbolic theme of exploration and differing perspectives; 23.57° from the axis symbolizing public roles"
+        }
+      ],
+      "ranked": [
+        {
+          "label": "London",
+          "location": "51.5074,-0.1278",
+          "score": 67,
+          "verdict": "positive",
+          "strongest_use_case": "home",
+          "goal_area": "love",
+          "opportunity": "Moon: 0.06° from the chart axis symbolizing agreements; Venus: chart sector 9, a symbolic theme of exploration and differing perspectives; 21.25° from the axis symbolizing public roles",
+          "symbolic_reason": "Moon: 0.06° from the chart axis symbolizing agreements; Venus: chart sector 9, a symbolic theme of exploration and differing perspectives; 21.25° from the axis symbolizing public roles",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "New York",
+          "location": "40.7128,-74.0060",
+          "score": 66,
+          "verdict": "positive",
+          "strongest_use_case": "community",
+          "goal_area": "love",
+          "opportunity": "Jupiter: 1.57° from the chart axis symbolizing presentation; Venus: chart sector 11, a symbolic theme of independence and collective ideas; 54.76° from the axis symbolizing public roles",
+          "symbolic_reason": "Jupiter: 1.57° from the chart axis symbolizing presentation; Venus: chart sector 11, a symbolic theme of independence and collective ideas; 54.76° from the axis symbolizing public roles",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "Paris",
+          "location": "48.8566,2.3522",
+          "score": 63,
+          "verdict": "mixed",
+          "strongest_use_case": "career",
+          "goal_area": "love",
+          "opportunity": "Moon: 1.24° from the chart axis symbolizing agreements; Venus: chart sector 9, a symbolic theme of exploration and differing perspectives; 23.57° from the axis symbolizing public roles",
+          "symbolic_reason": "Moon: 1.24° from the chart axis symbolizing agreements; Venus: chart sector 9, a symbolic theme of exploration and differing perspectives; 23.57° from the axis symbolizing public roles",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        }
+      ],
+      "missing_inputs": []
+    },
+    "business-geography": {
+      "executive": "Symbolic business location comparison. Compare the listed places against an independently researched shortlist",
+      "strategic": "Ranks order symbolic weights within this candidate list only; they are not a recommendation to move.",
+      "technical": "pathfinder.relocation · mode=business · jupiter,mercury,sun,saturn · houses=2,6,10,11",
+      "headline": "Symbolic business location comparison",
+      "action": "Compare the listed places against an independently researched shortlist",
+      "avoid": "Choosing a destination on the ranking alone",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Ranks order symbolic weights within this candidate list only; they are not a recommendation to move.",
+      "limitation": "These comparisons cannot predict prosperity, expansion, love or relationship outcomes. Real market, legal, financial, safety and relationship evidence must guide decisions.",
+      "explanation": "These comparisons cannot predict prosperity, expansion, love or relationship outcomes. Real market, legal, financial, safety and relationship evidence must guide decisions.",
+      "details": [
+        {
+          "label": "London",
+          "value": "62/100",
+          "reason": "Mercury: 4.36° from the chart axis symbolizing public roles; Sun: chart sector 10, a symbolic theme of responsibilities and long-term planning; 14.11° from the axis symbolizing public roles"
+        },
+        {
+          "label": "Paris",
+          "value": "60/100",
+          "reason": "Sun: chart sector 10, a symbolic theme of responsibilities and long-term planning; 11.79° from the axis symbolizing public roles"
+        },
+        {
+          "label": "New York",
+          "value": "58/100",
+          "reason": "Jupiter: 1.57° from the chart axis symbolizing presentation; Mercury: chart sector 11, a symbolic theme of independence and collective ideas; 38.69° from the axis symbolizing presentation"
+        }
+      ],
+      "ranked": [
+        {
+          "label": "London",
+          "location": "51.5074,-0.1278",
+          "score": 62,
+          "verdict": "positive",
+          "strongest_use_case": "career",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "Mercury: 4.36° from the chart axis symbolizing public roles; Sun: chart sector 10, a symbolic theme of responsibilities and long-term planning; 14.11° from the axis symbolizing public roles",
+          "symbolic_reason": "Mercury: 4.36° from the chart axis symbolizing public roles; Sun: chart sector 10, a symbolic theme of responsibilities and long-term planning; 14.11° from the axis symbolizing public roles",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "Paris",
+          "location": "48.8566,2.3522",
+          "score": 60,
+          "verdict": "mixed",
+          "strongest_use_case": "career",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "Sun: chart sector 10, a symbolic theme of responsibilities and long-term planning; 11.79° from the axis symbolizing public roles",
+          "symbolic_reason": "Sun: chart sector 10, a symbolic theme of responsibilities and long-term planning; 11.79° from the axis symbolizing public roles",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "New York",
+          "location": "40.7128,-74.0060",
+          "score": 58,
+          "verdict": "positive",
+          "strongest_use_case": "community",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "Jupiter: 1.57° from the chart axis symbolizing presentation; Mercury: chart sector 11, a symbolic theme of independence and collective ideas; 38.69° from the axis symbolizing presentation",
+          "symbolic_reason": "Jupiter: 1.57° from the chart axis symbolizing presentation; Mercury: chart sector 11, a symbolic theme of independence and collective ideas; 38.69° from the axis symbolizing presentation",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        }
+      ],
+      "missing_inputs": []
+    },
+    "partner-profile": {
+      "executive": "Optional partnership prompts. Action: Ask about priorities, boundaries and how disagreements will be discussed. Avoid: Using this sketch as a filter for people or dates.",
+      "strategic": "Use symbolic themes to explore expectations together, without defining an ideal person.",
+      "technical": "relationship_profile=romantic",
+      "headline": "Optional partnership prompts",
+      "action": "Ask about priorities, boundaries and how disagreements will be discussed",
+      "avoid": "Using this sketch as a filter for people or dates",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Use symbolic themes to explore expectations together, without defining an ideal person.",
+      "limitation": "These prompts cannot define personality, preferences or an ideal partner, and do not predict compatibility. Verify expectations through direct conversation and experience.",
+      "explanation": "These prompts cannot define personality, preferences or an ideal partner, and do not predict compatibility. Verify expectations through direct conversation and experience.",
+      "details": [
+        {
+          "label": "Presentation symbolism",
+          "value": "Taurus symbolically suggests continuity and practical resources. Which, if any, fits your experience?"
+        },
+        {
+          "label": "Shared-space symbolism / Agreement symbolism",
+          "value": "Pisces symbolically suggests imagination and room for ambiguity. Which, if any, fits your experience?"
+        },
+        {
+          "source": "two_chart_comparison",
+          "label": "Two-chart prompt: Sun / Mars",
+          "value": "The 120° pattern between the two charts is a symbolic prompt about agreements worth making explicit. Compare this with actual agreements; it describes neither person."
+        },
+        {
+          "source": "two_chart_comparison",
+          "label": "Two-chart prompt: Mars / Mercury",
+          "value": "The 0° pattern between the two charts is a symbolic prompt about shared priorities. Compare this with actual agreements; it describes neither person."
+        }
+      ],
+      "mode": "synastry",
+      "missing_inputs": [],
+      "ideal_traits": [
+        "Use symbolic themes to explore expectations together, without defining an ideal person."
+      ],
+      "compatibility_patterns": [
+        "Ask about priorities, boundaries and how disagreements will be discussed."
+      ],
+      "friction_points": [
+        "Using this sketch as a filter for people or dates."
+      ],
+      "dynamics": {
+        "financial": "Use symbolic themes to explore expectations together, without defining an ideal person.",
+        "emotional": "Use symbolic themes to explore expectations together, without defining an ideal person.",
+        "practical": "Use symbolic themes to explore expectations together, without defining an ideal person."
+      },
+      "verify_questions": [
+        "Ask about priorities, boundaries and how disagreements will be discussed."
+      ]
+    },
+    "compatibility": {
+      "executive": "Symbolic relationship comparison. Action: Discuss one shared priority and one difference using concrete examples from your relationship. Avoid: Using a score to decide whether to stay, leave or commit.",
+      "strategic": "The weights compare chart themes, not qualities measured in a relationship.",
+      "technical": "relationship_profile=romantic",
+      "headline": "Symbolic relationship comparison",
+      "action": "Discuss one shared priority and one difference using concrete examples from your relationship",
+      "avoid": "Using a score to decide whether to stay, leave or commit",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "The weights compare chart themes, not qualities measured in a relationship.",
+      "limitation": "All scores, including attraction, stability and growth, are symbolic comparison weights. They cannot establish emotional compatibility, attraction, commitment or relationship outcomes. Observable relationship evidence is decisive.",
+      "explanation": "All scores, including attraction, stability and growth, are symbolic comparison weights. They cannot establish emotional compatibility, attraction, commitment or relationship outcomes. Observable relationship evidence is decisive.",
+      "details": [
+        {
+          "label": "Emotional theme",
+          "value": "46/100"
+        },
+        {
+          "label": "Communication theme",
+          "value": "46/100"
+        },
+        {
+          "label": "Attraction theme",
+          "value": "56/100"
+        },
+        {
+          "label": "Stability theme",
+          "value": "52/100"
+        },
+        {
+          "label": "Growth theme",
+          "value": "57/100"
+        },
+        {
+          "label": "Overall",
+          "value": "50/100"
+        }
+      ],
+      "dimensions": {
+        "emotional": {
+          "score": 46,
+          "band": "mixed",
+          "hits": 10
+        },
+        "communication": {
+          "score": 46,
+          "band": "mixed",
+          "hits": 13
+        },
+        "chemistry": {
+          "score": 56,
+          "band": "mixed",
+          "hits": 11
+        },
+        "stability": {
+          "score": 52,
+          "band": "mixed",
+          "hits": 11
+        },
+        "growth": {
+          "score": 57,
+          "band": "mixed",
+          "hits": 11
+        },
+        "overall": {
+          "score": 50,
+          "band": "mixed",
+          "hits": 14
+        }
+      },
+      "overall_score": 50,
+      "missing_inputs": [],
+      "strengths": [
+        "The weights compare chart themes, not qualities measured in a relationship."
+      ],
+      "friction_points": [
+        "Using a score to decide whether to stay, leave or commit."
+      ],
+      "verify_questions": [
+        "Discuss one shared priority and one difference using concrete examples from your relationship."
+      ]
+    },
+    "trust-patterns": {
+      "executive": "Prompts for a trust conversation. Action: Choose a recent observable example and ask directly what each person expected. Avoid: Treating a symbolic pattern as evidence against someone.",
+      "strategic": "Symbolic contrasts can prompt questions about expectations, boundaries and follow-through. They are not observed behavior.",
+      "technical": "moon,mercury,venus,jupiter,saturn · verdict=never",
+      "headline": "Prompts for a trust conversation",
+      "action": "Choose a recent observable example and ask directly what each person expected",
+      "avoid": "Treating a symbolic pattern as evidence against someone",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Symbolic contrasts can prompt questions about expectations, boundaries and follow-through. They are not observed behavior.",
+      "limitation": "Trustworthiness, lying, loyalty, avoidance and actual behavior cannot be inferred from charts. Observable behavior and direct conversation remain decisive.",
+      "explanation": "Trustworthiness, lying, loyalty, avoidance and actual behavior cannot be inferred from charts. Observable behavior and direct conversation remain decisive.",
+      "details": [
+        {
+          "label": "Symbolic weight: reciprocity",
+          "value": "35/100"
+        },
+        {
+          "label": "Symbolic weight: expectations",
+          "value": "45/100"
+        },
+        {
+          "label": "Symbolic weight: clear agreements",
+          "value": "39/100"
+        },
+        {
+          "label": "Symbolic weight: boundaries",
+          "value": "45/100"
+        },
+        {
+          "label": "Symbolic weight: revisiting agreements",
+          "value": "38/100"
+        }
+      ],
+      "mode": "synastry",
+      "signals": {
+        "trust_building": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 35,
+          "hits": 10
+        },
+        "trust_pressure": {
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 11
+        },
+        "communication_reliability": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 39,
+          "hits": 9
+        },
+        "boundary_risks": {
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 11
+        },
+        "repair_opportunities": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 38,
+          "hits": 9
+        }
+      },
+      "planet_roles": {
+        "moon": {
+          "role": "emotional_consistency_safety",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 50,
+          "hits": 5
+        },
+        "mercury": {
+          "role": "communication_clarity_follow_through",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 46,
+          "hits": 4
+        },
+        "venus": {
+          "role": "reciprocity_relational_ease",
+          "band": "tension",
+          "layer": "inferred",
+          "score": 40,
+          "hits": 4
+        },
+        "jupiter": {
+          "role": "goodwill_repair_capacity",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 44,
+          "hits": 4
+        },
+        "saturn": {
+          "role": "boundaries_reliability_pressure_durability",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 3
+        }
+      },
+      "observed": [],
+      "inferred": [],
+      "unknown": [
+        "Trustworthiness, lying, loyalty, avoidance and actual behavior cannot be inferred from charts. Observable behavior and direct conversation remain decisive."
+      ],
+      "behaviors": [],
+      "questions": [
+        "Choose a recent observable example and ask directly what each person expected."
+      ],
+      "missing_inputs": []
+    }
+  },
+  "ru": {
+    "hot-attraction-days": {
+      "executive": "Необязательные окна для знакомства. Действие: Если хочется, предложите встречу без давления и оставьте возможность свободно ответить. Избегать: Давление, близость или молчание ради оценки в календаре.",
+      "strategic": "Окна сравнивают символическую выраженность времени для инициативы в общении. Они ничего не говорят об интересе другого человека.",
+      "technical": "action=hot_attraction · horizon=14d",
+      "headline": "Необязательные окна для знакомства",
+      "action": "Если хочется, предложите встречу без давления и оставьте возможность свободно ответить",
+      "avoid": "Давление, близость или молчание ради оценки в календаре",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Окна сравнивают символическую выраженность времени для инициативы в общении. Они ничего не говорят об интересе другого человека.",
+      "limitation": "Баллы — символические веса, а не вероятность притяжения. Прогностическая достоверность не установлена; согласие и ответ другого человека неизвестны.",
+      "explanation": "Баллы — символические веса, а не вероятность притяжения. Прогностическая достоверность не установлена; согласие и ответ другого человека неизвестны.",
+      "details": [],
+      "strongest_window": {
+        "date": "2026-09-10",
+        "score": 58,
+        "rating": "Mixed / Proceed with Awareness"
+      },
+      "secondary_windows": [
+        {
+          "date": "2026-09-11",
+          "score": 56,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-15",
+          "score": 49,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-12",
+          "score": 47,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-22",
+          "score": 31,
+          "rating": "Challenging"
+        }
+      ]
+    },
+    "todays-color": {
+      "executive": "Палитра на выбор. Действие: Сравните основной цвет и небольшой акцент при дневном свете. Избегать: Покупка вещи только из-за предложенного цвета.",
+      "strategic": "Символическая палитра для сочетания с тем, что уже есть в гардеробе.",
+      "technical": "transit_moon=virgo · date=2026-09-10",
+      "headline": "Палитра на выбор",
+      "action": "Сравните основной цвет и небольшой акцент при дневном свете",
+      "avoid": "Покупка вещи только из-за предложенного цвета",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Символическая палитра для сочетания с тем, что уже есть в гардеробе.",
+      "limitation": "Палитра — идея для оформления образа, а не прогноз уверенности, одобрения или успеха. Решают вкус, удобство и обстановка.",
+      "explanation": "Палитра — идея для оформления образа, а не прогноз уверенности, одобрения или успеха. Решают вкус, удобство и обстановка.",
+      "details": [
+        {
+          "label": "Дата",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "Палитра",
+          "value": "Каменный беж · Тёмно-синий"
+        }
+      ],
+      "sign": "Дева"
+    },
+    "todays-perfume": {
+      "executive": "Идея для выбора аромата. Действие: Сравните предложенные ноты на блоттере; интенсивность подбирайте с учётом места. Избегать: Насыщенный аромат в общем пространстве или там, где он запрещён.",
+      "strategic": "Символическое сочетание нот не описывает личность.",
+      "technical": "venus=taurus · moon=pisces · asc=virgo · transit_moon=virgo",
+      "headline": "Идея для выбора аромата",
+      "action": "Сравните предложенные ноты на блоттере; интенсивность подбирайте с учётом места",
+      "avoid": "Насыщенный аромат в общем пространстве или там, где он запрещён",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Символическое сочетание нот не описывает личность.",
+      "limitation": "Аромат — необязательная деталь образа, а не средство вызвать влечение или повлиять на других. Важнее вкус, чувствительность и правила места.",
+      "explanation": "Аромат — необязательная деталь образа, а не средство вызвать влечение или повлиять на других. Важнее вкус, чувствительность и правила места.",
+      "details": [
+        {
+          "label": "Дата",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "Ноты аромата",
+          "value": "роза + сандал · водные цветы + мягкий ладан · ирис + чистый кедр"
+        }
+      ],
+      "sign": "Телец",
+      "fragrance_family": "цветочно-древесный",
+      "primary_notes": "роза + сандал · водные цветы + мягкий ладан",
+      "accent_note": "ирис + чистый кедр",
+      "occasion": "камерный ужин",
+      "reason": "Ноты аромата"
+    },
+    "date-outfit": {
+      "executive": "Идея для образа. Действие: Примерьте вещи вместе; учтите погоду, дресс-код, свободу движения и удобство. Избегать: Отказ от удобства или личных границ ради предложенного образа.",
+      "strategic": "Символическое сочетание одежды, цвета и аксессуаров — отправная точка для выбора.",
+      "technical": "venus=taurus · asc=virgo · transit_moon=virgo",
+      "headline": "Идея для образа",
+      "action": "Примерьте вещи вместе; учтите погоду, дресс-код, свободу движения и удобство",
+      "avoid": "Отказ от удобства или личных границ ради предложенного образа",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Символическое сочетание одежды, цвета и аксессуаров — отправная точка для выбора.",
+      "limitation": "Оценка окна встречи — сила символического тайминга, а не вероятность удачного свидания. Это идея для стиля, а не прогноз влечения, согласия или исхода встречи. Решают личный вкус и практические потребности.",
+      "explanation": "Оценка окна встречи — сила символического тайминга, а не вероятность удачного свидания. Это идея для стиля, а не прогноз влечения, согласия или исхода встречи. Решают личный вкус и практические потребности.",
+      "details": [
+        {
+          "label": "Символическое окно встречи",
+          "value": "23:00–00:00 · 78/100 · Europe/London",
+          "direction": "ltr"
+        },
+        {
+          "label": "Дата",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "Одежда",
+          "value": "мягкие ткани и изящные детали"
+        },
+        {
+          "label": "Палитра",
+          "value": "Каменный беж · Тёмно-синий"
+        },
+        {
+          "label": "Аксессуар",
+          "value": "тонкая цепочка без подвесок"
+        }
+      ],
+      "outfit_style": "мягкие ткани и изящные детали",
+      "primary_color": "Каменный беж",
+      "accent_color": "Тёмно-синий",
+      "accessories": "тонкая цепочка без подвесок",
+      "fragrance_family": "цветочно-древесный",
+      "best_meeting_time": "23:00–00:00"
+    },
+    "live-reel-time": {
+      "executive": "Символическое время для контента. Действие: Используйте окна для небольшого эксперимента и сравните результат с обычными показателями публикаций. Избегать: Ожидание охвата или вовлечённости на основании высокого балла.",
+      "strategic": "Окна публикации, съёмки и эфира сравниваются отдельно. Одинаковые время и баллы объединены.",
+      "technical": "date=2026-09-10 · actions=social_media_post,creative_work,presentation",
+      "headline": "Символическое время для контента",
+      "action": "Используйте окна для небольшого эксперимента и сравните результат с обычными показателями публикаций",
+      "avoid": "Ожидание охвата или вовлечённости на основании высокого балла",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Окна публикации, съёмки и эфира сравниваются отдельно. Одинаковые время и баллы объединены.",
+      "limitation": "Баллы отражают символическую силу времени, а не ожидаемый охват, вовлечённость или реакцию аудитории. Решают данные аудитории, аналитика платформы, качество контента и указанный часовой пояс.",
+      "explanation": "Баллы отражают символическую силу времени, а не ожидаемый охват, вовлечённость или реакцию аудитории. Решают данные аудитории, аналитика платформы, качество контента и указанный часовой пояс.",
+      "details": [
+        {
+          "label": "Дата",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "Публикация / Эфир",
+          "value": "23:00–00:00 · 95/100"
+        },
+        {
+          "label": "Съёмка",
+          "value": "23:00–00:00 · 85/100"
+        },
+        {
+          "label": "Часовой пояс",
+          "value": "Europe/London",
+          "direction": "ltr"
+        }
+      ],
+      "reason": "Символические веса сравнения"
+    },
+    "best-countries": {
+      "executive": "Символическое сравнение мест: Общие ожидания. Сопоставьте места со списком, составленным на основе независимого исследования",
+      "strategic": "Рейтинг упорядочивает символические веса только внутри этого списка и не советует переезд.",
+      "technical": "pathfinder.relocation · mode=relationship · jupiter,mercury,sun,saturn · houses=2,6,10,11",
+      "headline": "Символическое сравнение мест: Общие ожидания",
+      "action": "Сопоставьте места со списком, составленным на основе независимого исследования",
+      "avoid": "Выбор места только по рейтингу",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Рейтинг упорядочивает символические веса только внутри этого списка и не советует переезд.",
+      "limitation": "Сравнение не предсказывает процветание, расширение бизнеса, любовь или исход отношений. Необходимы реальные рыночные, правовые, финансовые данные, сведения о безопасности и отношениях.",
+      "explanation": "Сравнение не предсказывает процветание, расширение бизнеса, любовь или исход отношений. Необходимы реальные рыночные, правовые, финансовые данные, сведения о безопасности и отношениях.",
+      "details": [
+        {
+          "label": "London",
+          "value": "67/100",
+          "reason": "Луна: 0.06° от оси карты, символизирующей тему «договорённости»; Венера: сектор карты 9, символическая тема — исследование и разные точки зрения; 21.25° от оси, символизирующей тему «общественные роли»"
+        },
+        {
+          "label": "New York",
+          "value": "66/100",
+          "reason": "Юпитер: 1.57° от оси карты, символизирующей тему «самовыражение»; Венера: сектор карты 11, символическая тема — самостоятельность и общие идеи; 54.76° от оси, символизирующей тему «общественные роли»"
+        },
+        {
+          "label": "Paris",
+          "value": "63/100",
+          "reason": "Луна: 1.24° от оси карты, символизирующей тему «договорённости»; Венера: сектор карты 9, символическая тема — исследование и разные точки зрения; 23.57° от оси, символизирующей тему «общественные роли»"
+        }
+      ],
+      "ranked": [
+        {
+          "label": "London",
+          "location": "51.5074,-0.1278",
+          "score": 67,
+          "verdict": "positive",
+          "strongest_use_case": "home",
+          "goal_area": "love",
+          "opportunity": "Луна: 0.06° от оси карты, символизирующей тему «договорённости»; Венера: сектор карты 9, символическая тема — исследование и разные точки зрения; 21.25° от оси, символизирующей тему «общественные роли»",
+          "symbolic_reason": "Луна: 0.06° от оси карты, символизирующей тему «договорённости»; Венера: сектор карты 9, символическая тема — исследование и разные точки зрения; 21.25° от оси, символизирующей тему «общественные роли»",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "New York",
+          "location": "40.7128,-74.0060",
+          "score": 66,
+          "verdict": "positive",
+          "strongest_use_case": "community",
+          "goal_area": "love",
+          "opportunity": "Юпитер: 1.57° от оси карты, символизирующей тему «самовыражение»; Венера: сектор карты 11, символическая тема — самостоятельность и общие идеи; 54.76° от оси, символизирующей тему «общественные роли»",
+          "symbolic_reason": "Юпитер: 1.57° от оси карты, символизирующей тему «самовыражение»; Венера: сектор карты 11, символическая тема — самостоятельность и общие идеи; 54.76° от оси, символизирующей тему «общественные роли»",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "Paris",
+          "location": "48.8566,2.3522",
+          "score": 63,
+          "verdict": "mixed",
+          "strongest_use_case": "career",
+          "goal_area": "love",
+          "opportunity": "Луна: 1.24° от оси карты, символизирующей тему «договорённости»; Венера: сектор карты 9, символическая тема — исследование и разные точки зрения; 23.57° от оси, символизирующей тему «общественные роли»",
+          "symbolic_reason": "Луна: 1.24° от оси карты, символизирующей тему «договорённости»; Венера: сектор карты 9, символическая тема — исследование и разные точки зрения; 23.57° от оси, символизирующей тему «общественные роли»",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        }
+      ],
+      "missing_inputs": []
+    },
+    "business-geography": {
+      "executive": "Символическое сравнение мест для бизнеса. Сопоставьте места со списком, составленным на основе независимого исследования",
+      "strategic": "Рейтинг упорядочивает символические веса только внутри этого списка и не советует переезд.",
+      "technical": "pathfinder.relocation · mode=business · jupiter,mercury,sun,saturn · houses=2,6,10,11",
+      "headline": "Символическое сравнение мест для бизнеса",
+      "action": "Сопоставьте места со списком, составленным на основе независимого исследования",
+      "avoid": "Выбор места только по рейтингу",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Рейтинг упорядочивает символические веса только внутри этого списка и не советует переезд.",
+      "limitation": "Сравнение не предсказывает процветание, расширение бизнеса, любовь или исход отношений. Необходимы реальные рыночные, правовые, финансовые данные, сведения о безопасности и отношениях.",
+      "explanation": "Сравнение не предсказывает процветание, расширение бизнеса, любовь или исход отношений. Необходимы реальные рыночные, правовые, финансовые данные, сведения о безопасности и отношениях.",
+      "details": [
+        {
+          "label": "London",
+          "value": "62/100",
+          "reason": "Меркурий: 4.36° от оси карты, символизирующей тему «общественные роли»; Солнце: сектор карты 10, символическая тема — ответственность и долгосрочное планирование; 14.11° от оси, символизирующей тему «общественные роли»"
+        },
+        {
+          "label": "Paris",
+          "value": "60/100",
+          "reason": "Солнце: сектор карты 10, символическая тема — ответственность и долгосрочное планирование; 11.79° от оси, символизирующей тему «общественные роли»"
+        },
+        {
+          "label": "New York",
+          "value": "58/100",
+          "reason": "Юпитер: 1.57° от оси карты, символизирующей тему «самовыражение»; Меркурий: сектор карты 11, символическая тема — самостоятельность и общие идеи; 38.69° от оси, символизирующей тему «самовыражение»"
+        }
+      ],
+      "ranked": [
+        {
+          "label": "London",
+          "location": "51.5074,-0.1278",
+          "score": 62,
+          "verdict": "positive",
+          "strongest_use_case": "career",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "Меркурий: 4.36° от оси карты, символизирующей тему «общественные роли»; Солнце: сектор карты 10, символическая тема — ответственность и долгосрочное планирование; 14.11° от оси, символизирующей тему «общественные роли»",
+          "symbolic_reason": "Меркурий: 4.36° от оси карты, символизирующей тему «общественные роли»; Солнце: сектор карты 10, символическая тема — ответственность и долгосрочное планирование; 14.11° от оси, символизирующей тему «общественные роли»",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "Paris",
+          "location": "48.8566,2.3522",
+          "score": 60,
+          "verdict": "mixed",
+          "strongest_use_case": "career",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "Солнце: сектор карты 10, символическая тема — ответственность и долгосрочное планирование; 11.79° от оси, символизирующей тему «общественные роли»",
+          "symbolic_reason": "Солнце: сектор карты 10, символическая тема — ответственность и долгосрочное планирование; 11.79° от оси, символизирующей тему «общественные роли»",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "New York",
+          "location": "40.7128,-74.0060",
+          "score": 58,
+          "verdict": "positive",
+          "strongest_use_case": "community",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "Юпитер: 1.57° от оси карты, символизирующей тему «самовыражение»; Меркурий: сектор карты 11, символическая тема — самостоятельность и общие идеи; 38.69° от оси, символизирующей тему «самовыражение»",
+          "symbolic_reason": "Юпитер: 1.57° от оси карты, символизирующей тему «самовыражение»; Меркурий: сектор карты 11, символическая тема — самостоятельность и общие идеи; 38.69° от оси, символизирующей тему «самовыражение»",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        }
+      ],
+      "missing_inputs": []
+    },
+    "partner-profile": {
+      "executive": "Вопросы о партнёрстве на выбор. Действие: Спросите о приоритетах, границах и способах обсуждать разногласия. Избегать: Отбор людей или партнёров для свиданий по этому описанию.",
+      "strategic": "Символические темы помогают обсуждать ожидания, но не определяют идеального человека.",
+      "technical": "relationship_profile=romantic",
+      "headline": "Вопросы о партнёрстве на выбор",
+      "action": "Спросите о приоритетах, границах и способах обсуждать разногласия",
+      "avoid": "Отбор людей или партнёров для свиданий по этому описанию",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Символические темы помогают обсуждать ожидания, но не определяют идеального человека.",
+      "limitation": "Вопросы не определяют личность, предпочтения или идеального партнёра и не предсказывают совместимость. Проверяйте ожидания разговором и опытом.",
+      "explanation": "Вопросы не определяют личность, предпочтения или идеального партнёра и не предсказывают совместимость. Проверяйте ожидания разговором и опытом.",
+      "details": [
+        {
+          "label": "Символика самовыражения",
+          "value": "Телец: символические темы — постоянство и практические ресурсы. Что из этого, если что-то подходит, отражает ваш опыт?"
+        },
+        {
+          "label": "Символика общего пространства / Символика договорённостей",
+          "value": "Рыбы: символические темы — воображение и место для неоднозначности. Что из этого, если что-то подходит, отражает ваш опыт?"
+        },
+        {
+          "source": "two_chart_comparison",
+          "label": "Вопрос по двум картам: Солнце / Марс",
+          "value": "Угол 120° между двумя картами — символический повод обсудить тему: договорённости, которые стоит уточнить. Сопоставьте её с реальными договорённостями; это не описание людей."
+        },
+        {
+          "source": "two_chart_comparison",
+          "label": "Вопрос по двум картам: Марс / Меркурий",
+          "value": "Угол 0° между двумя картами — символический повод обсудить тему: общие приоритеты. Сопоставьте её с реальными договорённостями; это не описание людей."
+        }
+      ],
+      "mode": "synastry",
+      "missing_inputs": [],
+      "ideal_traits": [
+        "Символические темы помогают обсуждать ожидания, но не определяют идеального человека."
+      ],
+      "compatibility_patterns": [
+        "Спросите о приоритетах, границах и способах обсуждать разногласия."
+      ],
+      "friction_points": [
+        "Отбор людей или партнёров для свиданий по этому описанию."
+      ],
+      "dynamics": {
+        "financial": "Символические темы помогают обсуждать ожидания, но не определяют идеального человека.",
+        "emotional": "Символические темы помогают обсуждать ожидания, но не определяют идеального человека.",
+        "practical": "Символические темы помогают обсуждать ожидания, но не определяют идеального человека."
+      },
+      "verify_questions": [
+        "Спросите о приоритетах, границах и способах обсуждать разногласия."
+      ]
+    },
+    "compatibility": {
+      "executive": "Символическое сравнение отношений. Действие: Обсудите один общий приоритет и одно различие на конкретных примерах из отношений. Избегать: Решение остаться, уйти или взять обязательства на основании балла.",
+      "strategic": "Веса сравнивают темы карт, а не измеренные качества отношений.",
+      "technical": "relationship_profile=romantic",
+      "headline": "Символическое сравнение отношений",
+      "action": "Обсудите один общий приоритет и одно различие на конкретных примерах из отношений",
+      "avoid": "Решение остаться, уйти или взять обязательства на основании балла",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Веса сравнивают темы карт, а не измеренные качества отношений.",
+      "limitation": "Все баллы, включая притяжение, стабильность и рост, — символические веса сравнения. Они не устанавливают эмоциональную совместимость, влечение, обязательства или исход отношений. Решают наблюдаемые факты отношений.",
+      "explanation": "Все баллы, включая притяжение, стабильность и рост, — символические веса сравнения. Они не устанавливают эмоциональную совместимость, влечение, обязательства или исход отношений. Решают наблюдаемые факты отношений.",
+      "details": [
+        {
+          "label": "Эмоциональная тема",
+          "value": "46/100"
+        },
+        {
+          "label": "Тема общения",
+          "value": "46/100"
+        },
+        {
+          "label": "Тема притяжения",
+          "value": "56/100"
+        },
+        {
+          "label": "Тема стабильности",
+          "value": "52/100"
+        },
+        {
+          "label": "Тема роста",
+          "value": "57/100"
+        },
+        {
+          "label": "Общий вес",
+          "value": "50/100"
+        }
+      ],
+      "dimensions": {
+        "emotional": {
+          "score": 46,
+          "band": "mixed",
+          "hits": 10
+        },
+        "communication": {
+          "score": 46,
+          "band": "mixed",
+          "hits": 13
+        },
+        "chemistry": {
+          "score": 56,
+          "band": "mixed",
+          "hits": 11
+        },
+        "stability": {
+          "score": 52,
+          "band": "mixed",
+          "hits": 11
+        },
+        "growth": {
+          "score": 57,
+          "band": "mixed",
+          "hits": 11
+        },
+        "overall": {
+          "score": 50,
+          "band": "mixed",
+          "hits": 14
+        }
+      },
+      "overall_score": 50,
+      "missing_inputs": [],
+      "strengths": [
+        "Веса сравнивают темы карт, а не измеренные качества отношений."
+      ],
+      "friction_points": [
+        "Решение остаться, уйти или взять обязательства на основании балла."
+      ],
+      "verify_questions": [
+        "Обсудите один общий приоритет и одно различие на конкретных примерах из отношений."
+      ]
+    },
+    "trust-patterns": {
+      "executive": "Вопросы для разговора о доверии. Действие: Выберите недавний конкретный пример и прямо спросите об ожиданиях каждого. Избегать: Использование символического рисунка как доказательства против человека.",
+      "strategic": "Символические различия могут подсказать вопросы об ожиданиях, границах и выполнении договорённостей. Это не наблюдения за поведением.",
+      "technical": "moon,mercury,venus,jupiter,saturn · verdict=never",
+      "headline": "Вопросы для разговора о доверии",
+      "action": "Выберите недавний конкретный пример и прямо спросите об ожиданиях каждого",
+      "avoid": "Использование символического рисунка как доказательства против человека",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "Символические различия могут подсказать вопросы об ожиданиях, границах и выполнении договорённостей. Это не наблюдения за поведением.",
+      "limitation": "Карты не устанавливают надёжность, ложь, верность, избегание или реальное поведение. Решают наблюдаемые поступки и прямой разговор.",
+      "explanation": "Карты не устанавливают надёжность, ложь, верность, избегание или реальное поведение. Решают наблюдаемые поступки и прямой разговор.",
+      "details": [
+        {
+          "label": "Символический вес: взаимность",
+          "value": "35/100"
+        },
+        {
+          "label": "Символический вес: ожидания",
+          "value": "45/100"
+        },
+        {
+          "label": "Символический вес: ясные договорённости",
+          "value": "39/100"
+        },
+        {
+          "label": "Символический вес: границы",
+          "value": "45/100"
+        },
+        {
+          "label": "Символический вес: пересмотр договорённостей",
+          "value": "38/100"
+        }
+      ],
+      "mode": "synastry",
+      "signals": {
+        "trust_building": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 35,
+          "hits": 10
+        },
+        "trust_pressure": {
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 11
+        },
+        "communication_reliability": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 39,
+          "hits": 9
+        },
+        "boundary_risks": {
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 11
+        },
+        "repair_opportunities": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 38,
+          "hits": 9
+        }
+      },
+      "planet_roles": {
+        "moon": {
+          "role": "emotional_consistency_safety",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 50,
+          "hits": 5
+        },
+        "mercury": {
+          "role": "communication_clarity_follow_through",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 46,
+          "hits": 4
+        },
+        "venus": {
+          "role": "reciprocity_relational_ease",
+          "band": "tension",
+          "layer": "inferred",
+          "score": 40,
+          "hits": 4
+        },
+        "jupiter": {
+          "role": "goodwill_repair_capacity",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 44,
+          "hits": 4
+        },
+        "saturn": {
+          "role": "boundaries_reliability_pressure_durability",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 3
+        }
+      },
+      "observed": [],
+      "inferred": [],
+      "unknown": [
+        "Карты не устанавливают надёжность, ложь, верность, избегание или реальное поведение. Решают наблюдаемые поступки и прямой разговор."
+      ],
+      "behaviors": [],
+      "questions": [
+        "Выберите недавний конкретный пример и прямо спросите об ожиданиях каждого."
+      ],
+      "missing_inputs": []
+    }
+  },
+  "fa": {
+    "hot-attraction-days": {
+      "executive": "زمان‌بندی اختیاری برای آشنایی. اقدام: اگر مایل هستید، پیشنهادی بدون فشار مطرح کنید و برای پاسخ آزادانه فضا بگذارید. پرهیز: توجیه فشار، صمیمیت یا سکوت با یک امتیاز.",
+      "strategic": "این بازه‌ها شدت نمادین زمان را برای آغاز گفتگو مقایسه می‌کنند؛ نشانه‌ای از علاقه طرف مقابل نیستند.",
+      "technical": "action=hot_attraction · horizon=14d",
+      "headline": "زمان‌بندی اختیاری برای آشنایی",
+      "action": "اگر مایل هستید، پیشنهادی بدون فشار مطرح کنید و برای پاسخ آزادانه فضا بگذارید",
+      "avoid": "توجیه فشار، صمیمیت یا سکوت با یک امتیاز",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "این بازه‌ها شدت نمادین زمان را برای آغاز گفتگو مقایسه می‌کنند؛ نشانه‌ای از علاقه طرف مقابل نیستند.",
+      "limitation": "امتیازها وزن نمادین‌اند، نه احتمال جذب. اعتبار پیش‌بینی تأیید نشده است؛ رضایت و پاسخ طرف مقابل از آن‌ها قابل استنباط نیست.",
+      "explanation": "امتیازها وزن نمادین‌اند، نه احتمال جذب. اعتبار پیش‌بینی تأیید نشده است؛ رضایت و پاسخ طرف مقابل از آن‌ها قابل استنباط نیست.",
+      "details": [],
+      "strongest_window": {
+        "date": "2026-09-10",
+        "score": 58,
+        "rating": "Mixed / Proceed with Awareness"
+      },
+      "secondary_windows": [
+        {
+          "date": "2026-09-11",
+          "score": 56,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-15",
+          "score": 49,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-12",
+          "score": 47,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-22",
+          "score": 31,
+          "rating": "Challenging"
+        }
+      ]
+    },
+    "todays-color": {
+      "executive": "پالت رنگ پیشنهادی. اقدام: یک رنگ اصلی و یک جزئیات رنگی را در نور روز کنار هم ببینید. پرهیز: خرید لباس صرفاً به دلیل رنگ پیشنهادی.",
+      "strategic": "پالتی نمادین برای امتحان‌کردن در کنار لباس‌های موجود شما.",
+      "technical": "transit_moon=virgo · date=2026-09-10",
+      "headline": "پالت رنگ پیشنهادی",
+      "action": "یک رنگ اصلی و یک جزئیات رنگی را در نور روز کنار هم ببینید",
+      "avoid": "خرید لباس صرفاً به دلیل رنگ پیشنهادی",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "پالتی نمادین برای امتحان‌کردن در کنار لباس‌های موجود شما.",
+      "limitation": "این پالت پیشنهادی برای ظاهر است، نه پیش‌بینی اعتمادبه‌نفس، تأیید یا موفقیت. سلیقه، راحتی و موقعیت شما تعیین‌کننده‌اند.",
+      "explanation": "این پالت پیشنهادی برای ظاهر است، نه پیش‌بینی اعتمادبه‌نفس، تأیید یا موفقیت. سلیقه، راحتی و موقعیت شما تعیین‌کننده‌اند.",
+      "details": [
+        {
+          "label": "تاریخ",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "پالت",
+          "value": "بژ سنگی · سرمه‌ای"
+        }
+      ],
+      "sign": "سنبله"
+    },
+    "todays-perfume": {
+      "executive": "پیشنهادی برای انتخاب رایحه. اقدام: نت‌های پیشنهادی را روی کاغذ تست مقایسه کنید و میزان ملایمی متناسب با فضا انتخاب کنید. پرهیز: رایحه سنگین در فضای مشترک یا محیط بدون عطر.",
+      "strategic": "این ترکیب نمادینِ نت‌ها توصیفی از شخصیت شما نیست.",
+      "technical": "venus=taurus · moon=pisces · asc=virgo · transit_moon=virgo",
+      "headline": "پیشنهادی برای انتخاب رایحه",
+      "action": "نت‌های پیشنهادی را روی کاغذ تست مقایسه کنید و میزان ملایمی متناسب با فضا انتخاب کنید",
+      "avoid": "رایحه سنگین در فضای مشترک یا محیط بدون عطر",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "این ترکیب نمادینِ نت‌ها توصیفی از شخصیت شما نیست.",
+      "limitation": "عطر انتخابی اختیاری برای ظاهر است، نه راهی برای جلب علاقه یا اثرگذاری بر دیگران. سلیقه، حساسیت و مقررات مکان اولویت دارند.",
+      "explanation": "عطر انتخابی اختیاری برای ظاهر است، نه راهی برای جلب علاقه یا اثرگذاری بر دیگران. سلیقه، حساسیت و مقررات مکان اولویت دارند.",
+      "details": [
+        {
+          "label": "تاریخ",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "نت‌های رایحه",
+          "value": "رز + صندل · گل‌های آبی + عود نرم · آیریس + سدر تمیز"
+        }
+      ],
+      "sign": "ثور",
+      "fragrance_family": "گلی-چوبی",
+      "primary_notes": "رز + صندل · گل‌های آبی + عود نرم",
+      "accent_note": "آیریس + سدر تمیز",
+      "occasion": "شام صمیمی",
+      "reason": "نت‌های رایحه"
+    },
+    "date-outfit": {
+      "executive": "پیشنهادی برای پوشش. اقدام: لباس‌ها را با هم امتحان کنید؛ هوا، پوشش مناسب موقعیت و راحتی حرکت را در نظر بگیرید. پرهیز: کنارگذاشتن راحتی یا مرزهای شخصی برای هماهنگی با پیشنهاد.",
+      "strategic": "ترکیب نمادین لباس، رنگ و اکسسوری می‌تواند نقطه شروع انتخاب باشد.",
+      "technical": "venus=taurus · asc=virgo · transit_moon=virgo",
+      "headline": "پیشنهادی برای پوشش",
+      "action": "لباس‌ها را با هم امتحان کنید؛ هوا، پوشش مناسب موقعیت و راحتی حرکت را در نظر بگیرید",
+      "avoid": "کنارگذاشتن راحتی یا مرزهای شخصی برای هماهنگی با پیشنهاد",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "ترکیب نمادین لباس، رنگ و اکسسوری می‌تواند نقطه شروع انتخاب باشد.",
+      "limitation": "امتیاز بازه دیدار، شدت زمان‌بندی نمادین است، نه احتمال موفقیت دیدار. این پیشنهاد درباره پوشش است، نه پیش‌بینی جذب، رضایت یا نتیجه دیدار. سلیقه و نیازهای عملی شما تعیین‌کننده‌اند.",
+      "explanation": "امتیاز بازه دیدار، شدت زمان‌بندی نمادین است، نه احتمال موفقیت دیدار. این پیشنهاد درباره پوشش است، نه پیش‌بینی جذب، رضایت یا نتیجه دیدار. سلیقه و نیازهای عملی شما تعیین‌کننده‌اند.",
+      "details": [
+        {
+          "label": "بازه نمادین دیدار",
+          "value": "23:00–00:00 · 78/100 · Europe/London",
+          "direction": "ltr"
+        },
+        {
+          "label": "تاریخ",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "پوشش",
+          "value": "پارچه‌های لطیف با جزئیات ظریف"
+        },
+        {
+          "label": "پالت",
+          "value": "بژ سنگی · سرمه‌ای"
+        },
+        {
+          "label": "اکسسوری",
+          "value": "زنجیر ظریف بدون آویز"
+        }
+      ],
+      "outfit_style": "پارچه‌های لطیف با جزئیات ظریف",
+      "primary_color": "بژ سنگی",
+      "accent_color": "سرمه‌ای",
+      "accessories": "زنجیر ظریف بدون آویز",
+      "fragrance_family": "گلی-چوبی",
+      "best_meeting_time": "23:00–00:00"
+    },
+    "live-reel-time": {
+      "executive": "زمان‌بندی نمادین محتوا. اقدام: بازه‌ها را برای آزمایشی کوچک به کار ببرید و نتیجه را با عملکرد معمول انتشار خود مقایسه کنید. پرهیز: تلقی امتیاز بالا به‌عنوان پیش‌بینی بازدید یا تعامل.",
+      "strategic": "بازه‌های انتشار، فیلم‌برداری و پخش زنده جداگانه مقایسه می‌شوند؛ زمان‌ها و امتیازهای یکسان ادغام می‌شوند.",
+      "technical": "date=2026-09-10 · actions=social_media_post,creative_work,presentation",
+      "headline": "زمان‌بندی نمادین محتوا",
+      "action": "بازه‌ها را برای آزمایشی کوچک به کار ببرید و نتیجه را با عملکرد معمول انتشار خود مقایسه کنید",
+      "avoid": "تلقی امتیاز بالا به‌عنوان پیش‌بینی بازدید یا تعامل",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "بازه‌های انتشار، فیلم‌برداری و پخش زنده جداگانه مقایسه می‌شوند؛ زمان‌ها و امتیازهای یکسان ادغام می‌شوند.",
+      "limitation": "امتیازها شدت نمادین زمان را نشان می‌دهند، نه بازدید، تعامل یا واکنش مخاطب. داده‌های مخاطبان، آمار پلتفرم، کیفیت محتوا و منطقه زمانی نمایش‌داده‌شده تعیین‌کننده‌اند.",
+      "explanation": "امتیازها شدت نمادین زمان را نشان می‌دهند، نه بازدید، تعامل یا واکنش مخاطب. داده‌های مخاطبان، آمار پلتفرم، کیفیت محتوا و منطقه زمانی نمایش‌داده‌شده تعیین‌کننده‌اند.",
+      "details": [
+        {
+          "label": "تاریخ",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "انتشار / پخش زنده",
+          "value": "23:00–00:00 · 95/100"
+        },
+        {
+          "label": "فیلم‌برداری",
+          "value": "23:00–00:00 · 85/100"
+        },
+        {
+          "label": "منطقه زمانی",
+          "value": "Europe/London",
+          "direction": "ltr"
+        }
+      ],
+      "reason": "وزن‌های مقایسه نمادین"
+    },
+    "best-countries": {
+      "executive": "مقایسه نمادین مکان‌ها: انتظارهای مشترک. مکان‌ها را با فهرستی که بر اساس تحقیق مستقل تهیه کرده‌اید مقایسه کنید",
+      "strategic": "رتبه‌ها فقط وزن‌های نمادین همین فهرست را مرتب می‌کنند؛ توصیه‌ای برای جابه‌جایی نیستند.",
+      "technical": "pathfinder.relocation · mode=relationship · jupiter,mercury,sun,saturn · houses=2,6,10,11",
+      "headline": "مقایسه نمادین مکان‌ها: انتظارهای مشترک",
+      "action": "مکان‌ها را با فهرستی که بر اساس تحقیق مستقل تهیه کرده‌اید مقایسه کنید",
+      "avoid": "انتخاب مقصد صرفاً بر اساس رتبه",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "رتبه‌ها فقط وزن‌های نمادین همین فهرست را مرتب می‌کنند؛ توصیه‌ای برای جابه‌جایی نیستند.",
+      "limitation": "این مقایسه‌ها رفاه، گسترش کسب‌وکار، عشق یا نتیجه رابطه را پیش‌بینی نمی‌کنند. شواهد واقعی بازار، حقوقی، مالی، ایمنی و رابطه باید مبنای تصمیم باشند.",
+      "explanation": "این مقایسه‌ها رفاه، گسترش کسب‌وکار، عشق یا نتیجه رابطه را پیش‌بینی نمی‌کنند. شواهد واقعی بازار، حقوقی، مالی، ایمنی و رابطه باید مبنای تصمیم باشند.",
+      "details": [
+        {
+          "label": "London",
+          "value": "67/100",
+          "reason": "ماه: فاصله 0.06 درجه از محور نمادین توافق‌ها در چارت؛ زهره: بخش 9 چارت، با مضمون نمادین کاوش و دیدگاه‌های متفاوت؛ فاصله 21.25 درجه از محور نمادین نقش‌های اجتماعی"
+        },
+        {
+          "label": "New York",
+          "value": "66/100",
+          "reason": "مشتری: فاصله 1.57 درجه از محور نمادین نحوه حضور در چارت؛ زهره: بخش 11 چارت، با مضمون نمادین استقلال و ایده‌های جمعی؛ فاصله 54.76 درجه از محور نمادین نقش‌های اجتماعی"
+        },
+        {
+          "label": "Paris",
+          "value": "63/100",
+          "reason": "ماه: فاصله 1.24 درجه از محور نمادین توافق‌ها در چارت؛ زهره: بخش 9 چارت، با مضمون نمادین کاوش و دیدگاه‌های متفاوت؛ فاصله 23.57 درجه از محور نمادین نقش‌های اجتماعی"
+        }
+      ],
+      "ranked": [
+        {
+          "label": "London",
+          "location": "51.5074,-0.1278",
+          "score": 67,
+          "verdict": "positive",
+          "strongest_use_case": "home",
+          "goal_area": "love",
+          "opportunity": "ماه: فاصله 0.06 درجه از محور نمادین توافق‌ها در چارت؛ زهره: بخش 9 چارت، با مضمون نمادین کاوش و دیدگاه‌های متفاوت؛ فاصله 21.25 درجه از محور نمادین نقش‌های اجتماعی",
+          "symbolic_reason": "ماه: فاصله 0.06 درجه از محور نمادین توافق‌ها در چارت؛ زهره: بخش 9 چارت، با مضمون نمادین کاوش و دیدگاه‌های متفاوت؛ فاصله 21.25 درجه از محور نمادین نقش‌های اجتماعی",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "New York",
+          "location": "40.7128,-74.0060",
+          "score": 66,
+          "verdict": "positive",
+          "strongest_use_case": "community",
+          "goal_area": "love",
+          "opportunity": "مشتری: فاصله 1.57 درجه از محور نمادین نحوه حضور در چارت؛ زهره: بخش 11 چارت، با مضمون نمادین استقلال و ایده‌های جمعی؛ فاصله 54.76 درجه از محور نمادین نقش‌های اجتماعی",
+          "symbolic_reason": "مشتری: فاصله 1.57 درجه از محور نمادین نحوه حضور در چارت؛ زهره: بخش 11 چارت، با مضمون نمادین استقلال و ایده‌های جمعی؛ فاصله 54.76 درجه از محور نمادین نقش‌های اجتماعی",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "Paris",
+          "location": "48.8566,2.3522",
+          "score": 63,
+          "verdict": "mixed",
+          "strongest_use_case": "career",
+          "goal_area": "love",
+          "opportunity": "ماه: فاصله 1.24 درجه از محور نمادین توافق‌ها در چارت؛ زهره: بخش 9 چارت، با مضمون نمادین کاوش و دیدگاه‌های متفاوت؛ فاصله 23.57 درجه از محور نمادین نقش‌های اجتماعی",
+          "symbolic_reason": "ماه: فاصله 1.24 درجه از محور نمادین توافق‌ها در چارت؛ زهره: بخش 9 چارت، با مضمون نمادین کاوش و دیدگاه‌های متفاوت؛ فاصله 23.57 درجه از محور نمادین نقش‌های اجتماعی",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        }
+      ],
+      "missing_inputs": []
+    },
+    "business-geography": {
+      "executive": "مقایسه نمادین مکان‌های کاری. مکان‌ها را با فهرستی که بر اساس تحقیق مستقل تهیه کرده‌اید مقایسه کنید",
+      "strategic": "رتبه‌ها فقط وزن‌های نمادین همین فهرست را مرتب می‌کنند؛ توصیه‌ای برای جابه‌جایی نیستند.",
+      "technical": "pathfinder.relocation · mode=business · jupiter,mercury,sun,saturn · houses=2,6,10,11",
+      "headline": "مقایسه نمادین مکان‌های کاری",
+      "action": "مکان‌ها را با فهرستی که بر اساس تحقیق مستقل تهیه کرده‌اید مقایسه کنید",
+      "avoid": "انتخاب مقصد صرفاً بر اساس رتبه",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "رتبه‌ها فقط وزن‌های نمادین همین فهرست را مرتب می‌کنند؛ توصیه‌ای برای جابه‌جایی نیستند.",
+      "limitation": "این مقایسه‌ها رفاه، گسترش کسب‌وکار، عشق یا نتیجه رابطه را پیش‌بینی نمی‌کنند. شواهد واقعی بازار، حقوقی، مالی، ایمنی و رابطه باید مبنای تصمیم باشند.",
+      "explanation": "این مقایسه‌ها رفاه، گسترش کسب‌وکار، عشق یا نتیجه رابطه را پیش‌بینی نمی‌کنند. شواهد واقعی بازار، حقوقی، مالی، ایمنی و رابطه باید مبنای تصمیم باشند.",
+      "details": [
+        {
+          "label": "London",
+          "value": "62/100",
+          "reason": "عطارد: فاصله 4.36 درجه از محور نمادین نقش‌های اجتماعی در چارت؛ خورشید: بخش 10 چارت، با مضمون نمادین مسئولیت‌ها و برنامه‌ریزی بلندمدت؛ فاصله 14.11 درجه از محور نمادین نقش‌های اجتماعی"
+        },
+        {
+          "label": "Paris",
+          "value": "60/100",
+          "reason": "خورشید: بخش 10 چارت، با مضمون نمادین مسئولیت‌ها و برنامه‌ریزی بلندمدت؛ فاصله 11.79 درجه از محور نمادین نقش‌های اجتماعی"
+        },
+        {
+          "label": "New York",
+          "value": "58/100",
+          "reason": "مشتری: فاصله 1.57 درجه از محور نمادین نحوه حضور در چارت؛ عطارد: بخش 11 چارت، با مضمون نمادین استقلال و ایده‌های جمعی؛ فاصله 38.69 درجه از محور نمادین نحوه حضور"
+        }
+      ],
+      "ranked": [
+        {
+          "label": "London",
+          "location": "51.5074,-0.1278",
+          "score": 62,
+          "verdict": "positive",
+          "strongest_use_case": "career",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "عطارد: فاصله 4.36 درجه از محور نمادین نقش‌های اجتماعی در چارت؛ خورشید: بخش 10 چارت، با مضمون نمادین مسئولیت‌ها و برنامه‌ریزی بلندمدت؛ فاصله 14.11 درجه از محور نمادین نقش‌های اجتماعی",
+          "symbolic_reason": "عطارد: فاصله 4.36 درجه از محور نمادین نقش‌های اجتماعی در چارت؛ خورشید: بخش 10 چارت، با مضمون نمادین مسئولیت‌ها و برنامه‌ریزی بلندمدت؛ فاصله 14.11 درجه از محور نمادین نقش‌های اجتماعی",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "Paris",
+          "location": "48.8566,2.3522",
+          "score": 60,
+          "verdict": "mixed",
+          "strongest_use_case": "career",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "خورشید: بخش 10 چارت، با مضمون نمادین مسئولیت‌ها و برنامه‌ریزی بلندمدت؛ فاصله 11.79 درجه از محور نمادین نقش‌های اجتماعی",
+          "symbolic_reason": "خورشید: بخش 10 چارت، با مضمون نمادین مسئولیت‌ها و برنامه‌ریزی بلندمدت؛ فاصله 11.79 درجه از محور نمادین نقش‌های اجتماعی",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "New York",
+          "location": "40.7128,-74.0060",
+          "score": 58,
+          "verdict": "positive",
+          "strongest_use_case": "community",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "مشتری: فاصله 1.57 درجه از محور نمادین نحوه حضور در چارت؛ عطارد: بخش 11 چارت، با مضمون نمادین استقلال و ایده‌های جمعی؛ فاصله 38.69 درجه از محور نمادین نحوه حضور",
+          "symbolic_reason": "مشتری: فاصله 1.57 درجه از محور نمادین نحوه حضور در چارت؛ عطارد: بخش 11 چارت، با مضمون نمادین استقلال و ایده‌های جمعی؛ فاصله 38.69 درجه از محور نمادین نحوه حضور",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        }
+      ],
+      "missing_inputs": []
+    },
+    "partner-profile": {
+      "executive": "پرسش‌های اختیاری درباره همراهی. اقدام: درباره اولویت‌ها، مرزها و شیوه گفتگو هنگام اختلاف بپرسید. پرهیز: استفاده از این طرح برای گزینش افراد یا قرارهای آشنایی.",
+      "strategic": "مضمون‌های نمادین را برای بررسی مشترک انتظارها به کار ببرید، بدون تعریف فرد ایده‌آل.",
+      "technical": "relationship_profile=romantic",
+      "headline": "پرسش‌های اختیاری درباره همراهی",
+      "action": "درباره اولویت‌ها، مرزها و شیوه گفتگو هنگام اختلاف بپرسید",
+      "avoid": "استفاده از این طرح برای گزینش افراد یا قرارهای آشنایی",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "مضمون‌های نمادین را برای بررسی مشترک انتظارها به کار ببرید، بدون تعریف فرد ایده‌آل.",
+      "limitation": "این پرسش‌ها شخصیت، ترجیح یا شریک ایده‌آل را تعریف نمی‌کنند و سازگاری را پیش‌بینی نمی‌کنند. انتظارها را با گفتگوی مستقیم و تجربه بررسی کنید.",
+      "explanation": "این پرسش‌ها شخصیت، ترجیح یا شریک ایده‌آل را تعریف نمی‌کنند و سازگاری را پیش‌بینی نمی‌کنند. انتظارها را با گفتگوی مستقیم و تجربه بررسی کنید.",
+      "details": [
+        {
+          "label": "نمادهای بیان فردی",
+          "value": "ثور از نظر نمادین به تداوم و امکانات عملی اشاره دارد. آیا چیزی از این مضمون با تجربه شما سازگار است؟"
+        },
+        {
+          "label": "نمادهای فضای مشترک / نمادهای توافق",
+          "value": "حوت از نظر نمادین به تخیل و پذیرش ابهام اشاره دارد. آیا چیزی از این مضمون با تجربه شما سازگار است؟"
+        },
+        {
+          "source": "two_chart_comparison",
+          "label": "پرسش از مقایسه دو چارت: خورشید / مریخ",
+          "value": "الگوی 120 درجه میان دو چارت، این موضوع نمادین را مطرح می‌کند: توافق‌هایی که بهتر است روشن شوند. آن را با توافق‌های واقعی مقایسه کنید؛ این توصیف هیچ‌یک از افراد نیست."
+        },
+        {
+          "source": "two_chart_comparison",
+          "label": "پرسش از مقایسه دو چارت: مریخ / عطارد",
+          "value": "الگوی 0 درجه میان دو چارت، این موضوع نمادین را مطرح می‌کند: اولویت‌های مشترک. آن را با توافق‌های واقعی مقایسه کنید؛ این توصیف هیچ‌یک از افراد نیست."
+        }
+      ],
+      "mode": "synastry",
+      "missing_inputs": [],
+      "ideal_traits": [
+        "مضمون‌های نمادین را برای بررسی مشترک انتظارها به کار ببرید، بدون تعریف فرد ایده‌آل."
+      ],
+      "compatibility_patterns": [
+        "درباره اولویت‌ها، مرزها و شیوه گفتگو هنگام اختلاف بپرسید."
+      ],
+      "friction_points": [
+        "استفاده از این طرح برای گزینش افراد یا قرارهای آشنایی."
+      ],
+      "dynamics": {
+        "financial": "مضمون‌های نمادین را برای بررسی مشترک انتظارها به کار ببرید، بدون تعریف فرد ایده‌آل.",
+        "emotional": "مضمون‌های نمادین را برای بررسی مشترک انتظارها به کار ببرید، بدون تعریف فرد ایده‌آل.",
+        "practical": "مضمون‌های نمادین را برای بررسی مشترک انتظارها به کار ببرید، بدون تعریف فرد ایده‌آل."
+      },
+      "verify_questions": [
+        "درباره اولویت‌ها، مرزها و شیوه گفتگو هنگام اختلاف بپرسید."
+      ]
+    },
+    "compatibility": {
+      "executive": "مقایسه نمادین رابطه. اقدام: یک اولویت مشترک و یک تفاوت را با مثال‌های مشخص از رابطه خود بررسی کنید. پرهیز: تصمیم برای ماندن، رفتن یا تعهد بر اساس امتیاز.",
+      "strategic": "وزن‌ها مضمون‌های نمودار را مقایسه می‌کنند، نه ویژگی‌های اندازه‌گیری‌شده رابطه را.",
+      "technical": "relationship_profile=romantic",
+      "headline": "مقایسه نمادین رابطه",
+      "action": "یک اولویت مشترک و یک تفاوت را با مثال‌های مشخص از رابطه خود بررسی کنید",
+      "avoid": "تصمیم برای ماندن، رفتن یا تعهد بر اساس امتیاز",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "وزن‌ها مضمون‌های نمودار را مقایسه می‌کنند، نه ویژگی‌های اندازه‌گیری‌شده رابطه را.",
+      "limitation": "همه امتیازها، از جمله جذب، ثبات و رشد، وزن مقایسه نمادین‌اند. آن‌ها سازگاری عاطفی، علاقه، تعهد یا نتیجه رابطه را مشخص نمی‌کنند. شواهد قابل مشاهده رابطه تعیین‌کننده‌اند.",
+      "explanation": "همه امتیازها، از جمله جذب، ثبات و رشد، وزن مقایسه نمادین‌اند. آن‌ها سازگاری عاطفی، علاقه، تعهد یا نتیجه رابطه را مشخص نمی‌کنند. شواهد قابل مشاهده رابطه تعیین‌کننده‌اند.",
+      "details": [
+        {
+          "label": "مضمون عاطفی",
+          "value": "46/100"
+        },
+        {
+          "label": "مضمون گفتگو",
+          "value": "46/100"
+        },
+        {
+          "label": "مضمون جذب",
+          "value": "56/100"
+        },
+        {
+          "label": "مضمون ثبات",
+          "value": "52/100"
+        },
+        {
+          "label": "مضمون رشد",
+          "value": "57/100"
+        },
+        {
+          "label": "کلی",
+          "value": "50/100"
+        }
+      ],
+      "dimensions": {
+        "emotional": {
+          "score": 46,
+          "band": "mixed",
+          "hits": 10
+        },
+        "communication": {
+          "score": 46,
+          "band": "mixed",
+          "hits": 13
+        },
+        "chemistry": {
+          "score": 56,
+          "band": "mixed",
+          "hits": 11
+        },
+        "stability": {
+          "score": 52,
+          "band": "mixed",
+          "hits": 11
+        },
+        "growth": {
+          "score": 57,
+          "band": "mixed",
+          "hits": 11
+        },
+        "overall": {
+          "score": 50,
+          "band": "mixed",
+          "hits": 14
+        }
+      },
+      "overall_score": 50,
+      "missing_inputs": [],
+      "strengths": [
+        "وزن‌ها مضمون‌های نمودار را مقایسه می‌کنند، نه ویژگی‌های اندازه‌گیری‌شده رابطه را."
+      ],
+      "friction_points": [
+        "تصمیم برای ماندن، رفتن یا تعهد بر اساس امتیاز."
+      ],
+      "verify_questions": [
+        "یک اولویت مشترک و یک تفاوت را با مثال‌های مشخص از رابطه خود بررسی کنید."
+      ]
+    },
+    "trust-patterns": {
+      "executive": "پرسش‌هایی برای گفتگو درباره اعتماد. اقدام: یک نمونه مشخص و اخیر انتخاب کنید و مستقیم درباره انتظار هر دو نفر بپرسید. پرهیز: استفاده از الگوی نمادین به‌عنوان مدرکی علیه کسی.",
+      "strategic": "تفاوت‌های نمادین می‌توانند پرسش‌هایی درباره انتظارها، مرزها و عمل به توافق‌ها ایجاد کنند؛ مشاهده رفتار نیستند.",
+      "technical": "moon,mercury,venus,jupiter,saturn · verdict=never",
+      "headline": "پرسش‌هایی برای گفتگو درباره اعتماد",
+      "action": "یک نمونه مشخص و اخیر انتخاب کنید و مستقیم درباره انتظار هر دو نفر بپرسید",
+      "avoid": "استفاده از الگوی نمادین به‌عنوان مدرکی علیه کسی",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "تفاوت‌های نمادین می‌توانند پرسش‌هایی درباره انتظارها، مرزها و عمل به توافق‌ها ایجاد کنند؛ مشاهده رفتار نیستند.",
+      "limitation": "اعتمادپذیری، دروغ، وفاداری، دوری‌کردن و رفتار واقعی از نمودار قابل استنباط نیست. رفتار قابل مشاهده و گفتگوی مستقیم تعیین‌کننده‌اند.",
+      "explanation": "اعتمادپذیری، دروغ، وفاداری، دوری‌کردن و رفتار واقعی از نمودار قابل استنباط نیست. رفتار قابل مشاهده و گفتگوی مستقیم تعیین‌کننده‌اند.",
+      "details": [
+        {
+          "label": "وزن نمادین: همراهی متقابل",
+          "value": "35/100"
+        },
+        {
+          "label": "وزن نمادین: انتظارها",
+          "value": "45/100"
+        },
+        {
+          "label": "وزن نمادین: توافق‌های روشن",
+          "value": "39/100"
+        },
+        {
+          "label": "وزن نمادین: مرزها",
+          "value": "45/100"
+        },
+        {
+          "label": "وزن نمادین: بازنگری توافق‌ها",
+          "value": "38/100"
+        }
+      ],
+      "mode": "synastry",
+      "signals": {
+        "trust_building": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 35,
+          "hits": 10
+        },
+        "trust_pressure": {
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 11
+        },
+        "communication_reliability": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 39,
+          "hits": 9
+        },
+        "boundary_risks": {
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 11
+        },
+        "repair_opportunities": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 38,
+          "hits": 9
+        }
+      },
+      "planet_roles": {
+        "moon": {
+          "role": "emotional_consistency_safety",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 50,
+          "hits": 5
+        },
+        "mercury": {
+          "role": "communication_clarity_follow_through",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 46,
+          "hits": 4
+        },
+        "venus": {
+          "role": "reciprocity_relational_ease",
+          "band": "tension",
+          "layer": "inferred",
+          "score": 40,
+          "hits": 4
+        },
+        "jupiter": {
+          "role": "goodwill_repair_capacity",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 44,
+          "hits": 4
+        },
+        "saturn": {
+          "role": "boundaries_reliability_pressure_durability",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 3
+        }
+      },
+      "observed": [],
+      "inferred": [],
+      "unknown": [
+        "اعتمادپذیری، دروغ، وفاداری، دوری‌کردن و رفتار واقعی از نمودار قابل استنباط نیست. رفتار قابل مشاهده و گفتگوی مستقیم تعیین‌کننده‌اند."
+      ],
+      "behaviors": [],
+      "questions": [
+        "یک نمونه مشخص و اخیر انتخاب کنید و مستقیم درباره انتظار هر دو نفر بپرسید."
+      ],
+      "missing_inputs": []
+    }
+  },
+  "ar": {
+    "hot-attraction-days": {
+      "executive": "توقيت اختياري للتعارف. الإجراء: يمكن اقتراح لقاء بلا ضغط عند الرغبة، مع إتاحة حرية الإجابة. ما ينبغي تجنّبه: استخدام الدرجة لتبرير الضغط أو الحميمية أو الصمت.",
+      "strategic": "تقارن هذه النوافذ قوة التوقيت الرمزية للمبادرة بالتواصل، ولا تدل على اهتمام الطرف الآخر.",
+      "technical": "action=hot_attraction · horizon=14d",
+      "headline": "توقيت اختياري للتعارف",
+      "action": "يمكن اقتراح لقاء بلا ضغط عند الرغبة، مع إتاحة حرية الإجابة",
+      "avoid": "استخدام الدرجة لتبرير الضغط أو الحميمية أو الصمت",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "تقارن هذه النوافذ قوة التوقيت الرمزية للمبادرة بالتواصل، ولا تدل على اهتمام الطرف الآخر.",
+      "limitation": "الدرجات أوزان رمزية وليست احتمالات للانجذاب. لم تثبت صلاحيتها للتنبؤ؛ ولا يمكن استنتاج الموافقة أو رد الطرف الآخر.",
+      "explanation": "الدرجات أوزان رمزية وليست احتمالات للانجذاب. لم تثبت صلاحيتها للتنبؤ؛ ولا يمكن استنتاج الموافقة أو رد الطرف الآخر.",
+      "details": [],
+      "strongest_window": {
+        "date": "2026-09-10",
+        "score": 58,
+        "rating": "Mixed / Proceed with Awareness"
+      },
+      "secondary_windows": [
+        {
+          "date": "2026-09-11",
+          "score": 56,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-15",
+          "score": 49,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-12",
+          "score": 47,
+          "rating": "Mixed / Proceed with Awareness"
+        },
+        {
+          "date": "2026-09-22",
+          "score": 31,
+          "rating": "Challenging"
+        }
+      ]
+    },
+    "todays-color": {
+      "executive": "لوحة ألوان اختيارية. الإجراء: يمكن مقارنة لون أساسي ولمسة لونية صغيرة في ضوء النهار. ما ينبغي تجنّبه: شراء قطعة لمجرد اقتراح لونها.",
+      "strategic": "لوحة رمزية لتجربتها مع الملابس المتاحة بالفعل.",
+      "technical": "transit_moon=virgo · date=2026-09-10",
+      "headline": "لوحة ألوان اختيارية",
+      "action": "يمكن مقارنة لون أساسي ولمسة لونية صغيرة في ضوء النهار",
+      "avoid": "شراء قطعة لمجرد اقتراح لونها",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "لوحة رمزية لتجربتها مع الملابس المتاحة بالفعل.",
+      "limitation": "هذه فكرة لتنسيق المظهر، وليست توقعاً للثقة أو القبول أو النجاح. الذوق والراحة وطبيعة المكان هي المرجع.",
+      "explanation": "هذه فكرة لتنسيق المظهر، وليست توقعاً للثقة أو القبول أو النجاح. الذوق والراحة وطبيعة المكان هي المرجع.",
+      "details": [
+        {
+          "label": "التاريخ",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "الألوان",
+          "value": "بيج حجري · كحلي"
+        }
+      ],
+      "sign": "العذراء"
+    },
+    "todays-perfume": {
+      "executive": "اتجاه عطري اختياري. الإجراء: يمكن مقارنة النغمات على ورقة اختبار واختيار كمية خفيفة تناسب المكان. ما ينبغي تجنّبه: العطر القوي في المساحات المشتركة أو الأماكن التي تمنع العطور.",
+      "strategic": "يجمع المزيج الرمزي بين نغمات عطرية، ولا يصف الشخصية.",
+      "technical": "venus=taurus · moon=pisces · asc=virgo · transit_moon=virgo",
+      "headline": "اتجاه عطري اختياري",
+      "action": "يمكن مقارنة النغمات على ورقة اختبار واختيار كمية خفيفة تناسب المكان",
+      "avoid": "العطر القوي في المساحات المشتركة أو الأماكن التي تمنع العطور",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "يجمع المزيج الرمزي بين نغمات عطرية، ولا يصف الشخصية.",
+      "limitation": "العطر خيار اختياري للمظهر، وليس وسيلة لضمان الانجذاب أو التأثير في الآخرين. الأولوية للتفضيل والحساسية وقواعد المكان.",
+      "explanation": "العطر خيار اختياري للمظهر، وليس وسيلة لضمان الانجذاب أو التأثير في الآخرين. الأولوية للتفضيل والحساسية وقواعد المكان.",
+      "details": [
+        {
+          "label": "التاريخ",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "النغمات العطرية",
+          "value": "ورد + صندل · زهور مائية + بخور ناعم · سوسن + أرز نظيف"
+        }
+      ],
+      "sign": "الثور",
+      "fragrance_family": "زهري-خشبي",
+      "primary_notes": "ورد + صندل · زهور مائية + بخور ناعم",
+      "accent_note": "سوسن + أرز نظيف",
+      "occasion": "عشاء حميمي",
+      "reason": "النغمات العطرية"
+    },
+    "date-outfit": {
+      "executive": "اقتراح اختياري للإطلالة. الإجراء: تجربة القطع معاً ومراجعة الطقس وقواعد اللباس وحرية الحركة تساعد في الاختيار. ما ينبغي تجنّبه: التخلي عن الراحة أو الحدود الشخصية من أجل إطلالة مقترحة.",
+      "strategic": "يمكن استخدام التنسيق الرمزي للملابس والألوان والإكسسوارات كنقطة بداية.",
+      "technical": "venus=taurus · asc=virgo · transit_moon=virgo",
+      "headline": "اقتراح اختياري للإطلالة",
+      "action": "تجربة القطع معاً ومراجعة الطقس وقواعد اللباس وحرية الحركة تساعد في الاختيار",
+      "avoid": "التخلي عن الراحة أو الحدود الشخصية من أجل إطلالة مقترحة",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "يمكن استخدام التنسيق الرمزي للملابس والألوان والإكسسوارات كنقطة بداية.",
+      "limitation": "درجة فترة اللقاء تعبّر عن قوة التوقيت الرمزي، لا عن احتمال نجاح اللقاء. هذا اقتراح للتنسيق، وليس توقعاً للانجذاب أو الموافقة أو نتيجة اللقاء. التفضيل الشخصي والاحتياجات العملية هي المرجع.",
+      "explanation": "درجة فترة اللقاء تعبّر عن قوة التوقيت الرمزي، لا عن احتمال نجاح اللقاء. هذا اقتراح للتنسيق، وليس توقعاً للانجذاب أو الموافقة أو نتيجة اللقاء. التفضيل الشخصي والاحتياجات العملية هي المرجع.",
+      "details": [
+        {
+          "label": "فترة رمزية للقاء",
+          "value": "23:00–00:00 · 78/100 · Europe/London",
+          "direction": "ltr"
+        },
+        {
+          "label": "التاريخ",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "الملابس",
+          "value": "أقمشة ناعمة بتفاصيل أنيقة"
+        },
+        {
+          "label": "الألوان",
+          "value": "بيج حجري · كحلي"
+        },
+        {
+          "label": "الإكسسوار",
+          "value": "سلسلة بسيطة"
+        }
+      ],
+      "outfit_style": "أقمشة ناعمة بتفاصيل أنيقة",
+      "primary_color": "بيج حجري",
+      "accent_color": "كحلي",
+      "accessories": "سلسلة بسيطة",
+      "fragrance_family": "زهري-خشبي",
+      "best_meeting_time": "23:00–00:00"
+    },
+    "live-reel-time": {
+      "executive": "توقيت رمزي للمحتوى. الإجراء: يمكن استخدام النوافذ لتجربة صغيرة ومقارنة النتائج بالمستوى المعتاد للنشر. ما ينبغي تجنّبه: اعتبار الدرجة المرتفعة توقعاً للوصول أو التفاعل.",
+      "strategic": "تُقارن نوافذ النشر والتصوير والبث كلٌّ على حدة، وتُجمع الأوقات والدرجات المتطابقة.",
+      "technical": "date=2026-09-10 · actions=social_media_post,creative_work,presentation",
+      "headline": "توقيت رمزي للمحتوى",
+      "action": "يمكن استخدام النوافذ لتجربة صغيرة ومقارنة النتائج بالمستوى المعتاد للنشر",
+      "avoid": "اعتبار الدرجة المرتفعة توقعاً للوصول أو التفاعل",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "تُقارن نوافذ النشر والتصوير والبث كلٌّ على حدة، وتُجمع الأوقات والدرجات المتطابقة.",
+      "limitation": "تقيس الدرجات قوة التوقيت الرمزية، لا الوصول أو التفاعل أو استجابة الجمهور المتوقعة. بيانات الجمهور وتحليلات المنصة وجودة المحتوى والمنطقة الزمنية المعروضة هي المرجع.",
+      "explanation": "تقيس الدرجات قوة التوقيت الرمزية، لا الوصول أو التفاعل أو استجابة الجمهور المتوقعة. بيانات الجمهور وتحليلات المنصة وجودة المحتوى والمنطقة الزمنية المعروضة هي المرجع.",
+      "details": [
+        {
+          "label": "التاريخ",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "النشر / البث المباشر",
+          "value": "23:00–00:00 · 95/100"
+        },
+        {
+          "label": "التصوير",
+          "value": "23:00–00:00 · 85/100"
+        },
+        {
+          "label": "المنطقة الزمنية",
+          "value": "Europe/London",
+          "direction": "ltr"
+        }
+      ],
+      "reason": "أوزان المقارنة الرمزية"
+    },
+    "best-countries": {
+      "executive": "مقارنة رمزية للأماكن: التوقعات المشتركة. يمكن مقارنة الأماكن بقائمة أُعدّت استناداً إلى بحث مستقل",
+      "strategic": "ترتّب الدرجات الأوزان الرمزية داخل هذه القائمة فقط؛ وليست توصية بالانتقال.",
+      "technical": "pathfinder.relocation · mode=relationship · jupiter,mercury,sun,saturn · houses=2,6,10,11",
+      "headline": "مقارنة رمزية للأماكن: التوقعات المشتركة",
+      "action": "يمكن مقارنة الأماكن بقائمة أُعدّت استناداً إلى بحث مستقل",
+      "avoid": "اختيار الوجهة بناءً على الترتيب وحده",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "ترتّب الدرجات الأوزان الرمزية داخل هذه القائمة فقط؛ وليست توصية بالانتقال.",
+      "limitation": "لا تتنبأ هذه المقارنات بالازدهار أو التوسع أو الحب أو نتائج العلاقات. القرار يحتاج إلى أدلة فعلية عن السوق والقانون والمال والسلامة والعلاقات.",
+      "explanation": "لا تتنبأ هذه المقارنات بالازدهار أو التوسع أو الحب أو نتائج العلاقات. القرار يحتاج إلى أدلة فعلية عن السوق والقانون والمال والسلامة والعلاقات.",
+      "details": [
+        {
+          "label": "London",
+          "value": "67/100",
+          "reason": "القمر: بُعد 0.06 درجة عن محور الخريطة الذي يرمز إلى الاتفاقات؛ الزهرة: القطاع 9 من الخريطة، بموضوع رمزي هو الاستكشاف وتنوع وجهات النظر؛ بُعد 21.25 درجة عن المحور الرمزي لموضوع الأدوار العامة"
+        },
+        {
+          "label": "New York",
+          "value": "66/100",
+          "reason": "المشتري: بُعد 1.57 درجة عن محور الخريطة الذي يرمز إلى أسلوب الحضور؛ الزهرة: القطاع 11 من الخريطة، بموضوع رمزي هو الاستقلال والأفكار الجماعية؛ بُعد 54.76 درجة عن المحور الرمزي لموضوع الأدوار العامة"
+        },
+        {
+          "label": "Paris",
+          "value": "63/100",
+          "reason": "القمر: بُعد 1.24 درجة عن محور الخريطة الذي يرمز إلى الاتفاقات؛ الزهرة: القطاع 9 من الخريطة، بموضوع رمزي هو الاستكشاف وتنوع وجهات النظر؛ بُعد 23.57 درجة عن المحور الرمزي لموضوع الأدوار العامة"
+        }
+      ],
+      "ranked": [
+        {
+          "label": "London",
+          "location": "51.5074,-0.1278",
+          "score": 67,
+          "verdict": "positive",
+          "strongest_use_case": "home",
+          "goal_area": "love",
+          "opportunity": "القمر: بُعد 0.06 درجة عن محور الخريطة الذي يرمز إلى الاتفاقات؛ الزهرة: القطاع 9 من الخريطة، بموضوع رمزي هو الاستكشاف وتنوع وجهات النظر؛ بُعد 21.25 درجة عن المحور الرمزي لموضوع الأدوار العامة",
+          "symbolic_reason": "القمر: بُعد 0.06 درجة عن محور الخريطة الذي يرمز إلى الاتفاقات؛ الزهرة: القطاع 9 من الخريطة، بموضوع رمزي هو الاستكشاف وتنوع وجهات النظر؛ بُعد 21.25 درجة عن المحور الرمزي لموضوع الأدوار العامة",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "New York",
+          "location": "40.7128,-74.0060",
+          "score": 66,
+          "verdict": "positive",
+          "strongest_use_case": "community",
+          "goal_area": "love",
+          "opportunity": "المشتري: بُعد 1.57 درجة عن محور الخريطة الذي يرمز إلى أسلوب الحضور؛ الزهرة: القطاع 11 من الخريطة، بموضوع رمزي هو الاستقلال والأفكار الجماعية؛ بُعد 54.76 درجة عن المحور الرمزي لموضوع الأدوار العامة",
+          "symbolic_reason": "المشتري: بُعد 1.57 درجة عن محور الخريطة الذي يرمز إلى أسلوب الحضور؛ الزهرة: القطاع 11 من الخريطة، بموضوع رمزي هو الاستقلال والأفكار الجماعية؛ بُعد 54.76 درجة عن المحور الرمزي لموضوع الأدوار العامة",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "Paris",
+          "location": "48.8566,2.3522",
+          "score": 63,
+          "verdict": "mixed",
+          "strongest_use_case": "career",
+          "goal_area": "love",
+          "opportunity": "القمر: بُعد 1.24 درجة عن محور الخريطة الذي يرمز إلى الاتفاقات؛ الزهرة: القطاع 9 من الخريطة، بموضوع رمزي هو الاستكشاف وتنوع وجهات النظر؛ بُعد 23.57 درجة عن المحور الرمزي لموضوع الأدوار العامة",
+          "symbolic_reason": "القمر: بُعد 1.24 درجة عن محور الخريطة الذي يرمز إلى الاتفاقات؛ الزهرة: القطاع 9 من الخريطة، بموضوع رمزي هو الاستكشاف وتنوع وجهات النظر؛ بُعد 23.57 درجة عن المحور الرمزي لموضوع الأدوار العامة",
+          "risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        }
+      ],
+      "missing_inputs": []
+    },
+    "business-geography": {
+      "executive": "مقارنة رمزية لأماكن العمل. يمكن مقارنة الأماكن بقائمة أُعدّت استناداً إلى بحث مستقل",
+      "strategic": "ترتّب الدرجات الأوزان الرمزية داخل هذه القائمة فقط؛ وليست توصية بالانتقال.",
+      "technical": "pathfinder.relocation · mode=business · jupiter,mercury,sun,saturn · houses=2,6,10,11",
+      "headline": "مقارنة رمزية لأماكن العمل",
+      "action": "يمكن مقارنة الأماكن بقائمة أُعدّت استناداً إلى بحث مستقل",
+      "avoid": "اختيار الوجهة بناءً على الترتيب وحده",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "ترتّب الدرجات الأوزان الرمزية داخل هذه القائمة فقط؛ وليست توصية بالانتقال.",
+      "limitation": "لا تتنبأ هذه المقارنات بالازدهار أو التوسع أو الحب أو نتائج العلاقات. القرار يحتاج إلى أدلة فعلية عن السوق والقانون والمال والسلامة والعلاقات.",
+      "explanation": "لا تتنبأ هذه المقارنات بالازدهار أو التوسع أو الحب أو نتائج العلاقات. القرار يحتاج إلى أدلة فعلية عن السوق والقانون والمال والسلامة والعلاقات.",
+      "details": [
+        {
+          "label": "London",
+          "value": "62/100",
+          "reason": "عطارد: بُعد 4.36 درجة عن محور الخريطة الذي يرمز إلى الأدوار العامة؛ الشمس: القطاع 10 من الخريطة، بموضوع رمزي هو المسؤوليات والتخطيط الطويل الأمد؛ بُعد 14.11 درجة عن المحور الرمزي لموضوع الأدوار العامة"
+        },
+        {
+          "label": "Paris",
+          "value": "60/100",
+          "reason": "الشمس: القطاع 10 من الخريطة، بموضوع رمزي هو المسؤوليات والتخطيط الطويل الأمد؛ بُعد 11.79 درجة عن المحور الرمزي لموضوع الأدوار العامة"
+        },
+        {
+          "label": "New York",
+          "value": "58/100",
+          "reason": "المشتري: بُعد 1.57 درجة عن محور الخريطة الذي يرمز إلى أسلوب الحضور؛ عطارد: القطاع 11 من الخريطة، بموضوع رمزي هو الاستقلال والأفكار الجماعية؛ بُعد 38.69 درجة عن المحور الرمزي لموضوع أسلوب الحضور"
+        }
+      ],
+      "ranked": [
+        {
+          "label": "London",
+          "location": "51.5074,-0.1278",
+          "score": 62,
+          "verdict": "positive",
+          "strongest_use_case": "career",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "عطارد: بُعد 4.36 درجة عن محور الخريطة الذي يرمز إلى الأدوار العامة؛ الشمس: القطاع 10 من الخريطة، بموضوع رمزي هو المسؤوليات والتخطيط الطويل الأمد؛ بُعد 14.11 درجة عن المحور الرمزي لموضوع الأدوار العامة",
+          "symbolic_reason": "عطارد: بُعد 4.36 درجة عن محور الخريطة الذي يرمز إلى الأدوار العامة؛ الشمس: القطاع 10 من الخريطة، بموضوع رمزي هو المسؤوليات والتخطيط الطويل الأمد؛ بُعد 14.11 درجة عن المحور الرمزي لموضوع الأدوار العامة",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "Paris",
+          "location": "48.8566,2.3522",
+          "score": 60,
+          "verdict": "mixed",
+          "strongest_use_case": "career",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "الشمس: القطاع 10 من الخريطة، بموضوع رمزي هو المسؤوليات والتخطيط الطويل الأمد؛ بُعد 11.79 درجة عن المحور الرمزي لموضوع الأدوار العامة",
+          "symbolic_reason": "الشمس: القطاع 10 من الخريطة، بموضوع رمزي هو المسؤوليات والتخطيط الطويل الأمد؛ بُعد 11.79 درجة عن المحور الرمزي لموضوع الأدوار العامة",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        },
+        {
+          "label": "New York",
+          "location": "40.7128,-74.0060",
+          "score": 58,
+          "verdict": "positive",
+          "strongest_use_case": "community",
+          "goal_areas": [
+            "wealth",
+            "career"
+          ],
+          "opportunity": "المشتري: بُعد 1.57 درجة عن محور الخريطة الذي يرمز إلى أسلوب الحضور؛ عطارد: القطاع 11 من الخريطة، بموضوع رمزي هو الاستقلال والأفكار الجماعية؛ بُعد 38.69 درجة عن المحور الرمزي لموضوع أسلوب الحضور",
+          "symbolic_reason": "المشتري: بُعد 1.57 درجة عن محور الخريطة الذي يرمز إلى أسلوب الحضور؛ عطارد: القطاع 11 من الخريطة، بموضوع رمزي هو الاستقلال والأفكار الجماعية؛ بُعد 38.69 درجة عن المحور الرمزي لموضوع أسلوب الحضور",
+          "risk": "",
+          "commercial_risk": "",
+          "recommended_next_action": "",
+          "confidence": "low",
+          "evidence_status": "unvalidated",
+          "data_completeness": "supplied_unverified"
+        }
+      ],
+      "missing_inputs": []
+    },
+    "partner-profile": {
+      "executive": "أسئلة اختيارية عن الشراكة. الإجراء: يمكن السؤال عن الأولويات والحدود وطريقة مناقشة الاختلاف. ما ينبغي تجنّبه: استخدام هذا التصور لفرز الأشخاص أو مواعيد التعارف.",
+      "strategic": "يمكن استكشاف التوقعات معاً عبر موضوعات رمزية من دون تعريف شخص مثالي.",
+      "technical": "relationship_profile=romantic",
+      "headline": "أسئلة اختيارية عن الشراكة",
+      "action": "يمكن السؤال عن الأولويات والحدود وطريقة مناقشة الاختلاف",
+      "avoid": "استخدام هذا التصور لفرز الأشخاص أو مواعيد التعارف",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "يمكن استكشاف التوقعات معاً عبر موضوعات رمزية من دون تعريف شخص مثالي.",
+      "limitation": "لا تحدد هذه الأسئلة الشخصية أو التفضيلات أو الشريك المثالي، ولا تتنبأ بالتوافق. التحقق يكون بالحوار المباشر والتجربة.",
+      "explanation": "لا تحدد هذه الأسئلة الشخصية أو التفضيلات أو الشريك المثالي، ولا تتنبأ بالتوافق. التحقق يكون بالحوار المباشر والتجربة.",
+      "details": [
+        {
+          "label": "رمزية التعبير",
+          "value": "الثور: موضوعات رمزية تشمل الاستمرارية والموارد العملية. هل يتوافق شيء منها مع التجربة الفعلية؟"
+        },
+        {
+          "label": "رمزية المساحة المشتركة / رمزية الاتفاقات",
+          "value": "الحوت: موضوعات رمزية تشمل الخيال وتقبّل الغموض. هل يتوافق شيء منها مع التجربة الفعلية؟"
+        },
+        {
+          "source": "two_chart_comparison",
+          "label": "موضوع من مقارنة الخريطتين: الشمس / المريخ",
+          "value": "النمط بزاوية 120 درجة بين الخريطتين يطرح موضوعاً رمزياً: الاتفاقات التي تستحق التوضيح. المرجع هو الاتفاقات الفعلية؛ وليس هذا وصفاً لأي من الشخصين."
+        },
+        {
+          "source": "two_chart_comparison",
+          "label": "موضوع من مقارنة الخريطتين: المريخ / عطارد",
+          "value": "النمط بزاوية 0 درجة بين الخريطتين يطرح موضوعاً رمزياً: الأولويات المشتركة. المرجع هو الاتفاقات الفعلية؛ وليس هذا وصفاً لأي من الشخصين."
+        }
+      ],
+      "mode": "synastry",
+      "missing_inputs": [],
+      "ideal_traits": [
+        "يمكن استكشاف التوقعات معاً عبر موضوعات رمزية من دون تعريف شخص مثالي."
+      ],
+      "compatibility_patterns": [
+        "يمكن السؤال عن الأولويات والحدود وطريقة مناقشة الاختلاف."
+      ],
+      "friction_points": [
+        "استخدام هذا التصور لفرز الأشخاص أو مواعيد التعارف."
+      ],
+      "dynamics": {
+        "financial": "يمكن استكشاف التوقعات معاً عبر موضوعات رمزية من دون تعريف شخص مثالي.",
+        "emotional": "يمكن استكشاف التوقعات معاً عبر موضوعات رمزية من دون تعريف شخص مثالي.",
+        "practical": "يمكن استكشاف التوقعات معاً عبر موضوعات رمزية من دون تعريف شخص مثالي."
+      },
+      "verify_questions": [
+        "يمكن السؤال عن الأولويات والحدود وطريقة مناقشة الاختلاف."
+      ]
+    },
+    "compatibility": {
+      "executive": "مقارنة رمزية للعلاقة. الإجراء: يمكن مناقشة أولوية مشتركة واختلاف واحد بأمثلة محددة من العلاقة. ما ينبغي تجنّبه: اتخاذ قرار بالبقاء أو الانفصال أو الالتزام بناءً على درجة.",
+      "strategic": "تقارن الأوزان موضوعات الخرائط، لا صفات مقاسة في العلاقة.",
+      "technical": "relationship_profile=romantic",
+      "headline": "مقارنة رمزية للعلاقة",
+      "action": "يمكن مناقشة أولوية مشتركة واختلاف واحد بأمثلة محددة من العلاقة",
+      "avoid": "اتخاذ قرار بالبقاء أو الانفصال أو الالتزام بناءً على درجة",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "تقارن الأوزان موضوعات الخرائط، لا صفات مقاسة في العلاقة.",
+      "limitation": "كل الدرجات، بما فيها الانجذاب والاستقرار والنمو، أوزان مقارنة رمزية. لا تثبت التوافق العاطفي أو الانجذاب أو الالتزام أو نتيجة العلاقة. الأدلة الملموسة في العلاقة هي المرجع.",
+      "explanation": "كل الدرجات، بما فيها الانجذاب والاستقرار والنمو، أوزان مقارنة رمزية. لا تثبت التوافق العاطفي أو الانجذاب أو الالتزام أو نتيجة العلاقة. الأدلة الملموسة في العلاقة هي المرجع.",
+      "details": [
+        {
+          "label": "الموضوع العاطفي",
+          "value": "46/100"
+        },
+        {
+          "label": "موضوع التواصل",
+          "value": "46/100"
+        },
+        {
+          "label": "موضوع الانجذاب",
+          "value": "56/100"
+        },
+        {
+          "label": "موضوع الاستقرار",
+          "value": "52/100"
+        },
+        {
+          "label": "موضوع النمو",
+          "value": "57/100"
+        },
+        {
+          "label": "الإجمالي",
+          "value": "50/100"
+        }
+      ],
+      "dimensions": {
+        "emotional": {
+          "score": 46,
+          "band": "mixed",
+          "hits": 10
+        },
+        "communication": {
+          "score": 46,
+          "band": "mixed",
+          "hits": 13
+        },
+        "chemistry": {
+          "score": 56,
+          "band": "mixed",
+          "hits": 11
+        },
+        "stability": {
+          "score": 52,
+          "band": "mixed",
+          "hits": 11
+        },
+        "growth": {
+          "score": 57,
+          "band": "mixed",
+          "hits": 11
+        },
+        "overall": {
+          "score": 50,
+          "band": "mixed",
+          "hits": 14
+        }
+      },
+      "overall_score": 50,
+      "missing_inputs": [],
+      "strengths": [
+        "تقارن الأوزان موضوعات الخرائط، لا صفات مقاسة في العلاقة."
+      ],
+      "friction_points": [
+        "اتخاذ قرار بالبقاء أو الانفصال أو الالتزام بناءً على درجة."
+      ],
+      "verify_questions": [
+        "يمكن مناقشة أولوية مشتركة واختلاف واحد بأمثلة محددة من العلاقة."
+      ]
+    },
+    "trust-patterns": {
+      "executive": "أسئلة لحوار حول الثقة. الإجراء: يمكن اختيار مثال حديث ومحدد والسؤال مباشرة عن توقعات كل طرف. ما ينبغي تجنّبه: استخدام النمط الرمزي كدليل ضد شخص.",
+      "strategic": "قد تقترح الفروق الرمزية أسئلة عن التوقعات والحدود والوفاء بالاتفاقات؛ لكنها ليست سلوكاً تمت ملاحظته.",
+      "technical": "moon,mercury,venus,jupiter,saturn · verdict=never",
+      "headline": "أسئلة لحوار حول الثقة",
+      "action": "يمكن اختيار مثال حديث ومحدد والسؤال مباشرة عن توقعات كل طرف",
+      "avoid": "استخدام النمط الرمزي كدليل ضد شخص",
+      "intensity": "moderate",
+      "confidence": "low",
+      "confidence_basis": "unvalidated_symbolic_guidance",
+      "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
+      "evidence_status": "unvalidated",
+      "data_completeness": "supplied_unverified",
+      "interpretation": "قد تقترح الفروق الرمزية أسئلة عن التوقعات والحدود والوفاء بالاتفاقات؛ لكنها ليست سلوكاً تمت ملاحظته.",
+      "limitation": "لا يمكن استنتاج الجدارة بالثقة أو الكذب أو الوفاء أو التجنب أو السلوك الفعلي من الخرائط. السلوك الملحوظ والحوار المباشر هما المرجع.",
+      "explanation": "لا يمكن استنتاج الجدارة بالثقة أو الكذب أو الوفاء أو التجنب أو السلوك الفعلي من الخرائط. السلوك الملحوظ والحوار المباشر هما المرجع.",
+      "details": [
+        {
+          "label": "وزن رمزي: التبادل",
+          "value": "35/100"
+        },
+        {
+          "label": "وزن رمزي: التوقعات",
+          "value": "45/100"
+        },
+        {
+          "label": "وزن رمزي: وضوح الاتفاقات",
+          "value": "39/100"
+        },
+        {
+          "label": "وزن رمزي: الحدود",
+          "value": "45/100"
+        },
+        {
+          "label": "وزن رمزي: مراجعة الاتفاقات",
+          "value": "38/100"
+        }
+      ],
+      "mode": "synastry",
+      "signals": {
+        "trust_building": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 35,
+          "hits": 10
+        },
+        "trust_pressure": {
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 11
+        },
+        "communication_reliability": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 39,
+          "hits": 9
+        },
+        "boundary_risks": {
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 11
+        },
+        "repair_opportunities": {
+          "band": "tension",
+          "layer": "inferred",
+          "score": 38,
+          "hits": 9
+        }
+      },
+      "planet_roles": {
+        "moon": {
+          "role": "emotional_consistency_safety",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 50,
+          "hits": 5
+        },
+        "mercury": {
+          "role": "communication_clarity_follow_through",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 46,
+          "hits": 4
+        },
+        "venus": {
+          "role": "reciprocity_relational_ease",
+          "band": "tension",
+          "layer": "inferred",
+          "score": 40,
+          "hits": 4
+        },
+        "jupiter": {
+          "role": "goodwill_repair_capacity",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 44,
+          "hits": 4
+        },
+        "saturn": {
+          "role": "boundaries_reliability_pressure_durability",
+          "band": "mixed",
+          "layer": "inferred",
+          "score": 45,
+          "hits": 3
+        }
+      },
+      "observed": [],
+      "inferred": [],
+      "unknown": [
+        "لا يمكن استنتاج الجدارة بالثقة أو الكذب أو الوفاء أو التجنب أو السلوك الفعلي من الخرائط. السلوك الملحوظ والحوار المباشر هما المرجع."
+      ],
+      "behaviors": [],
+      "questions": [
+        "يمكن اختيار مثال حديث ومحدد والسؤال مباشرة عن توقعات كل طرف."
+      ],
+      "missing_inputs": []
+    }
+  }
+}

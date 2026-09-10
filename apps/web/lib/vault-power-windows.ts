@@ -63,6 +63,7 @@ function parseYesSlot(raw: unknown): VaultYesDaySlot | null {
   if (typeof raw.confidence !== 'string' || !raw.confidence.trim()) return null;
   if (typeof raw.action_type !== 'string' || !raw.action_type.trim()) return null;
   const slot: VaultYesDaySlot = {
+    rating_label: optionalRating(raw.rating_label),
     date: raw.date,
     score: raw.score,
     confidence: raw.confidence,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { VAULT_AVAILABILITY } from '@/lib/vault-availability';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -510,6 +511,11 @@ export default function VaultSectionPage() {
   }
 
   const section = t[raw];
+  const availability = VAULT_AVAILABILITY[lang];
+  const availableCount = section.items.filter((_, index) => {
+    const key = LIVE_ITEM_API[raw]?.[index];
+    return !!key && LIVE_READING_KEYS.has(key);
+  }).length;
 
   return (
     <AppShell
@@ -635,7 +641,7 @@ export default function VaultSectionPage() {
                             : 'rgba(212,175,55,0.7)',
                         }}
                       >
-                        {itemLive ? 'LIVE' : lock.comingSoon}
+                        {itemLive ? availability.live : lock.comingSoon}
                       </span>
                       <svg
                         width="16"
@@ -867,8 +873,8 @@ export default function VaultSectionPage() {
                                         score={slot.score}
                                         band={band}
                                         bandLabel={bandLabel(band)}
-                                        confidence={slot.confidence}
-                                        rating={slot.rating}
+                                        confidence={null}
+                                        rating={slot.rating_label}
                                       />
                                     );
                                   })}
@@ -965,8 +971,8 @@ export default function VaultSectionPage() {
                                               score={slot.score}
                                               band={band}
                                               bandLabel={bandLabel(band)}
-                                              confidence={slot.confidence}
-                                              rating={slot.rating}
+                                              confidence={liveReading?.evidence_status === 'unvalidated' || liveReading?.confidence_basis === 'unvalidated_symbolic_guidance' ? null : slot.confidence}
+                                              rating={slot.rating_label}
                                             />
                                           );
                                         })}
@@ -1135,10 +1141,10 @@ export default function VaultSectionPage() {
             }}
           >
             <p className="fi text-xs mb-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              {section.coming}
+              {availability.summary(availableCount, section.items.length - availableCount)}
             </p>
             <p className="fi text-[11px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              {t.previewNote}
+              {availability.note}
             </p>
           </div>
         </div>

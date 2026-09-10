@@ -36,11 +36,14 @@ def test_render_ghost_days_ranked_windows():
         horizon_days=14,
     )
     assert reading["intensity"] == "strong"
-    assert reading["confidence"] == "high"
-    assert "2026-07-25" in reading["executive"]
-    assert "82" in reading["executive"]
+    assert reading["evidence_status"] == "unvalidated"
+    assert reading["confidence_basis"] == "unvalidated_symbolic_guidance"
+    assert "unvalidated" in reading["confidence_explanation"]
+    assert reading["strongest_window"]["date"] == "2026-07-25"
+    assert reading["strongest_window"]["score"] == 82
     assert "rest_recovery" not in reading["strategic"]
-    assert "Confidence:" in reading["executive"]
+    assert "probability" in reading["limitation"]
+    assert "unvalidated" in reading["confidence_explanation"]
     assert "Action:" in reading["executive"]
     assert "Avoid:" in reading["executive"]
     assert reading["action"]

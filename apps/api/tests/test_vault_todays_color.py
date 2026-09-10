@@ -25,11 +25,12 @@ def test_render_todays_color_leo():
         target_date="2026-07-24",
         lang="en",
     )
-    assert "Gold" in reading["executive"]
-    assert reading["headline"].startswith("Wear")
+    assert "Gold" in reading["details"][1]["value"]
+    assert "optional" in reading["headline"]
     assert "leo" in reading["technical"]
-    assert reading["confidence"] == "high"
-    assert "Confidence:" in reading["executive"]
+    assert reading["evidence_status"] == "unvalidated"
+    assert "Confidence:" not in reading["executive"]
+    assert reading["limitation"]
     assert "Action:" in reading["executive"]
     assert "Avoid:" in reading["executive"]
     assert reading["action"]

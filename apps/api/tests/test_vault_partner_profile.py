@@ -34,8 +34,9 @@ def test_render_partner_profile_ideal_only():
         confidence="medium",
     )
     assert reading["mode"] == "ideal_only"
-    assert "Tendencies, not verified facts" in reading["executive"]
-    assert "loyalty" in reading["executive"].lower() or "destiny" in reading["executive"].lower()
+    assert "cannot define" in reading["limitation"].lower()
+    assert reading["evidence_status"] == "unvalidated"
+    assert "do not predict compatibility" in reading["limitation"].lower()
     assert "partner_birth_date" in reading["missing_inputs"]
     assert reading["action"]
 
@@ -100,8 +101,9 @@ def test_partner_profile_synastry_when_partner_present():
     assert payload["compatibility_patterns"]
     assert payload["friction_points"]
     assert payload["reading"]["confidence"] in {"high", "medium", "low"}
-    assert "Synastry score" in payload["reading"]["executive"]
-    assert "Verify:" in payload["reading"]["executive"]
+    assert payload["reading"]["details"]
+    assert payload["reading"]["evidence_status"] == "unvalidated"
+    assert "Verify expectations" in payload["reading"]["limitation"]
 
 
 def test_partner_profile_business_goal_maps_profile():

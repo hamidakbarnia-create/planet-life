@@ -26,7 +26,8 @@ def test_render_money_ask_empty_windows():
     assert reading["action"]
     assert reading["avoid"]
     assert "Avoid:" in reading["executive"]
-    assert "Confidence:" in reading["executive"]
+    assert "probability" in reading["limitation"]
+    assert "unvalidated" in reading["confidence_explanation"]
 
 
 def test_render_money_ask_ranked_windows():
@@ -39,8 +40,10 @@ def test_render_money_ask_ranked_windows():
         horizon_days=14,
     )
     assert reading["intensity"] == "strong"
-    assert reading["confidence"] == "high"
-    assert "2026-07-27" in reading["executive"]
+    assert reading["evidence_status"] == "unvalidated"
+    assert reading["confidence_basis"] == "unvalidated_symbolic_guidance"
+    assert "unvalidated" in reading["confidence_explanation"]
+    assert reading["strongest_window"]["date"] == "2026-07-27"
     assert "Action:" in reading["executive"]
     assert "Avoid:" in reading["executive"]
     assert reading["action"]

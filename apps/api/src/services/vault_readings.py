@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from packages.astro_engine.vault_quality_copy import QUALITY_COPY, LANGS as QUALITY_LANGS
+
 from datetime import date, timedelta
 
 from packages.astro_engine.scoring_context import (
@@ -30,6 +32,7 @@ from packages.astro_engine.vault_templates import (
     render_mars_reading,
     render_money_ask_days_reading,
     render_cheating_radar_reading,
+    trust_reflections,
     render_compatibility_reading,
     render_partner_profile_reading,
     render_todays_color_reading,
@@ -208,6 +211,7 @@ def mars_reading(
     verdict = build_mars_verdict(natal.get("planets", {}), lilith_lon=lilith_lon)
     vdict = verdict_to_dict(verdict)
     text = render_mars_reading(vdict, lang=lang)
+    text["data_completeness"] = "supplied_unverified"
     return {
         "planet": "mars",
         "lang": lang,
@@ -280,6 +284,7 @@ def ghost_days_reading(
     text = render_ghost_days_reading(
         top, lang=lang, horizon_days=max(1, int(horizon_days))
     )
+    text["data_completeness"] = "supplied_unverified"
     return {
         "planet": "ghost",
         "action_type": _GHOST_ACTION,
@@ -361,6 +366,7 @@ def money_ask_days_reading(
     text = render_money_ask_days_reading(
         top, lang=lang, horizon_days=max(1, int(horizon_days))
     )
+    text["data_completeness"] = "supplied_unverified"
     return {
         "planet": "money",
         "action_type": _MONEY_ASK_ACTION,
@@ -426,7 +432,7 @@ def _calendar_day_windows(
                 "date": target_date,
                 "score": score_i,
                 "rating": executive.get("rating"),
-                "confidence": _reel_confidence(score_i),
+                "confidence": "low",
                 "action_type": action_type,
             }
         )
@@ -455,7 +461,7 @@ def yes_day_reading(
 
     Reuses Money Ask calendar-day scoring:
     ask = negotiation, sign = contract_signing,
-    commit = best day for both approval + terms clarity.
+    commit = best combined symbolic score; all three windows are independent.
     """
     days = max(1, int(horizon_days))
     common = dict(
@@ -501,7 +507,7 @@ def yes_day_reading(
             "date": d,
             "score": score_i,
             "rating": aw.get("rating") or sw.get("rating") or "",
-            "confidence": _reel_confidence(score_i),
+            "confidence": "low",
             "action_type": f"{_YES_ASK_ACTION}+{_YES_SIGN_ACTION}",
         }
         if commit is None or score_i > int(commit["score"]):
@@ -515,6 +521,20 @@ def yes_day_reading(
             "action_type": f"{_YES_ASK_ACTION}+{_YES_SIGN_ACTION}",
         }
 
+    # Keep the public rating enum unchanged; only rating_label is display copy.
+    labels = {
+        "Highly Favorable": ("Highly favorable", "Очень благоприятно", "بسیار مساعد", "ملائم جداً"),
+        "Favorable": ("Favorable", "Благоприятно", "مساعد", "ملائم"),
+        "Mixed / Proceed with Awareness": ("Mixed / proceed with awareness", "Неоднозначно / действуйте осмотрительно", "ترکیبی؛ با دقت پیش بروید", "متباين؛ المتابعة بحذر"),
+        "Challenging": ("Challenging", "Непросто", "چالش‌برانگیز", "صعب"),
+        "Unfavorable": ("Unfavorable", "Неблагоприятно", "نامساعد", "غير ملائم"),
+    }
+    locale_index = ("en", "ru", "fa", "ar").index(lang if lang in {"en", "ru", "fa", "ar"} else "en")
+    def with_rating_label(slot):
+        values = labels.get(slot.get("rating"))
+        return {**slot, "rating_label": values[locale_index] if values else None}
+    ask, commit, sign = (with_rating_label(slot) for slot in (ask, commit, sign))
+
     text = render_yes_day_reading(
         ask=ask,
         commit=commit,
@@ -522,11 +542,13 @@ def yes_day_reading(
         horizon_days=days,
         lang=lang,
     )
+    text["data_completeness"] = "supplied_unverified"
     return {
         "planet": "yes",
         "lang": lang,
         "verdict": {
             "horizon_days": days,
+            "window_relationship": "independent",
             "ask": ask,
             "commit": commit,
             "sign": sign,
@@ -843,9 +865,11 @@ def _best_hourly_window(
         candidate = {
             "hour": int(hour),
             "window": window,
+            "timezone": (_transit.get("evaluation") or {}).get("timezone"),
             "score": score_i,
             "rating": rating,
-            "confidence": _reel_confidence(score_i),
+            "confidence": "low",  # Deprecated; symbolic strength is the score, not evidence.
+            "evidence_status": "unvalidated",
             "reason": reason,
             "action_type": action_type,
         }
@@ -931,6 +955,12 @@ def live_reel_time_reading(
         target_date=day,
         lang=lang,
     )
+    from packages.astro_engine.vault_templates import _quality_label
+    timezone_label = posting.get("timezone")
+    if timezone_label:
+        text["details"].append({"label": _quality_label("timezone", lang), "value": timezone_label, "direction": "ltr"})
+
+
     return {
         "planet": "reel",
         "lang": lang,
@@ -1029,6 +1059,7 @@ def date_outfit_reading(
         transit_moon_sign=transit_moon_sign,
         meeting_window=str(meeting.get("window") or "—"),
         meeting_score=int(meeting.get("score") or 0),
+        meeting_timezone=meeting.get("timezone"),
         target_date=day,
         lang=lang,
     )
@@ -1211,6 +1242,8 @@ def best_countries_reading(
             missing.append(f"location:{label}")
             continue
         top_effect = effects[0] if effects else goal_effect
+        from packages.astro_engine.vault_quality_copy import geography_symbolic_reason
+        symbolic_reason = geography_symbolic_reason(goal_effect, reloc, lang)
         opportunity, risk = _opp_risk_from_effect(goal_effect, lang=lang)
         score = int(goal_effect.get("score") or 0)
         next_action = {
@@ -1228,6 +1261,7 @@ def best_countries_reading(
                 "strongest_use_case": top_effect.get("area") or area,
                 "goal_area": area,
                 "opportunity": opportunity,
+                "symbolic_reason": symbolic_reason,
                 "risk": risk,
                 "recommended_next_action": next_action,
                 "confidence": (
@@ -1239,6 +1273,14 @@ def best_countries_reading(
     ranked.sort(key=lambda r: int(r.get("score") or 0), reverse=True)
     if not ranked and "locations" not in missing:
         missing.append("locations")
+
+    # Keep ranking weights and legacy keys; none of the prose predicts outcomes.
+    for item in ranked:
+        if "commercial_risk" in item:
+            item["commercial_risk"] = ""
+        item.update(opportunity=item["symbolic_reason"], risk="", recommended_next_action="",
+                    confidence="low", evidence_status="unvalidated",
+                    data_completeness="supplied_unverified")
 
     text = render_best_countries_reading(
         ranked,
@@ -1397,6 +1439,8 @@ def business_geography_reading(
         if effect_for_reasons is None:
             missing.append(f"location:{label}")
             continue
+        from packages.astro_engine.vault_quality_copy import geography_symbolic_reason
+        symbolic_reason = geography_symbolic_reason(effect_for_reasons, reloc, lang)
         opportunity, risk = _opp_risk_from_effect(effect_for_reasons, lang=lang)
         next_action = {
             "en": f"Prioritize {label} for {goal_key} market work",
@@ -1413,6 +1457,7 @@ def business_geography_reading(
                 "strongest_use_case": use_area,
                 "goal_areas": [a for a, _ in weights],
                 "opportunity": opportunity,
+                "symbolic_reason": symbolic_reason,
                 "risk": risk,
                 "commercial_risk": risk,
                 "recommended_next_action": next_action,
@@ -1425,6 +1470,14 @@ def business_geography_reading(
     ranked.sort(key=lambda r: int(r.get("score") or 0), reverse=True)
     if not ranked and "locations" not in missing:
         missing.append("locations")
+
+    # Keep ranking weights and legacy keys; none of the prose predicts outcomes.
+    for item in ranked:
+        if "commercial_risk" in item:
+            item["commercial_risk"] = ""
+        item.update(opportunity=item["symbolic_reason"], risk="", recommended_next_action="",
+                    confidence="low", evidence_status="unvalidated",
+                    data_completeness="supplied_unverified")
 
     text = render_business_geography_reading(
         ranked,
@@ -1918,9 +1971,16 @@ def partner_profile_reading(
                 }.get(lang, "")
             )
 
+    # Context follows the selected relationship profile, including Business Partner.
+    presentation_goal = "business" if profile.key == "business_partner" else goal_key
+    copy = QUALITY_COPY["business" if presentation_goal == "business" else "partner"][QUALITY_LANGS.index(lang if lang in QUALITY_LANGS else "en")]
+    traits, patterns, friction = [copy[1]], [copy[2]], [copy[3]]
+    dynamics = {key: copy[1] for key in dynamics}
+    questions = [copy[2]]
+    confidence = "low"  # Deprecated compatibility enum, never predictive accuracy.
     text = render_partner_profile_reading(
         mode=mode,
-        goal=goal_key,
+        goal=presentation_goal,
         lang=lang,
         ideal_traits=traits,
         compatibility_patterns=patterns,
@@ -1931,6 +1991,11 @@ def partner_profile_reading(
         confidence=confidence,
         synastry_score=synastry_score,
     )
+    from packages.astro_engine.vault_quality_copy import partner_symbolic_details, partner_comparison_details
+    text["details"] = partner_symbolic_details(venus_sign, moon_sign, seventh_sign, lang)
+    if partner_complete:
+        text["details"].extend(partner_comparison_details(harmony, tension, lang))
+
     return {
         "planet": "partner",
         "lang": lang,
@@ -2297,6 +2362,10 @@ def compatibility_reading(
         }.get(lang)
 
     questions = _compat_verify_questions(rel, lang)
+    copy = QUALITY_COPY["compatibility"][QUALITY_LANGS.index(lang if lang in QUALITY_LANGS else "en")]
+    strengths, friction, questions = [copy[1]], [copy[3]], [copy[2]]
+    confidence = "low"  # Deprecated; evidence_status is authoritative, not overall score.
+    time_note = None
     text = render_compatibility_reading(
         lang=lang,
         relationship_type=rel,
@@ -2490,296 +2559,60 @@ def cheating_radar_reading(
     user_birth_time_known: bool = True,
     partner_birth_time_known: bool = True,
 ) -> dict:
-    """
-    Shadow Room — Cheating Radar.
-
-    Synastry tension/harmony signals only — never a cheating verdict.
-    Without second-person data: self-pattern + verification guide.
-    """
+    """Trust & Clarity Signals; legacy endpoint/keys never describe detection."""
     rel = relationship_type if relationship_type in _VALID_COMPAT_RELS else "romantic"
     profile = resolve_relationship_profile(_COMPAT_REL_TO_PROFILE[rel])
-    missing: list[str] = []
-    observed: list[str] = []
-    inferred: list[str] = []
-    unknown: list[str] = []
-
-    if concern and str(concern).strip():
-        observed.append(
-            {
-                "en": f"user concern text provided ({len(concern.strip())} chars)",
-                "fa": f"متن دغدغه کاربر ارائه شد ({len(concern.strip())} نویسه)",
-                "ru": f"текст запроса пользователя ({len(concern.strip())} симв.)",
-                "ar": f"نص قلق المستخدم مقدَّم ({len(concern.strip())} حرفاً)",
-            }.get(lang, "")
-        )
-
-    has_partner = bool(
-        partner_birth_date
-        and str(partner_birth_date).strip()
-        and partner_location
-        and str(partner_location).strip()
-    )
-    if not has_partner:
-        if not (partner_birth_date and str(partner_birth_date).strip()):
-            missing.append("partner_birth_date")
-        if not (partner_location and str(partner_location).strip()):
-            missing.append("partner_location")
-        if not (partner_birth_time and str(partner_birth_time).strip()):
-            missing.append("partner_birth_time")
-
-    user_time = (birth_time or "").strip() or "12:00"
-    if not user_birth_time_known:
-        user_time = "12:00"
-
+    has_partner = bool(partner_birth_date and partner_location)
+    missing = [key for key, value in {
+        "partner_birth_date": partner_birth_date,
+        "partner_birth_time": partner_birth_time,
+        "partner_location": partner_location,
+    }.items() if not value]
+    partner_birth_time_known = bool(partner_birth_time_known and partner_birth_time)
+    user_birth_time_known = bool(user_birth_time_known and birth_time)
+    if not user_birth_time_known or (has_partner and not partner_birth_time_known):
+        missing.append("exact_birth_time")
     today = date.today().isoformat()
     natal, _ = build_chart_payload(
-        birth_date=birth_date,
-        birth_time=user_time,
-        location=location,
-        target_date=today,
-        target_time=user_time,
-        house_system=house_system,
-        zodiac=zodiac,
-        latitude=latitude,
-        longitude=longitude,
+        birth_date=birth_date, birth_time=birth_time if user_birth_time_known else "12:00",
+        location=location, target_date=today, target_time="12:00",
+        house_system=house_system, zodiac=zodiac, latitude=latitude, longitude=longitude,
     )
-    planets = natal.get("planets") or {}
-    moon = planets.get("moon") or {}
-    mercury = planets.get("mercury") or {}
-    saturn = planets.get("saturn") or {}
-    moon_sign = (
-        sign_of(float(moon["longitude"]))
-        if isinstance(moon.get("longitude"), (int, float))
-        else None
-    )
-    mercury_sign = (
-        sign_of(float(mercury["longitude"]))
-        if isinstance(mercury.get("longitude"), (int, float))
-        else None
-    )
-    saturn_sign = (
-        sign_of(float(saturn["longitude"]))
-        if isinstance(saturn.get("longitude"), (int, float))
-        else None
-    )
-
-    signals: dict[str, dict] = {}
-    mode = "self"
-    confidence = "medium"
-
-    if not has_partner:
-        mode = "self"
-        confidence = "low"
-        observed.append(
-            {
-                "en": "user natal chart loaded; no second-person chart",
-                "fa": "چارت تولد کاربر بار شد؛ چارت نفر دوم نیست",
-                "ru": "натал пользователя загружен; второй карты нет",
-                "ar": "خريطة المستخدم محمّلة؛ لا خريطة للشخص الثاني",
-            }.get(lang, "")
-        )
-        if moon_sign:
-            inferred.append(
-                {
-                    "en": (
-                        f"self-pattern: Moon in {_sign_label(moon_sign, lang)} — "
-                        f"sensitivity to distance may run high (tendency, not a verdict)"
-                    ),
-                    "fa": (
-                        f"الگوی خود: ماه در {_sign_label(moon_sign, lang)} — "
-                        f"حساسیت به فاصله ممکن است بالا باشد (تمایل، نه حکم)"
-                    ),
-                    "ru": (
-                        f"свой паттерн: Луна в {_sign_label(moon_sign, lang)} — "
-                        f"чувствительность к дистанции может быть выше (тенденция)"
-                    ),
-                    "ar": (
-                        f"نمط ذاتي: القمر في {_sign_label(moon_sign, lang)} — "
-                        f"الحساسية للبعد قد تكون أعلى (ميل لا حكم)"
-                    ),
-                }.get(lang, "")
-            )
-        if mercury_sign:
-            inferred.append(
-                {
-                    "en": (
-                        f"self-pattern: Mercury in {_sign_label(mercury_sign, lang)} — "
-                        f"watch for reading ambiguity into silence"
-                    ),
-                    "fa": (
-                        f"الگوی خود: عطارد در {_sign_label(mercury_sign, lang)} — "
-                        f"مراقب خواندن ابهام در سکوت باش"
-                    ),
-                    "ru": (
-                        f"свой паттерн: Меркурий в {_sign_label(mercury_sign, lang)} — "
-                        f"осторожнее с домысливанием тишины"
-                    ),
-                    "ar": (
-                        f"نمط ذاتي: عطارد في {_sign_label(mercury_sign, lang)} — "
-                        f"راقبي قراءة الغموض في الصمت"
-                    ),
-                }.get(lang, "")
-            )
-        if saturn_sign:
-            inferred.append(
-                {
-                    "en": (
-                        f"self-pattern: Saturn in {_sign_label(saturn_sign, lang)} — "
-                        f"trust pressure may feel heavier under uncertainty"
-                    ),
-                    "fa": (
-                        f"الگوی خود: زحل در {_sign_label(saturn_sign, lang)} — "
-                        f"فشار اعتماد زیر ابهام ممکن است سنگین‌تر حس شود"
-                    ),
-                    "ru": (
-                        f"свой паттерн: Сатурн в {_sign_label(saturn_sign, lang)} — "
-                        f"давление на доверие сильнее при неопределённости"
-                    ),
-                    "ar": (
-                        f"نمط ذاتي: زحل في {_sign_label(saturn_sign, lang)} — "
-                        f"ضغط الثقة قد يثقل مع عدم اليقين"
-                    ),
-                }.get(lang, "")
-            )
-        unknown.extend(
-            [
-                {
-                    "en": "partner synastry signals — unknown without second chart",
-                    "fa": "سیگنال هم‌خوانی شریک — بدون چارت دوم نامشخص",
-                    "ru": "синастрия партнёра — неизвестна без второй карты",
-                    "ar": "إشارات توافق الشريك — غير معروفة بلا خريطة ثانية",
-                }.get(lang, ""),
-                {
-                    "en": "whether any secrecy behaviour is occurring — unknown",
-                    "fa": "اینکه رفتار پنهان‌کاری رخ می‌دهد یا نه — نامشخص",
-                    "ru": "происходит ли скрытное поведение — неизвестно",
-                    "ar": "ما إذا كان سلوك كتمان يحدث — غير معروف",
-                }.get(lang, ""),
-            ]
-        )
-        for key in _RADAR_DIM_PLANETS:
-            signals[key] = {
-                "band": "unknown",
-                "layer": "unknown",
-                "score": None,
-                "hits": 0,
-            }
-    else:
-        mode = "synastry"
-        partner_time = (partner_birth_time or "").strip()
-        if not partner_time:
-            missing.append("partner_birth_time")
-            partner_time = "12:00"
-            partner_birth_time_known = False
+    signals = {key: {"band": "unknown", "layer": "unknown", "score": None, "hits": 0}
+               for key in _RADAR_DIM_PLANETS}
+    mode = "synastry" if has_partner else "self"
+    if has_partner:
         partner_natal, _ = build_chart_payload(
-            birth_date=partner_birth_date,  # type: ignore[arg-type]
-            birth_time=partner_time,
-            location=partner_location,  # type: ignore[arg-type]
-            target_date=today,
-            target_time=partner_time,
-            house_system=house_system,
-            zodiac=zodiac,
-            latitude=partner_latitude,
-            longitude=partner_longitude,
+            birth_date=partner_birth_date,
+            birth_time=partner_birth_time if partner_birth_time_known else "12:00",
+            location=partner_location, target_date=today, target_time="12:00",
+            house_system=house_system, zodiac=zodiac,
+            latitude=partner_latitude, longitude=partner_longitude,
         )
-        observed.append(
-            {
-                "en": "second-person birth data provided for synastry",
-                "fa": "داده تولد نفر دوم برای هم‌خوانی ارائه شد",
-                "ru": "данные рождения второго человека для синастрии",
-                "ar": "بيانات ولادة الشخص الثاني للتوافق مقدَّمة",
-            }.get(lang, "")
+        _, harmony, tension = _compute_vault_synastry(
+            natal.get("planets") or {}, partner_natal.get("planets") or {}, profile,
         )
-        _overall, harmony, tension = _compute_vault_synastry(
-            planets, partner_natal.get("planets") or {}, profile
-        )
-        for key, pset in _RADAR_DIM_PLANETS.items():
-            dim = _score_compat_dimension(harmony, tension, pset, profile)
-            band = _radar_band_from_compat(dim)
-            layer = "inferred" if dim.get("hits", 0) > 0 else "unknown"
+        for key, planets in _RADAR_DIM_PLANETS.items():
+            dim = _score_compat_dimension(harmony, tension, planets, profile)
             signals[key] = {
-                "band": band,
-                "layer": layer,
-                "score": dim.get("score"),
-                "hits": dim.get("hits", 0),
+                "band": _radar_band_from_compat(dim),
+                "layer": "inferred" if dim.get("hits", 0) else "unknown",
+                "score": dim.get("score"), "hits": dim.get("hits", 0),
+                "meaning": "symbolic_reflection_weight_not_behavior",
             }
-            if layer == "inferred":
-                inferred.append(
-                    {
-                        "en": (
-                            f"{key.replace('_', ' ')} signal band={band} "
-                            f"(synastry pattern — not a behaviour fact)"
-                        ),
-                        "fa": (
-                            f"سیگنال {key}: باند={band} "
-                            f"(الگوی هم‌خوانی — نه واقعیت رفتار)"
-                        ),
-                        "ru": (
-                            f"сигнал {key}: полоса={band} "
-                            f"(паттерн синастрии — не факт поведения)"
-                        ),
-                        "ar": (
-                            f"إشارة {key}: النطاق={band} "
-                            f"(نمط توافق — ليس حقيقة سلوك)"
-                        ),
-                    }.get(lang, "")
-                )
-            else:
-                unknown.append(
-                    {
-                        "en": f"{key.replace('_', ' ')} — unknown (no aspects in orb)",
-                        "fa": f"{key} — نامشخص (جنبه‌ای در اورب نیست)",
-                        "ru": f"{key} — неизвестно (нет аспектов в орбе)",
-                        "ar": f"{key} — غير معروف (لا جوانب ضمن القوس)",
-                    }.get(lang, "")
-                )
-        unknown.append(
-            {
-                "en": "real-world secrecy or loyalty status — unknown from charts alone",
-                "fa": "وضعیت واقعی پنهان‌کاری یا وفاداری — فقط از چارت نامشخص",
-                "ru": "реальная скрытность или верность — по картам неизвестны",
-                "ar": "الكتمان أو الولاء في الواقع — غير معروف من الخرائط وحدها",
-            }.get(lang, "")
-        )
-        elev = sum(1 for s in signals.values() if s.get("band") == "elevated")
-        confidence = "high" if elev == 0 and all(
-            s.get("layer") == "inferred" for s in signals.values()
-        ) else "medium"
-        if elev >= 2:
-            confidence = "medium"
-
-    time_note = None
-    if not user_birth_time_known or (
-        has_partner and not partner_birth_time_known
-    ):
-        confidence = "low"
-        if "exact_birth_time" not in missing:
-            missing.append("exact_birth_time")
-        time_note = {
-            "en": "Exact birth time missing — house claims avoided; confidence reduced.",
-            "fa": "ساعت دقیق تولد ناقص است — ادعای خانه‌ای نیست؛ اطمینان کمتر.",
-            "ru": "Точное время рождения отсутствует — без домов; уверенность снижена.",
-            "ar": "وقت الولادة الدقيق ناقص — بلا ادعاء بيوت؛ ثقة أقل.",
-        }.get(lang)
-
+    # Supplied dates/concerns are input metadata, never observed behavior.
+    observed = []
+    inferred = trust_reflections(signals, lang)
     behaviors = _radar_verify_behaviors(lang)
     questions = _radar_questions(rel, lang)
+    confidence = "low"  # Deprecated compatibility enum; reading.evidence_status is authoritative.
     text = render_cheating_radar_reading(
-        lang=lang,
-        mode=mode,
-        relationship_type=rel,
-        signals=signals,
-        observed=observed,
-        inferred=inferred,
-        unknown=unknown,
-        behaviors=behaviors,
-        questions=questions,
-        missing_inputs=missing,
-        confidence=confidence,
-        concern=concern,
-        time_precision_note=time_note,
-        planet_roles={},
+        lang=lang, mode=mode, relationship_type=rel, signals=signals,
+        inferred=inferred, behaviors=behaviors, questions=questions,
+        missing_inputs=missing, confidence=confidence,
     )
+    text["data_completeness"] = "incomplete" if missing else "supplied_unverified"
+    unknown = text["unknown"]
     return {
         "planet": "radar",
         "lang": lang,
@@ -3309,6 +3142,11 @@ def trust_patterns_reading(
 
     behaviors = _trust_verify_behaviors(lang)
     questions = _trust_questions(rel, lang)
+    copy = QUALITY_COPY["trust"][QUALITY_LANGS.index(lang if lang in QUALITY_LANGS else "en")]
+    observed, inferred, unknown = [], [copy[1]], [copy[4]]
+    behaviors, questions = [copy[2]], [copy[2]]
+    confidence = "low"  # Deprecated; no inference of observed behavior from birth data.
+    time_note = None
     text = render_trust_patterns_reading(
         lang=lang,
         mode=mode,
@@ -3465,8 +3303,8 @@ def _comm_risk_questions(relationship_type: str, lang: str) -> list[str]:
         },
         "ar": {
             "romantic": [
-                "ماذا سمعتِ من طلبي — بكلماتك؟",
-                "حين تصمتين، ماذا يفترض أن أفهم؟",
+                "كيف يمكن تلخيص الطلب كما وصل إلى الطرف الآخر؟",
+                "كيف يمكن توضيح الحاجة إلى استراحة بدلاً من ترك معنى الصمت للتخمين؟",
                 "ما الذي يجعل الإصلاح آمناً بعد التوتر؟",
             ],
             "marriage": [
@@ -3576,7 +3414,7 @@ def communication_risk_reading(
         return None
 
     mode = "self"
-    confidence = "medium"
+    confidence = "low"
 
     if not has_partner:
         mode = "self"
@@ -3673,7 +3511,7 @@ def communication_risk_reading(
         )
         for key, pset in _COMM_RISK_DIM_PLANETS.items():
             dim = _score_compat_dimension(harmony, tension, pset, profile)
-            # Harmony ⇒ low risk / healthier repair capacity; tension ⇒ elevated.
+            # Legacy repair_capacity key stores repair DIFFICULTY bands: low score ⇒ elevated difficulty.
             band = _comm_risk_band(dim)
             layer = "inferred" if dim.get("hits", 0) > 0 else "unknown"
             if layer == "unknown":
@@ -3683,12 +3521,13 @@ def communication_risk_reading(
                 "layer": layer,
                 "score": dim.get("score"),
                 "hits": dim.get("hits", 0),
+                "meaning": "repair_difficulty" if key == "repair_capacity" else "symbolic_risk",
             }
             if layer == "inferred":
                 inferred.append(
                     {
                         "en": (
-                            f"{key.replace('_', ' ')} risk band={band} "
+                            f"{key.replace('_', ' ').replace('repair capacity', 'repair difficulty')} band={band} "
                             f"(synastry pattern — not a behaviour fact)"
                         ),
                         "fa": (
@@ -3739,8 +3578,7 @@ def communication_risk_reading(
                 "ar": "نية التواصل في الواقع — غير معروفة من الخرائط وحدها",
             }.get(lang, "")
         )
-        elev = sum(1 for s in signals.values() if s.get("band") == "elevated")
-        confidence = "high" if elev == 0 else "medium" if elev <= 2 else "low"
+        confidence = "low"  # Deprecated compatibility enum; reading.evidence_status is authoritative.
 
     time_note = None
     if not user_birth_time_known or (has_partner and not partner_birth_time_known):
@@ -3748,12 +3586,13 @@ def communication_risk_reading(
         if "exact_birth_time" not in missing:
             missing.append("exact_birth_time")
         time_note = {
-            "en": "Exact birth time missing — house claims avoided; confidence reduced.",
-            "fa": "ساعت دقیق تولد ناقص است — ادعای خانه‌ای نیست؛ اطمینان کمتر.",
-            "ru": "Точное время рождения отсутствует — без домов; уверенность снижена.",
-            "ar": "وقت الولادة الدقيق ناقص — بلا ادعاء بيوت؛ ثقة أقل.",
+            "en": "Exact birth time missing — input completeness is limited; no behavioral claim follows.",
+            "fa": "ساعت دقیق تولد ناقص است؛ داده‌ها کامل نیستند و رفتار را اثبات نمی‌کنند.",
+            "ru": "Точное время рождения отсутствует; данные неполны и не доказывают поведение.",
+            "ar": "وقت الولادة الدقيق ناقص؛ المدخلات غير مكتملة ولا تثبت السلوك.",
         }.get(lang)
 
+    observed = []  # Input metadata is not observed behavior.
     behaviors = _comm_risk_verify_behaviors(lang)
     questions = _comm_risk_questions(rel, lang)
     text = render_communication_risk_reading(

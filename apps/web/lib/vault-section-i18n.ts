@@ -458,12 +458,12 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'The Provider',
       sub: 'Patterns around security, resources, partnership and supportive environments.',
       intro:
-        'Where support and resources tend to gather — places, partnership patterns, and stability signals to act on.',
+        'Symbolic comparisons of places and partnerships to explore alongside real-world evidence.',
       items: [
-        { label: 'Prosperity Geography', hint: 'Places that score higher for expansion and resources' },
-        { label: 'Love Lines Map', hint: 'Places that score higher for connection' },
-        { label: 'Partner Profile', hint: 'Ideal traits and compatibility patterns' },
-        { label: 'Compatibility', hint: 'Emotional, chemistry, and stability scores' },
+        { label: 'Prosperity Geography', hint: 'Symbolic place comparisons, not financial forecasts' },
+        { label: 'Love Lines Map', hint: 'Symbolic place comparisons, not relationship predictions' },
+        { label: 'Partner Profile', hint: 'Optional prompts for discussing expectations' },
+        { label: 'Compatibility', hint: 'Symbolic comparison weights, not relationship measurements' },
       ],
       coming: 'Coming soon — place maps and partner timing.',
     },
@@ -471,10 +471,10 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'Shadow Room',
       sub: 'Patterns of trust, privacy and emotional protection. Signals, never verdicts.',
       intro:
-        'Patterns of secrecy, trust, and emotional protection. We show signals — never verdicts. Verify before you decide.',
+        'Symbolic prompts for discussing trust and boundaries. Actual behavior must be verified through real-world evidence.',
       items: [
-        { label: 'Cheating Radar', hint: 'Signals to verify — never verdicts' },
-        { label: 'Trust Patterns', hint: 'Building, pressure, repair — not verdicts' },
+        { label: 'Trust & Clarity Signals', hint: 'Signals to verify — never verdicts' },
+        { label: 'Trust Patterns', hint: 'Reflection on expectations and agreements' },
         { label: 'Communication Risk', hint: 'Clarity, reactivity, escalation — not verdicts' },
         { label: 'Private Conversation Timing', hint: 'Quieter windows for private talks — reflection only' },
       ],
@@ -486,10 +486,10 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'What to wear, scent, and share today so your presence lands with intention.',
       items: [
-        { label: "Today's Color", hint: 'Dress code for today' },
-        { label: "Today's Perfume", hint: 'Soft vs deep scent notes' },
-        { label: 'Best Post Time', hint: 'Best hour to post' },
-        { label: 'Date Outfit', hint: 'Presentation that matches tonight’s tone' },
+        { label: "Today's Color", hint: 'A palette to try, guided by comfort and taste' },
+        { label: "Today's Perfume", hint: 'Optional notes to compare before choosing' },
+        { label: 'Best Post Time', hint: 'Symbolic timing; audience analytics remain decisive' },
+        { label: 'Date Outfit', hint: 'An optional look for the setting and your comfort' },
       ],
       coming: 'Coming soon — daily dress code.',
     },
@@ -499,7 +499,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'Heat days, money days, distance days, and yes-days — choose when to ask, lean in, or step back.',
       items: [
-        { label: 'Heat Days', hint: 'Peak chemistry windows' },
+        { label: 'Heat Days', hint: 'Optional symbolic windows for social initiative' },
         { label: 'Money Days', hint: 'Best days to ask' },
         { label: 'Ghost Days', hint: 'Strategic distance' },
         { label: 'Yes Day', hint: 'Big asks and proposals' },
@@ -567,12 +567,12 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'Покровитель',
       sub: 'Паттерны безопасности, ресурсов, партнёрства и поддерживающих сред.',
       intro:
-        'Где собираются поддержка и ресурсы — места, паттерны партнёрства и сигналы стабильности.',
+        'Символическое сравнение мест и партнёрства для размышления с опорой на реальные данные.',
       items: [
-        { label: 'География процветания', hint: 'Места с более высоким баллом для роста и ресурсов' },
-        { label: 'Карта любви', hint: 'Места с более высоким баллом связи' },
-        { label: 'Профиль партнёра', hint: 'Черты и паттерны совместимости' },
-        { label: 'Совместимость', hint: 'Эмоции, химия и стабильность' },
+        { label: 'География процветания', hint: 'Символическое сравнение мест, не финансовый прогноз' },
+        { label: 'Карта любви', hint: 'Символическое сравнение мест, не прогноз отношений' },
+        { label: 'Профиль партнёра', hint: 'Вопросы для обсуждения ожиданий' },
+        { label: 'Совместимость', hint: 'Символические веса, не измерения отношений' },
       ],
       coming: 'Скоро — карты мест и тайминг партнёра.',
     },
@@ -580,10 +580,10 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'Теневая комната',
       sub: 'Паттерны доверия, приватности и эмоциональной защиты. Сигналы, не приговоры.',
       intro:
-        'Паттерны скрытности, доверия и защиты. Мы показываем сигналы — не приговоры. Проверяйте перед решением.',
+        'Символические вопросы о доверии и границах. Реальное поведение проверяется по фактам.',
       items: [
-        { label: 'Радар верности', hint: 'Сигналы для проверки — не приговоры' },
-        { label: 'Паттерны доверия', hint: 'Строительство, давление, ремонт — не приговоры' },
+        { label: 'Сигналы доверия и ясности', hint: 'Сигналы для проверки — не приговоры' },
+        { label: 'Паттерны доверия', hint: 'Размышления об ожиданиях и договорённостях' },
         { label: 'Риск общения', hint: 'Ясность, реактивность, эскалация — не приговоры' },
         { label: 'Время для частных разговоров', hint: 'Более тихие окна для личных бесед — только рефлексия' },
       ],
@@ -594,10 +594,10 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       sub: 'Ежедневные подсказки по цвету, аромату, подаче и присутствию.',
       intro: 'Что надеть, какой аромат выбрать и когда делиться — с намерением.',
       items: [
-        { label: 'Цвет дня', hint: 'Код стиля на сегодня' },
-        { label: 'Аромат дня', hint: 'Мягкие и глубокие ноты' },
-        { label: 'Время лайва', hint: 'Лучший час' },
-        { label: 'Образ на свидание', hint: 'Подача под тон вечера' },
+        { label: 'Цвет дня', hint: 'Палитра с учётом вкуса и удобства' },
+        { label: 'Аромат дня', hint: 'Ноты для сравнения перед выбором' },
+        { label: 'Время лайва', hint: 'Символическое время; решает аналитика аудитории' },
+        { label: 'Образ на свидание', hint: 'Образ на выбор с учётом обстановки и удобства' },
       ],
       coming: 'Скоро — ежедневный код стиля.',
     },
@@ -607,7 +607,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'Горячие дни, дни денег, дни дистанции и дни «да» — когда просить, сближаться или отойти.',
       items: [
-        { label: 'Горячие дни', hint: 'Окна жара' },
+        { label: 'Горячие дни', hint: 'Символические окна для инициативы в общении' },
         { label: 'Дни денег', hint: 'Лучшие дни спросить' },
         { label: 'Дни тишины', hint: 'Дистанция' },
         { label: 'День «да»', hint: 'Большие просьбы' },
@@ -675,12 +675,12 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'حامی',
       sub: 'الگوهای امنیت، منابع، شراکت و محیط‌های حمایتی.',
       intro:
-        'جایی که حمایت و منابع جمع می‌شن — مکان‌ها، الگوهای شراکت و سیگنال‌های ثبات.',
+        'مقایسه نمادین مکان‌ها و شراکت‌ها برای بررسی در کنار شواهد واقعی.',
       items: [
-        { label: 'جغرافیای رفاه', hint: 'جاهایی با امتیاز بالاتر برای گسترش و منابع' },
-        { label: 'نقشه عشق', hint: 'جاهایی با امتیاز بالاتر برای ارتباط' },
-        { label: 'پروفایل شریک', hint: 'ویژگی ایده‌آل و الگوهای هم‌خوانی' },
-        { label: 'هم‌خوانی', hint: 'عاطفی، شیمی و ثبات' },
+        { label: 'جغرافیای رفاه', hint: 'مقایسه نمادین مکان\u200cها، نه پیش\u200cبینی مالی' },
+        { label: 'نقشه عشق', hint: 'مقایسه نمادین مکان\u200cها، نه پیش\u200cبینی رابطه' },
+        { label: 'پروفایل شریک', hint: 'پرسش\u200cهای اختیاری برای گفتگو درباره انتظارها' },
+        { label: 'هم‌خوانی', hint: 'وزن\u200cهای مقایسه نمادین، نه سنجش رابطه' },
       ],
       coming: 'به‌زودی — نقشه مکان و تایمینگ شریک.',
     },
@@ -688,10 +688,10 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'اتاق سایه',
       sub: 'الگوهای اعتماد، حریم خصوصی و محافظت احساسی. نشانه، نه حکم.',
       intro:
-        'الگوهای پنهان‌کاری، اعتماد و محافظت احساسی. ما نشانه می‌دهیم — نه حکم. قبل از تصمیم بررسی کن.',
+        'پرسش‌های نمادین درباره اعتماد و مرزها. رفتار واقعی را باید با شواهد واقعی بررسی کرد.',
       items: [
-        { label: 'رادار خیانت', hint: 'نشانه‌هایی برای بررسی — نه حکم' },
-        { label: 'الگوهای اعتماد', hint: 'ساخت، فشار، ترمیم — نه حکم' },
+        { label: 'نشانه‌های اعتماد و وضوح', hint: 'نشانه‌هایی برای بررسی — نه حکم' },
+        { label: 'الگوهای اعتماد', hint: 'تأمل درباره انتظارها و توافق\u200cها' },
         { label: 'ریسک ارتباط', hint: 'وضوح، واکنش، تشدید — نه حکم' },
         { label: 'زمان گفت‌وگوی خصوصی', hint: 'پنجره‌های آرام‌تر برای حرف خصوصی — فقط بازتاب' },
       ],
@@ -700,12 +700,12 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
     look: {
       title: 'زمان‌بندی استایل',
       sub: 'راهنمای روزانه برای رنگ، عطر، ارائه و حضور شخصی.',
-      intro: 'امروز چه بپوشی، چه عطری بزنی و کی به اشتراک بذاری — با نیت.',
+      intro: 'پیشنهادهای اختیاری برای پوشش، عطر و زمان انتشار، با توجه به راحتی و موقعیت.',
       items: [
-        { label: 'رنگ امروز', hint: 'کد لباس امروز' },
-        { label: 'عطر امروز', hint: 'نت‌های نرم در برابر عمیق' },
-        { label: 'ساعت لایو', hint: 'بهترین پست' },
-        { label: 'استایل قرار', hint: 'ارائه‌ای هم‌خوان با حال امشب' },
+        { label: 'رنگ امروز', hint: 'پالت پیشنهادی با توجه به سلیقه و راحتی' },
+        { label: 'عطر امروز', hint: 'رایحه\u200cهای پیشنهادی برای مقایسه پیش از انتخاب' },
+        { label: 'ساعت لایو', hint: 'زمان نمادین؛ آمار واقعی مخاطبان تعیین\u200cکننده است' },
+        { label: 'استایل قرار', hint: 'پوشش پیشنهادی متناسب با موقعیت و راحتی شما' },
       ],
       coming: 'به‌زودی — کد لباس روزانه.',
     },
@@ -713,9 +713,9 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'تقویم قدرت',
       sub: 'الگوهای تایمینگ برای اعتمادبه‌نفس، پول، ارتباط، فاصله و اقدام آگاهانه.',
       intro:
-        'روزهای داغ، روز پول، روز فاصله و روز «بله» — کی بخواهی، نزدیک شی یا فاصله بگیری.',
+        'بازه‌های نمادین برای آغاز گفتگو، مطرح‌کردن درخواست و مکثِ هماهنگ‌شده؛ تصمیم با شماست.',
       items: [
-        { label: 'روزهای داغ', hint: 'پنجره‌های حرارت' },
+        { label: 'روزهای داغ', hint: 'بازه\u200cهای نمادین برای آغاز گفتگو، به انتخاب شما' },
         { label: 'روز پول', hint: 'بهترین روز درخواست' },
         { label: 'روز غیبت', hint: 'دوری استراتژیک' },
         { label: 'روز بله', hint: 'درخواست بزرگ' },
@@ -755,9 +755,9 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
     previewNote: 'وضع المعاينة — الأدوات الكاملة مع البريميوم.',
     sensuality: {
       title: 'الحسّية',
-      sub: 'الرغبة والخيال والجاذبية — عبر توقيتكِ الشخصي.',
+      sub: 'الرغبة والخيال والجاذبية — موضوعات للتأمل في التوقيت الرمزي.',
       intro:
-        'الرغبة والخيال والجاذبية عبر توقيتكِ الشخصي — ثم اختاري متى تقتربين.',
+        'موضوعات رمزية للتأمل في الرغبة والخيال والجاذبية، مع حرية اختيار ما يناسب التجربة الشخصية.',
       items: [
         { label: 'بصمة الرغبة', hint: 'كيف يظهر نمط رغبتكِ وسعيكِ' },
         { label: 'خيالات عميقة', hint: 'ثيمات خاصة من الشوق والشدّة' },
@@ -783,12 +783,12 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'العائل',
       sub: 'أنماط الأمن والموارد والشراكة والبيئات الداعمة.',
       intro:
-        'أين تتجمّع الدعم والموارد — أماكن وأنماط شراكة وإشارات استقرار للعمل عليها.',
+        'مقارنات رمزية للأماكن والشراكات للتأمل إلى جانب الأدلة الواقعية.',
       items: [
-        { label: 'جغرافيا الازدهار', hint: 'أماكن بدرجات أعلى للتوسّع والموارد' },
-        { label: 'خريطة الحب', hint: 'أماكن بدرجات أعلى للارتباط' },
-        { label: 'ملف الشريك', hint: 'سمات مثالية وأنماط توافق' },
-        { label: 'التوافق', hint: 'عاطفي وكيمياء واستقرار' },
+        { label: 'جغرافيا الازدهار', hint: 'مقارنة رمزية للأماكن، لا توقعات مالية' },
+        { label: 'خريطة الحب', hint: 'مقارنة رمزية للأماكن، لا توقعات للعلاقات' },
+        { label: 'ملف الشريك', hint: 'موضوعات اختيارية لمناقشة التوقعات' },
+        { label: 'التوافق', hint: 'أوزان مقارنة رمزية، لا قياسات للعلاقة' },
       ],
       coming: 'قريباً — خرائط الأماكن وتوقيت الشريك.',
     },
@@ -796,10 +796,10 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'غرفة الظل',
       sub: 'أنماط الثقة والخصوصية والحماية العاطفية. إشارات، لا أحكام.',
       intro:
-        'أنماط الكتمان والثقة والحماية العاطفية. نعرض إشارات — لا أحكاماً. تحقّقي قبل القرار.',
+        'موضوعات رمزية لمناقشة الثقة والحدود. التحقق من السلوك الفعلي يتطلب أدلة واقعية.',
       items: [
-        { label: 'رادار الخيانة', hint: 'إشارات للتحقّق — لا أحكام' },
-        { label: 'أنماط الثقة', hint: 'بناء وضغط وإصلاح — لا أحكام' },
+        { label: 'إشارات الثقة والوضوح', hint: 'إشارات للتحقّق — لا أحكام' },
+        { label: 'أنماط الثقة', hint: 'تأمل في التوقعات والاتفاقات' },
         { label: 'مخاطر التواصل', hint: 'وضوح وردة فعل وتصعيد — لا أحكام' },
         { label: 'توقيت المحادثة الخاصة', hint: 'نوافذ أهدأ لأحاديث خاصة — تأمّل فقط' },
       ],
@@ -808,12 +808,12 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
     look: {
       title: 'توقيت الأسلوب',
       sub: 'إرشاد يومي للون والعطر والتقديم والحضور الشخصي.',
-      intro: 'ماذا ترتدين وتتعطّرين ومتى تشاركين — بقصد.',
+      intro: 'اقتراحات اختيارية للملابس والعطر وتوقيت النشر، وفق الراحة والسياق.',
       items: [
-        { label: 'لون اليوم', hint: 'كود الإطلالة اليوم' },
-        { label: 'عطر اليوم', hint: 'نغمات ناعمة مقابل عميقة' },
-        { label: 'وقت البث', hint: 'أفضل ساعة' },
-        { label: 'إطلالة الموعد', hint: 'تقديم يناسب نبرة الليلة' },
+        { label: 'لون اليوم', hint: 'ألوان للتجربة وفق الذوق والراحة' },
+        { label: 'عطر اليوم', hint: 'نغمات عطرية اختيارية للمقارنة' },
+        { label: 'وقت البث', hint: 'توقيت رمزي؛ المرجع هو بيانات الجمهور' },
+        { label: 'إطلالة الموعد', hint: 'إطلالة اختيارية تراعي المكان والراحة' },
       ],
       coming: 'قريباً — كود إطلالة يومي.',
     },
@@ -821,9 +821,9 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'تقويم القوة',
       sub: 'أنماط توقيت للثقة والمال والارتباط والمسافة والفعل الواعي.',
       intro:
-        'أيام حارّة وأيام مال وأيام مسافة وأيام «نعم» — متى تطلبين أو تقتربين أو تتراجعين.',
+        'نوافذ رمزية للمبادرة والنقاش واستراحة متفق عليها؛ القرار يبقى شخصياً.',
       items: [
-        { label: 'أيام حارّة', hint: 'نوافذ الذروة' },
+        { label: 'أيام حارّة', hint: 'نوافذ رمزية اختيارية للمبادرة بالتواصل' },
         { label: 'أيام المال', hint: 'أفضل أيام الطلب' },
         { label: 'أيام الغياب', hint: 'مسافة استراتيجية' },
         { label: 'يوم نعم', hint: 'طلبات كبيرة' },

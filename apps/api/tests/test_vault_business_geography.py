@@ -55,10 +55,10 @@ def test_render_business_geography_ranked_en():
         lang="en",
     )
     assert reading["intensity"] == "strong"
-    assert reading["confidence"] == "high"
-    assert "Dubai" in reading["executive"]
-    assert "Commercial risk:" in reading["executive"]
-    assert "Strongest business use:" in reading["executive"]
+    assert reading["evidence_status"] == "unvalidated"
+    assert "Dubai" in str(reading["details"])
+    assert reading["avoid"] and reading["limitation"]
+    assert "business" in reading["headline"]
     assert "jupiter" in reading["technical"]
     assert "houses=2,6,10,11" in reading["technical"]
 
@@ -79,7 +79,7 @@ def test_render_business_geography_langs():
         )
         assert reading["executive"]
         assert reading["strategic"]
-        assert reading["confidence"] == "medium"
+        assert reading["evidence_status"] == "unvalidated"
 
 
 def test_business_geography_missing_locations_no_invented_ranks():
@@ -134,4 +134,4 @@ def test_business_geography_ranks_shortlist():
     for key in ("executive", "strategic", "technical", "confidence", "explanation"):
         assert key in payload["reading"]
     assert "mode=business" in payload["reading"]["technical"]
-    assert "Commercial risk:" in payload["reading"]["executive"]
+    assert payload["reading"]["avoid"] and payload["reading"]["limitation"]

@@ -16,7 +16,18 @@ export type VaultReadingLayer = {
   intensity?: string;
   sign?: string;
   house?: number;
+  /** @deprecated For symbolic readings use evidence_status and data_completeness. */
   confidence?: string;
+  /** Legacy confidence enum is not calibrated accuracy for symbolic readings. */
+  confidence_basis?: 'unvalidated_symbolic_guidance';
+  confidence_explanation?: string;
+  limitation?: string;
+  evidence_status?: 'unvalidated';
+  data_completeness?: 'complete' | 'not_assessed' | 'supplied_unverified' | 'incomplete';
+  interpretation?: string;
+  details?: Array<{ label: string; value: string; reason?: string; direction?: "ltr" | "rtl" | "auto" }>;
+  strongest_window?: VaultPowerDayWindow | null;
+  secondary_windows?: VaultPowerDayWindow[];
   action?: string;
   avoid?: string;
 };
@@ -161,9 +172,12 @@ export type VaultTodaysColorResponse = {
 
 /** Yes Day slot — not a top-level windows[] item. */
 export type VaultYesDaySlot = {
+  /** Localized display copy; legacy rating remains a stable API value. */
+  rating_label?: string | null;
   date: string;
   score: number;
   rating?: string | null;
+  /** @deprecated Retained because normalizeYesSlot requires a nonempty legacy value. */
   confidence: string;
   action_type: string;
 };

@@ -121,7 +121,7 @@ def test_missing_second_person_unknown_and_verification():
         assert payload["signals"][key]["band"] == "unknown"
         assert payload["signals"][key]["layer"] == "unknown"
     exec_l = payload["reading"]["executive"].lower()
-    assert "unknown" in exec_l
+    assert "actual behavior and fidelity are unknown" in payload["reading"]["limitation"].lower()
     assert "verify" in exec_l
 
 
@@ -135,17 +135,16 @@ def test_observed_concern_not_presented_as_verified_fact():
         concern=concern,
     )
     exec_text = payload["reading"]["executive"]
-    assert "Observed:" in exec_text
-    assert "Inferred:" in exec_text
-    assert "Unknown:" in exec_text
-    assert "observed input" in exec_text.lower() or "concern (observed" in exec_text.lower()
-    assert "verified fact" not in exec_text.lower()
-    assert any("concern" in str(o).lower() for o in payload["observed"])
-    # Concern may appear as labeled observed input, never as a proven secrecy claim.
+    assert payload["observed"] == []
+    assert "actual behavior and fidelity are unknown" in payload["reading"]["limitation"].lower()
+    assert "observable behavior" in exec_text.lower()
+    assert "direct, calm conversation" in exec_text.lower()
+    assert concern not in exec_text
+    assert payload["reading"]["confidence_basis"] == "unvalidated_symbolic_guidance"
     assert not re.search(r"\bverified\b.*\b" + re.escape(concern), exec_text, re.I)
 
 
-def test_missing_partner_birth_time_lowers_confidence():
+def test_missing_partner_birth_time_changes_completeness_not_evidence_status():
     with_time = cheating_radar_reading(
         **_BASE,
         **_PARTNER,
@@ -162,19 +161,7 @@ def test_missing_partner_birth_time_lowers_confidence():
         user_birth_time_known=True,
         partner_birth_time_known=False,
     )
-    assert missing_partner_time["reading"]["confidence"] == "low"
     assert "exact_birth_time" in missing_partner_time["missing_inputs"]
-    assert (
-        _CONF[missing_partner_time["reading"]["confidence"]]
-        < _CONF[with_time["reading"]["confidence"]]
-        or (
-            with_time["reading"]["confidence"] == "low"
-            and missing_partner_time["reading"]["confidence"] == "low"
-        )
-    )
-    # Prefer strict decrease when baseline is not already low.
-    if with_time["reading"]["confidence"] != "low":
-        assert (
-            _CONF[missing_partner_time["reading"]["confidence"]]
-            < _CONF[with_time["reading"]["confidence"]]
-        )
+    assert with_time["reading"]["data_completeness"] == "supplied_unverified"
+    assert missing_partner_time["reading"]["data_completeness"] == "incomplete"
+    assert with_time["reading"]["evidence_status"] == missing_partner_time["reading"]["evidence_status"] == "unvalidated"

@@ -112,8 +112,9 @@ def test_separate_planet_roles_moon_mercury_venus_jupiter_saturn():
     # Distinct role strings — not one shared label.
     assert len({roles[p]["role"] for p in roles}) == 5
     strategic = payload["reading"]["strategic"]
-    assert "moon:emotional_consistency_safety" in strategic
-    assert "saturn:boundaries_reliability_pressure_durability" in strategic
+    assert "moon:emotional_consistency_safety" not in strategic
+    assert "saturn:boundaries_reliability_pressure_durability" not in strategic
+    assert len({d["label"] for d in payload["reading"]["details"]}) == 5
 
 
 def test_no_deterministic_loyalty_verdict_all_langs():
@@ -171,7 +172,7 @@ def test_missing_second_person_self_pattern_and_unknown():
     payload = trust_patterns_reading(**_BASE, lang="en", relationship_type="friendship")
     assert payload["mode"] == "self"
     assert "partner_birth_date" in payload["missing_inputs"]
-    assert any("self-pattern" in str(x) for x in payload["inferred"])
+    assert payload["reading"]["data_completeness"] == "incomplete"
     assert payload["unknown"]
     assert payload["questions"]
     for key in _TRUST_KEYS:
@@ -179,7 +180,7 @@ def test_missing_second_person_self_pattern_and_unknown():
         assert payload["signals"][key]["layer"] == "unknown"
     for planet in _TRUST_PLANET_ROLES:
         assert payload["planet_roles"][planet]["layer"] == "unknown"
-    assert "unknown" in payload["reading"]["executive"].lower()
+    assert "cannot be inferred" in payload["reading"]["limitation"].lower()
 
 
 def test_concern_is_observed_input_not_verified_fact():
@@ -192,12 +193,11 @@ def test_concern_is_observed_input_not_verified_fact():
         concern=concern,
     )
     exec_text = payload["reading"]["executive"]
-    assert "Observed:" in exec_text
-    assert "Inferred:" in exec_text
-    assert "Unknown:" in exec_text
-    assert "observed input" in exec_text.lower()
-    assert "verified fact" not in exec_text.lower()
-    assert any("concern" in str(o).lower() for o in payload["observed"])
+    assert "Observed:" not in exec_text
+    assert payload["observed"] == []
+    assert concern not in exec_text  # A supplied concern is not verified behavioral evidence.
+    assert "not observed behavior" in payload["reading"]["interpretation"]
+    assert "cannot be inferred" in payload["reading"]["limitation"].lower()
 
 
 def test_missing_birth_time_lowers_confidence():

@@ -85,8 +85,9 @@ def test_missing_birth_time_lowers_confidence():
     assert exact["reading"]["confidence"] in {"high", "medium", "low"}
     assert unknown["reading"]["confidence"] == "low"
     assert "exact_birth_time" in unknown["missing_inputs"]
-    assert "house" in (unknown["reading"]["executive"] + unknown["reading"].get("explanation", "")).lower() or \
-        "birth time" in unknown["reading"]["executive"].lower()
+    assert unknown["reading"]["data_completeness"] == "incomplete"
+    assert exact["reading"]["data_completeness"] == "supplied_unverified"
+    assert unknown["reading"]["evidence_status"] == exact["reading"]["evidence_status"] == "unvalidated"
 
 
 def test_localized_output_exists():
