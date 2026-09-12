@@ -69,7 +69,7 @@ export const VAULT_READING_PRESENTATION_COPY: Record<
     mainOpportunity: 'فرصت اصلی',
     mainRisk: 'ریسک اصلی',
     recommendedActions: 'اقدام‌های پیشنهادی',
-    thingsToAvoid: 'چیزهایی که باید پرهیز کنی',
+    thingsToAvoid: 'مواردی که باید از آن‌ها پرهیز کنید',
     practicalNextStep: 'قدم عملی بعدی',
     deepReading: 'خوانش عمیق',
     fallbackSituation: 'زمینهٔ زمان‌بندی آماده است — از راهنمای زیر برای این تصمیم استفاده کن.',

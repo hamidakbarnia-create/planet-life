@@ -129,6 +129,23 @@ def test_missing_second_person_unknown_and_verification():
     assert "verify" in exec_l
 
 
+def test_missing_partner_unknown_stays_out_of_limitation_and_has_no_invented_scores():
+    payload = cheating_radar_reading(**_BASE, lang="en", relationship_type="romantic")
+    reading = payload["reading"]
+    assert payload["unknown"] == [
+        "partner synastry trust signals — unknown without second chart"
+    ]
+    assert reading["unknown"] == payload["unknown"]
+    assert reading["limitation"] not in payload["unknown"]
+    values = [row["value"] for row in reading.get("details") or []]
+    assert "partner synastry trust signals — unknown without second chart" in values
+    assert not any(str(value).endswith("/100") for value in values)
+    fa = cheating_radar_reading(**_BASE, lang="fa", relationship_type="romantic")
+    assert "برای شما" in " ".join(fa["questions"])
+    assert "برایت" not in " ".join(fa["questions"])
+    assert fa["reading"]["action"].startswith("برداشت خود را")
+
+
 def test_supplied_partner_does_not_copy_limitation_into_unknown():
     payload = cheating_radar_reading(
         **_BASE, **_PARTNER, lang="en", relationship_type="romantic"
