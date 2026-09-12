@@ -218,18 +218,18 @@ export const VAULT_MISSING_INPUT_COPY: Record<AppLang, VaultMissingInputCopy> = 
     goProfile: 'إلى الملف',
     completeProfile: 'إكمال الملف',
     genericPartial:
-      'هذه القراءة جزئية. أضيفي بعض التفاصيل لتحسين الإرشاد.',
+      'هذه القراءة جزئية. أضف بعض التفاصيل لتحسين الإرشاد.',
     byKind: {
       birth_profile:
         'هذه القراءة جزئية. وقت الميلاد ناقص، لذا تبقى بعض تفاصيل التوقيت عامة.',
       current_location:
-        'هذه القراءة جزئية. أضيفي موقعك الحالي لتحسين الإرشاد المكاني.',
+        'هذه القراءة جزئية. أضف موقعك الحالي لتحسين الإرشاد المكاني.',
       place_shortlist:
         'هذه القراءة جزئية. إرشاد الأماكن يحتاج قائمة أوضح للمقارنة.',
       partner_profile:
         'هذه القراءة جزئية. يلزم إكمال ملف هذا الشخص — بإضافة تاريخ ومكان الميلاد.',
       partner_birth_time:
-        'هذه القراءة جزئية. أضيفي وقت ميلاده/ها لتدقيق تفاصيل التوقيت.',
+        'هذه القراءة جزئية. أضف وقت ميلاده/ها لتدقيق تفاصيل التوقيت.',
     },
   },
 };
@@ -242,6 +242,7 @@ export type VaultPowerTimingCopy = {
   strongest: string;
   supportive: string;
   lighter: string;
+  equalScoreDays: string;
   /** Fixed numeric ranges — not a rank in the visible list. */
   scoreDirection: string;
   /** Response-level advisory confidence label (not outcome certainty). */
@@ -260,6 +261,8 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
     strongest: 'Strongest',
     supportive: 'Supportive',
     lighter: 'Lower score band',
+    equalScoreDays:
+      'These days share the same score; display order does not indicate a stronger day.',
     scoreDirection:
       'Score bands are fixed ranges: 80 and above, 60–79, and below 60. They are not a rank in this list.',
     confidence: 'Advisory confidence',
@@ -275,6 +278,8 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
     strongest: 'قوی‌ترین',
     supportive: 'حمایت‌گر',
     lighter: 'بازهٔ امتیازی پایین',
+    equalScoreDays:
+      'این روزها امتیاز یکسان دارند؛ ترتیب نمایش روز قوی‌تری را نشان نمی‌دهد.',
     scoreDirection:
       'بازه‌های امتیازی ثابت‌اند: ۸۰ و بالاتر، ۶۰–۷۹ و کمتر از ۶۰. رتبه در این فهرست نیستند.',
     confidence: 'اطمینان مشورتی',
@@ -290,6 +295,8 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
     strongest: 'الأقوى',
     supportive: 'داعم',
     lighter: 'نطاق درجة أدنى',
+    equalScoreDays:
+      'هذه الأيام تشترك في الدرجة نفسها؛ ترتيب العرض لا يعني يوماً أقوى.',
     scoreDirection:
       'نطاقات الدرجة ثابتة: ٨٠ فأعلى، ٦٠–٧٩، وأقل من ٦٠. ليست مرتبة في هذه القائمة.',
     confidence: 'ثقة استرشادية',
@@ -305,6 +312,8 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
     strongest: 'Сильнее всего',
     supportive: 'Поддерживает',
     lighter: 'Нижняя полоса баллов',
+    equalScoreDays:
+      'У этих дней одинаковый балл; порядок в списке не означает более сильный день.',
     scoreDirection:
       'Полосы баллов фиксированные: 80 и выше, 60–79 и ниже 60. Это не место в списке.',
     confidence: 'Ориентир уверенности',
@@ -323,7 +332,7 @@ export type VaultComparisonCopy = {
 export const VAULT_COMPARISON_COPY: Record<AppLang, VaultComparisonCopy> = {
   en: {
     overallBlend:
-      'If theme scores are present, Overall is 45% of the full two-chart comparison plus 55% of the mean of those themes, then rounded. If no themes are present, Overall is the full two-chart comparison only. If required partner date or place is missing, Overall is not calculated. Unknown birth time uses a 12:00 placeholder and does not validate house claims. Overall is not measured relationship quality.',
+      'If theme scores are present, Overall is 45% of the full two-chart comparison plus 55% of the mean of those themes, then rounded. If no themes are present, Overall is the full two-chart comparison only. If required partner date or place is missing, Overall is not calculated. Unknown birth time uses a 12:00 placeholder and does not validate astrological-house claims. Overall is not measured relationship quality.',
     placeShortlist:
       'Ranking applies only to this candidate-city shortlist. It is not a global ranking or advice to move.',
     tiedScores:
@@ -331,7 +340,7 @@ export const VAULT_COMPARISON_COPY: Record<AppLang, VaultComparisonCopy> = {
   },
   ru: {
     overallBlend:
-      'Если есть баллы тем, «Общий вес» — это 45% полного сравнения двух карт плюс 55% среднего этих тем, затем округление. Если тем нет, остаётся только полное сравнение. Если нет даты или места второго человека, общий балл не считается. Неизвестное время рождения заменяется на 12:00 и не подтверждает дома. Это не измеренное качество отношений.',
+      'Если есть баллы тем, «Общий вес» — это 45% полного сравнения двух карт плюс 55% среднего этих тем, затем округление. Если тем нет, остаётся только полное сравнение. Если нет даты или места второго человека, общий балл не считается. Неизвестное время рождения заменяется на 12:00 и не подтверждает астрологические дома. Это не измеренное качество отношений.',
     placeShortlist:
       'Рейтинг действует только для этого короткого списка городов-кандидатов. Это не мировой рейтинг и не совет переезжать.',
     tiedScores:
@@ -339,7 +348,7 @@ export const VAULT_COMPARISON_COPY: Record<AppLang, VaultComparisonCopy> = {
   },
   fa: {
     overallBlend:
-      'اگر امتیاز مضمون‌ها باشد، کلی برابر است با ۴۵٪ مقایسهٔ کامل دو نمودار به‌اضافهٔ ۵۵٪ میانگین همان مضمون‌ها، سپس گرد می‌شود. اگر مضمونی نباشد، فقط مقایسهٔ کامل است. اگر تاریخ یا مکان طرف دیگر نباشد، کلی محاسبه نمی‌شود. ساعت نامشخص تولد با ۱۲:۰۰ جایگزین می‌شود و خانه را تأیید نمی‌کند. کیفیت واقعی رابطه را اندازه نمی‌گیرد.',
+      'اگر امتیاز مضمون‌ها باشد، کلی برابر است با ۴۵٪ مقایسهٔ کامل دو نمودار به‌اضافهٔ ۵۵٪ میانگین همان مضمون‌ها، سپس گرد می‌شود. اگر مضمونی نباشد، فقط مقایسهٔ کامل است. اگر تاریخ یا مکان طرف دیگر نباشد، کلی محاسبه نمی‌شود. ساعت نامشخص تولد با ۱۲:۰۰ جایگزین می‌شود و خانه‌های نجومی را تأیید نمی‌کند. کیفیت واقعی رابطه را اندازه نمی‌گیرد.',
     placeShortlist:
       'رتبه‌بندی فقط برای همین فهرست کوتاه شهرهای نامزد است؛ رتبهٔ جهانی یا توصیهٔ جابه‌جایی نیست.',
     tiedScores:
@@ -347,7 +356,7 @@ export const VAULT_COMPARISON_COPY: Record<AppLang, VaultComparisonCopy> = {
   },
   ar: {
     overallBlend:
-      'إذا وُجدت درجات الموضوعات، فإن الإجمالي هو ٤٥٪ من مقارنة الرسمين الكاملة زائد ٥٥٪ من متوسط تلك الموضوعات، ثم يُقرَّب. إن لم توجد موضوعات، يبقى الإجمالي مقارنة الرسمين فقط. إذا نقص تاريخ أو مكان الطرف الآخر فلا يُحسَب الإجمالي. الوقت غير المعروف يُستبدل بـ ١٢:٠٠ ولا يثبت البيوت. هذا ليس جودة علاقة مقيسة.',
+      'إذا وُجدت درجات الموضوعات، فإن الإجمالي هو ٤٥٪ من مقارنة الرسمين الكاملة زائد ٥٥٪ من متوسط تلك الموضوعات، ثم يُقرَّب. إن لم توجد موضوعات، يبقى الإجمالي مقارنة الرسمين فقط. إذا نقص تاريخ أو مكان الطرف الآخر فلا يُحسَب الإجمالي. الوقت غير المعروف يُستبدل بـ ١٢:٠٠ ولا يثبت البيوت الفلكية. هذا ليس جودة علاقة مقيسة.',
     placeShortlist:
       'الترتيب ينطبق فقط على قائمة المدن المرشحة هذه، وليس ترتيباً عالمياً ولا نصيحة بالانتقال.',
     tiedScores:
@@ -358,6 +367,7 @@ export const VAULT_COMPARISON_COPY: Record<AppLang, VaultComparisonCopy> = {
 export type VaultStyleTimingCopy = {
   scentAlternatives: string;
   optionalAccessory: string;
+  dateCalendar: string;
   windowPast: string;
   windowCurrent: string;
   windowUpcoming: string;
@@ -368,6 +378,7 @@ export const VAULT_STYLE_TIMING_COPY: Record<AppLang, VaultStyleTimingCopy> = {
   en: {
     scentAlternatives: 'These note groups are alternatives to compare, not one required blend.',
     optionalAccessory: 'Optional',
+    dateCalendar: 'Dates use the Gregorian calendar.',
     windowPast: 'This window has ended.',
     windowCurrent: 'This window is in progress.',
     windowUpcoming: 'This window has not started.',
@@ -376,6 +387,7 @@ export const VAULT_STYLE_TIMING_COPY: Record<AppLang, VaultStyleTimingCopy> = {
   ru: {
     scentAlternatives: 'Эти группы нот — варианты для сравнения, а не один обязательный микс.',
     optionalAccessory: 'Необязательно',
+    dateCalendar: 'Даты указаны по григорианскому календарю.',
     windowPast: 'Это окно уже завершилось.',
     windowCurrent: 'Это окно сейчас идёт.',
     windowUpcoming: 'Это окно ещё не началось.',
@@ -384,6 +396,7 @@ export const VAULT_STYLE_TIMING_COPY: Record<AppLang, VaultStyleTimingCopy> = {
   fa: {
     scentAlternatives: 'این گروه‌های نت گزینه‌هایی برای مقایسه‌اند، نه یک ترکیب اجباری.',
     optionalAccessory: 'اختیاری',
+    dateCalendar: 'تاریخ‌ها بر اساس تقویم میلادی است.',
     windowPast: 'این بازه تمام شده است.',
     windowCurrent: 'این بازه در جریان است.',
     windowUpcoming: 'این بازه هنوز شروع نشده است.',
@@ -392,6 +405,7 @@ export const VAULT_STYLE_TIMING_COPY: Record<AppLang, VaultStyleTimingCopy> = {
   ar: {
     scentAlternatives: 'هذه مجموعات نغمات بديلة للمقارنة، وليست مزيجاً واحداً مطلوباً.',
     optionalAccessory: 'اختياري',
+    dateCalendar: 'التواريخ وفق التقويم الميلادي.',
     windowPast: 'انتهت هذه النافذة.',
     windowCurrent: 'هذه النافذة جارية الآن.',
     windowUpcoming: 'هذه النافذة لم تبدأ بعد.',
@@ -438,13 +452,13 @@ export const READING_UI: Record<AppLang, VaultReadingUiCopy> = {
     tryThis: 'Your next move',
   },
   fa: {
-    liveLabel: 'خوانش تو',
+    liveLabel: 'خوانش شما',
     loading: 'در حال آماده‌سازی خوانش…',
     needProfile:
-      'تاریخ، ساعت و شهر تولد را در پروفایل ذخیره کن — بعد این خوانش برایت آماده می‌شود.',
+      'تاریخ، ساعت و شهر تولد را در پروفایل ذخیره کنید — سپس این خوانش برای شما آماده می‌شود.',
     goProfile: 'رفتن به پروفایل',
     apiError: 'به سرور وصل نشد. API روی پورت ۸۰۰۰ روشن هست؟',
-    tryThis: 'قدم بعدی تو',
+    tryThis: 'قدم بعدی شما',
   },
   ru: {
     liveLabel: 'Ваш разбор',
@@ -456,13 +470,13 @@ export const READING_UI: Record<AppLang, VaultReadingUiCopy> = {
     tryThis: 'Ваш следующий шаг',
   },
   ar: {
-    liveLabel: 'قراءتكِ',
-    loading: 'نحضر قراءتكِ…',
+    liveLabel: 'قراءتك',
+    loading: 'نحضر قراءتك…',
     needProfile:
-      'احفظي تاريخ الميلاد والوقت والمدينة في الملف — ثم يمكن إعداد هذه القراءة لكِ.',
+      'احفظ تاريخ الميلاد والوقت والمدينة في الملف — ثم يمكن إعداد هذه القراءة لك.',
     goProfile: 'إلى الملف',
     apiError: 'تعذّر الاتصال. هل يعمل الخادم على المنفذ 8000؟',
-    tryThis: 'خطوتكِ التالية',
+    tryThis: 'خطوتك التالية',
   },
 };
 
@@ -506,14 +520,14 @@ export const PREVIEW_LOCK_LANGS: Record<AppLang, VaultPreviewLockCopy> = {
   fa: {
     sampleLabel: 'نمونه خوانش',
     teaser:
-      'با فعال شدن پریمیوم اینجا یک خوانش زنده و شخصی می‌بینی — زمان‌بندی، زمینه و قدم بعدی روشن برای تصمیم تو.',
+      'با فعال شدن پریمیوم اینجا یک خوانش زنده و شخصی می‌بینید — زمان‌بندی، زمینه و قدم بعدی روشن برای تصمیم شما.',
     unlock: 'باز کردن خوانش کامل',
     premium: 'به‌زودی',
-    expand: 'باز کن',
-    collapse: 'ببند',
+    expand: 'باز کنید',
+    collapse: 'ببندید',
     unlockedBadge: 'باز شد',
     unlockedNote:
-      'با اشتراکت باز شد — خوانش زنده‌ی شخصی با آماده‌شدن هر ابزار فعال می‌شه.',
+      'با اشتراک شما باز شد — خوانش زندهٔ شخصی با آماده‌شدن هر ابزار فعال می‌شود.',
     comingSoon: 'به‌زودی',
     notBuiltTitle: 'هنوز آماده نیست',
     notBuiltBody:
@@ -524,8 +538,8 @@ export const PREVIEW_LOCK_LANGS: Record<AppLang, VaultPreviewLockCopy> = {
   ar: {
     sampleLabel: 'قراءة تجريبية',
     teaser:
-      'ستظهر قراءة شخصية حيّة هنا عند تفعيل البريميوم — توقيت وسياق وخطوة تالية واضحة لقراركِ.',
-    unlock: 'افتحي القراءة الكاملة',
+      'ستظهر قراءة شخصية حيّة هنا عند تفعيل البريميوم — توقيت وسياق وخطوة تالية واضحة لقرارك.',
+    unlock: 'افتح القراءة الكاملة',
     premium: 'قريباً',
     expand: 'افتح',
     collapse: 'إغلاق',
@@ -714,7 +728,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'Цвет дня', hint: 'Палитра с учётом вкуса и удобства' },
         { label: 'Аромат дня', hint: 'Ноты для сравнения перед выбором' },
-        { label: 'Время лайва', hint: 'Символическое время; решает аналитика аудитории' },
+        { label: 'Лучшее время для публикаций', hint: 'Символическое время для публикации, съёмки и эфира; решает аналитика аудитории' },
         { label: 'Образ на свидание', hint: 'Образ на выбор с учётом обстановки и удобства' },
       ],
       coming: 'Скоро — ежедневный код стиля.',
@@ -769,9 +783,9 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'این بخش فعلاً فقط امضای میل را دارد. فانتزی‌های عمیق، مگنتیسم پنهان و جذابیت امروز هنوز ساخته نشده‌اند و تایمینگ شخصی نمی‌دهند.',
       items: [
-        { label: 'امضای میل', hint: 'الگوی میل و پیگیری تو چطور دیده می‌شود' },
+        { label: 'امضای میل', hint: 'الگوی میل و پیگیری شما چطور دیده می‌شود' },
         { label: 'فانتزی‌های عمیق', hint: 'تم‌های خصوصی اشتیاق و شدت' },
-        { label: 'مگنتیسم پنهان', hint: 'حضوری که اعلام نمی‌کنی' },
+        { label: 'مگنتیسم پنهان', hint: 'حضوری که اعلام نمی‌کنید' },
         { label: 'جذابیت امروز', hint: 'ساعات اوج جذابیت' },
       ],
       coming: 'به‌زودی — اتصال به پروفایل تولد.',
@@ -782,8 +796,8 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'بازتاب انرژی و ریتم شخصی کنار آسمان — آگاهی سلامتی، نه توصیه پزشکی.',
       items: [
-        { label: 'هم‌گام ریتم', hint: 'ریتم آسمان و آهنگ شخصی تو' },
-        { label: 'اوج انرژی', hint: 'روزهایی که معمولاً بازتر حس می‌شن' },
+        { label: 'هم‌گام ریتم', hint: 'ریتم آسمان و آهنگ شخصی شما' },
+        { label: 'اوج انرژی', hint: 'روزهایی که معمولاً بازتر حس می‌شوند' },
         { label: 'تقویم انرژی', hint: 'ریتم هفتگی' },
         { label: 'روزهای محافظت', hint: 'روزهای مراقبت از استراحت و مرزها' },
       ],
@@ -810,7 +824,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'نشانه‌های اعتماد و وضوح', hint: 'نشانه‌هایی برای بررسی — نه حکم' },
         { label: 'الگوهای اعتماد', hint: 'تأمل درباره انتظارها و توافق\u200cها' },
-        { label: 'ریسک ارتباط', hint: 'مضمون‌های نمادین وضوح، واکنش و تشدید — نه حکم' },
+        { label: 'ریسک گفت‌وگو', hint: 'موضوع‌های نمادین وضوح، واکنش و تشدید — نه حکم' },
         { label: 'زمان گفت‌وگوی خصوصی', hint: 'پنجره‌های آرام‌تر برای حرف خصوصی — فقط بازتاب' },
       ],
       coming: 'به‌زودی — تایمینگ. فقط آموزشی.',
@@ -822,7 +836,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'رنگ امروز', hint: 'پالت پیشنهادی با توجه به سلیقه و راحتی' },
         { label: 'عطر امروز', hint: 'رایحه\u200cهای پیشنهادی برای مقایسه پیش از انتخاب' },
-        { label: 'ساعت لایو', hint: 'زمان نمادین؛ آمار واقعی مخاطبان تعیین\u200cکننده است' },
+        { label: 'بهترین زمان انتشار', hint: 'زمان نمادین برای انتشار، فیلم‌برداری و پخش زنده؛ آمار واقعی مخاطبان تعیین\u200cکننده است' },
         { label: 'استایل قرار', hint: 'پوشش پیشنهادی متناسب با موقعیت و راحتی شما' },
       ],
       coming: 'به‌زودی — کد لباس روزانه.',
@@ -835,7 +849,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'روزهای داغ', hint: 'بازه\u200cهای نمادین برای آغاز گفتگو، به انتخاب شما' },
         { label: 'روز پول', hint: 'بهترین روز درخواست' },
-        { label: 'روز غیبت', hint: 'مکثِ هماهنگ‌شده' },
+        { label: 'روز مکث هماهنگ', hint: 'مکث هماهنگ‌شده' },
         { label: 'روز بله', hint: 'درخواست بزرگ' },
       ],
       coming:
@@ -877,7 +891,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       intro:
         'هذا القسم يقدّم بصمة الرغبة فقط حالياً. الخيالات العميقة والجاذبية الخفية وجاذبية اليوم غير مبنية بعد ولا تعطي توقيتاً شخصياً.',
       items: [
-        { label: 'بصمة الرغبة', hint: 'كيف يظهر نمط رغبتكِ وسعيكِ' },
+        { label: 'بصمة الرغبة', hint: 'كيف يظهر نمط رغبتك وسعيك' },
         { label: 'خيالات عميقة', hint: 'ثيمات خاصة من الشوق والشدّة' },
         { label: 'جاذبية خفية', hint: 'حضور بلا إعلان' },
         { label: 'جاذبية اليوم', hint: 'ساعات الذروة' },
@@ -888,9 +902,9 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       title: 'الجسد والدورة',
       sub: 'إيقاعات شخصية وتحوّلات طاقة وتأمّل الدورة — للتوعية بالعافية فقط.',
       intro:
-        'تأمّلي تحوّلات الطاقة وإيقاعكِ الشخصي مع السماء — توعية بالعافية، لا نصيحة طبية.',
+        'تأمّل تحولات الطاقة وإيقاعك الشخصي مع السماء — توعية بالعافية، لا نصيحة طبية.',
       items: [
-        { label: 'مزامنة الإيقاع', hint: 'إيقاع السماء ووتيرتكِ' },
+        { label: 'مزامنة الإيقاع', hint: 'إيقاع السماء ووتيرتك' },
         { label: 'ذروة الطاقة', hint: 'أيام غالباً أكثر انفتاحاً' },
         { label: 'تقويم الطاقة', hint: 'إيقاع الأسبوع' },
         { label: 'أيام الحماية', hint: 'أيام لحراسة الراحة والحدود' },
@@ -930,7 +944,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'لون اليوم', hint: 'ألوان للتجربة وفق الذوق والراحة' },
         { label: 'عطر اليوم', hint: 'نغمات عطرية اختيارية للمقارنة' },
-        { label: 'وقت البث', hint: 'توقيت رمزي؛ المرجع هو بيانات الجمهور' },
+        { label: 'أفضل وقت للنشر', hint: 'توقيت رمزي للنشر والتصوير والبث؛ المرجع هو بيانات الجمهور' },
         { label: 'إطلالة الموعد', hint: 'إطلالة اختيارية تراعي المكان والراحة' },
       ],
       coming: 'قريباً — كود إطلالة يومي.',
@@ -943,7 +957,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'أيام حارّة', hint: 'نوافذ رمزية اختيارية للمبادرة بالتواصل' },
         { label: 'أيام المال', hint: 'أفضل أيام الطلب' },
-        { label: 'أيام الغياب', hint: 'استراحة مع توضيح' },
+        { label: 'أيام الاستراحة المتفق عليها', hint: 'استراحة مع توضيح' },
         { label: 'يوم نعم', hint: 'طلبات كبيرة' },
       ],
       coming:
@@ -960,7 +974,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
           hint: 'غرف حسب الموضوع للحميمية والتأمّل العاطفي',
         },
         {
-          label: 'اسألي جوليا',
+          label: 'اسأل جوليا',
           hint: 'سؤال مجهول واحد عن الثقة أو الارتباط',
         },
         {

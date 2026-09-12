@@ -5,8 +5,22 @@ import fixtures from './fixtures/quality-api.json';
 import type { VaultReadingLayer } from '@/lib/vault-reading';
 import { VAULT_READING_PRESENTATION_COPY } from '@/lib/vault-reading-presentation';
 import { VAULT_AVAILABILITY } from '@/lib/vault-availability';
+import { localizeFixedShortlistLabel } from '@/lib/vault-shortlist-labels';
 
 afterEach(cleanup);
+
+it('RU Heat Avoid names using a score to justify pressure, intimacy, or silence', () => {
+  const heat = fixtures.ru['hot-attraction-days'] as VaultReadingLayer;
+  expect(heat.avoid).toBe(
+    'Использование оценки для оправдания давления, интимной близости или молчания',
+  );
+  expect(heat.avoid).not.toContain('ради оценки в календаре');
+  expect(heat.executive).toContain(heat.avoid);
+  expect(fixtures.en['hot-attraction-days'].avoid).toBe(
+    'Using a score to justify pressure, intimacy or silence',
+  );
+});
+
 for (const lang of ['en', 'ru', 'fa', 'ar'] as const) {
   describe(`actual synthetic API rendering ${lang}`, () => {
     for (const [endpoint, fixture] of Object.entries(fixtures[lang])) {
@@ -26,8 +40,9 @@ for (const lang of ['en', 'ru', 'fa', 'ar'] as const) {
           expect(leaf.textContent).toMatch(/[\p{L}\p{N}]/u);
         }
         for (const detail of reading.details ?? []) {
-          expect(screen.getAllByText(detail.label, { exact: true })).toHaveLength(1);
-          const row = screen.getByText(detail.label, { exact: true }).parentElement!;
+          const shownLabel = localizeFixedShortlistLabel(detail.label, lang);
+          expect(screen.getAllByText(shownLabel, { exact: true })).toHaveLength(1);
+          const row = screen.getByText(shownLabel, { exact: true }).parentElement!;
           const splitValue =
             (detail.label === 'Palette' ||
               detail.label === 'Палитра' ||
@@ -57,6 +72,10 @@ for (const lang of ['en', 'ru', 'fa', 'ar'] as const) {
       expect(c.summary(3, 1)).toContain('3');
       expect(c.summary(3, 1)).toContain('1');
       expect(c.summary(1, 3)).not.toBe(c.summary(4, 0));
+      if (lang === 'en') {
+        expect(c.summary(1, 1)).toBe('1 reading is available. 1 planned tool is not yet available.');
+        expect(c.summary(4, 0)).toBe('4 readings are available.');
+      }
       expect(c.note).not.toMatch(/Premium|unlock|Coming soon/i);
       if (lang !== 'en') expect(c.live).not.toMatch(/LIVE|Available/);
     });

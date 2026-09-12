@@ -308,12 +308,26 @@ _TRUST_LIMITATION_FRIEND = {
     "ru": "Реальное поведение неизвестно. Эти символические веса — темы для разговора о дружбе, а не доказательство скрытого поведения. Опирайтесь на прямой разговор и наблюдаемое поведение; не обвиняйте, не следите и не вступайте в конфронтацию на этой основе.",
     "ar": "السلوك الفعلي غير معروف. هذه الأوزان الرمزية موضوعات لحوار صداقة، وليست دليلاً على سلوك خفي. يلزم الاعتماد على الحوار المباشر والسلوك الملحوظ، دون اتهام أو مراقبة أو مواجهة على هذا الأساس."
 }
+_TRUST_LIMITATION_BUSINESS = {
+    "en": "Actual working behavior is unknown. These symbolic weights are conversation prompts for a business partnership, not evidence of hidden conduct, competence or contract risk. Use direct discussion and observable work; do not accuse, surveil or confront someone on this basis.",
+    "fa": "رفتار کاری واقعی نامشخص است. این وزن‌های نمادین موضوع گفت‌وگو برای شراکت کاری‌اند، نه شاهد رفتار پنهان، شایستگی یا ریسک قرارداد. بر گفت‌وگوی مستقیم و کار قابل مشاهده تکیه کنید؛ بر این اساس اتهام، نظارت یا مقابله نکنید.",
+    "ru": "Реальное рабочее поведение неизвестно. Эти символические веса — темы для разговора о деловом партнёрстве, а не доказательство скрытого поведения, компетентности или договорного риска. Опирайтесь на прямое обсуждение и наблюдаемую работу; не обвиняйте, не следите и не вступайте в конфронтацию на этой основе.",
+    "ar": "السلوك المهني الفعلي غير معروف. هذه الأوزان الرمزية موضوعات لحوار شراكة عمل، وليست دليلاً على سلوك خفي أو كفاءة أو مخاطر تعاقدية. يلزم الاعتماد على النقاش المباشر والعمل الملحوظ، دون اتهام أو مراقبة أو مواجهة على هذا الأساس."
+}
 _TRUST_TITLE = {
     "en": "Trust & Clarity Signals",
     "fa": "نشانه‌های اعتماد و وضوح",
     "ru": "Сигналы доверия и ясности",
     "ar": "إشارات الثقة والوضوح"
 }
+
+
+def _trust_limitation_for(relationship_type: str, lang: str) -> str:
+    if relationship_type == "friendship":
+        return _TRUST_LIMITATION_FRIEND[lang]
+    if relationship_type == "business":
+        return _TRUST_LIMITATION_BUSINESS[lang]
+    return _TRUST_LIMITATION[lang]
 
 
 def _safe_reading(
@@ -405,7 +419,7 @@ GHOST_HEADLINE: dict[str, dict[str, str]] = {
 
 GHOST_STRATEGY: dict[str, str] = {
     "en": "Reduce pressure if you need space. Briefly communicate the pause and agree when to return to the conversation. Do not use distance to influence another person.",
-    "fa": "اگر به فضا نیاز داری فشار را کم کن. مکث را کوتاه توضیح بده و زمان بازگشت به گفت‌وگو را توافق کن. از فاصله برای اثرگذاری بر دیگری استفاده نکن.",
+    "fa": "اگر به فضا نیاز دارید فشار را کم کنید. مکث را کوتاه توضیح دهید و دربارهٔ زمان بازگشت به گفت‌وگو توافق کنید. از فاصله برای اثرگذاری بر دیگری استفاده نکنید.",
     "ru": "Если нужно пространство, снизьте давление. Кратко объясните паузу и договоритесь о возвращении к разговору. Не используйте дистанцию для влияния на другого.",
     "ar": "عند الحاجة إلى مساحة، يمكن تخفيف الضغط وتوضيح الاستراحة بإيجاز والاتفاق على وقت العودة للحوار. المسافة ليست وسيلة للتأثير على شخص آخر."
 }
@@ -431,9 +445,9 @@ def _confidence_clause(confidence: str, lang: str) -> str:
         },
         "medium": {
             "en": "Confidence: medium — usable signal; leave room to adjust.",
-            "fa": "اطمینان: medium — سیگنال قابل استفاده؛ جا برای تنظیم بگذار.",
+            "fa": "اطمینان: medium — سیگنال قابل استفاده؛ جا برای تنظیم بگذارید.",
             "ru": "Уверенность: medium — рабочий сигнал; оставьте запас.",
-            "ar": "الثقة: medium — إشارة قابلة للاستخدام؛ اتركي هامش تعديل.",
+            "ar": "الثقة: medium — إشارة قابلة للاستخدام؛ مع هامش للتعديل.",
         },
         "low": {
             "en": "Confidence: low — a soft lean, not a green light.",
@@ -476,7 +490,7 @@ def _window_bundle(
         ),
         "ar": (
             f"{headline}. {signal}{score_bit} "
-            f"الإجراء: {action}. تجنبي: {avoid}. {conf}"
+            f"الإجراء: {action}. تجنّب: {avoid}. {conf}"
         ),
     }[lang]
     strategic = {
@@ -494,7 +508,7 @@ def _window_bundle(
         ),
         "ar": (
             f"{interpretation}{windows_bit} {conf} "
-            f"{impact} الإجراء: {action}. تجنبي: {avoid}."
+            f"{impact} الإجراء: {action}. تجنّب: {avoid}."
         ),
     }[lang]
     return executive, strategic
@@ -517,7 +531,7 @@ def render_ghost_days_reading(windows: list[dict[str, Any]], *, lang: str = "en"
         lang=lang, headline=GHOST_HEADLINE[intensity][lang],
         body=GHOST_STRATEGY[lang], action={
             "en": "If useful, take an intentional pause, briefly explain it and agree a return time",
-            "fa": "اگر مفید است آگاهانه مکث کن، کوتاه توضیح بده و زمان بازگشت را توافق کن",
+            "fa": "اگر مفید است آگاهانه مکث کنید، کوتاه توضیح دهید و دربارهٔ زمان بازگشت توافق کنید",
             "ru": "Если полезно, сделайте осознанную паузу, кратко объясните её и согласуйте время возвращения",
             "ar": "عند الحاجة، يمكن أخذ استراحة مقصودة مع توضيح قصير واتفاق على موعد العودة"
         }[lang], avoid=_GHOST_AVOID[lang],
@@ -560,9 +574,9 @@ MONEY_ASK_STRATEGY: dict[str, str] = {
 
 _MONEY_ASK_AVOID: dict[str, str] = {
     "en": "apologizing for the ask, stacking follow-ups, and vague amounts",
-    "fa": "درخواست مبهم، پیگیری‌های پیاپی و فشار برای پاسخ فوری",
+    "fa": "عذرخواهی بابت درخواست، پیگیری‌های پیاپی و مبلغ‌های مبهم",
     "ru": "извинения за просьбу, серии напоминаний и размытые суммы",
-    "ar": "الطلبات المبهمة وتكرار المتابعة والضغط للحصول على رد فوري"
+    "ar": "الاعتذار عن الطلب وتكرار المتابعة والمبالغ المبهمة"
 }
 
 
@@ -733,9 +747,9 @@ MOON_SIGN_COLORS: dict[str, dict[str, dict[str, str]]] = {
     },
     "libra": {
         "en": {"primary": "Blush rose", "accent": "Powder blue"},
-        "fa": {"primary": "رز براق", "accent": "آبی پودری"},
+        "fa": {"primary": "صورتی ملایم", "accent": "آبی پودری"},
         "ru": {"primary": "Нежная роза", "accent": "Пудрово-голубой"},
-        "ar": {"primary": "وردي خجول", "accent": "أزرق بودري"},
+        "ar": {"primary": "وردي خفيف", "accent": "أزرق بودري"},
     },
     "scorpio": {
         "en": {"primary": "Deep burgundy", "accent": "Black"},
@@ -1506,6 +1520,53 @@ def render_partner_profile_reading(
                              verify_questions=list(verify_questions or []))
 
 
+_COMPAT_CONTEXT_COPY = {
+    "business": {
+        "en": {
+            "body": "The weights compare chart themes for a working partnership, not qualities measured in the collaboration.",
+            "action": "Discuss one shared work priority and one difference using concrete examples from the collaboration",
+            "avoid": "Using a score to hire, fire, assign ownership or decide whether to continue a business partnership",
+        },
+        "ru": {
+            "body": "Веса сравнивают темы карт для рабочего партнёрства, а не измеренные качества сотрудничества.",
+            "action": "Обсудите один общий рабочий приоритет и одно различие на конкретных примерах из сотрудничества",
+            "avoid": "Решение нанять, уволить, распределить доли или продолжать деловое партнёрство на основании балла",
+        },
+        "fa": {
+            "body": "وزن‌ها مضمون‌های نمودار را برای شراکت کاری مقایسه می‌کنند، نه ویژگی‌های اندازه‌گیری‌شده همکاری را.",
+            "action": "یک اولویت کاری مشترک و یک تفاوت را با مثال‌های مشخص از همکاری بررسی کنید",
+            "avoid": "تصمیم برای استخدام، پایان همکاری، تقسیم مالکیت یا ادامه شراکت کاری بر اساس امتیاز",
+        },
+        "ar": {
+            "body": "تقارن الأوزان موضوعات الخرائط لشراكة عمل، لا صفات مقاسة في التعاون.",
+            "action": "يمكن مناقشة أولوية عمل مشتركة واختلاف واحد بأمثلة محددة من التعاون",
+            "avoid": "اتخاذ قرار بالتوظيف أو إنهاء التعاون أو توزيع الملكية أو استمرار الشراكة بناءً على درجة",
+        },
+    },
+    "friendship": {
+        "en": {
+            "body": "The weights compare chart themes for a friendship, not qualities measured in the friendship.",
+            "action": "Discuss one shared friendship priority and one difference using concrete examples from the friendship",
+            "avoid": "Using a score to decide whether to keep, distance or end a friendship",
+        },
+        "ru": {
+            "body": "Веса сравнивают темы карт для дружбы, а не измеренные качества дружбы.",
+            "action": "Обсудите один общий приоритет дружбы и одно различие на конкретных примерах",
+            "avoid": "Решение сохранить, отдалить или прекратить дружбу на основании балла",
+        },
+        "fa": {
+            "body": "وزن‌ها مضمون‌های نمودار را برای دوستی مقایسه می‌کنند، نه ویژگی‌های اندازه‌گیری‌شده دوستی را.",
+            "action": "یک اولویت مشترک دوستی و یک تفاوت را با مثال‌های مشخص بررسی کنید",
+            "avoid": "تصمیم برای حفظ، فاصله‌گرفتن یا پایان دوستی بر اساس امتیاز",
+        },
+        "ar": {
+            "body": "تقارن الأوزان موضوعات الخرائط للصداقة، لا صفات مقاسة في الصداقة.",
+            "action": "يمكن مناقشة أولوية مشتركة في الصداقة واختلاف واحد بأمثلة محددة",
+            "avoid": "اتخاذ قرار بالإبقاء على الصداقة أو الإبعاد أو إنهائها بناءً على درجة",
+        },
+    },
+}
+
 _COMPAT_REL_LABEL: dict[str, dict[str, str]] = {
     "romantic": {
         "en": "romantic",
@@ -1585,11 +1646,21 @@ def render_compatibility_reading(
                             friction_points=list(friction_points or []), verify_questions=list(verify_questions or []),
                             data_completeness="incomplete" if missing_inputs else "supplied_unverified")
     result["score_formula"] = {
-        "en": "If theme scores are present, Overall is 45% of the full two-chart comparison plus 55% of the mean of those themes, then rounded. If no themes are present, Overall is the full two-chart comparison only. If required partner date or place is missing, Overall is not calculated. Unknown birth time uses a 12:00 placeholder and does not validate house claims. Overall is not measured relationship quality.",
-        "ru": "Если есть баллы тем, «Общий вес» — это 45% полного сравнения двух карт плюс 55% среднего этих тем, затем округление. Если тем нет, остаётся только полное сравнение. Если нет даты или места второго человека, общий балл не считается. Неизвестное время рождения заменяется на 12:00 и не подтверждает дома. Это не измеренное качество отношений.",
-        "fa": "اگر امتیاز مضمون‌ها باشد، کلی برابر است با ۴۵٪ مقایسهٔ کامل دو نمودار به‌اضافهٔ ۵۵٪ میانگین همان مضمون‌ها، سپس گرد می‌شود. اگر مضمونی نباشد، فقط مقایسهٔ کامل است. اگر تاریخ یا مکان طرف دیگر نباشد، کلی محاسبه نمی‌شود. ساعت نامشخص تولد با ۱۲:۰۰ جایگزین می‌شود و خانه را تأیید نمی‌کند. کیفیت واقعی رابطه را اندازه نمی‌گیرد.",
-        "ar": "إذا وُجدت درجات الموضوعات، فإن الإجمالي هو ٤٥٪ من مقارنة الرسمين الكاملة زائد ٥٥٪ من متوسط تلك الموضوعات، ثم يُقرَّب. إن لم توجد موضوعات، يبقى الإجمالي مقارنة الرسمين فقط. إذا نقص تاريخ أو مكان الطرف الآخر فلا يُحسَب الإجمالي. الوقت غير المعروف يُستبدل بـ ١٢:٠٠ ولا يثبت البيوت. هذا ليس جودة علاقة مقيسة.",
+        "en": "If theme scores are present, Overall is 45% of the full two-chart comparison plus 55% of the mean of those themes, then rounded. If no themes are present, Overall is the full two-chart comparison only. If required partner date or place is missing, Overall is not calculated. Unknown birth time uses a 12:00 placeholder and does not validate astrological-house claims. Overall is not measured relationship quality.",
+        "ru": "Если есть баллы тем, «Общий вес» — это 45% полного сравнения двух карт плюс 55% среднего этих тем, затем округление. Если тем нет, остаётся только полное сравнение. Если нет даты или места второго человека, общий балл не считается. Неизвестное время рождения заменяется на 12:00 и не подтверждает астрологические дома. Это не измеренное качество отношений.",
+        "fa": "اگر امتیاز مضمون‌ها باشد، کلی برابر است با ۴۵٪ مقایسهٔ کامل دو نمودار به‌اضافهٔ ۵۵٪ میانگین همان مضمون‌ها، سپس گرد می‌شود. اگر مضمونی نباشد، فقط مقایسهٔ کامل است. اگر تاریخ یا مکان طرف دیگر نباشد، کلی محاسبه نمی‌شود. ساعت نامشخص تولد با ۱۲:۰۰ جایگزین می‌شود و خانه‌های نجومی را تأیید نمی‌کند. کیفیت واقعی رابطه را اندازه نمی‌گیرد.",
+        "ar": "إذا وُجدت درجات الموضوعات، فإن الإجمالي هو ٤٥٪ من مقارنة الرسمين الكاملة زائد ٥٥٪ من متوسط تلك الموضوعات، ثم يُقرَّب. إن لم توجد موضوعات، يبقى الإجمالي مقارنة الرسمين فقط. إذا نقص تاريخ أو مكان الطرف الآخر فلا يُحسَب الإجمالي. الوقت غير المعروف يُستبدل بـ ١٢:٠٠ ولا يثبت البيوت الفلكية. هذا ليس جودة علاقة مقيسة.",
     }[lang]
+    overlay = _COMPAT_CONTEXT_COPY.get(relationship_type)
+    if overlay:
+        action_label = {"en": "Action", "fa": "اقدام", "ru": "Действие", "ar": "الإجراء"}[lang]
+        avoid_label = {"en": "Avoid", "fa": "پرهیز", "ru": "Избегать", "ar": "ما ينبغي تجنّبه"}[lang]
+        result["action"] = overlay[lang]["action"]
+        result["avoid"] = overlay[lang]["avoid"]
+        result["strategic"] = overlay[lang]["body"]
+        result["executive"] = (
+            f"{result['headline']}. {action_label}: {result['action']}. {avoid_label}: {result['avoid']}."
+        )
     return result
 
 
@@ -1613,7 +1684,7 @@ def render_cheating_radar_reading(
     lang = _pick_lang(lang)
     sigs = dict(signals or {})
     prompts = trust_reflections(sigs, lang)
-    limitation = (_TRUST_LIMITATION_FRIEND if relationship_type == "friendship" else _TRUST_LIMITATION)[lang]
+    limitation = _trust_limitation_for(relationship_type, lang)
     action = {
         "en": "Verify your understanding through observable behavior and a direct, calm conversation",
         "fa": "برداشتت را با رفتار قابل مشاهده و گفت‌وگوی مستقیم و آرام بررسی کن",
@@ -1632,7 +1703,7 @@ def render_cheating_radar_reading(
         technical=f"mode={mode} · rel={relationship_type} · legacy_signal_keys={','.join(sigs)} · verdict=never",
         limitation=limitation, mode=mode,
         signals=sigs, planet_roles=dict(planet_roles or {}), observed=[], inferred=prompts,
-        unknown=[limitation], behaviors=list(behaviors or []), questions=list(questions or []),
+        unknown=list(unknown or []), behaviors=list(behaviors or []), questions=list(questions or []),
         missing_inputs=list(missing_inputs or []),
     )
     return reading
@@ -1816,7 +1887,7 @@ def render_communication_risk_reading(
 
     action = {
         "en": "Slow the next hard talk — one clear ask, one check on how to return to the conversation, no accusation",
-        "fa": "در گفت‌وگوی دشوار بعدی عجله نکن؛ یک درخواست روشن مطرح کن و بدون اتهام، دربارهٔ راه بازگشت به گفت‌وگو توافق کنید",
+        "fa": "در گفت‌وگوی دشوار بعدی عجله نکنید؛ یک درخواست روشن مطرح کنید و بدون اتهام، دربارهٔ راه بازگشت به گفت‌وگو توافق کنید",
         "ru": "Не торопите следующий трудный разговор: сформулируйте одну ясную просьбу и обсудите, как восстановить контакт, без обвинений",
         "ar": "من المفيد التمهّل في الحديث الصعب التالي: طلب واضح واحد واتفاق على استعادة الحوار، دون اتهام",
     }[lang]
@@ -1838,7 +1909,7 @@ def render_communication_risk_reading(
 
     headline = {
         "en": f"Communication Risk themes · {rel_l} · {mode_l}",
-        "fa": f"مضمون‌های ریسک ارتباط · {rel_l} · {mode_l}",
+        "fa": f"موضوع‌های ریسک در گفت‌وگو · {rel_l} · {mode_l}",
         "ru": f"Темы риска общения · {rel_l} · {mode_l}",
         "ar": f"موضوعات مخاطر التواصل · {rel_l} · {mode_l}",
     }[lang]
@@ -1866,7 +1937,7 @@ def render_communication_risk_reading(
 
     impact = {
         "en": "What this changes today: gather observable proof before you escalate meaning.",
-        "fa": "تأثیر امروز: قبل از بزرگ‌کردن معنا، شاهد قابل مشاهده جمع کن.",
+        "fa": "تأثیر امروز: قبل از بزرگ‌کردن معنا، شاهد قابل مشاهده جمع کنید.",
         "ru": "Что меняется сегодня: соберите наблюдаемые факты до эскалации смысла.",
         "ar": "قبل استخلاص أي معنى، يلزم الرجوع إلى الوقائع القابلة للملاحظة.",
     }[lang]
@@ -1904,9 +1975,9 @@ def render_communication_risk_reading(
             f"{impact} Action: {action}. Ask calmly: {q_txt}."
         ),
         "fa": (
-            f"نقشه ریسک ارتباط: {sig_block}. نقش‌ها: {roles_txt}. "
-            f"مشاهده ({obs_txt}) را از استنباط ({inf_txt}) و نامشخص ({unk_txt}) جدا نگه دار. "
-            f"{impact} اقدام: {action}. آرام بپرس: {q_txt}."
+            f"نقشه ریسک گفت‌وگو: {sig_block}. نقش‌ها: {roles_txt}. "
+            f"مشاهده ({obs_txt}) را از استنباط ({inf_txt}) و نامشخص ({unk_txt}) جدا نگه دارید. "
+            f"{impact} اقدام: {action}. آرام بپرسید: {q_txt}."
         ),
         "ru": (
             f"Карта риска общения: {sig_block}. Роли: {roles_txt}. "
@@ -1945,12 +2016,34 @@ def render_communication_risk_reading(
         f"{labels[key][lang]}: {_COMM_RISK_BAND_LABEL.get(str((sigs.get(key) or {}).get('band')), _COMM_RISK_BAND_LABEL['unknown'])[lang]}"
         for key in order
     )
+    theme_details = [
+        {
+            "label": labels[key][lang],
+            "value": _COMM_RISK_BAND_LABEL.get(
+                str((sigs.get(key) or {}).get("band")),
+                _COMM_RISK_BAND_LABEL["unknown"],
+            )[lang],
+        }
+        for key in order
+    ]
+    question_label = {
+        "en": "Question",
+        "fa": "پرسش",
+        "ru": "Вопрос",
+        "ar": "سؤال",
+    }[lang]
+    question_details = [
+        {"label": f"{question_label} {index}", "value": question}
+        for index, question in enumerate(questions_l, start=1)
+        if question.strip()
+    ]
     return {
         "executive": executive,
         "strategic": strategic,
         "technical": technical,
         "headline": headline,
-        "interpretation": f"{reflection_intro} {display_bands}. {q_txt}",
+        "interpretation": reflection_intro,
+        "details": theme_details + question_details,
         "intensity": intensity,
         "confidence": confidence,
         "evidence_status": "unvalidated",

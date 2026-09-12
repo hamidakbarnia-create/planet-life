@@ -74,6 +74,26 @@ function parseYesSlot(raw: unknown): VaultYesDaySlot | null {
   return slot;
 }
 
+/**
+ * Presentation-only top-score tie handling. Does not reorder days or change scores.
+ * A day is dominant only when its score is uniquely highest.
+ * All-equal copy is used only when every visible day shares that score.
+ */
+export function powerRankedDaysPresentation(days: { score: number }[]): {
+  dominantIndex: number | null;
+  allScoresEqual: boolean;
+} {
+  if (days.length === 0) {
+    return { dominantIndex: null, allScoresEqual: false };
+  }
+  const top = Math.max(...days.map((day) => day.score));
+  const topIndexes = days.flatMap((day, index) => (day.score === top ? [index] : []));
+  return {
+    dominantIndex: topIndexes.length === 1 ? topIndexes[0] : null,
+    allScoresEqual: days.length > 1 && days.every((day) => day.score === days[0].score),
+  };
+}
+
 /** Presentation-only score band — not a probability or certainty claim. */
 export function vaultScoreBand(score: number): VaultScoreBand {
   if (score >= 80) return 'strongest';

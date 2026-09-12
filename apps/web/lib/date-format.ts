@@ -319,3 +319,8 @@ export function formatDisplayMonthCoverage(
   });
   return startLabel === endLabel ? startLabel : `${startLabel} – ${endLabel}`;
 }
+
+/** Vault Power / Yes Day chips: always Gregorian, matching the on-screen calendar note. */
+export function formatVaultPowerDate(lang: AppLang, isoDate: string): string {
+  return formatCompactCalendarDate(lang, isoDate, 'gregorian');
+}

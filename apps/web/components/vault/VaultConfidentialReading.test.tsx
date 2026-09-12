@@ -744,4 +744,77 @@ describe('style timing presentation', () => {
     expect(screen.getByTestId('vault-window-when').getAttribute('data-relation')).toBe('current');
     expect(screen.getByTestId('vault-window-when').textContent).toContain('This window is in progress.');
   });
+
+  it('hides scent-alternatives copy when the interpretation already has that sentence', () => {
+    render(
+      <VaultConfidentialReading
+        lang="en"
+        reading={{
+          executive: 'An optional scent direction',
+          strategic: 'These note groups are alternatives to compare, not one required blend. They do not describe your personality.',
+          technical: '',
+          headline: 'An optional scent direction',
+          action: 'Compare the suggested notes',
+          interpretation:
+            'These note groups are alternatives to compare, not one required blend. They do not describe your personality.',
+          evidence_status: 'unvalidated',
+          data_completeness: 'supplied_unverified',
+          limitation: 'Scent is an optional presentation choice.',
+          details: [{ label: 'Scent notes', value: 'rose + sandalwood' }],
+        }}
+        labels={VAULT_READING_PRESENTATION_COPY.en}
+      />,
+    );
+    expect(screen.queryByTestId('vault-scent-alternatives')).toBeNull();
+    expect(screen.getByText('rose + sandalwood')).toBeTruthy();
+  });
+
+  it('localizes a fixed shortlist city without rewriting a user-entered name', () => {
+    render(
+      <VaultConfidentialReading
+        lang="ru"
+        reading={{
+          executive: 'Symbolic location comparisons',
+          strategic: 'Ranks order symbolic weights.',
+          technical: '',
+          headline: 'Symbolic location comparisons',
+          action: 'Compare independently',
+          evidence_status: 'unvalidated',
+          data_completeness: 'supplied_unverified',
+          limitation: 'These comparisons cannot predict prosperity.',
+          place_scope: 'shortlist',
+          details: [
+            { label: 'London', value: '70/100', reason: 'Sun-axis symbolism' },
+            { label: 'Manchester', value: '61/100', reason: 'Jupiter weight' },
+          ],
+        }}
+        labels={VAULT_READING_PRESENTATION_COPY.ru}
+      />,
+    );
+    expect(screen.getByText('Лондон')).toBeTruthy();
+    expect(screen.getByText('Manchester')).toBeTruthy();
+  });
+
+  it('states that displayed dates use the Gregorian calendar', () => {
+    render(
+      <VaultConfidentialReading
+        lang="en"
+        reading={{
+          executive: 'An optional outfit direction',
+          strategic: 'Accessories stay optional.',
+          technical: '',
+          headline: 'An optional outfit direction',
+          action: 'Try the pieces together',
+          evidence_status: 'unvalidated',
+          data_completeness: 'supplied_unverified',
+          limitation: 'This is a styling prompt.',
+          details: [{ label: 'Date', value: '2026-09-10' }],
+        }}
+        labels={VAULT_READING_PRESENTATION_COPY.en}
+      />,
+    );
+    expect(screen.getByTestId('vault-date-calendar').textContent).toBe(
+      'Dates use the Gregorian calendar.',
+    );
+  });
 });

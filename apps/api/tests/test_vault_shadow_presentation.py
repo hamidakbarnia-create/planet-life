@@ -16,7 +16,7 @@ REPAIR = {
 HEADLINE = {
     "en": "Communication Risk themes",
     "ru": "Темы риска общения",
-    "fa": "مضمون‌های ریسک ارتباط",
+    "fa": "موضوع‌های ریسک در گفت‌وگو",
     "ar": "موضوعات مخاطر التواصل",
 }
 
@@ -73,6 +73,11 @@ def test_communication_risk_labels_are_symbolic_themes():
             assert "деловые" not in reading["headline"]
         if lang == "ar":
             assert "مستوى متوسط" in blob
+        if lang == "fa":
+            assert "نقشه ریسک گفت‌وگو" in reading["strategic"]
+            assert "نقشه ریسک ارتباط" not in reading["strategic"]
+            assert "عجله نکنید" in reading["action"]
+            assert "عجله نکن؛" not in reading["action"]
     business = render_communication_risk_reading(
         lang="ru", mode="synastry", relationship_type="business", signals=_signals()
     )
@@ -102,4 +107,40 @@ def test_friend_radar_limitation_avoids_cheating_framing():
             lang=lang, relationship_type="romantic"
         )
         assert romantic["limitation"] != reading["limitation"]
+
+
+def test_business_radar_limitation_avoids_fidelity_framing():
+    for lang in ("en", "ru", "fa", "ar"):
+        reading = render_cheating_radar_reading(
+            lang=lang, relationship_type="business"
+        )
+        text = f"{reading['limitation']} {reading['headline']}".lower()
+        for banned in FRIEND_CHEATING:
+            assert banned.lower() not in text, (lang, banned)
+        romantic = render_cheating_radar_reading(
+            lang=lang, relationship_type="romantic"
+        )
+        assert romantic["limitation"] != reading["limitation"]
+        assert "business" in reading["limitation"].lower() or "работ" in reading["limitation"].lower() or "کاری" in reading["limitation"] or "عمل" in reading["limitation"]
+
+
+def test_communication_risk_themes_and_questions_are_detail_rows():
+    questions = ["Ask about one recent example.", "Ask how to return to the talk."]
+    reading = render_communication_risk_reading(
+        lang="en",
+        mode="synastry",
+        relationship_type="business",
+        signals=_signals(),
+        questions=questions,
+    )
+    labels = [row["label"] for row in reading["details"]]
+    values = [row["value"] for row in reading["details"]]
+    assert "Symbolic repair difficulty" in labels
+    assert "Question 1" in labels
+    assert questions[0] in values
+    assert questions[1] in values
+    assert " · " not in reading["interpretation"]
+    assert reading["interpretation"] == (
+        "Symbolic prompts for a conversation, not observed communication behavior."
+    )
 

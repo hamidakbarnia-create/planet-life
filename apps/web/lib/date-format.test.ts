@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  formatCompactCalendarDate,
   formatDisplayDate,
   formatDisplayDateRange,
   formatDisplayDay,
   formatDisplayMonthCoverage,
   formatDisplayMonthYear,
+  formatVaultPowerDate,
 } from './date-format';
 
 describe('formatDisplayDate', () => {
@@ -112,5 +114,31 @@ describe('formatDisplayMonthCoverage', () => {
     const coverage = formatDisplayMonthCoverage('en', 2026, 7, 'gregorian');
     expect(coverage).not.toContain('–');
     expect(coverage).toMatch(/July.*2026/);
+  });
+});
+
+describe('formatVaultPowerDate', () => {
+  it('prints Persian Yes Day labels on the Gregorian calendar, not Shamsi', () => {
+    const iso = '2026-09-12';
+    const power = formatVaultPowerDate('fa', iso);
+    const gregorian = formatCompactCalendarDate('fa', iso, 'gregorian');
+    const shamsi = formatCompactCalendarDate('fa', iso, 'shamsi');
+    expect(power).toBe(gregorian);
+    expect(power).toMatch(/سپتامبر/);
+    expect(power).not.toMatch(/شهریور/);
+    expect(shamsi).toMatch(/شهریور/);
+    expect(shamsi).not.toMatch(/سپتامبر/);
+  });
+
+  it('does not follow bare fa-IR locale calendar defaults', () => {
+    const iso = '2026-09-12';
+    const bareFaIr = new Date(`${iso}T00:00:00Z`).toLocaleDateString('fa-IR', {
+      month: 'short',
+      day: 'numeric',
+    });
+    const power = formatVaultPowerDate('fa', iso);
+    expect(bareFaIr).toMatch(/شهریور/);
+    expect(power).not.toBe(bareFaIr);
+    expect(power).toMatch(/سپتامبر/);
   });
 });

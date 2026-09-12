@@ -7,6 +7,10 @@ describe('vault color swatches', () => {
     expect(swatchHexForPaletteName('Каменный беж')).toBe(swatchHexForPaletteName('Stone beige'));
     expect(swatchHexForPaletteName('بژ سنگی')).toBe(swatchHexForPaletteName('Stone beige'));
     expect(swatchHexForPaletteName('بيج حجري')).toBe(swatchHexForPaletteName('Stone beige'));
+    expect(swatchHexForPaletteName('Blush rose')).toBe('#D9A0B0');
+    expect(swatchHexForPaletteName('صورتی ملایم')).toBe('#D9A0B0');
+    expect(swatchHexForPaletteName('رز ملایم')).toBe('#D9A0B0');
+    expect(swatchHexForPaletteName('وردي خفيف')).toBe('#D9A0B0');
     expect(swatchHexForPaletteName('Not A Real Color')).toBeNull();
     expect(splitPaletteNames('Stone beige · Navy')).toEqual(['Stone beige', 'Navy']);
   });

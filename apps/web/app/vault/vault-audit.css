@@ -28,9 +28,31 @@ html.vault-audit-layout .metioro-header__actions {
   word-break: break-word;
 }
 
+html.vault-audit-layout .vault-back-link {
+  position: relative;
+  z-index: 2;
+  min-height: 44px;
+  padding-inline: 2px;
+}
+
+html.vault-audit-layout .vault-item-card button {
+  text-align: start;
+}
+
 @media (max-width: 430px) {
+  html.vault-audit-layout .metioro-header {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
   html.vault-audit-layout .metioro-header__brand {
     max-width: 36%;
+  }
+
+  html.vault-audit-layout .metioro-header__actions {
+    width: 100%;
+    max-width: 100%;
+    justify-content: flex-end;
   }
 
   html.vault-audit-layout .metioro-header-chip {

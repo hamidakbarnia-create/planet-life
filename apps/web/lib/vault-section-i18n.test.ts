@@ -190,6 +190,10 @@ describe('Vault section presentation copy', () => {
     expect(pageSource).toContain("import '../vault-audit.css'");
     expect(pageSource).toContain('vault-section-page');
     expect(pageSource).toContain('vault-item-card');
+    expect(pageSource).toContain('text-start');
+    expect(pageSource).toContain('dir={dir}');
+    expect(pageSource).toContain('vault-back-link');
+    expect(pageSource).toContain('#C9A227');
   });
 
   it('validates section keys', () => {
@@ -235,6 +239,7 @@ describe('Vault section presentation copy', () => {
       resolve(__dirname, '../components/vault/VaultConfidentialReading.tsx'),
       'utf8',
     );
+    expect(pageSource).toContain('formatVaultPowerDate');
     expect(pageSource).toContain('powerAdvisoryConfidenceLabel');
     expect(pageSource).toContain('VaultConfidentialReading');
     expect(readingSource).toContain('data-vault-power-confidence');
@@ -257,8 +262,22 @@ it('names Love Lines as a list and Ghost Days as a communicated pause', () => {
   );
   expect(SECTION_LANGS.en.sensuality.intro.toLowerCase()).toMatch(/not built yet/);
   expect(SECTION_LANGS.en.sensuality.intro.toLowerCase()).toMatch(/desire signature only/);
-  expect(SECTION_LANGS.en.look.title).toBe('Style Timing');
-});
+    expect(SECTION_LANGS.en.look.title).toBe('Style Timing');
+    expect(SECTION_LANGS.ru.look.items[2].label).toBe('Лучшее время для публикаций');
+    expect(SECTION_LANGS.fa.look.items[2].label).toBe('بهترین زمان انتشار');
+    expect(SECTION_LANGS.ar.look.items[2].label).toBe('أفضل وقت للنشر');
+    expect(SECTION_LANGS.fa.power.items[2].label).toBe('روز مکث هماهنگ');
+    expect(SECTION_LANGS.fa.shadow.items[2].label).toBe('ریسک گفت‌وگو');
+    expect(READING_UI.ar.liveLabel).toBe('قراءتك');
+    expect(READING_UI.ar.liveLabel).not.toMatch(/قراءتكِ/);
+    expect(SECTION_LANGS.ar.cycle.intro).not.toMatch(/تأمّلي|إيقاعكِ|وتيرتكِ/);
+    expect(SECTION_LANGS.ar.cycle.items[0].hint).not.toMatch(/وتيرتكِ/);
+    expect(READING_UI.fa.liveLabel).toBe('خوانش شما');
+    expect(VAULT_POWER_TIMING_COPY.ru.lighter).toBe('Нижняя полоса баллов');
+    expect(VAULT_COMPARISON_COPY.fa.overallBlend).toContain('خانه‌های نجومی');
+    expect(VAULT_COMPARISON_COPY.ru.overallBlend).toContain('астрологические дома');
+    expect(VAULT_COMPARISON_COPY.ar.overallBlend).toContain('البيوت الفلكية');
+  });
 
 it('uses trust and clarity titles while preserving the legacy radar slot', () => {
   const titles = {en: 'Trust & Clarity Signals', ru: 'Сигналы доверия и ясности', fa: 'نشانه‌های اعتماد و وضوح', ar: 'إشارات الثقة والوضوح'};

@@ -276,6 +276,8 @@ describe('Power timing localization + page wiring', () => {
     expect(pageSource).toContain('VAULT_POWER_TIMING_COPY');
     expect(pageSource).toContain('visiblePowerRating');
     expect(pageSource).toContain('powerRatingTitle');
+    expect(pageSource).toContain('powerRankedDaysPresentation');
+    expect(pageSource).not.toContain('dayIdx === 0 && !equalScores');
     expect(pageSource).toContain('VaultRankedDayChip');
     expect(pageSource).toContain('VaultYesDecisionSlot');
     expect(pageSource).toContain('powerUi.scoreDirection');
