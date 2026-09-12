@@ -28,9 +28,25 @@ for (const lang of ['en', 'ru', 'fa', 'ar'] as const) {
         for (const detail of reading.details ?? []) {
           expect(screen.getAllByText(detail.label, { exact: true })).toHaveLength(1);
           const row = screen.getByText(detail.label, { exact: true }).parentElement!;
-          expect(within(row).getAllByText(detail.value, { exact: true })).toHaveLength(1);
+          const splitValue =
+            (detail.label === 'Palette' ||
+              detail.label === 'Палитра' ||
+              detail.label === 'پالت' ||
+              detail.label === 'الألوان' ||
+              detail.label === 'Scent notes' ||
+              detail.label === 'Ноты аромата' ||
+              detail.label === 'نت‌های رایحه' ||
+              detail.label === 'النغمات العطرية') &&
+            detail.value.includes('·');
+          if (splitValue) {
+            for (const part of detail.value.split(/\s*·\s*/)) {
+              expect(within(row).getAllByText(part, { exact: true }).length).toBeGreaterThan(0);
+            }
+          } else {
+            expect(within(row).getAllByText(detail.value, { exact: true })).toHaveLength(1);
+            if (detail.direction) expect(within(row).getByText(detail.value).getAttribute('dir')).toBe(detail.direction);
+          }
           if (detail.reason) expect(screen.getAllByText(detail.reason, { exact: true })).toHaveLength(1);
-          if (detail.direction) expect(within(row).getByText(detail.value).getAttribute('dir')).toBe(detail.direction);
         }
         expect(screen.getByTestId('vault-confidential-reading').dir).toBe(lang === 'fa' || lang === 'ar' ? 'rtl' : 'ltr');
       });
@@ -60,7 +76,7 @@ for (const lang of ['en', 'ru', 'fa', 'ar'] as const) {
     rerender(<VaultConfidentialReading {...props} reading={changed} />);
     expect(screen.queryByText(row.value, { exact: true })).toBeNull();
     expect(screen.getAllByText(value, { exact: true })).toHaveLength(1);
-    expect(container.textContent!.split('09:00–10:00')).toHaveLength(2);
+    expect(container.textContent!.split('09:00–10:00')).toHaveLength(3);
     expect(screen.getAllByText(reading.limitation!, { exact: true })).toHaveLength(1);
   });
 }

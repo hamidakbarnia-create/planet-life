@@ -75,7 +75,7 @@
     },
     "todays-perfume": {
       "executive": "An optional scent direction. Action: Compare the suggested notes on a scent strip; choose a subtle amount appropriate to the space. Avoid: Heavy fragrance in shared or scent-free spaces.",
-      "strategic": "The symbolic blend combines scent notes; it does not describe your personality.",
+      "strategic": "These note groups are alternatives to compare, not one required blend. They do not describe your personality.",
       "technical": "venus=taurus · moon=pisces · asc=virgo · transit_moon=virgo",
       "headline": "An optional scent direction",
       "action": "Compare the suggested notes on a scent strip; choose a subtle amount appropriate to the space",
@@ -86,7 +86,7 @@
       "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "The symbolic blend combines scent notes; it does not describe your personality.",
+      "interpretation": "These note groups are alternatives to compare, not one required blend. They do not describe your personality.",
       "limitation": "Scent is an optional presentation choice, not a way to secure attraction or influence others. Preference, sensitivity and venue rules take priority.",
       "explanation": "Scent is an optional presentation choice, not a way to secure attraction or influence others. Preference, sensitivity and venue rules take priority.",
       "details": [
@@ -108,7 +108,7 @@
     },
     "date-outfit": {
       "executive": "An optional outfit direction. Action: Try the pieces together; check weather, dress code, movement and comfort before choosing. Avoid: Changing your boundaries or comfort to fit a suggested look.",
-      "strategic": "Use the symbolic clothing, colour and accessory combination as a starting point.",
+      "strategic": "Use the symbolic clothing and colour as a starting point. Accessories stay optional.",
       "technical": "venus=taurus · asc=virgo · transit_moon=virgo",
       "headline": "An optional outfit direction",
       "action": "Try the pieces together; check weather, dress code, movement and comfort before choosing",
@@ -119,7 +119,7 @@
       "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "Use the symbolic clothing, colour and accessory combination as a starting point.",
+      "interpretation": "Use the symbolic clothing and colour as a starting point. Accessories stay optional.",
       "limitation": "The meeting score measures symbolic timing strength, not the probability of date success. This is a styling prompt, not a prediction of attraction, consent or how a meeting will go. Personal preference and practical needs decide.",
       "explanation": "The meeting score measures symbolic timing strength, not the probability of date success. This is a styling prompt, not a prediction of attraction, consent or how a meeting will go. Personal preference and practical needs decide.",
       "details": [
@@ -190,19 +190,19 @@
       "reason": "Symbolic comparison weights"
     },
     "best-countries": {
-      "executive": "Symbolic location comparison: Shared expectations. Compare the listed places against an independently researched shortlist",
-      "strategic": "Ranks order symbolic weights within this candidate list only; they are not a recommendation to move.",
+      "executive": "Symbolic location comparison: Shared expectations. Compare the listed places with independently researched relationship, safety and practical evidence. Ranking applies only to this candidate-city shortlist. It is not a global ranking or advice to move.",
+      "strategic": "Ranks order symbolic weights for shared-life place themes within this candidate-city shortlist only. They are not a prediction of love or a recommendation to move.",
       "technical": "pathfinder.relocation · mode=relationship · jupiter,mercury,sun,saturn · houses=2,6,10,11",
       "headline": "Symbolic location comparison: Shared expectations",
-      "action": "Compare the listed places against an independently researched shortlist",
-      "avoid": "Choosing a destination on the ranking alone",
+      "action": "Compare the listed places with independently researched relationship, safety and practical evidence.",
+      "avoid": "Choosing a destination on the ranking alone.",
       "intensity": "moderate",
       "confidence": "low",
       "confidence_basis": "unvalidated_symbolic_guidance",
       "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "Ranks order symbolic weights within this candidate list only; they are not a recommendation to move.",
+      "interpretation": "Ranks order symbolic weights for shared-life place themes within this candidate-city shortlist only. They are not a prediction of love or a recommendation to move.",
       "limitation": "These comparisons cannot predict prosperity, expansion, love or relationship outcomes. Real market, legal, financial, safety and relationship evidence must guide decisions.",
       "explanation": "These comparisons cannot predict prosperity, expansion, love or relationship outcomes. Real market, legal, financial, safety and relationship evidence must guide decisions.",
       "details": [
@@ -269,22 +269,23 @@
           "data_completeness": "supplied_unverified"
         }
       ],
-      "missing_inputs": []
+      "missing_inputs": [],
+      "place_scope": "Ranking applies only to this candidate-city shortlist. It is not a global ranking or advice to move."
     },
     "business-geography": {
-      "executive": "Symbolic business location comparison. Compare the listed places against an independently researched shortlist",
-      "strategic": "Ranks order symbolic weights within this candidate list only; they are not a recommendation to move.",
+      "executive": "Symbolic business location comparison. Compare the listed places with independently researched commercial, legal and financial evidence. Ranking applies only to this candidate-city shortlist. It is not a global ranking or advice to move.",
+      "strategic": "Ranks order symbolic weights for work and expansion within this candidate-city shortlist only. They are not a forecast of profit or a recommendation to move.",
       "technical": "pathfinder.relocation · mode=business · jupiter,mercury,sun,saturn · houses=2,6,10,11",
       "headline": "Symbolic business location comparison",
-      "action": "Compare the listed places against an independently researched shortlist",
-      "avoid": "Choosing a destination on the ranking alone",
+      "action": "Compare the listed places with independently researched commercial, legal and financial evidence.",
+      "avoid": "Choosing a market on the ranking alone.",
       "intensity": "moderate",
       "confidence": "low",
       "confidence_basis": "unvalidated_symbolic_guidance",
       "confidence_explanation": "Predictive reliability is unvalidated. Supplied birth details are unverified inputs, not observed behavior.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "Ranks order symbolic weights within this candidate list only; they are not a recommendation to move.",
+      "interpretation": "Ranks order symbolic weights for work and expansion within this candidate-city shortlist only. They are not a forecast of profit or a recommendation to move.",
       "limitation": "These comparisons cannot predict prosperity, expansion, love or relationship outcomes. Real market, legal, financial, safety and relationship evidence must guide decisions.",
       "explanation": "These comparisons cannot predict prosperity, expansion, love or relationship outcomes. Real market, legal, financial, safety and relationship evidence must guide decisions.",
       "details": [
@@ -363,7 +364,8 @@
           "data_completeness": "supplied_unverified"
         }
       ],
-      "missing_inputs": []
+      "missing_inputs": [],
+      "place_scope": "Ranking applies only to this candidate-city shortlist. It is not a global ranking or advice to move."
     },
     "partner-profile": {
       "executive": "Optional partnership prompts. Action: Ask about priorities, boundaries and how disagreements will be discussed. Avoid: Using this sketch as a filter for people or dates.",
@@ -505,7 +507,8 @@
       ],
       "verify_questions": [
         "Discuss one shared priority and one difference using concrete examples from your relationship."
-      ]
+      ],
+      "score_formula": "If theme scores are present, Overall is 45% of the full two-chart comparison plus 55% of the mean of those themes, then rounded. If no themes are present, Overall is the full two-chart comparison only. If required partner date or place is missing, Overall is not calculated. Unknown birth time uses a 12:00 placeholder and does not validate house claims. Overall is not measured relationship quality."
     },
     "trust-patterns": {
       "executive": "Prompts for a trust conversation. Action: Choose a recent observable example and ask directly what each person expected. Avoid: Treating a symbolic pattern as evidence against someone.",
@@ -703,7 +706,7 @@
     },
     "todays-perfume": {
       "executive": "Идея для выбора аромата. Действие: Сравните предложенные ноты на блоттере; интенсивность подбирайте с учётом места. Избегать: Насыщенный аромат в общем пространстве или там, где он запрещён.",
-      "strategic": "Символическое сочетание нот не описывает личность.",
+      "strategic": "Эти группы нот — варианты для сравнения, а не один обязательный микс. Они не описывают личность.",
       "technical": "venus=taurus · moon=pisces · asc=virgo · transit_moon=virgo",
       "headline": "Идея для выбора аромата",
       "action": "Сравните предложенные ноты на блоттере; интенсивность подбирайте с учётом места",
@@ -714,7 +717,7 @@
       "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "Символическое сочетание нот не описывает личность.",
+      "interpretation": "Эти группы нот — варианты для сравнения, а не один обязательный микс. Они не описывают личность.",
       "limitation": "Аромат — необязательная деталь образа, а не средство вызвать влечение или повлиять на других. Важнее вкус, чувствительность и правила места.",
       "explanation": "Аромат — необязательная деталь образа, а не средство вызвать влечение или повлиять на других. Важнее вкус, чувствительность и правила места.",
       "details": [
@@ -736,7 +739,7 @@
     },
     "date-outfit": {
       "executive": "Идея для образа. Действие: Примерьте вещи вместе; учтите погоду, дресс-код, свободу движения и удобство. Избегать: Отказ от удобства или личных границ ради предложенного образа.",
-      "strategic": "Символическое сочетание одежды, цвета и аксессуаров — отправная точка для выбора.",
+      "strategic": "Символические одежда и цвет — отправная точка. Аксессуары необязательны.",
       "technical": "venus=taurus · asc=virgo · transit_moon=virgo",
       "headline": "Идея для образа",
       "action": "Примерьте вещи вместе; учтите погоду, дресс-код, свободу движения и удобство",
@@ -747,7 +750,7 @@
       "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "Символическое сочетание одежды, цвета и аксессуаров — отправная точка для выбора.",
+      "interpretation": "Символические одежда и цвет — отправная точка. Аксессуары необязательны.",
       "limitation": "Оценка окна встречи — сила символического тайминга, а не вероятность удачного свидания. Это идея для стиля, а не прогноз влечения, согласия или исхода встречи. Решают личный вкус и практические потребности.",
       "explanation": "Оценка окна встречи — сила символического тайминга, а не вероятность удачного свидания. Это идея для стиля, а не прогноз влечения, согласия или исхода встречи. Решают личный вкус и практические потребности.",
       "details": [
@@ -818,19 +821,19 @@
       "reason": "Символические веса сравнения"
     },
     "best-countries": {
-      "executive": "Символическое сравнение мест: Общие ожидания. Сопоставьте места со списком, составленным на основе независимого исследования",
-      "strategic": "Рейтинг упорядочивает символические веса только внутри этого списка и не советует переезд.",
+      "executive": "Символическое сравнение мест: Общие ожидания. Сопоставьте места с данными об отношениях, безопасности и быте из независимого исследования. Рейтинг действует только для этого короткого списка городов-кандидатов. Это не мировой рейтинг и не совет переезжать.",
+      "strategic": "Рейтинг упорядочивает символические веса тем совместной жизни только внутри этого короткого списка городов. Это не прогноз любви и не совет переезжать.",
       "technical": "pathfinder.relocation · mode=relationship · jupiter,mercury,sun,saturn · houses=2,6,10,11",
       "headline": "Символическое сравнение мест: Общие ожидания",
-      "action": "Сопоставьте места со списком, составленным на основе независимого исследования",
-      "avoid": "Выбор места только по рейтингу",
+      "action": "Сопоставьте места с данными об отношениях, безопасности и быте из независимого исследования.",
+      "avoid": "Выбор места только по рейтингу.",
       "intensity": "moderate",
       "confidence": "low",
       "confidence_basis": "unvalidated_symbolic_guidance",
       "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "Рейтинг упорядочивает символические веса только внутри этого списка и не советует переезд.",
+      "interpretation": "Рейтинг упорядочивает символические веса тем совместной жизни только внутри этого короткого списка городов. Это не прогноз любви и не совет переезжать.",
       "limitation": "Сравнение не предсказывает процветание, расширение бизнеса, любовь или исход отношений. Необходимы реальные рыночные, правовые, финансовые данные, сведения о безопасности и отношениях.",
       "explanation": "Сравнение не предсказывает процветание, расширение бизнеса, любовь или исход отношений. Необходимы реальные рыночные, правовые, финансовые данные, сведения о безопасности и отношениях.",
       "details": [
@@ -897,22 +900,23 @@
           "data_completeness": "supplied_unverified"
         }
       ],
-      "missing_inputs": []
+      "missing_inputs": [],
+      "place_scope": "Рейтинг действует только для этого короткого списка городов-кандидатов. Это не мировой рейтинг и не совет переезжать."
     },
     "business-geography": {
-      "executive": "Символическое сравнение мест для бизнеса. Сопоставьте места со списком, составленным на основе независимого исследования",
-      "strategic": "Рейтинг упорядочивает символические веса только внутри этого списка и не советует переезд.",
+      "executive": "Символическое сравнение мест для бизнеса. Сопоставьте места с коммерческими, правовыми и финансовыми данными из независимого исследования. Рейтинг действует только для этого короткого списка городов-кандидатов. Это не мировой рейтинг и не совет переезжать.",
+      "strategic": "Рейтинг упорядочивает символические веса для работы и расширения только внутри этого короткого списка городов. Это не прогноз прибыли и не совет переезжать.",
       "technical": "pathfinder.relocation · mode=business · jupiter,mercury,sun,saturn · houses=2,6,10,11",
       "headline": "Символическое сравнение мест для бизнеса",
-      "action": "Сопоставьте места со списком, составленным на основе независимого исследования",
-      "avoid": "Выбор места только по рейтингу",
+      "action": "Сопоставьте места с коммерческими, правовыми и финансовыми данными из независимого исследования.",
+      "avoid": "Выбор рынка только по рейтингу.",
       "intensity": "moderate",
       "confidence": "low",
       "confidence_basis": "unvalidated_symbolic_guidance",
       "confidence_explanation": "Надёжность прогноза не подтверждена. Данные рождения — непроверенные исходные сведения, а не наблюдаемое поведение.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "Рейтинг упорядочивает символические веса только внутри этого списка и не советует переезд.",
+      "interpretation": "Рейтинг упорядочивает символические веса для работы и расширения только внутри этого короткого списка городов. Это не прогноз прибыли и не совет переезжать.",
       "limitation": "Сравнение не предсказывает процветание, расширение бизнеса, любовь или исход отношений. Необходимы реальные рыночные, правовые, финансовые данные, сведения о безопасности и отношениях.",
       "explanation": "Сравнение не предсказывает процветание, расширение бизнеса, любовь или исход отношений. Необходимы реальные рыночные, правовые, финансовые данные, сведения о безопасности и отношениях.",
       "details": [
@@ -991,7 +995,8 @@
           "data_completeness": "supplied_unverified"
         }
       ],
-      "missing_inputs": []
+      "missing_inputs": [],
+      "place_scope": "Рейтинг действует только для этого короткого списка городов-кандидатов. Это не мировой рейтинг и не совет переезжать."
     },
     "partner-profile": {
       "executive": "Вопросы о партнёрстве на выбор. Действие: Спросите о приоритетах, границах и способах обсуждать разногласия. Избегать: Отбор людей или партнёров для свиданий по этому описанию.",
@@ -1133,7 +1138,8 @@
       ],
       "verify_questions": [
         "Обсудите один общий приоритет и одно различие на конкретных примерах из отношений."
-      ]
+      ],
+      "score_formula": "Если есть баллы тем, «Общий вес» — это 45% полного сравнения двух карт плюс 55% среднего этих тем, затем округление. Если тем нет, остаётся только полное сравнение. Если нет даты или места второго человека, общий балл не считается. Неизвестное время рождения заменяется на 12:00 и не подтверждает дома. Это не измеренное качество отношений."
     },
     "trust-patterns": {
       "executive": "Вопросы для разговора о доверии. Действие: Выберите недавний конкретный пример и прямо спросите об ожиданиях каждого. Избегать: Использование символического рисунка как доказательства против человека.",
@@ -1331,7 +1337,7 @@
     },
     "todays-perfume": {
       "executive": "پیشنهادی برای انتخاب رایحه. اقدام: نت‌های پیشنهادی را روی کاغذ تست مقایسه کنید و میزان ملایمی متناسب با فضا انتخاب کنید. پرهیز: رایحه سنگین در فضای مشترک یا محیط بدون عطر.",
-      "strategic": "این ترکیب نمادینِ نت‌ها توصیفی از شخصیت شما نیست.",
+      "strategic": "این گروه‌های نت گزینه‌هایی برای مقایسه‌اند، نه یک ترکیب اجباری. توصیفی از شخصیت شما نیستند.",
       "technical": "venus=taurus · moon=pisces · asc=virgo · transit_moon=virgo",
       "headline": "پیشنهادی برای انتخاب رایحه",
       "action": "نت‌های پیشنهادی را روی کاغذ تست مقایسه کنید و میزان ملایمی متناسب با فضا انتخاب کنید",
@@ -1342,7 +1348,7 @@
       "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "این ترکیب نمادینِ نت‌ها توصیفی از شخصیت شما نیست.",
+      "interpretation": "این گروه‌های نت گزینه‌هایی برای مقایسه‌اند، نه یک ترکیب اجباری. توصیفی از شخصیت شما نیستند.",
       "limitation": "عطر انتخابی اختیاری برای ظاهر است، نه راهی برای جلب علاقه یا اثرگذاری بر دیگران. سلیقه، حساسیت و مقررات مکان اولویت دارند.",
       "explanation": "عطر انتخابی اختیاری برای ظاهر است، نه راهی برای جلب علاقه یا اثرگذاری بر دیگران. سلیقه، حساسیت و مقررات مکان اولویت دارند.",
       "details": [
@@ -1364,7 +1370,7 @@
     },
     "date-outfit": {
       "executive": "پیشنهادی برای پوشش. اقدام: لباس‌ها را با هم امتحان کنید؛ هوا، پوشش مناسب موقعیت و راحتی حرکت را در نظر بگیرید. پرهیز: کنارگذاشتن راحتی یا مرزهای شخصی برای هماهنگی با پیشنهاد.",
-      "strategic": "ترکیب نمادین لباس، رنگ و اکسسوری می‌تواند نقطه شروع انتخاب باشد.",
+      "strategic": "پوشش و رنگ نمادین می‌تواند نقطه شروع باشد. اکسسوری اختیاری می‌ماند.",
       "technical": "venus=taurus · asc=virgo · transit_moon=virgo",
       "headline": "پیشنهادی برای پوشش",
       "action": "لباس‌ها را با هم امتحان کنید؛ هوا، پوشش مناسب موقعیت و راحتی حرکت را در نظر بگیرید",
@@ -1375,7 +1381,7 @@
       "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "ترکیب نمادین لباس، رنگ و اکسسوری می‌تواند نقطه شروع انتخاب باشد.",
+      "interpretation": "پوشش و رنگ نمادین می‌تواند نقطه شروع باشد. اکسسوری اختیاری می‌ماند.",
       "limitation": "امتیاز بازه دیدار، شدت زمان‌بندی نمادین است، نه احتمال موفقیت دیدار. این پیشنهاد درباره پوشش است، نه پیش‌بینی جذب، رضایت یا نتیجه دیدار. سلیقه و نیازهای عملی شما تعیین‌کننده‌اند.",
       "explanation": "امتیاز بازه دیدار، شدت زمان‌بندی نمادین است، نه احتمال موفقیت دیدار. این پیشنهاد درباره پوشش است، نه پیش‌بینی جذب، رضایت یا نتیجه دیدار. سلیقه و نیازهای عملی شما تعیین‌کننده‌اند.",
       "details": [
@@ -1446,19 +1452,19 @@
       "reason": "وزن‌های مقایسه نمادین"
     },
     "best-countries": {
-      "executive": "مقایسه نمادین مکان‌ها: انتظارهای مشترک. مکان‌ها را با فهرستی که بر اساس تحقیق مستقل تهیه کرده‌اید مقایسه کنید",
-      "strategic": "رتبه‌ها فقط وزن‌های نمادین همین فهرست را مرتب می‌کنند؛ توصیه‌ای برای جابه‌جایی نیستند.",
+      "executive": "مقایسه نمادین مکان‌ها: انتظارهای مشترک. مکان‌ها را با شواهد رابطه، ایمنی و امور عملی که جداگانه بررسی کرده‌اید مقایسه کنید. رتبه‌بندی فقط برای همین فهرست کوتاه شهرهای نامزد است؛ رتبهٔ جهانی یا توصیهٔ جابه‌جایی نیست.",
+      "strategic": "رتبه‌ها فقط وزن نمادین مضمون‌های زندگی مشترک را در همین فهرست کوتاه شهرها مرتب می‌کنند؛ پیش‌بینی عشق یا توصیهٔ جابه‌جایی نیستند.",
       "technical": "pathfinder.relocation · mode=relationship · jupiter,mercury,sun,saturn · houses=2,6,10,11",
       "headline": "مقایسه نمادین مکان‌ها: انتظارهای مشترک",
-      "action": "مکان‌ها را با فهرستی که بر اساس تحقیق مستقل تهیه کرده‌اید مقایسه کنید",
-      "avoid": "انتخاب مقصد صرفاً بر اساس رتبه",
+      "action": "مکان‌ها را با شواهد رابطه، ایمنی و امور عملی که جداگانه بررسی کرده‌اید مقایسه کنید.",
+      "avoid": "انتخاب مقصد صرفاً بر اساس رتبه.",
       "intensity": "moderate",
       "confidence": "low",
       "confidence_basis": "unvalidated_symbolic_guidance",
       "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "رتبه‌ها فقط وزن‌های نمادین همین فهرست را مرتب می‌کنند؛ توصیه‌ای برای جابه‌جایی نیستند.",
+      "interpretation": "رتبه‌ها فقط وزن نمادین مضمون‌های زندگی مشترک را در همین فهرست کوتاه شهرها مرتب می‌کنند؛ پیش‌بینی عشق یا توصیهٔ جابه‌جایی نیستند.",
       "limitation": "این مقایسه‌ها رفاه، گسترش کسب‌وکار، عشق یا نتیجه رابطه را پیش‌بینی نمی‌کنند. شواهد واقعی بازار، حقوقی، مالی، ایمنی و رابطه باید مبنای تصمیم باشند.",
       "explanation": "این مقایسه‌ها رفاه، گسترش کسب‌وکار، عشق یا نتیجه رابطه را پیش‌بینی نمی‌کنند. شواهد واقعی بازار، حقوقی، مالی، ایمنی و رابطه باید مبنای تصمیم باشند.",
       "details": [
@@ -1525,22 +1531,23 @@
           "data_completeness": "supplied_unverified"
         }
       ],
-      "missing_inputs": []
+      "missing_inputs": [],
+      "place_scope": "رتبه‌بندی فقط برای همین فهرست کوتاه شهرهای نامزد است؛ رتبهٔ جهانی یا توصیهٔ جابه‌جایی نیست."
     },
     "business-geography": {
-      "executive": "مقایسه نمادین مکان‌های کاری. مکان‌ها را با فهرستی که بر اساس تحقیق مستقل تهیه کرده‌اید مقایسه کنید",
-      "strategic": "رتبه‌ها فقط وزن‌های نمادین همین فهرست را مرتب می‌کنند؛ توصیه‌ای برای جابه‌جایی نیستند.",
+      "executive": "مقایسه نمادین مکان‌های کاری. مکان‌ها را با شواهد تجاری، حقوقی و مالی که جداگانه بررسی کرده‌اید مقایسه کنید. رتبه‌بندی فقط برای همین فهرست کوتاه شهرهای نامزد است؛ رتبهٔ جهانی یا توصیهٔ جابه‌جایی نیست.",
+      "strategic": "رتبه‌ها فقط وزن نمادین کار و گسترش را در همین فهرست کوتاه شهرها مرتب می‌کنند؛ پیش‌بینی سود یا توصیهٔ جابه‌جایی نیستند.",
       "technical": "pathfinder.relocation · mode=business · jupiter,mercury,sun,saturn · houses=2,6,10,11",
       "headline": "مقایسه نمادین مکان‌های کاری",
-      "action": "مکان‌ها را با فهرستی که بر اساس تحقیق مستقل تهیه کرده‌اید مقایسه کنید",
-      "avoid": "انتخاب مقصد صرفاً بر اساس رتبه",
+      "action": "مکان‌ها را با شواهد تجاری، حقوقی و مالی که جداگانه بررسی کرده‌اید مقایسه کنید.",
+      "avoid": "انتخاب بازار صرفاً بر اساس رتبه.",
       "intensity": "moderate",
       "confidence": "low",
       "confidence_basis": "unvalidated_symbolic_guidance",
       "confidence_explanation": "اعتبار پیش‌بینی تأیید نشده است. اطلاعات تولد، ورودی تأییدنشده‌اند و رفتار مشاهده‌شده نیستند.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "رتبه‌ها فقط وزن‌های نمادین همین فهرست را مرتب می‌کنند؛ توصیه‌ای برای جابه‌جایی نیستند.",
+      "interpretation": "رتبه‌ها فقط وزن نمادین کار و گسترش را در همین فهرست کوتاه شهرها مرتب می‌کنند؛ پیش‌بینی سود یا توصیهٔ جابه‌جایی نیستند.",
       "limitation": "این مقایسه‌ها رفاه، گسترش کسب‌وکار، عشق یا نتیجه رابطه را پیش‌بینی نمی‌کنند. شواهد واقعی بازار، حقوقی، مالی، ایمنی و رابطه باید مبنای تصمیم باشند.",
       "explanation": "این مقایسه‌ها رفاه، گسترش کسب‌وکار، عشق یا نتیجه رابطه را پیش‌بینی نمی‌کنند. شواهد واقعی بازار، حقوقی، مالی، ایمنی و رابطه باید مبنای تصمیم باشند.",
       "details": [
@@ -1619,7 +1626,8 @@
           "data_completeness": "supplied_unverified"
         }
       ],
-      "missing_inputs": []
+      "missing_inputs": [],
+      "place_scope": "رتبه‌بندی فقط برای همین فهرست کوتاه شهرهای نامزد است؛ رتبهٔ جهانی یا توصیهٔ جابه‌جایی نیست."
     },
     "partner-profile": {
       "executive": "پرسش‌های اختیاری درباره همراهی. اقدام: درباره اولویت‌ها، مرزها و شیوه گفتگو هنگام اختلاف بپرسید. پرهیز: استفاده از این طرح برای گزینش افراد یا قرارهای آشنایی.",
@@ -1761,7 +1769,8 @@
       ],
       "verify_questions": [
         "یک اولویت مشترک و یک تفاوت را با مثال‌های مشخص از رابطه خود بررسی کنید."
-      ]
+      ],
+      "score_formula": "اگر امتیاز مضمون‌ها باشد، کلی برابر است با ۴۵٪ مقایسهٔ کامل دو نمودار به‌اضافهٔ ۵۵٪ میانگین همان مضمون‌ها، سپس گرد می‌شود. اگر مضمونی نباشد، فقط مقایسهٔ کامل است. اگر تاریخ یا مکان طرف دیگر نباشد، کلی محاسبه نمی‌شود. ساعت نامشخص تولد با ۱۲:۰۰ جایگزین می‌شود و خانه را تأیید نمی‌کند. کیفیت واقعی رابطه را اندازه نمی‌گیرد."
     },
     "trust-patterns": {
       "executive": "پرسش‌هایی برای گفتگو درباره اعتماد. اقدام: یک نمونه مشخص و اخیر انتخاب کنید و مستقیم درباره انتظار هر دو نفر بپرسید. پرهیز: استفاده از الگوی نمادین به‌عنوان مدرکی علیه کسی.",
@@ -1959,7 +1968,7 @@
     },
     "todays-perfume": {
       "executive": "اتجاه عطري اختياري. الإجراء: يمكن مقارنة النغمات على ورقة اختبار واختيار كمية خفيفة تناسب المكان. ما ينبغي تجنّبه: العطر القوي في المساحات المشتركة أو الأماكن التي تمنع العطور.",
-      "strategic": "يجمع المزيج الرمزي بين نغمات عطرية، ولا يصف الشخصية.",
+      "strategic": "هذه مجموعات نغمات بديلة للمقارنة، وليست مزيجاً واحداً مطلوباً، ولا تصف الشخصية.",
       "technical": "venus=taurus · moon=pisces · asc=virgo · transit_moon=virgo",
       "headline": "اتجاه عطري اختياري",
       "action": "يمكن مقارنة النغمات على ورقة اختبار واختيار كمية خفيفة تناسب المكان",
@@ -1970,7 +1979,7 @@
       "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "يجمع المزيج الرمزي بين نغمات عطرية، ولا يصف الشخصية.",
+      "interpretation": "هذه مجموعات نغمات بديلة للمقارنة، وليست مزيجاً واحداً مطلوباً، ولا تصف الشخصية.",
       "limitation": "العطر خيار اختياري للمظهر، وليس وسيلة لضمان الانجذاب أو التأثير في الآخرين. الأولوية للتفضيل والحساسية وقواعد المكان.",
       "explanation": "العطر خيار اختياري للمظهر، وليس وسيلة لضمان الانجذاب أو التأثير في الآخرين. الأولوية للتفضيل والحساسية وقواعد المكان.",
       "details": [
@@ -1992,7 +2001,7 @@
     },
     "date-outfit": {
       "executive": "اقتراح اختياري للإطلالة. الإجراء: تجربة القطع معاً ومراجعة الطقس وقواعد اللباس وحرية الحركة تساعد في الاختيار. ما ينبغي تجنّبه: التخلي عن الراحة أو الحدود الشخصية من أجل إطلالة مقترحة.",
-      "strategic": "يمكن استخدام التنسيق الرمزي للملابس والألوان والإكسسوارات كنقطة بداية.",
+      "strategic": "يمكن استخدام الملابس واللون الرمزيين كنقطة بداية. الإكسسوار يبقى اختيارياً.",
       "technical": "venus=taurus · asc=virgo · transit_moon=virgo",
       "headline": "اقتراح اختياري للإطلالة",
       "action": "تجربة القطع معاً ومراجعة الطقس وقواعد اللباس وحرية الحركة تساعد في الاختيار",
@@ -2003,7 +2012,7 @@
       "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "يمكن استخدام التنسيق الرمزي للملابس والألوان والإكسسوارات كنقطة بداية.",
+      "interpretation": "يمكن استخدام الملابس واللون الرمزيين كنقطة بداية. الإكسسوار يبقى اختيارياً.",
       "limitation": "درجة فترة اللقاء تعبّر عن قوة التوقيت الرمزي، لا عن احتمال نجاح اللقاء. هذا اقتراح للتنسيق، وليس توقعاً للانجذاب أو الموافقة أو نتيجة اللقاء. التفضيل الشخصي والاحتياجات العملية هي المرجع.",
       "explanation": "درجة فترة اللقاء تعبّر عن قوة التوقيت الرمزي، لا عن احتمال نجاح اللقاء. هذا اقتراح للتنسيق، وليس توقعاً للانجذاب أو الموافقة أو نتيجة اللقاء. التفضيل الشخصي والاحتياجات العملية هي المرجع.",
       "details": [
@@ -2074,19 +2083,19 @@
       "reason": "أوزان المقارنة الرمزية"
     },
     "best-countries": {
-      "executive": "مقارنة رمزية للأماكن: التوقعات المشتركة. يمكن مقارنة الأماكن بقائمة أُعدّت استناداً إلى بحث مستقل",
-      "strategic": "ترتّب الدرجات الأوزان الرمزية داخل هذه القائمة فقط؛ وليست توصية بالانتقال.",
+      "executive": "مقارنة رمزية للأماكن: التوقعات المشتركة. يمكن مقارنة الأماكن بأدلة عن العلاقة والسلامة والواقع العملي جُمعت بشكل مستقل. الترتيب ينطبق فقط على قائمة المدن المرشحة هذه، وليس ترتيباً عالمياً ولا نصيحة بالانتقال.",
+      "strategic": "ترتّب الدرجات أوزاناً رمزية لموضوعات الحياة المشتركة داخل قائمة المدن المرشحة فقط، وليست توقعاً للحب ولا توصية بالانتقال.",
       "technical": "pathfinder.relocation · mode=relationship · jupiter,mercury,sun,saturn · houses=2,6,10,11",
       "headline": "مقارنة رمزية للأماكن: التوقعات المشتركة",
-      "action": "يمكن مقارنة الأماكن بقائمة أُعدّت استناداً إلى بحث مستقل",
-      "avoid": "اختيار الوجهة بناءً على الترتيب وحده",
+      "action": "يمكن مقارنة الأماكن بأدلة عن العلاقة والسلامة والواقع العملي جُمعت بشكل مستقل.",
+      "avoid": "اختيار الوجهة بناءً على الترتيب وحده.",
       "intensity": "moderate",
       "confidence": "low",
       "confidence_basis": "unvalidated_symbolic_guidance",
       "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "ترتّب الدرجات الأوزان الرمزية داخل هذه القائمة فقط؛ وليست توصية بالانتقال.",
+      "interpretation": "ترتّب الدرجات أوزاناً رمزية لموضوعات الحياة المشتركة داخل قائمة المدن المرشحة فقط، وليست توقعاً للحب ولا توصية بالانتقال.",
       "limitation": "لا تتنبأ هذه المقارنات بالازدهار أو التوسع أو الحب أو نتائج العلاقات. القرار يحتاج إلى أدلة فعلية عن السوق والقانون والمال والسلامة والعلاقات.",
       "explanation": "لا تتنبأ هذه المقارنات بالازدهار أو التوسع أو الحب أو نتائج العلاقات. القرار يحتاج إلى أدلة فعلية عن السوق والقانون والمال والسلامة والعلاقات.",
       "details": [
@@ -2153,22 +2162,23 @@
           "data_completeness": "supplied_unverified"
         }
       ],
-      "missing_inputs": []
+      "missing_inputs": [],
+      "place_scope": "الترتيب ينطبق فقط على قائمة المدن المرشحة هذه، وليس ترتيباً عالمياً ولا نصيحة بالانتقال."
     },
     "business-geography": {
-      "executive": "مقارنة رمزية لأماكن العمل. يمكن مقارنة الأماكن بقائمة أُعدّت استناداً إلى بحث مستقل",
-      "strategic": "ترتّب الدرجات الأوزان الرمزية داخل هذه القائمة فقط؛ وليست توصية بالانتقال.",
+      "executive": "مقارنة رمزية لأماكن العمل. يمكن مقارنة الأماكن بأدلة تجارية وقانونية ومالية جُمعت بشكل مستقل. الترتيب ينطبق فقط على قائمة المدن المرشحة هذه، وليس ترتيباً عالمياً ولا نصيحة بالانتقال.",
+      "strategic": "ترتّب الدرجات أوزاناً رمزية للعمل والتوسع داخل قائمة المدن المرشحة فقط، وليست توقعاً للربح ولا توصية بالانتقال.",
       "technical": "pathfinder.relocation · mode=business · jupiter,mercury,sun,saturn · houses=2,6,10,11",
       "headline": "مقارنة رمزية لأماكن العمل",
-      "action": "يمكن مقارنة الأماكن بقائمة أُعدّت استناداً إلى بحث مستقل",
-      "avoid": "اختيار الوجهة بناءً على الترتيب وحده",
+      "action": "يمكن مقارنة الأماكن بأدلة تجارية وقانونية ومالية جُمعت بشكل مستقل.",
+      "avoid": "اختيار سوق بناءً على الترتيب وحده.",
       "intensity": "moderate",
       "confidence": "low",
       "confidence_basis": "unvalidated_symbolic_guidance",
       "confidence_explanation": "موثوقية التنبؤ غير مثبتة. تفاصيل الميلاد مدخلات غير متحقق منها، وليست سلوكاً ملاحظاً.",
       "evidence_status": "unvalidated",
       "data_completeness": "supplied_unverified",
-      "interpretation": "ترتّب الدرجات الأوزان الرمزية داخل هذه القائمة فقط؛ وليست توصية بالانتقال.",
+      "interpretation": "ترتّب الدرجات أوزاناً رمزية للعمل والتوسع داخل قائمة المدن المرشحة فقط، وليست توقعاً للربح ولا توصية بالانتقال.",
       "limitation": "لا تتنبأ هذه المقارنات بالازدهار أو التوسع أو الحب أو نتائج العلاقات. القرار يحتاج إلى أدلة فعلية عن السوق والقانون والمال والسلامة والعلاقات.",
       "explanation": "لا تتنبأ هذه المقارنات بالازدهار أو التوسع أو الحب أو نتائج العلاقات. القرار يحتاج إلى أدلة فعلية عن السوق والقانون والمال والسلامة والعلاقات.",
       "details": [
@@ -2247,7 +2257,8 @@
           "data_completeness": "supplied_unverified"
         }
       ],
-      "missing_inputs": []
+      "missing_inputs": [],
+      "place_scope": "الترتيب ينطبق فقط على قائمة المدن المرشحة هذه، وليس ترتيباً عالمياً ولا نصيحة بالانتقال."
     },
     "partner-profile": {
       "executive": "أسئلة اختيارية عن الشراكة. الإجراء: يمكن السؤال عن الأولويات والحدود وطريقة مناقشة الاختلاف. ما ينبغي تجنّبه: استخدام هذا التصور لفرز الأشخاص أو مواعيد التعارف.",
@@ -2389,7 +2400,8 @@
       ],
       "verify_questions": [
         "يمكن مناقشة أولوية مشتركة واختلاف واحد بأمثلة محددة من العلاقة."
-      ]
+      ],
+      "score_formula": "إذا وُجدت درجات الموضوعات، فإن الإجمالي هو ٤٥٪ من مقارنة الرسمين الكاملة زائد ٥٥٪ من متوسط تلك الموضوعات، ثم يُقرَّب. إن لم توجد موضوعات، يبقى الإجمالي مقارنة الرسمين فقط. إذا نقص تاريخ أو مكان الطرف الآخر فلا يُحسَب الإجمالي. الوقت غير المعروف يُستبدل بـ ١٢:٠٠ ولا يثبت البيوت. هذا ليس جودة علاقة مقيسة."
     },
     "trust-patterns": {
       "executive": "أسئلة لحوار حول الثقة. الإجراء: يمكن اختيار مثال حديث ومحدد والسؤال مباشرة عن توقعات كل طرف. ما ينبغي تجنّبه: استخدام النمط الرمزي كدليل ضد شخص.",

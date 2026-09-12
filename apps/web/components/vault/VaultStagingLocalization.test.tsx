@@ -42,5 +42,6 @@ it('Arabic Sensuality documented strings do not gender the reader', () => {
   const copy = SECTION_LANGS.ar.sensuality;
   const { container } = render(<section dir="rtl"><p>{copy.sub}</p><p>{copy.intro}</p></section>);
   expect(container.textContent).not.toMatch(/توقيتكِ|اختاري|تقتربين/);
-  expect(container.textContent).toContain('موضوعات');
+  expect(container.textContent).toContain('بصمة الرغبة');
+  expect(container.textContent).toContain('غير مبنية بعد');
 });

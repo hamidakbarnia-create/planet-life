@@ -217,7 +217,7 @@ const LANGS: Record<AppLang, Copy> = {
           },
           {
             heading: 'The Provider',
-            body: 'Your Jupiter and your love-line astrocartography. The kind of partner your chart actually pulls in, and the cities on Earth where your wealth-line activates.',
+            body: 'Prosperity Geography and Love Lines compare a candidate-city shortlist as text, not a world map. Partner type prompts stay symbolic.',
           },
           {
             heading: 'Shadow Room',
@@ -429,7 +429,7 @@ const LANGS: Record<AppLang, Copy> = {
           },
           {
             heading: 'Покровитель',
-            body: 'Ваш Юпитер и линии любви на карте мира. Тип партнёра и города, где активна линия богатства.',
+            body: '«География процветания» и «Линии любви» сравнивают короткий список городов текстом, а не на карте мира. Подсказки о типе партнёра остаются символическими.',
           },
           {
             heading: 'Теневая комната',
@@ -641,7 +641,7 @@ const LANGS: Record<AppLang, Copy> = {
           },
           {
             heading: 'حامی (Provider)',
-            body: 'ژوپیتر تو + خط عشق روی نقشه دنیا. نوع شریکی که چارتت می‌کشه و شهرهایی که خط ثروتت فعال می‌شه.',
+            body: 'جغرافیای رفاه و خط‌های عشق فهرست کوتاه شهرهای نامزد را به‌صورت متن مقایسه می‌کنند، نه روی نقشه دنیا. پرسش‌های نوع شریک نمادین می‌مانند.',
           },
           {
             heading: 'اتاق سایه',
@@ -815,7 +815,7 @@ const LANGS: Record<AppLang, Copy> = {
         details: [
           { heading: 'الحسّية', body: 'هندسة مرّيخك وبلوتوك وليليت — أيّ مغناطيسية تحملين، وساعات الذروة.' },
           { heading: 'الجسد والدورة', body: 'مزامنة دورتك مع القمر. نافذة الخصوبة، الهبوط، أيام حماية الـ PMS — يوماً بيوم.' },
-          { heading: 'العائل', body: 'مشتريكِ وخطوط الحب على خريطة العالم. نوع الشريك ومدن الثروة.' },
+          { heading: 'العائل', body: 'جغرافيا الازدهار وخطوط الحب تقارنان قائمة المدن المرشحة كنص، وليستا خريطة للعالم. إشارات نوع الشريك تبقى رمزية.' },
           { heading: 'غرفة الظل', body: 'إشارات الكتمان والثقة في أي خريطة. إشارات فقط — لا أحكام.' },
           { heading: 'تقويم القوة', body: 'أيام حارّة، أيام طلب المال، أيام الغياب، أيام «نعم». إيقاع الجاذبية.' },
           { heading: 'دورة الزواج', body: 'أفضل أشهر للخطبة والعرس. نوافذ الحمل. وإن كان الطلاق — توقيت يحميكِ.' },

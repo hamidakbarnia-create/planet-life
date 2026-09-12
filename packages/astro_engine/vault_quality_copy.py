@@ -1,5 +1,25 @@
 """Card-specific localized symbolic guidance; no computation or providers."""
 LANGS = ("en", "ru", "fa", "ar")
+
+
+def collapse_repeated_reason(reason: str) -> str:
+    """Drop exact semicolon clauses; keep distinct evidence text."""
+    if not reason:
+        return ""
+    arabic = "؛" in reason
+    sep = "؛" if arabic else ";"
+    join = "؛ " if arabic else "; "
+    seen: list[str] = []
+    for clause in reason.split(sep):
+        item = clause.strip()
+        if not item:
+            continue
+        key = " ".join(item.lower().split())
+        if any(" ".join(existing.lower().split()) == key for existing in seen):
+            continue
+        seen.append(item)
+    return join.join(seen)
+
 QUALITY_COPY = {'heat': [['Optional attraction timing',
            'These windows compare symbolic timing strength for social initiative. They say nothing '
            'about another person’s interest.',
@@ -52,48 +72,48 @@ QUALITY_COPY = {'heat': [['Optional attraction timing',
             'هذه فكرة لتنسيق المظهر، وليست توقعاً للثقة أو القبول أو النجاح. الذوق والراحة وطبيعة '
             'المكان هي المرجع.']],
  'perfume': [['An optional scent direction',
-              'The symbolic blend combines scent notes; it does not describe your personality.',
+              'These note groups are alternatives to compare, not one required blend. They do not describe your personality.',
               'Compare the suggested notes on a scent strip; choose a subtle amount appropriate to the '
               'space.',
               'Heavy fragrance in shared or scent-free spaces.',
               'Scent is an optional presentation choice, not a way to secure attraction or influence '
               'others. Preference, sensitivity and venue rules take priority.'],
              ['Идея для выбора аромата',
-              'Символическое сочетание нот не описывает личность.',
+              'Эти группы нот — варианты для сравнения, а не один обязательный микс. Они не описывают личность.',
               'Сравните предложенные ноты на блоттере; интенсивность подбирайте с учётом места.',
               'Насыщенный аромат в общем пространстве или там, где он запрещён.',
               'Аромат — необязательная деталь образа, а не средство вызвать влечение или повлиять на '
               'других. Важнее вкус, чувствительность и правила места.'],
              ['پیشنهادی برای انتخاب رایحه',
-              'این ترکیب نمادینِ نت\u200cها توصیفی از شخصیت شما نیست.',
+              'این گروه‌های نت گزینه‌هایی برای مقایسه‌اند، نه یک ترکیب اجباری. توصیفی از شخصیت شما نیستند.',
               'نت\u200cهای پیشنهادی را روی کاغذ تست مقایسه کنید و میزان ملایمی متناسب با فضا انتخاب '
               'کنید.',
               'رایحه سنگین در فضای مشترک یا محیط بدون عطر.',
               'عطر انتخابی اختیاری برای ظاهر است، نه راهی برای جلب علاقه یا اثرگذاری بر دیگران. سلیقه، '
               'حساسیت و مقررات مکان اولویت دارند.'],
              ['اتجاه عطري اختياري',
-              'يجمع المزيج الرمزي بين نغمات عطرية، ولا يصف الشخصية.',
+              'هذه مجموعات نغمات بديلة للمقارنة، وليست مزيجاً واحداً مطلوباً، ولا تصف الشخصية.',
               'يمكن مقارنة النغمات على ورقة اختبار واختيار كمية خفيفة تناسب المكان.',
               'العطر القوي في المساحات المشتركة أو الأماكن التي تمنع العطور.',
               'العطر خيار اختياري للمظهر، وليس وسيلة لضمان الانجذاب أو التأثير في الآخرين. الأولوية '
               'للتفضيل والحساسية وقواعد المكان.']],
  'outfit': [['An optional outfit direction',
-             'Use the symbolic clothing, colour and accessory combination as a starting point.',
+             'Use the symbolic clothing and colour as a starting point. Accessories stay optional.',
              'Try the pieces together; check weather, dress code, movement and comfort before choosing.',
              'Changing your boundaries or comfort to fit a suggested look.',
              'The meeting score measures symbolic timing strength, not the probability of date success. This is a styling prompt, not a prediction of attraction, consent or how a meeting will go. Personal preference and practical needs decide.'],
             ['Идея для образа',
-             'Символическое сочетание одежды, цвета и аксессуаров — отправная точка для выбора.',
+             'Символические одежда и цвет — отправная точка. Аксессуары необязательны.',
              'Примерьте вещи вместе; учтите погоду, дресс-код, свободу движения и удобство.',
              'Отказ от удобства или личных границ ради предложенного образа.',
              'Оценка окна встречи — сила символического тайминга, а не вероятность удачного свидания. Это идея для стиля, а не прогноз влечения, согласия или исхода встречи. Решают личный вкус и практические потребности.'],
             ['پیشنهادی برای پوشش',
-             'ترکیب نمادین لباس، رنگ و اکسسوری می\u200cتواند نقطه شروع انتخاب باشد.',
+             'پوشش و رنگ نمادین می‌تواند نقطه شروع باشد. اکسسوری اختیاری می‌ماند.',
              'لباس\u200cها را با هم امتحان کنید؛ هوا، پوشش مناسب موقعیت و راحتی حرکت را در نظر بگیرید.',
              'کنارگذاشتن راحتی یا مرزهای شخصی برای هماهنگی با پیشنهاد.',
              'امتیاز بازه دیدار، شدت زمان\u200cبندی نمادین است، نه احتمال موفقیت دیدار. این پیشنهاد درباره پوشش است، نه پیش\u200cبینی جذب، رضایت یا نتیجه دیدار. سلیقه و نیازهای عملی شما تعیین\u200cکننده\u200cاند.'],
             ['اقتراح اختياري للإطلالة',
-             'يمكن استخدام التنسيق الرمزي للملابس والألوان والإكسسوارات كنقطة بداية.',
+             'يمكن استخدام الملابس واللون الرمزيين كنقطة بداية. الإكسسوار يبقى اختيارياً.',
              'تجربة القطع معاً ومراجعة الطقس وقواعد اللباس وحرية الحركة تساعد في الاختيار.',
              'التخلي عن الراحة أو الحدود الشخصية من أجل إطلالة مقترحة.',
              'درجة فترة اللقاء تعبّر عن قوة التوقيت الرمزي، لا عن احتمال نجاح اللقاء. هذا اقتراح للتنسيق، وليس توقعاً للانجذاب أو الموافقة أو نتيجة اللقاء. التفضيل الشخصي والاحتياجات العملية هي المرجع.']],
@@ -446,4 +466,5 @@ def geography_symbolic_reason(effect, relocation, lang):
                          f"{name}: сектор карты {house}, символическая тема — {theme}",
                          f"{name}: بخش {house} چارت، با مضمون نمادین {theme}",
                          f"{name}: القطاع {house} من الخريطة، بموضوع رمزي هو {theme}")[i] + context)
-    return ("؛ " if lang in {"fa", "ar"} else "; ").join(dict.fromkeys(rows))
+    joined = ("؛ " if lang in {"fa", "ar"} else "; ").join(dict.fromkeys(rows))
+    return collapse_repeated_reason(joined)

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import './vault-audit.css';
 import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { AppShell } from '@/components/AppShell';
@@ -23,6 +24,13 @@ const VAULT_ENTERED_KEY = 'planet-life-vault-entered';
 export default function VaultPage() {
   const [lang, setLangState] = useState<AppLang>('en');
   const [entered, setEntered] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.add('vault-audit-layout');
+    return () => {
+      document.documentElement.classList.remove('vault-audit-layout');
+    };
+  }, []);
 
   useQueuedEffect(() => {
     const stored = loadAppLang();
@@ -74,7 +82,7 @@ export default function VaultPage() {
           }}
         />
 
-        <div className="relative max-w-3xl mx-auto px-6 py-10">
+        <div className="relative max-w-3xl mx-auto px-4 py-6 vault-home-page">
           <div className="text-center mb-10">
             <div
               className="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 relative"

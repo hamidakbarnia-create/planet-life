@@ -44,7 +44,12 @@ PROHIBITED = (
 )
 INDEPENDENT = {"en": "Independent symbolic windows", "ru": "Независимые символические окна", "fa": "پنجره‌های نمادین مستقل", "ar": "نوافذ رمزية مستقلة"}
 UNKNOWN = {"en": "Actual behavior and fidelity are unknown", "ru": "Реальное поведение и верность неизвестны", "fa": "رفتار واقعی و وفاداری نامشخص‌اند", "ar": "السلوك الفعلي والوفاء غير معروفين"}
-REPAIR = {"en": "Repair difficulty", "ru": "Трудность восстановления", "fa": "دشواری ترمیم", "ar": "صعوبة الإصلاح"}
+REPAIR = {
+    "en": "Symbolic repair difficulty",
+    "ru": "Символическая трудность восстановления",
+    "fa": "وزن نمادین سختی برگشتن به گفت‌وگو",
+    "ar": "رمزية: صعوبة العودة إلى الحوار",
+}
 
 
 @pytest.fixture(autouse=True)

@@ -75,6 +75,8 @@ import {
 } from '@/components/vault/VaultPowerTiming';
 import { VaultConfidentialReading } from '@/components/vault/VaultConfidentialReading';
 import { VAULT_READING_PRESENTATION_COPY } from '@/lib/vault-reading-presentation';
+import { partnerRequirementHint } from '@/lib/vault-reading-ux';
+import '../vault-audit.css';
 
 /** Vault item index → live API key (same order as section.items). */
 const LIVE_ITEM_API: Partial<Record<VaultSectionKey, string[]>> = {
@@ -132,6 +134,21 @@ export default function VaultSectionPage() {
     string | null
   >(null);
   const [partnerSelectionReady, setPartnerSelectionReady] = useState(false);
+  useEffect(() => {
+    document.documentElement.classList.add('vault-audit-layout');
+    return () => {
+      document.documentElement.classList.remove('vault-audit-layout');
+    };
+  }, []);
+  useEffect(() => {
+    if (!openItem) return;
+    const panel = document.querySelector(
+      '[data-testid="vault-coming-soon-honesty"], [data-testid="vault-yes-slots"]'
+    );
+    if (!(panel instanceof HTMLElement)) return;
+    if (typeof panel.scrollIntoView !== 'function') return;
+    panel.scrollIntoView({ block: 'center', inline: 'nearest' });
+  }, [openItem, lang, liveReading, powerTiming]);
   useQueuedEffect(() => {
     const stored = loadAppLang();
     if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') {
@@ -461,7 +478,6 @@ export default function VaultSectionPage() {
     partnerSelectionReady,
   ]);
 
-  const unlocked = tier === 'premium' || tier === 'vip';
   const t = SECTION_LANGS[lang];
   const rui = READING_UI[lang];
   const powerUi = VAULT_POWER_TIMING_COPY[lang];
@@ -535,7 +551,7 @@ export default function VaultSectionPage() {
           }}
         />
 
-        <div className="relative max-w-2xl mx-auto px-6 py-10">
+        <div className="relative max-w-2xl mx-auto px-4 py-6 vault-section-page">
           <Link
             href="/vault"
             className="fi text-xs no-underline inline-block mb-6"
@@ -588,7 +604,7 @@ export default function VaultSectionPage() {
               return (
                 <div
                   key={item.label}
-                  className="rounded-xl overflow-hidden transition-all"
+                  className="rounded-xl overflow-hidden transition-all vault-item-card"
                   style={{
                     background:
                       'linear-gradient(135deg, rgba(40,20,40,0.55), rgba(20,14,28,0.55))',
@@ -625,6 +641,16 @@ export default function VaultSectionPage() {
                       >
                         {item.hint}
                       </div>
+                      {partnerRequirementHint(itemApiKey, lang) ? (
+                        <div
+                          className="fi text-[11px] leading-relaxed mt-1"
+                          style={{ color: 'rgba(242,207,117,0.78)' }}
+                          data-vault-partner-requirement={itemApiKey}
+                          data-testid="vault-partner-requirement"
+                        >
+                          {partnerRequirementHint(itemApiKey, lang)}
+                        </div>
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span
@@ -853,6 +879,13 @@ export default function VaultSectionPage() {
                                       );
                                     })}
                                   </div>
+                                  <p
+                                    className="fi text-[11px] leading-relaxed"
+                                    data-testid="vault-score-direction"
+                                    style={{ color: 'rgba(255,255,255,0.55)' }}
+                                  >
+                                    {powerUi.scoreDirection}
+                                  </p>
                                 </>
                               )}
                               {powerTiming.kind === 'yes_slots' && (
@@ -878,6 +911,13 @@ export default function VaultSectionPage() {
                                       />
                                     );
                                   })}
+                                  <p
+                                    className="fi text-[11px] leading-relaxed"
+                                    data-testid="vault-score-direction"
+                                    style={{ color: 'rgba(255,255,255,0.55)' }}
+                                  >
+                                    {powerUi.scoreDirection}
+                                  </p>
                                 </div>
                               )}
                             </div>
@@ -898,19 +938,61 @@ export default function VaultSectionPage() {
                                   : null
                               }
                               bestWindowLabelTitle={
-                                raw === 'power' && powerTiming
+                                raw === 'power' &&
+                                powerTiming &&
+                                powerTiming.kind === 'ranked_days'
                                   ? powerUi.topDays
                                   : null
                               }
                               bestWindowLabel={
-                                raw === 'power' && powerTiming
-                                  ? powerTiming.kind === 'ranked_days' &&
-                                    powerTiming.days[0]
-                                    ? `${formatPowerDate(powerTiming.days[0].date)} · ${powerTiming.days[0].score}`
-                                    : powerTiming.kind === 'yes_slots'
-                                      ? `${powerUi.ask}: ${formatPowerDate(powerTiming.ask.date)} · ${powerTiming.ask.score}`
-                                      : null
+                                raw === 'power' &&
+                                powerTiming &&
+                                powerTiming.kind === 'ranked_days' &&
+                                powerTiming.days[0]
+                                  ? `${formatPowerDate(powerTiming.days[0].date)} · ${powerTiming.days[0].score}`
                                   : null
+                              }
+                              timingSlot={
+                                raw === 'power' &&
+                                powerTiming &&
+                                powerTiming.kind === 'yes_slots' ? (
+                                  <div className="space-y-2">
+                                    {(
+                                      [
+                                        ['ask', powerUi.ask, powerTiming.ask],
+                                        ['commit', powerUi.commit, powerTiming.commit],
+                                        ['sign', powerUi.sign, powerTiming.sign],
+                                      ] as const
+                                    ).map(([slotKey, slotLabel, slot]) => {
+                                      const band = vaultScoreBand(slot.score);
+                                      return (
+                                        <VaultYesDecisionSlot
+                                          key={slotKey}
+                                          label={slotLabel}
+                                          dateLabel={formatPowerDate(slot.date)}
+                                          score={slot.score}
+                                          band={band}
+                                          bandLabel={bandLabel(band)}
+                                          confidence={
+                                            liveReading?.evidence_status === 'unvalidated' ||
+                                            liveReading?.confidence_basis ===
+                                              'unvalidated_symbolic_guidance'
+                                              ? null
+                                              : slot.confidence
+                                          }
+                                          rating={slot.rating_label}
+                                        />
+                                      );
+                                    })}
+                                    <p
+                                      className="fi text-[11px] leading-relaxed"
+                                      data-testid="vault-score-direction"
+                                      style={{ color: 'rgba(255,255,255,0.55)' }}
+                                    >
+                                      {powerUi.scoreDirection}
+                                    </p>
+                                  </div>
+                                ) : null
                               }
                               windowsSlot={
                                 raw === 'power' && powerTiming ? (
@@ -947,36 +1029,14 @@ export default function VaultSectionPage() {
                                             );
                                           })}
                                         </div>
+                                        <p
+                                          className="fi text-[11px] leading-relaxed"
+                                          data-testid="vault-score-direction"
+                                          style={{ color: 'rgba(255,255,255,0.55)' }}
+                                        >
+                                          {powerUi.scoreDirection}
+                                        </p>
                                       </>
-                                    )}
-                                    {powerTiming.kind === 'yes_slots' && (
-                                      <div className="space-y-2">
-                                        {(
-                                          [
-                                            ['ask', powerUi.ask, powerTiming.ask],
-                                            [
-                                              'commit',
-                                              powerUi.commit,
-                                              powerTiming.commit,
-                                            ],
-                                            ['sign', powerUi.sign, powerTiming.sign],
-                                          ] as const
-                                        ).map(([slotKey, slotLabel, slot]) => {
-                                          const band = vaultScoreBand(slot.score);
-                                          return (
-                                            <VaultYesDecisionSlot
-                                              key={slotKey}
-                                              label={slotLabel}
-                                              dateLabel={formatPowerDate(slot.date)}
-                                              score={slot.score}
-                                              band={band}
-                                              bandLabel={bandLabel(band)}
-                                              confidence={liveReading?.evidence_status === 'unvalidated' || liveReading?.confidence_basis === 'unvalidated_symbolic_guidance' ? null : slot.confidence}
-                                              rating={slot.rating_label}
-                                            />
-                                          );
-                                        })}
-                                      </div>
                                     )}
                                   </div>
                                 ) : null
@@ -1007,124 +1067,36 @@ export default function VaultSectionPage() {
                             </div>
                           )}
                         </>
-                      ) : unlocked ? (
-                        <>
-                          <div
-                            className="fi text-[10px] tracking-[0.2em] uppercase mb-2 inline-flex items-center gap-1.5"
-                            style={{ color: 'rgba(134,239,172,0.85)' }}
+                      ) : (
+                        <div
+                          data-testid="vault-coming-soon-honesty"
+                          className="rounded-lg p-3"
+                          style={{
+                            background: 'rgba(0,0,0,0.18)',
+                            border: '1px solid rgba(212,175,55,0.18)',
+                            scrollMarginBottom:
+                              'calc(var(--metioro-mobile-nav-h) + var(--metioro-safe-bottom) + 16px)',
+                          }}
+                        >
+                          <p
+                            className="fi text-[10px] tracking-[0.2em] uppercase mb-2"
+                            style={{ color: 'rgba(212,175,55,0.75)' }}
                           >
-                            <svg
-                              width="12"
-                              height="12"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <rect x="5" y="11" width="14" height="9" rx="2" />
-                              <path d="M8 11V7a4 4 0 0 1 7.5-2" />
-                            </svg>
-                            {lock.unlockedBadge}
-                          </div>
+                            {lock.notBuiltTitle}
+                          </p>
                           <p
                             className="fi text-xs leading-relaxed mb-2"
                             style={{ color: 'rgba(255,255,255,0.72)' }}
                           >
-                            {lock.teaser}
+                            {lock.notBuiltBody}
                           </p>
                           <p
                             className="fi text-[11px] leading-relaxed"
                             style={{ color: 'rgba(255,255,255,0.45)' }}
                           >
-                            {lock.unlockedNote}
+                            {lock.membershipDoesNotActivate}
                           </p>
-                        </>
-                      ) : (
-                        <>
-                          <div
-                            className="fi text-[10px] tracking-[0.2em] uppercase mb-2"
-                            style={{ color: 'rgba(212,175,55,0.6)' }}
-                          >
-                            {lock.sampleLabel}
-                          </div>
-                          <div
-                            className="rounded-lg p-3 mb-3 relative overflow-hidden"
-                            style={{
-                              background: 'rgba(0,0,0,0.25)',
-                              border: '1px dashed rgba(212,175,55,0.18)',
-                            }}
-                          >
-                            <p
-                              className="fi text-xs leading-relaxed italic"
-                              style={{
-                                color: 'rgba(255,255,255,0.55)',
-                                filter: 'blur(2px)',
-                                userSelect: 'none',
-                              }}
-                              aria-hidden
-                            >
-                              ████ ████████ ██ ████, ███████ ████████ ██ ██████.
-                              ████ ███████ ██ ███, ███ █████████ ██ ██████ █████.
-                              ████ ████████ ██ ██████ ███, █████████ ██ ████.
-                            </p>
-                            <div
-                              className="absolute inset-0 flex items-center justify-center"
-                              style={{
-                                background:
-                                  'linear-gradient(180deg, rgba(20,14,28,0.4), rgba(20,14,28,0.85))',
-                              }}
-                            >
-                              <svg
-                                width="22"
-                                height="22"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="#D4AF37"
-                                strokeWidth="1.6"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <rect x="5" y="11" width="14" height="9" rx="2" />
-                                <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-                              </svg>
-                            </div>
-                          </div>
-                          <p
-                            className="fi text-xs leading-relaxed mb-3"
-                            style={{ color: 'rgba(255,255,255,0.6)' }}
-                          >
-                            {lock.teaser}
-                          </p>
-                          <Link
-                            href="/upgrade"
-                            title={lock.premium}
-                            className="fc text-xs tracking-widest px-4 py-2 rounded-lg inline-flex items-center gap-2 transition-all hover:scale-[1.02] no-underline"
-                            style={{
-                              background:
-                                'linear-gradient(135deg, rgba(212,175,55,0.28), rgba(181,148,16,0.22))',
-                              border: '1px solid rgba(212,175,55,0.4)',
-                              color: '#F2CF75',
-                              letterSpacing: '0.12em',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            <svg
-                              width="13"
-                              height="13"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.8"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8z" />
-                            </svg>
-                            {lock.unlock}
-                          </Link>
-                        </>
+                        </div>
                       )}
                     </div>
                   )}

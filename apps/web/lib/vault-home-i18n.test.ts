@@ -159,6 +159,18 @@ describe('Vault Home repositioning data', () => {
     expect(en.sensuality.cta.toLowerCase()).toMatch(/limited/);
     expect(en.power.cta.length).toBeGreaterThan(en.look.cta.length - 5);
   });
+
+  it('names the Look card CTA Open Style Timing in every locale', () => {
+    expect(VAULT_HOME_LANGS.en.cards.look.cta).toBe('Open Style Timing');
+    expect(VAULT_HOME_LANGS.ru.cards.look.cta.toLowerCase()).toMatch(/стиль и тайминг/);
+    expect(VAULT_HOME_LANGS.fa.cards.look.cta).toMatch(/زمان‌بندی استایل/);
+    expect(VAULT_HOME_LANGS.ar.cards.look.cta).toMatch(/توقيت الأسلوب/);
+    for (const lang of LANGS) {
+      expect(VAULT_HOME_LANGS[lang].cards.look.cta.toLowerCase()).not.toMatch(
+        /^open look$|^открыть стиль$|^باز کردن استایل$|^فتح الأسلوب$/,
+      );
+    }
+  });
 });
 
 describe('Vault Home page wiring', () => {
@@ -180,6 +192,9 @@ describe('Vault Home page wiring', () => {
     expect(pageSource).not.toContain('Members only');
     expect(pageSource).not.toContain('fertile');
     expect(pageSource).not.toContain('End-to-end');
+    expect(pageSource).toContain("import './vault-audit.css'");
+    expect(pageSource).toContain('vault-audit-layout');
+    expect(pageSource).toContain('vault-home-page');
   });
 
   it('leaves Cycle and Lounge section routes valid and untouched in section order', () => {

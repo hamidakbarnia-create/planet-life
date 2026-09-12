@@ -302,6 +302,12 @@ _TRUST_LIMITATION = {
     "ru": "Реальное поведение и верность неизвестны. Данные рождения не выявляют измену, скрытность или верность. Опирайтесь на прямой разговор и наблюдаемое поведение; не обвиняйте, не следите и не вступайте в конфронтацию на этой основе.",
     "ar": "السلوك الفعلي والوفاء غير معروفين. بيانات الميلاد لا تكشف الخيانة أو الكتمان أو الوفاء. يلزم الاعتماد على الحوار المباشر والسلوك الملحوظ، دون اتهام أو مراقبة أو مواجهة على هذا الأساس."
 }
+_TRUST_LIMITATION_FRIEND = {
+    "en": "Actual behavior is unknown. These symbolic weights are conversation prompts for a friendship, not evidence of hidden conduct. Use direct conversation and observable behavior; do not accuse, surveil or confront someone on this basis.",
+    "fa": "رفتار واقعی نامشخص است. این وزن‌های نمادین موضوع گفت‌وگو برای دوستی‌اند، نه شاهد رفتار پنهان. بر گفت‌وگوی مستقیم و رفتار قابل مشاهده تکیه کن؛ بر این اساس اتهام، نظارت یا مقابله نکن.",
+    "ru": "Реальное поведение неизвестно. Эти символические веса — темы для разговора о дружбе, а не доказательство скрытого поведения. Опирайтесь на прямой разговор и наблюдаемое поведение; не обвиняйте, не следите и не вступайте в конфронтацию на этой основе.",
+    "ar": "السلوك الفعلي غير معروف. هذه الأوزان الرمزية موضوعات لحوار صداقة، وليست دليلاً على سلوك خفي. يلزم الاعتماد على الحوار المباشر والسلوك الملحوظ، دون اتهام أو مراقبة أو مواجهة على هذا الأساس."
+}
 _TRUST_TITLE = {
     "en": "Trust & Clarity Signals",
     "fa": "نشانه‌های اعتماد و وضوح",
@@ -594,29 +600,6 @@ def render_yes_day_reading(*, ask: dict[str, Any], commit: dict[str, Any], sign:
     """The scorer returns independent maxima, never a chronological plan."""
     lang = _pick_lang(lang)
     avg = sum(int(slot.get("score", 0)) for slot in (ask, commit, sign)) // 3
-    labels = {
-        "en": [
-            "Ask",
-            "Commit",
-            "Sign"
-        ],
-        "fa": [
-            "درخواست",
-            "تعهد",
-            "امضا"
-        ],
-        "ru": [
-            "Просьба",
-            "Обязательство",
-            "Подпись"
-        ],
-        "ar": [
-            "الطلب",
-            "الالتزام",
-            "التوقيع"
-        ]
-    }[lang]
-    dates = " · ".join(f"{label}: {slot.get('date', '—')} ({slot.get('score', 0)}/100)" for label, slot in zip(labels, (ask, commit, sign)))
     reason = {
         "en": "Each date is selected independently for its own symbolic score. An earlier signing window is not advice to sign before asking or agreeing terms. Same-day windows do not require same-day decisions.",
         "fa": "هر تاریخ بر اساس امتیاز نمادین خودش مستقل انتخاب شده است. پنجرهٔ زودتر امضا توصیه به امضا پیش از درخواست یا توافق نیست. پنجره‌های هم‌روز تصمیم هم‌روز را الزام نمی‌کنند.",
@@ -629,7 +612,7 @@ def render_yes_day_reading(*, ask: dict[str, Any], commit: dict[str, Any], sign:
             "fa": "پنجره‌های نمادین مستقل، نه یک توالی",
             "ru": "Независимые символические окна, не последовательность",
             "ar": "نوافذ رمزية مستقلة، وليست تسلسلاً"
-        }[lang] + f": {dates}", body=reason,
+        }[lang], body=reason,
         action={
             "en": "Choose only a window relevant to your actual stage; do not sign before the terms are understood and agreed",
             "fa": "فقط پنجرهٔ مرتبط با مرحلهٔ واقعی را انتخاب کن؛ پیش از فهم و توافق بر شروط امضا نکن",
@@ -1514,14 +1497,13 @@ def render_partner_profile_reading(
 ) -> dict[str, Any]:
     lang = _pick_lang(lang)
     business = goal in {"business", "business_partner"}
-    result = _quality_reading("business" if business else "partner", lang,
+    return _quality_reading("business" if business else "partner", lang,
                              mode=mode, missing_inputs=list(missing_inputs or []),
                              technical=f"relationship_profile={goal}",
                              data_completeness="incomplete" if missing_inputs else "supplied_unverified",
                              ideal_traits=list(ideal_traits or []), compatibility_patterns=list(compatibility_patterns or []),
                              friction_points=list(friction_points or []), dynamics=dict(dynamics or {}),
                              verify_questions=list(verify_questions or []))
-    return result
 
 
 _COMPAT_REL_LABEL: dict[str, dict[str, str]] = {
@@ -1540,7 +1522,7 @@ _COMPAT_REL_LABEL: dict[str, dict[str, str]] = {
     "business": {
         "en": "business",
         "fa": "کاری",
-        "ru": "деловые",
+        "ru": "деловые отношения",
         "ar": "عمل",
     },
     "friendship": {
@@ -1597,11 +1579,18 @@ def render_compatibility_reading(
     dims = dict(dimensions or {})
     details = [{"label": _quality_label(key, lang), "value": f"{dim['score']}/100"}
                for key, dim in dims.items() if isinstance(dim.get("score"), (int, float))]
-    return _quality_reading("compatibility", lang, details=details, dimensions=dims, overall_score=overall_score,
+    result = _quality_reading("compatibility", lang, details=details, dimensions=dims, overall_score=overall_score,
                             technical=f"relationship_profile={relationship_type}",
                             missing_inputs=list(missing_inputs or []), strengths=list(strengths or []),
                             friction_points=list(friction_points or []), verify_questions=list(verify_questions or []),
                             data_completeness="incomplete" if missing_inputs else "supplied_unverified")
+    result["score_formula"] = {
+        "en": "If theme scores are present, Overall is 45% of the full two-chart comparison plus 55% of the mean of those themes, then rounded. If no themes are present, Overall is the full two-chart comparison only. If required partner date or place is missing, Overall is not calculated. Unknown birth time uses a 12:00 placeholder and does not validate house claims. Overall is not measured relationship quality.",
+        "ru": "Если есть баллы тем, «Общий вес» — это 45% полного сравнения двух карт плюс 55% среднего этих тем, затем округление. Если тем нет, остаётся только полное сравнение. Если нет даты или места второго человека, общий балл не считается. Неизвестное время рождения заменяется на 12:00 и не подтверждает дома. Это не измеренное качество отношений.",
+        "fa": "اگر امتیاز مضمون‌ها باشد، کلی برابر است با ۴۵٪ مقایسهٔ کامل دو نمودار به‌اضافهٔ ۵۵٪ میانگین همان مضمون‌ها، سپس گرد می‌شود. اگر مضمونی نباشد، فقط مقایسهٔ کامل است. اگر تاریخ یا مکان طرف دیگر نباشد، کلی محاسبه نمی‌شود. ساعت نامشخص تولد با ۱۲:۰۰ جایگزین می‌شود و خانه را تأیید نمی‌کند. کیفیت واقعی رابطه را اندازه نمی‌گیرد.",
+        "ar": "إذا وُجدت درجات الموضوعات، فإن الإجمالي هو ٤٥٪ من مقارنة الرسمين الكاملة زائد ٥٥٪ من متوسط تلك الموضوعات، ثم يُقرَّب. إن لم توجد موضوعات، يبقى الإجمالي مقارنة الرسمين فقط. إذا نقص تاريخ أو مكان الطرف الآخر فلا يُحسَب الإجمالي. الوقت غير المعروف يُستبدل بـ ١٢:٠٠ ولا يثبت البيوت. هذا ليس جودة علاقة مقيسة.",
+    }[lang]
+    return result
 
 
 def render_cheating_radar_reading(
@@ -1624,6 +1613,7 @@ def render_cheating_radar_reading(
     lang = _pick_lang(lang)
     sigs = dict(signals or {})
     prompts = trust_reflections(sigs, lang)
+    limitation = (_TRUST_LIMITATION_FRIEND if relationship_type == "friendship" else _TRUST_LIMITATION)[lang]
     action = {
         "en": "Verify your understanding through observable behavior and a direct, calm conversation",
         "fa": "برداشتت را با رفتار قابل مشاهده و گفت‌وگوی مستقیم و آرام بررسی کن",
@@ -1640,9 +1630,9 @@ def render_cheating_radar_reading(
         }[lang],
         intensity="moderate" if any(v.get("hits", 0) for v in sigs.values()) else "subtle",
         technical=f"mode={mode} · rel={relationship_type} · legacy_signal_keys={','.join(sigs)} · verdict=never",
-        limitation=_TRUST_LIMITATION[lang], mode=mode,
+        limitation=limitation, mode=mode,
         signals=sigs, planet_roles=dict(planet_roles or {}), observed=[], inferred=prompts,
-        unknown=[_TRUST_LIMITATION[lang]], behaviors=list(behaviors or []), questions=list(questions or []),
+        unknown=[limitation], behaviors=list(behaviors or []), questions=list(questions or []),
         missing_inputs=list(missing_inputs or []),
     )
     return reading
@@ -1677,24 +1667,24 @@ def render_trust_patterns_reading(
 
 
 _COMM_RISK_BAND_LABEL: dict[str, dict[str, str]] = {
-    "low": {"en": "low", "fa": "کم", "ru": "низкий", "ar": "منخفض"},
+    "low": {"en": "low level", "fa": "سطح پایین", "ru": "низкий уровень", "ar": "مستوى منخفض"},
     "moderate": {
-        "en": "moderate",
-        "fa": "متوسط",
-        "ru": "умеренный",
-        "ar": "معتدل",
+        "en": "moderate level",
+        "fa": "سطح متوسط",
+        "ru": "умеренный уровень",
+        "ar": "مستوى متوسط",
     },
     "elevated": {
-        "en": "elevated",
-        "fa": "بالا",
-        "ru": "повышенный",
-        "ar": "مرتفع",
+        "en": "elevated level",
+        "fa": "سطح بالا",
+        "ru": "повышенный уровень",
+        "ar": "مستوى مرتفع",
     },
     "unknown": {
-        "en": "unknown",
-        "fa": "نامشخص",
-        "ru": "неясно",
-        "ar": "غير معروف",
+        "en": "unknown level",
+        "fa": "سطح نامشخص",
+        "ru": "неясный уровень",
+        "ar": "مستوى غير معروف",
     },
 }
 
@@ -1763,40 +1753,40 @@ def render_communication_risk_reading(
 
     labels = {
         "clarity_risk": {
-            "en": "Clarity risk",
-            "fa": "ریسک وضوح",
-            "ru": "Риск ясности",
-            "ar": "مخاطر الوضوح",
+            "en": "Symbolic unclear-message weight",
+            "fa": "وزن نمادین پیام مبهم",
+            "ru": "Символический вес неясности сообщения",
+            "ar": "وزن رمزي لرسالة غير واضحة",
         },
         "misunderstanding_risk": {
-            "en": "Misunderstanding risk",
-            "fa": "ریسک سوءتفاهم",
-            "ru": "Риск недопонимания",
-            "ar": "مخاطر سوء الفهم",
+            "en": "Symbolic misunderstanding weight",
+            "fa": "وزن نمادین سوءتفاهم",
+            "ru": "Символический вес недопонимания",
+            "ar": "وزن رمزي لسوء الفهم",
         },
         "emotional_reactivity": {
-            "en": "Emotional reactivity",
-            "fa": "واکنش‌پذیری عاطفی",
-            "ru": "Эмоциональная реактивность",
-            "ar": "ردة فعل عاطفية",
+            "en": "Symbolic emotional-reactivity weight",
+            "fa": "وزن نمادین واکنش عاطفی",
+            "ru": "Символический вес эмоциональной реактивности",
+            "ar": "وزن رمزي لردة الفعل العاطفية",
         },
         "avoidance_silence": {
-            "en": "Avoidance/silence pattern",
-            "fa": "الگوی اجتناب/سکوت",
-            "ru": "Паттерн избегания/тишины",
-            "ar": "نمط تجنّب/صمت",
+            "en": "Symbolic withdrawal/silence theme",
+            "fa": "مضمون نمادین کناره‌گیری/سکوت",
+            "ru": "Символическая тема ухода/тишины",
+            "ar": "موضوع رمزي للانسحاب/الصمت",
         },
         "escalation_risk": {
-            "en": "Escalation risk",
-            "fa": "ریسک تشدید",
-            "ru": "Риск эскалации",
-            "ar": "مخاطر التصعيد",
+            "en": "Symbolic escalation weight",
+            "fa": "وزن نمادین تشدید",
+            "ru": "Символический вес эскалации",
+            "ar": "وزن رمزي للتصعيد",
         },
         "repair_capacity": {
-            "en": "Repair difficulty",
-            "fa": "دشواری ترمیم",
-            "ru": "Трудность восстановления",
-            "ar": "صعوبة الإصلاح",
+            "en": "Symbolic repair difficulty",
+            "fa": "وزن نمادین سختی برگشتن به گفت‌وگو",
+            "ru": "Символическая трудность восстановления",
+            "ar": "رمزية: صعوبة العودة إلى الحوار",
         },
     }
     order = (
@@ -1825,7 +1815,7 @@ def render_communication_risk_reading(
     time_bit = f" {time_precision_note}" if time_precision_note else ""
 
     action = {
-        "en": "Slow the next hard talk — one clear ask, one repair check, no accusation",
+        "en": "Slow the next hard talk — one clear ask, one check on how to return to the conversation, no accusation",
         "fa": "در گفت‌وگوی دشوار بعدی عجله نکن؛ یک درخواست روشن مطرح کن و بدون اتهام، دربارهٔ راه بازگشت به گفت‌وگو توافق کنید",
         "ru": "Не торопите следующий трудный разговор: сформулируйте одну ясную просьбу и обсудите, как восстановить контакт, без обвинений",
         "ar": "من المفيد التمهّل في الحديث الصعب التالي: طلب واضح واحد واتفاق على استعادة الحوار، دون اتهام",
@@ -1839,18 +1829,18 @@ def render_communication_risk_reading(
             "ar": "نمط ذاتي",
         },
         "synastry": {
-            "en": "synastry risk patterns",
-            "fa": "الگوهای ریسک هم‌خوانی",
-            "ru": "синастрические риски",
-            "ar": "أنماط مخاطر توافق",
+            "en": "two-chart comparison (synastry) risk patterns",
+            "fa": "الگوهای ریسک مقایسهٔ دو نمودار (سیناستری)",
+            "ru": "риски сравнения двух карт (синастрия)",
+            "ar": "أنماط مخاطر مقارنة الرسمين (السيناستري)",
         },
     }.get(mode, {}).get(lang, mode)
 
     headline = {
-        "en": f"Communication Risk · {rel_l} · {mode_l}",
-        "fa": f"ریسک ارتباط · {rel_l} · {mode_l}",
-        "ru": f"Риск общения · {rel_l} · {mode_l}",
-        "ar": f"مخاطر التواصل · {rel_l} · {mode_l}",
+        "en": f"Communication Risk themes · {rel_l} · {mode_l}",
+        "fa": f"مضمون‌های ریسک ارتباط · {rel_l} · {mode_l}",
+        "ru": f"Темы риска общения · {rel_l} · {mode_l}",
+        "ar": f"موضوعات مخاطر التواصل · {rel_l} · {mode_l}",
     }[lang]
 
     elev = sum(
@@ -2072,11 +2062,16 @@ def _quality_label(key, lang):
 
 
 def _quality_geography(ranked, goal, lang, missing_inputs, business=False):
+    from .vault_quality_copy import collapse_repeated_reason
     rows = []
     for item in ranked:
         label, score = item.get("label"), item.get("score")
         if isinstance(label, str) and label.strip() and isinstance(score, (int, float)):
-            rows.append({"label": label, "value": f"{score}/100", **({"reason": item["symbolic_reason"]} if item.get("symbolic_reason") else {})})
+            reason = item.get("symbolic_reason")
+            extra = {}
+            if isinstance(reason, str) and reason.strip():
+                extra["reason"] = collapse_repeated_reason(reason)
+            rows.append({"label": label, "value": f"{score}/100", **extra})
     result = _quality_reading("places", lang, details=rows,
                              technical=f"pathfinder.relocation · mode={'business' if business else goal} · jupiter,mercury,sun,saturn · houses=2,6,10,11",
                              intensity="strong" if rows and max(r.get("score", 0) for r in ranked) >= 75 else "moderate" if rows else "subtle",
@@ -2089,5 +2084,50 @@ def _quality_geography(ranked, goal, lang, missing_inputs, business=False):
         "fa": "مقایسه نمادین مکان‌های کاری" if business else "مقایسه نمادین مکان‌ها: " + _quality_label("romantic" if goal == "relationship" else "weights", lang),
         "ar": "مقارنة رمزية لأماكن العمل" if business else "مقارنة رمزية للأماكن: " + _quality_label("romantic" if goal == "relationship" else "weights", lang),
     }[lang]
-    result["executive"] = result["headline"] + ". " + result["action"]
+    if business:
+        result["interpretation"] = {
+            "en": "Ranks order symbolic weights for work and expansion within this candidate-city shortlist only. They are not a forecast of profit or a recommendation to move.",
+            "ru": "Рейтинг упорядочивает символические веса для работы и расширения только внутри этого короткого списка городов. Это не прогноз прибыли и не совет переезжать.",
+            "fa": "رتبه‌ها فقط وزن نمادین کار و گسترش را در همین فهرست کوتاه شهرها مرتب می‌کنند؛ پیش‌بینی سود یا توصیهٔ جابه‌جایی نیستند.",
+            "ar": "ترتّب الدرجات أوزاناً رمزية للعمل والتوسع داخل قائمة المدن المرشحة فقط، وليست توقعاً للربح ولا توصية بالانتقال.",
+        }[lang]
+        result["action"] = {
+            "en": "Compare the listed places with independently researched commercial, legal and financial evidence.",
+            "ru": "Сопоставьте места с коммерческими, правовыми и финансовыми данными из независимого исследования.",
+            "fa": "مکان‌ها را با شواهد تجاری، حقوقی و مالی که جداگانه بررسی کرده‌اید مقایسه کنید.",
+            "ar": "يمكن مقارنة الأماكن بأدلة تجارية وقانونية ومالية جُمعت بشكل مستقل.",
+        }[lang]
+        result["avoid"] = {
+            "en": "Choosing a market on the ranking alone.",
+            "ru": "Выбор рынка только по рейтингу.",
+            "fa": "انتخاب بازار صرفاً بر اساس رتبه.",
+            "ar": "اختيار سوق بناءً على الترتيب وحده.",
+        }[lang]
+    else:
+        result["interpretation"] = {
+            "en": "Ranks order symbolic weights for shared-life place themes within this candidate-city shortlist only. They are not a prediction of love or a recommendation to move.",
+            "ru": "Рейтинг упорядочивает символические веса тем совместной жизни только внутри этого короткого списка городов. Это не прогноз любви и не совет переезжать.",
+            "fa": "رتبه‌ها فقط وزن نمادین مضمون‌های زندگی مشترک را در همین فهرست کوتاه شهرها مرتب می‌کنند؛ پیش‌بینی عشق یا توصیهٔ جابه‌جایی نیستند.",
+            "ar": "ترتّب الدرجات أوزاناً رمزية لموضوعات الحياة المشتركة داخل قائمة المدن المرشحة فقط، وليست توقعاً للحب ولا توصية بالانتقال.",
+        }[lang]
+        result["action"] = {
+            "en": "Compare the listed places with independently researched relationship, safety and practical evidence.",
+            "ru": "Сопоставьте места с данными об отношениях, безопасности и быте из независимого исследования.",
+            "fa": "مکان‌ها را با شواهد رابطه، ایمنی و امور عملی که جداگانه بررسی کرده‌اید مقایسه کنید.",
+            "ar": "يمكن مقارنة الأماكن بأدلة عن العلاقة والسلامة والواقع العملي جُمعت بشكل مستقل.",
+        }[lang]
+        result["avoid"] = {
+            "en": "Choosing a destination on the ranking alone.",
+            "ru": "Выбор места только по рейтингу.",
+            "fa": "انتخاب مقصد صرفاً بر اساس رتبه.",
+            "ar": "اختيار الوجهة بناءً على الترتيب وحده.",
+        }[lang]
+    result["place_scope"] = {
+        "en": "Ranking applies only to this candidate-city shortlist. It is not a global ranking or advice to move.",
+        "ru": "Рейтинг действует только для этого короткого списка городов-кандидатов. Это не мировой рейтинг и не совет переезжать.",
+        "fa": "رتبه‌بندی فقط برای همین فهرست کوتاه شهرهای نامزد است؛ رتبهٔ جهانی یا توصیهٔ جابه‌جایی نیست.",
+        "ar": "الترتيب ينطبق فقط على قائمة المدن المرشحة هذه، وليس ترتيباً عالمياً ولا نصيحة بالانتقال.",
+    }[lang]
+    result["executive"] = result["headline"] + ". " + result["action"] + " " + result["place_scope"]
+    result["strategic"] = result["interpretation"]
     return result

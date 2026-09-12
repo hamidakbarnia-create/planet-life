@@ -244,6 +244,24 @@ describe('Power timing localization + page wiring', () => {
     expect(VAULT_POWER_TIMING_COPY.fa.topDays).toBe('روزهای برتر');
     expect(VAULT_POWER_TIMING_COPY.ar.topDays).toBe('أفضل الأيام');
     expect(VAULT_POWER_TIMING_COPY.ru.topDays).toBe('Лучшие дни');
+    expect(VAULT_POWER_TIMING_COPY.en.ask).toBe('Ask');
+    expect(VAULT_POWER_TIMING_COPY.en.commit).toBe('Commit');
+    expect(VAULT_POWER_TIMING_COPY.en.sign).toBe('Sign');
+    expect(VAULT_POWER_TIMING_COPY.fa.ask).toBe('پرسیدن');
+    expect(VAULT_POWER_TIMING_COPY.ru.commit).toBe('Обязательство');
+    expect(VAULT_POWER_TIMING_COPY.ar.ask).toBe('الطلب');
+    expect(VAULT_POWER_TIMING_COPY.ar.commit).toBe('الالتزام');
+    expect(VAULT_POWER_TIMING_COPY.ar.sign).toBe('التوقيع');
+    expect(VAULT_POWER_TIMING_COPY.en.lighter).toBe('Lower score band');
+    expect(VAULT_POWER_TIMING_COPY.fa.lighter).toBe('بازهٔ امتیازی پایین');
+    expect(VAULT_POWER_TIMING_COPY.ru.lighter).toBe('Нижняя полоса баллов');
+    expect(VAULT_POWER_TIMING_COPY.ar.lighter).toBe('نطاق درجة أدنى');
+    for (const lang of ['en', 'fa', 'ar', 'ru'] as const) {
+      const direction = VAULT_POWER_TIMING_COPY[lang].scoreDirection;
+      expect(direction).toMatch(/80|۸۰|٨٠/);
+      expect(direction).toMatch(/60|۶۰|٦٠/);
+      expect(direction.toLowerCase()).not.toMatch(/lower in this list|ниже в этом списке/);
+    }
   });
 
   it('keeps structured Power data in the page flow and scopes timing UI to Power', () => {
@@ -260,6 +278,10 @@ describe('Power timing localization + page wiring', () => {
     expect(pageSource).toContain('powerRatingTitle');
     expect(pageSource).toContain('VaultRankedDayChip');
     expect(pageSource).toContain('VaultYesDecisionSlot');
+    expect(pageSource).toContain('powerUi.scoreDirection');
+    expect(pageSource).toContain('vault-score-direction');
+    expect(pageSource).toContain('timingSlot=');
+    expect(pageSource).not.toContain('powerTiming.ask.date');
     // Page prepares visible rating / title; Yes uses localized display copy without exposing the raw enum.
     expect(pageSource).toMatch(/rating=\{visibleRating\}/);
     expect(pageSource).toMatch(/rating=\{slot\.rating_label\}/);

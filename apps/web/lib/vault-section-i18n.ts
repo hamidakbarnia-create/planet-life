@@ -242,6 +242,8 @@ export type VaultPowerTimingCopy = {
   strongest: string;
   supportive: string;
   lighter: string;
+  /** Fixed numeric ranges — not a rank in the visible list. */
+  scoreDirection: string;
   /** Response-level advisory confidence label (not outcome certainty). */
   confidence: string;
   confidenceHigh: string;
@@ -257,7 +259,9 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
     sign: 'Sign',
     strongest: 'Strongest',
     supportive: 'Supportive',
-    lighter: 'Lighter',
+    lighter: 'Lower score band',
+    scoreDirection:
+      'Score bands are fixed ranges: 80 and above, 60–79, and below 60. They are not a rank in this list.',
     confidence: 'Advisory confidence',
     confidenceHigh: 'Higher',
     confidenceMedium: 'Moderate',
@@ -270,7 +274,9 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
     sign: 'امضا',
     strongest: 'قوی‌ترین',
     supportive: 'حمایت‌گر',
-    lighter: 'سبک‌تر',
+    lighter: 'بازهٔ امتیازی پایین',
+    scoreDirection:
+      'بازه‌های امتیازی ثابت‌اند: ۸۰ و بالاتر، ۶۰–۷۹ و کمتر از ۶۰. رتبه در این فهرست نیستند.',
     confidence: 'اطمینان مشورتی',
     confidenceHigh: 'بالاتر',
     confidenceMedium: 'متوسط',
@@ -278,12 +284,14 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
   },
   ar: {
     topDays: 'أفضل الأيام',
-    ask: 'اطلب',
-    commit: 'التزم',
-    sign: 'وقّع',
+    ask: 'الطلب',
+    commit: 'الالتزام',
+    sign: 'التوقيع',
     strongest: 'الأقوى',
     supportive: 'داعم',
-    lighter: 'أخف',
+    lighter: 'نطاق درجة أدنى',
+    scoreDirection:
+      'نطاقات الدرجة ثابتة: ٨٠ فأعلى، ٦٠–٧٩، وأقل من ٦٠. ليست مرتبة في هذه القائمة.',
     confidence: 'ثقة استرشادية',
     confidenceHigh: 'أعلى',
     confidenceMedium: 'متوسطة',
@@ -291,16 +299,103 @@ export const VAULT_POWER_TIMING_COPY: Record<AppLang, VaultPowerTimingCopy> = {
   },
   ru: {
     topDays: 'Лучшие дни',
-    ask: 'Спросить',
-    commit: 'Решиться',
-    sign: 'Подписать',
+    ask: 'Просьба',
+    commit: 'Обязательство',
+    sign: 'Подпись',
     strongest: 'Сильнее всего',
     supportive: 'Поддерживает',
-    lighter: 'Слабее',
+    lighter: 'Нижняя полоса баллов',
+    scoreDirection:
+      'Полосы баллов фиксированные: 80 и выше, 60–79 и ниже 60. Это не место в списке.',
     confidence: 'Ориентир уверенности',
     confidenceHigh: 'Выше',
     confidenceMedium: 'Средняя',
     confidenceLow: 'Ниже',
+  },
+};
+
+export type VaultComparisonCopy = {
+  overallBlend: string;
+  placeShortlist: string;
+  tiedScores: string;
+};
+
+export const VAULT_COMPARISON_COPY: Record<AppLang, VaultComparisonCopy> = {
+  en: {
+    overallBlend:
+      'If theme scores are present, Overall is 45% of the full two-chart comparison plus 55% of the mean of those themes, then rounded. If no themes are present, Overall is the full two-chart comparison only. If required partner date or place is missing, Overall is not calculated. Unknown birth time uses a 12:00 placeholder and does not validate house claims. Overall is not measured relationship quality.',
+    placeShortlist:
+      'Ranking applies only to this candidate-city shortlist. It is not a global ranking or advice to move.',
+    tiedScores:
+      'For entries with equal scores, display order does not indicate superiority.',
+  },
+  ru: {
+    overallBlend:
+      'Если есть баллы тем, «Общий вес» — это 45% полного сравнения двух карт плюс 55% среднего этих тем, затем округление. Если тем нет, остаётся только полное сравнение. Если нет даты или места второго человека, общий балл не считается. Неизвестное время рождения заменяется на 12:00 и не подтверждает дома. Это не измеренное качество отношений.',
+    placeShortlist:
+      'Рейтинг действует только для этого короткого списка городов-кандидатов. Это не мировой рейтинг и не совет переезжать.',
+    tiedScores:
+      'Для позиций с равными баллами порядок в списке не означает превосходства.',
+  },
+  fa: {
+    overallBlend:
+      'اگر امتیاز مضمون‌ها باشد، کلی برابر است با ۴۵٪ مقایسهٔ کامل دو نمودار به‌اضافهٔ ۵۵٪ میانگین همان مضمون‌ها، سپس گرد می‌شود. اگر مضمونی نباشد، فقط مقایسهٔ کامل است. اگر تاریخ یا مکان طرف دیگر نباشد، کلی محاسبه نمی‌شود. ساعت نامشخص تولد با ۱۲:۰۰ جایگزین می‌شود و خانه را تأیید نمی‌کند. کیفیت واقعی رابطه را اندازه نمی‌گیرد.',
+    placeShortlist:
+      'رتبه‌بندی فقط برای همین فهرست کوتاه شهرهای نامزد است؛ رتبهٔ جهانی یا توصیهٔ جابه‌جایی نیست.',
+    tiedScores:
+      'برای مواردی با امتیاز برابر، ترتیب نمایش برتری نیست.',
+  },
+  ar: {
+    overallBlend:
+      'إذا وُجدت درجات الموضوعات، فإن الإجمالي هو ٤٥٪ من مقارنة الرسمين الكاملة زائد ٥٥٪ من متوسط تلك الموضوعات، ثم يُقرَّب. إن لم توجد موضوعات، يبقى الإجمالي مقارنة الرسمين فقط. إذا نقص تاريخ أو مكان الطرف الآخر فلا يُحسَب الإجمالي. الوقت غير المعروف يُستبدل بـ ١٢:٠٠ ولا يثبت البيوت. هذا ليس جودة علاقة مقيسة.',
+    placeShortlist:
+      'الترتيب ينطبق فقط على قائمة المدن المرشحة هذه، وليس ترتيباً عالمياً ولا نصيحة بالانتقال.',
+    tiedScores:
+      'بالنسبة للبنود ذات الدرجات المتساوية، ترتيب العرض لا يعني تفوقاً.',
+  },
+};
+
+export type VaultStyleTimingCopy = {
+  scentAlternatives: string;
+  optionalAccessory: string;
+  windowPast: string;
+  windowCurrent: string;
+  windowUpcoming: string;
+  windowUnknown: string;
+};
+
+export const VAULT_STYLE_TIMING_COPY: Record<AppLang, VaultStyleTimingCopy> = {
+  en: {
+    scentAlternatives: 'These note groups are alternatives to compare, not one required blend.',
+    optionalAccessory: 'Optional',
+    windowPast: 'This window has ended.',
+    windowCurrent: 'This window is in progress.',
+    windowUpcoming: 'This window has not started.',
+    windowUnknown: 'Start, end, date and timezone are needed before a past or future label can be stated.',
+  },
+  ru: {
+    scentAlternatives: 'Эти группы нот — варианты для сравнения, а не один обязательный микс.',
+    optionalAccessory: 'Необязательно',
+    windowPast: 'Это окно уже завершилось.',
+    windowCurrent: 'Это окно сейчас идёт.',
+    windowUpcoming: 'Это окно ещё не началось.',
+    windowUnknown: 'Без даты, начала, конца и часового пояса нельзя уверенно сказать, прошло окно или нет.',
+  },
+  fa: {
+    scentAlternatives: 'این گروه‌های نت گزینه‌هایی برای مقایسه‌اند، نه یک ترکیب اجباری.',
+    optionalAccessory: 'اختیاری',
+    windowPast: 'این بازه تمام شده است.',
+    windowCurrent: 'این بازه در جریان است.',
+    windowUpcoming: 'این بازه هنوز شروع نشده است.',
+    windowUnknown: 'بدون تاریخ، شروع، پایان و منطقهٔ زمانی نمی‌توان با اطمینان گفت بازه گذشته است یا نه.',
+  },
+  ar: {
+    scentAlternatives: 'هذه مجموعات نغمات بديلة للمقارنة، وليست مزيجاً واحداً مطلوباً.',
+    optionalAccessory: 'اختياري',
+    windowPast: 'انتهت هذه النافذة.',
+    windowCurrent: 'هذه النافذة جارية الآن.',
+    windowUpcoming: 'هذه النافذة لم تبدأ بعد.',
+    windowUnknown: 'بدون التاريخ والبداية والنهاية والمنطقة الزمنية لا يمكن الجزم بأن النافذة مضت أو لم تأتِ.',
   },
 };
 
@@ -327,6 +422,9 @@ export type VaultPreviewLockCopy = {
   unlockedBadge: string;
   unlockedNote: string;
   comingSoon: string;
+  notBuiltTitle: string;
+  notBuiltBody: string;
+  membershipDoesNotActivate: string;
 };
 
 export const READING_UI: Record<AppLang, VaultReadingUiCopy> = {
@@ -381,6 +479,11 @@ export const PREVIEW_LOCK_LANGS: Record<AppLang, VaultPreviewLockCopy> = {
     unlockedNote:
       'Unlocked with your membership — your live personal reading activates as each tool ships.',
     comingSoon: 'Coming Soon',
+    notBuiltTitle: 'Not available yet',
+    notBuiltBody:
+      'This tool is not built yet. Payment or a higher plan will not unlock it today.',
+    membershipDoesNotActivate:
+      'Membership does not activate this tool. It will appear here only after it is implemented.',
   },
   ru: {
     sampleLabel: 'Пример разбора',
@@ -394,6 +497,11 @@ export const PREVIEW_LOCK_LANGS: Record<AppLang, VaultPreviewLockCopy> = {
     unlockedNote:
       'Открыто по подписке — живой персональный разбор появится по мере выхода инструментов.',
     comingSoon: 'Скоро',
+    notBuiltTitle: 'Пока недоступно',
+    notBuiltBody:
+      'Этот инструмент ещё не сделан. Оплата или более высокий тариф сегодня его не откроет.',
+    membershipDoesNotActivate:
+      'Подписка этот инструмент не включает. Он появится здесь только после реализации.',
   },
   fa: {
     sampleLabel: 'نمونه خوانش',
@@ -407,6 +515,11 @@ export const PREVIEW_LOCK_LANGS: Record<AppLang, VaultPreviewLockCopy> = {
     unlockedNote:
       'با اشتراکت باز شد — خوانش زنده‌ی شخصی با آماده‌شدن هر ابزار فعال می‌شه.',
     comingSoon: 'به‌زودی',
+    notBuiltTitle: 'هنوز آماده نیست',
+    notBuiltBody:
+      'این ابزار هنوز ساخته نشده. پرداخت یا پلن بالاتر امروز آن را باز نمی‌کند.',
+    membershipDoesNotActivate:
+      'عضویت این ابزار را فعال نمی‌کند. فقط بعد از پیاده‌سازی اینجا دیده می‌شود.',
   },
   ar: {
     sampleLabel: 'قراءة تجريبية',
@@ -420,6 +533,11 @@ export const PREVIEW_LOCK_LANGS: Record<AppLang, VaultPreviewLockCopy> = {
     unlockedNote:
       'مفتوح باشتراكك — تُفعّل قراءتك الشخصية الحيّة مع إطلاق كل أداة.',
     comingSoon: 'قريباً',
+    notBuiltTitle: 'غير متاح بعد',
+    notBuiltBody:
+      'هذه الأداة غير مبنية بعد. الدفع أو خطة أعلى لن يفتحها اليوم.',
+    membershipDoesNotActivate:
+      'العضوية لا تفعّل هذه الأداة. ستظهر هنا فقط بعد بنائها.',
   },
 };
 
@@ -430,9 +548,9 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
     previewNote: 'Preview mode — full tools unlock with Premium.',
     sensuality: {
       title: 'Sensuality',
-      sub: 'Desire, fantasy and magnetism — interpreted through your personal timing.',
+      sub: 'Desire Signature is available. Other sensuality tools are not built yet.',
       intro:
-        'Read desire, fantasy, and magnetism through your personal timing — then choose when to lean in.',
+        'This section currently offers Desire Signature only. Deep Fantasies, Hidden Magnetism, and Attraction Today are not built yet and do not give personal timing.',
       items: [
         { label: 'Desire Signature', hint: 'How your desire and pursuit pattern shows up' },
         { label: 'Deep Fantasies', hint: 'Private themes of longing and intensity' },
@@ -461,7 +579,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         'Symbolic comparisons of places and partnerships to explore alongside real-world evidence.',
       items: [
         { label: 'Prosperity Geography', hint: 'Symbolic place comparisons, not financial forecasts' },
-        { label: 'Love Lines Map', hint: 'Symbolic place comparisons, not relationship predictions' },
+        { label: 'Love Lines', hint: 'Symbolic place comparisons, not relationship predictions' },
         { label: 'Partner Profile', hint: 'Optional prompts for discussing expectations' },
         { label: 'Compatibility', hint: 'Symbolic comparison weights, not relationship measurements' },
       ],
@@ -475,7 +593,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'Trust & Clarity Signals', hint: 'Signals to verify — never verdicts' },
         { label: 'Trust Patterns', hint: 'Reflection on expectations and agreements' },
-        { label: 'Communication Risk', hint: 'Clarity, reactivity, escalation — not verdicts' },
+        { label: 'Communication Risk', hint: 'Symbolic themes of clarity, reactivity, escalation — not verdicts' },
         { label: 'Private Conversation Timing', hint: 'Quieter windows for private talks — reflection only' },
       ],
       coming: 'Coming soon — timing tools. Educational only.',
@@ -501,7 +619,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'Heat Days', hint: 'Optional symbolic windows for social initiative' },
         { label: 'Money Days', hint: 'Best days to ask' },
-        { label: 'Ghost Days', hint: 'Strategic distance' },
+        { label: 'Ghost Days', hint: 'Communicated pause' },
         { label: 'Yes Day', hint: 'Big asks and proposals' },
       ],
       coming:
@@ -539,9 +657,9 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
     previewNote: 'Режим превью — полные инструменты с Премиум.',
     sensuality: {
       title: 'Чувственность',
-      sub: 'Желание, фантазия и магнетизм — через ваш личный тайминг.',
+      sub: 'Доступна сигнатура желания. Остальные инструменты чувственности ещё не сделаны.',
       intro:
-        'Желание, фантазия и магнетизм через ваш личный тайминг — и момент, когда стоит шагнуть ближе.',
+        'Сейчас доступна только сигнатура желания. Глубокие фантазии, скрытый магнетизм и «притяжение сегодня» ещё не сделаны и не дают личного тайминга.',
       items: [
         { label: 'Сигнатура желания', hint: 'Как проявляется ваш паттерн желания и стремления' },
         { label: 'Глубокие фантазии', hint: 'Личные темы томления и интенсивности' },
@@ -570,7 +688,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         'Символическое сравнение мест и партнёрства для размышления с опорой на реальные данные.',
       items: [
         { label: 'География процветания', hint: 'Символическое сравнение мест, не финансовый прогноз' },
-        { label: 'Карта любви', hint: 'Символическое сравнение мест, не прогноз отношений' },
+        { label: 'Линии любви', hint: 'Символическое сравнение мест, не прогноз отношений' },
         { label: 'Профиль партнёра', hint: 'Вопросы для обсуждения ожиданий' },
         { label: 'Совместимость', hint: 'Символические веса, не измерения отношений' },
       ],
@@ -584,7 +702,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'Сигналы доверия и ясности', hint: 'Сигналы для проверки — не приговоры' },
         { label: 'Паттерны доверия', hint: 'Размышления об ожиданиях и договорённостях' },
-        { label: 'Риск общения', hint: 'Ясность, реактивность, эскалация — не приговоры' },
+        { label: 'Риск общения', hint: 'Символические темы ясности, реактивности и эскалации — не приговоры' },
         { label: 'Время для частных разговоров', hint: 'Более тихие окна для личных бесед — только рефлексия' },
       ],
       coming: 'Скоро — тайминг. Только обучение.',
@@ -609,7 +727,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'Горячие дни', hint: 'Символические окна для инициативы в общении' },
         { label: 'Дни денег', hint: 'Лучшие дни спросить' },
-        { label: 'Дни тишины', hint: 'Дистанция' },
+        { label: 'Дни тишины', hint: 'Согласованная пауза' },
         { label: 'День «да»', hint: 'Большие просьбы' },
       ],
       coming:
@@ -646,10 +764,10 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
     vaultHome: 'گنجینه',
     previewNote: 'حالت پیش‌نمایش — ابزار کامل با پریمیوم.',
     sensuality: {
-      title: 'شهوت و جذابیت',
-      sub: 'میل، فانتزی و مگنتیسم — از مسیر تایمینگ شخصی تو.',
+      title: 'جذابیت',
+      sub: 'امضای میل در دسترس است. بقیه ابزارهای این بخش هنوز ساخته نشده‌اند.',
       intro:
-        'میل، فانتزی و مگنتیسم از مسیر تایمینگ شخصی — بعد انتخاب کن کی نزدیک‌تر بشوی.',
+        'این بخش فعلاً فقط امضای میل را دارد. فانتزی‌های عمیق، مگنتیسم پنهان و جذابیت امروز هنوز ساخته نشده‌اند و تایمینگ شخصی نمی‌دهند.',
       items: [
         { label: 'امضای میل', hint: 'الگوی میل و پیگیری تو چطور دیده می‌شود' },
         { label: 'فانتزی‌های عمیق', hint: 'تم‌های خصوصی اشتیاق و شدت' },
@@ -678,7 +796,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         'مقایسه نمادین مکان‌ها و شراکت‌ها برای بررسی در کنار شواهد واقعی.',
       items: [
         { label: 'جغرافیای رفاه', hint: 'مقایسه نمادین مکان\u200cها، نه پیش\u200cبینی مالی' },
-        { label: 'نقشه عشق', hint: 'مقایسه نمادین مکان\u200cها، نه پیش\u200cبینی رابطه' },
+        { label: 'خط‌های عشق', hint: 'مقایسه نمادین مکان\u200cها، نه پیش\u200cبینی رابطه' },
         { label: 'پروفایل شریک', hint: 'پرسش\u200cهای اختیاری برای گفتگو درباره انتظارها' },
         { label: 'هم‌خوانی', hint: 'وزن\u200cهای مقایسه نمادین، نه سنجش رابطه' },
       ],
@@ -692,7 +810,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'نشانه‌های اعتماد و وضوح', hint: 'نشانه‌هایی برای بررسی — نه حکم' },
         { label: 'الگوهای اعتماد', hint: 'تأمل درباره انتظارها و توافق\u200cها' },
-        { label: 'ریسک ارتباط', hint: 'وضوح، واکنش، تشدید — نه حکم' },
+        { label: 'ریسک ارتباط', hint: 'مضمون‌های نمادین وضوح، واکنش و تشدید — نه حکم' },
         { label: 'زمان گفت‌وگوی خصوصی', hint: 'پنجره‌های آرام‌تر برای حرف خصوصی — فقط بازتاب' },
       ],
       coming: 'به‌زودی — تایمینگ. فقط آموزشی.',
@@ -717,7 +835,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'روزهای داغ', hint: 'بازه\u200cهای نمادین برای آغاز گفتگو، به انتخاب شما' },
         { label: 'روز پول', hint: 'بهترین روز درخواست' },
-        { label: 'روز غیبت', hint: 'دوری استراتژیک' },
+        { label: 'روز غیبت', hint: 'مکثِ هماهنگ‌شده' },
         { label: 'روز بله', hint: 'درخواست بزرگ' },
       ],
       coming:
@@ -755,9 +873,9 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
     previewNote: 'وضع المعاينة — الأدوات الكاملة مع البريميوم.',
     sensuality: {
       title: 'الحسّية',
-      sub: 'الرغبة والخيال والجاذبية — موضوعات للتأمل في التوقيت الرمزي.',
+      sub: 'بصمة الرغبة متاحة. بقية أدوات الحسّية غير مبنية بعد.',
       intro:
-        'موضوعات رمزية للتأمل في الرغبة والخيال والجاذبية، مع حرية اختيار ما يناسب التجربة الشخصية.',
+        'هذا القسم يقدّم بصمة الرغبة فقط حالياً. الخيالات العميقة والجاذبية الخفية وجاذبية اليوم غير مبنية بعد ولا تعطي توقيتاً شخصياً.',
       items: [
         { label: 'بصمة الرغبة', hint: 'كيف يظهر نمط رغبتكِ وسعيكِ' },
         { label: 'خيالات عميقة', hint: 'ثيمات خاصة من الشوق والشدّة' },
@@ -786,7 +904,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
         'مقارنات رمزية للأماكن والشراكات للتأمل إلى جانب الأدلة الواقعية.',
       items: [
         { label: 'جغرافيا الازدهار', hint: 'مقارنة رمزية للأماكن، لا توقعات مالية' },
-        { label: 'خريطة الحب', hint: 'مقارنة رمزية للأماكن، لا توقعات للعلاقات' },
+        { label: 'خطوط الحب', hint: 'مقارنة رمزية للأماكن، لا توقعات للعلاقات' },
         { label: 'ملف الشريك', hint: 'موضوعات اختيارية لمناقشة التوقعات' },
         { label: 'التوافق', hint: 'أوزان مقارنة رمزية، لا قياسات للعلاقة' },
       ],
@@ -800,7 +918,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'إشارات الثقة والوضوح', hint: 'إشارات للتحقّق — لا أحكام' },
         { label: 'أنماط الثقة', hint: 'تأمل في التوقعات والاتفاقات' },
-        { label: 'مخاطر التواصل', hint: 'وضوح وردة فعل وتصعيد — لا أحكام' },
+        { label: 'مخاطر التواصل', hint: 'موضوعات رمزية للوضوح وردة الفعل والتصعيد — ليست أحكاماً' },
         { label: 'توقيت المحادثة الخاصة', hint: 'نوافذ أهدأ لأحاديث خاصة — تأمّل فقط' },
       ],
       coming: 'قريباً — توقيت. تعليمي فقط.',
@@ -825,7 +943,7 @@ export const SECTION_LANGS: Record<AppLang, VaultSectionLangPack> = {
       items: [
         { label: 'أيام حارّة', hint: 'نوافذ رمزية اختيارية للمبادرة بالتواصل' },
         { label: 'أيام المال', hint: 'أفضل أيام الطلب' },
-        { label: 'أيام الغياب', hint: 'مسافة استراتيجية' },
+        { label: 'أيام الغياب', hint: 'استراحة مع توضيح' },
         { label: 'يوم نعم', hint: 'طلبات كبيرة' },
       ],
       coming:

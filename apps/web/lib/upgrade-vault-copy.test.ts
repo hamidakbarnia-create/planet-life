@@ -33,7 +33,7 @@ describe('Persian /upgrade Vault product copy', () => {
     expect(fa).not.toMatch(/nav\.|insight\.|{range}/);
   });
 
-  it('keeps EN, AR, and RU Vault upgrade copy unchanged', () => {
+  it('keeps EN, AR, and RU Vault upgrade nouns unchanged', () => {
     expect(source).toContain('Premium opens the Vault');
     expect(source).toContain("vaultUnlocks: 'Unlocks the Vault'");
     expect(source).toContain("tagline: 'The Vault opens.'");
@@ -42,5 +42,20 @@ describe('Persian /upgrade Vault product copy', () => {
     expect(source).toContain('تنفتح الخزانة');
     expect(source).toContain('Открывает Хранилище');
     expect(source).toContain('Хранилище открывается');
+  });
+});
+
+describe('Love Lines upgrade claim matches the text-list feature', () => {
+  const source = readFileSync(UPGRADE_PAGE, 'utf8');
+
+  it('does not sell Love Lines as a world map in EN/RU/FA/AR', () => {
+    expect(source).not.toMatch(/love-line astrocartography/i);
+    expect(source).not.toContain('линии любви на карте мира');
+    expect(source).not.toContain('خط عشق روی نقشه دنیا');
+    expect(source).not.toContain('خطوط الحب على خريطة العالم');
+    expect(source).toContain('Love Lines compare a candidate-city shortlist as text, not a world map');
+    expect(source).toContain('«Линии любви» сравнивают короткий список городов текстом, а не на карте мира');
+    expect(source).toContain('خط‌های عشق فهرست کوتاه شهرهای نامزد را به‌صورت متن مقایسه می‌کنند، نه روی نقشه دنیا');
+    expect(source).toContain('خطوط الحب تقارنان قائمة المدن المرشحة كنص، وليستا خريطة للعالم');
   });
 });
