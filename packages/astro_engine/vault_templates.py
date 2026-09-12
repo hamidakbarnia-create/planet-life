@@ -1683,16 +1683,48 @@ def render_cheating_radar_reading(
 ) -> dict[str, Any]:
     lang = _pick_lang(lang)
     sigs = dict(signals or {})
-    prompts = trust_reflections(sigs, lang)
+    questions_l = [item for item in list(questions or []) if str(item).strip()]
+    unknown_l = [item for item in list(unknown or []) if str(item).strip()]
+    behaviors_l = [item for item in list(behaviors or []) if str(item).strip()]
     limitation = _trust_limitation_for(relationship_type, lang)
     action = {
         "en": "Verify your understanding through observable behavior and a direct, calm conversation",
-        "fa": "برداشتت را با رفتار قابل مشاهده و گفت‌وگوی مستقیم و آرام بررسی کن",
+        "fa": "برداشت خود را با رفتار قابل مشاهده و گفت‌وگوی مستقیم و آرام بررسی کنید",
         "ru": "Проверьте своё понимание по наблюдаемому поведению и в прямом спокойном разговоре",
         "ar": "يمكن مراجعة الفهم بالاستناد إلى السلوك الملحوظ وحوار مباشر وهادئ"
     }[lang]
+    explanation = {
+        "en": "These scores are optional symbolic comparison weights, not behavioral evidence.",
+        "fa": "این امتیازها وزن مقایسهٔ نمادین اختیاری‌اند، نه شاهد رفتار.",
+        "ru": "Эти оценки — необязательные символические веса сравнения, а не свидетельство поведения.",
+        "ar": "هذه الدرجات أوزان مقارنة رمزية اختيارية، وليست دليلاً سلوكياً.",
+    }[lang]
+    theme_details = []
+    inferred = []
+    for key, topic in _TRUST_REFLECTION_TOPICS.items():
+        score = (sigs.get(key) or {}).get("score")
+        if not isinstance(score, (int, float)):
+            continue
+        label = topic[lang]
+        if lang == "en" and label:
+            label = label[0].upper() + label[1:]
+        value = str(score) + "/100"
+        theme_details.append({"label": label, "value": value})
+        inferred.append(f"{label} {value}")
+    question_label = {"en": "Question", "fa": "پرسش", "ru": "Вопрос", "ar": "سؤال"}[lang]
+    unknown_label = {"en": "Unknown", "fa": "نامشخص", "ru": "Неизвестно", "ar": "غير معروف"}[lang]
+    verify_label = {"en": "Verify", "fa": "راستی‌آزمایی", "ru": "Проверка", "ar": "تحقّق"}[lang]
+    details = (
+        theme_details
+        + [{"label": unknown_label, "value": item} for item in unknown_l]
+        + [{"label": verify_label, "value": item} for item in behaviors_l]
+        + [
+            {"label": f"{question_label} {index}", "value": item}
+            for index, item in enumerate(questions_l, start=1)
+        ]
+    )
     reading = _safe_reading(
-        lang=lang, headline=_TRUST_TITLE[lang], body=" ".join(prompts + list(questions or [])),
+        lang=lang, headline=_TRUST_TITLE[lang], body=explanation,
         action=action, avoid={
             "en": "accusations, surveillance and treating symbolic weights as facts",
             "fa": "اتهام، نظارت و واقعی دانستن وزن‌های نمادین",
@@ -1702,9 +1734,9 @@ def render_cheating_radar_reading(
         intensity="moderate" if any(v.get("hits", 0) for v in sigs.values()) else "subtle",
         technical=f"mode={mode} · rel={relationship_type} · legacy_signal_keys={','.join(sigs)} · verdict=never",
         limitation=limitation, mode=mode,
-        signals=sigs, planet_roles=dict(planet_roles or {}), observed=[], inferred=prompts,
-        unknown=list(unknown or []), behaviors=list(behaviors or []), questions=list(questions or []),
-        missing_inputs=list(missing_inputs or []),
+        signals=sigs, planet_roles=dict(planet_roles or {}), observed=[], inferred=inferred,
+        unknown=unknown_l, behaviors=behaviors_l, questions=questions_l,
+        details=details, missing_inputs=list(missing_inputs or []),
     )
     return reading
 

@@ -818,3 +818,83 @@ describe('style timing presentation', () => {
     );
   });
 });
+
+describe('Trust & Clarity structured presentation', () => {
+  const explanations = {
+    en: 'These scores are optional symbolic comparison weights, not behavioral evidence.',
+    ru: 'Эти оценки — необязательные символические веса сравнения, а не свидетельство поведения.',
+    fa: 'این امتیازها وزن مقایسهٔ نمادین اختیاری‌اند، نه شاهد رفتار.',
+    ar: 'هذه الدرجات أوزان مقارنة رمزية اختيارية، وليست دليلاً سلوكياً.',
+  } as const;
+  const questions = {
+    en: 'What would help you feel safer telling me hard things?',
+    ru: 'Что поможет тебе безопаснее говорить трудное?',
+    fa: 'چه چیزی گفتن حرف سخت را برای شما امن‌تر می‌کند؟',
+    ar: 'ما الذي يساعدك على قول الصعب بأمان أكثر؟',
+  } as const;
+  const questionLabel = {
+    en: 'Question 1',
+    ru: 'Вопрос 1',
+    fa: 'پرسش 1',
+    ar: 'سؤال 1',
+  } as const;
+  const theme = {
+    en: 'Boundaries',
+    ru: 'границы',
+    fa: 'مرزها',
+    ar: 'الحدود',
+  } as const;
+
+  it.each(['en', 'ru', 'fa', 'ar'] as const)(
+    'renders theme rows, one explanation, and separate questions in %s',
+    (lang) => {
+      const labels = VAULT_READING_PRESENTATION_COPY[lang];
+      render(
+        <VaultConfidentialReading
+          lang={lang}
+          reading={{
+            executive: 'Trust & Clarity Signals',
+            strategic: explanations[lang],
+            interpretation: explanations[lang],
+            technical: '',
+            headline: 'Trust & Clarity Signals',
+            action:
+              lang === 'fa'
+                ? 'برداشت خود را با رفتار قابل مشاهده و گفت‌وگوی مستقیم و آرام بررسی کنید'
+                : 'Verify your understanding through observable behavior and a direct, calm conversation',
+            avoid: 'accusations',
+            evidence_status: 'unvalidated',
+            data_completeness: 'supplied_unverified',
+            limitation:
+              'A symbolic score is not a probability. Actual behavior and fidelity are unknown.',
+            details: [
+              { label: theme[lang], value: '41/100' },
+              { label: questionLabel[lang], value: questions[lang] },
+            ],
+          }}
+          labels={labels}
+        />,
+      );
+      const overall = screen.getByTestId('vault-reading-interpretation');
+      expect(overall.textContent).toContain(explanations[lang]);
+      expect(overall.textContent?.split(explanations[lang])).toHaveLength(2);
+      expect(overall.textContent).not.toMatch(/Optional reflection|تأمل اختیاری/);
+      const details = screen.getByTestId('vault-reading-details');
+      expect(details.textContent).toContain(theme[lang]);
+      expect(details.textContent).toContain('41/100');
+      expect(details.textContent).toContain(questions[lang]);
+      expect(details.textContent).toContain(questionLabel[lang]);
+      if (lang === 'fa') {
+        expect(screen.getByTestId('vault-reading-hero-risk').textContent).toContain(
+          'مواردی که باید از آن‌ها پرهیز کنید',
+        );
+        expect(screen.getByTestId('vault-reading-hero-action').textContent).toContain(
+          'برداشت خود را',
+        );
+        expect(screen.getByTestId('vault-reading-hero-action').textContent).toContain(
+          'بررسی کنید',
+        );
+      }
+    },
+  );
+});
