@@ -2418,6 +2418,17 @@ def _radar_band_from_compat(dim: dict) -> str:
     return "moderate"
 
 
+def _radar_missing_second_person_unknowns(lang: str) -> list[str]:
+    """Missing second chart is a real unknown. Do not copy the generic limitation."""
+    item = {
+        "en": "partner synastry trust signals — unknown without second chart",
+        "fa": "نشانه‌های اعتماد هم‌خوانی شریک — بدون چارت دوم نامشخص",
+        "ru": "синастрические сигналы доверия партнёра — неизвестны без второй карты",
+        "ar": "إشارات ثقة توافق الشريك — غير معروفة بلا خريطة ثانية",
+    }.get(lang, "partner synastry trust signals — unknown without second chart")
+    return [item]
+
+
 def _radar_verify_behaviors(lang: str) -> list[str]:
     return {
         "en": [
@@ -2605,10 +2616,11 @@ def cheating_radar_reading(
     inferred = trust_reflections(signals, lang)
     behaviors = _radar_verify_behaviors(lang)
     questions = _radar_questions(rel, lang)
+    unknown = _radar_missing_second_person_unknowns(lang) if not has_partner else []
     confidence = "low"  # Deprecated compatibility enum; reading.evidence_status is authoritative.
     text = render_cheating_radar_reading(
         lang=lang, mode=mode, relationship_type=rel, signals=signals,
-        inferred=inferred, behaviors=behaviors, questions=questions,
+        inferred=inferred, unknown=unknown, behaviors=behaviors, questions=questions,
         missing_inputs=missing, confidence=confidence,
     )
     text["data_completeness"] = "incomplete" if missing else "supplied_unverified"

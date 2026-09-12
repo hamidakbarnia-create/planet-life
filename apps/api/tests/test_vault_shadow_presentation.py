@@ -124,6 +124,29 @@ def test_business_radar_limitation_avoids_fidelity_framing():
         assert "business" in reading["limitation"].lower() or "работ" in reading["limitation"].lower() or "کاری" in reading["limitation"] or "عمل" in reading["limitation"]
 
 
+def test_radar_renderer_keeps_supplied_unknowns_and_does_not_copy_limitation():
+    supplied = ["partner synastry trust signals — unknown without second chart"]
+    reading = render_cheating_radar_reading(
+        lang="en",
+        mode="self",
+        relationship_type="romantic",
+        unknown=supplied,
+        missing_inputs=["partner_birth_date"],
+    )
+    assert reading["unknown"] == supplied
+    assert reading["limitation"] not in reading["unknown"]
+    assert "actual behavior and fidelity are unknown" in reading["limitation"].lower()
+
+    empty = render_cheating_radar_reading(
+        lang="en",
+        mode="synastry",
+        relationship_type="romantic",
+        unknown=[],
+    )
+    assert empty["unknown"] == []
+    assert "actual behavior and fidelity are unknown" in empty["limitation"].lower()
+
+
 def test_communication_risk_themes_and_questions_are_detail_rows():
     questions = ["Ask about one recent example.", "Ask how to return to the talk."]
     reading = render_communication_risk_reading(
