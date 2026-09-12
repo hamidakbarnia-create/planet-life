@@ -62,6 +62,7 @@ import {
 } from '@/lib/vault-selected-partner';
 import { buildVaultMissingInputNotice } from '@/lib/vault-missing-inputs';
 import {
+  powerRankedDaysPresentation,
   powerRatingTitle,
   toPowerTimingView,
   vaultScoreBand,
@@ -74,6 +75,7 @@ import {
   VaultYesDecisionSlot,
 } from '@/components/vault/VaultPowerTiming';
 import { VaultConfidentialReading } from '@/components/vault/VaultConfidentialReading';
+import { formatVaultPowerDate } from '@/lib/date-format';
 import { VAULT_READING_PRESENTATION_COPY } from '@/lib/vault-reading-presentation';
 import { partnerRequirementHint } from '@/lib/vault-reading-ux';
 import '../vault-audit.css';
@@ -492,16 +494,7 @@ export default function VaultSectionPage() {
   const dir = HOME_LANGS[lang].dir;
   const fontFamily = localeFontFamily(lang);
 
-  const formatPowerDate = (iso: string) => {
-    const locale =
-      lang === 'fa' ? 'fa-IR' : lang === 'ar' ? 'ar' : lang === 'ru' ? 'ru-RU' : 'en-GB';
-    const tms = Date.parse(`${iso}T00:00:00Z`);
-    if (!Number.isFinite(tms)) return iso;
-    return new Date(tms).toLocaleDateString(locale, {
-      month: 'short',
-      day: 'numeric',
-    });
-  };
+  const formatPowerDate = (iso: string) => formatVaultPowerDate(lang, iso);
 
   const bandLabel = (band: VaultScoreBand) =>
     band === 'strongest'
@@ -554,8 +547,8 @@ export default function VaultSectionPage() {
         <div className="relative max-w-2xl mx-auto px-4 py-6 vault-section-page">
           <Link
             href="/vault"
-            className="fi text-xs no-underline inline-block mb-6"
-            style={{ color: 'rgba(212,175,55,0.75)' }}
+            className="fi text-xs no-underline inline-flex items-center vault-back-link mb-6"
+            style={{ color: '#E2C46A' }}
           >
             {t.back}
           </Link>
@@ -563,7 +556,7 @@ export default function VaultSectionPage() {
           <div className="mb-2">
             <span
               className="fi text-[10px] tracking-[0.25em] uppercase"
-              style={{ color: 'rgba(212,175,55,0.5)' }}
+              style={{ color: '#C9A227' }}
             >
               {t.vaultHome}
             </span>
@@ -578,7 +571,7 @@ export default function VaultSectionPage() {
           >
             {section.title}
           </h1>
-          <p className="fi text-xs mb-4" style={{ color: 'rgba(212,175,55,0.55)' }}>
+          <p className="fi text-xs mb-4" style={{ color: '#C9A227' }}>
             {section.sub}
           </p>
           <p className="fi text-sm leading-relaxed mb-8" style={{ color: 'rgba(255,255,255,0.7)' }}>
@@ -621,7 +614,8 @@ export default function VaultSectionPage() {
                     onClick={() =>
                       setOpenItem(isOpen ? null : item.label)
                     }
-                    className="w-full text-left p-4 flex items-start justify-between gap-4 transition-colors"
+                    className="w-full text-start p-4 flex items-start justify-between gap-4 transition-colors"
+                    dir={dir}
                     style={{
                       background: 'transparent',
                       border: 'none',
@@ -856,7 +850,7 @@ export default function VaultSectionPage() {
                                 <>
                                   <div
                                     className="fi text-[10px] tracking-[0.2em] uppercase"
-                                    style={{ color: 'rgba(212,175,55,0.7)' }}
+                                    style={{ color: '#C9A227' }}
                                   >
                                     {powerUi.topDays}
                                   </div>
@@ -865,6 +859,7 @@ export default function VaultSectionPage() {
                                       const band = vaultScoreBand(day.score);
                                       const visibleRating = visiblePowerRating(day.rating);
                                       const ratingTitle = powerRatingTitle(day.rating);
+                                      const ranked = powerRankedDaysPresentation(powerTiming.days);
                                       return (
                                         <VaultRankedDayChip
                                           key={`${day.date}-${day.score}`}
@@ -874,7 +869,7 @@ export default function VaultSectionPage() {
                                           bandLabel={bandLabel(band)}
                                           rating={visibleRating}
                                           title={ratingTitle ?? bandLabel(band)}
-                                          dominant={dayIdx === 0}
+                                          dominant={ranked.dominantIndex === dayIdx}
                                         />
                                       );
                                     })}
@@ -884,7 +879,9 @@ export default function VaultSectionPage() {
                                     data-testid="vault-score-direction"
                                     style={{ color: 'rgba(255,255,255,0.55)' }}
                                   >
-                                    {powerUi.scoreDirection}
+                                    {powerRankedDaysPresentation(powerTiming.days).allScoresEqual
+                                      ? powerUi.equalScoreDays
+                                      : powerUi.scoreDirection}
                                   </p>
                                 </>
                               )}
@@ -1001,7 +998,7 @@ export default function VaultSectionPage() {
                                       <>
                                         <div
                                           className="fi text-[10px] tracking-[0.2em] uppercase"
-                                          style={{ color: 'rgba(212,175,55,0.55)' }}
+                                          style={{ color: '#C9A227' }}
                                         >
                                           {powerUi.topDays}
                                         </div>
@@ -1012,6 +1009,9 @@ export default function VaultSectionPage() {
                                               visiblePowerRating(day.rating);
                                             const ratingTitle = powerRatingTitle(
                                               day.rating
+                                            );
+                                            const ranked = powerRankedDaysPresentation(
+                                              powerTiming.days,
                                             );
                                             return (
                                               <VaultRankedDayChip
@@ -1024,7 +1024,7 @@ export default function VaultSectionPage() {
                                                 title={
                                                   ratingTitle ?? bandLabel(band)
                                                 }
-                                                dominant={dayIdx === 0}
+                                                dominant={ranked.dominantIndex === dayIdx}
                                               />
                                             );
                                           })}
@@ -1034,7 +1034,10 @@ export default function VaultSectionPage() {
                                           data-testid="vault-score-direction"
                                           style={{ color: 'rgba(255,255,255,0.55)' }}
                                         >
-                                          {powerUi.scoreDirection}
+                                          {powerRankedDaysPresentation(powerTiming.days)
+                                            .allScoresEqual
+                                            ? powerUi.equalScoreDays
+                                            : powerUi.scoreDirection}
                                         </p>
                                       </>
                                     )}

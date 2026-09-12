@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
+
+import { VAULT_POWER_TIMING_COPY } from '@/lib/vault-section-i18n';
+import {
+  powerRankedDaysPresentation,
+  vaultScoreBand,
+} from '@/lib/vault-power-windows';
 
 import {
   VaultRankedDayChip,
@@ -124,6 +130,75 @@ describe('VaultRankedDayChip', () => {
         'data-vault-day-dominant'
       )
     ).toBeNull();
+  });
+});
+
+function renderRankedDays(scores: number[]) {
+  const days = scores.map((score, index) => ({
+    date: `2026-09-${String(index + 1).padStart(2, '0')}`,
+    score,
+  }));
+  const ranked = powerRankedDaysPresentation(days);
+  const copy = VAULT_POWER_TIMING_COPY.en;
+  const bandLabel = (band: 'strongest' | 'supportive' | 'lighter') =>
+    band === 'strongest' ? copy.strongest : band === 'supportive' ? copy.supportive : copy.lighter;
+  render(
+    <div data-testid="heat-fixture">
+      {days.map((day, dayIdx) => (
+        <VaultRankedDayChip
+          key={day.date}
+          dateLabel={day.date}
+          score={day.score}
+          band={vaultScoreBand(day.score)}
+          bandLabel={bandLabel(vaultScoreBand(day.score))}
+          dominant={ranked.dominantIndex === dayIdx}
+        />
+      ))}
+      <p data-testid="vault-score-direction">
+        {ranked.allScoresEqual ? copy.equalScoreDays : copy.scoreDirection}
+      </p>
+    </div>,
+  );
+  return { ranked, copy };
+}
+
+describe('Heat Days top-score ties', () => {
+  it('does not mark a dominant day for a 100/100/90 partial tie', () => {
+    const { copy } = renderRankedDays([100, 100, 90]);
+    const root = screen.getByTestId('heat-fixture');
+    const chips = within(root).getAllByText(/2026-09-/).map((node) => node.parentElement as HTMLElement);
+    expect(chips).toHaveLength(3);
+    expect(chips.every((chip) => chip.getAttribute('data-vault-day-dominant') == null)).toBe(true);
+    expect(screen.getByTestId('vault-score-direction').textContent).toBe(copy.scoreDirection);
+    expect(screen.getByTestId('vault-score-direction').textContent).not.toBe(copy.equalScoreDays);
+  });
+
+  it('uses all-equal wording for 100/100/100 and marks no dominant day', () => {
+    const { copy } = renderRankedDays([100, 100, 100]);
+    const root = screen.getByTestId('heat-fixture');
+    const chips = within(root).getAllByText(/2026-09-/).map((node) => node.parentElement as HTMLElement);
+    expect(chips.every((chip) => chip.getAttribute('data-vault-day-dominant') == null)).toBe(true);
+    expect(screen.getByTestId('vault-score-direction').textContent).toBe(copy.equalScoreDays);
+  });
+
+  it('marks only the unique 100 as dominant for 100/90/80', () => {
+    const { copy } = renderRankedDays([100, 90, 80]);
+    const root = screen.getByTestId('heat-fixture');
+    const chips = within(root).getAllByText(/2026-09-/).map((node) => node.parentElement as HTMLElement);
+    expect(chips[0].getAttribute('data-vault-day-dominant')).toBe('true');
+    expect(chips[1].getAttribute('data-vault-day-dominant')).toBeNull();
+    expect(chips[2].getAttribute('data-vault-day-dominant')).toBeNull();
+    expect(screen.getByTestId('vault-score-direction').textContent).toBe(copy.scoreDirection);
+  });
+
+  it('marks a single day as uniquely highest without all-equal wording', () => {
+    const { copy } = renderRankedDays([80]);
+    const root = screen.getByTestId('heat-fixture');
+    const chips = within(root).getAllByText(/2026-09-/).map((node) => node.parentElement as HTMLElement);
+    expect(chips).toHaveLength(1);
+    expect(chips[0].getAttribute('data-vault-day-dominant')).toBe('true');
+    expect(screen.getByTestId('vault-score-direction').textContent).toBe(copy.scoreDirection);
+    expect(screen.getByTestId('vault-score-direction').textContent).not.toBe(copy.equalScoreDays);
   });
 });
 

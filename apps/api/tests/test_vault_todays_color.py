@@ -39,6 +39,19 @@ def test_render_todays_color_leo():
         assert reading[key]
 
 
+def test_render_todays_color_libra_fa_uses_unambiguous_blush_label():
+    reading = render_todays_color_reading(
+        moon_sign="libra",
+        moon_degree=10.0,
+        target_date="2026-09-12",
+        lang="fa",
+    )
+    palette = reading["details"][1]["value"]
+    assert "صورتی ملایم" in palette
+    assert "رز ملایم" not in palette
+    assert palette.split(" · ")[0] == "صورتی ملایم"
+
+
 def test_todays_color_reading_shape():
     payload = todays_color_reading(
         birth_date="1990-06-15",

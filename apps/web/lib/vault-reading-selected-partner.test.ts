@@ -130,4 +130,25 @@ describe('Vault fetchers use explicit selected Person', () => {
     expect(body.partner_birth_time).toBe('');
     expect(body.partner_relationship).toBe('romantic_partner');
   });
+
+  it('sends empty partner date and unknown time without inventing 1990-01-15 or 12:00', async () => {
+    const missing = person({
+      id: 'missing-date',
+      birth_date: '',
+      birth_time: '',
+      location: '',
+      relationship: 'romantic_partner',
+    });
+    await fetchVaultCompatibilityReading(profile, 'en', missing, 'romantic');
+    const body = JSON.parse(
+      (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.at(-1)![1].body,
+    );
+    expect(body.partner_birth_date).toBe('');
+    expect(body.partner_birth_date).not.toBe('1990-01-15');
+    expect(body.partner_birth_time).toBe('');
+    expect(body.partner_birth_time).not.toBe('12:00');
+    expect(body.partner_location).toBe('');
+    expect(body.partner_birth_time_known).toBe(false);
+    expect(body.user_birth_time_known).toBe(true);
+  });
 });

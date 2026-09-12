@@ -26,6 +26,25 @@ def test_render_ghost_days_empty_windows():
     assert "Avoid:" in reading["executive"]
 
 
+def test_render_ghost_days_fa_uses_formal_pause_sentences():
+    reading = render_ghost_days_reading([], lang="fa", horizon_days=14)
+    blob = " ".join(
+        str(reading.get(key) or "")
+        for key in ("headline", "executive", "strategic", "action")
+    )
+    assert "مکثِ هماهنگ‌شده" in reading["headline"]
+    assert "نیاز دارید" in blob
+    assert "مکث کنید" in blob
+    assert "دربارهٔ زمان بازگشت به گفت‌وگو توافق کنید" in reading["strategic"]
+    assert reading["action"] == (
+        "اگر مفید است آگاهانه مکث کنید، کوتاه توضیح دهید و دربارهٔ زمان بازگشت توافق کنید"
+    )
+    assert "زمان بازگشت را توافق" not in blob
+    assert "زمان بازگشت به گفت‌وگو را توافق" not in blob
+    assert "نیاز داری " not in blob
+    assert "مکث کن،" not in blob
+
+
 def test_render_ghost_days_ranked_windows():
     reading = render_ghost_days_reading(
         [

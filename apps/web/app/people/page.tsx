@@ -13,6 +13,14 @@ import { saveAppLang } from '@/lib/calendar-preferences';
 import { PEOPLE_LANGS, type PeopleLang } from '@/lib/people-i18n';
 import { BADGE_STYLES } from '@/lib/synergy';
 import {
+  draftFromPerson,
+  emptyPersonDraft,
+  joinBirthTime,
+  persistablePersonFields,
+  splitBirthTime,
+  validatePersonDraft,
+} from '@/lib/people-draft';
+import {
   addPerson,
   loadPeople,
   removePerson,
@@ -31,12 +39,14 @@ export default function PeoplePage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
-  const [birthDate, setBirthDate] = useState('1990-01-15');
-  const [birthTime, setBirthTime] = useState('12:00');
+  const [birthDate, setBirthDate] = useState('');
+  const [birthTime, setBirthTime] = useState('');
+  const [timeUnknown, setTimeUnknown] = useState(true);
   const [location, setLocation] = useState('');
   const [citySearch, setCitySearch] = useState('');
   const [relationship, setRelationship] = useState<RelationshipType>('friend');
   const [photoDataUrl, setPhotoDataUrl] = useState<string | undefined>();
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const t = PEOPLE_LANGS[lang];
 
@@ -90,25 +100,31 @@ export default function PeoplePage() {
   };
 
   const resetForm = () => {
+    const blank = emptyPersonDraft();
     setEditingId(null);
-    setName('');
-    setBirthDate('1990-01-15');
-    setBirthTime('12:00');
-    setLocation('');
+    setName(blank.name);
+    setBirthDate(blank.birthDate);
+    setBirthTime(blank.birthTime);
+    setTimeUnknown(blank.timeUnknown);
+    setLocation(blank.location);
     setCitySearch('');
     setRelationship('friend');
     setPhotoDataUrl(undefined);
+    setFormErrors({});
   };
 
   const startEdit = (p: Person) => {
+    const draft = draftFromPerson(p);
     setEditingId(p.id);
-    setName(p.name);
-    setBirthDate(p.birth_date);
-    setBirthTime(p.birth_time);
-    setLocation(p.location);
-    setCitySearch(p.location);
+    setName(draft.name);
+    setBirthDate(draft.birthDate);
+    setBirthTime(draft.birthTime);
+    setTimeUnknown(draft.timeUnknown);
+    setLocation(draft.location);
+    setCitySearch(draft.location);
     setRelationship(p.relationship);
     setPhotoDataUrl(p.photoDataUrl);
+    setFormErrors({});
     setShowForm(true);
   };
 
@@ -123,13 +139,28 @@ export default function PeoplePage() {
   };
 
   const handleSave = () => {
-    if (!name.trim()) return;
+    const errors = validatePersonDraft(
+      { name, birthDate, birthTime, timeUnknown, location },
+      {
+        nameRequired: t.nameRequired,
+        dateRequired: t.dateRequired,
+        dateInvalid: t.dateInvalid,
+        cityRequired: t.cityRequired,
+        timeRequired: t.timeRequired,
+      },
+    );
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+    const fields = persistablePersonFields({
+      name,
+      birthDate,
+      birthTime,
+      timeUnknown,
+      location,
+    });
     const saved = editingId
       ? updatePerson(editingId, {
-          name: name.trim(),
-          birth_date: birthDate,
-          birth_time: birthTime,
-          location,
+          ...fields,
           relationship,
           photoDataUrl,
           // birth details changed → drop stale synergy so the detail page recomputes
@@ -138,10 +169,7 @@ export default function PeoplePage() {
           synergyUpdatedAt: undefined,
         })
       : addPerson({
-          name: name.trim(),
-          birth_date: birthDate,
-          birth_time: birthTime,
-          location,
+          ...fields,
           relationship,
           photoDataUrl,
         });
@@ -206,34 +234,62 @@ export default function PeoplePage() {
               {editingId ? t.editTitle : t.addPerson}
             </div>
             <div>
-              <label className="fi block text-[11px] mb-1.5 text-white/35">{t.name}</label>
+              <label className="fi block text-[11px] mb-1.5 text-white/35" htmlFor="people-name">{t.name}</label>
               <input
+                id="people-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                aria-invalid={Boolean(formErrors.name)}
+                aria-describedby={formErrors.name ? 'people-name-error' : undefined}
                 className="fi w-full px-3 py-2.5 text-sm rounded-[10px] bg-white/5 border border-white/10 text-white"
               />
+              {formErrors.name ? (
+                <p id="people-name-error" className="fi text-[11px] mt-1 text-red-300" data-testid="people-name-error">{formErrors.name}</p>
+              ) : null}
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="fi block text-[11px] mb-1.5 text-white/35">{t.bdate}</label>
+                <label className="fi block text-[11px] mb-1.5 text-white/35" htmlFor="people-birth-date">{t.bdate}</label>
                 <input
+                  id="people-birth-date"
                   type="date"
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
+                  aria-invalid={Boolean(formErrors.birthDate)}
+                  aria-describedby="people-date-calendar people-date-error"
                   className="fi w-full px-3 py-2.5 text-sm rounded-[10px] bg-white/5 border border-white/10 text-white"
                 />
+                <p id="people-date-calendar" className="fi text-[10px] mt-1 text-white/35">{t.dateCalendar}</p>
+                {formErrors.birthDate ? (
+                  <p id="people-date-error" className="fi text-[11px] mt-1 text-red-300" data-testid="people-date-error">{formErrors.birthDate}</p>
+                ) : null}
               </div>
               <div>
                 <label className="fi block text-[11px] mb-1.5 text-white/35">{t.btime}</label>
+                <label className="fi flex items-center gap-2 text-[11px] mb-2 text-white/60">
+                  <input
+                    type="checkbox"
+                    checked={timeUnknown}
+                    onChange={(e) => {
+                      const unknown = e.target.checked;
+                      setTimeUnknown(unknown);
+                      if (unknown) setBirthTime('');
+                    }}
+                    data-testid="people-time-unknown"
+                  />
+                  {t.timeUnknown}
+                </label>
+                {!timeUnknown ? (
                 <div className="grid grid-cols-2 gap-1" dir="ltr">
                   <select
                     aria-label="hour"
-                    value={(birthTime.split(':')[0] ?? '12').padStart(2, '0')}
+                    value={splitBirthTime(birthTime).hour}
                     onChange={(e) =>
-                      setBirthTime(`${e.target.value}:${(birthTime.split(':')[1] ?? '00').padStart(2, '0')}`)
+                      setBirthTime(joinBirthTime(e.target.value, splitBirthTime(birthTime).minute))
                     }
                     className="fi w-full px-2 py-2.5 text-sm rounded-[10px] bg-[#070B14] border border-white/10 text-white"
                   >
+                    <option value="">{'--'}</option>
                     {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map((h) => (
                       <option key={h} value={h}>
                         {h}
@@ -242,12 +298,13 @@ export default function PeoplePage() {
                   </select>
                   <select
                     aria-label="minute"
-                    value={(birthTime.split(':')[1] ?? '00').padStart(2, '0')}
+                    value={splitBirthTime(birthTime).minute}
                     onChange={(e) =>
-                      setBirthTime(`${(birthTime.split(':')[0] ?? '12').padStart(2, '0')}:${e.target.value}`)
+                      setBirthTime(joinBirthTime(splitBirthTime(birthTime).hour, e.target.value))
                     }
                     className="fi w-full px-2 py-2.5 text-sm rounded-[10px] bg-[#070B14] border border-white/10 text-white"
                   >
+                    <option value="">{'--'}</option>
                     {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map((m) => (
                       <option key={m} value={m}>
                         {m}
@@ -255,6 +312,11 @@ export default function PeoplePage() {
                     ))}
                   </select>
                 </div>
+                ) : null}
+                <p className="fi text-[10px] mt-1 text-white/35">{t.timeFallback}</p>
+                {formErrors.birthTime ? (
+                  <p className="fi text-[11px] mt-1 text-red-300" data-testid="people-time-error">{formErrors.birthTime}</p>
+                ) : null}
               </div>
             </div>
             <div>
@@ -262,6 +324,8 @@ export default function PeoplePage() {
               <CityAutocomplete
                 value={citySearch}
                 lang={lang}
+                ariaInvalid={Boolean(formErrors.location)}
+                ariaDescribedBy={formErrors.location ? 'people-city-error' : undefined}
                 onChange={(v) => {
                   setCitySearch(v);
                   setLocation(v);
@@ -274,6 +338,9 @@ export default function PeoplePage() {
                 searchingLabel={t.searching}
                 noResultsLabel={t.noResults}
               />
+              {formErrors.location ? (
+                <p id="people-city-error" className="fi text-[11px] mt-1 text-red-300" data-testid="people-city-error">{formErrors.location}</p>
+              ) : null}
             </div>
             <div>
               <label className="fi block text-[11px] mb-1.5 text-white/35">{t.relationship}</label>

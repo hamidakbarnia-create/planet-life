@@ -22,6 +22,19 @@ from packages.astro_engine.vault_templates import (  # noqa: E402
 from services import vault_readings as vr  # noqa: E402
 
 
+def test_heat_ru_avoid_uses_score_to_justify_pressure_intimacy_or_silence():
+    from packages.astro_engine.vault_quality_copy import LANGS, QUALITY_COPY
+
+    ru_avoid = QUALITY_COPY["heat"][LANGS.index("ru")][3]
+    en_avoid = QUALITY_COPY["heat"][LANGS.index("en")][3]
+    assert ru_avoid == (
+        "Использование оценки для оправдания давления, "
+        "интимной близости или молчания."
+    )
+    assert "ради оценки в календаре" not in ru_avoid
+    assert en_avoid == "Using a score to justify pressure, intimacy or silence."
+
+
 def test_live_actions_are_not_business_launch():
     assert vr._HOT_ACTION == "hot_attraction"
     assert vr._HOT_ACTION != "business_launch"

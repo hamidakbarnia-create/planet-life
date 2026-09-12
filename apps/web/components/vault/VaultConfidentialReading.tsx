@@ -20,6 +20,7 @@ import {
 } from '@/lib/vault-reading-safeguards';
 import { VAULT_COMPARISON_COPY, VAULT_STYLE_TIMING_COPY } from '@/lib/vault-section-i18n';
 import { splitPaletteNames, swatchHexForPaletteName } from '@/lib/vault-color-swatches';
+import { localizeFixedShortlistLabel } from '@/lib/vault-shortlist-labels';
 import { useVaultWindowClock } from '@/lib/use-vault-window-clock';
 import {
   describeWindowWhen,
@@ -56,7 +57,7 @@ const DATE_LABELS = new Set(['Date', 'Дата', 'تاریخ', 'التاريخ']
 const TIMEZONE_LABELS = new Set(['Timezone', 'Часовой пояс', 'منطقه زمانی', 'المنطقة الزمنية']);
 
 const LABEL: CSSProperties = {
-  color: 'rgba(212,175,55,0.55)',
+  color: '#C9A227',
 };
 
 const BODY: CSSProperties = {
@@ -312,10 +313,10 @@ export function VaultConfidentialReading({
                 : null;
               return (
               <div key={`${detail.label}-${index}`} className="min-w-0 break-words">
-                <dt className="fi text-xs opacity-70">
-                  {detail.label}
+                <dt className="fi text-xs opacity-80 inline-flex flex-wrap items-center gap-2">
+                  {hasPlaces ? localizeFixedShortlistLabel(detail.label, lang) : detail.label}
                   {ACCESSORY_LABELS.has(detail.label) ? (
-                    <span className="ms-2 opacity-70" data-testid="vault-accessory-optional">
+                    <span className="opacity-80" data-testid="vault-accessory-optional">
                       {styleCopy.optionalAccessory}
                     </span>
                   ) : null}
@@ -352,9 +353,14 @@ export function VaultConfidentialReading({
                     </ul>
                   ) : NOTES_LABELS.has(detail.label) ? (
                     <div>
+                      {!statementAlreadyPresent(
+                        reading.interpretation ?? reading.strategic,
+                        styleCopy.scentAlternatives,
+                      ) ? (
                       <p className="fi text-xs opacity-70 mb-1" data-testid="vault-scent-alternatives">
                         {styleCopy.scentAlternatives}
                       </p>
+                      ) : null}
                       <ul className="m-0 p-0 list-none space-y-1">
                         {splitNoteGroups(detail.value).map((group) => (
                           <li key={group}>
@@ -364,7 +370,14 @@ export function VaultConfidentialReading({
                       </ul>
                     </div>
                   ) : (
-                    <bdi dir={detail.direction ?? 'auto'}>{detail.value}</bdi>
+                    <>
+                      <bdi dir={detail.direction ?? 'auto'}>{detail.value}</bdi>
+                      {DATE_LABELS.has(detail.label) ? (
+                        <p className="fi text-[10px] mt-1 opacity-70" data-testid="vault-date-calendar">
+                          {styleCopy.dateCalendar}
+                        </p>
+                      ) : null}
+                    </>
                   )}
                   {when ? (
                     <p className="fi text-xs leading-relaxed mt-1" data-testid="vault-window-when" data-relation={when.relation}>

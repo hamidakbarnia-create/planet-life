@@ -177,7 +177,7 @@ const COLOR_FROM_PREFIX =
   /^today'?s\s+color\s+from\s+moon\s+in\s+[a-z]+\s*/i;
 
 const LABELED_FIELD_RE =
-  /(?:^|[.!?]\s+|[\n\r]\s*)(?:Action|Avoid|Opportunity|Risk|Commercial risk|Watch the risk|Next|Verify|Reason|Confidence|What this changes today|اقدام|پرهیز|فرصت|ریسک|بعدی|Действие|Избегать|Возможность|Риск|Далее|الإجراء|تجنبي|الفرصة|المخاطر)\s*:\s*/gi;
+  /(?:^|[.!?]\s+|[\n\r]\s*)(?:Action|Avoid|Opportunity|Risk|Commercial risk|Watch the risk|Next|Verify|Reason|Confidence|What this changes today|اقدام|پرهیز|فرصت|ریسک|بعدی|Действие|Избегать|Возможность|Риск|Далее|الإجراء|تجنّب|تجنبي|الفرصة|المخاطر)\s*:\s*/gi;
 
 function collapseWhitespace(text: string): string {
   return text.replace(/\s+/g, ' ').trim();
@@ -274,7 +274,7 @@ function stripLabeledClausesBounded(source: string): string {
   return collapseWhitespace(
     source
       .replace(
-        /(?:Action|Avoid|Opportunity|Risk|Commercial risk|Watch the risk|Next|Verify|Reason|Confidence|What this changes today|اقدام|پرهیز|فرصت|ریسک|Действие|Избегать|Возможность|Риск|Далее|الإجراء|تجنبي)\s*:[^.؟…]*[.؟…]?/gi,
+        /(?:Action|Avoid|Opportunity|Risk|Commercial risk|Watch the risk|Next|Verify|Reason|Confidence|What this changes today|اقدام|پرهیز|فرصت|ریسک|Действие|Избегать|Возможность|Риск|Далее|الإجراء|تجنّب|تجنبي)\s*:[^.؟…]*[.؟…]?/gi,
         ' '
       )
       .replace(LABELED_FIELD_RE, ' ')
@@ -288,7 +288,7 @@ function stripLabeledClausesBounded(source: string): string {
 function stripLabelMarkersOnly(source: string): string {
   return collapseWhitespace(
     source.replace(
-      /(?:Action|Avoid|Opportunity|Risk|Commercial risk|Watch the risk|Next|Verify|Reason|Confidence|What this changes today|اقدام|پرهیز|فرصت|ریسک|بعدی|Действие|Избегать|Возможность|Риск|Далее|الإجراء|تجنبي|الفرصة|المخاطر)\s*:\s*/gi,
+      /(?:Action|Avoid|Opportunity|Risk|Commercial risk|Watch the risk|Next|Verify|Reason|Confidence|What this changes today|اقدام|پرهیز|فرصت|ریسک|بعدی|Действие|Избегать|Возможность|Риск|Далее|الإجراء|تجنّب|تجنبي|الفرصة|المخاطر)\s*:\s*/gi,
       ' '
     )
   );
@@ -360,6 +360,7 @@ export function presentVaultReading(
       'Avoid',
       'پرهیز',
       'Избегать',
+      'تجنّب',
       'تجنبي',
     ]);
   const opportunityRaw =

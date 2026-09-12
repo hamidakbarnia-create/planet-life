@@ -122,3 +122,23 @@ def test_missing_partner_no_invented_scores():
     assert payload["dimensions"] == {}
     assert "partner_birth_date" in payload["missing_inputs"]
     assert payload["reading"]["confidence"] == "low"
+
+
+def test_business_and_friend_guidance_does_not_use_romantic_stay_leave():
+    dims = {"attraction": {"score": 50}}
+    romantic = render_compatibility_reading(
+        lang="en", relationship_type="romantic", dimensions=dims, overall_score=50
+    )
+    business = render_compatibility_reading(
+        lang="en", relationship_type="business", dimensions=dims, overall_score=50
+    )
+    friend = render_compatibility_reading(
+        lang="en", relationship_type="friendship", dimensions=dims, overall_score=50
+    )
+    assert romantic["details"] == business["details"] == friend["details"]
+    assert "stay, leave or commit" in romantic["avoid"]
+    assert "stay, leave or commit" not in business["avoid"]
+    assert "stay, leave or commit" not in friend["avoid"]
+    assert "hire, fire" in business["avoid"]
+    assert "friendship" in friend["avoid"]
+    assert business["score_formula"] == romantic["score_formula"]
