@@ -14,7 +14,10 @@ export function useVaultWindowClock(
   const [liveNow, setLiveNow] = useState(() => new Date());
   const boundaryKey = boundaries.map((boundary) => `${boundary.start}:${boundary.end}`).join(',');
   const boundariesRef = useRef(boundaries);
-  boundariesRef.current = boundaries;
+
+  useEffect(() => {
+    boundariesRef.current = boundaries;
+  }, [boundaries]);
 
   useEffect(() => {
     if (frozenNow) return undefined;
