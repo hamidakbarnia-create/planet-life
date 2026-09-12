@@ -1,16 +1,15 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useSyncExternalStore } from 'react';
 import type { AppLang } from './app-settings';
-import { loadAppLang, saveAppLang as persistAppLang, APP_LANG_CHANGED_EVENT } from './calendar-preferences';
+import {
+  saveAppLang as persistAppLang,
+  APP_LANG_CHANGED_EVENT,
+  readAppLang,
+} from './calendar-preferences';
 import { useQueuedEffect } from './use-queued-effect';
 
 export { APP_LANG_CHANGED_EVENT };
-
-function parseAppLang(stored: string | null): AppLang {
-  if (stored === 'en' || stored === 'ru' || stored === 'fa' || stored === 'ar') return stored;
-  return 'en';
-}
 
 /** True after the first client commit — avoids SSR/hydration showing the wrong locale. */
 export function useClientReady(): boolean {
@@ -21,26 +20,35 @@ export function useClientReady(): boolean {
   return ready;
 }
 
+function subscribeAppLang(onStoreChange: () => void): () => void {
+  if (typeof window === 'undefined') return () => undefined;
+  window.addEventListener(APP_LANG_CHANGED_EVENT, onStoreChange);
+  window.addEventListener('storage', onStoreChange);
+  return () => {
+    window.removeEventListener(APP_LANG_CHANGED_EVENT, onStoreChange);
+    window.removeEventListener('storage', onStoreChange);
+  };
+}
+
+export function getAppLangClientSnapshot(): AppLang {
+  return readAppLang();
+}
+
+/** SSR/hydration snapshot. Must stay English so the first client hydrate matches the server. */
+export function getAppLangServerSnapshot(): AppLang {
+  return 'en';
+}
+
 /** Reactive app language synced with `planet-life-lang` localStorage. */
 export function useAppLang(): [AppLang, (lang: AppLang) => void] {
-  const [lang, setLangState] = useState<AppLang>(() =>
-    typeof window === 'undefined' ? 'en' : parseAppLang(loadAppLang())
+  const lang = useSyncExternalStore(
+    subscribeAppLang,
+    getAppLangClientSnapshot,
+    getAppLangServerSnapshot
   );
-
-  useQueuedEffect(() => {
-    setLangState(parseAppLang(loadAppLang()));
-    const sync = () => setLangState(parseAppLang(loadAppLang()));
-    window.addEventListener(APP_LANG_CHANGED_EVENT, sync);
-    window.addEventListener('storage', sync);
-    return () => {
-      window.removeEventListener(APP_LANG_CHANGED_EVENT, sync);
-      window.removeEventListener('storage', sync);
-    };
-  }, []);
 
   const setLang = useCallback((next: AppLang) => {
     persistAppLang(next);
-    setLangState(next);
   }, []);
 
   return [lang, setLang];

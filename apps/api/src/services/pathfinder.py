@@ -8,6 +8,7 @@ life-area verdicts derived from those placements.
 
 from __future__ import annotations
 
+import re
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
@@ -21,6 +22,41 @@ from services.chart_data import (
     _planet_house,
     resolve_coordinates,
 )
+from services.transit_instant import timezone_at
+
+BEST_TIMES_CIVIL_TIMEZONE_REQUIRED = (
+    "Best Times requires an authoritative civil timezone for the target coordinates."
+)
+_FIXED_OFFSET_STYLE_NAME = re.compile(r"^(?:UTC|GMT)?[+-]\d", re.IGNORECASE)
+
+
+def is_authoritative_civil_timezone(name: str | None) -> bool:
+    """Accept geographic civil IANA zones; reject UTC/GMT/Etc/* and offsets."""
+    if not isinstance(name, str):
+        return False
+    zone = name.strip().replace("\\", "/")
+    if not zone:
+        return False
+    folded = zone.upper()
+    if folded in {"UTC", "GMT"}:
+        return False
+    if folded.startswith("ETC/"):
+        return False
+    if "/" not in zone:
+        return False
+    if _FIXED_OFFSET_STYLE_NAME.match(zone):
+        return False
+    return True
+
+
+def _require_civil_target_timezone(latitude: float, longitude: float) -> str:
+    try:
+        derived = timezone_at(latitude, longitude)
+    except ValueError as exc:
+        raise ValueError(BEST_TIMES_CIVIL_TIMEZONE_REQUIRED) from exc
+    if not is_authoritative_civil_timezone(derived):
+        raise ValueError(BEST_TIMES_CIVIL_TIMEZONE_REQUIRED)
+    return derived
 
 ANGLE_ORB = 6.0
 
@@ -591,6 +627,8 @@ def best_times(
     end = start + timedelta(days=max(1, min(search_months, 12)) * 30)
     trip_days = max(3, min(trip_days, 30))
     action = PURPOSE_TO_ACTION.get(purpose, "travel")
+    target_lat, target_lon = resolve_coordinates(target_location)
+    target_timezone = _require_civil_target_timezone(target_lat, target_lon)
     natal = _relocated_natal_for_scoring(
         birth_date,
         birth_time,
@@ -600,7 +638,6 @@ def best_times(
         zodiac=zodiac,
     )
 
-    target_lat, target_lon = resolve_coordinates(target_location)
     reloc_angles = natal["angles"]
     # City baseline: which natal planets are angular *in this city*. This is
     # constant across the trip dates but differs strongly between cities, so it
@@ -621,7 +658,13 @@ def best_times(
         scores: list[int] = []
         for offset in range(trip_days):
             d = cursor + timedelta(days=offset)
-            dt_local = _local_datetime(d.isoformat(), birth_time, target_lat, target_lon)
+            dt_local = _local_datetime(
+                d.isoformat(),
+                birth_time,
+                target_lat,
+                target_lon,
+                timezone_name=target_timezone,
+            )
             transit = _calc_chart_for_instant(
                 dt_local.astimezone(timezone.utc),
                 target_lat,

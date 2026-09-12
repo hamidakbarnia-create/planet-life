@@ -70,8 +70,66 @@ export interface PathfinderCity {
   lon: number;
 }
 
+export type AnalyzeFailureKind = 'unsupported_calculation' | 'validation' | 'unknown';
+
+export type ClassifiedAnalyzeFailure = {
+  kind: AnalyzeFailureKind;
+  status: number;
+  backendDetail: string;
+};
+
+export class PathfinderApiError extends Error {
+  readonly status: number;
+  readonly detail: unknown;
+
+  constructor(status: number, detail: unknown, fallback: string) {
+    const message = typeof detail === 'string' && detail.trim() ? detail : fallback;
+    super(message);
+    this.name = 'PathfinderApiError';
+    this.status = status;
+    this.detail = detail;
+  }
+}
+
+const POLAR_FAILURE_MARKERS = [
+  'Placidus houses cannot be calculated reliably',
+  'PlacidusLatitudeError',
+  'swisseph.houses',
+];
+
+function analyzeErrorDetail(detail: unknown): string {
+  if (typeof detail === 'string') return detail;
+  if (detail && typeof detail === 'object' && 'message' in detail) {
+    const message = (detail as { message?: unknown }).message;
+    if (typeof message === 'string') return message;
+  }
+  return '';
+}
+
+export function classifyAnalyzeFailure(status: number, detail: unknown): ClassifiedAnalyzeFailure {
+  const backendDetail = analyzeErrorDetail(detail);
+  if (POLAR_FAILURE_MARKERS.some((marker) => backendDetail.includes(marker))) {
+    return { kind: 'unsupported_calculation', status, backendDetail };
+  }
+  if (status === 422) {
+    return { kind: 'validation', status, backendDetail };
+  }
+  return { kind: 'unknown', status, backendDetail };
+}
+
 function targetLocation(city: PathfinderCity): string {
   return `${city.lat},${city.lon}`;
+}
+
+async function readApiError(res: Response, fallback: string): Promise<never> {
+  let detail: unknown;
+  try {
+    const data = (await res.json()) as { detail?: unknown };
+    detail = data?.detail;
+  } catch {
+    detail = undefined;
+  }
+  throw new PathfinderApiError(res.status, detail, fallback);
 }
 
 export async function fetchPathfinderRelocation(
@@ -93,11 +151,10 @@ export async function fetchPathfinderRelocation(
       ...prefs,
     }),
   });
-  const data = await res.json();
   if (!res.ok) {
-    throw new Error(typeof data?.detail === 'string' ? data.detail : 'Pathfinder request failed');
+    await readApiError(res, 'Pathfinder request failed');
   }
-  return data as PathfinderRelocation;
+  return (await res.json()) as PathfinderRelocation;
 }
 
 export async function fetchPathfinderBestTimes(
@@ -125,9 +182,8 @@ export async function fetchPathfinderBestTimes(
       ...prefs,
     }),
   });
-  const data = await res.json();
   if (!res.ok) {
-    throw new Error(typeof data?.detail === 'string' ? data.detail : 'Best times request failed');
+    await readApiError(res, 'Best times request failed');
   }
-  return data as PathfinderBestTimes;
+  return (await res.json()) as PathfinderBestTimes;
 }
