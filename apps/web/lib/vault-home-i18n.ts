@@ -102,7 +102,7 @@ export const VAULT_HOME_LANGS: Record<AppLang, VaultHomeLangPack> = {
         sub: 'Color · Scent · Presence',
         preview:
           'Light daily guidance for color, scent, and presence — supportive, not the main decision tool.',
-        cta: 'Open Look',
+        cta: 'Open Style Timing',
         badge: '',
       },
       sensuality: {
@@ -158,7 +158,7 @@ export const VAULT_HOME_LANGS: Record<AppLang, VaultHomeLangPack> = {
         sub: 'Цвет · Аромат · Присутствие',
         preview:
           'Лёгкие дневные подсказки по цвету, аромату и присутствию — поддержка, не главный инструмент.',
-        cta: 'Открыть Стиль',
+        cta: 'Открыть стиль и тайминг',
         badge: '',
       },
       sensuality: {
@@ -214,7 +214,7 @@ export const VAULT_HOME_LANGS: Record<AppLang, VaultHomeLangPack> = {
         sub: 'رنگ · عطر · حضور',
         preview:
           'راهنمای سبک روزانه برای رنگ، عطر و حضور — حمایت‌گر، نه ابزار اصلی تصمیم.',
-        cta: 'باز کردن استایل',
+        cta: 'باز کردن زمان‌بندی استایل',
         badge: '',
       },
       sensuality: {
@@ -270,7 +270,7 @@ export const VAULT_HOME_LANGS: Record<AppLang, VaultHomeLangPack> = {
         sub: 'لون · عطر · حضور',
         preview:
           'إرشاد يومي خفيف للون والعطر والحضور — داعم، وليس أداة القرار الرئيسية.',
-        cta: 'فتح الأسلوب',
+        cta: 'فتح توقيت الأسلوب',
         badge: '',
       },
       sensuality: {

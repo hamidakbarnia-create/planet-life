@@ -49,6 +49,12 @@ describe('Vault page selected-partner wiring', () => {
     );
   });
 
+  it('shows partner and type requirements on collapsed cards', () => {
+    expect(pageSource).toContain('partnerRequirementHint');
+    expect(pageSource).toContain('data-vault-partner-requirement');
+    expect(pageSource).toContain("from '@/lib/vault-reading-ux'");
+  });
+
   it('shows identity name and Choose Partner affordances', () => {
     expect(pageSource).toContain('data-vault-partner-identity');
     expect(pageSource).toContain('data-vault-partner-name');

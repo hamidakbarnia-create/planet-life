@@ -6,6 +6,8 @@ import {
   READING_UI,
   SECTION_LANGS,
   VAULT_POWER_TIMING_COPY,
+  VAULT_COMPARISON_COPY,
+  VAULT_STYLE_TIMING_COPY,
   VAULT_SECTION_ORDER,
   isValidVaultSection,
   powerAdvisoryConfidenceLabel,
@@ -26,7 +28,7 @@ describe('Vault section presentation copy', () => {
 
   it('exposes product subtitles for every locale', () => {
     const expected: Record<(typeof VAULT_SECTION_ORDER)[number], RegExp> = {
-      sensuality: /desire|fantasy|magnetism/i,
+      sensuality: /desire signature|сигнатура желания|امضای میل|بصمة الرغبة/i,
       cycle: /wellness|awareness/i,
       provider: /security|resources|partnership/i,
       shadow: /signals|verdicts/i,
@@ -115,6 +117,26 @@ describe('Vault section presentation copy', () => {
     expect(SECTION_LANGS.fa.provider.items[0].label).toMatch(/جغرافیا/);
     expect(SECTION_LANGS.ar.provider.items[0].label).toMatch(/جغرافيا/);
 
+    expect(SECTION_LANGS.en.provider.items[1].label).toBe('Love Lines');
+    expect(SECTION_LANGS.en.provider.items[1].label).not.toMatch(/map/i);
+    expect(SECTION_LANGS.ru.provider.items[1].label).toBe('Линии любви');
+    expect(SECTION_LANGS.fa.provider.items[1].label).toBe('خط‌های عشق');
+    expect(SECTION_LANGS.ar.provider.items[1].label).toBe('خطوط الحب');
+    expect(VAULT_COMPARISON_COPY.en.overallBlend).toContain('45%');
+    expect(VAULT_COMPARISON_COPY.en.overallBlend).toContain('not measured relationship quality');
+    expect(VAULT_COMPARISON_COPY.en.tiedScores).toBe(
+      'For entries with equal scores, display order does not indicate superiority.',
+    );
+    expect(VAULT_COMPARISON_COPY.ru.tiedScores).toContain('Для позиций с равными баллами');
+    expect(VAULT_COMPARISON_COPY.ru.tiedScores).toContain('порядок в списке не означает превосходства');
+    expect(VAULT_COMPARISON_COPY.fa.tiedScores).toContain('برای مواردی با امتیاز برابر');
+    expect(VAULT_COMPARISON_COPY.ar.tiedScores).toContain('بالنسبة للبنود ذات الدرجات المتساوية');
+    expect(VAULT_COMPARISON_COPY.ar.tiedScores).toContain('ترتيب العرض لا يعني تفوقاً');
+    expect(VAULT_STYLE_TIMING_COPY.en.scentAlternatives).toContain('not one required blend');
+    expect(VAULT_STYLE_TIMING_COPY.ru.optionalAccessory).toBe('Необязательно');
+    expect(VAULT_STYLE_TIMING_COPY.fa.optionalAccessory).toBe('اختیاری');
+    expect(VAULT_STYLE_TIMING_COPY.ar.windowUnknown).toMatch(/المنطقة الزمنية/);
+
     expect(SECTION_LANGS.ru.shadow.items[3].label).toMatch(/частн|разговор/i);
     expect(SECTION_LANGS.fa.shadow.items[3].label).toMatch(/گفت|خصوصی/);
     expect(SECTION_LANGS.ar.shadow.items[3].label).toMatch(/محادثة|خاصة/);
@@ -164,6 +186,10 @@ describe('Vault section presentation copy', () => {
     expect(pageSource).not.toContain('chart-api');
     expect(pageSource).not.toMatch(/LIVE_ITEM_API\s*=\s*\{[^}]*cycle/);
     expect(pageSource).not.toMatch(/LIVE_ITEM_API\s*=\s*\{[^}]*lounge/);
+    expect(pageSource).toContain("from '@/lib/vault-reading-ux'");
+    expect(pageSource).toContain("import '../vault-audit.css'");
+    expect(pageSource).toContain('vault-section-page');
+    expect(pageSource).toContain('vault-item-card');
   });
 
   it('validates section keys', () => {
@@ -216,6 +242,23 @@ describe('Vault section presentation copy', () => {
   });
 });
 
+
+it('names Love Lines as a list and Ghost Days as a communicated pause', () => {
+  expect(SECTION_LANGS.en.provider.items[1].label).toBe('Love Lines');
+  expect(SECTION_LANGS.en.provider.items[1].label.toLowerCase()).not.toContain('map');
+  expect(SECTION_LANGS.en.power.items[2].hint.toLowerCase()).toMatch(/pause/);
+  expect(SECTION_LANGS.en.power.items[2].hint.toLowerCase()).not.toMatch(/strategic distance/);
+  expect(SECTION_LANGS.ru.power.items[2].hint).toMatch(/пауз/i);
+  expect(SECTION_LANGS.fa.power.items[2].hint).toMatch(/مکث/);
+  expect(SECTION_LANGS.ar.power.items[2].hint).toMatch(/استراحة/);
+  expect(SECTION_LANGS.en.sensuality.intro.toLowerCase()).not.toMatch(/when to lean in/);
+  expect(SECTION_LANGS.en.sensuality.intro.toLowerCase()).not.toMatch(
+    /through your personal timing/,
+  );
+  expect(SECTION_LANGS.en.sensuality.intro.toLowerCase()).toMatch(/not built yet/);
+  expect(SECTION_LANGS.en.sensuality.intro.toLowerCase()).toMatch(/desire signature only/);
+  expect(SECTION_LANGS.en.look.title).toBe('Style Timing');
+});
 
 it('uses trust and clarity titles while preserving the legacy radar slot', () => {
   const titles = {en: 'Trust & Clarity Signals', ru: 'Сигналы доверия и ясности', fa: 'نشانه‌های اعتماد و وضوح', ar: 'إشارات الثقة والوضوح'};

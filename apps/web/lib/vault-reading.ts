@@ -30,6 +30,8 @@ export type VaultReadingLayer = {
   secondary_windows?: VaultPowerDayWindow[];
   action?: string;
   avoid?: string;
+  score_formula?: string;
+  place_scope?: string;
 };
 
 export type VaultMarsResponse = {
