@@ -75,9 +75,15 @@ describe('Vault page selected-partner wiring', () => {
     expect(pageSource).toContain(
       'showPartnerIdentity ? partnerUi.loading : rui.loading',
     );
-    expect(pageSource).toContain(
-      'showPartnerIdentity ? partnerUi.apiError : rui.apiError',
-    );
+    expect(pageSource).toContain('VaultLiveErrorBanner');
+    expect(pageSource).toContain("'forbidden'");
+    expect(pageSource).toContain("'rateLimit'");
+    expect(pageSource).toContain("'network'");
+    expect(pageSource).toContain("'rejected'");
+    expect(pageSource).toContain("'validation'");
+    expect(pageSource).toContain("'auth'");
+    expect(pageSource).toContain('vaultLiveErrorKind');
+    expect(pageSource).not.toContain('partnerUi.apiError');
   });
 
   it('keeps one Choose Partner explanation and no inert pseudo-CTA', () => {
@@ -125,7 +131,19 @@ describe('Vault partner selection i18n', () => {
       expect(copy.changeRelationshipCta.length).toBeGreaterThan(0);
       expect(copy.partnerProfileVsCompatNote.length).toBeGreaterThan(0);
       expect(copy.loading.length).toBeGreaterThan(0);
-      expect(copy.apiError.length).toBeGreaterThan(0);
+      expect(copy.networkError.length).toBeGreaterThan(0);
+      expect(copy.serviceError.length).toBeGreaterThan(0);
+      expect(copy.rateLimitError.length).toBeGreaterThan(0);
+      expect(copy.validationError.length).toBeGreaterThan(0);
+      expect(copy.rejectedError.length).toBeGreaterThan(0);
+      expect(copy.authError.length).toBeGreaterThan(0);
+      expect(copy.forbiddenError.length).toBeGreaterThan(0);
+      expect(copy.validationError).not.toMatch(/connection|اتصال|соединен/i);
+      expect(copy.rejectedError).not.toMatch(/connection|اتصال|соединен/i);
+      expect(copy.authError).not.toMatch(/connection|اتصال|соединен/i);
+      expect(copy.forbiddenError).not.toMatch(/sign in again, then|دوباره وارد شوید و|войдите снова и|يُرجى تسجيل الدخول مرة أخرى ثم/i);
+      expect(copy.networkError).not.toMatch(/8000|۸۰۰۰/);
+      expect(copy.serviceError).not.toMatch(/8000|۸۰۰۰/);
       expect(copy.choosePartnerHint).not.toBe(copy.noPeopleBody);
       expect(copy.unsupportedRelationship.toLowerCase()).toMatch(
         /romantic|عاطفی|романтическ|عاطفي|spouse|همسر|زوج|друг|friend|صديق|business|تجاری|делового|عمل/,
@@ -140,7 +158,13 @@ describe('Vault partner selection i18n', () => {
     const ar = VAULT_PARTNER_SELECTION_COPY.ar;
     const gendered = /اختري|أضيفي|تحققي|افتحي|أكملي/;
     expect(ar.noPeopleBody).not.toMatch(gendered);
-    expect(ar.apiError).not.toMatch(gendered);
+    expect(ar.networkError).not.toMatch(gendered);
+    expect(ar.serviceError).not.toMatch(gendered);
+    expect(ar.rateLimitError).not.toMatch(gendered);
+    expect(ar.validationError).not.toMatch(gendered);
+    expect(ar.rejectedError).not.toMatch(gendered);
+    expect(ar.authError).not.toMatch(gendered);
+    expect(ar.forbiddenError).not.toMatch(gendered);
     expect(ar.choosePartnerHint).not.toMatch(gendered);
     expect(ar.addPersonCta).not.toMatch(gendered);
     expect(ar.changeRelationshipCta).not.toMatch(gendered);

@@ -8,6 +8,110 @@ import {
   type VaultRelationshipType,
 } from './vault-selected-partner';
 
+/** Omit blank optional partner date/time so the API is not sent "". */
+export function optionalVaultBirthField(
+  value: string | undefined | null,
+): string | null {
+  const trimmed = typeof value === 'string' ? value.trim() : '';
+  return trimmed || null;
+}
+
+/**
+ * Vault HTTP contract:
+ * - 401: unauthenticated / session recovery
+ * - 403: authenticated but forbidden (signing in again will not grant access)
+ * - 422: FastAPI/Pydantic request validation (format, required, enum/pattern)
+ * - 400: handler ValueError after a parsed body (not every 400 is birth data)
+ * - 429: rate limited
+ * - 5xx: service failure
+ * - status 0 / fetch transport throw ("Failed to fetch", NetworkError, Load failed):
+ *   network. A generic TypeError is a service failure, not a connection error.
+ */
+export type VaultRequestErrorKind =
+  | 'auth'
+  | 'forbidden'
+  | 'validation'
+  | 'rejected'
+  | 'rateLimit'
+  | 'service'
+  | 'network';
+
+export function classifyVaultRequestStatus(
+  status: number,
+): VaultRequestErrorKind {
+  if (status === 401) return 'auth';
+  if (status === 403) return 'forbidden';
+  if (status === 429) return 'rateLimit';
+  if (status === 422) return 'validation';
+  if (status === 400) return 'rejected';
+  if (status >= 500 && status <= 599) return 'service';
+  if (status === 0) return 'network';
+  return 'service';
+}
+
+export class VaultRequestError extends Error {
+  readonly status: number;
+  readonly kind: VaultRequestErrorKind;
+
+  constructor(status: number, message?: string) {
+    super(message || `Vault API error ${status}`);
+    this.name = 'VaultRequestError';
+    this.status = status;
+    this.kind = classifyVaultRequestStatus(status);
+  }
+}
+
+const VAULT_NETWORK_MESSAGE =
+  /failed to fetch|networkerror|load failed|network request failed/i;
+
+export function isVaultNetworkFailure(err: unknown): boolean {
+  if (err instanceof VaultRequestError) return err.kind === 'network';
+  if (!err || typeof err !== 'object') return false;
+  const message = 'message' in err ? String(err.message) : '';
+  // Only fetch/transport messages. A bare TypeError is a programming/service fault.
+  return VAULT_NETWORK_MESSAGE.test(message);
+}
+
+export function vaultLiveErrorKind(err: unknown): VaultRequestErrorKind {
+  if (err instanceof VaultRequestError) return err.kind;
+  if (isVaultNetworkFailure(err)) return 'network';
+  return 'service';
+}
+
+function vaultFetchError(status: number, detail: unknown): VaultRequestError {
+  const message =
+    typeof detail === 'string' ? detail : `Vault API error ${status}`;
+  return new VaultRequestError(status, message);
+}
+
+async function postVaultJson<T>(path: string, body: unknown): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    if (err instanceof VaultRequestError) throw err;
+    if (isVaultNetworkFailure(err)) {
+      throw new VaultRequestError(
+        0,
+        err instanceof Error ? err.message : 'Network error',
+      );
+    }
+    throw new VaultRequestError(
+      500,
+      err instanceof Error ? err.message : 'Vault request failed',
+    );
+  }
+  if (!res.ok) {
+    const payload = await res.json().catch(() => ({}));
+    throw vaultFetchError(res.status, (payload as { detail?: unknown }).detail);
+  }
+  return res.json() as Promise<T>;
+}
+
 export type VaultReadingLayer = {
   executive: string;
   strategic: string;
@@ -62,25 +166,14 @@ export async function fetchVaultMarsReading(
   lang: string,
 ): Promise<VaultMarsResponse> {
   const prefs = chartPreferenceFields();
-  const res = await fetch(`${API_BASE}/api/vault/mars`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultMarsResponse>("/api/vault/mars", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
       lang,
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultMarsResponse>;
+    });
 }
 
 export async function fetchVaultGhostDaysReading(
@@ -88,25 +181,14 @@ export async function fetchVaultGhostDaysReading(
   lang: string,
 ): Promise<VaultGhostDaysResponse> {
   const prefs = chartPreferenceFields();
-  const res = await fetch(`${API_BASE}/api/vault/ghost-days`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultGhostDaysResponse>("/api/vault/ghost-days", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
       lang,
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultGhostDaysResponse>;
+    });
 }
 
 export type VaultHotAttractionDaysResponse = VaultGhostDaysResponse;
@@ -116,25 +198,14 @@ export async function fetchVaultHotAttractionDaysReading(
   lang: string,
 ): Promise<VaultHotAttractionDaysResponse> {
   const prefs = chartPreferenceFields();
-  const res = await fetch(`${API_BASE}/api/vault/hot-attraction-days`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultHotAttractionDaysResponse>("/api/vault/hot-attraction-days", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
       lang,
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultHotAttractionDaysResponse>;
+    });
 }
 
 export type VaultMoneyAskDaysResponse = VaultGhostDaysResponse;
@@ -144,25 +215,14 @@ export async function fetchVaultMoneyAskDaysReading(
   lang: string,
 ): Promise<VaultMoneyAskDaysResponse> {
   const prefs = chartPreferenceFields();
-  const res = await fetch(`${API_BASE}/api/vault/money-ask-days`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultMoneyAskDaysResponse>("/api/vault/money-ask-days", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
       lang,
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultMoneyAskDaysResponse>;
+    });
 }
 
 export type VaultTodaysColorResponse = {
@@ -207,25 +267,14 @@ export async function fetchVaultYesDayReading(
   lang: string,
 ): Promise<VaultYesDayResponse> {
   const prefs = chartPreferenceFields();
-  const res = await fetch(`${API_BASE}/api/vault/yes-day`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultYesDayResponse>("/api/vault/yes-day", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
       lang,
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultYesDayResponse>;
+    });
 }
 
 export async function fetchVaultTodaysColorReading(
@@ -233,25 +282,14 @@ export async function fetchVaultTodaysColorReading(
   lang: string,
 ): Promise<VaultTodaysColorResponse> {
   const prefs = chartPreferenceFields();
-  const res = await fetch(`${API_BASE}/api/vault/todays-color`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultTodaysColorResponse>("/api/vault/todays-color", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
       lang,
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultTodaysColorResponse>;
+    });
 }
 
 export type VaultTodaysPerfumeResponse = VaultTodaysColorResponse;
@@ -261,25 +299,14 @@ export async function fetchVaultTodaysPerfumeReading(
   lang: string,
 ): Promise<VaultTodaysPerfumeResponse> {
   const prefs = chartPreferenceFields();
-  const res = await fetch(`${API_BASE}/api/vault/todays-perfume`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultTodaysPerfumeResponse>("/api/vault/todays-perfume", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
       lang,
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultTodaysPerfumeResponse>;
+    });
 }
 
 export type VaultLiveReelTimeResponse = VaultTodaysColorResponse;
@@ -289,25 +316,14 @@ export async function fetchVaultLiveReelTimeReading(
   lang: string,
 ): Promise<VaultLiveReelTimeResponse> {
   const prefs = chartPreferenceFields();
-  const res = await fetch(`${API_BASE}/api/vault/live-reel-time`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultLiveReelTimeResponse>("/api/vault/live-reel-time", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
       lang,
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultLiveReelTimeResponse>;
+    });
 }
 
 export type VaultDateOutfitResponse = VaultTodaysColorResponse;
@@ -317,25 +333,14 @@ export async function fetchVaultDateOutfitReading(
   lang: string,
 ): Promise<VaultDateOutfitResponse> {
   const prefs = chartPreferenceFields();
-  const res = await fetch(`${API_BASE}/api/vault/date-outfit`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultDateOutfitResponse>("/api/vault/date-outfit", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
       lang,
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultDateOutfitResponse>;
+    });
 }
 
 /** Default shortlist uses lat,lon so ranking never depends on Nominatim. */
@@ -375,10 +380,7 @@ export async function fetchVaultBestCountriesReading(
     const label = cur.country ? `${cur.city}, ${cur.country}` : cur.city;
     currentLocation = `${label}|${cur.latitude},${cur.longitude}`;
   }
-  const res = await fetch(`${API_BASE}/api/vault/best-countries`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultBestCountriesResponse>("/api/vault/best-countries", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
@@ -388,15 +390,7 @@ export async function fetchVaultBestCountriesReading(
       goal,
       locations: shortlist,
       current_location: currentLocation,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultBestCountriesResponse>;
+    });
 }
 
 export type VaultBusinessGeographyResponse = VaultBestCountriesResponse;
@@ -418,10 +412,7 @@ export async function fetchVaultBusinessGeographyReading(
     const label = cur.country ? `${cur.city}, ${cur.country}` : cur.city;
     currentLocation = `${label}|${cur.latitude},${cur.longitude}`;
   }
-  const res = await fetch(`${API_BASE}/api/vault/business-geography`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultBusinessGeographyResponse>("/api/vault/business-geography", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
@@ -431,15 +422,7 @@ export async function fetchVaultBusinessGeographyReading(
       goal,
       locations: shortlist,
       current_location: currentLocation,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultBusinessGeographyResponse>;
+    });
 }
 
 export type VaultPartnerProfileResponse = {
@@ -463,10 +446,7 @@ export async function fetchVaultPartnerProfileReading(
   const partnerRelationship = partnerRelationshipForVaultApi(
     partner?.relationship,
   );
-  const res = await fetch(`${API_BASE}/api/vault/partner-profile`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultPartnerProfileResponse>("/api/vault/partner-profile", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
@@ -474,21 +454,13 @@ export async function fetchVaultPartnerProfileReading(
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
       goal,
-      partner_birth_date: partner?.birth_date,
-      partner_birth_time: partner?.birth_time,
-      partner_location: partner?.location,
+      partner_birth_date: optionalVaultBirthField(partner?.birth_date),
+      partner_birth_time: optionalVaultBirthField(partner?.birth_time),
+      partner_location: partner?.location || null,
       ...(partnerRelationship
         ? { partner_relationship: partnerRelationship }
         : {}),
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultPartnerProfileResponse>;
+    });
 }
 
 export type VaultCompatibilityResponse = {
@@ -511,10 +483,7 @@ export async function fetchVaultCompatibilityReading(
 ): Promise<VaultCompatibilityResponse> {
   const prefs = chartPreferenceFields();
   const partnerTimeKnown = Boolean(partner?.birth_time);
-  const res = await fetch(`${API_BASE}/api/vault/compatibility`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultCompatibilityResponse>("/api/vault/compatibility", {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
@@ -522,21 +491,13 @@ export async function fetchVaultCompatibilityReading(
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
       relationship_type: relationshipType,
-      partner_birth_date: partner?.birth_date,
-      partner_birth_time: partner?.birth_time,
-      partner_location: partner?.location,
+      partner_birth_date: optionalVaultBirthField(partner?.birth_date),
+      partner_birth_time: optionalVaultBirthField(partner?.birth_time),
+      partner_location: partner?.location || null,
       concern,
       user_birth_time_known: Boolean(profile.birth_time),
       partner_birth_time_known: partnerTimeKnown,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultCompatibilityResponse>;
+    });
 }
 
 export type VaultShadowSynastryResponse = {
@@ -570,10 +531,7 @@ async function fetchVaultShadowSynastryReading(
 ): Promise<VaultShadowSynastryResponse> {
   const prefs = chartPreferenceFields();
   const partnerTimeKnown = Boolean(partner?.birth_time);
-  const res = await fetch(`${API_BASE}/api/vault/${endpoint}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  return postVaultJson<VaultShadowSynastryResponse>(`/api/vault/${endpoint}`, {
       birth_date: profile.birth_date,
       birth_time: profile.birth_time,
       location: profile.location,
@@ -581,21 +539,13 @@ async function fetchVaultShadowSynastryReading(
       house_system: prefs.house_system,
       zodiac: prefs.zodiac,
       relationship_type: relationshipType,
-      partner_birth_date: partner?.birth_date,
-      partner_birth_time: partner?.birth_time,
-      partner_location: partner?.location,
+      partner_birth_date: optionalVaultBirthField(partner?.birth_date),
+      partner_birth_time: optionalVaultBirthField(partner?.birth_time),
+      partner_location: partner?.location || null,
       concern,
       user_birth_time_known: Boolean(profile.birth_time),
       partner_birth_time_known: partnerTimeKnown,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { detail?: string }).detail ?? `Vault API error ${res.status}`,
-    );
-  }
-  return res.json() as Promise<VaultShadowSynastryResponse>;
+    });
 }
 
 export async function fetchVaultCheatingRadarReading(

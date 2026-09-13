@@ -6,6 +6,7 @@ import { useQueuedEffect } from '@/lib/use-queued-effect';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { AppShell } from '@/components/AppShell';
+import { VaultLiveErrorBanner } from '@/components/vault/VaultLiveErrorBanner';
 import { localeFontFamily } from '@/lib/brand-theme';
 import { HOME_LANGS } from '@/lib/home-i18n';
 import { loadAppLang, saveAppLang } from '@/lib/calendar-preferences';
@@ -29,7 +30,9 @@ import {
   fetchVaultTodaysColorReading,
   fetchVaultTodaysPerfumeReading,
   fetchVaultYesDayReading,
+  vaultLiveErrorKind,
   type VaultReadingLayer,
+  type VaultRequestErrorKind,
 } from '@/lib/vault-reading';
 import {
   PREVIEW_LOCK_LANGS,
@@ -120,7 +123,12 @@ export default function VaultSectionPage() {
   const [liveReading, setLiveReading] = useState<VaultReadingLayer | null>(null);
   const [liveLoading, setLiveLoading] = useState(false);
   const [liveError, setLiveError] = useState<
-    'needProfile' | 'api' | 'choosePartner' | 'unsupportedRelationship' | 'needPerson' | null
+    | VaultRequestErrorKind
+    | 'needProfile'
+    | 'choosePartner'
+    | 'unsupportedRelationship'
+    | 'needPerson'
+    | null
   >(null);
   const [missingNotice, setMissingNotice] = useState<
     ReturnType<typeof buildVaultMissingInputNotice>
@@ -448,9 +456,9 @@ export default function VaultSectionPage() {
               : undefined;
           setMissingNotice(buildVaultMissingInputNotice(missing, lang));
         })
-        .catch(() => {
+        .catch((err: unknown) => {
           if (!cancelled) {
-            setLiveError('api');
+            setLiveError(vaultLiveErrorKind(err));
             setLiveReading(null);
             setMissingNotice(null);
             setPowerTiming(null);
@@ -611,9 +619,23 @@ export default function VaultSectionPage() {
                 >
                   <button
                     type="button"
-                    onClick={() =>
-                      setOpenItem(isOpen ? null : item.label)
-                    }
+                    onClick={(event) => {
+                      const next = isOpen ? null : item.label;
+                      setOpenItem(next);
+                      if (next) {
+                        const card = event.currentTarget.closest(
+                          '.vault-item-card',
+                        );
+                        window.setTimeout(() => {
+                          if (card && typeof card.scrollIntoView === 'function') {
+                            card.scrollIntoView({
+                              block: 'nearest',
+                              inline: 'nearest',
+                            });
+                          }
+                        }, 0);
+                      }
+                    }}
                     className="w-full text-start p-4 flex items-start justify-between gap-4 transition-colors"
                     dir={dir}
                     style={{
@@ -785,14 +807,22 @@ export default function VaultSectionPage() {
                               </Link>
                             </div>
                           )}
-                          {!liveLoading && liveError === 'api' && (
-                            <p
-                              className="fi text-xs leading-relaxed"
-                              style={{ color: 'rgba(248,113,113,0.85)' }}
-                            >
-                              {showPartnerIdentity ? partnerUi.apiError : rui.apiError}
-                            </p>
-                          )}
+                          {!liveLoading &&
+                            liveError &&
+                            [
+                              'auth',
+                              'forbidden',
+                              'rateLimit',
+                              'validation',
+                              'rejected',
+                              'service',
+                              'network',
+                            ].includes(liveError) && (
+                              <VaultLiveErrorBanner
+                                kind={liveError as VaultRequestErrorKind}
+                                copy={showPartnerIdentity ? partnerUi : rui}
+                              />
+                            )}
                           {!liveLoading && liveError === 'needPerson' && (
                             <div className="mb-3" data-vault-no-people="true">
                               <p

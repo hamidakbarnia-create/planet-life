@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   collapseRepeatedReason,
   interpretationRepeatsAction,
+  localizedStatementAlreadyOwned,
   statementAlreadyPresent,
   uniqueSentences,
   validityWarningAlreadyPresent,
@@ -137,6 +138,22 @@ describe('Vault safeguard dedupe', () => {
       interpretationRepeatsAction(
         'قرّر إن كنت ستناقش المال بعد مراجعة الشروط والأدلة الفعلية. راجع المبلغ وشروط العقد أيضاً.',
         'قرّر إن كنت ستناقش المال بعد مراجعة الشروط والأدلة الفعلية.',
+      ),
+    ).toBe(false);
+  });
+
+  it('owns Arabic scent-alternatives when Overall joins them with a comma', () => {
+    const older =
+      'هذه مجموعات نغمات بديلة للمقارنة، وليست مزيجاً واحداً مطلوباً، ولا تصف الشخصية.';
+    const canonical =
+      'هذه مجموعات نغمات بديلة للمقارنة، وليست مزيجاً واحداً مطلوباً.';
+    expect(statementAlreadyPresent(older, canonical)).toBe(false);
+    expect(localizedStatementAlreadyOwned(older, canonical)).toBe(true);
+    expect(older).toContain('ولا تصف الشخصية');
+    expect(
+      localizedStatementAlreadyOwned(
+        'العطر خيار اختياري للمظهر، وليس وسيلة لضمان الانجذاب.',
+        canonical,
       ),
     ).toBe(false);
   });

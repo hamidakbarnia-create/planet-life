@@ -127,7 +127,7 @@ describe('Vault fetchers use explicit selected Person', () => {
     );
     expect(body.goal).toBe('romantic');
     expect(body.partner_birth_date).toBe('1995-05-05');
-    expect(body.partner_birth_time).toBe('');
+    expect(body.partner_birth_time).toBeNull();
     expect(body.partner_relationship).toBe('romantic_partner');
   });
 
@@ -143,11 +143,11 @@ describe('Vault fetchers use explicit selected Person', () => {
     const body = JSON.parse(
       (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.at(-1)![1].body,
     );
-    expect(body.partner_birth_date).toBe('');
+    expect(body.partner_birth_date).toBeNull();
     expect(body.partner_birth_date).not.toBe('1990-01-15');
-    expect(body.partner_birth_time).toBe('');
+    expect(body.partner_birth_time).toBeNull();
     expect(body.partner_birth_time).not.toBe('12:00');
-    expect(body.partner_location).toBe('');
+    expect(body.partner_location).toBeNull();
     expect(body.partner_birth_time_known).toBe(false);
     expect(body.user_birth_time_known).toBe(true);
   });

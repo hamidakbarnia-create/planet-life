@@ -1,11 +1,22 @@
 """Shadow / Communication Risk presentation: symbolic labels, no engine change."""
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+API_SRC = ROOT / "apps" / "api" / "src"
+if str(API_SRC) not in sys.path:
+    sys.path.insert(0, str(API_SRC))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from packages.astro_engine.vault_templates import (
     render_cheating_radar_reading,
     render_communication_risk_reading,
     trust_reflections,
 )
+from services.vault_readings import _comm_risk_questions, _radar_questions
 
 REPAIR = {
     "en": "Symbolic repair difficulty",
@@ -15,15 +26,15 @@ REPAIR = {
 }
 
 HEADLINE = {
-    "en": "Communication Risk themes",
-    "ru": "Темы риска общения",
-    "fa": "موضوع‌های ریسک در گفت‌وگو",
-    "ar": "موضوعات مخاطر التواصل",
+    "en": "Communication themes",
+    "ru": "Темы общения",
+    "fa": "موضوع‌های گفت‌وگو",
+    "ar": "موضوعات التواصل",
 }
 
 SYNASTRY = {
     "en": "two-chart comparison (synastry)",
-    "ru": "сравнения двух карт (синастрия)",
+    "ru": "сравнение двух карт (синастрия)",
     "fa": "مقایسهٔ دو نمودار (سیناستری)",
     "ar": "مقارنة الرسمين (السيناستري)",
 }
@@ -64,7 +75,8 @@ def test_communication_risk_labels_are_symbolic_themes():
             for key in ("headline", "executive", "strategic", "interpretation")
         )
         assert HEADLINE[lang] in reading["headline"]
-        assert SYNASTRY[lang] in reading["headline"]
+        assert SYNASTRY[lang] not in reading["headline"]
+        assert SYNASTRY[lang] in reading["technical"]
         assert repair in blob
         if lang == "en":
             assert "Symbolic repair difficulty" in blob
@@ -271,4 +283,64 @@ def test_communication_risk_themes_and_questions_are_detail_rows():
     assert reading["interpretation"] == (
         "Symbolic prompts for a conversation, not observed communication behavior."
     )
+
+
+FORMAL_FA_TRUST = (
+    "بر گفت‌وگوی مستقیم و رفتار قابل مشاهده تکیه کنید؛ بر این اساس اتهام، نظارت یا مقابله نکنید."
+)
+FORMAL_FA_BUSINESS = (
+    "بر گفت‌وگوی مستقیم و کار قابل مشاهده تکیه کنید؛ بر این اساس اتهام، نظارت یا مقابله نکنید."
+)
+
+
+def test_trust_limitations_use_formal_persian_address():
+    for relationship, expected in (
+        ("romantic", FORMAL_FA_TRUST),
+        ("marriage", FORMAL_FA_TRUST),
+        ("friendship", FORMAL_FA_TRUST),
+        ("business", FORMAL_FA_BUSINESS),
+    ):
+        reading = render_cheating_radar_reading(
+            lang="fa", relationship_type=relationship
+        )
+        assert expected in reading["limitation"]
+        assert "تکیه کن؛" not in reading["limitation"]
+        assert "مقابله نکن." not in reading["limitation"]
+
+
+def test_marriage_shadow_questions_are_natural_localized_equivalents():
+    trust_fa = _radar_questions("marriage", "fa")
+    assert trust_fa == [
+        "کدام عادت‌ها به تقویت اعتماد بین ما کمک می‌کنند؟",
+        "صحبت‌کردن دربارهٔ کدام موضوع برای ما دشوارتر است؟",
+        "بعد از یک هفته فاصلهٔ عاطفی، چطور دوباره ارتباطمان را بهتر کنیم؟",
+    ]
+    comm_fa = _comm_risk_questions("marriage", "fa")
+    assert comm_fa == [
+        "کدام موضوع به گفت‌وگویی آرام‌تر و باحوصله‌تر نیاز دارد؟",
+        "چطور گفت‌وگوی تندشونده را بدون فاصله‌گرفتن از هم متوقف کنیم؟",
+        "بعد از گفت‌وگو چه اقدام مشخصی به رفع ابهام کمک می‌کند؟",
+    ]
+    comm_fa_friend = _comm_risk_questions("friendship", "fa")
+    assert comm_fa_friend == [
+        "در تبادل آخر چه چیزی مبهم بود؟",
+        "بعد از فاصله چطور دوباره خبری از هم بگیریم؟",
+        "با چه لحنی راحت‌تر می‌توانیم گفت‌وگو را ادامه دهیم؟",
+    ]
+    comm_ru = _comm_risk_questions("marriage", "ru")
+    assert comm_ru == [
+        "Какая тема нуждается в более спокойном и неспешном разговоре?",
+        "Как остановить обостряющийся разговор, не закрываясь друг от друга?",
+        "Какой конкретный шаг после разговора вернёт ясность?",
+    ]
+    assert _radar_questions("marriage", "en") == [
+        "Which habits help strengthen trust between us?",
+        "Which topic is harder for us to talk about?",
+        "After a cold week, how do we reconnect?",
+    ]
+    assert _comm_risk_questions("marriage", "en") == [
+        "Which topic needs a slower, calmer conversation?",
+        "How can we pause an escalating conversation without shutting each other out?",
+        "What concrete follow-through would restore clarity?",
+    ]
 
