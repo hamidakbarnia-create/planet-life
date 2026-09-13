@@ -298,13 +298,13 @@ _DESIRE_LIMITATION = {
 }
 _TRUST_LIMITATION = {
     "en": "Actual behavior and fidelity are unknown. Birth data cannot detect cheating, secrecy or loyalty. Use direct conversation and observable behavior; do not accuse, surveil or confront someone on this basis.",
-    "fa": "رفتار واقعی و وفاداری نامشخص‌اند. دادهٔ تولد خیانت، پنهان‌کاری یا وفاداری را تشخیص نمی‌دهد. بر گفت‌وگوی مستقیم و رفتار قابل مشاهده تکیه کن؛ بر این اساس اتهام، نظارت یا مقابله نکن.",
+    "fa": "رفتار واقعی و وفاداری نامشخص‌اند. دادهٔ تولد خیانت، پنهان‌کاری یا وفاداری را تشخیص نمی‌دهد. بر گفت‌وگوی مستقیم و رفتار قابل مشاهده تکیه کنید؛ بر این اساس اتهام، نظارت یا مقابله نکنید.",
     "ru": "Реальное поведение и верность неизвестны. Данные рождения не выявляют измену, скрытность или верность. Опирайтесь на прямой разговор и наблюдаемое поведение; не обвиняйте, не следите и не вступайте в конфронтацию на этой основе.",
     "ar": "السلوك الفعلي والوفاء غير معروفين. بيانات الميلاد لا تكشف الخيانة أو الكتمان أو الوفاء. يلزم الاعتماد على الحوار المباشر والسلوك الملحوظ، دون اتهام أو مراقبة أو مواجهة على هذا الأساس."
 }
 _TRUST_LIMITATION_FRIEND = {
     "en": "Actual behavior is unknown. These symbolic weights are conversation prompts for a friendship, not evidence of hidden conduct. Use direct conversation and observable behavior; do not accuse, surveil or confront someone on this basis.",
-    "fa": "رفتار واقعی نامشخص است. این وزن‌های نمادین موضوع گفت‌وگو برای دوستی‌اند، نه شاهد رفتار پنهان. بر گفت‌وگوی مستقیم و رفتار قابل مشاهده تکیه کن؛ بر این اساس اتهام، نظارت یا مقابله نکن.",
+    "fa": "رفتار واقعی نامشخص است. این وزن‌های نمادین موضوع گفت‌وگو برای دوستی‌اند، نه شاهد رفتار پنهان. بر گفت‌وگوی مستقیم و رفتار قابل مشاهده تکیه کنید؛ بر این اساس اتهام، نظارت یا مقابله نکنید.",
     "ru": "Реальное поведение неизвестно. Эти символические веса — темы для разговора о дружбе, а не доказательство скрытого поведения. Опирайтесь на прямой разговор и наблюдаемое поведение; не обвиняйте, не следите и не вступайте в конфронтацию на этой основе.",
     "ar": "السلوك الفعلي غير معروف. هذه الأوزان الرمزية موضوعات لحوار صداقة، وليست دليلاً على سلوك خفي. يلزم الاعتماد على الحوار المباشر والسلوك الملحوظ، دون اتهام أو مراقبة أو مواجهة على هذا الأساس."
 }
@@ -1932,18 +1932,18 @@ def render_communication_risk_reading(
             "ar": "نمط ذاتي",
         },
         "synastry": {
-            "en": "two-chart comparison (synastry) risk patterns",
-            "fa": "الگوهای ریسک مقایسهٔ دو نمودار (سیناستری)",
-            "ru": "риски сравнения двух карт (синастрия)",
-            "ar": "أنماط مخاطر مقارنة الرسمين (السيناستري)",
+            "en": "two-chart comparison (synastry)",
+            "fa": "مقایسهٔ دو نمودار (سیناستری)",
+            "ru": "сравнение двух карт (синастрия)",
+            "ar": "مقارنة الرسمين (السيناستري)",
         },
     }.get(mode, {}).get(lang, mode)
 
     headline = {
-        "en": f"Communication Risk themes · {rel_l} · {mode_l}",
-        "fa": f"موضوع‌های ریسک در گفت‌وگو · {rel_l} · {mode_l}",
-        "ru": f"Темы риска общения · {rel_l} · {mode_l}",
-        "ar": f"موضوعات مخاطر التواصل · {rel_l} · {mode_l}",
+        "en": f"Communication themes · {rel_l}",
+        "fa": f"موضوع‌های گفت‌وگو · {rel_l}",
+        "ru": f"Темы общения · {rel_l}",
+        "ar": f"موضوعات التواصل · {rel_l}",
     }[lang]
 
     elev = sum(
@@ -2032,6 +2032,7 @@ def render_communication_risk_reading(
 
     technical = (
         f"engine=relationship_profile+synastry_aspects · mode={mode} · "
+        f"comparison={mode_l} · "
         f"rel={relationship_type} · signals={','.join(sigs.keys())} · "
         f"planets=mercury,moon,mars,saturn,jupiter,venus · roles={roles_txt} · "
         f"confidence={confidence} · missing={','.join(missing) if missing else 'none'} · "

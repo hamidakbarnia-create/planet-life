@@ -114,6 +114,7 @@ export function AppShell({
             <button
               type="button"
               onClick={signOut}
+              data-header-account=""
               className="metioro-header-chip fi border transition-colors"
               style={{
                 borderColor: COLORS_RGBA.royalBlue28,
@@ -151,12 +152,13 @@ export function AppShell({
           >
             {tierLabel}
           </Link>
-          <div className="flex gap-1">
+          <div className="flex gap-1 metioro-header-langs" data-header-langs="">
             {LANG_OPTIONS.map((l) => (
               <button
                 key={l.key}
                 type="button"
                 onClick={() => setLang(l.key)}
+                data-header-lang={l.key}
                 className="metioro-header-chip fi border transition-all"
                 style={
                   lang === l.key

@@ -5,9 +5,14 @@ html.vault-audit-layout .metioro-header__brand {
 }
 
 html.vault-audit-layout .metioro-header__actions {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   row-gap: 6px;
+  min-width: 0;
   max-width: min(100%, calc(100vw - 5.25rem));
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-padding-inline: 12px;
+  padding-block: 4px;
 }
 
 .vault-section-page,
@@ -39,25 +44,89 @@ html.vault-audit-layout .vault-item-card button {
   text-align: start;
 }
 
-@media (max-width: 430px) {
+@media (max-width: 767px) {
+  html.vault-audit-layout {
+    --metioro-header-h: 56px;
+  }
+
   html.vault-audit-layout .metioro-header {
-    flex-wrap: wrap;
-    row-gap: 8px;
+    flex-wrap: nowrap;
+    gap: 8px;
+    row-gap: 0;
+    padding-top: calc(var(--metioro-safe-top) + 6px);
+    padding-bottom: 6px;
   }
 
   html.vault-audit-layout .metioro-header__brand {
-    max-width: 36%;
+    max-width: none;
+    flex: 0 0 auto;
   }
 
   html.vault-audit-layout .metioro-header__actions {
-    width: 100%;
+    width: auto;
+    min-width: 0;
     max-width: 100%;
-    justify-content: flex-end;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-padding-inline: 12px;
+    padding-block: 4px;
+  }
+
+  html.vault-audit-layout .metioro-header-langs {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 4px;
+    min-width: 0;
   }
 
   html.vault-audit-layout .metioro-header-chip {
-    padding: 6px 8px;
-    font-size: 10px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  html.vault-audit-layout .metioro-header__actions > a[href='/vault'] {
+    min-height: 44px;
+  }
+
+  html.vault-audit-layout .metioro-header__actions > button:first-of-type,
+  html.vault-audit-layout .metioro-header__actions > a:first-of-type {
+    max-width: 7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  html.vault-audit-layout [data-testid='vault-reading-details'] {
+    margin-bottom: 0.75rem;
+  }
+}
+
+@media (max-width: 430px) {
+  html.vault-audit-layout .metioro-header {
+    flex-wrap: nowrap;
+    row-gap: 0;
+  }
+
+  html.vault-audit-layout .metioro-header__brand {
+    max-width: none;
+  }
+
+  html.vault-audit-layout .metioro-header__actions {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  html.vault-audit-layout .metioro-header-chip {
+    padding: 8px 10px;
+    font-size: 11px;
   }
 
   .vault-section-page,
@@ -73,4 +142,46 @@ html.vault-audit-layout .vault-item-card button {
     font-size: 1.05rem;
     line-height: 1.35;
   }
+}
+
+@media (max-height: 540px) and (max-width: 767px) {
+  html.vault-audit-layout {
+    --metioro-header-h: 48px;
+  }
+
+  html.vault-audit-layout .metioro-header {
+    padding-top: calc(var(--metioro-safe-top) + 4px);
+    padding-bottom: 4px;
+  }
+
+  .vault-section-page,
+  .vault-home-page {
+    padding-bottom: calc(var(--metioro-mobile-nav-h) + var(--metioro-safe-bottom) + 88px);
+  }
+
+  .vault-item-card,
+  [data-testid='vault-confidential-reading'],
+  [data-testid='vault-confidential-reading'] > :last-child,
+  [data-testid='vault-coming-soon-honesty'] {
+    scroll-margin-bottom: calc(var(--metioro-mobile-nav-h) + var(--metioro-safe-bottom) + 36px);
+  }
+}
+
+
+html.vault-audit-layout .metioro-header-chip:focus,
+html.vault-audit-layout .metioro-header-chip:focus-visible,
+html.vault-audit-layout .metioro-header__actions > a:focus,
+html.vault-audit-layout .metioro-header__actions > a:focus-visible {
+  outline: 2px solid #f2cf75 !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(242, 207, 117, 0.35);
+  position: relative;
+  z-index: 3;
+}
+
+html[dir='rtl'].vault-audit-layout .metioro-header-chip:focus,
+html[dir='rtl'].vault-audit-layout .metioro-header-chip:focus-visible,
+html[dir='rtl'].vault-audit-layout .metioro-header__actions > a:focus,
+html[dir='rtl'].vault-audit-layout .metioro-header__actions > a:focus-visible {
+  outline-offset: 3px;
 }

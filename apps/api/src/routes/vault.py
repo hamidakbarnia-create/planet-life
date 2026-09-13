@@ -1,7 +1,7 @@
 """Vault interpretation endpoints — rules engine + templates."""
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from services.vault_readings import (
     best_countries_reading,
@@ -23,6 +23,13 @@ from services.vault_readings import (
 )
 
 router = APIRouter()
+
+
+def _blank_optional_to_none(value: object) -> object:
+    """Treat blank optional partner birth fields as omitted, not invalid HH:MM."""
+    if isinstance(value, str) and not value.strip():
+        return None
+    return value
 
 
 class VaultMarsRequest(BaseModel):
@@ -365,6 +372,11 @@ class VaultPartnerProfileRequest(VaultGhostDaysRequest):
     partner_longitude: float | None = None
     partner_relationship: str | None = None
 
+    @field_validator("partner_birth_date", "partner_birth_time", mode="before")
+    @classmethod
+    def omit_blank_optional_partner_birth(cls, value: object) -> object:
+        return _blank_optional_to_none(value)
+
 
 @router.post("/partner-profile")
 async def vault_partner_profile(body: VaultPartnerProfileRequest):
@@ -409,6 +421,11 @@ class VaultCompatibilityRequest(VaultGhostDaysRequest):
     concern: str | None = None
     user_birth_time_known: bool = True
     partner_birth_time_known: bool = True
+
+    @field_validator("partner_birth_date", "partner_birth_time", mode="before")
+    @classmethod
+    def omit_blank_optional_partner_birth(cls, value: object) -> object:
+        return _blank_optional_to_none(value)
 
 
 @router.post("/compatibility")

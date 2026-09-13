@@ -22,6 +22,14 @@ def test_perfume_copy_presents_alternatives_not_one_blend():
         )
         assert needle in reading["interpretation"]
         assert " · " in reading["details"][1]["value"]
+        if lang == "ar":
+            assert (
+                "هذه مجموعات نغمات بديلة للمقارنة، وليست مزيجاً واحداً مطلوباً. "
+                "ولا تصف الشخصية."
+            ) == reading["interpretation"]
+            assert reading["interpretation"].count(
+                "هذه مجموعات نغمات بديلة للمقارنة، وليست مزيجاً واحداً مطلوباً"
+            ) == 1
 
 
 def test_outfit_copy_keeps_accessories_optional_and_preserves_window():

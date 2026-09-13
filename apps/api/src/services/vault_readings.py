@@ -2463,9 +2463,9 @@ def _radar_questions(relationship_type: str, lang: str) -> list[str]:
                 "What feels unclear between us right now?",
             ],
             "marriage": [
-                "Which routines make trust easier for you?",
-                "What topics feel hardest to name?",
-                "How do we repair after a cold week?",
+                "Which habits help strengthen trust between us?",
+                "Which topic is harder for us to talk about?",
+                "After a cold week, how do we reconnect?",
             ],
             "business": [
                 "Where should decisions be written down?",
@@ -2485,9 +2485,9 @@ def _radar_questions(relationship_type: str, lang: str) -> list[str]:
                 "الان چه چیزی بین ما مبهم است؟",
             ],
             "marriage": [
-                "کدام روتین اعتماد را برای شما آسان‌تر می‌کند؟",
-                "کدام موضوع نامیدنش سخت است؟",
-                "بعد از هفته سرد چطور ترمیم کنیم؟",
+                "کدام عادت‌ها به تقویت اعتماد بین ما کمک می‌کنند؟",
+                "صحبت‌کردن دربارهٔ کدام موضوع برای ما دشوارتر است؟",
+                "بعد از یک هفته فاصلهٔ عاطفی، چطور دوباره ارتباطمان را بهتر کنیم؟",
             ],
             "business": [
                 "تصمیم‌ها کجا باید مکتوب شود؟",
@@ -2495,8 +2495,8 @@ def _radar_questions(relationship_type: str, lang: str) -> list[str]:
                 "ریسک را بدون سرزنش چطور علامت بزنیم؟",
             ],
             "friendship": [
-                "وقتی یکی دور است چک‌این چه شکلی است؟",
-                "چه چیزی نامانده که حسش می‌کنیم؟",
+                "وقتی یکی از ما فاصله می‌گیرد، چطور سراغ هم برویم؟",
+                "چه چیزی حس می‌شود که هنوز درباره‌اش حرف نزده‌ایم؟",
                 "دوستی را چطور سبک و صادق نگه داریم؟",
             ],
         },
@@ -2507,9 +2507,9 @@ def _radar_questions(relationship_type: str, lang: str) -> list[str]:
                 "Что сейчас между нами неясно?",
             ],
             "marriage": [
-                "Какие ритуалы облегчают тебе доверие?",
-                "Какие темы труднее всего назвать?",
-                "Как мы чиним связь после холодной недели?",
+                "Какие привычки помогают укрепить доверие между нами?",
+                "О какой теме нам труднее всего говорить?",
+                "После холодной недели как нам восстановить связь?",
             ],
             "business": [
                 "Где должны быть зафиксированы решения?",
@@ -2517,7 +2517,7 @@ def _radar_questions(relationship_type: str, lang: str) -> list[str]:
                 "Как отмечать риск без обвинений?",
             ],
             "friendship": [
-                "Как выглядит check-in, когда кто-то отдаляется?",
+                "Как выглядит короткий контакт, когда кто-то отдаляется?",
                 "Что ощущается странным, но не названо?",
                 "Как сохранить дружбу лёгкой и честной?",
             ],
@@ -2529,9 +2529,9 @@ def _radar_questions(relationship_type: str, lang: str) -> list[str]:
                 "ما الذي يبدو غير واضح بيننا الآن؟",
             ],
             "marriage": [
-                "أي عادات تسهّل عليك الثقة؟",
-                "أي مواضيع أصعب أن نسمّيها؟",
-                "كيف نصلح بعد أسبوع بارد؟",
+                "أي عادات تساعد على تعزيز الثقة بيننا؟",
+                "الحديث عن أي موضوع أصعب علينا؟",
+                "بعد أسبوع من البعد العاطفي، كيف نعيد التواصل؟",
             ],
             "business": [
                 "أين يجب توثيق القرارات؟",
@@ -3254,9 +3254,9 @@ def _comm_risk_questions(relationship_type: str, lang: str) -> list[str]:
                 "What would make repair feel safe after heat?",
             ],
             "marriage": [
-                "Which topic needs a slower format this week?",
-                "How do we pause escalation without stonewalling?",
-                "What follow-through would rebuild clarity?",
+                "Which topic needs a slower, calmer conversation?",
+                "How can we pause an escalating conversation without shutting each other out?",
+                "What concrete follow-through would restore clarity?",
             ],
             "business": [
                 "What decision needs a written summary today?",
@@ -3276,9 +3276,9 @@ def _comm_risk_questions(relationship_type: str, lang: str) -> list[str]:
                 "بعد از تنش چه چیزی ترمیم را امن می‌کند؟",
             ],
             "marriage": [
-                "این هفته کدام موضوع به فرمت آهسته‌تر نیاز دارد؟",
-                "تشدید را بدون دیوار چطور متوقف کنیم؟",
-                "کدام پیگیری وضوح را برمی‌گرداند؟",
+                "کدام موضوع به گفت‌وگویی آرام‌تر و باحوصله‌تر نیاز دارد؟",
+                "چطور گفت‌وگوی تندشونده را بدون فاصله‌گرفتن از هم متوقف کنیم؟",
+                "بعد از گفت‌وگو چه اقدام مشخصی به رفع ابهام کمک می‌کند؟",
             ],
             "business": [
                 "کدام تصمیم امروز به خلاصه مکتوب نیاز دارد؟",
@@ -3287,8 +3287,8 @@ def _comm_risk_questions(relationship_type: str, lang: str) -> list[str]:
             ],
             "friendship": [
                 "در تبادل آخر چه چیزی مبهم بود؟",
-                "بعد از فاصله چطور چک‌این کنیم؟",
-                "کدام تن به باز ماندن کمک می‌کند؟",
+                "بعد از فاصله چطور دوباره خبری از هم بگیریم؟",
+                "با چه لحنی راحت‌تر می‌توانیم گفت‌وگو را ادامه دهیم؟",
             ],
         },
         "ru": {
@@ -3298,9 +3298,9 @@ def _comm_risk_questions(relationship_type: str, lang: str) -> list[str]:
                 "Что сделает ремонт безопасным после жара?",
             ],
             "marriage": [
-                "Какая тема на этой неделе нуждается в более медленном формате?",
-                "Как поставить паузу эскалации без стены?",
-                "Какое выполнение вернёт ясность?",
+                "Какая тема нуждается в более спокойном и неспешном разговоре?",
+                "Как остановить обостряющийся разговор, не закрываясь друг от друга?",
+                "Какой конкретный шаг после разговора вернёт ясность?",
             ],
             "business": [
                 "Какое решение сегодня нужно письменно резюмировать?",
@@ -3309,7 +3309,7 @@ def _comm_risk_questions(relationship_type: str, lang: str) -> list[str]:
             ],
             "friendship": [
                 "Что было неясно в нашем последнем обмене?",
-                "Как мы check-in'имся после дистанции?",
+                "Как мы связываемся после дистанции?",
                 "Какой тон помогает тебе оставаться открытым(ой)?",
             ],
         },
@@ -3320,9 +3320,9 @@ def _comm_risk_questions(relationship_type: str, lang: str) -> list[str]:
                 "ما الذي يجعل الإصلاح آمناً بعد التوتر؟",
             ],
             "marriage": [
-                "أي موضوع يحتاج تنسيقاً أبطأ هذا الأسبوع؟",
-                "كيف نوقف التصعيد بلا جدار؟",
-                "أي متابعة تعيد الوضوح؟",
+                "أي موضوع يحتاج إلى حديث أهدأ وأبطأ؟",
+                "كيف نوقف تصاعد الحديث دون أن نغلق الباب على بعضنا؟",
+                "أي متابعة ملموسة تعيد الوضوح؟",
             ],
             "business": [
                 "أي قرار يحتاج ملخصاً مكتوباً اليوم؟",

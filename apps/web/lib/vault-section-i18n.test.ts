@@ -133,6 +133,10 @@ describe('Vault section presentation copy', () => {
     expect(VAULT_COMPARISON_COPY.ar.tiedScores).toContain('بالنسبة للبنود ذات الدرجات المتساوية');
     expect(VAULT_COMPARISON_COPY.ar.tiedScores).toContain('ترتيب العرض لا يعني تفوقاً');
     expect(VAULT_STYLE_TIMING_COPY.en.scentAlternatives).toContain('not one required blend');
+    expect(VAULT_STYLE_TIMING_COPY.ar.scentAlternatives).toBe(
+      'هذه مجموعات نغمات بديلة للمقارنة، وليست مزيجاً واحداً مطلوباً.',
+    );
+    expect(VAULT_STYLE_TIMING_COPY.ar.scentAlternatives).not.toContain('ولا تصف الشخصية');
     expect(VAULT_STYLE_TIMING_COPY.ru.optionalAccessory).toBe('Необязательно');
     expect(VAULT_STYLE_TIMING_COPY.fa.optionalAccessory).toBe('اختیاری');
     expect(VAULT_STYLE_TIMING_COPY.ar.windowUnknown).toMatch(/المنطقة الزمنية/);
@@ -283,5 +287,25 @@ it('uses trust and clarity titles while preserving the legacy radar slot', () =>
   const titles = {en: 'Trust & Clarity Signals', ru: 'Сигналы доверия и ясности', fa: 'نشانه‌های اعتماد و وضوح', ar: 'إشارات الثقة والوضوح'};
   for (const lang of ['en', 'ru', 'fa', 'ar'] as const) {
     expect(SECTION_LANGS[lang].shadow.items[0].label).toBe(titles[lang]);
+  }
+});
+
+
+it('keeps Vault live-error copy free of developer port-8000 prompts', () => {
+  for (const lang of ['en', 'fa', 'ar', 'ru'] as const) {
+    const blob = [
+      READING_UI[lang].networkError,
+      READING_UI[lang].serviceError,
+      READING_UI[lang].rateLimitError,
+      READING_UI[lang].authError,
+      READING_UI[lang].forbiddenError,
+      READING_UI[lang].validationError,
+      READING_UI[lang].rejectedError,
+    ].join(' ');
+    expect(blob).not.toMatch(/8000|۸۰۰۰/);
+    expect(READING_UI[lang].forbiddenError).not.toMatch(
+      /Sign in again, then|دوباره وارد شوید و|Войдите снова и|يُرجى تسجيل الدخول مرة أخرى ثم/,
+    );
+    expect(READING_UI[lang].validationError.toLowerCase()).not.toMatch(/invalid birth/);
   }
 });

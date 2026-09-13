@@ -14,6 +14,7 @@ import {
 import {
   collapseRepeatedReason,
   interpretationRepeatsAction,
+  localizedStatementAlreadyOwned,
   statementAlreadyPresent,
   uniqueSentences,
   validityWarningAlreadyPresent,
@@ -291,7 +292,7 @@ export function VaultConfidentialReading({
           </section>
         ) : windowsSlot ? <section className="mb-4" data-testid="vault-reading-windows">{windowsSlot}</section> : null}
         {details.length ? (
-          <dl className="mb-4 space-y-2" data-testid="vault-reading-details">
+          <dl className="mb-3 space-y-1.5" data-testid="vault-reading-details">
             {details.map((detail, index) => {
               const parsedWindow = parseTimedWindowValue(detail.value);
               const when = parsedWindow.start
@@ -353,7 +354,7 @@ export function VaultConfidentialReading({
                     </ul>
                   ) : NOTES_LABELS.has(detail.label) ? (
                     <div>
-                      {!statementAlreadyPresent(
+                      {!localizedStatementAlreadyOwned(
                         reading.interpretation ?? reading.strategic,
                         styleCopy.scentAlternatives,
                       ) ? (

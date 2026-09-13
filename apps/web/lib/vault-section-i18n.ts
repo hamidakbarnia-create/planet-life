@@ -39,14 +39,52 @@ export type VaultSectionLangPack = Record<VaultSectionKey, VaultSectionCopy> & {
   previewNote: string;
 };
 
-export type VaultReadingUiCopy = {
+export type VaultLiveErrorCopy = {
+  networkError: string;
+  serviceError: string;
+  rateLimitError: string;
+  authError: string;
+  forbiddenError: string;
+  validationError: string;
+  rejectedError: string;
+};
+
+export type VaultReadingUiCopy = VaultLiveErrorCopy & {
   liveLabel: string;
   loading: string;
   needProfile: string;
   goProfile: string;
-  apiError: string;
   tryThis: string;
 };
+
+export function vaultLiveErrorMessage(
+  kind:
+    | 'network'
+    | 'service'
+    | 'rateLimit'
+    | 'auth'
+    | 'forbidden'
+    | 'validation'
+    | 'rejected',
+  copy: VaultLiveErrorCopy,
+): string {
+  switch (kind) {
+    case 'network':
+      return copy.networkError;
+    case 'service':
+      return copy.serviceError;
+    case 'rateLimit':
+      return copy.rateLimitError;
+    case 'auth':
+      return copy.authError;
+    case 'forbidden':
+      return copy.forbiddenError;
+    case 'validation':
+      return copy.validationError;
+    case 'rejected':
+      return copy.rejectedError;
+  }
+}
 
 /** Vault-scoped selected partner identity / choice / relationship gating. */
 export type VaultPartnerSelectionCopy = {
@@ -63,7 +101,13 @@ export type VaultPartnerSelectionCopy = {
   /** Extra line when Partner Profile is unavailable for a relationship Compat/Shadow may still allow. */
   partnerProfileVsCompatNote: string;
   loading: string;
-  apiError: string;
+  networkError: string;
+  serviceError: string;
+  rateLimitError: string;
+  authError: string;
+  forbiddenError: string;
+  validationError: string;
+  rejectedError: string;
 };
 
 export const VAULT_PARTNER_SELECTION_COPY: Record<
@@ -85,8 +129,20 @@ export const VAULT_PARTNER_SELECTION_COPY: Record<
     partnerProfileVsCompatNote:
       'Compatibility or Shadow may still be available for this person if their relationship is supported there.',
     loading: 'Preparing this person’s reading…',
-    apiError:
+    networkError:
       'This reading could not load. Check your connection, then open this module again.',
+    serviceError:
+      'This reading could not be prepared because the service failed. Open this module again in a moment.',
+    rateLimitError:
+      'Too many requests right now. Wait a moment, then open this module again.',
+    authError:
+      'Your session could not be confirmed. Sign in again, then open this module again.',
+    forbiddenError:
+      'You do not have access to this reading. Signing in again will not change that.',
+    validationError:
+      'This request could not be accepted. Check the submitted details and try again.',
+    rejectedError:
+      'This reading could not be prepared from the supplied details. Check them, then open this module again.',
   },
   fa: {
     readingFor: 'خوانش برای',
@@ -103,8 +159,20 @@ export const VAULT_PARTNER_SELECTION_COPY: Record<
     partnerProfileVsCompatNote:
       'اگر نوع رابطه در آنجا پشتیبانی شود، سازگاری یا سایه ممکن است همچنان برای همین فرد در دسترس باشد.',
     loading: 'در حال آماده‌سازی خوانش این فرد…',
-    apiError:
+    networkError:
       'این خوانش بارگذاری نشد. اتصال را بررسی کنید و دوباره این بخش را باز کنید.',
+    serviceError:
+      'این خوانش به‌خاطر اختلال سرویس آماده نشد. کمی بعد دوباره این بخش را باز کنید.',
+    rateLimitError:
+      'درخواست‌ها فعلاً بیش از حد مجاز است. کمی صبر کنید و دوباره این بخش را باز کنید.',
+    authError:
+      'نشست شما تأیید نشد. دوباره وارد شوید و این بخش را باز کنید.',
+    forbiddenError:
+      'دسترسی به این خوانش ندارید. ورود دوباره این را تغییر نمی‌دهد.',
+    validationError:
+      'این درخواست پذیرفته نشد. جزئیات ارسال‌شده را بررسی کنید و دوباره تلاش کنید.',
+    rejectedError:
+      'این خوانش از روی جزئیات داده‌شده آماده نشد. آن‌ها را بررسی کنید و دوباره این بخش را باز کنید.',
   },
   ar: {
     readingFor: 'قراءة لـ',
@@ -121,8 +189,20 @@ export const VAULT_PARTNER_SELECTION_COPY: Record<
     partnerProfileVsCompatNote:
       'قد يظل التوافق أو الظل متاحاً لهذا الشخص إذا كان نوع العلاقة مدعوماً هناك.',
     loading: 'جارٍ إعداد قراءة هذا الشخص…',
-    apiError:
+    networkError:
       'تعذّر تحميل هذه القراءة. يُرجى التحقق من الاتصال ثم إعادة فتح هذه الوحدة.',
+    serviceError:
+      'تعذّر إعداد هذه القراءة بسبب تعذّر الخدمة. يُرجى إعادة فتح هذه الوحدة بعد قليل.',
+    rateLimitError:
+      'عدد الطلبات تجاوز الحد حالياً. يُرجى الانتظار قليلاً ثم إعادة فتح هذه الوحدة.',
+    authError:
+      'تعذّر تأكيد الجلسة. يُرجى تسجيل الدخول مرة أخرى ثم إعادة فتح هذه الوحدة.',
+    forbiddenError:
+      'لا يتوفر لديك حق الوصول إلى هذه القراءة. تسجيل الدخول مرة أخرى لن يغيّر ذلك.',
+    validationError:
+      'تعذّر قبول هذا الطلب. يُرجى التحقق من البيانات المُرسلة ثم المحاولة مرة أخرى.',
+    rejectedError:
+      'تعذّر إعداد هذه القراءة من البيانات المقدَّمة. يُرجى التحقق منها ثم إعادة فتح هذه الوحدة.',
   },
   ru: {
     readingFor: 'Разбор для',
@@ -139,8 +219,20 @@ export const VAULT_PARTNER_SELECTION_COPY: Record<
     partnerProfileVsCompatNote:
       'Совместимость или Тень могут оставаться доступны для этого человека, если тип отношений там поддерживается.',
     loading: 'Готовим разбор для этого человека…',
-    apiError:
+    networkError:
       'Не удалось загрузить разбор. Проверьте соединение и откройте модуль снова.',
+    serviceError:
+      'Не удалось подготовить разбор из-за сбоя сервиса. Откройте модуль снова через минуту.',
+    rateLimitError:
+      'Слишком много запросов. Подождите немного и откройте модуль снова.',
+    authError:
+      'Сессию не удалось подтвердить. Войдите снова и откройте модуль ещё раз.',
+    forbiddenError:
+      'Нет доступа к этому разбору. Повторный вход это не изменит.',
+    validationError:
+      'Запрос не принят. Проверьте отправленные данные и попробуйте снова.',
+    rejectedError:
+      'Не удалось подготовить разбор по указанным данным. Проверьте их и откройте модуль снова.',
   },
 };
 
@@ -448,7 +540,20 @@ export const READING_UI: Record<AppLang, VaultReadingUiCopy> = {
     needProfile:
       'Save your birth date, time and city in Profile — then this reading can be prepared for you.',
     goProfile: 'Go to Profile',
-    apiError: 'Could not reach METIORO. Is the API running on port 8000?',
+    networkError:
+      'This reading could not load. Check your connection, then open this module again.',
+    serviceError:
+      'This reading could not be prepared because the service failed. Open this module again in a moment.',
+    rateLimitError:
+      'Too many requests right now. Wait a moment, then open this module again.',
+    authError:
+      'Your session could not be confirmed. Sign in again, then open this module again.',
+    forbiddenError:
+      'You do not have access to this reading. Signing in again will not change that.',
+    validationError:
+      'This request could not be accepted. Check the submitted details and try again.',
+    rejectedError:
+      'This reading could not be prepared from the supplied details. Check them, then open this module again.',
     tryThis: 'Your next move',
   },
   fa: {
@@ -457,7 +562,20 @@ export const READING_UI: Record<AppLang, VaultReadingUiCopy> = {
     needProfile:
       'تاریخ، ساعت و شهر تولد را در پروفایل ذخیره کنید — سپس این خوانش برای شما آماده می‌شود.',
     goProfile: 'رفتن به پروفایل',
-    apiError: 'به سرور وصل نشد. API روی پورت ۸۰۰۰ روشن هست؟',
+    networkError:
+      'این خوانش بارگذاری نشد. اتصال را بررسی کنید و دوباره این بخش را باز کنید.',
+    serviceError:
+      'این خوانش به‌خاطر اختلال سرویس آماده نشد. کمی بعد دوباره این بخش را باز کنید.',
+    rateLimitError:
+      'درخواست‌ها فعلاً بیش از حد مجاز است. کمی صبر کنید و دوباره این بخش را باز کنید.',
+    authError:
+      'نشست شما تأیید نشد. دوباره وارد شوید و این بخش را باز کنید.',
+    forbiddenError:
+      'دسترسی به این خوانش ندارید. ورود دوباره این را تغییر نمی‌دهد.',
+    validationError:
+      'این درخواست پذیرفته نشد. جزئیات ارسال‌شده را بررسی کنید و دوباره تلاش کنید.',
+    rejectedError:
+      'این خوانش از روی جزئیات داده‌شده آماده نشد. آن‌ها را بررسی کنید و دوباره این بخش را باز کنید.',
     tryThis: 'قدم بعدی شما',
   },
   ru: {
@@ -466,7 +584,20 @@ export const READING_UI: Record<AppLang, VaultReadingUiCopy> = {
     needProfile:
       'Сохраните дату, время и город в Профиле — тогда разбор можно подготовить для вас.',
     goProfile: 'В профиль',
-    apiError: 'Нет связи с API. Запущен ли сервер на порту 8000?',
+    networkError:
+      'Не удалось загрузить разбор. Проверьте соединение и откройте модуль снова.',
+    serviceError:
+      'Не удалось подготовить разбор из-за сбоя сервиса. Откройте модуль снова через минуту.',
+    rateLimitError:
+      'Слишком много запросов. Подождите немного и откройте модуль снова.',
+    authError:
+      'Сессию не удалось подтвердить. Войдите снова и откройте модуль ещё раз.',
+    forbiddenError:
+      'Нет доступа к этому разбору. Повторный вход это не изменит.',
+    validationError:
+      'Запрос не принят. Проверьте отправленные данные и попробуйте снова.',
+    rejectedError:
+      'Не удалось подготовить разбор по указанным данным. Проверьте их и откройте модуль снова.',
     tryThis: 'Ваш следующий шаг',
   },
   ar: {
@@ -475,7 +606,20 @@ export const READING_UI: Record<AppLang, VaultReadingUiCopy> = {
     needProfile:
       'احفظ تاريخ الميلاد والوقت والمدينة في الملف — ثم يمكن إعداد هذه القراءة لك.',
     goProfile: 'إلى الملف',
-    apiError: 'تعذّر الاتصال. هل يعمل الخادم على المنفذ 8000؟',
+    networkError:
+      'تعذّر تحميل هذه القراءة. يُرجى التحقق من الاتصال ثم إعادة فتح هذه الوحدة.',
+    serviceError:
+      'تعذّر إعداد هذه القراءة بسبب تعذّر الخدمة. يُرجى إعادة فتح هذه الوحدة بعد قليل.',
+    rateLimitError:
+      'عدد الطلبات تجاوز الحد حالياً. يُرجى الانتظار قليلاً ثم إعادة فتح هذه الوحدة.',
+    authError:
+      'تعذّر تأكيد الجلسة. يُرجى تسجيل الدخول مرة أخرى ثم إعادة فتح هذه الوحدة.',
+    forbiddenError:
+      'لا يتوفر لديك حق الوصول إلى هذه القراءة. تسجيل الدخول مرة أخرى لن يغيّر ذلك.',
+    validationError:
+      'تعذّر قبول هذا الطلب. يُرجى التحقق من البيانات المُرسلة ثم المحاولة مرة أخرى.',
+    rejectedError:
+      'تعذّر إعداد هذه القراءة من البيانات المقدَّمة. يُرجى التحقق منها ثم إعادة فتح هذه الوحدة.',
     tryThis: 'خطوتك التالية',
   },
 };

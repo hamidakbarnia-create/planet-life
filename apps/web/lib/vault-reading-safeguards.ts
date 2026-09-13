@@ -18,6 +18,39 @@ export function statementAlreadyPresent(
   return h.includes(s);
 }
 
+function stripComparableEdgePunctuation(value: string): string {
+  return value.replace(/^[.!?…؟،,;؛]+|[.!?…؟،,;؛]+$/gu, '').trim();
+}
+
+/**
+ * True when the full canonical localized statement already appears as its
+ * own sentence or as a prefix bounded by sentence/clause punctuation.
+ * Used only for scent-alternatives ownership — not keyword deletion.
+ */
+export function localizedStatementAlreadyOwned(
+  haystack: string | undefined | null,
+  statement: string | undefined | null,
+): boolean {
+  if (statementAlreadyPresent(haystack, statement)) return true;
+  const h = normalizeComparableText(haystack ?? '');
+  const s = stripComparableEdgePunctuation(
+    normalizeComparableText(statement ?? ''),
+  );
+  if (!h || !s) return false;
+  let from = 0;
+  while (from < h.length) {
+    const idx = h.indexOf(s, from);
+    if (idx === -1) return false;
+    const prev = idx === 0 ? '' : h[idx - 1];
+    const startedAtBoundary = idx === 0 || /[\s.!?؟،,;؛]/.test(prev);
+    const after = h.slice(idx + s.length).trimStart();
+    const endedAtBoundary = after.length === 0 || /^[.!?؟،,;؛]/.test(after);
+    if (startedAtBoundary && endedAtBoundary) return true;
+    from = idx + 1;
+  }
+  return false;
+}
+
 /**
  * Known localized forms of the same predictive-validity warning.
  * Used only to omit a duplicate line — never to hide a distinct limitation.
