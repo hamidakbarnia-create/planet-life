@@ -42,7 +42,10 @@
     "pngjs": "^7.0.0",
     "tailwindcss": "^4",
     "typescript": "^5",
-   "vitest": "^4.1.12",
+    "vitest": "^4.1.12",
     "wrangler": "^4.152.0"
+  },
+  "overrides": {
+    "undici": "7.30.1"
   }
 }
