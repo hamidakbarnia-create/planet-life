@@ -6,8 +6,8 @@ from typing import Any
 from uuid import UUID
 
 from decision_case.repository import DecisionCaseRepository
+from decision_case.services.intake_errors import IntakeIncompleteError
 from decision_case.services.car_interview_intake import (
-    IntakeIncompleteError,
     UnsupportedDecisionTypeError,
     complete_car_interview_intake,
     save_car_interview_answers,
