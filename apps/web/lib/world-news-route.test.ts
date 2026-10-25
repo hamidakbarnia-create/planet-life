@@ -344,7 +344,7 @@ describe('GET /api/world/news — bounded upstream retry', () => {
 
     await GET(makeReq({ topic: 'geopolitics', lang: 'fa' }));
 
-    const payloads = errorSpy.mock.calls.map((c) => c[1] as Record<string, unknown>);
+    const payloads = errorSpy.mock.calls.map((c: unknown[]) => c[1] as Record<string, unknown>);
     expect(payloads).toHaveLength(2);
     expect(payloads[0]).toMatchObject({
       event: 'upstream_non_ok',
@@ -371,7 +371,7 @@ describe('GET /api/world/news — bounded upstream retry', () => {
 
     await GET(makeReq({ topic: 'markets', lang: 'en' }));
 
-    const payloads = errorSpy.mock.calls.map((c) => c[1] as Record<string, unknown>);
+    const payloads = errorSpy.mock.calls.map((c: unknown[]) => c[1] as Record<string, unknown>);
     expect(payloads).toHaveLength(2);
     for (const p of payloads) {
       expect(p.event).toBe('upstream_fetch_failed');
@@ -388,7 +388,7 @@ describe('GET /api/world/news — bounded upstream retry', () => {
 
     await GET(makeReq({ topic: 'geopolitics', lang: 'en' }));
 
-    const payloads = errorSpy.mock.calls.map((c) => c[1] as Record<string, unknown>);
+    const payloads = errorSpy.mock.calls.map((c: unknown[]) => c[1] as Record<string, unknown>);
     expect(payloads).toHaveLength(1);
     expect(payloads[0]).toMatchObject({
       event: 'invalid_upstream_payload',
