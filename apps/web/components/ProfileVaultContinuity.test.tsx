@@ -36,9 +36,12 @@ it('successful Create Chart remains a preview and does not silently save a profi
   vi.stubGlobal('fetch', fetchMock);
   render(<Profile />);
   await waitFor(() => expect(loadBirthProfile).toHaveBeenCalled());
+  // A complete saved profile resumes its chart automatically, so settle that
+  // request before clicking; the click is then the second, separate request.
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
   fireEvent.click(screen.getByRole('button', { name: 'Create Chart' }));
   await screen.findByText('Chart preview');
-  expect(fetchMock).toHaveBeenCalledTimes(1);
+  expect(fetchMock).toHaveBeenCalledTimes(2);
   expect(String(fetchMock.mock.calls[0][0])).toContain('/api/business/chart');
   expect(saveBirthProfile).not.toHaveBeenCalled();
   expect(screen.getByTestId('profile-vault-continuity').textContent).toContain('Save Profile');
