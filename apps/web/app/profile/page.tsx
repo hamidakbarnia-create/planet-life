@@ -56,6 +56,13 @@ import {
   type ProfileLang,
 } from '@/lib/profile-i18n';
 import { formatProfileBirthDate } from '@/lib/profile-calendar';
+import {
+  birthSignature,
+  hasCompleteBirthData,
+  resolveChartRequestIntent,
+  resolveChartStatus,
+  shouldAutoBuildChart,
+} from '@/lib/profile-status';
 
 type CalendarType = 'gregorian' | 'persian' | 'hijri';
 
@@ -95,14 +102,20 @@ function ProfileRoute() {
 function ProfileEditor() {
   const [lang, setLangState] = useState<ProfileLang>('en');
   const [calendarType, setCalendarType] = useState<CalendarType>('gregorian');
-  const [birthDate, setBirthDate] = useState('1990-06-15');
-  const [birthTime, setBirthTime] = useState('14:30');
+  // Empty until the persisted profile loads — never seed demo birth details.
+  const [birthDate, setBirthDate] = useState('');
+  const [birthTime, setBirthTime] = useState('');
   const [location, setLocation] = useState('');
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [name, setName] = useState('');
   const [gender, setGender] = useState<ProfileGender | ''>('');
   const [genderError, setGenderError] = useState('');
   const [chartData, setChartData] = useState<ChartData | null>(null);
   const [pendingGeocodeChart, setPendingGeocodeChart] = useState<ChartData | null>(null);
+  // Birth inputs the pending chart was built from, so a later confirmation
+  // cannot apply a result that no longer matches the form.
+  const [pendingGeocodeBirth, setPendingGeocodeBirth] = useState<string | null>(null);
+  const [geocodeDialogOpen, setGeocodeDialogOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState<CitySelection | null>(null);
   const [chartError, setChartError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -127,6 +140,7 @@ function ProfileEditor() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimerRef = useRef<number | null>(null);
+  const autoChartAttemptedRef = useRef(false);
   const t = PROFILE_LANGS[lang];
   const months = HOME_LANGS[lang].months;
 
@@ -162,9 +176,24 @@ function ProfileEditor() {
   );
 
   const displayBirthDate = useMemo(
-    () => formatProfileBirthDate(lang, birthDate, calendarType),
+    () =>
+      birthDate.trim()
+        ? formatProfileBirthDate(lang, birthDate, calendarType)
+        : '—',
     [lang, birthDate, calendarType]
   );
+
+  const birthDataComplete = hasCompleteBirthData({
+    birthDate,
+    birthTime,
+    location,
+  });
+
+  // Telling a user to create a chart is only actionable once birth data exists.
+  const unlockMessage =
+    profileLoaded && !birthDataComplete
+      ? t.missingBirthData
+      : t.chartUnlockMessage;
 
   const calendarLabel = useMemo(() => {
     if (calendarType === 'persian') return t.calendarPersian;
@@ -172,17 +201,41 @@ function ProfileEditor() {
     return t.calendarGregorian;
   }, [calendarType, t]);
 
-  const buildStatus = loading
-    ? t.statusLoading
-    : chartData
-      ? t.statusReady
-      : t.statusPending;
+  // A retained chart stops standing for the form once the birth inputs change,
+  // so an edit silently drops it rather than offering a stale confirmation.
+  const awaitingLocationConfirm =
+    pendingGeocodeChart !== null &&
+    resolveChartRequestIntent({
+      pendingBirthSignature: pendingGeocodeBirth,
+      birth: { birthDate, birthTime, location },
+    }) === 'confirm-retained';
 
-  const buildStatusClass = loading
-    ? 'mio-obs-metric__value--loading'
-    : chartData
-      ? 'mio-obs-metric__value--ready'
-      : 'mio-obs-metric__value--pending';
+  const chartStatus = resolveChartStatus({
+    profileLoaded,
+    loading,
+    hasChart: Boolean(chartData),
+    hasError: Boolean(chartError),
+    awaitingLocationConfirm,
+    birth: { birthDate, birthTime, location },
+  });
+
+  const buildStatus = {
+    loading: t.statusLoading,
+    ready: t.statusReady,
+    pending: t.statusPending,
+    'missing-data': t.statusMissingData,
+    'needs-location': t.statusNeedsLocation,
+    error: t.statusError,
+  }[chartStatus];
+
+  const buildStatusClass = {
+    loading: 'mio-obs-metric__value--loading',
+    ready: 'mio-obs-metric__value--ready',
+    pending: 'mio-obs-metric__value--pending',
+    'missing-data': 'mio-obs-metric__value--pending',
+    'needs-location': 'mio-obs-metric__value--pending',
+    error: 'mio-obs-metric__value--pending',
+  }[chartStatus];
 
   useQueuedEffect(() => {
     const storedLang = loadAppLang();
@@ -203,6 +256,7 @@ function ProfileEditor() {
       }
     }
     if (savedName) setName(savedName);
+    setProfileLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -401,6 +455,13 @@ function ProfileEditor() {
       return;
     }
 
+    // A resume may already hold the exact result this press would fetch; open
+    // its confirmation instead of issuing the same request again.
+    if (awaitingLocationConfirm) {
+      setGeocodeDialogOpen(true);
+      return;
+    }
+
     const action = resolveGenerateChartAction(lang);
     if (action === 'show-confirm-modal') {
       void openFaConfirmModal();
@@ -448,11 +509,24 @@ function ProfileEditor() {
     }
   };
 
-  const executeGenerateChart = async () => {
+  const clearPendingGeocode = () => {
+    setPendingGeocodeChart(null);
+    setPendingGeocodeBirth(null);
+    setGeocodeDialogOpen(false);
+  };
+
+  /**
+   * `auto` resumes a chart for an already-persisted profile on load. An
+   * unverified `geocoded_fallback` result is always retained so the UI can ask
+   * for confirmation, but an auto resume only surfaces the inline notice — the
+   * confirmation dialog stays closed until the user asks for a chart.
+   */
+  const executeGenerateChart = async ({ auto = false }: { auto?: boolean } = {}) => {
     setFaConfirmOpen(false);
     setLoading(true);
     setChartError('');
     setChartData(null);
+    clearPendingGeocode();
 
     try {
       const coords = chartApiCoordinatesFromResolved(resolvedLocation, selectedCity);
@@ -484,6 +558,10 @@ function ProfileEditor() {
           if (selectedCity?.country) result.data.country = selectedCity.country;
           if (result.data.coordinate_source === 'geocoded_fallback') {
             setPendingGeocodeChart(result.data);
+            setPendingGeocodeBirth(
+              birthSignature({ birthDate, birthTime, location })
+            );
+            setGeocodeDialogOpen(!auto);
           } else {
             setChartData(result.data);
           }
@@ -496,6 +574,21 @@ function ProfileEditor() {
     }
     setLoading(false);
   };
+
+  // Resume the chart once for a persisted profile so a reload does not strand
+  // the page on "Awaiting chart" when all birth data is already present.
+  useQueuedEffect(() => {
+    const resume = shouldAutoBuildChart({
+      profileLoaded,
+      loading,
+      hasChart: Boolean(chartData),
+      alreadyAttempted: autoChartAttemptedRef.current,
+      birth: { birthDate, birthTime, location },
+    });
+    if (!resume) return;
+    autoChartAttemptedRef.current = true;
+    void executeGenerateChart({ auto: true });
+  }, [profileLoaded, birthDate, birthTime, location]);
 
   const fontFamily = localeFontFamily(lang);
 
@@ -573,7 +666,7 @@ function ProfileEditor() {
                   </div>
                 </>
               ) : (
-                <ProfileUnlockEmpty message={t.chartUnlockMessage} />
+                <ProfileUnlockEmpty message={unlockMessage} />
               )}
             </GlassCard>
           </div>
@@ -602,7 +695,7 @@ function ProfileEditor() {
                   <MetricCard icon="🪐" label={t.ruler} value={personalSignature.ruler} />
                 </div>
               ) : (
-                <ProfileUnlockEmpty message={t.chartUnlockMessage} />
+                <ProfileUnlockEmpty message={unlockMessage} />
               )}
             </GlassCard>
           </div>
@@ -624,7 +717,7 @@ function ProfileEditor() {
                   showInsights={false}
                 />
               )}
-            {pendingGeocodeChart && !chartData && (
+            {awaitingLocationConfirm && !chartData && (
               <div
                 className="w-full mt-3 rounded-xl px-3 py-2.5 flex items-start gap-2"
                 style={{ background: 'rgba(251,146,60,0.1)', border: '1px solid rgba(251,146,60,0.35)' }}
@@ -633,7 +726,7 @@ function ProfileEditor() {
                   ⚠
                 </span>
                 <span className="fi text-[11px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
-                  {t.geocodePending}
+                  {geocodeDialogOpen ? t.geocodePending : t.geocodeConfirmRequired}
                 </span>
               </div>
             )}
@@ -936,7 +1029,7 @@ function ProfileEditor() {
                 <button
                   type="button"
                   onClick={handleGenerateClick}
-                  disabled={loading}
+                  disabled={loading || !birthDataComplete}
                   className="metioro-btn metioro-btn--primary fc"
                 >
                   {loading ? t.loading : t.generate}
@@ -989,15 +1082,15 @@ function ProfileEditor() {
           }}
         />
       )}
-      {pendingGeocodeChart && (
+      {pendingGeocodeChart && geocodeDialogOpen && (
         <GeocodeConfirmDialog
           chart={pendingGeocodeChart}
           onConfirm={() => {
             setChartData(pendingGeocodeChart);
-            setPendingGeocodeChart(null);
+            clearPendingGeocode();
           }}
           onReject={() => {
-            setPendingGeocodeChart(null);
+            clearPendingGeocode();
             setChartError(t.chartErrorGeocode);
           }}
         />

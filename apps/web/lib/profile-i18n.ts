@@ -25,6 +25,10 @@ export const PROFILE_LANGS: Record<
     statusReady: string;
     statusPending: string;
     statusLoading: string;
+    statusMissingData: string;
+    statusError: string;
+    statusNeedsLocation: string;
+    missingBirthData: string;
     yourData: string;
     currentSection: string;
     currentCity: string;
@@ -75,6 +79,7 @@ export const PROFILE_LANGS: Record<
     elWater: string;
     chartAccuracy: string;
     geocodePending: string;
+    geocodeConfirmRequired: string;
     chartErrorApi: string;
     chartErrorGeocode: string;
     chartErrorCoords: string;
@@ -102,6 +107,10 @@ export const PROFILE_LANGS: Record<
     statusReady: 'Chart built',
     statusPending: 'Awaiting chart',
     statusLoading: 'Building chart…',
+    statusMissingData: 'Add birth data',
+    statusError: 'Chart unavailable',
+    statusNeedsLocation: 'Confirm location',
+    missingBirthData: 'Add your birth date, time and city to build your chart.',
     yourData: 'Birth Data',
     currentSection: 'Current living location',
     currentCity: 'Current city',
@@ -153,6 +162,8 @@ export const PROFILE_LANGS: Record<
     chartAccuracy:
       'Chart accuracy depends on verified birth timezone, exact city coordinates, and Swiss Ephemeris calculation.',
     geocodePending: 'Geocoded location awaiting your confirmation in the dialog.',
+    geocodeConfirmRequired:
+      'We located this city approximately. Press Create Chart to review and confirm it.',
     chartErrorApi: 'Cannot connect to API. Start the backend on port 8000.',
     chartErrorGeocode:
       'Geocoded location not confirmed. Pick a city from the dropdown for verified coordinates.',
@@ -181,6 +192,10 @@ export const PROFILE_LANGS: Record<
     statusReady: 'Карта построена',
     statusPending: 'Ожидает построения',
     statusLoading: 'Построение карты…',
+    statusMissingData: 'Добавьте данные рождения',
+    statusError: 'Карта недоступна',
+    statusNeedsLocation: 'Подтвердите место',
+    missingBirthData: 'Укажите дату, время и город рождения, чтобы построить карту.',
     yourData: 'Данные рождения',
     currentSection: 'Текущее место жительства',
     currentCity: 'Текущий город',
@@ -232,6 +247,8 @@ export const PROFILE_LANGS: Record<
     chartAccuracy:
       'Точность карты зависит от подтверждённого часового пояса рождения, точных координат города и расчёта Swiss Ephemeris.',
     geocodePending: 'Геокодированное место ожидает подтверждения в диалоге.',
+    geocodeConfirmRequired:
+      'Город определён приблизительно. Нажмите «Построить карту», чтобы проверить и подтвердить место.',
     chartErrorApi: 'Нет связи с API. Запустите бэкенд на порту 8000.',
     chartErrorGeocode:
       'Геокодированное место не подтверждено. Выберите город из списка для проверки координат.',
@@ -259,6 +276,10 @@ export const PROFILE_LANGS: Record<
     statusReady: 'چارت ساخته شد',
     statusPending: 'در انتظار ساخت چارت',
     statusLoading: 'در حال ساخت چارت…',
+    statusMissingData: 'داده‌های تولد را وارد کنید',
+    statusError: 'چارت در دسترس نیست',
+    statusNeedsLocation: 'تأیید موقعیت مکانی',
+    missingBirthData: 'برای ساخت چارت، تاریخ، ساعت و شهر تولد را وارد کنید.',
     yourData: 'اطلاعات تولد',
     currentSection: 'محل زندگی فعلی',
     currentCity: 'شهر فعلی',
@@ -310,6 +331,8 @@ export const PROFILE_LANGS: Record<
     chartAccuracy:
       'دقت نقشه به منطقه زمانی تأییدشده تولد، مختصات دقیق شهر و محاسبه Swiss Ephemeris بستگی دارد.',
     geocodePending: 'مکان جغرافیایی در انتظار تأیید شما در پنجره گفتگو است.',
+    geocodeConfirmRequired:
+      'این شهر به‌صورت تقریبی شناسایی شد. برای بررسی و تأیید آن، «ساخت چارت» را بزنید.',
     chartErrorApi: 'اتصال به API برقرار نیست. سرور را روی پورت ۸۰۰۰ اجرا کنید.',
     chartErrorGeocode:
       'مکان جغرافیایی تأیید نشد. شهر را از فهرست انتخاب کنید.',
@@ -336,6 +359,10 @@ export const PROFILE_LANGS: Record<
     statusReady: 'تم بناء الخريطة',
     statusPending: 'بانتظار بناء الخريطة',
     statusLoading: 'جارٍ بناء الخريطة…',
+    statusMissingData: 'أضف بيانات الميلاد',
+    statusError: 'الخريطة غير متاحة',
+    statusNeedsLocation: 'أكّد الموقع',
+    missingBirthData: 'أضف تاريخ ووقت ومدينة الميلاد لبناء خريطتك.',
     yourData: 'بيانات الميلاد',
     currentSection: 'مكان الإقامة الحالي',
     currentCity: 'المدينة الحالية',
@@ -387,6 +414,8 @@ export const PROFILE_LANGS: Record<
     chartAccuracy:
       'تعتمد دقة الخريطة على المنطقة الزمنية المؤكدة للميلاد، والإحداثيات الدقيقة للمدينة، وحساب Swiss Ephemeris.',
     geocodePending: 'الموقع المُرمَّز جغرافياً بانتظار تأكيدك في الحوار.',
+    geocodeConfirmRequired:
+      'تم تحديد المدينة بشكل تقريبي. اضغط «إنشاء الخريطة» لمراجعة الموقع وتأكيده.',
     chartErrorApi: 'تعذّر الاتصال بـ API. شغّل الخادم على المنفذ 8000.',
     chartErrorGeocode:
       'لم يتم تأكيد الموقع المُرمَّز. اختر مدينة من القائمة للإحداثيات الموثوقة.',
