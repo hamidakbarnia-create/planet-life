@@ -20,7 +20,7 @@
     "visual:diff": "playwright test --project=visual && node tests/visual/write-current.mjs && node tests/visual/diff-report.mjs"
   },
   "dependencies": {
-    "next": "16.4.3",
+    "next": "16.4.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "three": "^0.175.0"
